@@ -186,7 +186,9 @@ function paintHover(){
 function showNode(d){
   drawBoard(d.b);
   document.getElementById('lineTxt').textContent=d.l;
-  document.getElementById('nameTxt').textContent=d.n||'';
+  const nt=document.getElementById('nameTxt');
+  nt.textContent=d.n||'';
+  nt.style.color=d.c;
   const parW = d.par<0 ? CFG.total : DATA[d.par].g;
   const after = d.par<0 ? CFG.startCrumb : tok(DATA[d.par]);
   const share = `${(100*d.g/parW).toFixed(1)}% after ${after}`;
@@ -197,7 +199,9 @@ function showNode(d){
 function showRoot(){
   if(root<0){ drawBoard(CFG.rootBoard);
     document.getElementById('lineTxt').textContent=CFG.rootLine;
-    document.getElementById('nameTxt').textContent=CFG.rootSub;
+    const nt=document.getElementById('nameTxt');
+    nt.textContent=CFG.rootSub;
+    nt.style.color='';
     document.getElementById('statTxt').textContent=CFG.rootStat;
   } else showNode(DATA[root]);
 }
