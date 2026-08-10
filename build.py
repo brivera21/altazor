@@ -35,10 +35,11 @@ SECTIONS_DIR = ROOT / "sections"
 # Landing cards, in order. Notes is generated from posts/; the others
 # take their body from sections/<slug>.md.
 SECTIONS = [
-    {"slug": "library", "title": "Library", "blurb": "Books and reading."},
-    {"slug": "film", "title": "Film", "blurb": "Films and watching."},
-    {"slug": "notes", "title": "Notes", "blurb": "Short pieces of writing, with an RSS feed."},
-    {"slug": "elsewhere", "title": "Elsewhere", "blurb": "Other places to find me."},
+    {"slug": "library", "title": "Library"},
+    {"slug": "film", "title": "Film"},
+    {"slug": "chess", "title": "Chess"},
+    {"slug": "notes", "title": "Notes"},
+    {"slug": "elsewhere", "title": "Elsewhere"},
 ]
 
 CSS = """
@@ -278,8 +279,7 @@ def build():
     )
     notes_content = (
         "<h1>Notes</h1>\n"
-        "<p class=\"lede\">Short pieces of writing. "
-        "Follow along by <a href=\"feed.xml\">RSS</a>.</p>\n"
+        "<p class=\"lede\"><a href=\"feed.xml\">RSS</a></p>\n"
         f"<ul class=\"post-list\">\n{items}\n</ul>"
     )
     (ROOT / "notes.html").write_text(
@@ -307,7 +307,6 @@ def build():
         f"""<a class="card" href="{s['slug']}.html">
 <span class="num">{["I", "II", "III", "IV", "V", "VI"][i]}</span>
 <h3>{s['title']}</h3>
-<p>{s['blurb']}</p>
 </a>"""
         for i, s in enumerate(SECTIONS)
     )
