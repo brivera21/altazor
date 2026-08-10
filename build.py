@@ -77,9 +77,9 @@ header.site {
   font-size: 20px;
   letter-spacing: 0.1em;
   text-decoration: none;
-  color: var(--text);
+  color: var(--accent);
 }
-.brand:hover { color: var(--accent); }
+.brand:hover { color: var(--text); }
 nav.site { display: flex; gap: 14px; flex-wrap: wrap; }
 nav.site a {
   color: var(--muted);
@@ -311,7 +311,6 @@ def build():
         for i, s in enumerate(SECTIONS)
     )
     landing = (
-        f"<h1>{SITE_TITLE}</h1>\n"
         f"<p class=\"lede\">{SITE_DESCRIPTION}</p>\n"
         f"<div class=\"grid\">\n{cards}\n</div>"
     )
