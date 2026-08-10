@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
 <channel>
-<title>Altazor</title>
-<link>https://brivera21.github.io/altazor</link>
-<description>Short pieces of writing and diagrams.</description>
-<lastBuildDate>Mon, 10 Aug 2026 16:14:17 +0000</lastBuildDate>
+<title>Altazor · Notes</title>
+<link>https://brivera21.github.io/altazor/notes.html</link>
+<description>A collection of different ideas.</description>
+<lastBuildDate>Mon, 10 Aug 2026 16:57:24 +0000</lastBuildDate>
 <item>
 <title>Hello World!</title>
 <link>https://brivera21.github.io/altazor/hello.html</link>

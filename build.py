@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
 """Build script for Altazor.
 
-Reads markdown files from posts/, generates one HTML page per post,
-an index.html, and an RSS feed (feed.xml).
+Sources:
+    posts/*.md      pieces for the Notes section (title/date frontmatter)
+    sections/*.md   body text for Library, Film, Elsewhere (title frontmatter)
+
+Output (flat, upload-ready):
+    index.html      landing page with a card per section
+    library.html, film.html, notes.html, elsewhere.html
+    <slug>.html     one page per post
+    feed.xml        RSS for the Notes posts
 
 Usage:
     python3 build.py
@@ -12,111 +19,146 @@ Requires: pip install markdown
 
 import html
 import re
-import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
 import markdown
 
-# Edit these two lines once the GitHub repo exists.
 SITE_URL = "https://brivera21.github.io/altazor"
 SITE_TITLE = "Altazor"
-SITE_DESCRIPTION = "Short pieces of writing and diagrams."
+SITE_DESCRIPTION = "A collection of different ideas."
 
 ROOT = Path(__file__).parent
 POSTS_DIR = ROOT / "posts"
+SECTIONS_DIR = ROOT / "sections"
+
+# Landing cards, in order. Notes is generated from posts/; the others
+# take their body from sections/<slug>.md.
+SECTIONS = [
+    {"slug": "library", "title": "Library", "blurb": "Books and reading."},
+    {"slug": "film", "title": "Film", "blurb": "Films and watching."},
+    {"slug": "notes", "title": "Notes", "blurb": "Short pieces of writing, with an RSS feed."},
+    {"slug": "elsewhere", "title": "Elsewhere", "blurb": "Other places to find me."},
+]
 
 CSS = """
 :root {
-  --text: #1a1a1a;
-  --muted: #6b6b6b;
-  --bg: #ffffff;
-  --rule: #e4e4e4;
-  --link: #1a1a1a;
+  --bg: #121212;
+  --panel: #1a1a1a;
+  --text: #e6e6e6;
+  --muted: #9a9a9a;
+  --line: #2b2b2b;
+  --accent: #58a6ff;
 }
 * { box-sizing: border-box; }
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 1.05rem;
-  line-height: 1.65;
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
 }
-main {
-  max-width: 40rem;
+.wrap {
+  max-width: 900px;
   margin: 0 auto;
-  padding: 3rem 1.25rem 5rem;
+  padding: 32px 20px 80px;
 }
 header.site {
-  margin-bottom: 3rem;
+  border-top: 4px solid var(--accent);
+  padding-top: 22px;
+  margin-bottom: 34px;
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  flex-wrap: wrap;
 }
-header.site a {
-  font-family: Helvetica, Arial, sans-serif;
+.brand {
   font-weight: 700;
-  font-size: 1rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 20px;
+  letter-spacing: 0.1em;
   text-decoration: none;
   color: var(--text);
 }
-h1 {
-  font-size: 1.7rem;
-  line-height: 1.25;
-  margin: 0 0 0.35rem;
+.brand:hover { color: var(--accent); }
+nav.site { display: flex; gap: 14px; flex-wrap: wrap; }
+nav.site a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 14px;
 }
-h2 { font-size: 1.25rem; margin-top: 2.2rem; }
-h3 { font-size: 1.05rem; margin-top: 1.8rem; }
-a { color: var(--link); }
+nav.site a:hover, nav.site a.here { color: var(--accent); }
+h1 { margin: 0 0 8px; font-size: 28px; line-height: 1.25; }
+.lede { color: var(--muted); max-width: 640px; margin: 6px 0 30px; font-size: 15px; }
+a { color: var(--accent); }
+
+/* Landing cards */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+.card {
+  display: block;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 22px 20px 20px;
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.15s, border-color 0.15s;
+}
+.card:hover { transform: translateY(-3px); border-color: var(--accent); }
+.card .num {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+.card h3 { margin: 8px 0 7px; font-size: 18px; }
+.card p { margin: 0; font-size: 13.5px; color: var(--muted); }
+
+/* Section and article pages */
+.section-body, article {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  max-width: 40rem;
+}
+.section-body p, article p { margin: 0 0 1.1rem; }
+article h1 { font-family: Georgia, "Times New Roman", serif; }
 time, .date {
-  font-family: Helvetica, Arial, sans-serif;
-  font-size: 0.82rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 13px;
   color: var(--muted);
 }
-article.post-body { margin-top: 2rem; }
-ul.post-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-ul.post-list li {
-  padding: 1.1rem 0;
-  border-bottom: 1px solid var(--rule);
-}
-ul.post-list li:first-child { border-top: 1px solid var(--rule); }
+.post-body { margin-top: 1.6rem; }
+ul.post-list { list-style: none; padding: 0; margin: 0; max-width: 40rem; }
+ul.post-list li { padding: 1rem 0; border-bottom: 1px solid var(--line); }
+ul.post-list li:first-child { border-top: 1px solid var(--line); }
 ul.post-list a {
+  font-family: Georgia, "Times New Roman", serif;
   font-size: 1.15rem;
+  color: var(--text);
   text-decoration: none;
 }
-ul.post-list a:hover { text-decoration: underline; }
+ul.post-list a:hover { color: var(--accent); }
 ul.post-list .date { display: block; margin-top: 0.2rem; }
 figure { margin: 2rem 0; text-align: center; }
 figure svg { max-width: 100%; height: auto; }
-figcaption {
-  font-family: Helvetica, Arial, sans-serif;
-  font-size: 0.82rem;
-  color: var(--muted);
-  margin-top: 0.6rem;
-}
+figcaption { font-size: 13px; color: var(--muted); margin-top: 0.6rem; }
 img { max-width: 100%; }
 code {
   font-family: Menlo, Consolas, monospace;
   font-size: 0.88em;
-  background: #f4f4f4;
+  background: var(--panel);
   padding: 0.1em 0.3em;
   border-radius: 3px;
 }
-pre {
-  background: #f4f4f4;
-  padding: 1rem;
-  overflow-x: auto;
-  border-radius: 4px;
-}
+pre { background: var(--panel); padding: 1rem; overflow-x: auto; border-radius: 6px; }
 pre code { background: none; padding: 0; }
 blockquote {
   margin: 1.5rem 0;
   padding-left: 1rem;
-  border-left: 3px solid var(--rule);
+  border-left: 3px solid var(--line);
   color: var(--muted);
 }
 .bilingual { margin: 2rem 0; }
@@ -133,14 +175,14 @@ blockquote {
   .bilingual .pair p[lang="en"] { margin-bottom: 1.1rem; }
 }
 footer.site {
-  margin-top: 4rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--rule);
-  font-family: Helvetica, Arial, sans-serif;
-  font-size: 0.82rem;
+  margin-top: 60px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
   color: var(--muted);
 }
 footer.site a { color: var(--muted); }
+footer.site a:hover { color: var(--accent); }
 """
 
 PAGE_TEMPLATE = """<!DOCTYPE html>
@@ -149,82 +191,137 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
-<link rel="alternate" type="application/rss+xml" title="{site_title}" href="{root}feed.xml">
+<link rel="alternate" type="application/rss+xml" title="{site_title} · Notes" href="feed.xml">
 <style>{css}</style>
 </head>
 <body>
-<main>
-<header class="site"><a href="{root}">{site_title}</a></header>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site">{nav}</nav>
+</header>
 {content}
-<footer class="site"><a href="{root}feed.xml">RSS</a></footer>
-</main>
+<footer class="site">{footer}</footer>
+</div>
 </body>
 </html>
 """
 
 
-def parse_post(path):
-    """Parse a markdown file with title/date frontmatter."""
+def nav_html(here=None):
+    links = []
+    for s in SECTIONS:
+        cls = ' class="here"' if s["slug"] == here else ""
+        links.append(f'<a href="{s["slug"]}.html"{cls}>{s["title"]}</a>')
+    return "\n".join(links)
+
+
+def page(title, content, here=None, footer='<a href="index.html">Altazor</a>'):
+    return PAGE_TEMPLATE.format(
+        title=title,
+        site_title=SITE_TITLE,
+        css=CSS,
+        nav=nav_html(here),
+        content=content,
+        footer=footer,
+    )
+
+
+def parse_md(path, required):
+    """Parse a markdown file with frontmatter."""
     text = path.read_text(encoding="utf-8")
     match = re.match(r"\A---\s*\n(.*?)\n---\s*\n", text, re.DOTALL)
     if not match:
-        raise ValueError(f"{path.name}: missing frontmatter (--- title/date ---)")
+        raise ValueError(f"{path.name}: missing frontmatter")
     meta = {}
     for line in match.group(1).splitlines():
         if ":" in line:
             key, _, value = line.partition(":")
             meta[key.strip().lower()] = value.strip().strip('"')
-    if "title" not in meta or "date" not in meta:
-        raise ValueError(f"{path.name}: frontmatter needs both title and date")
+    for key in required:
+        if key not in meta:
+            raise ValueError(f"{path.name}: frontmatter needs {key}")
     body = text[match.end():]
-    return {
-        "slug": path.stem,
-        "title": meta["title"],
-        "date": datetime.strptime(meta["date"], "%Y-%m-%d"),
-        "html": markdown.markdown(body, extensions=["extra"]),
-    }
+    return meta, markdown.markdown(body, extensions=["extra"])
 
 
 def build():
-    posts = sorted(
-        (parse_post(p) for p in POSTS_DIR.glob("*.md")),
-        key=lambda p: p["date"],
-        reverse=True,
-    )
+    # ---- posts (Notes) ----
+    posts = []
+    for p in POSTS_DIR.glob("*.md"):
+        meta, body_html = parse_md(p, ["title", "date"])
+        posts.append({
+            "slug": p.stem,
+            "title": meta["title"],
+            "date": datetime.strptime(meta["date"], "%Y-%m-%d"),
+            "html": body_html,
+        })
+    posts.sort(key=lambda p: p["date"], reverse=True)
 
-    # Post pages, flat layout: one <slug>.html per post at the site root.
     for post in posts:
         content = (
             f"<article>\n<h1>{html.escape(post['title'])}</h1>\n"
             f"<time datetime=\"{post['date']:%Y-%m-%d}\">{post['date']:%B %-d, %Y}</time>\n"
             f"<div class=\"post-body\">\n{post['html']}\n</div>\n</article>"
         )
-        page = PAGE_TEMPLATE.format(
-            title=f"{post['title']} · {SITE_TITLE}",
-            site_title=SITE_TITLE,
-            root="./",
-            css=CSS,
-            content=content,
+        (ROOT / f"{post['slug']}.html").write_text(
+            page(f"{post['title']} · {SITE_TITLE}", content, here="notes",
+                 footer='<a href="notes.html">Notes</a> · <a href="feed.xml">RSS</a>'),
+            encoding="utf-8",
         )
-        (ROOT / f"{post['slug']}.html").write_text(page, encoding="utf-8")
 
-    # Index.
+    # ---- notes.html ----
     items = "\n".join(
         f"<li><a href=\"{p['slug']}.html\">{html.escape(p['title'])}</a>"
         f"<time class=\"date\" datetime=\"{p['date']:%Y-%m-%d}\">{p['date']:%B %-d, %Y}</time></li>"
         for p in posts
     )
-    index_content = f"<ul class=\"post-list\">\n{items}\n</ul>"
-    index_page = PAGE_TEMPLATE.format(
-        title=SITE_TITLE,
-        site_title=SITE_TITLE,
-        root="./",
-        css=CSS,
-        content=index_content,
+    notes_content = (
+        "<h1>Notes</h1>\n"
+        "<p class=\"lede\">Short pieces of writing. "
+        "Follow along by <a href=\"feed.xml\">RSS</a>.</p>\n"
+        f"<ul class=\"post-list\">\n{items}\n</ul>"
     )
-    (ROOT / "index.html").write_text(index_page, encoding="utf-8")
+    (ROOT / "notes.html").write_text(
+        page(f"Notes · {SITE_TITLE}", notes_content, here="notes",
+             footer='<a href="feed.xml">RSS</a>'),
+        encoding="utf-8",
+    )
 
-    # RSS feed.
+    # ---- section pages from sections/*.md ----
+    for s in SECTIONS:
+        if s["slug"] == "notes":
+            continue
+        meta, body_html = parse_md(SECTIONS_DIR / f"{s['slug']}.md", ["title"])
+        content = (
+            f"<h1>{html.escape(meta['title'])}</h1>\n"
+            f"<div class=\"section-body\">\n{body_html}\n</div>"
+        )
+        (ROOT / f"{s['slug']}.html").write_text(
+            page(f"{meta['title']} · {SITE_TITLE}", content, here=s["slug"]),
+            encoding="utf-8",
+        )
+
+    # ---- landing ----
+    cards = "\n".join(
+        f"""<a class="card" href="{s['slug']}.html">
+<span class="num">{["I", "II", "III", "IV", "V", "VI"][i]}</span>
+<h3>{s['title']}</h3>
+<p>{s['blurb']}</p>
+</a>"""
+        for i, s in enumerate(SECTIONS)
+    )
+    landing = (
+        f"<h1>{SITE_TITLE}</h1>\n"
+        f"<p class=\"lede\">{SITE_DESCRIPTION}</p>\n"
+        f"<div class=\"grid\">\n{cards}\n</div>"
+    )
+    (ROOT / "index.html").write_text(
+        page(SITE_TITLE, landing, footer='<a href="feed.xml">RSS</a>'),
+        encoding="utf-8",
+    )
+
+    # ---- RSS (Notes) ----
     now = datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S +0000")
     rss_items = "\n".join(
         f"""<item>
@@ -239,8 +336,8 @@ def build():
     feed = f"""<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
 <channel>
-<title>{html.escape(SITE_TITLE)}</title>
-<link>{SITE_URL}</link>
+<title>{html.escape(SITE_TITLE)} · Notes</title>
+<link>{SITE_URL}/notes.html</link>
 <description>{html.escape(SITE_DESCRIPTION)}</description>
 <lastBuildDate>{now}</lastBuildDate>
 {rss_items}
@@ -249,7 +346,7 @@ def build():
 """
     (ROOT / "feed.xml").write_text(feed, encoding="utf-8")
 
-    print(f"Built {len(posts)} post(s), index.html, feed.xml")
+    print(f"Built landing, {len(SECTIONS)} sections, {len(posts)} post(s), feed.xml")
 
 
 if __name__ == "__main__":
