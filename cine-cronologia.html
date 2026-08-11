@@ -253,7 +253,7 @@ function candidates(f){
     ['en', f.n], ['en', `${f.n} (film)`], ['en', `${f.n} (${f.y} film)`],
   ];
 }
-async function lookup(lang,title){
+async function lookup(lang,title,year){
   const r=await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/`+
     encodeURIComponent(title.replace(/ /g,'_')));
   if(!r.ok) throw 0;
@@ -261,6 +261,7 @@ async function lookup(lang,title){
   if(j.type!=='standard') throw 0;
   const d=((j.description||'')+' '+(j.extract||'')).toLowerCase();
   if(!/pel\u00edcula|film|cine|documental/.test(d.normalize('NFC'))) throw 0;
+  if(!new RegExp('\\b('+(year-1)+'|'+year+'|'+(year+1)+')\\b').test(d)) throw 0;
   if(!j.thumbnail) throw 0;
   return j.thumbnail.source;
 }
@@ -268,7 +269,7 @@ async function posterFor(f){
   const k=f.n+'|'+f.y;
   if(k in cache) return cache[k];
   for(const [lang,t] of candidates(f)){
-    try{ const u=await lookup(lang,t); cache[k]=u; return u; }catch(e){}
+    try{ const u=await lookup(lang,t,f.y); cache[k]=u; return u; }catch(e){}
   }
   cache[k]=null; return null;
 }
