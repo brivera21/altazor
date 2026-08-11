@@ -177,7 +177,6 @@ function render(){
   el.innerHTML=s;
   document.getElementById('info').textContent=
     `${Math.round(view.a)} to ${Math.round(view.b)}`;
-  hook();
 }
 function clampView(a,b){
   const span=Math.min(MAXY-MINY,Math.max(8,b-a));
@@ -185,24 +184,26 @@ function clampView(a,b){
   return {a,b:a+span};
 }
 function hook(){
-  const svg=document.getElementById('tlsvg');
-  const px=e=>{const r=svg.getBoundingClientRect();return (e.clientX-r.left)/r.width*W;};
-  svg.addEventListener('wheel',e=>{
+  const px=e=>{const r=el.getBoundingClientRect();return (e.clientX-r.left)/r.width*W;};
+  el.addEventListener('wheel',e=>{
     e.preventDefault();
     const f=e.deltaY>0?1.18:1/1.18, yr=YR(px(e));
     view=clampView(yr-(yr-view.a)*f, yr+(view.b-yr)*f);
     render();
   },{passive:false});
-  let drag=null;
-  svg.addEventListener('pointerdown',e=>{drag={x:px(e),a:view.a,b:view.b};svg.classList.add('panning');svg.setPointerCapture(e.pointerId);});
-  svg.addEventListener('pointermove',e=>{
+  let drag=null, dragged=false;
+  el.addEventListener('pointerdown',e=>{drag={x:px(e),a:view.a,b:view.b};dragged=false;el.setPointerCapture(e.pointerId);});
+  el.addEventListener('pointermove',e=>{
     if(!drag) return;
-    const dyr=(px(e)-drag.x)/W*(drag.b-drag.a);
+    const dx=px(e)-drag.x;
+    if(Math.abs(dx)>2) dragged=true;
+    const dyr=dx/W*(drag.b-drag.a);
     view=clampView(drag.a-dyr, drag.b-dyr);
     render();
   });
-  svg.addEventListener('pointerup',()=>{drag=null;});
-  svg.addEventListener('click',e=>{
+  el.addEventListener('pointerup',()=>{drag=null;});
+  el.addEventListener('click',e=>{
+    if(dragged){dragged=false;return;}
     const g=e.target.closest('[data-per]');
     if(g){const p=PERIODS[+g.getAttribute('data-per')];
       view=clampView(p.a-3,p.b+3);render();}
@@ -210,7 +211,7 @@ function hook(){
   const tip=(name,year,extra)=>{
     document.getElementById('info').textContent=`${name} (${year})${extra?' \u00b7 '+extra:''}`;
   };
-  svg.addEventListener('pointerover',e=>{
+  el.addEventListener('pointerover',e=>{
     const gg=e.target.closest('[data-g]');
     if(gg){const g=GAMES[+gg.getAttribute('data-g')];tip(g.n,g.y,ERAN[g.e]);return;}
     const cc=e.target.closest('[data-c]');
@@ -227,6 +228,7 @@ lg.innerHTML=Object.keys(ERAC).map(k=>
   `<span><span class="sw" style="background:${ERAC[k]}"></span>${ERAN[k]}</span>`).join('')+
   `<span><span class="sw" style="background:${CHAMPC}"></span>World Champions</span>`;
 render();
+hook();
 </script>
 </body>
 </html>

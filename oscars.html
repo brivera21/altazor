@@ -147,7 +147,6 @@ function render(){
   el.innerHTML=s;
   document.getElementById('info').textContent=
     `${Math.round(view.a)} to ${Math.round(view.b)}`;
-  hook();
 }
 function clampView(a,b){
   const span=Math.min(MAXY-MINY,Math.max(6,b-a));
@@ -155,29 +154,31 @@ function clampView(a,b){
   return {a,b:a+span};
 }
 function hook(){
-  const svg=document.getElementById('tlsvg');
-  const px=e=>{const r=svg.getBoundingClientRect();return (e.clientX-r.left)/r.width*W;};
-  svg.addEventListener('wheel',e=>{
+  const px=e=>{const r=el.getBoundingClientRect();return (e.clientX-r.left)/r.width*W;};
+  el.addEventListener('wheel',e=>{
     e.preventDefault();
     const f=e.deltaY>0?1.18:1/1.18, yr=YR(px(e));
     view=clampView(yr-(yr-view.a)*f, yr+(view.b-yr)*f);
     render();
   },{passive:false});
-  let drag=null;
-  svg.addEventListener('pointerdown',e=>{drag={x:px(e),a:view.a,b:view.b};svg.setPointerCapture(e.pointerId);});
-  svg.addEventListener('pointermove',e=>{
+  let drag=null, dragged=false;
+  el.addEventListener('pointerdown',e=>{drag={x:px(e),a:view.a,b:view.b};dragged=false;el.setPointerCapture(e.pointerId);});
+  el.addEventListener('pointermove',e=>{
     if(!drag) return;
-    const dyr=(px(e)-drag.x)/W*(drag.b-drag.a);
+    const dx=px(e)-drag.x;
+    if(Math.abs(dx)>2) dragged=true;
+    const dyr=dx/W*(drag.b-drag.a);
     view=clampView(drag.a-dyr, drag.b-dyr);
     render();
   });
-  svg.addEventListener('pointerup',()=>{drag=null;});
-  svg.addEventListener('click',e=>{
+  el.addEventListener('pointerup',()=>{drag=null;});
+  el.addEventListener('click',e=>{
+    if(dragged){dragged=false;return;}
     const g=e.target.closest('[data-era]');
     if(g){const p=ERAS[+g.getAttribute('data-era')];
       view=clampView(p.a-2,p.b+2);render();}
   });
-  svg.addEventListener('pointerover',e=>{
+  el.addEventListener('pointerover',e=>{
     const g=e.target.closest('[data-f]');
     if(g){ showFilm(+g.getAttribute('data-f')); setFocus(+g.getAttribute('data-dec')); return; }
     const b=e.target.closest('[data-era]');
@@ -187,7 +188,7 @@ function hook(){
     const db=e.target.closest('[data-dec-band]');
     setFocus(db ? +db.getAttribute('data-dec-band') : null);
   });
-  svg.addEventListener('pointerleave',()=>setFocus(null));
+  el.addEventListener('pointerleave',()=>setFocus(null));
 }
 
 function setFocus(d){
@@ -243,6 +244,7 @@ lg.innerHTML=ERAS.map(p=>
   `<span><span class="sw" style="background:${p.c}"></span>${esc(p.n)}</span>`).join('');
 render();
 showFilm(FILMS.length-1);
+hook();
 </script>
 </body>
 </html>
