@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Best Picture Winners · Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 6px; font-size:26px; }
+.lede { color:var(--muted); font-size:14.5px; margin:0 0 14px; max-width:760px; }
+.controls { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
+.controls button { background:var(--panel); border:1px solid var(--line); color:var(--text);
+  padding:7px 13px; border-radius:8px; cursor:pointer; font-size:13.5px; }
+.controls button:hover { border-color:var(--accent); }
+.controls .info { color:var(--muted); font-size:13px; margin-left:6px; }
+.stage { display:flex; gap:22px; align-items:flex-start; }
+#tl { flex:1 1 640px; min-width:0; }
+#tl svg { width:100%; height:auto; display:block; cursor:grab; user-select:none; }
+.side { flex:0 0 260px; position:sticky; top:16px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:14px; }
+#poster { width:100%; aspect-ratio:2/3; object-fit:contain; background:#101010;
+  border-radius:6px; display:block; }
+#filmTxt { font-weight:700; margin:10px 0 2px; font-size:15px; }
+#eraTxt { font-size:13px; min-height:1.2em; }
+#yearTxt { color:var(--muted); font-size:13px; margin-top:4px; }
+.legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-size:12.5px; color:var(--muted); }
+.legend span.sw { width:11px; height:11px; border-radius:3px; display:inline-block; margin-right:5px; }
+.note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;}
+  #poster{max-width:220px; margin:0 auto;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="film.html">&larr; Film</a></nav>
+</header>
+<h1>Best Picture Winners</h1>
+<p class="lede">Every Academy Award Best Picture winner, from Wings at the
+first ceremony in 1929 to Anora in 2025, grouped into eight Hollywood eras.
+Scroll to zoom, drag to pan, click an era band to zoom into it, hover a film
+to see its poster.</p>
+<div class="controls">
+  <button id="reset">Reset view</button>
+  <span class="info" id="info"></span>
+</div>
+<div class="stage">
+  <div id="tl"></div>
+  <div class="side"><div class="card">
+    <img id="poster" alt="Film poster">
+    <div id="filmTxt">Hover a film</div>
+    <div id="eraTxt"></div>
+    <div id="yearTxt"></div>
+  </div></div>
+</div>
+<div class="legend" id="legend"></div>
+<p class="note">Years are ceremony years. Winners and eras follow a Mathematica
+timeline notebook, with Anora appended. Posters are loaded at view time from
+Wikipedia's public API for identification and are not stored on this site; a
+few may fail to resolve.</p>
+</div>
+<script>
+const FILMS=[{"y":1929,"n":"Wings","e":0},{"y":1930,"n":"The Broadway Melody","e":0},{"y":1931,"n":"All Quiet on the Western Front","e":0},{"y":1932,"n":"Grand Hotel","e":0},{"y":1933,"n":"Cavalcade","e":0},{"y":1935,"n":"It Happened One Night","e":0},{"y":1936,"n":"Mutiny on the Bounty","e":0},{"y":1937,"n":"The Great Ziegfeld","e":0},{"y":1938,"n":"The Life of Emile Zola","e":0},{"y":1939,"n":"You Can't Take It with You","e":1},{"y":1940,"n":"Gone with the Wind","e":1},{"y":1941,"n":"Rebecca","e":1},{"y":1942,"n":"How Green Was My Valley","e":1},{"y":1943,"n":"Mrs. Miniver","e":1},{"y":1944,"n":"Casablanca","e":1},{"y":1945,"n":"Going My Way","e":1},{"y":1946,"n":"The Lost Weekend","e":1},{"y":1947,"n":"The Best Years of Our Lives","e":1},{"y":1948,"n":"Gentleman's Agreement","e":1},{"y":1949,"n":"Hamlet","e":1},{"y":1950,"n":"All the King's Men","e":1},{"y":1951,"n":"All About Eve","e":1},{"y":1952,"n":"An American in Paris","e":1},{"y":1953,"n":"The Greatest Show on Earth","e":1},{"y":1954,"n":"From Here to Eternity","e":2},{"y":1955,"n":"On the Waterfront","e":2},{"y":1956,"n":"Marty","e":2},{"y":1957,"n":"Around the World in 80 Days","e":2},{"y":1958,"n":"The Bridge on the River Kwai","e":2},{"y":1959,"n":"Gigi","e":2},{"y":1960,"n":"Ben-Hur","e":2},{"y":1961,"n":"The Apartment","e":2},{"y":1962,"n":"West Side Story","e":2},{"y":1963,"n":"Lawrence of Arabia","e":2},{"y":1964,"n":"Tom Jones","e":2},{"y":1965,"n":"My Fair Lady","e":2},{"y":1966,"n":"The Sound of Music","e":3},{"y":1967,"n":"A Man for All Seasons","e":3},{"y":1968,"n":"In the Heat of the Night","e":3},{"y":1969,"n":"Oliver!","e":3},{"y":1970,"n":"Midnight Cowboy","e":3},{"y":1971,"n":"Patton","e":3},{"y":1972,"n":"The French Connection","e":3},{"y":1973,"n":"The Godfather","e":3},{"y":1974,"n":"The Sting","e":3},{"y":1975,"n":"The Godfather Part II","e":3},{"y":1976,"n":"One Flew Over the Cuckoo's Nest","e":3},{"y":1977,"n":"Rocky","e":3},{"y":1978,"n":"Annie Hall","e":3},{"y":1979,"n":"The Deer Hunter","e":3},{"y":1980,"n":"Kramer vs. Kramer","e":4},{"y":1981,"n":"Ordinary People","e":4},{"y":1982,"n":"Chariots of Fire","e":4},{"y":1983,"n":"Gandhi","e":4},{"y":1984,"n":"Terms of Endearment","e":4},{"y":1985,"n":"Amadeus","e":4},{"y":1986,"n":"Out of Africa","e":4},{"y":1987,"n":"Platoon","e":4},{"y":1988,"n":"The Last Emperor","e":4},{"y":1989,"n":"Rain Man","e":4},{"y":1990,"n":"Driving Miss Daisy","e":4},{"y":1991,"n":"Dances with Wolves","e":4},{"y":1992,"n":"The Silence of the Lambs","e":4},{"y":1993,"n":"Unforgiven","e":5},{"y":1994,"n":"Schindler's List","e":5},{"y":1995,"n":"Forrest Gump","e":5},{"y":1996,"n":"Braveheart","e":5},{"y":1997,"n":"The English Patient","e":5},{"y":1998,"n":"Titanic","e":5},{"y":1999,"n":"Shakespeare in Love","e":5},{"y":2000,"n":"American Beauty","e":5},{"y":2001,"n":"Gladiator","e":5},{"y":2002,"n":"A Beautiful Mind","e":5},{"y":2003,"n":"Chicago","e":5},{"y":2004,"n":"The Lord of the Rings: The Return of the King","e":5},{"y":2005,"n":"Million Dollar Baby","e":6},{"y":2006,"n":"Crash","e":6},{"y":2007,"n":"The Departed","e":6},{"y":2008,"n":"No Country for Old Men","e":6},{"y":2009,"n":"Slumdog Millionaire","e":6},{"y":2010,"n":"The Hurt Locker","e":6},{"y":2011,"n":"The King's Speech","e":6},{"y":2012,"n":"The Artist","e":6},{"y":2013,"n":"Argo","e":6},{"y":2014,"n":"12 Years a Slave","e":6},{"y":2015,"n":"Birdman","e":7},{"y":2016,"n":"Spotlight","e":7},{"y":2017,"n":"Moonlight","e":7},{"y":2018,"n":"The Shape of Water","e":7},{"y":2019,"n":"Green Book","e":7},{"y":2020,"n":"Parasite","e":7},{"y":2021,"n":"Nomadland","e":7},{"y":2022,"n":"CODA","e":7},{"y":2023,"n":"Everything Everywhere All at Once","e":7},{"y":2024,"n":"Oppenheimer","e":7},{"y":2025,"n":"Anora","e":7}], ERAS=[{"a":1929,"b":1939,"n":"Early Academy Awards","c":"#8b93a7"},{"a":1939,"b":1954,"n":"Golden Age of Hollywood","c":"#ffb02e"},{"a":1954,"b":1966,"n":"Studio System Transition","c":"#ff5c4d"},{"a":1966,"b":1980,"n":"New Hollywood Era","c":"#31d67a"},{"a":1980,"b":1993,"n":"Blockbuster & Auteur Era","c":"#b48cf2"},{"a":1993,"b":2005,"n":"Independent Film Renaissance","c":"#58a6ff"},{"a":2005,"b":2015,"n":"Global Cinema Recognition","c":"#d1548e"},{"a":2015,"b":2025,"n":"Streaming & Diversity Era","c":"#2fc6a6"}];
+const W=980,H=760,CY=600,MINY=1925,MAXY=2030;
+let view={a:MINY,b:MAXY};
+
+const el=document.getElementById('tl');
+const X=y=>(y-view.a)/(view.b-view.a)*W;
+const YR=x=>view.a+x/W*(view.b-view.a);
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+function ticks(){
+  const span=view.b-view.a;
+  const step=span>60?10:span>25?5:span>12?2:1;
+  const out=[];
+  for(let y=Math.ceil(view.a/step)*step;y<=view.b;y+=step) out.push(y);
+  return out;
+}
+function lanes(items,estw){
+  const ends=[];
+  for(const it of items){
+    const w=estw(it), x0=it.cx-w/2;
+    let l=0;
+    while(l<ends.length && ends[l]>x0) l++;
+    it.lane=l; ends[l]=it.cx+w/2+8;
+  }
+}
+function render(){
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" id="tlsvg">`;
+  s+=`<rect width="${W}" height="${H}" fill="#121212"/>`;
+  for(const y of ticks()){
+    const x=X(y);
+    s+=`<line x1="${x}" y1="26" x2="${x}" y2="${H-60}" stroke="#242424"/>`;
+    s+=`<text x="${x}" y="${CY+20}" text-anchor="middle" font-size="12.5" font-weight="700"
+      fill="#9a9a9a">${y}</text>`;
+  }
+  s+=`<line x1="0" y1="${CY}" x2="${W}" y2="${CY}" stroke="#3a3a3a" stroke-width="2"/>`;
+  ERAS.forEach((p,i)=>{
+    if(p.b<view.a||p.a>view.b) return;
+    const x0=Math.max(0,X(p.a)), x1=Math.min(W,X(p.b));
+    s+=`<rect x="${x0}" y="${CY+30}" width="${Math.max(2,x1-x0)}" height="22" rx="6"
+      fill="${p.c}22" stroke="${p.c}" stroke-width="1" data-era="${i}" style="cursor:pointer"/>`;
+    if(x1-x0>150) s+=`<text x="${(x0+x1)/2}" y="${CY+45}" text-anchor="middle" font-size="11.5"
+      fill="${p.c}" pointer-events="none">${esc(p.n)} (${p.a}-${p.b})</text>`;
+  });
+  const fs=FILMS.filter(f=>f.y>=view.a-30&&f.y<=view.b+30)
+                .map(f=>({...f,x:X(f.y),fi:FILMS.indexOf(f)}))
+                .sort((a,b)=>a.x-b.x);
+  fs.forEach(f=>{const w=Math.min(215,(f.n.length+7)*6.2)+14;
+    f.w=w; f.cx=Math.min(W-w/2-4,Math.max(w/2+4,f.x));});
+  lanes(fs,f=>f.w-14);
+  for(const f of fs){
+    const ly=CY-42-f.lane*26, c=ERAS[f.e].c;
+    s+=`<line x1="${f.x}" y1="${CY-4}" x2="${f.x}" y2="${ly+9}" stroke="${c}" stroke-width="1.1" opacity="0.7"/>`;
+    s+=`<circle cx="${f.x}" cy="${CY-6}" r="3.2" fill="${c}"/>`;
+    const label=`${f.n} (${f.y})`;
+    s+=`<g data-f="${f.fi}" style="cursor:default">
+      <rect x="${f.cx-f.w/2}" y="${ly-8}" width="${f.w}" height="20" rx="7"
+        fill="#1a1a1a" stroke="${c}" stroke-width="1.1"/>
+      <text x="${f.cx}" y="${ly+6}" text-anchor="middle" font-size="11.3" font-weight="600"
+        fill="#e6e6e6" pointer-events="none">${esc(label).slice(0,40)}</text></g>`;
+  }
+  s+='</svg>';
+  el.innerHTML=s;
+  document.getElementById('info').textContent=
+    `${Math.round(view.a)} to ${Math.round(view.b)}`;
+  hook();
+}
+function clampView(a,b){
+  const span=Math.min(MAXY-MINY,Math.max(6,b-a));
+  a=Math.max(MINY,Math.min(a,MAXY-span));
+  return {a,b:a+span};
+}
+function hook(){
+  const svg=document.getElementById('tlsvg');
+  const px=e=>{const r=svg.getBoundingClientRect();return (e.clientX-r.left)/r.width*W;};
+  svg.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const f=e.deltaY>0?1.18:1/1.18, yr=YR(px(e));
+    view=clampView(yr-(yr-view.a)*f, yr+(view.b-yr)*f);
+    render();
+  },{passive:false});
+  let drag=null;
+  svg.addEventListener('pointerdown',e=>{drag={x:px(e),a:view.a,b:view.b};svg.setPointerCapture(e.pointerId);});
+  svg.addEventListener('pointermove',e=>{
+    if(!drag) return;
+    const dyr=(px(e)-drag.x)/W*(drag.b-drag.a);
+    view=clampView(drag.a-dyr, drag.b-dyr);
+    render();
+  });
+  svg.addEventListener('pointerup',()=>{drag=null;});
+  svg.addEventListener('click',e=>{
+    const g=e.target.closest('[data-era]');
+    if(g){const p=ERAS[+g.getAttribute('data-era')];
+      view=clampView(p.a-2,p.b+2);render();}
+  });
+  svg.addEventListener('pointerover',e=>{
+    const g=e.target.closest('[data-f]');
+    if(g){ showFilm(+g.getAttribute('data-f')); return; }
+    const b=e.target.closest('[data-era]');
+    if(b){ const p=ERAS[+b.getAttribute('data-era')];
+      document.getElementById('info').textContent=`${p.n} (${p.a}-${p.b}) \u00b7 click to zoom`; }
+  });
+}
+
+// ---- poster panel: Wikipedia REST API, candidates tried in order ----
+const cache={};
+let current=-1;
+function candidates(f){
+  const fy=f.y-1, fy2=f.y-2;
+  return [f.n, `${f.n} (film)`, `${f.n} (${fy} film)`, `${f.n} (${fy2} film)`];
+}
+async function lookup(title){
+  const r=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+
+    encodeURIComponent(title.replace(/ /g,'_')));
+  if(!r.ok) throw 0;
+  const j=await r.json();
+  if(j.type!=='standard') throw 0;
+  const d=((j.description||'')+' '+(j.extract||'')).toLowerCase();
+  if(!d.includes('film')) throw 0;
+  return j.thumbnail?j.thumbnail.source.replace(/\/\d+px-/,'/360px-'):null;
+}
+async function posterFor(f){
+  if(f.n in cache) return cache[f.n];
+  for(const t of candidates(f)){
+    try{ const u=await lookup(t); cache[f.n]=u; return u; }catch(e){}
+  }
+  cache[f.n]=null; return null;
+}
+async function showFilm(i){
+  const f=FILMS[i]; current=i;
+  document.getElementById('filmTxt').textContent=`${f.n}`;
+  const et=document.getElementById('eraTxt');
+  et.textContent=ERAS[f.e].n; et.style.color=ERAS[f.e].c;
+  document.getElementById('yearTxt').textContent=`Best Picture, ${f.y} ceremony`;
+  const img=document.getElementById('poster');
+  img.removeAttribute('src'); img.alt='Loading poster\u2026';
+  const u=await posterFor(f);
+  if(current!==i) return;
+  if(u){ img.src=u; img.alt=`${f.n} poster`; }
+  else { img.alt='No poster found'; }
+}
+document.getElementById('reset').onclick=()=>{view={a:MINY,b:MAXY};render();};
+const lg=document.getElementById('legend');
+lg.innerHTML=ERAS.map(p=>
+  `<span><span class="sw" style="background:${p.c}"></span>${esc(p.n)}</span>`).join('');
+render();
+showFilm(FILMS.length-1);
+</script>
+</body>
+</html>
