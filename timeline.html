@@ -26,7 +26,7 @@ h1 { margin:0 0 6px; font-size:26px; }
 .controls .info { color:var(--muted); font-size:13px; margin-left:6px; }
 #tl { width:100%; }
 #tl svg { width:100%; height:auto; display:block; cursor:grab; user-select:none; }
-#tl svg.panning { cursor:grabbing; }
+#tl.panning, #tl.panning * { cursor:grabbing !important; }
 .legend { display:flex; gap:16px; flex-wrap:wrap; margin-top:10px; font-size:13px; color:var(--muted); }
 .legend span.sw { width:11px; height:11px; border-radius:3px; display:inline-block; margin-right:6px; }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
@@ -192,7 +192,7 @@ function hook(){
     render();
   },{passive:false});
   let drag=null, dragged=false;
-  el.addEventListener('pointerdown',e=>{drag={x:px(e),a:view.a,b:view.b};dragged=false;el.setPointerCapture(e.pointerId);});
+  el.addEventListener('pointerdown',e=>{drag={x:px(e),a:view.a,b:view.b};dragged=false;el.classList.add('panning');el.setPointerCapture(e.pointerId);});
   el.addEventListener('pointermove',e=>{
     if(!drag) return;
     const dx=px(e)-drag.x;
@@ -201,7 +201,8 @@ function hook(){
     view=clampView(drag.a-dyr, drag.b-dyr);
     render();
   });
-  el.addEventListener('pointerup',()=>{drag=null;});
+  el.addEventListener('pointerup',()=>{drag=null;el.classList.remove('panning');});
+  el.addEventListener('pointercancel',()=>{drag=null;el.classList.remove('panning');});
   el.addEventListener('click',e=>{
     if(dragged){dragged=false;return;}
     const g=e.target.closest('[data-per]');
