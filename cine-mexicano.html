@@ -56,8 +56,8 @@ h1 { margin:0 0 6px; font-size:26px; }
 </header>
 <h1>Cine Mexicano</h1>
 <p class="lede">Una lista maestra del cine mexicano: 1,712 películas de 1896
-a 2025, mostradas como películas por año. Usa la rueda para acercar y arrastra
-para desplazarte. Haz clic en la barra de un año para listar sus películas, o
+a 2025, mostradas como películas por año. Ctrl (o &#8984;) + rueda para
+acercar; arrastra para desplazarte. Haz clic en la barra de un año para listar sus películas, o
 en la banda de una era para acercarte a ella y listarla. El auge de la Época de
 Oro y el repunte posterior al 2000 saltan a la vista.</p>
 <div class="controls">
@@ -169,17 +169,20 @@ function showRange(a,b,title,sub,color){
 function hook(){
   const px=e=>{const r=el.getBoundingClientRect();return (e.clientX-r.left)/r.width*W;};
   el.addEventListener('wheel',e=>{
-    e.preventDefault();
-    if(Math.abs(e.deltaX)>Math.abs(e.deltaY)){
-      const dyr=Math.max(-60,Math.min(60,e.deltaX))/W*(view.b-view.a)*0.45;
-      view=clampView(view.a+dyr,view.b+dyr);
-    }else{
+    if(e.ctrlKey||e.metaKey){
+      e.preventDefault();
       const mag=Math.min(Math.abs(e.deltaY),50);
       const k=Math.exp((e.deltaY>0?1:-1)*mag*0.002);
       const yr=YR(px(e));
       view=clampView(yr-(yr-view.a)*k, yr+(view.b-yr)*k);
+      render();
+    }else if(Math.abs(e.deltaX)>Math.abs(e.deltaY)){
+      e.preventDefault();
+      const dyr=Math.max(-60,Math.min(60,e.deltaX))/W*(view.b-view.a)*0.45;
+      view=clampView(view.a+dyr,view.b+dyr);
+      render();
     }
-    render();
+    // rueda vertical sin modificador: la página se desplaza normalmente
   },{passive:false});
   let drag=null, dragged=false;
   el.addEventListener('pointerdown',e=>{drag={x:px(e),a:view.a,b:view.b};dragged=false;el.classList.add('panning');el.setPointerCapture(e.pointerId);});

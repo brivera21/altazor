@@ -56,9 +56,10 @@ h1 { margin:0 0 6px; font-size:26px; }
 <h1>Cine Mexicano: Cronología</h1>
 <p class="lede">Las 1,712 películas de la lista maestra, ahora una por una. Haz
 clic en la banda de una década para entrar a ella y ver cada entrada con su
-año; pasa el cursor sobre una película para ver su póster. Usa la rueda para
-acercar y arrastra para desplazarte. Con la vista completa solo se muestran
-puntos; las fichas aparecen al entrar a una década.</p>
+año; pasa el cursor sobre una película para ver su póster. Ctrl (o &#8984;) +
+rueda para acercar; la rueda sola desplaza la página y arrastrar mueve la vista
+en ambas direcciones. Con la vista completa solo se muestran puntos; las fichas
+aparecen al entrar a una década.</p>
 <div class="controls" id="decnav">
   <button id="reset">Vista completa</button>
   <span class="info" id="info"></span>
@@ -188,26 +189,30 @@ function gotoDecade(d){
 function hook(){
   const px=e=>{const r=el.getBoundingClientRect();return (e.clientX-r.left)/r.width*W;};
   el.addEventListener('wheel',e=>{
-    e.preventDefault();
-    if(Math.abs(e.deltaX)>Math.abs(e.deltaY)){
-      const dyr=Math.max(-60,Math.min(60,e.deltaX))/W*(view.b-view.a)*0.45;
-      view=clampView(view.a+dyr,view.b+dyr);
-    }else{
+    if(e.ctrlKey||e.metaKey){
+      e.preventDefault();
       const mag=Math.min(Math.abs(e.deltaY),50);
       const k=Math.exp((e.deltaY>0?1:-1)*mag*0.002);
       const yr=YR(px(e));
       view=clampView(yr-(yr-view.a)*k, yr+(view.b-yr)*k);
+      render();
+    }else if(Math.abs(e.deltaX)>Math.abs(e.deltaY)){
+      e.preventDefault();
+      const dyr=Math.max(-60,Math.min(60,e.deltaX))/W*(view.b-view.a)*0.45;
+      view=clampView(view.a+dyr,view.b+dyr);
+      render();
     }
-    render();
+    // rueda vertical sin modificador: la página se desplaza normalmente
   },{passive:false});
   let drag=null, dragged=false;
-  el.addEventListener('pointerdown',e=>{drag={x:px(e),a:view.a,b:view.b};dragged=false;el.classList.add('panning');el.setPointerCapture(e.pointerId);});
+  el.addEventListener('pointerdown',e=>{drag={x:px(e),y:e.clientY,a:view.a,b:view.b};dragged=false;el.classList.add('panning');el.setPointerCapture(e.pointerId);});
   el.addEventListener('pointermove',e=>{
     if(!drag) return;
-    const dx=px(e)-drag.x;
-    if(Math.abs(dx)>2) dragged=true;
+    const dx=px(e)-drag.x, dy=e.clientY-drag.y;
+    if(Math.abs(dx)>2||Math.abs(dy)>2) dragged=true;
     const dyr=dx/W*(drag.b-drag.a);
     view=clampView(drag.a-dyr, drag.b-dyr);
+    if(dy){ window.scrollBy(0,-dy); drag.y=e.clientY; }
     render();
   });
   el.addEventListener('pointerup',()=>{drag=null;el.classList.remove('panning');});
@@ -226,11 +231,14 @@ function hook(){
       document.getElementById('info').textContent=
         d+'s · clic para entrar a la década';
       setFocus(d); return; }
-    setFocus(null);
+    // huecos entre fichas: se conserva el enfoque actual (sin parpadeo)
   });
   el.addEventListener('pointerleave',()=>setFocus(null));
 }
+let focusD=null;
 function setFocus(d){
+  if(d===focusD) return;
+  focusD=d;
   document.querySelectorAll('#tlsvg [data-dec]').forEach(g=>{
     g.setAttribute('opacity', d===null||+g.getAttribute('data-dec')===d ? 1 : 0.22);
   });
