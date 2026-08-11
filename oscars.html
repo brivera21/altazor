@@ -192,7 +192,7 @@ async function lookup(title){
   if(j.type!=='standard') throw 0;
   const d=((j.description||'')+' '+(j.extract||'')).toLowerCase();
   if(!d.includes('film')) throw 0;
-  return j.thumbnail?j.thumbnail.source.replace(/\/\d+px-/,'/360px-'):null;
+  return j.thumbnail?j.thumbnail.source:null;
 }
 async function posterFor(f){
   if(f.n in cache) return cache[f.n];
