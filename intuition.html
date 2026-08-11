@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Board Intuition · Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff;
+        --sq-light:#a9b2be; --sq-dark:#5a6472;
+        --hi-strong:#f09b28; --hi-soft:#f8d692; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1240px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 6px; font-size:26px; }
+.lede { color:var(--muted); font-size:14.5px; margin:0 0 18px; max-width:760px; }
+.stage { display:flex; gap:26px; align-items:flex-start; }
+.menu { flex:0 0 230px; }
+.menu h3 { font-size:11.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--muted); margin:18px 0 6px; font-weight:600; }
+.menu h3:first-child { margin-top:0; }
+.menu button { display:block; width:100%; text-align:left; background:none;
+  border:none; border-left:2px solid transparent; color:var(--muted);
+  padding:5px 10px; font-size:14px; cursor:pointer; border-radius:0 6px 6px 0; }
+.menu button:hover { color:var(--text); background:#1d1d1d; }
+.menu button.here { color:var(--text); border-left-color:var(--hi-strong);
+  background:#1f1c16; }
+.boardcol { flex:1 1 520px; min-width:0; max-width:620px; }
+#board { width:100%; display:block; user-select:none; }
+.info { flex:0 0 270px; position:sticky; top:16px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:16px; }
+#tTitle { font-weight:700; font-size:17px; margin:0 0 8px; }
+#tCap { color:var(--muted); font-size:13.5px; line-height:1.55; margin:0 0 12px; }
+.legend div { display:flex; gap:8px; align-items:flex-start; font-size:12.5px;
+  color:var(--muted); margin-top:6px; }
+.legend span.swb { flex:0 0 12px; height:12px; border-radius:3px; margin-top:4px; }
+#tNotes { margin:12px 0 0; padding:10px 0 0; border-top:1px solid var(--line);
+  font-size:12.5px; color:var(--muted); }
+#tNotes p { margin:0 0 6px; }
+#sqName { margin-top:12px; padding-top:10px; border-top:1px solid var(--line);
+  font-size:13px; color:var(--muted); min-height:1.3em; }
+#sqName b { color:var(--hi-strong); font-size:15px; }
+.pn { display:flex; gap:8px; margin-top:14px; }
+.pn button { background:var(--panel); border:1px solid var(--line); color:var(--text);
+  padding:6px 12px; border-radius:8px; cursor:pointer; font-size:13px; }
+.pn button:hover { border-color:var(--accent); }
+.note { color:var(--muted); font-size:12.5px; margin-top:22px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+@media (max-width:980px){ .stage{flex-wrap:wrap;} .menu{flex:1 1 100%; display:flex;
+  flex-wrap:wrap; gap:2px 10px;} .menu h3{width:100%;} .menu button{width:auto;}
+  .info{position:static; flex:1 1 100%;} }
+/* board squares */
+rect.sq { transition: fill .45s ease; }
+g.pc text { paint-order: stroke; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="chess.html">&larr; Chess</a></nav>
+</header>
+<h1>Board Intuition</h1>
+<p class="lede">The geography of the chessboard: one board, eighteen ways of
+seeing it. Pick a topic and the highlights repaint in place. Hover any square
+to name it; use the arrows or your keyboard to walk through the set.</p>
+<div class="stage">
+  <div class="menu" id="menu"></div>
+  <div class="boardcol">
+    <svg id="board" viewBox="0 0 560 560" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="pn">
+      <button id="prev">&larr; Previous</button>
+      <button id="next">Next &rarr;</button>
+    </div>
+  </div>
+  <div class="info"><div class="card">
+    <div id="tTitle"></div>
+    <p id="tCap"></p>
+    <div class="legend" id="tLegend"></div>
+    <div id="tNotes" style="display:none"></div>
+    <div id="sqName"></div>
+  </div></div>
+</div>
+<p class="note">After the Board intuition trainer diagrams. The same reference
+board underlies every topic; only the paint changes.</p>
+</div>
+<script>
+const TOPICS=[{"id":"reference","g":"Geography","t":"Reference board","c":"Corner labels stay readable with pieces on the board. Every topic that follows repaints this same board.","strong":[],"soft":[],"legend":[]},{"id":"ranks","g":"Geography","t":"Pawn ranks and back ranks","c":"Every pawn starts on the 2nd or 7th rank. Every piece starts on the 1st or 8th, behind its own pawns.","strong":["a2","b2","c2","d2","e2","f2","g2","h2","a7","b7","c7","d7","e7","f7","g7","h7"],"soft":["a1","b1","c1","d1","e1","f1","g1","h1","a8","b8","c8","d8","e8","f8","g8","h8"],"legend":[["s","2nd and 7th ranks: pawn starting squares"],["w","1st and 8th ranks: back rank, pieces"]]},{"id":"center","g":"Geography","t":"The center","c":"d4, d5, e4 and e5. Occupying or controlling these four squares gives pieces the most scope and the shortest routes to both wings.","strong":["d4","d5","e4","e5"],"soft":[],"legend":[["s","the center: d4, d5, e4, e5"]]},{"id":"extcenter","g":"Geography","t":"The extended center","c":"The 16 squares from c3 to f6. Most opening theory is a fight over this block, either by occupying it or controlling it from afar.","strong":["d4","d5","e4","e5"],"soft":["c3","c4","c5","c6","d3","d6","e3","e6","f3","f4","f5","f6"],"legend":[["s","center: d4, d5, e4, e5"],["w","extended center: c3 to f6"]]},{"id":"files","g":"Geography","t":"The d-file and the e-file","c":"The two center files. Whichever one opens first tends to define the character of the middlegame.","strong":["e1","e2","e3","e4","e5","e6","e7","e8"],"soft":["d1","d2","d3","d4","d5","d6","d7","d8"],"legend":[["s","e-file: aims at the king's starting square"],["w","d-file: aims at the queen's starting square"]]},{"id":"wings","g":"Geography","t":"Kingside and queenside","c":"Files a to d are the queenside, e to h the kingside. Castling sends the king to g1 or c1, and the rook to f1 or d1.","strong":["c1","g1","c8","g8"],"soft":["a1","a2","a3","a4","a5","a6","a7","a8","b1","b2","b3","b4","b5","b6","b7","b8","c2","c3","c4","c5","c6","c7","d1","d2","d3","d4","d5","d6","d7","d8"],"legend":[["s","king's destination after castling"],["w","queenside, files a to d"]]},{"id":"colors","g":"Geography","t":"Color complexes","c":"32 light squares and 32 dark. A bishop never leaves its own color, so trading one hands the opponent a permanent say over the other half.","strong":["a2","a4","a6","a8","b1","b3","b5","b7","c2","c4","c6","c8","d1","d3","d5","d7","e2","e4","e6","e8","f1","f3","f5","f7","g2","g4","g6","g8","h1","h3","h5","h7"],"soft":[],"legend":[["s","the 32 dark squares, a1 through h8"]]},{"id":"knight","g":"Piece vision","t":"Knight mobility","c":"The number of squares a knight attacks from each square. Two in the corner, eight in the center. This is why the rim is dim.","strong":[],"soft":[],"numbers":{"a1":2,"a2":3,"a3":4,"a4":4,"a5":4,"a6":4,"a7":3,"a8":2,"b1":3,"b2":4,"b3":6,"b4":6,"b5":6,"b6":6,"b7":4,"b8":3,"c1":4,"c2":6,"c3":8,"c4":8,"c5":8,"c6":8,"c7":6,"c8":4,"d1":4,"d2":6,"d3":8,"d4":8,"d5":8,"d6":8,"d7":6,"d8":4,"e1":4,"e2":6,"e3":8,"e4":8,"e5":8,"e6":8,"e7":6,"e8":4,"f1":4,"f2":6,"f3":8,"f4":8,"f5":8,"f6":8,"f7":6,"f8":4,"g1":3,"g2":4,"g3":6,"g4":6,"g5":6,"g6":6,"g7":4,"g8":3,"h1":2,"h2":3,"h3":4,"h4":4,"h5":4,"h6":4,"h7":3,"h8":2},"heat":true,"legend":[["s","more squares attacked"],["w","fewer"]]},{"id":"king","g":"Piece vision","t":"King mobility","c":"Squares a king reaches in one move. Three in the corner, five on an edge, eight in the middle. Endgame kings belong in the middle.","strong":[],"soft":[],"numbers":{"a1":3,"a2":5,"a3":5,"a4":5,"a5":5,"a6":5,"a7":5,"a8":3,"b1":5,"b2":8,"b3":8,"b4":8,"b5":8,"b6":8,"b7":8,"b8":5,"c1":5,"c2":8,"c3":8,"c4":8,"c5":8,"c6":8,"c7":8,"c8":5,"d1":5,"d2":8,"d3":8,"d4":8,"d5":8,"d6":8,"d7":8,"d8":5,"e1":5,"e2":8,"e3":8,"e4":8,"e5":8,"e6":8,"e7":8,"e8":5,"f1":5,"f2":8,"f3":8,"f4":8,"f5":8,"f6":8,"f7":8,"f8":5,"g1":5,"g2":8,"g3":8,"g4":8,"g5":8,"g6":8,"g7":8,"g8":5,"h1":3,"h2":5,"h3":5,"h4":5,"h5":5,"h6":5,"h7":5,"h8":3},"heat":true,"legend":[["s","more squares reached"],["w","fewer"]]},{"id":"soft","g":"Piece vision","t":"f2 and f7, the soft squares","c":"In the starting position these two squares are defended by the king and nothing else. Most early tactics against beginners aim here.","strong":["f2","f7"],"soft":["a2","a7","b3","b6","c4","c5","d4","d5","e1","e3","e6","e8","g1","g3","g6","g8","h4","h5"],"legend":[["s","f2 and f7"],["w","the diagonals that attack them"]]},{"id":"longdiag","g":"Piece vision","t":"The long diagonals","c":"a1 to h8 and a8 to h1, eight squares each. A fianchettoed bishop on b2, g2, b7 or g7 rakes one of them end to end.","strong":["b2","g2","b7","g7"],"soft":["a1","a8","c3","c6","d4","d5","e4","e5","f3","f6","h1","h8"],"legend":[["s","fianchetto squares"],["w","the two long diagonals"]]},{"id":"atkdiag","g":"Piece vision","t":"The attacking diagonals","c":"b1 to h7 and b8 to h2. A bishop here points straight at the square in front of a castled king. This is the Greek gift geometry.","strong":["h7","h2"],"soft":["b1","b8","c2","c7","d3","d6","e4","e5","f4","f5","g3","g6"],"pieces":{"d3":"wB","h7":"bP"},"legend":[["s","h7 and h2, the sacrifice squares"],["w","the diagonals that reach them"]]},{"id":"outpost","g":"Piece vision","t":"Outpost territory","c":"A knight is strongest on the 5th or 6th rank where no enemy pawn can chase it away. The c, d, e and f files matter most.","strong":["c5","c6","d5","d6","e5","e6","f5","f6"],"soft":["a5","a6","b5","b6","g5","g6","h5","h6"],"legend":[["s","prime outpost squares: c5 to f6"],["w","the rest of the 5th and 6th ranks"]]},{"id":"rook7","g":"Piece vision","t":"Rook on the 7th","c":"The 7th rank is where a rook attacks pawns that have not moved and traps the king on its back rank. Two rooks there usually decide the game.","strong":["a7","b7","c7","d7","e7","f7","g7","h7"],"soft":["a8","b8","c8","d8","e8","f8","g8","h8"],"pieces":{"d7":"wR","g8":"bK","a7":"bP","b7":"bP","f7":"bP"},"legend":[["s","the 7th rank, where the pawns still sit"],["w","the 8th rank, where the king is confined"]]},{"id":"square","g":"Endgame rules","t":"The rule of the square","c":"Draw the square whose corners are the pawn and its promotion square. If the defending king is inside it, or can step inside, it catches the pawn.","strong":["c5","c6","c7","c8","d5","d6","d7","d8","e5","e6","e7","e8","f5","f6","f7","f8"],"soft":[],"pieces":{"c5":"wP","g5":"bK"},"legend":[["s","the square of the c5 pawn: c5 to f8"]],"notes":["White to move queens. Black to move plays Kf6, steps inside, and catches it.","Count from the 3rd rank for a pawn still on its 2nd, since it can move two."]},{"id":"opposition","g":"Endgame rules","t":"The opposition","c":"Kings on the same file with one square between them. Whoever is to move must step aside, so having the opposition means NOT being to move.","strong":["e6"],"soft":["d5","f5","d6","f6","d7","f7"],"pieces":{"e7":"bK","e5":"wK"},"legend":[["s","the square between them"],["w","squares the king to move is forced onto"]]},{"id":"keysquares","g":"Endgame rules","t":"Key squares","c":"Occupy one with your king and the pawn promotes, whoever is to move. For a pawn on the 2nd through 4th rank they sit two ranks ahead.","strong":["d6","e6","f6"],"soft":[],"pieces":{"e4":"wP"},"legend":[["s","key squares for the e4 pawn"]],"notes":["Pawn on the 5th or 6th rank: six key squares, on the two ranks ahead.","Rook pawns are the exception. An h-pawn has only g7 and g8."]},{"id":"wrongbishop","g":"Endgame rules","t":"The wrong bishop","c":"A rook pawn plus a bishop that cannot control the promotion square is a draw. The defending king simply sits in the corner.","strong":["h8"],"soft":["a8","a1","h1"],"pieces":{"h8":"bK","h5":"wP","f3":"wB"},"legend":[["s","h8 is dark, so a light-squared bishop can never touch it"],["w","the other three corners: a1 dark, a8 and h1 light"]],"notes":["So an h-pawn wants a dark-squared bishop, and an a-pawn a light-squared one."]}];
+const FILESTR='abcdefgh';
+const S=64, M=24;  // square size, margin for coordinates
+const GLYPH={K:'\u265A',Q:'\u265B',R:'\u265C',B:'\u265D',N:'\u265E',P:'\u265F'};
+
+const svg=document.getElementById('board');
+function sqColor(f,r){ return (f+r)%2===0 ? 'dark':'light'; }
+function baseFill(f,r){ return (f+r)%2===0 ? getCss('--sq-dark') : getCss('--sq-light'); }
+function getCss(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+// mix two hex colors
+function mix(a,b,t){
+  const pa=[1,3,5].map(i=>parseInt(a.slice(i,i+2),16));
+  const pb=[1,3,5].map(i=>parseInt(b.slice(i,i+2),16));
+  return '#'+pa.map((v,i)=>Math.round(v+(pb[i]-v)*t).toString(16).padStart(2,'0')).join('');
+}
+
+function build(){
+  let s='';
+  s+=`<rect x="${M-4}" y="${M-4}" width="${8*S+8}" height="${8*S+8}" rx="6" fill="#0d0d0d" stroke="#333"/>`;
+  for(let f=0;f<8;f++) for(let r=1;r<=8;r++){
+    const x=M+f*S, y=M+(8-r)*S;
+    s+=`<rect class="sq" id="sq-${FILESTR[f]}${r}" x="${x}" y="${y}" width="${S}" height="${S}"
+      fill="${baseFill(f,r)}" data-f="${f}" data-r="${r}"/>`;
+  }
+  // corner coordinate labels inside squares (like the PDF)
+  for(let f=0;f<8;f++) for(let r=1;r<=8;r++){
+    const x=M+f*S, y=M+(8-r)*S;
+    s+=`<text id="lb-${FILESTR[f]}${r}" x="${x+5}" y="${y+S-6}" font-size="11.5"
+      font-weight="600" fill="rgba(0,0,0,0.45)" pointer-events="none">${FILESTR[f]}${r}</text>`;
+  }
+  s+='<g id="numbers"></g><g id="pieces"></g>';
+  svg.innerHTML=s;
+}
+build();
+
+function fillFor(f,r,topic){
+  const name=FILESTR[f]+r;
+  const dark=(f+r)%2===0;
+  if(topic.numbers){
+    const n=topic.numbers[name];
+    const lo=Math.min(...Object.values(topic.numbers));
+    const hi=Math.max(...Object.values(topic.numbers));
+    const t=(n-lo)/(hi-lo);
+    const base=dark?getCss('--sq-dark'):getCss('--sq-light');
+    // blend toward strong amber by mobility
+    return mix(base, dark?'#e08a18':'#f7b449', 0.15+0.85*t);
+  }
+  if(topic.strong.includes(name))
+    return dark ? '#e08a18' : '#f7a833';
+  if(topic.soft && topic.soft.includes(name))
+    return dark ? '#c9a25e' : '#f3d391';
+  return dark?getCss('--sq-dark'):getCss('--sq-light');
+}
+
+let cur=0;
+function show(i){
+  cur=(i+TOPICS.length)%TOPICS.length;
+  const t=TOPICS[cur];
+  for(let f=0;f<8;f++) for(let r=1;r<=8;r++){
+    document.getElementById('sq-'+FILESTR[f]+r).setAttribute('fill', fillFor(f,r,t));
+  }
+  // numbers
+  const ng=document.getElementById('numbers');
+  if(t.numbers){
+    let s='';
+    for(let f=0;f<8;f++) for(let r=1;r<=8;r++){
+      const x=M+f*S, y=M+(8-r)*S;
+      s+=`<text x="${x+S/2}" y="${y+S/2+9}" text-anchor="middle" font-size="26"
+        font-weight="700" fill="rgba(0,0,0,0.72)" pointer-events="none">${t.numbers[FILESTR[f]+r]}</text>`;
+    }
+    ng.innerHTML=s;
+  } else ng.innerHTML='';
+  // pieces
+  const pg=document.getElementById('pieces');
+  if(t.pieces){
+    let s='';
+    for(const [name,pc] of Object.entries(t.pieces)){
+      const f=FILESTR.indexOf(name[0]), r=+name[1];
+      const x=M+f*S+S/2, y=M+(8-r)*S+S/2+16;
+      const white=pc[0]==='w';
+      s+=`<g class="pc"><text x="${x}" y="${y}" text-anchor="middle" font-size="46"
+        fill="${white?'#f4efe2':'#141414'}" stroke="${white?'#20242c':'#e8e2d2'}"
+        stroke-width="1.6">${GLYPH[pc[1]]}</text></g>`;
+    }
+    pg.innerHTML=s;
+  } else pg.innerHTML='';
+  // panel
+  document.getElementById('tTitle').textContent=t.t;
+  document.getElementById('tCap').textContent=t.c;
+  document.getElementById('tLegend').innerHTML=(t.legend||[]).map(([k,txt])=>
+    `<div><span class="swb" style="background:${k==='s'?'#f09b28':'#f3d391'}"></span><span>${txt}</span></div>`).join('');
+  const nt=document.getElementById('tNotes');
+  if(t.notes){ nt.style.display='block'; nt.innerHTML=t.notes.map(n=>`<p>${n}</p>`).join(''); }
+  else { nt.style.display='none'; }
+  document.querySelectorAll('.menu button').forEach(b=>
+    b.classList.toggle('here', b.dataset.i==cur));
+}
+
+// menu
+const menu=document.getElementById('menu');
+let lastG=null;
+TOPICS.forEach((t,i)=>{
+  if(t.g!==lastG){ lastG=t.g;
+    const h=document.createElement('h3'); h.textContent=t.g; menu.appendChild(h); }
+  const b=document.createElement('button');
+  b.textContent=t.t; b.dataset.i=i;
+  b.onclick=()=>show(i);
+  menu.appendChild(b);
+});
+
+document.getElementById('prev').onclick=()=>show(cur-1);
+document.getElementById('next').onclick=()=>show(cur+1);
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft') show(cur-1);
+  if(e.key==='ArrowRight') show(cur+1);
+});
+
+// hover square name
+svg.addEventListener('pointermove',e=>{
+  const el=e.target.closest('rect.sq');
+  const out=document.getElementById('sqName');
+  if(!el){ out.innerHTML=''; return; }
+  const name=FILESTR[+el.dataset.f]+el.dataset.r;
+  const t=TOPICS[cur];
+  let tag='';
+  if(t.numbers) tag=' \u00b7 '+t.numbers[name];
+  else if(t.strong.includes(name)) tag=' \u00b7 highlighted';
+  else if(t.soft && t.soft.includes(name)) tag=' \u00b7 highlighted (light)';
+  out.innerHTML='<b>'+name+'</b>'+tag;
+});
+svg.addEventListener('pointerleave',()=>{document.getElementById('sqName').innerHTML='';});
+
+show(0);
+</script>
+</body>
+</html>
