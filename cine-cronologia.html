@@ -27,7 +27,8 @@ h1 { margin:0 0 6px; font-size:26px; }
 .controls button.dec:hover { color:var(--text); }
 .controls .info { color:var(--muted); font-size:13px; margin-left:6px; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
-#tl { flex:1 1 640px; min-width:0; }
+#tl { flex:1 1 640px; min-width:0; max-height:78vh; overflow-y:auto;
+  border:1px solid var(--line); border-radius:12px; background:#121212; }
 #tl svg { width:100%; height:auto; display:block; cursor:grab; user-select:none; }
 #tl.panning, #tl.panning * { cursor:grabbing !important; }
 .side { flex:0 0 260px; position:sticky; top:16px; }
@@ -57,8 +58,8 @@ h1 { margin:0 0 6px; font-size:26px; }
 <p class="lede">Las 1,712 películas de la lista maestra, ahora una por una. Haz
 clic en la banda de una década para entrar a ella y ver cada entrada con su
 año; pasa el cursor sobre una película para ver su póster. Ctrl (o &#8984;) +
-rueda para acercar; la rueda sola desplaza la página y arrastrar mueve la vista
-en ambas direcciones. Con la vista completa solo se muestran puntos; las fichas
+rueda para acercar; la rueda sola sube y baja dentro del recuadro y arrastrar
+mueve la vista en ambas direcciones. Con la vista completa solo se muestran puntos; las fichas
 aparecen al entrar a una década.</p>
 <div class="controls" id="decnav">
   <button id="reset">Vista completa</button>
@@ -101,26 +102,35 @@ function ticks(){
   for(let y=Math.ceil(view.a/step)*step;y<=view.b;y+=step) out.push(y);
   return out;
 }
-function lanes(items,estw){
-  const ends=[]; let mx=0;
-  for(const it of items){
-    const w=estw(it), x0=it.cx-w/2;
-    let l=0;
-    while(l<ends.length && ends[l]>x0) l++;
-    it.lane=l; ends[l]=it.cx+w/2+8; mx=Math.max(mx,l);
-  }
-  return mx;
+let laneData=null, laneSpanKey=0;
+function layoutForSpan(){
+  const span=view.b-view.a;
+  if(laneData && Math.abs(span-laneSpanKey)<1e-6) return laneData;
+  const pxY=W/span;
+  const items=FILMS.map((f,i)=>({y:f.y,n:f.n,e:f.e,fi:i}));
+  items.sort((a,b)=>a.y-b.y||a.n.localeCompare(b.n));
+  items.forEach((f,i)=>{ f.w=Math.min(215,(f.n.length+7)*6.2)+14; f.up=(i%2===0); });
+  const assign=arr=>{ const ends=[]; let mx=0;
+    for(const it of arr){
+      const x0=(it.y+0.5)-((it.w-14)/2)/pxY;
+      let l=0; while(l<ends.length && ends[l]>x0) l++;
+      it.lane=l; ends[l]=(it.y+0.5)+(((it.w-14)/2)+8)/pxY; mx=Math.max(mx,l);
+    }
+    return mx; };
+  const upMax=assign(items.filter(f=>f.up));
+  const dnMax=assign(items.filter(f=>!f.up));
+  laneData={items,upMax,dnMax}; laneSpanKey=span;
+  return laneData;
 }
 function render(){
   const vis=FILMS.map((f,i)=>({...f,fi:i})).filter(f=>f.y+1>=view.a&&f.y<=view.b);
   const labelMode=vis.length<=LABEL_CAP;
   let upMax=0,dnMax=0,fs=[];
   if(labelMode){
-    fs=vis.map(f=>({...f,x:X(f.y+0.5)})).sort((a,b)=>a.x-b.x||a.n.localeCompare(b.n));
-    fs.forEach((f,i)=>{const w=Math.min(215,(f.n.length+7)*6.2)+14;
-      f.w=w; f.cx=Math.min(W-w/2-4,Math.max(w/2+4,f.x)); f.up=(i%2===0);});
-    upMax=lanes(fs.filter(f=>f.up),f=>f.w-14);
-    dnMax=lanes(fs.filter(f=>!f.up),f=>f.w-14);
+    const L=layoutForSpan();
+    upMax=L.upMax; dnMax=L.dnMax;
+    fs=L.items.filter(f=>f.y+1>=view.a-1&&f.y<=view.b+1)
+      .map(f=>({...f,x:X(f.y+0.5),cx:X(f.y+0.5)}));
   }
   const CY=labelMode?70+(upMax+1)*26+20:230;
   const H=labelMode?CY+120+(dnMax+1)*26+40:400;
@@ -212,7 +222,7 @@ function hook(){
     if(Math.abs(dx)>2||Math.abs(dy)>2) dragged=true;
     const dyr=dx/W*(drag.b-drag.a);
     view=clampView(drag.a-dyr, drag.b-dyr);
-    if(dy){ window.scrollBy(0,-dy); drag.y=e.clientY; }
+    if(dy){ el.scrollTop-=dy; drag.y=e.clientY; }
     render();
   });
   el.addEventListener('pointerup',()=>{drag=null;el.classList.remove('panning');});
