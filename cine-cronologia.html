@@ -246,7 +246,8 @@ async function lookup(lang,title){
   if(j.type!=='standard') throw 0;
   const d=((j.description||'')+' '+(j.extract||'')).toLowerCase();
   if(!/pel\u00edcula|film|cine|documental/.test(d.normalize('NFC'))) throw 0;
-  return j.thumbnail?j.thumbnail.source:null;
+  if(!j.thumbnail) throw 0;
+  return j.thumbnail.source;
 }
 async function posterFor(f){
   const k=f.n+'|'+f.y;
