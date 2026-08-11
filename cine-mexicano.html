@@ -170,8 +170,15 @@ function hook(){
   const px=e=>{const r=el.getBoundingClientRect();return (e.clientX-r.left)/r.width*W;};
   el.addEventListener('wheel',e=>{
     e.preventDefault();
-    const f=e.deltaY>0?1.18:1/1.18, yr=YR(px(e));
-    view=clampView(yr-(yr-view.a)*f, yr+(view.b-yr)*f);
+    if(Math.abs(e.deltaX)>Math.abs(e.deltaY)){
+      const dyr=Math.max(-60,Math.min(60,e.deltaX))/W*(view.b-view.a)*0.45;
+      view=clampView(view.a+dyr,view.b+dyr);
+    }else{
+      const mag=Math.min(Math.abs(e.deltaY),50);
+      const k=Math.exp((e.deltaY>0?1:-1)*mag*0.002);
+      const yr=YR(px(e));
+      view=clampView(yr-(yr-view.a)*k, yr+(view.b-yr)*k);
+    }
     render();
   },{passive:false});
   let drag=null, dragged=false;
