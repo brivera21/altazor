@@ -164,6 +164,9 @@ function render(){
 
   const svg=document.querySelector('#sun svg');
   svg.addEventListener('pointerover',e=>{
+    if(e.target.getAttribute('data-center')!==null){
+      hover=-1; paintHover(); showRoot(); return;
+    }
     const id=e.target.getAttribute('data-id');
     if(id!==null){ hover=+id; paintHover(); showNode(DATA[+id]); }
   });
