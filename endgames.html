@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Endgames · Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff;
+        --sq-light:#a9b2be; --sq-dark:#5a6472;
+        --hi-strong:#f09b28; --hi-soft:#f8d692; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1240px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 6px; font-size:26px; }
+.lede { color:var(--muted); font-size:14.5px; margin:0 0 18px; max-width:760px; }
+.stage { display:flex; gap:26px; align-items:flex-start; }
+.menu { flex:0 0 230px; }
+.menu h3 { font-size:11.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--muted); margin:18px 0 6px; font-weight:600; }
+.menu h3:first-child { margin-top:0; }
+.menu button { display:block; width:100%; text-align:left; background:none;
+  border:none; border-left:2px solid transparent; color:var(--muted);
+  padding:5px 10px; font-size:14px; cursor:pointer; border-radius:0 6px 6px 0; }
+.menu button:hover { color:var(--text); background:#1d1d1d; }
+.menu button.here { color:var(--text); border-left-color:var(--hi-strong);
+  background:#1f1c16; }
+.boardcol { flex:1 1 520px; min-width:0; max-width:620px; }
+#board { width:100%; display:block; user-select:none; }
+.info { flex:0 0 270px; position:sticky; top:16px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:16px; }
+#tTitle { font-weight:700; font-size:17px; margin:0 0 8px; }
+#stepbar { display:flex; align-items:center; gap:10px; margin:2px 0 8px; }
+#stepbar button { background:var(--bg); border:1px solid var(--line); color:var(--text);
+  padding:4px 12px; border-radius:7px; cursor:pointer; font-size:13px; }
+#stepbar button:hover { border-color:var(--hi-strong); }
+#sInd { color:var(--muted); font-size:12.5px; }
+#stepCap { color:var(--text); font-size:13.5px; line-height:1.55; margin:0 0 12px;
+  border-left:2px solid var(--hi-strong); padding-left:10px; }
+#tCap { color:var(--muted); font-size:13.5px; line-height:1.55; margin:0 0 12px; }
+.legend div { display:flex; gap:8px; align-items:flex-start; font-size:12.5px;
+  color:var(--muted); margin-top:6px; }
+.legend span.swb { flex:0 0 12px; height:12px; border-radius:3px; margin-top:4px; }
+#tNotes { margin:12px 0 0; padding:10px 0 0; border-top:1px solid var(--line);
+  font-size:12.5px; color:var(--muted); }
+#tNotes p { margin:0 0 6px; }
+#sqName { margin-top:12px; padding-top:10px; border-top:1px solid var(--line);
+  font-size:13px; color:var(--muted); min-height:1.3em; }
+#sqName b { color:var(--hi-strong); font-size:15px; }
+.pn { display:flex; gap:8px; margin-top:14px; }
+.pn button { background:var(--panel); border:1px solid var(--line); color:var(--text);
+  padding:6px 12px; border-radius:8px; cursor:pointer; font-size:13px; }
+.pn button:hover { border-color:var(--accent); }
+.note { color:var(--muted); font-size:12.5px; margin-top:22px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+@media (max-width:980px){ .stage{flex-wrap:wrap;} .menu{flex:1 1 100%; display:flex;
+  flex-wrap:wrap; gap:2px 10px;} .menu h3{width:100%;} .menu button{width:auto;}
+  .info{position:static; flex:1 1 100%;} }
+/* board squares */
+rect.sq { transition: fill .45s ease; }
+g.pc text { paint-order: stroke; transition: transform .55s ease; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="chess.html">&larr; Chess</a></nav>
+</header>
+<h1>Endgames</h1>
+<p class="lede">The basic checkmates, played out one move at a time against the tablebase defence: black always picks the reply that delays mate the longest. Use the arrows or the arrow keys to step through a line, and hover any square to name it.</p>
+<div class="stage">
+  <div class="menu" id="menu"></div>
+  <div class="boardcol">
+    <svg id="board" viewBox="0 0 560 560" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="pn">
+      <button id="prev">&larr; Previous</button>
+      <button id="next">Next &rarr;</button>
+    </div>
+  </div>
+  <div class="info"><div class="card">
+    <div id="tTitle"></div>
+    <p id="tCap"></p>
+    <div id="stepbar" style="display:none">
+      <button id="sPrev">&#9664;</button>
+      <span id="sInd"></span>
+      <button id="sNext">&#9654;</button>
+    </div>
+    <p id="stepCap" style="display:none"></p>
+    <div class="legend" id="tLegend"></div>
+    <div id="tNotes" style="display:none"></div>
+    <div id="sqName"></div>
+  </div></div>
+</div>
+<p class="note">After the Board intuition trainer diagrams. The same reference
+board underlies every topic; only the paint changes.</p>
+</div>
+<script>
+const TOPICS=[{"id":"twobishops","g":"Checkmates","t":"The two-bishop mate","c":"Two bishops form diagonal fences a king cannot cross. Black is not scripted: it plays the tablebase defence, the reply that delays mate the longest. Gold is every square White covers; green is every square still open to the black king.","strong":[],"soft":[],"legend":[["w","the dark-squared bishop's squares"],["g2","the light-squared bishop's squares"],["wk","squares the white king covers"],["bk","squares the black king can still move to"],["chk","check"]],"steps":[{"pieces":[["bK","bK","d5"],["wK","wK","c1"],["BL","wB","d1"],["BD","wB","e1"]],"c":"The start: Kc1, Bd1, Be1, black king on d5. Black plays the tablebase defence: every reply is the one that delays mate the longest. White aims for a mate away from the corner, which costs one extra move: mate in 17.","soft":["f2","g3","h4","d2","c3","b4","a5"],"g2":["e2","f3","g4","h5","c2","b3","a4"],"chk":[],"wk":["b1","b2","c2","d1","d2"],"bk":["c4","c5","c6","d4","d6","e4","e5","e6"],"strong":[]},{"pieces":[["bK","bK","d5"],["wK","wK","d2"],["BL","wB","d1"],["BD","wB","e1"]],"c":"1. Kd2. The king steps up first.","soft":["f2","g3","h4"],"g2":["e2","f3","g4","h5","c2","b3","a4"],"chk":[],"wk":["c1","c2","c3","d1","d3","e1","e2","e3"],"bk":["c4","c5","c6","d4","d6","e4","e5","e6"],"strong":[]},{"pieces":[["bK","bK","d4"],["wK","wK","d2"],["BL","wB","d1"],["BD","wB","e1"]],"c":"1... Kd4. All eight replies lose in the same number of moves; black takes the centre.","soft":["f2","g3","h4"],"g2":["e2","f3","g4","h5","c2","b3","a4"],"chk":[],"wk":["c1","c2","c3","d1","d3","e1","e2","e3"],"bk":["c4","c5","d5","e4","e5"],"strong":[]},{"pieces":[["bK","bK","d4"],["wK","wK","d2"],["BL","wB","e2"],["BD","wB","e1"]],"c":"2. Be2. The light bishop clears d1 and eyes the f1-a6 diagonal.","soft":["f2","g3","h4"],"g2":["f3","g4","h5","f1","d3","c4","b5","a6","d1"],"chk":[],"wk":["c1","c2","c3","d1","d3","e1","e2","e3"],"bk":["c5","d5","e4","e5"],"strong":[]},{"pieces":[["bK","bK","e4"],["wK","wK","d2"],["BL","wB","e2"],["BD","wB","e1"]],"c":"2... Ke4. Black crowds the white pieces.","soft":["f2","g3","h4"],"g2":["f3","g4","h5","f1","d3","c4","b5","a6","d1"],"chk":[],"wk":["c1","c2","c3","d1","d3","e1","e2","e3"],"bk":["d4","d5","e5","f4","f5"],"strong":[]},{"pieces":[["bK","bK","e4"],["wK","wK","d2"],["BL","wB","e2"],["BD","wB","g3"]],"c":"3. Bg3. The dark bishop takes the b8-h2 diagonal.","soft":["h4","h2","f4","e5","d6","c7","b8","f2","e1"],"g2":["f3","g4","h5","f1","d3","c4","b5","a6","d1"],"chk":[],"wk":["c1","c2","c3","d1","d3","e1","e2","e3"],"bk":["d4","d5","f5"],"strong":[]},{"pieces":[["bK","bK","d5"],["wK","wK","d2"],["BL","wB","e2"],["BD","wB","g3"]],"c":"3... Kd5.","soft":["h4","h2","f4","e5","d6","c7","b8","f2","e1"],"g2":["f3","g4","h5","f1","d3","c4","b5","a6","d1"],"chk":[],"wk":["c1","c2","c3","d1","d3","e1","e2","e3"],"bk":["c5","c6","d4","e4","e6"],"strong":[]},{"pieces":[["bK","bK","d5"],["wK","wK","d3"],["BL","wB","e2"],["BD","wB","g3"]],"c":"4. Kd3. The kings face off.","soft":["h4","h2","f4","e5","d6","c7","b8","f2","e1"],"g2":["f3","g4","h5","f1","d1"],"chk":[],"wk":["c2","c3","c4","d2","d4","e2","e3","e4"],"bk":["c5","c6","e6"],"strong":[]},{"pieces":[["bK","bK","c5"],["wK","wK","d3"],["BL","wB","e2"],["BD","wB","g3"]],"c":"4... Kc5.","soft":["h4","h2","f4","e5","d6","c7","b8","f2","e1"],"g2":["f3","g4","h5","f1","d1"],"chk":[],"wk":["c2","c3","c4","d2","d4","e2","e3","e4"],"bk":["b4","b5","b6","c6","d5"],"strong":[]},{"pieces":[["bK","bK","c5"],["wK","wK","e4"],["BL","wB","e2"],["BD","wB","g3"]],"c":"5. Ke4. The white king starts taking ground.","soft":["h4","h2","f4","e5","d6","c7","b8","f2","e1"],"g2":["f3","g4","h5","f1","d3","c4","b5","a6","d1"],"chk":[],"wk":["d3","d4","d5","e3","e5","f3","f4","f5"],"bk":["b4","b6","c6"],"strong":[]},{"pieces":[["bK","bK","c6"],["wK","wK","e4"],["BL","wB","e2"],["BD","wB","g3"]],"c":"5... Kc6.","soft":["h4","h2","f4","e5","d6","c7","b8","f2","e1"],"g2":["f3","g4","h5","f1","d3","c4","b5","a6","d1"],"chk":[],"wk":["d3","d4","d5","e3","e5","f3","f4","f5"],"bk":["b6","b7","c5","d7"],"strong":[]},{"pieces":[["bK","bK","c6"],["wK","wK","d4"],["BL","wB","e2"],["BD","wB","g3"]],"c":"6. Kd4.","soft":["h4","h2","f4","e5","d6","c7","b8","f2","e1"],"g2":["f3","g4","h5","f1","d3","c4","b5","a6","d1"],"chk":[],"wk":["c3","c4","c5","d3","d5","e3","e4","e5"],"bk":["b6","b7","d7"],"strong":[]},{"pieces":[["bK","bK","b6"],["wK","wK","d4"],["BL","wB","e2"],["BD","wB","g3"]],"c":"6... Kb6.","soft":["h4","h2","f4","e5","d6","c7","b8","f2","e1"],"g2":["f3","g4","h5","f1","d3","c4","b5","a6","d1"],"chk":[],"wk":["c3","c4","c5","d3","d5","e3","e4","e5"],"bk":["a5","a7","b7","c6"],"strong":[]},{"pieces":[["bK","bK","b6"],["wK","wK","d5"],["BL","wB","e2"],["BD","wB","g3"]],"c":"7. Kd5. Black is pushed toward the queenside.","soft":["h4","h2","f4","e5","d6","c7","b8","f2","e1"],"g2":["f3","g4","h5","f1","d3","c4","b5","a6","d1"],"chk":[],"wk":["c4","c5","c6","d4","d6","e4","e5","e6"],"bk":["a5","a7","b7"],"strong":[]},{"pieces":[["bK","bK","a5"],["wK","wK","d5"],["BL","wB","e2"],["BD","wB","g3"]],"c":"7... Ka5. The tablebase choice; going to a7 instead loses eight moves faster.","soft":["h4","h2","f4","e5","d6","c7","b8","f2","e1"],"g2":["f3","g4","h5","f1","d3","c4","b5","a6","d1"],"chk":[],"wk":["c4","c5","c6","d4","d6","e4","e5","e6"],"bk":["a4","b4","b6"],"strong":[]},{"pieces":[["bK","bK","a5"],["wK","wK","d5"],["BL","wB","e2"],["BD","wB","e1"]],"c":"8. Be1+. Check from the back rank.","soft":["f2","g3","h4","d2","c3","b4","a5"],"g2":["f3","g4","h5","f1","d3","c4","b5","a6","d1"],"chk":["a5"],"wk":["c4","c5","c6","d4","d6","e4","e5","e6"],"bk":["a4","b6"],"strong":[]},{"pieces":[["bK","bK","b6"],["wK","wK","d5"],["BL","wB","e2"],["BD","wB","e1"]],"c":"8... Kb6. Back up; a4 loses faster.","soft":["f2","g3","h4","d2","c3","b4","a5"],"g2":["f3","g4","h5","f1","d3","c4","b5","a6","d1"],"chk":[],"wk":["c4","c5","c6","d4","d6","e4","e5","e6"],"bk":["a7","b7","c7"],"strong":[]},{"pieces":[["bK","bK","b6"],["wK","wK","d6"],["BL","wB","e2"],["BD","wB","e1"]],"c":"9. Kd6.","soft":["f2","g3","h4","d2","c3","b4","a5"],"g2":["f3","g4","h5","f1","d3","c4","b5","a6","d1"],"chk":[],"wk":["c5","c6","c7","d5","d7","e5","e6","e7"],"bk":["a7","b7"],"strong":[]},{"pieces":[["bK","bK","b7"],["wK","wK","d6"],["BL","wB","e2"],["BD","wB","e1"]],"c":"9... Kb7.","soft":["f2","g3","h4","d2","c3","b4","a5"],"g2":["f3","g4","h5","f1","d3","c4","b5","a6","d1"],"chk":[],"wk":["c5","c6","c7","d5","d7","e5","e6","e7"],"bk":["a7","a8","b6","b8","c8"],"strong":[]},{"pieces":[["bK","bK","b7"],["wK","wK","d6"],["BL","wB","e2"],["BD","wB","a5"]],"c":"10. Ba5. Takes b6 away.","soft":["b6","c7","d8","b4","c3","d2","e1"],"g2":["f3","g4","h5","f1","d3","c4","b5","a6","d1"],"chk":[],"wk":["c5","c6","c7","d5","d7","e5","e6","e7"],"bk":["a7","a8","b8","c8"],"strong":[]},{"pieces":[["bK","bK","c8"],["wK","wK","d6"],["BL","wB","e2"],["BD","wB","a5"]],"c":"10... Kc8. The longest defence; heading for a7 falls sooner.","soft":["b6","c7","d8","b4","c3","d2","e1"],"g2":["f3","g4","h5","f1","d3","c4","b5","a6","d1"],"chk":[],"wk":["c5","c6","c7","d5","d7","e5","e6","e7"],"bk":["b7","b8"],"strong":[]},{"pieces":[["bK","bK","c8"],["wK","wK","c6"],["BL","wB","e2"],["BD","wB","a5"]],"c":"11. Kc6. Black is down to one reply.","soft":["b6","c7","d8","b4","c3","d2","e1"],"g2":["f3","g4","h5","f1","d3","c4","b5","a6","d1"],"chk":[],"wk":["b5","b6","b7","c5","c7","d5","d6","d7"],"bk":["b8"],"strong":[]},{"pieces":[["bK","bK","b8"],["wK","wK","c6"],["BL","wB","e2"],["BD","wB","a5"]],"c":"11... Kb8.","soft":["b6","c7","d8","b4","c3","d2","e1"],"g2":["f3","g4","h5","f1","d3","c4","b5","a6","d1"],"chk":[],"wk":["b5","b6","b7","c5","c7","d5","d6","d7"],"bk":["a7","a8","c8"],"strong":[]},{"pieces":[["bK","bK","b8"],["wK","wK","c6"],["BL","wB","f1"],["BD","wB","a5"]],"c":"12. Bf1. The light bishop swings toward the f1-a6 diagonal.","soft":["b6","c7","d8","b4","c3","d2","e1"],"g2":["g2","h3","e2","d3","c4","b5","a6"],"chk":[],"wk":["b5","b6","b7","c5","c7","d5","d6","d7"],"bk":["a7","a8","c8"],"strong":[]},{"pieces":[["bK","bK","c8"],["wK","wK","c6"],["BL","wB","f1"],["BD","wB","a5"]],"c":"12... Kc8.","soft":["b6","c7","d8","b4","c3","d2","e1"],"g2":["g2","h3","e2","d3","c4","b5","a6"],"chk":[],"wk":["b5","b6","b7","c5","c7","d5","d6","d7"],"bk":["b8"],"strong":[]},{"pieces":[["bK","bK","c8"],["wK","wK","c6"],["BL","wB","h3"],["BD","wB","a5"]],"c":"13. Bh3+. Check along c8-h3.","soft":["b6","c7","d8","b4","c3","d2","e1"],"g2":["g4","f5","e6","d7","c8","g2","f1"],"chk":["c8"],"wk":["b5","b6","b7","c5","c7","d5","d6","d7"],"bk":["b8"],"strong":[]},{"pieces":[["bK","bK","b8"],["wK","wK","c6"],["BL","wB","h3"],["BD","wB","a5"]],"c":"13... Kb8. Forced.","soft":["b6","c7","d8","b4","c3","d2","e1"],"g2":["g4","f5","e6","d7","c8","g2","f1"],"chk":[],"wk":["b5","b6","b7","c5","c7","d5","d6","d7"],"bk":["a7","a8"],"strong":[]},{"pieces":[["bK","bK","b8"],["wK","wK","b6"],["BL","wB","h3"],["BD","wB","a5"]],"c":"14. Kb6. Now c8 stays covered and the king holds a7 and b7.","soft":["b4","c3","d2","e1"],"g2":["g4","f5","e6","d7","c8","g2","f1"],"chk":[],"wk":["a5","a6","a7","b5","b7","c5","c6","c7"],"bk":["a8"],"strong":[]},{"pieces":[["bK","bK","a8"],["wK","wK","b6"],["BL","wB","h3"],["BD","wB","a5"]],"c":"14... Ka8. Forced.","soft":["b4","c3","d2","e1"],"g2":["g4","f5","e6","d7","c8","g2","f1"],"chk":[],"wk":["a5","a6","a7","b5","b7","c5","c6","c7"],"bk":["b8"],"strong":[]},{"pieces":[["bK","bK","a8"],["wK","wK","c7"],["BL","wB","h3"],["BD","wB","a5"]],"c":"15. Kc7. A quiet move; black gets one square.","soft":["b6","b4","c3","d2","e1"],"g2":["g4","f5","e6","d7","c8","g2","f1"],"chk":[],"wk":["b6","b7","b8","c6","c8","d6","d7","d8"],"bk":["a7"],"strong":[]},{"pieces":[["bK","bK","a7"],["wK","wK","c7"],["BL","wB","h3"],["BD","wB","a5"]],"c":"15... Ka7. Forced.","soft":["b6","b4","c3","d2","e1"],"g2":["g4","f5","e6","d7","c8","g2","f1"],"chk":[],"wk":["b6","b7","b8","c6","c8","d6","d7","d8"],"bk":["a6","a8"],"strong":[]},{"pieces":[["bK","bK","a7"],["wK","wK","c7"],["BL","wB","h3"],["BD","wB","b6"]],"c":"16. Bb6+. Check.","soft":["c5","d4","e3","f2","g1","a7","a5"],"g2":["g4","f5","e6","d7","c8","g2","f1"],"chk":["a7"],"wk":["b6","b7","b8","c6","c8","d6","d7","d8"],"bk":["a6","a8"],"strong":[]},{"pieces":[["bK","bK","a6"],["wK","wK","c7"],["BL","wB","h3"],["BD","wB","b6"]],"c":"16... Ka6. The corner square a8 was mate in one as well; black steps to the middle of the file.","soft":["c5","d4","e3","f2","g1","a7","a5"],"g2":["g4","f5","e6","d7","c8","g2","f1"],"chk":[],"wk":["b6","b7","b8","c6","c8","d6","d7","d8"],"bk":["b5"],"strong":[]},{"pieces":[["bK","bK","a6"],["wK","wK","c7"],["BL","wB","f1"],["BD","wB","b6"]],"c":"17. Bf1, mate. The bishop returns to f1 and the whole f1-a6 diagonal is the check. Bb6 covers a5 and a7, the king covers b7.","soft":["c5","d4","e3","f2","g1","a7","a5"],"g2":["g2","h3","e2","d3","c4","b5","a6"],"chk":["a6"],"wk":["b6","b7","b8","c6","c8","d6","d7","d8"],"bk":[],"strong":[]}],"notes":["Black's moves come from a computed tablebase of this ending, so this is the longest resistance possible, not a scripted defence.","Use the arrows or the arrow keys to play through the line one move at a time."]},{"id":"twobishops2","g":"Checkmates","t":"The two-bishop mate in the corner","c":"The same start, with both sides playing perfectly: White takes the fastest mate, black delays as long as it can, and the fight ends in the a1 corner.","strong":[],"soft":[],"legend":[["w","the dark-squared bishop's squares"],["g2","the light-squared bishop's squares"],["wk","squares the white king covers"],["bk","squares the black king can still move to"],["chk","check"]],"steps":[{"pieces":[["bK","bK","d5"],["wK","wK","c1"],["BL","wB","d1"],["BD","wB","e1"]],"c":"The start: Kc1, Bd1, Be1, black king on d5. Both sides play perfectly: White mates as fast as possible, black delays as long as possible. Mate in 16.","soft":["f2","g3","h4","d2","c3","b4","a5"],"g2":["e2","f3","g4","h5","c2","b3","a4"],"chk":[],"wk":["b1","b2","c2","d1","d2"],"bk":["c4","c5","c6","d4","d6","e4","e5","e6"],"strong":[]},{"pieces":[["bK","bK","d5"],["wK","wK","d2"],["BL","wB","d1"],["BD","wB","e1"]],"c":"1. Kd2.","soft":["f2","g3","h4"],"g2":["e2","f3","g4","h5","c2","b3","a4"],"chk":[],"wk":["c1","c2","c3","d1","d3","e1","e2","e3"],"bk":["c4","c5","c6","d4","d6","e4","e5","e6"],"strong":[]},{"pieces":[["bK","bK","d4"],["wK","wK","d2"],["BL","wB","d1"],["BD","wB","e1"]],"c":"1... Kd4. Every reply loses in 16; black takes the centre.","soft":["f2","g3","h4"],"g2":["e2","f3","g4","h5","c2","b3","a4"],"chk":[],"wk":["c1","c2","c3","d1","d3","e1","e2","e3"],"bk":["c4","c5","d5","e4","e5"],"strong":[]},{"pieces":[["bK","bK","d4"],["wK","wK","d2"],["BL","wB","d1"],["BD","wB","g3"]],"c":"2. Bg3. The dark bishop takes the b8-h2 diagonal.","soft":["h4","h2","f4","e5","d6","c7","b8","f2","e1"],"g2":["e2","f3","g4","h5","c2","b3","a4"],"chk":[],"wk":["c1","c2","c3","d1","d3","e1","e2","e3"],"bk":["c4","c5","d5","e4"],"strong":[]},{"pieces":[["bK","bK","e4"],["wK","wK","d2"],["BL","wB","d1"],["BD","wB","g3"]],"c":"2... Ke4. Black crowds the bishops rather than retreat.","soft":["h4","h2","f4","e5","d6","c7","b8","f2","e1"],"g2":["e2","f3","g4","h5","c2","b3","a4"],"chk":[],"wk":["c1","c2","c3","d1","d3","e1","e2","e3"],"bk":["d4","d5","f5"],"strong":[]},{"pieces":[["bK","bK","e4"],["wK","wK","d2"],["BL","wB","g4"],["BD","wB","g3"]],"c":"3. Bg4. Out of the king's reach, ready for f3.","soft":["h4","h2","f4","e5","d6","c7","b8","f2","e1"],"g2":["h5","h3","f5","e6","d7","c8","f3","e2","d1"],"chk":[],"wk":["c1","c2","c3","d1","d3","e1","e2","e3"],"bk":["d4","d5"],"strong":[]},{"pieces":[["bK","bK","d4"],["wK","wK","d2"],["BL","wB","g4"],["BD","wB","g3"]],"c":"3... Kd4.","soft":["h4","h2","f4","e5","d6","c7","b8","f2","e1"],"g2":["h5","h3","f5","e6","d7","c8","f3","e2","d1"],"chk":[],"wk":["c1","c2","c3","d1","d3","e1","e2","e3"],"bk":["c4","c5","d5","e4"],"strong":[]},{"pieces":[["bK","bK","d4"],["wK","wK","d2"],["BL","wB","f3"],["BD","wB","g3"]],"c":"4. Bf3. The long diagonal is fenced.","soft":["h4","h2","f4","e5","d6","c7","b8","f2","e1"],"g2":["g4","h5","g2","h1","e4","d5","c6","b7","a8","e2","d1"],"chk":[],"wk":["c1","c2","c3","d1","d3","e1","e2","e3"],"bk":["c4","c5"],"strong":[]},{"pieces":[["bK","bK","c4"],["wK","wK","d2"],["BL","wB","f3"],["BD","wB","g3"]],"c":"4... Kc4.","soft":["h4","h2","f4","e5","d6","c7","b8","f2","e1"],"g2":["g4","h5","g2","h1","e4","d5","c6","b7","a8","e2","d1"],"chk":[],"wk":["c1","c2","c3","d1","d3","e1","e2","e3"],"bk":["b3","b4","b5","c5","d4"],"strong":[]},{"pieces":[["bK","bK","c4"],["wK","wK","d2"],["BL","wB","f3"],["BD","wB","f2"]],"c":"5. Bf2. The second fence, on a7-g1.","soft":["g3","h4","g1","e3","d4","c5","b6","a7","e1"],"g2":["g4","h5","g2","h1","e4","d5","c6","b7","a8","e2","d1"],"chk":[],"wk":["c1","c2","c3","d1","d3","e1","e2","e3"],"bk":["b3","b4","b5"],"strong":[]},{"pieces":[["bK","bK","b5"],["wK","wK","d2"],["BL","wB","f3"],["BD","wB","f2"]],"c":"5... Kb5. b3 and b4 lose faster.","soft":["g3","h4","g1","e3","d4","c5","b6","a7","e1"],"g2":["g4","h5","g2","h1","e4","d5","c6","b7","a8","e2","d1"],"chk":[],"wk":["c1","c2","c3","d1","d3","e1","e2","e3"],"bk":["a4","a5","a6","b4","c4"],"strong":[]},{"pieces":[["bK","bK","b5"],["wK","wK","c3"],["BL","wB","f3"],["BD","wB","f2"]],"c":"6. Kc3. The king joins.","soft":["g3","h4","g1","e3","d4","c5","b6","a7","e1"],"g2":["g4","h5","g2","h1","e4","d5","c6","b7","a8","e2","d1"],"chk":[],"wk":["b2","b3","b4","c2","c4","d2","d3","d4"],"bk":["a4","a5","a6"],"strong":[]},{"pieces":[["bK","bK","a6"],["wK","wK","c3"],["BL","wB","f3"],["BD","wB","f2"]],"c":"6... Ka6. The best defence runs up the edge on its own; the lower retreats lose faster.","soft":["g3","h4","g1","e3","d4","c5","b6","a7","e1"],"g2":["g4","h5","g2","h1","e4","d5","c6","b7","a8","e2","d1"],"chk":[],"wk":["b2","b3","b4","c2","c4","d2","d3","d4"],"bk":["a5","b5"],"strong":[]},{"pieces":[["bK","bK","a6"],["wK","wK","c4"],["BL","wB","f3"],["BD","wB","f2"]],"c":"7. Kc4.","soft":["g3","h4","g1","e3","d4","c5","b6","a7","e1"],"g2":["g4","h5","g2","h1","e4","d5","c6","b7","a8","e2","d1"],"chk":[],"wk":["b3","b4","b5","c3","c5","d3","d4","d5"],"bk":["a5"],"strong":[]},{"pieces":[["bK","bK","a5"],["wK","wK","c4"],["BL","wB","f3"],["BD","wB","f2"]],"c":"7... Ka5. Forced.","soft":["g3","h4","g1","e3","d4","c5","b6","a7","e1"],"g2":["g4","h5","g2","h1","e4","d5","c6","b7","a8","e2","d1"],"chk":[],"wk":["b3","b4","b5","c3","c5","d3","d4","d5"],"bk":["a4","a6"],"strong":[]},{"pieces":[["bK","bK","a5"],["wK","wK","c4"],["BL","wB","b7"],["BD","wB","f2"]],"c":"8. Bb7. Takes a6.","soft":["g3","h4","g1","e3","d4","c5","b6","a7","e1"],"g2":["c8","c6","d5","e4","f3","g2","h1","a8","a6"],"chk":[],"wk":["b3","b4","b5","c3","c5","d3","d4","d5"],"bk":["a4"],"strong":[]},{"pieces":[["bK","bK","a4"],["wK","wK","c4"],["BL","wB","b7"],["BD","wB","f2"]],"c":"8... Ka4. Forced.","soft":["g3","h4","g1","e3","d4","c5","b6","a7","e1"],"g2":["c8","c6","d5","e4","f3","g2","h1","a8","a6"],"chk":[],"wk":["b3","b4","b5","c3","c5","d3","d4","d5"],"bk":["a3","a5"],"strong":[]},{"pieces":[["bK","bK","a4"],["wK","wK","c4"],["BL","wB","b7"],["BD","wB","b6"]],"c":"9. Bb6. Takes a5.","soft":["c7","d8","c5","d4","e3","f2","g1","a7","a5"],"g2":["c8","c6","d5","e4","f3","g2","h1","a8","a6"],"chk":[],"wk":["b3","b4","b5","c3","c5","d3","d4","d5"],"bk":["a3"],"strong":[]},{"pieces":[["bK","bK","a3"],["wK","wK","c4"],["BL","wB","b7"],["BD","wB","b6"]],"c":"9... Ka3. Forced.","soft":["c7","d8","c5","d4","e3","f2","g1","a7","a5"],"g2":["c8","c6","d5","e4","f3","g2","h1","a8","a6"],"chk":[],"wk":["b3","b4","b5","c3","c5","d3","d4","d5"],"bk":["a2","a4","b2"],"strong":[]},{"pieces":[["bK","bK","a3"],["wK","wK","c3"],["BL","wB","b7"],["BD","wB","b6"]],"c":"10. Kc3. Covers b2, b3 and b4.","soft":["c7","d8","c5","d4","e3","f2","g1","a7","a5"],"g2":["c8","c6","d5","e4","f3","g2","h1","a8","a6"],"chk":[],"wk":["b2","b3","b4","c2","c4","d2","d3","d4"],"bk":["a2","a4"],"strong":[]},{"pieces":[["bK","bK","a2"],["wK","wK","c3"],["BL","wB","b7"],["BD","wB","b6"]],"c":"10... Ka2.","soft":["c7","d8","c5","d4","e3","f2","g1","a7","a5"],"g2":["c8","c6","d5","e4","f3","g2","h1","a8","a6"],"chk":[],"wk":["b2","b3","b4","c2","c4","d2","d3","d4"],"bk":["a1","a3","b1"],"strong":[]},{"pieces":[["bK","bK","a2"],["wK","wK","c3"],["BL","wB","b7"],["BD","wB","e3"]],"c":"11. Be3. Covers c1, so the king cannot slip out along the back rank.","soft":["f4","g5","h6","f2","g1","d4","c5","b6","a7","d2","c1"],"g2":["c8","c6","d5","e4","f3","g2","h1","a8","a6"],"chk":[],"wk":["b2","b3","b4","c2","c4","d2","d3","d4"],"bk":["a1","a3","b1"],"strong":[]},{"pieces":[["bK","bK","a3"],["wK","wK","c3"],["BL","wB","b7"],["BD","wB","e3"]],"c":"11... Ka3. Dropping to b1 or a1 at once loses faster.","soft":["f4","g5","h6","f2","g1","d4","c5","b6","a7","d2","c1"],"g2":["c8","c6","d5","e4","f3","g2","h1","a8","a6"],"chk":[],"wk":["b2","b3","b4","c2","c4","d2","d3","d4"],"bk":["a2","a4"],"strong":[]},{"pieces":[["bK","bK","a3"],["wK","wK","c3"],["BL","wB","c6"],["BD","wB","e3"]],"c":"12. Bc6. A waiting move on the long diagonal; black must give ground.","soft":["f4","g5","h6","f2","g1","d4","c5","b6","a7","d2","c1"],"g2":["d7","e8","d5","e4","f3","g2","h1","b7","a8","b5","a4"],"chk":[],"wk":["b2","b3","b4","c2","c4","d2","d3","d4"],"bk":["a2"],"strong":[]},{"pieces":[["bK","bK","a2"],["wK","wK","c3"],["BL","wB","c6"],["BD","wB","e3"]],"c":"12... Ka2. Forced.","soft":["f4","g5","h6","f2","g1","d4","c5","b6","a7","d2","c1"],"g2":["d7","e8","d5","e4","f3","g2","h1","b7","a8","b5","a4"],"chk":[],"wk":["b2","b3","b4","c2","c4","d2","d3","d4"],"bk":["a1","a3","b1"],"strong":[]},{"pieces":[["bK","bK","a2"],["wK","wK","c2"],["BL","wB","c6"],["BD","wB","e3"]],"c":"13. Kc2. Takes b1 and b2.","soft":["f4","g5","h6","f2","g1","d4","c5","b6","a7","d2","c1"],"g2":["d7","e8","d5","e4","f3","g2","h1","b7","a8","b5","a4"],"chk":[],"wk":["b1","b2","b3","c1","c3","d1","d2","d3"],"bk":["a1","a3"],"strong":[]},{"pieces":[["bK","bK","a1"],["wK","wK","c2"],["BL","wB","c6"],["BD","wB","e3"]],"c":"13... Ka1. a1 and a3 lose alike; the corner it is.","soft":["f4","g5","h6","f2","g1","d4","c5","b6","a7","d2","c1"],"g2":["d7","e8","d5","e4","f3","g2","h1","b7","a8","b5","a4"],"chk":[],"wk":["b1","b2","b3","c1","c3","d1","d2","d3"],"bk":["a2"],"strong":[]},{"pieces":[["bK","bK","a1"],["wK","wK","b3"],["BL","wB","c6"],["BD","wB","e3"]],"c":"14. Kb3. Boxes the king in.","soft":["f4","g5","h6","f2","g1","d4","c5","b6","a7","d2","c1"],"g2":["d7","e8","d5","e4","f3","g2","h1","b7","a8","b5","a4"],"chk":[],"wk":["a2","a3","a4","b2","b4","c2","c3","c4"],"bk":["b1"],"strong":[]},{"pieces":[["bK","bK","b1"],["wK","wK","b3"],["BL","wB","c6"],["BD","wB","e3"]],"c":"14... Kb1. Only move.","soft":["f4","g5","h6","f2","g1","d4","c5","b6","a7","d2","c1"],"g2":["d7","e8","d5","e4","f3","g2","h1","b7","a8","b5","a4"],"chk":[],"wk":["a2","a3","a4","b2","b4","c2","c3","c4"],"bk":["a1"],"strong":[]},{"pieces":[["bK","bK","b1"],["wK","wK","b3"],["BL","wB","e4"],["BD","wB","e3"]],"c":"15. Be4+. Check on the b1-h7 diagonal.","soft":["f4","g5","h6","f2","g1","d4","c5","b6","a7","d2","c1"],"g2":["f5","g6","h7","f3","g2","h1","d5","c6","b7","a8","d3","c2","b1"],"chk":["b1"],"wk":["a2","a3","a4","b2","b4","c2","c3","c4"],"bk":["a1"],"strong":[]},{"pieces":[["bK","bK","a1"],["wK","wK","b3"],["BL","wB","e4"],["BD","wB","e3"]],"c":"15... Ka1. Forced.","soft":["f4","g5","h6","f2","g1","d4","c5","b6","a7","d2","c1"],"g2":["f5","g6","h7","f3","g2","h1","d5","c6","b7","a8","d3","c2","b1"],"chk":[],"wk":["a2","a3","a4","b2","b4","c2","c3","c4"],"bk":[],"strong":[]},{"pieces":[["bK","bK","a1"],["wK","wK","b3"],["BL","wB","e4"],["BD","wB","d4"]],"c":"16. Bd4, mate. The long dark diagonal ends the game; Be4 covers b1 and the king covers a2 and b2.","soft":["e5","f6","g7","h8","e3","f2","g1","c5","b6","a7","c3","b2","a1"],"g2":["f5","g6","h7","f3","g2","h1","d5","c6","b7","a8","d3","c2","b1"],"chk":["a1"],"wk":["a2","a3","a4","b2","b4","c2","c3","c4"],"bk":[],"strong":[]}],"notes":["This is the fastest mate from the starting position against the tablebase defence. With best play from both sides the king ends up in the corner.","Use the arrows or the arrow keys to play through the line one move at a time."]},{"id":"rookmate","g":"Checkmates","t":"The rook mate","c":"A rook and king against a bare king. The rook fences a whole rank or file at a time; the kings fight for the squares in between. Black plays the tablebase defence. Mate in 14.","strong":[],"soft":[],"legend":[["w","the rook's squares"],["wk","squares the white king covers"],["bk","squares the black king can still move to"],["chk","check"]],"steps":[{"pieces":[["bK","bK","d5"],["wK","wK","c1"],["RK","wR","e1"]],"c":"The start: Kc1, Re1, black king on d5. Black plays the tablebase defence, the reply that delays mate the longest. Mate in 14.","soft":["f1","g1","h1","d1","e2","e3","e4","e5","e6","e7","e8"],"g2":[],"chk":[],"wk":["b1","b2","c2","d1","d2"],"bk":["c4","c5","c6","d4","d6"],"strong":[]},{"pieces":[["bK","bK","d5"],["wK","wK","b2"],["RK","wR","e1"]],"c":"1. Kb2. The rook cannot do it alone; the king sets out first.","soft":["f1","g1","h1","d1","c1","b1","a1","e2","e3","e4","e5","e6","e7","e8"],"g2":[],"chk":[],"wk":["a1","a2","a3","b1","b3","c1","c2","c3"],"bk":["c4","c5","c6","d4","d6"],"strong":[]},{"pieces":[["bK","bK","d4"],["wK","wK","b2"],["RK","wR","e1"]],"c":"1... Kd4. Black holds the centre.","soft":["f1","g1","h1","d1","c1","b1","a1","e2","e3","e4","e5","e6","e7","e8"],"g2":[],"chk":[],"wk":["a1","a2","a3","b1","b3","c1","c2","c3"],"bk":["c4","c5","d3","d5"],"strong":[]},{"pieces":[["bK","bK","d4"],["wK","wK","c2"],["RK","wR","e1"]],"c":"2. Kc2.","soft":["f1","g1","h1","d1","c1","b1","a1","e2","e3","e4","e5","e6","e7","e8"],"g2":[],"chk":[],"wk":["b1","b2","b3","c1","c3","d1","d2","d3"],"bk":["c4","c5","d5"],"strong":[]},{"pieces":[["bK","bK","c4"],["wK","wK","c2"],["RK","wR","e1"]],"c":"2... Kc4.","soft":["f1","g1","h1","d1","c1","b1","a1","e2","e3","e4","e5","e6","e7","e8"],"g2":[],"chk":[],"wk":["b1","b2","b3","c1","c3","d1","d2","d3"],"bk":["b4","b5","c5","d4","d5"],"strong":[]},{"pieces":[["bK","bK","c4"],["wK","wK","c2"],["RK","wR","d1"]],"c":"3. Rd1. The rook fences the whole d-file; the black king is cut off on the queenside.","soft":["e1","f1","g1","h1","c1","b1","a1","d2","d3","d4","d5","d6","d7","d8"],"g2":[],"chk":[],"wk":["b1","b2","b3","c1","c3","d1","d2","d3"],"bk":["b4","b5","c5"],"strong":[]},{"pieces":[["bK","bK","b4"],["wK","wK","c2"],["RK","wR","d1"]],"c":"3... Kb4.","soft":["e1","f1","g1","h1","c1","b1","a1","d2","d3","d4","d5","d6","d7","d8"],"g2":[],"chk":[],"wk":["b1","b2","b3","c1","c3","d1","d2","d3"],"bk":["a3","a4","a5","b5","c4","c5"],"strong":[]},{"pieces":[["bK","bK","b4"],["wK","wK","d3"],["RK","wR","d1"]],"c":"4. Kd3. With the fence up, the king walks out to fight for squares.","soft":["e1","f1","g1","h1","c1","b1","a1","d2"],"g2":[],"chk":[],"wk":["c2","c3","c4","d2","d4","e2","e3","e4"],"bk":["a3","a4","a5","b3","b5","c5"],"strong":[]},{"pieces":[["bK","bK","c5"],["wK","wK","d3"],["RK","wR","d1"]],"c":"4... Kc5. Dropping to the third rank instead loses much faster.","soft":["e1","f1","g1","h1","c1","b1","a1","d2"],"g2":[],"chk":[],"wk":["c2","c3","c4","d2","d4","e2","e3","e4"],"bk":["b4","b5","b6","c6","d5","d6"],"strong":[]},{"pieces":[["bK","bK","c5"],["wK","wK","c3"],["RK","wR","d1"]],"c":"5. Kc3. The kings take opposition.","soft":["e1","f1","g1","h1","c1","b1","a1","d2","d3","d4","d5","d6","d7","d8"],"g2":[],"chk":[],"wk":["b2","b3","b4","c2","c4","d2","d3","d4"],"bk":["b5","b6","c6"],"strong":[]},{"pieces":[["bK","bK","b5"],["wK","wK","c3"],["RK","wR","d1"]],"c":"5... Kb5.","soft":["e1","f1","g1","h1","c1","b1","a1","d2","d3","d4","d5","d6","d7","d8"],"g2":[],"chk":[],"wk":["b2","b3","b4","c2","c4","d2","d3","d4"],"bk":["a4","a5","a6","b6","c5","c6"],"strong":[]},{"pieces":[["bK","bK","b5"],["wK","wK","d4"],["RK","wR","d1"]],"c":"6. Kd4. The king slips forward on the other diagonal; this zigzag is the heart of the technique.","soft":["e1","f1","g1","h1","c1","b1","a1","d2","d3"],"g2":[],"chk":[],"wk":["c3","c4","c5","d3","d5","e3","e4","e5"],"bk":["a4","a5","a6","b4","b6","c6"],"strong":[]},{"pieces":[["bK","bK","c6"],["wK","wK","d4"],["RK","wR","d1"]],"c":"6... Kc6.","soft":["e1","f1","g1","h1","c1","b1","a1","d2","d3"],"g2":[],"chk":[],"wk":["c3","c4","c5","d3","d5","e3","e4","e5"],"bk":["b5","b6","b7","c7","d6","d7"],"strong":[]},{"pieces":[["bK","bK","c6"],["wK","wK","c4"],["RK","wR","d1"]],"c":"7. Kc4. Opposition again.","soft":["e1","f1","g1","h1","c1","b1","a1","d2","d3","d4","d5","d6","d7","d8"],"g2":[],"chk":[],"wk":["b3","b4","b5","c3","c5","d3","d4","d5"],"bk":["b6","b7","c7"],"strong":[]},{"pieces":[["bK","bK","b6"],["wK","wK","c4"],["RK","wR","d1"]],"c":"7... Kb6.","soft":["e1","f1","g1","h1","c1","b1","a1","d2","d3","d4","d5","d6","d7","d8"],"g2":[],"chk":[],"wk":["b3","b4","b5","c3","c5","d3","d4","d5"],"bk":["a5","a6","a7","b7","c6","c7"],"strong":[]},{"pieces":[["bK","bK","b6"],["wK","wK","c4"],["RK","wR","d6"]],"c":"8. Rd6+. The rook joins with check and takes the sixth rank; the fence turns sideways.","soft":["e6","f6","g6","h6","c6","b6","d7","d8","d5","d4","d3","d2","d1"],"g2":[],"chk":["b6"],"wk":["b3","b4","b5","c3","c5","d3","d4","d5"],"bk":["a5","a7","b7","c7"],"strong":[]},{"pieces":[["bK","bK","b7"],["wK","wK","c4"],["RK","wR","d6"]],"c":"8... Kb7. Pushed a rank back.","soft":["e6","f6","g6","h6","c6","b6","a6","d7","d8","d5","d4","d3","d2","d1"],"g2":[],"chk":[],"wk":["b3","b4","b5","c3","c5","d3","d4","d5"],"bk":["a7","a8","b8","c7","c8"],"strong":[]},{"pieces":[["bK","bK","b7"],["wK","wK","b5"],["RK","wR","d6"]],"c":"9. Kb5. The king keeps step.","soft":["e6","f6","g6","h6","c6","b6","a6","d7","d8","d5","d4","d3","d2","d1"],"g2":[],"chk":[],"wk":["a4","a5","a6","b4","b6","c4","c5","c6"],"bk":["a7","a8","b8","c7","c8"],"strong":[]},{"pieces":[["bK","bK","c7"],["wK","wK","b5"],["RK","wR","d6"]],"c":"9... Kc7. Attacking the rook.","soft":["e6","f6","g6","h6","c6","b6","a6","d7","d8","d5","d4","d3","d2","d1"],"g2":[],"chk":[],"wk":["a4","a5","a6","b4","b6","c4","c5","c6"],"bk":["b7","b8","c8"],"strong":[]},{"pieces":[["bK","bK","c7"],["wK","wK","b5"],["RK","wR","d1"]],"c":"10. Rd1. The rook drops to the far end of the file. The fence is the file, not the rook.","soft":["e1","f1","g1","h1","c1","b1","a1","d2","d3","d4","d5","d6","d7","d8"],"g2":[],"chk":[],"wk":["a4","a5","a6","b4","b6","c4","c5","c6"],"bk":["b7","b8","c8"],"strong":[]},{"pieces":[["bK","bK","b7"],["wK","wK","b5"],["RK","wR","d1"]],"c":"10... Kb7.","soft":["e1","f1","g1","h1","c1","b1","a1","d2","d3","d4","d5","d6","d7","d8"],"g2":[],"chk":[],"wk":["a4","a5","a6","b4","b6","c4","c5","c6"],"bk":["a7","a8","b8","c7","c8"],"strong":[]},{"pieces":[["bK","bK","b7"],["wK","wK","b5"],["RK","wR","c1"]],"c":"11. Rc1. The fence advances one file; the box shrinks.","soft":["d1","e1","f1","g1","h1","b1","a1","c2","c3","c4","c5","c6","c7","c8"],"g2":[],"chk":[],"wk":["a4","a5","a6","b4","b6","c4","c5","c6"],"bk":["a7","a8","b8"],"strong":[]},{"pieces":[["bK","bK","a7"],["wK","wK","b5"],["RK","wR","c1"]],"c":"11... Ka7. Only the a-file and the b-file are left.","soft":["d1","e1","f1","g1","h1","b1","a1","c2","c3","c4","c5","c6","c7","c8"],"g2":[],"chk":[],"wk":["a4","a5","a6","b4","b6","c4","c5","c6"],"bk":["a8","b7","b8"],"strong":[]},{"pieces":[["bK","bK","a7"],["wK","wK","c6"],["RK","wR","c1"]],"c":"12. Kc6. The king comes around to take b7.","soft":["d1","e1","f1","g1","h1","b1","a1","c2","c3","c4","c5"],"g2":[],"chk":[],"wk":["b5","b6","b7","c5","c7","d5","d6","d7"],"bk":["a6","a8","b8"],"strong":[]},{"pieces":[["bK","bK","a8"],["wK","wK","c6"],["RK","wR","c1"]],"c":"12... Ka8.","soft":["d1","e1","f1","g1","h1","b1","a1","c2","c3","c4","c5"],"g2":[],"chk":[],"wk":["b5","b6","b7","c5","c7","d5","d6","d7"],"bk":["a7","b8"],"strong":[]},{"pieces":[["bK","bK","a8"],["wK","wK","c7"],["RK","wR","c1"]],"c":"13. Kc7. Covers b7 and b8; black has the a-file and nothing else.","soft":["d1","e1","f1","g1","h1","b1","a1","c2","c3","c4","c5","c6"],"g2":[],"chk":[],"wk":["b6","b7","b8","c6","c8","d6","d7","d8"],"bk":["a7"],"strong":[]},{"pieces":[["bK","bK","a7"],["wK","wK","c7"],["RK","wR","c1"]],"c":"13... Ka7. Forced.","soft":["d1","e1","f1","g1","h1","b1","a1","c2","c3","c4","c5","c6"],"g2":[],"chk":[],"wk":["b6","b7","b8","c6","c8","d6","d7","d8"],"bk":["a6","a8"],"strong":[]},{"pieces":[["bK","bK","a7"],["wK","wK","c7"],["RK","wR","a1"]],"c":"14. Ra1, mate. The rook takes the a-file from the far end; the king covers b6, b7 and b8.","soft":["b1","c1","d1","e1","f1","g1","h1","a2","a3","a4","a5","a6","a7"],"g2":[],"chk":["a7"],"wk":["b6","b7","b8","c6","c8","d6","d7","d8"],"bk":[],"strong":[]}],"notes":["Black's moves come from a computed tablebase of this ending, so this is the longest resistance possible.","Use the arrows or the arrow keys to play through the line one move at a time."]}];
+const FILESTR='abcdefgh';
+const S=64, M=24;  // square size, margin for coordinates
+const GLYPH={K:'\u265A',Q:'\u265B',R:'\u265C',B:'\u265D',N:'\u265E',P:'\u265F'};
+
+const svg=document.getElementById('board');
+function sqColor(f,r){ return (f+r)%2===1 ? 'dark':'light'; }
+function baseFill(f,r){ return (f+r)%2===1 ? getCss('--sq-dark') : getCss('--sq-light'); }
+function getCss(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+// mix two hex colors
+function mix(a,b,t){
+  const pa=[1,3,5].map(i=>parseInt(a.slice(i,i+2),16));
+  const pb=[1,3,5].map(i=>parseInt(b.slice(i,i+2),16));
+  return '#'+pa.map((v,i)=>Math.round(v+(pb[i]-v)*t).toString(16).padStart(2,'0')).join('');
+}
+
+function build(){
+  let s='';
+  s+=`<rect x="${M-4}" y="${M-4}" width="${8*S+8}" height="${8*S+8}" rx="6" fill="#0d0d0d" stroke="#333"/>`;
+  for(let f=0;f<8;f++) for(let r=1;r<=8;r++){
+    const x=M+f*S, y=M+(8-r)*S;
+    s+=`<rect class="sq" id="sq-${FILESTR[f]}${r}" x="${x}" y="${y}" width="${S}" height="${S}"
+      fill="${baseFill(f,r)}" data-f="${f}" data-r="${r}"/>`;
+  }
+  // corner coordinate labels inside squares (like the PDF)
+  for(let f=0;f<8;f++) for(let r=1;r<=8;r++){
+    const x=M+f*S, y=M+(8-r)*S;
+    s+=`<text id="lb-${FILESTR[f]}${r}" x="${x+5}" y="${y+S-6}" font-size="11.5"
+      font-weight="600" fill="rgba(0,0,0,0.45)" pointer-events="none">${FILESTR[f]}${r}</text>`;
+  }
+  s+='<g id="numbers"></g><g id="pieces"></g>';
+  svg.innerHTML=s;
+}
+build();
+
+function fillFor(f,r,topic){
+  const name=FILESTR[f]+r;
+  const dark=(f+r)%2===1;
+  if(topic.numbers){
+    const n=topic.numbers[name];
+    const lo=Math.min(...Object.values(topic.numbers));
+    const hi=Math.max(...Object.values(topic.numbers));
+    const t=(n-lo)/(hi-lo);
+    const base=dark?getCss('--sq-dark'):getCss('--sq-light');
+    // blend toward strong amber by mobility
+    return mix(base, dark?'#e08a18':'#f7b449', 0.15+0.85*t);
+  }
+  if(topic.chk && topic.chk.includes(name))
+    return dark ? '#c94435' : '#e8604e';
+  if(topic.strong.includes(name))
+    return dark ? '#e08a18' : '#f7a833';
+  if(topic.strong2 && topic.strong2.includes(name))
+    return dark ? '#3579cf' : '#5aa3f2';
+  if(topic.bk && topic.bk.includes(name))
+    return dark ? '#4f9160' : '#7dc48f';
+  if(topic.soft && topic.soft.includes(name))
+    return dark ? '#c9a25e' : '#f3d391';
+  if(topic.g2 && topic.g2.includes(name))
+    return dark ? '#d9962d' : '#f6bd55';
+  if(topic.soft2 && topic.soft2.includes(name))
+    return dark ? '#5f83b0' : '#a9c8ec';
+  if(topic.wk && topic.wk.includes(name))
+    return dark ? '#ab8330' : '#e6c46c';
+  return dark?getCss('--sq-dark'):getCss('--sq-light');
+}
+
+let cur=0, stepIdx=0;
+function pieceList(t,st){
+  const src=(st&&st.pieces)||t.pieces;
+  if(!src) return [];
+  if(Array.isArray(src)) return src;               // [[key,type,square],...]
+  return Object.entries(src).map(([name,pc])=>[pc+name,pc,name]);
+}
+function renderPieces(list){
+  const pg=document.getElementById('pieces');
+  const seen=new Set();
+  for(const [key,pc,name] of list){
+    seen.add(key);
+    const f=FILESTR.indexOf(name[0]), r=+name[1];
+    const x=M+f*S+S/2, y=M+(8-r)*S+S/2+16;
+    let el=pg.querySelector(`g[data-k="${key}"]`);
+    if(!el){
+      pg.insertAdjacentHTML('beforeend',
+        `<g class="pc" data-k="${key}"><text x="0" y="0" text-anchor="middle"
+          font-size="46" fill="${pc[0]==='w'?'#f4efe2':'#141414'}"
+          stroke="${pc[0]==='w'?'#20242c':'#e8e2d2'}" stroke-width="1.6"
+          style="transform:translate(${x}px,${y}px)">${GLYPH[pc[1]]}</text></g>`);
+    } else {
+      el.querySelector('text').style.transform=`translate(${x}px,${y}px)`;
+    }
+  }
+  [...pg.children].forEach(g=>{ if(!seen.has(g.dataset.k)) g.remove(); });
+}
+function paint(){
+  const t=TOPICS[cur];
+  const st=t.steps ? t.steps[stepIdx] : null;
+  const fillsrc=st ? Object.assign({}, t, st) : t;
+  for(let f=0;f<8;f++) for(let r=1;r<=8;r++){
+    document.getElementById('sq-'+FILESTR[f]+r).setAttribute('fill', fillFor(f,r,fillsrc));
+  }
+  // numbers
+  const ng=document.getElementById('numbers');
+  if(t.numbers){
+    let s='';
+    for(let f=0;f<8;f++) for(let r=1;r<=8;r++){
+      const x=M+f*S, y=M+(8-r)*S;
+      s+=`<text x="${x+S/2}" y="${y+S/2+9}" text-anchor="middle" font-size="26"
+        font-weight="700" fill="rgba(0,0,0,0.72)" pointer-events="none">${t.numbers[FILESTR[f]+r]}</text>`;
+    }
+    ng.innerHTML=s;
+  } else ng.innerHTML='';
+  renderPieces(pieceList(t,st));
+  // step bar
+  const sb=document.getElementById('stepbar'), sc=document.getElementById('stepCap');
+  if(t.steps){
+    sb.style.display='flex'; sc.style.display='block';
+    document.getElementById('sInd').textContent=(stepIdx+1)+' / '+t.steps.length;
+    sc.textContent=st.c||'';
+  } else { sb.style.display='none'; sc.style.display='none'; }
+  // panel
+  document.getElementById('tTitle').textContent=t.t;
+  document.getElementById('tCap').textContent=t.c;
+  const SW={s:'#f09b28',w:'#f3d391',s2:'#4f9bf0',w2:'#a9c8ec',
+            g2:'#f6bd55',wk:'#e6c46c',bk:'#7dc48f',chk:'#e8604e'};
+  document.getElementById('tLegend').innerHTML=(t.legend||[]).map(([k,txt])=>
+    `<div><span class="swb" style="background:${SW[k]||'#f09b28'}"></span><span>${txt}</span></div>`).join('');
+  const nt=document.getElementById('tNotes');
+  if(t.notes){ nt.style.display='block'; nt.innerHTML=t.notes.map(n=>`<p>${n}</p>`).join(''); }
+  else { nt.style.display='none'; }
+  document.querySelectorAll('.menu button').forEach(b=>
+    b.classList.toggle('here', b.dataset.i==cur));
+}
+function show(i){
+  cur=(i+TOPICS.length)%TOPICS.length;
+  stepIdx=0;
+  paint();
+}
+document.getElementById('sPrev').onclick=()=>{
+  const t=TOPICS[cur]; if(!t.steps) return;
+  stepIdx=(stepIdx-1+t.steps.length)%t.steps.length; paint();
+};
+document.getElementById('sNext').onclick=()=>{
+  const t=TOPICS[cur]; if(!t.steps) return;
+  stepIdx=(stepIdx+1)%t.steps.length; paint();
+};
+
+// menu
+const menu=document.getElementById('menu');
+let lastG=null;
+TOPICS.forEach((t,i)=>{
+  if(t.g!==lastG){ lastG=t.g;
+    const h=document.createElement('h3'); h.textContent=t.g; menu.appendChild(h); }
+  const b=document.createElement('button');
+  b.textContent=t.t; b.dataset.i=i;
+  b.onclick=()=>show(i);
+  menu.appendChild(b);
+});
+
+document.getElementById('prev').onclick=()=>show(cur-1);
+document.getElementById('next').onclick=()=>show(cur+1);
+document.addEventListener('keydown',e=>{
+  const t=TOPICS[cur];
+  if(t.steps){
+    if(e.key==='ArrowLeft'){ stepIdx=(stepIdx-1+t.steps.length)%t.steps.length; paint(); }
+    if(e.key==='ArrowRight'){ stepIdx=(stepIdx+1)%t.steps.length; paint(); }
+  } else {
+    if(e.key==='ArrowLeft') show(cur-1);
+    if(e.key==='ArrowRight') show(cur+1);
+  }
+});
+
+// hover square name
+svg.addEventListener('pointermove',e=>{
+  const el=e.target.closest('rect.sq');
+  const out=document.getElementById('sqName');
+  if(!el){ out.innerHTML=''; return; }
+  const name=FILESTR[+el.dataset.f]+el.dataset.r;
+  const t0=TOPICS[cur];
+  const t=t0.steps ? Object.assign({}, t0, t0.steps[stepIdx]) : t0;
+  let tag='';
+  if(t.numbers) tag=' \u00b7 '+t.numbers[name];
+  else if(t.chk && t.chk.includes(name)) tag=' \u00b7 check';
+  else if(t.strong.includes(name)) tag=' \u00b7 highlighted';
+  else if(t.strong2 && t.strong2.includes(name)) tag=' \u00b7 highlighted (blue)';
+  else if(t.bk && t.bk.includes(name)) tag=' \u00b7 open to the black king';
+  else if(t.soft && t.soft.includes(name)) tag=t.g2 ? ' \u00b7 the dark-squared bishop' : ' \u00b7 highlighted (light)';
+  else if(t.g2 && t.g2.includes(name)) tag=' \u00b7 the light-squared bishop';
+  else if(t.soft2 && t.soft2.includes(name)) tag=' \u00b7 highlighted (light blue)';
+  else if(t.wk && t.wk.includes(name)) tag=' \u00b7 the white king';
+  out.innerHTML='<b>'+name+'</b>'+tag;
+});
+svg.addEventListener('pointerleave',()=>{document.getElementById('sqName').innerHTML='';});
+
+show(0);
+</script>
+</body>
+</html>

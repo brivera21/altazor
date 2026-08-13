@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hugo and Nebula Winners · Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 6px; font-size:26px; }
+.lede { color:var(--muted); font-size:14.5px; margin:0 0 14px; max-width:760px; }
+.controls { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
+.controls button { background:var(--panel); border:1px solid var(--line); color:var(--text);
+  padding:7px 13px; border-radius:8px; cursor:pointer; font-size:13.5px; }
+.controls button:hover { border-color:var(--accent); }
+.controls button.dec { padding:5px 10px; font-size:12.5px; color:var(--muted); }
+.controls button.dec:hover { color:var(--text); }
+.controls .info { color:var(--muted); font-size:13px; margin-left:6px; }
+.stage { display:flex; gap:22px; align-items:flex-start; }
+#tl { flex:1 1 640px; min-width:0; max-height:78vh; overflow-y:auto;
+  border:1px solid var(--line); border-radius:12px; background:#121212; }
+#tl svg { width:100%; height:auto; display:block; cursor:grab; user-select:none; }
+#tl.panning, #tl.panning * { cursor:grabbing !important; }
+.side { flex:0 0 260px; position:sticky; top:16px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:14px; }
+#cover { width:100%; aspect-ratio:2/3; object-fit:contain; background:#101010;
+  border-radius:6px; display:block; }
+#bookTxt { font-weight:700; margin:10px 0 2px; font-size:15px; }
+#authTxt { color:var(--muted); font-size:13px; }
+#badgeTxt { font-size:13px; min-height:1.2em; }
+#yearTxt { color:var(--muted); font-size:13px; margin-top:4px; }
+.legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-size:12.5px; color:var(--muted); }
+.legend span.sw { width:11px; height:11px; border-radius:3px; display:inline-block; margin-right:5px; }
+.note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;}
+  #cover{max-width:220px; margin:0 auto;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="science-fiction.html">&larr; Science Fiction</a> &nbsp;·&nbsp; <a href="scifi-canon.html">The canon</a></nav>
+</header>
+<h1>Hugo and Nebula Winners</h1>
+<p class="lede">Every Best Novel winner of both awards on one timeline. A book that won both appears once, in green. Click the band of a decade to enter it and see each book with its year; hover over a book to see its cover. Ctrl (or ⌘) + wheel zooms; the wheel alone scrolls inside the frame and dragging pans the view.</p>
+<div class="controls" id="decnav">
+  <button id="reset">Full view</button>
+  <span class="info" id="info"></span>
+</div>
+<div class="stage">
+  <div id="tl"></div>
+  <div class="side"><div class="card">
+    <img id="cover" alt="Cover">
+    <div id="bookTxt">Hover over a book</div>
+    <div id="authTxt"></div>
+    <div id="badgeTxt"></div>
+    <div id="yearTxt"></div>
+  </div></div>
+</div>
+<div class="legend" id="legend"></div>
+<p class="note">Covers come from <a href="https://openlibrary.org"
+style="color:var(--accent)">Open Library</a> and are loaded from its
+servers for identification only. The Hugo year is the year the award was presented; the Nebula year is the award's own label. The 2026 Hugo is presented on August 30, 2026.</p>
+</div>
+<script>
+const BOOKS=[{"y":1953,"n":"The Demolished Man","a":"Alfred Bester","e":0,"b":"Hugo 1953"},{"y":1955,"n":"They'd Rather Be Right","a":"Mark Clifton and Frank Riley","e":0,"b":"Hugo 1955"},{"y":1956,"n":"Double Star","a":"Robert A. Heinlein","e":0,"b":"Hugo 1956"},{"y":1958,"n":"The Big Time","a":"Fritz Leiber","e":0,"b":"Hugo 1958"},{"y":1959,"n":"A Case of Conscience","a":"James Blish","e":0,"b":"Hugo 1959"},{"y":1960,"n":"Starship Troopers","a":"Robert A. Heinlein","e":0,"b":"Hugo 1960"},{"y":1961,"n":"A Canticle for Leibowitz","a":"Walter M. Miller Jr.","e":0,"b":"Hugo 1961"},{"y":1962,"n":"Stranger in a Strange Land","a":"Robert A. Heinlein","e":0,"b":"Hugo 1962"},{"y":1963,"n":"The Man in the High Castle","a":"Philip K. Dick","e":0,"b":"Hugo 1963"},{"y":1964,"n":"Way Station","a":"Clifford D. Simak","e":0,"b":"Hugo 1964"},{"y":1965,"n":"The Wanderer","a":"Fritz Leiber","e":0,"b":"Hugo 1965"},{"y":1965,"n":"Dune","a":"Frank Herbert","e":2,"b":"Hugo 1966 · Nebula 1965"},{"y":1966,"n":"This Immortal","a":"Roger Zelazny","e":0,"b":"Hugo 1966"},{"y":1966,"n":"Flowers for Algernon","a":"Daniel Keyes","e":1,"b":"Nebula 1966"},{"y":1966,"n":"Babel-17","a":"Samuel R. Delany","e":1,"b":"Nebula 1966"},{"y":1967,"n":"The Moon Is a Harsh Mistress","a":"Robert A. Heinlein","e":0,"b":"Hugo 1967"},{"y":1967,"n":"The Einstein Intersection","a":"Samuel R. Delany","e":1,"b":"Nebula 1967"},{"y":1968,"n":"Lord of Light","a":"Roger Zelazny","e":0,"b":"Hugo 1968"},{"y":1968,"n":"Rite of Passage","a":"Alexei Panshin","e":1,"b":"Nebula 1968"},{"y":1969,"n":"Stand on Zanzibar","a":"John Brunner","e":0,"b":"Hugo 1969"},{"y":1969,"n":"The Left Hand of Darkness","a":"Ursula K. Le Guin","e":2,"b":"Hugo 1970 · Nebula 1969"},{"y":1970,"n":"Ringworld","a":"Larry Niven","e":2,"b":"Hugo 1971 · Nebula 1970"},{"y":1971,"n":"A Time of Changes","a":"Robert Silverberg","e":1,"b":"Nebula 1971"},{"y":1972,"n":"To Your Scattered Bodies Go","a":"Philip Jose Farmer","e":0,"b":"Hugo 1972"},{"y":1972,"n":"The Gods Themselves","a":"Isaac Asimov","e":2,"b":"Hugo 1973 · Nebula 1972"},{"y":1973,"n":"Rendezvous with Rama","a":"Arthur C. Clarke","e":2,"b":"Hugo 1974 · Nebula 1973"},{"y":1974,"n":"The Dispossessed","a":"Ursula K. Le Guin","e":2,"b":"Hugo 1975 · Nebula 1974"},{"y":1975,"n":"The Forever War","a":"Joe Haldeman","e":2,"b":"Hugo 1976 · Nebula 1975"},{"y":1976,"n":"Man Plus","a":"Frederik Pohl","e":1,"b":"Nebula 1976"},{"y":1977,"n":"Where Late the Sweet Birds Sang","a":"Kate Wilhelm","e":0,"b":"Hugo 1977"},{"y":1977,"n":"Gateway","a":"Frederik Pohl","e":2,"b":"Hugo 1978 · Nebula 1977"},{"y":1978,"n":"Dreamsnake","a":"Vonda N. McIntyre","e":2,"b":"Hugo 1979 · Nebula 1978"},{"y":1979,"n":"The Fountains of Paradise","a":"Arthur C. Clarke","e":2,"b":"Hugo 1980 · Nebula 1979"},{"y":1980,"n":"Timescape","a":"Gregory Benford","e":1,"b":"Nebula 1980"},{"y":1981,"n":"The Snow Queen","a":"Joan D. Vinge","e":0,"b":"Hugo 1981"},{"y":1981,"n":"The Claw of the Conciliator","a":"Gene Wolfe","e":1,"b":"Nebula 1981"},{"y":1982,"n":"Downbelow Station","a":"C. J. Cherryh","e":0,"b":"Hugo 1982"},{"y":1982,"n":"No Enemy But Time","a":"Michael Bishop","e":1,"b":"Nebula 1982"},{"y":1983,"n":"Foundation's Edge","a":"Isaac Asimov","e":0,"b":"Hugo 1983"},{"y":1983,"n":"Startide Rising","a":"David Brin","e":2,"b":"Hugo 1984 · Nebula 1983"},{"y":1984,"n":"Neuromancer","a":"William Gibson","e":2,"b":"Hugo 1985 · Nebula 1984"},{"y":1985,"n":"Ender's Game","a":"Orson Scott Card","e":2,"b":"Hugo 1986 · Nebula 1985"},{"y":1986,"n":"Speaker for the Dead","a":"Orson Scott Card","e":2,"b":"Hugo 1987 · Nebula 1986"},{"y":1987,"n":"The Falling Woman","a":"Pat Murphy","e":1,"b":"Nebula 1987"},{"y":1988,"n":"The Uplift War","a":"David Brin","e":0,"b":"Hugo 1988"},{"y":1988,"n":"Falling Free","a":"Lois McMaster Bujold","e":1,"b":"Nebula 1988"},{"y":1989,"n":"Cyteen","a":"C. J. Cherryh","e":0,"b":"Hugo 1989"},{"y":1989,"n":"The Healer's War","a":"Elizabeth Ann Scarborough","e":1,"b":"Nebula 1989"},{"y":1990,"n":"Hyperion","a":"Dan Simmons","e":0,"b":"Hugo 1990"},{"y":1990,"n":"Tehanu","a":"Ursula K. Le Guin","e":1,"b":"Nebula 1990"},{"y":1991,"n":"The Vor Game","a":"Lois McMaster Bujold","e":0,"b":"Hugo 1991"},{"y":1991,"n":"Stations of the Tide","a":"Michael Swanwick","e":1,"b":"Nebula 1991"},{"y":1992,"n":"Barrayar","a":"Lois McMaster Bujold","e":0,"b":"Hugo 1992"},{"y":1992,"n":"Doomsday Book","a":"Connie Willis","e":2,"b":"Hugo 1993 · Nebula 1992"},{"y":1993,"n":"A Fire Upon the Deep","a":"Vernor Vinge","e":0,"b":"Hugo 1993"},{"y":1993,"n":"Red Mars","a":"Kim Stanley Robinson","e":1,"b":"Nebula 1993"},{"y":1994,"n":"Green Mars","a":"Kim Stanley Robinson","e":0,"b":"Hugo 1994"},{"y":1994,"n":"Moving Mars","a":"Greg Bear","e":1,"b":"Nebula 1994"},{"y":1995,"n":"Mirror Dance","a":"Lois McMaster Bujold","e":0,"b":"Hugo 1995"},{"y":1995,"n":"The Terminal Experiment","a":"Robert J. Sawyer","e":1,"b":"Nebula 1995"},{"y":1996,"n":"The Diamond Age","a":"Neal Stephenson","e":0,"b":"Hugo 1996"},{"y":1996,"n":"Slow River","a":"Nicola Griffith","e":1,"b":"Nebula 1996"},{"y":1997,"n":"Blue Mars","a":"Kim Stanley Robinson","e":0,"b":"Hugo 1997"},{"y":1997,"n":"The Moon and the Sun","a":"Vonda N. McIntyre","e":1,"b":"Nebula 1997"},{"y":1998,"n":"Forever Peace","a":"Joe Haldeman","e":2,"b":"Hugo 1998 · Nebula 1998"},{"y":1999,"n":"To Say Nothing of the Dog","a":"Connie Willis","e":0,"b":"Hugo 1999"},{"y":1999,"n":"Parable of the Talents","a":"Octavia E. Butler","e":1,"b":"Nebula 1999"},{"y":2000,"n":"A Deepness in the Sky","a":"Vernor Vinge","e":0,"b":"Hugo 2000"},{"y":2000,"n":"Darwin's Radio","a":"Greg Bear","e":1,"b":"Nebula 2000"},{"y":2001,"n":"Harry Potter and the Goblet of Fire","a":"J. K. Rowling","e":0,"b":"Hugo 2001"},{"y":2001,"n":"The Quantum Rose","a":"Catherine Asaro","e":1,"b":"Nebula 2001"},{"y":2002,"n":"American Gods","a":"Neil Gaiman","e":2,"b":"Hugo 2002 · Nebula 2002"},{"y":2003,"n":"Hominids","a":"Robert J. Sawyer","e":0,"b":"Hugo 2003"},{"y":2003,"n":"The Speed of Dark","a":"Elizabeth Moon","e":1,"b":"Nebula 2003"},{"y":2004,"n":"Paladin of Souls","a":"Lois McMaster Bujold","e":2,"b":"Hugo 2004 · Nebula 2004"},{"y":2005,"n":"Jonathan Strange and Mr Norrell","a":"Susanna Clarke","e":0,"b":"Hugo 2005"},{"y":2005,"n":"Camouflage","a":"Joe Haldeman","e":1,"b":"Nebula 2005"},{"y":2006,"n":"Spin","a":"Robert Charles Wilson","e":0,"b":"Hugo 2006"},{"y":2006,"n":"Seeker","a":"Jack McDevitt","e":1,"b":"Nebula 2006"},{"y":2007,"n":"Rainbows End","a":"Vernor Vinge","e":0,"b":"Hugo 2007"},{"y":2007,"n":"The Yiddish Policemen's Union","a":"Michael Chabon","e":2,"b":"Hugo 2008 · Nebula 2007"},{"y":2008,"n":"Powers","a":"Ursula K. Le Guin","e":1,"b":"Nebula 2008"},{"y":2009,"n":"The Graveyard Book","a":"Neil Gaiman","e":0,"b":"Hugo 2009"},{"y":2009,"n":"The Windup Girl","a":"Paolo Bacigalupi","e":2,"b":"Hugo 2010 · Nebula 2009"},{"y":2010,"n":"The City and the City","a":"China Mieville","e":0,"b":"Hugo 2010"},{"y":2010,"n":"Blackout/All Clear","a":"Connie Willis","e":2,"b":"Hugo 2011 · Nebula 2010"},{"y":2011,"n":"Among Others","a":"Jo Walton","e":2,"b":"Hugo 2012 · Nebula 2011"},{"y":2012,"n":"2312","a":"Kim Stanley Robinson","e":1,"b":"Nebula 2012"},{"y":2013,"n":"Redshirts","a":"John Scalzi","e":0,"b":"Hugo 2013"},{"y":2013,"n":"Ancillary Justice","a":"Ann Leckie","e":2,"b":"Hugo 2014 · Nebula 2013"},{"y":2014,"n":"Annihilation","a":"Jeff VanderMeer","e":1,"b":"Nebula 2014"},{"y":2015,"n":"The Three-Body Problem","a":"Cixin Liu","e":0,"b":"Hugo 2015"},{"y":2015,"n":"Uprooted","a":"Naomi Novik","e":1,"b":"Nebula 2015"},{"y":2016,"n":"The Fifth Season","a":"N. K. Jemisin","e":0,"b":"Hugo 2016"},{"y":2016,"n":"All the Birds in the Sky","a":"Charlie Jane Anders","e":1,"b":"Nebula 2016"},{"y":2017,"n":"The Obelisk Gate","a":"N. K. Jemisin","e":0,"b":"Hugo 2017"},{"y":2017,"n":"The Stone Sky","a":"N. K. Jemisin","e":2,"b":"Hugo 2018 · Nebula 2017"},{"y":2018,"n":"The Calculating Stars","a":"Mary Robinette Kowal","e":2,"b":"Hugo 2019 · Nebula 2018"},{"y":2019,"n":"A Song for a New Day","a":"Sarah Pinsker","e":1,"b":"Nebula 2019"},{"y":2020,"n":"A Memory Called Empire","a":"Arkady Martine","e":0,"b":"Hugo 2020"},{"y":2020,"n":"Network Effect","a":"Martha Wells","e":2,"b":"Hugo 2021 · Nebula 2020"},{"y":2021,"n":"A Master of Djinn","a":"P. Djeli Clark","e":1,"b":"Nebula 2021"},{"y":2022,"n":"A Desolation Called Peace","a":"Arkady Martine","e":0,"b":"Hugo 2022"},{"y":2022,"n":"Babel","a":"R. F. Kuang","e":1,"b":"Nebula 2022"},{"y":2023,"n":"Nettle and Bone","a":"T. Kingfisher","e":0,"b":"Hugo 2023"},{"y":2023,"n":"The Saint of Bright Doors","a":"Vajra Chandrasekera","e":1,"b":"Nebula 2023"},{"y":2024,"n":"Some Desperate Glory","a":"Emily Tesh","e":0,"b":"Hugo 2024"},{"y":2024,"n":"Someone You Can Build a Nest In","a":"John Wiswell","e":1,"b":"Nebula 2024"},{"y":2025,"n":"The Tainted Cup","a":"Robert Jackson Bennett","e":0,"b":"Hugo 2025"},{"y":2025,"n":"The Buffalo Hunter Hunter","a":"Stephen Graham Jones","e":1,"b":"Nebula 2025"}], CATS=[{"n":"Hugo","c":"#ffb02e"},{"n":"Nebula","c":"#b48cf2"},{"n":"Both awards","c":"#31d67a"}], COVERS={"The Demolished Man|1953":6874573,"A Case of Conscience|1959":5540783,"Starship Troopers|1960":14630746,"Double Star|1956":14632131,"They'd Rather Be Right|1955":6874396,"The Big Time|1958":12373928,"A Canticle for Leibowitz|1961":10221348,"The Man in the High Castle|1963":420452,"Stranger in a Strange Land|1962":14630668,"Way Station|1964":14169,"The Wanderer|1965":379960,"Dune|1965":11481354,"This Immortal|1966":8775174,"Babel-17|1966":12375569,"Flowers for Algernon|1966":12947700,"The Moon Is a Harsh Mistress|1967":14631258,"The Einstein Intersection|1967":5540956,"Lord of Light|1968":29946,"Rite of Passage|1968":12375571,"The Left Hand of Darkness|1969":10618463,"Ringworld|1970":8999878,"A Time of Changes|1971":10268213,"To Your Scattered Bodies Go|1972":382159,"The Gods Themselves|1972":15138118,"The Forever War|1975":10693768,"The Dispossessed|1974":6979680,"Rendezvous with Rama|1973":13472608,"Man Plus|1976":6905749,"Where Late the Sweet Birds Sang|1977":182911,"Gateway|1977":9424523,"Timescape|1980":2144677,"Stand on Zanzibar|1969":911128,"The Fountains of Paradise|1979":6449963,"Dreamsnake|1978":7267148,"The Claw of the Conciliator|1981":12384364,"Downbelow Station|1982":683236,"The Snow Queen|1981":288125,"No Enemy But Time|1982":12372147,"Foundation's Edge|1983":6700720,"Ender's Game|1985":12996033,"Neuromancer|1984":283860,"Startide Rising|1983":12384344,"Speaker for the Dead|1986":9315123,"The Uplift War|1988":6572753,"The Falling Woman|1987":182391,"Falling Free|1988":407069,"Cyteen|1989":4125331,"The Healer's War|1989":12372151,"Hyperion|1990":380332,"Tehanu|1990":3347790,"The Vor Game|1991":5807570,"Stations of the Tide|1991":235432,"Barrayar|1992":981974,"Doomsday Book|1992":369478,"Moving Mars|1994":2815950,"Red Mars|1993":382552,"Green Mars|1994":372391,"Mirror Dance|1995":3943745,"The Diamond Age|1996":8598269,"The Terminal Experiment|1995":44047,"Forever Peace|1998":283721,"The Moon and the Sun|1997":406449,"Blue Mars|1997":3818726,"To Say Nothing of the Dog|1999":982148,"Parable of the Talents|1999":12384358,"Slow River|1996":9506947,"A Deepness in the Sky|2000":603591,"The Quantum Rose|2001":183653,"Harry Potter and the Goblet of Fire|2001":12059372,"Darwin's Radio|2000":210914,"American Gods|2002":8494659,"Hominids|2003":183505,"The Speed of Dark|2003":210339,"A Fire Upon the Deep|1993":9261466,"Paladin of Souls|2004":238001,"Jonathan Strange and Mr Norrell|2005":525391,"Camouflage|2005":284158,"Spin|2006":6632328,"Seeker|2006":284292,"Rainbows End|2007":182444,"The Yiddish Policemen's Union|2007":12745258,"Powers|2008":1120521,"The Graveyard Book|2009":7099583,"The Windup Girl|2009":6463375,"Blackout/All Clear|2010":6584391,"Among Others|2011":6998632,"2312|2012":7265302,"Redshirts|2013":7238735,"Ancillary Justice|2013":7355949,"Annihilation|2014":8408974,"The Three-Body Problem|2015":10526598,"Uprooted|2015":8539161,"The Fifth Season|2016":8133598,"The Obelisk Gate|2017":8138324,"All the Birds in the Sky|2016":7435137,"The Stone Sky|2017":8191910,"The Calculating Stars|2018":8290909,"A Song for a New Day|2019":8780333,"A Memory Called Empire|2020":8802134,"Network Effect|2020":9426689,"A Master of Djinn|2021":10457293,"A Desolation Called Peace|2022":10718806,"Babel|2022":12468631,"Nettle and Bone|2023":14687665,"Some Desperate Glory|2024":13462488,"Someone You Can Build a Nest In|2024":15137468,"The Tainted Cup|2025":14578473,"The City and the City|2010":5540971,"The Buffalo Hunter Hunter|2025":15234922};
+const MINY=1948,MAXY=2028,W=980,LABEL_CAP=460;
+let view={a:MINY,b:MAXY};
+
+const el=document.getElementById('tl');
+const X=y=>(y-view.a)/(view.b-view.a)*W;
+const YR=x=>view.a+x/W*(view.b-view.a);
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const DECS=[];
+{ const ys=BOOKS.map(f=>f.y);
+  for(let d=Math.floor(Math.min(...ys)/10)*10; d<=Math.max(...ys); d+=10)
+    if(BOOKS.some(f=>f.y>=d&&f.y<d+10)) DECS.push(d); }
+
+function ticks(){
+  const span=view.b-view.a;
+  const step=span>120?20:span>60?10:span>25?5:span>12?2:1;
+  const out=[];
+  for(let y=Math.ceil(view.a/step)*step;y<=view.b;y+=step) out.push(y);
+  return out;
+}
+let laneData=null, laneSpanKey=0;
+function layoutForSpan(){
+  const span=view.b-view.a;
+  if(laneData && Math.abs(span-laneSpanKey)<1e-6) return laneData;
+  const pxY=W/span;
+  const items=BOOKS.map((f,i)=>({y:f.y,n:f.n,e:f.e,fi:i}));
+  items.sort((a,b)=>a.y-b.y||a.n.localeCompare(b.n));
+  items.forEach((f,i)=>{ f.w=Math.min(215,(f.n.length+7)*6.2)+14; f.up=(i%2===0); });
+  const assign=arr=>{ const ends=[]; let mx=0;
+    for(const it of arr){
+      const x0=(it.y+0.5)-((it.w-14)/2)/pxY;
+      let l=0; while(l<ends.length && ends[l]>x0) l++;
+      it.lane=l; ends[l]=(it.y+0.5)+(((it.w-14)/2)+8)/pxY; mx=Math.max(mx,l);
+    }
+    return mx; };
+  const upMax=assign(items.filter(f=>f.up));
+  const dnMax=assign(items.filter(f=>!f.up));
+  laneData={items,upMax,dnMax}; laneSpanKey=span;
+  return laneData;
+}
+function render(){
+  const vis=BOOKS.map((f,i)=>({...f,fi:i})).filter(f=>f.y+1>=view.a&&f.y<=view.b);
+  const labelMode=vis.length<=LABEL_CAP;
+  let upMax=0,dnMax=0,fs=[];
+  if(labelMode){
+    const L=layoutForSpan();
+    upMax=L.upMax; dnMax=L.dnMax;
+    fs=L.items.filter(f=>f.y+1>=view.a-1&&f.y<=view.b+1)
+      .map(f=>({...f,x:X(f.y+0.5),cx:X(f.y+0.5)}));
+  }
+  const CY=labelMode?70+(upMax+1)*26+20:230;
+  const H=labelMode?CY+120+(dnMax+1)*26+40:400;
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" id="tlsvg">`;
+  s+=`<rect width="${W}" height="${H}" fill="#121212"/>`;
+  for(const y of ticks()){
+    const x=X(y);
+    s+=`<line x1="${x}" y1="26" x2="${x}" y2="${H-26}" stroke="#242424"/>`;
+    s+=`<text x="${x}" y="${CY+20}" text-anchor="middle" font-size="12.5" font-weight="700"
+      fill="#9a9a9a">${y}</text>`;
+  }
+  s+=`<line x1="0" y1="${CY}" x2="${W}" y2="${CY}" stroke="#3a3a3a" stroke-width="2"/>`;
+  for(const d of DECS){
+    if(d+10<view.a||d>view.b) continue;
+    const x0=Math.max(0,X(d)), x1=Math.min(W,X(d+10));
+    if(x1-x0<2) continue;
+    const n=BOOKS.filter(f=>f.y>=d&&f.y<d+10).length;
+    s+=`<rect x="${x0}" y="${CY+30}" width="${Math.max(2,x1-x0)}" height="22" rx="6"
+      fill="#58a6ff18" stroke="#3d5a80" stroke-width="1" data-dec-band="${d}" style="cursor:pointer"/>`;
+    if(x1-x0>60) s+=`<text x="${(x0+x1)/2}" y="${CY+45}" text-anchor="middle" font-size="11.5"
+      fill="#9ec3ef" pointer-events="none">${d}s · ${n}</text>`;
+  }
+  if(!labelMode){
+    const seen={};
+    for(const f of vis){
+      const k=f.y; seen[k]=(seen[k]||0)+1;
+      const x=X(f.y+0.5), stack=seen[k];
+      const yy=CY-8-(stack-1)*4.6;
+      if(yy<40) continue;
+      s+=`<circle cx="${x}" cy="${yy}" r="1.9" fill="${CATS[f.e].c}" opacity="0.9"
+        data-dot="${f.fi}" data-dec="${Math.floor(f.y/10)*10}"/>`;
+    }
+  } else {
+    for(const f of fs){
+      const c=CATS[f.e].c;
+      const ly=f.up ? CY-42-f.lane*26 : CY+108+f.lane*26;
+      const dotY=f.up ? CY-6 : CY+6;
+      const tipY=f.up ? ly+9 : ly-9;
+      const label=`${f.n} (${f.y})`;
+      s+=`<g data-f="${f.fi}" data-dec="${Math.floor(f.y/10)*10}" style="cursor:default">
+        <line x1="${f.x}" y1="${dotY}" x2="${f.x}" y2="${tipY}" stroke="${c}" stroke-width="1" opacity="0.55"/>
+        <circle cx="${f.x}" cy="${dotY}" r="2.8" fill="${c}"/>
+        <rect x="${f.cx-f.w/2}" y="${ly-8}" width="${f.w}" height="20" rx="7"
+          fill="#1a1a1a" stroke="${c}" stroke-width="1"/>
+        <text x="${f.cx}" y="${ly+6}" text-anchor="middle" font-size="11.3" font-weight="600"
+          fill="#e6e6e6" pointer-events="none">${esc(label).slice(0,40)}</text></g>`;
+    }
+  }
+  s+='</svg>';
+  el.innerHTML=s;
+  const n=vis.length;
+  document.getElementById('info').textContent=
+    `${Math.round(view.a)} to ${Math.round(view.b)} · ${n} book${n===1?'':'s'} in view`;
+}
+function clampView(a,b){
+  const span=Math.min(MAXY-MINY,Math.max(4,b-a));
+  a=Math.max(MINY,Math.min(a,MAXY-span));
+  return {a,b:a+span};
+}
+function gotoDecade(d){
+  view=clampView(d-0.6,d+10.6);
+  render();
+}
+function hook(){
+  const px=e=>{const r=el.getBoundingClientRect();return (e.clientX-r.left)/r.width*W;};
+  el.addEventListener('wheel',e=>{
+    if(e.ctrlKey||e.metaKey){
+      e.preventDefault();
+      const mag=Math.min(Math.abs(e.deltaY),50);
+      const k=Math.exp((e.deltaY>0?1:-1)*mag*0.002);
+      const yr=YR(px(e));
+      view=clampView(yr-(yr-view.a)*k, yr+(view.b-yr)*k);
+      render();
+    }else if(Math.abs(e.deltaX)>Math.abs(e.deltaY)){
+      e.preventDefault();
+      const dyr=Math.max(-60,Math.min(60,e.deltaX))/W*(view.b-view.a)*0.45;
+      view=clampView(view.a+dyr,view.b+dyr);
+      render();
+    }
+  },{passive:false});
+  let drag=null, dragged=false;
+  el.addEventListener('pointerdown',e=>{drag={x:px(e),y:e.clientY,a:view.a,b:view.b};dragged=false;el.classList.add('panning');el.setPointerCapture(e.pointerId);});
+  el.addEventListener('pointermove',e=>{
+    if(!drag) return;
+    const dx=px(e)-drag.x, dy=e.clientY-drag.y;
+    if(Math.abs(dx)>2||Math.abs(dy)>2) dragged=true;
+    const dyr=dx/W*(drag.b-drag.a);
+    view=clampView(drag.a-dyr, drag.b-dyr);
+    if(dy){ el.scrollTop-=dy; drag.y=e.clientY; }
+    render();
+  });
+  el.addEventListener('pointerup',()=>{drag=null;el.classList.remove('panning');});
+  el.addEventListener('pointercancel',()=>{drag=null;el.classList.remove('panning');});
+  el.addEventListener('click',e=>{
+    if(dragged){dragged=false;return;}
+    const db=e.target.closest('[data-dec-band]');
+    if(db){gotoDecade(+db.getAttribute('data-dec-band'));}
+  });
+  el.addEventListener('pointerover',e=>{
+    const g=e.target.closest('[data-f]')||e.target.closest('[data-dot]');
+    if(g){ const i=+(g.getAttribute('data-f')??g.getAttribute('data-dot'));
+      showBook(i); setFocus(+g.getAttribute('data-dec')); return; }
+    const db=e.target.closest('[data-dec-band]');
+    if(db){ const d=+db.getAttribute('data-dec-band');
+      document.getElementById('info').textContent=
+        d+'s · click to enter the decade';
+      setFocus(d); return; }
+  });
+  el.addEventListener('pointerleave',()=>setFocus(null));
+}
+let focusD=null;
+function setFocus(d){
+  if(d===focusD) return;
+  focusD=d;
+  document.querySelectorAll('#tlsvg [data-dec]').forEach(g=>{
+    g.setAttribute('opacity', d===null||+g.getAttribute('data-dec')===d ? 1 : 0.22);
+  });
+}
+
+// ---- cover panel: manifest first, Open Library search as fallback ----
+const cache={};
+let current=-1;
+async function coverFor(f){
+  const k=f.n+'|'+f.y;
+  if(k in COVERS && COVERS[k]) return 'https://covers.openlibrary.org/b/id/'+COVERS[k]+'-L.jpg';
+  if(k in cache) return cache[k];
+  try{
+    const q='https://openlibrary.org/search.json?limit=8&fields=cover_i,first_publish_year,title'+
+      '&title='+encodeURIComponent(f.n)+'&author='+encodeURIComponent(f.a.split(' and ')[0]);
+    const r=await fetch(q); const j=await r.json();
+    let best=null;
+    for(const d of (j.docs||[])){
+      if(!d.cover_i) continue;
+      if(d.first_publish_year && Math.abs(d.first_publish_year-f.y)<=2){ best=d; break; }
+      if(!best) best=d;
+    }
+    const u=best?('https://covers.openlibrary.org/b/id/'+best.cover_i+'-L.jpg'):null;
+    cache[k]=u; return u;
+  }catch(e){ cache[k]=null; return null; }
+}
+async function showBook(i){
+  const f=BOOKS[i]; current=i;
+  document.getElementById('bookTxt').textContent=f.n;
+  document.getElementById('authTxt').textContent=f.a;
+  const bt=document.getElementById('badgeTxt');
+  bt.textContent=f.b; bt.style.color=CATS[f.e].c;
+  document.getElementById('yearTxt').textContent=String(f.y);
+  const img=document.getElementById('cover');
+  img.removeAttribute('src'); img.alt='Loading cover';
+  const u=await coverFor(f);
+  if(current!==i) return;
+  if(u){ img.src=u; img.alt='Cover of '+f.n; }
+  else { img.alt='No cover found'; }
+}
+document.getElementById('reset').onclick=()=>{view={a:MINY,b:MAXY};render();};
+const nav=document.getElementById('decnav');
+for(const d of DECS){
+  const b=document.createElement('button');
+  b.className='dec'; b.textContent=d+'s';
+  b.onclick=()=>gotoDecade(d);
+  nav.insertBefore(b, document.getElementById('info'));
+}
+const lg=document.getElementById('legend');
+lg.innerHTML=CATS.map(p=>
+  `<span><span class="sw" style="background:${p.c}"></span>${esc(p.n)}</span>`).join('');
+render();
+hook();
+</script>
+</body>
+</html>
