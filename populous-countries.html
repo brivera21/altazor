@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The World's Most Populous Countries · Altazor</title>
+<title>World's Most Populous Countries · Altazor</title>
 <style>
 :root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
         --line:#2b2b2b; --accent:#58a6ff;
@@ -21,7 +21,8 @@ nav.site a { color:var(--muted); text-decoration:none; font-size:14px; }
 nav.site a:hover { color:var(--accent); }
 h1 { margin:0 0 6px; font-size:26px; }
 h2 { font-size:16px; margin:34px 0 12px; letter-spacing:.02em; }
-.lede { color:var(--muted); font-size:14.5px; margin:0 0 22px; max-width:720px; }
+.lede { color:var(--muted); font-size:14.5px; margin:0 0 6px; max-width:720px; }
+.stamp { color:var(--ink-3); font-size:12.5px; margin:0 0 22px; }
 
 .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; }
 .tile { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
@@ -67,7 +68,6 @@ g.bar:hover rect { opacity:.75; }
 .refs a { color:var(--accent); }
 @media (max-width:700px) {
   td.share { width:auto; } .track { width:60px; }
-  th.hide, td.hide { display:none; }
 }
 </style>
 </head>
@@ -78,10 +78,12 @@ g.bar:hover rect { opacity:.75; }
   <nav class="site"><a href="library.html">&larr; Library</a></nav>
 </header>
 
-<h1>The World's Most Populous Countries</h1>
-<p class="lede">The ten largest countries by population in 2026, with the share of
-the world each one holds and how many people are born and die in each per day.
-Together these ten hold 56.6 percent of everyone alive.</p>
+<h1>World's Most Populous Countries</h1>
+<p class="lede">The twenty largest countries by population, with the share of the
+world each one holds and how many people are born and die in each per day. The
+first ten alone hold 56.6 percent of everyone alive; all twenty hold
+69.3 percent.</p>
+<p class="stamp">Snapshot taken August 14, 2026, using United Nations projections for 2026.</p>
 
 <div class="tiles">
   <div class="tile"><div class="lab">World population</div>
@@ -98,7 +100,7 @@ Together these ten hold 56.6 percent of everyone alive.</p>
     <div class="sub">births minus deaths</div></div>
 </div>
 
-<h2>The ten</h2>
+<h2>The first ten</h2>
 <table>
 <thead><tr>
   <th class="l" colspan="2">Country</th>
@@ -209,12 +211,122 @@ Together these ten hold 56.6 percent of everyone alive.</p>
   <td class="num">2,177</td>
   <td class="num up">+9,358</td>
 </tr>
-<tr class="total"><td></td><td>These ten together</td>
-  <td class="num">4,701,870,901</td>
-  <td>56.6% of the world</td>
-  <td class="num">179,827</td>
-  <td class="num">99,498</td>
-  <td class="num">+80,329</td></tr>
+<tr class="total"><td></td><td>These ten together</td><td class="num">4,701,870,901</td><td>56.6% of the world</td><td class="num">179,827</td><td class="num">99,498</td><td class="num">+80,329</td></tr>
+</tbody>
+</table>
+
+<h2>The next ten</h2>
+<table>
+<thead><tr>
+  <th class="l" colspan="2">Country</th>
+  <th>Population</th>
+  <th class="l">Share of world</th>
+  <th>Births / day</th>
+  <th>Deaths / day</th>
+  <th>Net / day</th>
+</tr></thead>
+<tbody>
+<tr>
+  <td class="rank">11</td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/mx.png"
+      width="30" height="20" alt="Flag of Mexico"><span>Mexico</span></span></td>
+  <td class="num">132,997,658</td>
+  <td class="share"><span class="track"><span class="fill" style="width:9.0%"></span></span><span class="pct">1.6%</span></td>
+  <td class="num">5,446</td>
+  <td class="num">2,312</td>
+  <td class="num up">+3,134</td>
+</tr>
+<tr>
+  <td class="rank">12</td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/jp.png"
+      width="30" height="20" alt="Flag of Japan"><span>Japan</span></span></td>
+  <td class="num">122,427,730</td>
+  <td class="share"><span class="track"><span class="fill" style="width:8.3%"></span></span><span class="pct">1.5%</span></td>
+  <td class="num">2,042</td>
+  <td class="num">4,280</td>
+  <td class="num down">−2,238</td>
+</tr>
+<tr>
+  <td class="rank">13</td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/eg.png"
+      width="30" height="20" alt="Flag of Egypt"><span>Egypt</span></span></td>
+  <td class="num">120,101,178</td>
+  <td class="share"><span class="track"><span class="fill" style="width:8.1%"></span></span><span class="pct">1.4%</span></td>
+  <td class="num">6,733</td>
+  <td class="num">1,841</td>
+  <td class="num up">+4,892</td>
+</tr>
+<tr>
+  <td class="rank">14</td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/ph.png"
+      width="30" height="20" alt="Flag of Philippines"><span>Philippines</span></span></td>
+  <td class="num">117,724,473</td>
+  <td class="share"><span class="track"><span class="fill" style="width:8.0%"></span></span><span class="pct">1.4%</span></td>
+  <td class="num">5,075</td>
+  <td class="num">2,124</td>
+  <td class="num up">+2,951</td>
+</tr>
+<tr>
+  <td class="rank">15</td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/cd.png"
+      width="30" height="20" alt="Flag of DR Congo"><span>DR Congo</span></span></td>
+  <td class="num">116,452,162</td>
+  <td class="share"><span class="track"><span class="fill" style="width:7.9%"></span></span><span class="pct">1.4%</span></td>
+  <td class="num">12,690</td>
+  <td class="num">2,625</td>
+  <td class="num up">+10,065</td>
+</tr>
+<tr>
+  <td class="rank">16</td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/vn.png"
+      width="30" height="20" alt="Flag of Vietnam"><span>Vietnam</span></span></td>
+  <td class="num">102,177,434</td>
+  <td class="share"><span class="track"><span class="fill" style="width:6.9%"></span></span><span class="pct">1.2%</span></td>
+  <td class="num">3,580</td>
+  <td class="num">1,904</td>
+  <td class="num up">+1,676</td>
+</tr>
+<tr>
+  <td class="rank">17</td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/ir.png"
+      width="30" height="20" alt="Flag of Iran"><span>Iran</span></span></td>
+  <td class="num">93,168,492</td>
+  <td class="share"><span class="track"><span class="fill" style="width:6.3%"></span></span><span class="pct">1.1%</span></td>
+  <td class="num">3,016</td>
+  <td class="num">1,262</td>
+  <td class="num up">+1,754</td>
+</tr>
+<tr>
+  <td class="rank">18</td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/tr.png"
+      width="30" height="20" alt="Flag of Turkey"><span>Turkey</span></span></td>
+  <td class="num">87,926,083</td>
+  <td class="share"><span class="track"><span class="fill" style="width:6.0%"></span></span><span class="pct">1.1%</span></td>
+  <td class="num">2,863</td>
+  <td class="num">1,548</td>
+  <td class="num up">+1,315</td>
+</tr>
+<tr>
+  <td class="rank">19</td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/de.png"
+      width="30" height="20" alt="Flag of Germany"><span>Germany</span></span></td>
+  <td class="num">83,644,257</td>
+  <td class="share"><span class="track"><span class="fill" style="width:5.7%"></span></span><span class="pct">1.0%</span></td>
+  <td class="num">1,889</td>
+  <td class="num">2,854</td>
+  <td class="num down">−965</td>
+</tr>
+<tr>
+  <td class="rank">20</td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/tz.png"
+      width="30" height="20" alt="Flag of Tanzania"><span>Tanzania</span></span></td>
+  <td class="num">72,563,778</td>
+  <td class="share"><span class="track"><span class="fill" style="width:4.9%"></span></span><span class="pct">0.9%</span></td>
+  <td class="num">6,734</td>
+  <td class="num">1,111</td>
+  <td class="num up">+5,623</td>
+</tr>
+<tr class="total"><td></td><td>Ranks eleven to twenty together</td><td class="num">1,049,183,245</td><td>12.6% of the world</td><td class="num">50,068</td><td class="num">21,861</td><td class="num">+28,207</td></tr>
 </tbody>
 </table>
 
@@ -224,66 +336,117 @@ Together these ten hold 56.6 percent of everyone alive.</p>
     <span><span class="sw" style="background:var(--births)"></span>Births per day</span>
     <span><span class="sw" style="background:var(--deaths)"></span>Deaths per day</span>
   </div>
-  <svg viewBox="0 0 720 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Births and deaths per day in the ten most populous countries">
-<line x1="132.0" y1="24" x2="132.0" y2="494" stroke="#2c2c2a"/>
-<text x="132.0" y="508" text-anchor="middle" font-size="11" fill="#898781">0</text>
-<line x1="295.3" y1="24" x2="295.3" y2="494" stroke="#2c2c2a"/>
-<text x="295.3" y="508" text-anchor="middle" font-size="11" fill="#898781">20,000</text>
-<line x1="458.7" y1="24" x2="458.7" y2="494" stroke="#2c2c2a"/>
-<text x="458.7" y="508" text-anchor="middle" font-size="11" fill="#898781">40,000</text>
-<line x1="622.0" y1="24" x2="622.0" y2="494" stroke="#2c2c2a"/>
-<text x="622.0" y="508" text-anchor="middle" font-size="11" fill="#898781">60,000</text>
-<text x="122" y="50" text-anchor="end" font-size="12.5" fill="#c3c2b7">India</text>
-<g class="bar" data-t="India: 62,939 births per day"><rect x="132" y="34" width="514.0" height="15" rx="4" fill="#3987e5"/><rect x="132" y="34" width="4" height="15" fill="#3987e5"/></g>
-<text x="653.0" y="46" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">62,939</text>
-<g class="bar" data-t="India: 27,073 deaths per day"><rect x="132" y="52" width="221.1" height="15" rx="4" fill="#d55181"/><rect x="132" y="52" width="4" height="15" fill="#d55181"/></g>
-<text x="360.1" y="64" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">27,073</text>
-<text x="122" y="96" text-anchor="end" font-size="12.5" fill="#c3c2b7">China</text>
-<g class="bar" data-t="China: 23,615 births per day"><rect x="132" y="80" width="192.9" height="15" rx="4" fill="#3987e5"/><rect x="132" y="80" width="4" height="15" fill="#3987e5"/></g>
-<text x="331.9" y="92" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">23,615</text>
-<g class="bar" data-t="China: 31,436 deaths per day"><rect x="132" y="98" width="256.7" height="15" rx="4" fill="#d55181"/><rect x="132" y="98" width="4" height="15" fill="#d55181"/></g>
-<text x="395.7" y="110" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">31,436</text>
-<text x="122" y="142" text-anchor="end" font-size="12.5" fill="#c3c2b7">United States</text>
-<g class="bar" data-t="United States: 10,057 births per day"><rect x="132" y="126" width="82.1" height="15" rx="4" fill="#3987e5"/><rect x="132" y="126" width="4" height="15" fill="#3987e5"/></g>
-<text x="221.1" y="138" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">10,057</text>
-<g class="bar" data-t="United States: 8,586 deaths per day"><rect x="132" y="144" width="70.1" height="15" rx="4" fill="#d55181"/><rect x="132" y="144" width="4" height="15" fill="#d55181"/></g>
-<text x="209.1" y="156" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">8,586</text>
-<text x="122" y="188" text-anchor="end" font-size="12.5" fill="#c3c2b7">Indonesia</text>
-<g class="bar" data-t="Indonesia: 12,101 births per day"><rect x="132" y="172" width="98.8" height="15" rx="4" fill="#3987e5"/><rect x="132" y="172" width="4" height="15" fill="#3987e5"/></g>
-<text x="237.8" y="184" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">12,101</text>
-<g class="bar" data-t="Indonesia: 6,153 deaths per day"><rect x="132" y="190" width="50.2" height="15" rx="4" fill="#d55181"/><rect x="132" y="190" width="4" height="15" fill="#d55181"/></g>
-<text x="189.2" y="202" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">6,153</text>
-<text x="122" y="234" text-anchor="end" font-size="12.5" fill="#c3c2b7">Pakistan</text>
-<g class="bar" data-t="Pakistan: 18,989 births per day"><rect x="132" y="218" width="155.1" height="15" rx="4" fill="#3987e5"/><rect x="132" y="218" width="4" height="15" fill="#3987e5"/></g>
-<text x="294.1" y="230" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">18,989</text>
-<g class="bar" data-t="Pakistan: 4,556 deaths per day"><rect x="132" y="236" width="37.2" height="15" rx="4" fill="#d55181"/><rect x="132" y="236" width="4" height="15" fill="#d55181"/></g>
-<text x="176.2" y="248" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">4,556</text>
-<text x="122" y="280" text-anchor="end" font-size="12.5" fill="#c3c2b7">Nigeria</text>
-<g class="bar" data-t="Nigeria: 21,114 births per day"><rect x="132" y="264" width="172.4" height="15" rx="4" fill="#3987e5"/><rect x="132" y="264" width="4" height="15" fill="#3987e5"/></g>
-<text x="311.4" y="276" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">21,114</text>
-<g class="bar" data-t="Nigeria: 7,613 deaths per day"><rect x="132" y="282" width="62.2" height="15" rx="4" fill="#d55181"/><rect x="132" y="282" width="4" height="15" fill="#d55181"/></g>
-<text x="201.2" y="294" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">7,613</text>
-<text x="122" y="326" text-anchor="end" font-size="12.5" fill="#c3c2b7">Brazil</text>
-<g class="bar" data-t="Brazil: 6,825 births per day"><rect x="132" y="310" width="55.7" height="15" rx="4" fill="#3987e5"/><rect x="132" y="310" width="4" height="15" fill="#3987e5"/></g>
-<text x="194.7" y="322" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">6,825</text>
-<g class="bar" data-t="Brazil: 4,288 deaths per day"><rect x="132" y="328" width="35.0" height="15" rx="4" fill="#d55181"/><rect x="132" y="328" width="4" height="15" fill="#d55181"/></g>
-<text x="174.0" y="340" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">4,288</text>
-<text x="122" y="372" text-anchor="end" font-size="12.5" fill="#c3c2b7">Bangladesh</text>
-<g class="bar" data-t="Bangladesh: 9,330 births per day"><rect x="132" y="356" width="76.2" height="15" rx="4" fill="#3987e5"/><rect x="132" y="356" width="4" height="15" fill="#3987e5"/></g>
-<text x="215.2" y="368" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">9,330</text>
-<g class="bar" data-t="Bangladesh: 2,501 deaths per day"><rect x="132" y="374" width="20.4" height="15" rx="4" fill="#d55181"/><rect x="132" y="374" width="4" height="15" fill="#d55181"/></g>
-<text x="159.4" y="386" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,501</text>
-<text x="122" y="418" text-anchor="end" font-size="12.5" fill="#c3c2b7">Russia</text>
-<g class="bar" data-t="Russia: 3,322 births per day"><rect x="132" y="402" width="27.1" height="15" rx="4" fill="#3987e5"/><rect x="132" y="402" width="4" height="15" fill="#3987e5"/></g>
-<text x="166.1" y="414" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">3,322</text>
-<g class="bar" data-t="Russia: 5,115 deaths per day"><rect x="132" y="420" width="41.8" height="15" rx="4" fill="#d55181"/><rect x="132" y="420" width="4" height="15" fill="#d55181"/></g>
-<text x="180.8" y="432" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">5,115</text>
-<text x="122" y="464" text-anchor="end" font-size="12.5" fill="#c3c2b7">Ethiopia</text>
-<g class="bar" data-t="Ethiopia: 11,535 births per day"><rect x="132" y="448" width="94.2" height="15" rx="4" fill="#3987e5"/><rect x="132" y="448" width="4" height="15" fill="#3987e5"/></g>
-<text x="233.2" y="460" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">11,535</text>
-<g class="bar" data-t="Ethiopia: 2,177 deaths per day"><rect x="132" y="466" width="17.8" height="15" rx="4" fill="#d55181"/><rect x="132" y="466" width="4" height="15" fill="#d55181"/></g>
-<text x="156.8" y="478" font-size="11.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,177</text>
-<line x1="132" y1="24" x2="132" y2="494" stroke="#383835"/>
+  <svg viewBox="0 0 720 860" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Births and deaths per day in the twenty most populous countries">
+<line x1="132.0" y1="24" x2="132.0" y2="834" stroke="#2c2c2a"/>
+<text x="132.0" y="848" text-anchor="middle" font-size="11" fill="#898781">0</text>
+<line x1="295.3" y1="24" x2="295.3" y2="834" stroke="#2c2c2a"/>
+<text x="295.3" y="848" text-anchor="middle" font-size="11" fill="#898781">20,000</text>
+<line x1="458.7" y1="24" x2="458.7" y2="834" stroke="#2c2c2a"/>
+<text x="458.7" y="848" text-anchor="middle" font-size="11" fill="#898781">40,000</text>
+<line x1="622.0" y1="24" x2="622.0" y2="834" stroke="#2c2c2a"/>
+<text x="622.0" y="848" text-anchor="middle" font-size="11" fill="#898781">60,000</text>
+<text x="122" y="47" text-anchor="end" font-size="12" fill="#c3c2b7">India</text>
+<g class="bar" data-t="India: 62,939 births per day"><rect x="132" y="32" width="514.0" height="13" rx="4" fill="#3987e5"/><rect x="132" y="32" width="4" height="13" fill="#3987e5"/></g>
+<text x="653.0" y="43" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">62,939</text>
+<g class="bar" data-t="India: 27,073 deaths per day"><rect x="132" y="48" width="221.1" height="13" rx="4" fill="#d55181"/><rect x="132" y="48" width="4" height="13" fill="#d55181"/></g>
+<text x="360.1" y="59" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">27,073</text>
+<text x="122" y="87" text-anchor="end" font-size="12" fill="#c3c2b7">China</text>
+<g class="bar" data-t="China: 23,615 births per day"><rect x="132" y="72" width="192.9" height="13" rx="4" fill="#3987e5"/><rect x="132" y="72" width="4" height="13" fill="#3987e5"/></g>
+<text x="331.9" y="83" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">23,615</text>
+<g class="bar" data-t="China: 31,436 deaths per day"><rect x="132" y="88" width="256.7" height="13" rx="4" fill="#d55181"/><rect x="132" y="88" width="4" height="13" fill="#d55181"/></g>
+<text x="395.7" y="99" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">31,436</text>
+<text x="122" y="127" text-anchor="end" font-size="12" fill="#c3c2b7">United States</text>
+<g class="bar" data-t="United States: 10,057 births per day"><rect x="132" y="112" width="82.1" height="13" rx="4" fill="#3987e5"/><rect x="132" y="112" width="4" height="13" fill="#3987e5"/></g>
+<text x="221.1" y="123" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">10,057</text>
+<g class="bar" data-t="United States: 8,586 deaths per day"><rect x="132" y="128" width="70.1" height="13" rx="4" fill="#d55181"/><rect x="132" y="128" width="4" height="13" fill="#d55181"/></g>
+<text x="209.1" y="139" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">8,586</text>
+<text x="122" y="167" text-anchor="end" font-size="12" fill="#c3c2b7">Indonesia</text>
+<g class="bar" data-t="Indonesia: 12,101 births per day"><rect x="132" y="152" width="98.8" height="13" rx="4" fill="#3987e5"/><rect x="132" y="152" width="4" height="13" fill="#3987e5"/></g>
+<text x="237.8" y="163" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">12,101</text>
+<g class="bar" data-t="Indonesia: 6,153 deaths per day"><rect x="132" y="168" width="50.2" height="13" rx="4" fill="#d55181"/><rect x="132" y="168" width="4" height="13" fill="#d55181"/></g>
+<text x="189.2" y="179" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">6,153</text>
+<text x="122" y="207" text-anchor="end" font-size="12" fill="#c3c2b7">Pakistan</text>
+<g class="bar" data-t="Pakistan: 18,989 births per day"><rect x="132" y="192" width="155.1" height="13" rx="4" fill="#3987e5"/><rect x="132" y="192" width="4" height="13" fill="#3987e5"/></g>
+<text x="294.1" y="203" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">18,989</text>
+<g class="bar" data-t="Pakistan: 4,556 deaths per day"><rect x="132" y="208" width="37.2" height="13" rx="4" fill="#d55181"/><rect x="132" y="208" width="4" height="13" fill="#d55181"/></g>
+<text x="176.2" y="219" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">4,556</text>
+<text x="122" y="247" text-anchor="end" font-size="12" fill="#c3c2b7">Nigeria</text>
+<g class="bar" data-t="Nigeria: 21,114 births per day"><rect x="132" y="232" width="172.4" height="13" rx="4" fill="#3987e5"/><rect x="132" y="232" width="4" height="13" fill="#3987e5"/></g>
+<text x="311.4" y="243" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">21,114</text>
+<g class="bar" data-t="Nigeria: 7,613 deaths per day"><rect x="132" y="248" width="62.2" height="13" rx="4" fill="#d55181"/><rect x="132" y="248" width="4" height="13" fill="#d55181"/></g>
+<text x="201.2" y="259" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">7,613</text>
+<text x="122" y="287" text-anchor="end" font-size="12" fill="#c3c2b7">Brazil</text>
+<g class="bar" data-t="Brazil: 6,825 births per day"><rect x="132" y="272" width="55.7" height="13" rx="4" fill="#3987e5"/><rect x="132" y="272" width="4" height="13" fill="#3987e5"/></g>
+<text x="194.7" y="283" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">6,825</text>
+<g class="bar" data-t="Brazil: 4,288 deaths per day"><rect x="132" y="288" width="35.0" height="13" rx="4" fill="#d55181"/><rect x="132" y="288" width="4" height="13" fill="#d55181"/></g>
+<text x="174.0" y="299" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">4,288</text>
+<text x="122" y="327" text-anchor="end" font-size="12" fill="#c3c2b7">Bangladesh</text>
+<g class="bar" data-t="Bangladesh: 9,330 births per day"><rect x="132" y="312" width="76.2" height="13" rx="4" fill="#3987e5"/><rect x="132" y="312" width="4" height="13" fill="#3987e5"/></g>
+<text x="215.2" y="323" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">9,330</text>
+<g class="bar" data-t="Bangladesh: 2,501 deaths per day"><rect x="132" y="328" width="20.4" height="13" rx="4" fill="#d55181"/><rect x="132" y="328" width="4" height="13" fill="#d55181"/></g>
+<text x="159.4" y="339" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,501</text>
+<text x="122" y="367" text-anchor="end" font-size="12" fill="#c3c2b7">Russia</text>
+<g class="bar" data-t="Russia: 3,322 births per day"><rect x="132" y="352" width="27.1" height="13" rx="4" fill="#3987e5"/><rect x="132" y="352" width="4" height="13" fill="#3987e5"/></g>
+<text x="166.1" y="363" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">3,322</text>
+<g class="bar" data-t="Russia: 5,115 deaths per day"><rect x="132" y="368" width="41.8" height="13" rx="4" fill="#d55181"/><rect x="132" y="368" width="4" height="13" fill="#d55181"/></g>
+<text x="180.8" y="379" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">5,115</text>
+<text x="122" y="407" text-anchor="end" font-size="12" fill="#c3c2b7">Ethiopia</text>
+<g class="bar" data-t="Ethiopia: 11,535 births per day"><rect x="132" y="392" width="94.2" height="13" rx="4" fill="#3987e5"/><rect x="132" y="392" width="4" height="13" fill="#3987e5"/></g>
+<text x="233.2" y="403" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">11,535</text>
+<g class="bar" data-t="Ethiopia: 2,177 deaths per day"><rect x="132" y="408" width="17.8" height="13" rx="4" fill="#d55181"/><rect x="132" y="408" width="4" height="13" fill="#d55181"/></g>
+<text x="156.8" y="419" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,177</text>
+<line x1="14" y1="423" x2="706" y2="423" stroke="#383835"/>
+<text x="122" y="447" text-anchor="end" font-size="12" fill="#c3c2b7">Mexico</text>
+<g class="bar" data-t="Mexico: 5,446 births per day"><rect x="132" y="432" width="44.5" height="13" rx="4" fill="#3987e5"/><rect x="132" y="432" width="4" height="13" fill="#3987e5"/></g>
+<text x="183.5" y="443" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">5,446</text>
+<g class="bar" data-t="Mexico: 2,312 deaths per day"><rect x="132" y="448" width="18.9" height="13" rx="4" fill="#d55181"/><rect x="132" y="448" width="4" height="13" fill="#d55181"/></g>
+<text x="157.9" y="459" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,312</text>
+<text x="122" y="487" text-anchor="end" font-size="12" fill="#c3c2b7">Japan</text>
+<g class="bar" data-t="Japan: 2,042 births per day"><rect x="132" y="472" width="16.7" height="13" rx="4" fill="#3987e5"/><rect x="132" y="472" width="4" height="13" fill="#3987e5"/></g>
+<text x="155.7" y="483" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,042</text>
+<g class="bar" data-t="Japan: 4,280 deaths per day"><rect x="132" y="488" width="35.0" height="13" rx="4" fill="#d55181"/><rect x="132" y="488" width="4" height="13" fill="#d55181"/></g>
+<text x="174.0" y="499" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">4,280</text>
+<text x="122" y="527" text-anchor="end" font-size="12" fill="#c3c2b7">Egypt</text>
+<g class="bar" data-t="Egypt: 6,733 births per day"><rect x="132" y="512" width="55.0" height="13" rx="4" fill="#3987e5"/><rect x="132" y="512" width="4" height="13" fill="#3987e5"/></g>
+<text x="194.0" y="523" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">6,733</text>
+<g class="bar" data-t="Egypt: 1,841 deaths per day"><rect x="132" y="528" width="15.0" height="13" rx="4" fill="#d55181"/><rect x="132" y="528" width="4" height="13" fill="#d55181"/></g>
+<text x="154.0" y="539" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,841</text>
+<text x="122" y="567" text-anchor="end" font-size="12" fill="#c3c2b7">Philippines</text>
+<g class="bar" data-t="Philippines: 5,075 births per day"><rect x="132" y="552" width="41.4" height="13" rx="4" fill="#3987e5"/><rect x="132" y="552" width="4" height="13" fill="#3987e5"/></g>
+<text x="180.4" y="563" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">5,075</text>
+<g class="bar" data-t="Philippines: 2,124 deaths per day"><rect x="132" y="568" width="17.3" height="13" rx="4" fill="#d55181"/><rect x="132" y="568" width="4" height="13" fill="#d55181"/></g>
+<text x="156.3" y="579" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,124</text>
+<text x="122" y="607" text-anchor="end" font-size="12" fill="#c3c2b7">DR Congo</text>
+<g class="bar" data-t="DR Congo: 12,690 births per day"><rect x="132" y="592" width="103.6" height="13" rx="4" fill="#3987e5"/><rect x="132" y="592" width="4" height="13" fill="#3987e5"/></g>
+<text x="242.6" y="603" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">12,690</text>
+<g class="bar" data-t="DR Congo: 2,625 deaths per day"><rect x="132" y="608" width="21.4" height="13" rx="4" fill="#d55181"/><rect x="132" y="608" width="4" height="13" fill="#d55181"/></g>
+<text x="160.4" y="619" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,625</text>
+<text x="122" y="647" text-anchor="end" font-size="12" fill="#c3c2b7">Vietnam</text>
+<g class="bar" data-t="Vietnam: 3,580 births per day"><rect x="132" y="632" width="29.2" height="13" rx="4" fill="#3987e5"/><rect x="132" y="632" width="4" height="13" fill="#3987e5"/></g>
+<text x="168.2" y="643" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">3,580</text>
+<g class="bar" data-t="Vietnam: 1,904 deaths per day"><rect x="132" y="648" width="15.5" height="13" rx="4" fill="#d55181"/><rect x="132" y="648" width="4" height="13" fill="#d55181"/></g>
+<text x="154.5" y="659" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,904</text>
+<text x="122" y="687" text-anchor="end" font-size="12" fill="#c3c2b7">Iran</text>
+<g class="bar" data-t="Iran: 3,016 births per day"><rect x="132" y="672" width="24.6" height="13" rx="4" fill="#3987e5"/><rect x="132" y="672" width="4" height="13" fill="#3987e5"/></g>
+<text x="163.6" y="683" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">3,016</text>
+<g class="bar" data-t="Iran: 1,262 deaths per day"><rect x="132" y="688" width="10.3" height="13" rx="4" fill="#d55181"/><rect x="132" y="688" width="4" height="13" fill="#d55181"/></g>
+<text x="149.3" y="699" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,262</text>
+<text x="122" y="727" text-anchor="end" font-size="12" fill="#c3c2b7">Turkey</text>
+<g class="bar" data-t="Turkey: 2,863 births per day"><rect x="132" y="712" width="23.4" height="13" rx="4" fill="#3987e5"/><rect x="132" y="712" width="4" height="13" fill="#3987e5"/></g>
+<text x="162.4" y="723" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,863</text>
+<g class="bar" data-t="Turkey: 1,548 deaths per day"><rect x="132" y="728" width="12.6" height="13" rx="4" fill="#d55181"/><rect x="132" y="728" width="4" height="13" fill="#d55181"/></g>
+<text x="151.6" y="739" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,548</text>
+<text x="122" y="767" text-anchor="end" font-size="12" fill="#c3c2b7">Germany</text>
+<g class="bar" data-t="Germany: 1,889 births per day"><rect x="132" y="752" width="15.4" height="13" rx="4" fill="#3987e5"/><rect x="132" y="752" width="4" height="13" fill="#3987e5"/></g>
+<text x="154.4" y="763" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,889</text>
+<g class="bar" data-t="Germany: 2,854 deaths per day"><rect x="132" y="768" width="23.3" height="13" rx="4" fill="#d55181"/><rect x="132" y="768" width="4" height="13" fill="#d55181"/></g>
+<text x="162.3" y="779" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,854</text>
+<text x="122" y="807" text-anchor="end" font-size="12" fill="#c3c2b7">Tanzania</text>
+<g class="bar" data-t="Tanzania: 6,734 births per day"><rect x="132" y="792" width="55.0" height="13" rx="4" fill="#3987e5"/><rect x="132" y="792" width="4" height="13" fill="#3987e5"/></g>
+<text x="194.0" y="803" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">6,734</text>
+<g class="bar" data-t="Tanzania: 1,111 deaths per day"><rect x="132" y="808" width="9.1" height="13" rx="4" fill="#d55181"/><rect x="132" y="808" width="4" height="13" fill="#d55181"/></g>
+<text x="148.1" y="819" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,111</text>
+<line x1="132" y1="24" x2="132" y2="834" stroke="#383835"/>
 </svg>
   <div id="tip"></div>
 </div>
@@ -292,15 +455,15 @@ Together these ten hold 56.6 percent of everyone alive.</p>
 <p class="note">Population figures are United Nations projections for 2026 under the
 medium variant, the middle of the range the UN publishes. Daily figures are the
 projected births and deaths for the whole year divided by 365.25, so they are an
-average day rather than any particular one. Only China and Russia are shrinking on
-their own births and deaths; both can still grow through migration, which these
-columns do not count. Flags are served by <a href="https://flagcdn.com"
-style="color:var(--accent)">FlagCDN</a>.</p>
+average day rather than any particular one. China, Russia, Japan and Germany are the
+four here whose deaths outnumber their births; all four can still grow through
+migration, which these columns do not count. Flags are served by
+<a href="https://flagcdn.com" style="color:var(--accent)">FlagCDN</a>.</p>
 
 <h2>References</h2>
 <div class="refs">
 <p>Our World in Data. (2024). <em>Population and demography</em> [Data set]. Based on
-United Nations World Population Prospects (2024). Retrieved August 13, 2026, from
+United Nations World Population Prospects (2024). Retrieved August 14, 2026, from
 <a href="https://ourworldindata.org/population-growth">https://ourworldindata.org/population-growth</a></p>
 <p>United Nations, Department of Economic and Social Affairs, Population Division.
 (2024). <em>World population prospects 2024: Summary of results</em>
