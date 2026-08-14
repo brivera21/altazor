@@ -36,8 +36,10 @@ th.l { text-align:left; }
 td { padding:9px 10px; border-bottom:1px solid var(--line); font-size:14px; }
 td.num { text-align:right; font-variant-numeric:tabular-nums; }
 td.rank { color:var(--ink-3); width:26px; font-variant-numeric:tabular-nums; }
-td.ct { display:flex; align-items:center; gap:10px; white-space:nowrap; }
-img.flag { border-radius:2px; box-shadow:0 0 0 1px rgba(255,255,255,.14); display:block; }
+td.ct { white-space:nowrap; }
+.cw { display:flex; align-items:center; gap:10px; }
+img.flag { width:30px; height:20px; object-fit:cover; border-radius:2px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.14); display:block; flex:none; }
 td.share { width:190px; white-space:nowrap; }
 .track { display:inline-block; width:110px; height:9px; background:#242424; border-radius:5px;
   vertical-align:middle; overflow:hidden; }
@@ -109,9 +111,8 @@ Together these ten hold 56.6 percent of everyone alive.</p>
 <tbody>
 <tr>
   <td class="rank">1</td>
-  <td class="ct"><img class="flag" src="https://flagcdn.com/w40/in.png"
-      srcset="https://flagcdn.com/w80/in.png 2x"
-      width="30" height="20" alt="" loading="lazy"><span>India</span></td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/in.png"
+      width="30" height="20" alt="Flag of India"><span>India</span></span></td>
   <td class="num">1,476,625,571</td>
   <td class="share"><span class="track"><span class="fill" style="width:100.0%"></span></span><span class="pct">17.8%</span></td>
   <td class="num">62,939</td>
@@ -120,9 +121,8 @@ Together these ten hold 56.6 percent of everyone alive.</p>
 </tr>
 <tr>
   <td class="rank">2</td>
-  <td class="ct"><img class="flag" src="https://flagcdn.com/w40/cn.png"
-      srcset="https://flagcdn.com/w80/cn.png 2x"
-      width="30" height="20" alt="" loading="lazy"><span>China</span></td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/cn.png"
+      width="30" height="20" alt="Flag of China"><span>China</span></span></td>
   <td class="num">1,412,914,090</td>
   <td class="share"><span class="track"><span class="fill" style="width:95.7%"></span></span><span class="pct">17.0%</span></td>
   <td class="num">23,615</td>
@@ -131,9 +131,8 @@ Together these ten hold 56.6 percent of everyone alive.</p>
 </tr>
 <tr>
   <td class="rank">3</td>
-  <td class="ct"><img class="flag" src="https://flagcdn.com/w40/us.png"
-      srcset="https://flagcdn.com/w80/us.png 2x"
-      width="30" height="20" alt="" loading="lazy"><span>United States</span></td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us.png"
+      width="30" height="20" alt="Flag of United States"><span>United States</span></span></td>
   <td class="num">349,035,484</td>
   <td class="share"><span class="track"><span class="fill" style="width:23.6%"></span></span><span class="pct">4.2%</span></td>
   <td class="num">10,057</td>
@@ -142,9 +141,8 @@ Together these ten hold 56.6 percent of everyone alive.</p>
 </tr>
 <tr>
   <td class="rank">4</td>
-  <td class="ct"><img class="flag" src="https://flagcdn.com/w40/id.png"
-      srcset="https://flagcdn.com/w80/id.png 2x"
-      width="30" height="20" alt="" loading="lazy"><span>Indonesia</span></td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/id.png"
+      width="30" height="20" alt="Flag of Indonesia"><span>Indonesia</span></span></td>
   <td class="num">287,886,782</td>
   <td class="share"><span class="track"><span class="fill" style="width:19.5%"></span></span><span class="pct">3.5%</span></td>
   <td class="num">12,101</td>
@@ -153,9 +151,8 @@ Together these ten hold 56.6 percent of everyone alive.</p>
 </tr>
 <tr>
   <td class="rank">5</td>
-  <td class="ct"><img class="flag" src="https://flagcdn.com/w40/pk.png"
-      srcset="https://flagcdn.com/w80/pk.png 2x"
-      width="30" height="20" alt="" loading="lazy"><span>Pakistan</span></td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/pk.png"
+      width="30" height="20" alt="Flag of Pakistan"><span>Pakistan</span></span></td>
   <td class="num">259,299,792</td>
   <td class="share"><span class="track"><span class="fill" style="width:17.6%"></span></span><span class="pct">3.1%</span></td>
   <td class="num">18,989</td>
@@ -164,9 +161,8 @@ Together these ten hold 56.6 percent of everyone alive.</p>
 </tr>
 <tr>
   <td class="rank">6</td>
-  <td class="ct"><img class="flag" src="https://flagcdn.com/w40/ng.png"
-      srcset="https://flagcdn.com/w80/ng.png 2x"
-      width="30" height="20" alt="" loading="lazy"><span>Nigeria</span></td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/ng.png"
+      width="30" height="20" alt="Flag of Nigeria"><span>Nigeria</span></span></td>
   <td class="num">242,431,835</td>
   <td class="share"><span class="track"><span class="fill" style="width:16.4%"></span></span><span class="pct">2.9%</span></td>
   <td class="num">21,114</td>
@@ -175,9 +171,8 @@ Together these ten hold 56.6 percent of everyone alive.</p>
 </tr>
 <tr>
   <td class="rank">7</td>
-  <td class="ct"><img class="flag" src="https://flagcdn.com/w40/br.png"
-      srcset="https://flagcdn.com/w80/br.png 2x"
-      width="30" height="20" alt="" loading="lazy"><span>Brazil</span></td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/br.png"
+      width="30" height="20" alt="Flag of Brazil"><span>Brazil</span></span></td>
   <td class="num">213,562,666</td>
   <td class="share"><span class="track"><span class="fill" style="width:14.5%"></span></span><span class="pct">2.6%</span></td>
   <td class="num">6,825</td>
@@ -186,9 +181,8 @@ Together these ten hold 56.6 percent of everyone alive.</p>
 </tr>
 <tr>
   <td class="rank">8</td>
-  <td class="ct"><img class="flag" src="https://flagcdn.com/w40/bd.png"
-      srcset="https://flagcdn.com/w80/bd.png 2x"
-      width="30" height="20" alt="" loading="lazy"><span>Bangladesh</span></td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/bd.png"
+      width="30" height="20" alt="Flag of Bangladesh"><span>Bangladesh</span></span></td>
   <td class="num">177,818,039</td>
   <td class="share"><span class="track"><span class="fill" style="width:12.0%"></span></span><span class="pct">2.1%</span></td>
   <td class="num">9,330</td>
@@ -197,9 +191,8 @@ Together these ten hold 56.6 percent of everyone alive.</p>
 </tr>
 <tr>
   <td class="rank">9</td>
-  <td class="ct"><img class="flag" src="https://flagcdn.com/w40/ru.png"
-      srcset="https://flagcdn.com/w80/ru.png 2x"
-      width="30" height="20" alt="" loading="lazy"><span>Russia</span></td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/ru.png"
+      width="30" height="20" alt="Flag of Russia"><span>Russia</span></span></td>
   <td class="num">143,394,457</td>
   <td class="share"><span class="track"><span class="fill" style="width:9.7%"></span></span><span class="pct">1.7%</span></td>
   <td class="num">3,322</td>
@@ -208,9 +201,8 @@ Together these ten hold 56.6 percent of everyone alive.</p>
 </tr>
 <tr>
   <td class="rank">10</td>
-  <td class="ct"><img class="flag" src="https://flagcdn.com/w40/et.png"
-      srcset="https://flagcdn.com/w80/et.png 2x"
-      width="30" height="20" alt="" loading="lazy"><span>Ethiopia</span></td>
+  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/et.png"
+      width="30" height="20" alt="Flag of Ethiopia"><span>Ethiopia</span></span></td>
   <td class="num">138,902,185</td>
   <td class="share"><span class="track"><span class="fill" style="width:9.4%"></span></span><span class="pct">1.7%</span></td>
   <td class="num">11,535</td>
