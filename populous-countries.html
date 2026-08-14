@@ -41,6 +41,9 @@ th.l { text-align:left; }
 td { padding:8px 10px; border-bottom:1px solid var(--line); font-size:14px; }
 td.num { text-align:right; font-variant-numeric:tabular-nums; color:var(--ink-2); }
 td.rank { color:var(--ink-3); width:26px; font-variant-numeric:tabular-nums; }
+td.pop { white-space:nowrap; }
+.gap { color:#0ca30c; font-size:12.5px; font-variant-numeric:tabular-nums;
+  margin-left:7px; }
 td.ct { white-space:nowrap; }
 .cw { display:flex; align-items:center; gap:10px; }
 img.flag { width:30px; height:20px; object-fit:cover; border-radius:2px;
@@ -76,9 +79,12 @@ tr.total td { border-bottom:none; color:var(--muted); font-size:13px; padding-to
 <h1>World's Most Populous Countries</h1>
 <p class="lede">The twenty largest countries by population, with the share of the
 world each one holds and how many people are born and die in each per day. The
-paired bars run on one scale across every country, so their lengths compare
-between rows as well as within one. The first ten alone hold 56.6 percent
-of everyone alive; all twenty hold 69.3 percent.</p>
+green figure after each population is that country's lead: how many more people
+it has than the country one rank below it, so India's is its margin over China
+and the last row's is Tanzania's over Thailand, which sits just off this
+list. The paired bars run on one scale across every country, so their lengths
+compare between rows as well as within one. The first ten alone hold
+56.6 percent of everyone alive; all twenty hold 69.3 percent.</p>
 <p class="stamp">Snapshot taken August 14, 2026, using United Nations projections for 2026.</p>
 
 <div class="tiles">
@@ -115,7 +121,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">1</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/in.png"
       width="30" height="20" alt="Flag of India"><span>India</span></span></td>
-  <td class="num">1,476,625,571</td>
+  <td class="num pop">1,476,625,571 <span class="gap">(+63,711,481)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:100.0%"></span></span><span class="pct">17.8%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="India: 62,939 births and 27,073 deaths per day"><g><title>62,939 births per day</title><rect x="0" y="2" width="150.0" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="156.0" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">62,939</text><g><title>27,073 deaths per day</title><rect x="0" y="15" width="64.5" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="70.5" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">27,073</text></svg></td>
   <td class="num">+35,866</td>
@@ -124,7 +130,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">2</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/cn.png"
       width="30" height="20" alt="Flag of China"><span>China</span></span></td>
-  <td class="num">1,412,914,090</td>
+  <td class="num pop">1,412,914,090 <span class="gap">(+1,063,878,606)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:95.7%"></span></span><span class="pct">17.0%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="China: 23,615 births and 31,436 deaths per day"><g><title>23,615 births per day</title><rect x="0" y="2" width="56.3" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="62.3" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">23,615</text><g><title>31,436 deaths per day</title><rect x="0" y="15" width="74.9" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="80.9" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">31,436</text></svg></td>
   <td class="num">−7,821</td>
@@ -133,7 +139,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">3</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us.png"
       width="30" height="20" alt="Flag of United States"><span>United States</span></span></td>
-  <td class="num">349,035,484</td>
+  <td class="num pop">349,035,484 <span class="gap">(+61,148,702)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:23.6%"></span></span><span class="pct">4.2%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="United States: 10,057 births and 8,586 deaths per day"><g><title>10,057 births per day</title><rect x="0" y="2" width="24.0" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="30.0" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">10,057</text><g><title>8,586 deaths per day</title><rect x="0" y="15" width="20.5" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="26.5" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">8,586</text></svg></td>
   <td class="num">+1,471</td>
@@ -142,7 +148,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">4</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/id.png"
       width="30" height="20" alt="Flag of Indonesia"><span>Indonesia</span></span></td>
-  <td class="num">287,886,782</td>
+  <td class="num pop">287,886,782 <span class="gap">(+28,586,990)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:19.5%"></span></span><span class="pct">3.5%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Indonesia: 12,101 births and 6,153 deaths per day"><g><title>12,101 births per day</title><rect x="0" y="2" width="28.8" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="34.8" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">12,101</text><g><title>6,153 deaths per day</title><rect x="0" y="15" width="14.7" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="20.7" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">6,153</text></svg></td>
   <td class="num">+5,948</td>
@@ -151,7 +157,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">5</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/pk.png"
       width="30" height="20" alt="Flag of Pakistan"><span>Pakistan</span></span></td>
-  <td class="num">259,299,792</td>
+  <td class="num pop">259,299,792 <span class="gap">(+16,867,957)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:17.6%"></span></span><span class="pct">3.1%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pakistan: 18,989 births and 4,556 deaths per day"><g><title>18,989 births per day</title><rect x="0" y="2" width="45.3" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="51.3" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">18,989</text><g><title>4,556 deaths per day</title><rect x="0" y="15" width="10.9" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="16.9" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">4,556</text></svg></td>
   <td class="num">+14,433</td>
@@ -160,7 +166,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">6</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/ng.png"
       width="30" height="20" alt="Flag of Nigeria"><span>Nigeria</span></span></td>
-  <td class="num">242,431,835</td>
+  <td class="num pop">242,431,835 <span class="gap">(+28,869,169)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:16.4%"></span></span><span class="pct">2.9%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nigeria: 21,114 births and 7,613 deaths per day"><g><title>21,114 births per day</title><rect x="0" y="2" width="50.3" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="56.3" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">21,114</text><g><title>7,613 deaths per day</title><rect x="0" y="15" width="18.1" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="24.1" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">7,613</text></svg></td>
   <td class="num">+13,501</td>
@@ -169,7 +175,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">7</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/br.png"
       width="30" height="20" alt="Flag of Brazil"><span>Brazil</span></span></td>
-  <td class="num">213,562,666</td>
+  <td class="num pop">213,562,666 <span class="gap">(+35,744,627)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:14.5%"></span></span><span class="pct">2.6%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Brazil: 6,825 births and 4,288 deaths per day"><g><title>6,825 births per day</title><rect x="0" y="2" width="16.3" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="22.3" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">6,825</text><g><title>4,288 deaths per day</title><rect x="0" y="15" width="10.2" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="16.2" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">4,288</text></svg></td>
   <td class="num">+2,537</td>
@@ -178,7 +184,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">8</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/bd.png"
       width="30" height="20" alt="Flag of Bangladesh"><span>Bangladesh</span></span></td>
-  <td class="num">177,818,039</td>
+  <td class="num pop">177,818,039 <span class="gap">(+34,423,582)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:12.0%"></span></span><span class="pct">2.1%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bangladesh: 9,330 births and 2,501 deaths per day"><g><title>9,330 births per day</title><rect x="0" y="2" width="22.2" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="28.2" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">9,330</text><g><title>2,501 deaths per day</title><rect x="0" y="15" width="6.0" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="12.0" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,501</text></svg></td>
   <td class="num">+6,829</td>
@@ -187,7 +193,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">9</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/ru.png"
       width="30" height="20" alt="Flag of Russia"><span>Russia</span></span></td>
-  <td class="num">143,394,457</td>
+  <td class="num pop">143,394,457 <span class="gap">(+4,492,272)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:9.7%"></span></span><span class="pct">1.7%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Russia: 3,322 births and 5,115 deaths per day"><g><title>3,322 births per day</title><rect x="0" y="2" width="7.9" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="13.9" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">3,322</text><g><title>5,115 deaths per day</title><rect x="0" y="15" width="12.2" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="18.2" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">5,115</text></svg></td>
   <td class="num">−1,793</td>
@@ -196,7 +202,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">10</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/et.png"
       width="30" height="20" alt="Flag of Ethiopia"><span>Ethiopia</span></span></td>
-  <td class="num">138,902,185</td>
+  <td class="num pop">138,902,185 <span class="gap">(+5,904,527)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:9.4%"></span></span><span class="pct">1.7%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ethiopia: 11,535 births and 2,177 deaths per day"><g><title>11,535 births per day</title><rect x="0" y="2" width="27.5" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="33.5" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">11,535</text><g><title>2,177 deaths per day</title><rect x="0" y="15" width="5.2" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="11.2" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,177</text></svg></td>
   <td class="num">+9,358</td>
@@ -219,7 +225,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">11</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/mx.png"
       width="30" height="20" alt="Flag of Mexico"><span>Mexico</span></span></td>
-  <td class="num">132,997,658</td>
+  <td class="num pop">132,997,658 <span class="gap">(+10,569,928)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:9.0%"></span></span><span class="pct">1.6%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mexico: 5,446 births and 2,312 deaths per day"><g><title>5,446 births per day</title><rect x="0" y="2" width="13.0" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="19.0" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">5,446</text><g><title>2,312 deaths per day</title><rect x="0" y="15" width="5.5" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="11.5" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,312</text></svg></td>
   <td class="num">+3,134</td>
@@ -228,7 +234,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">12</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/jp.png"
       width="30" height="20" alt="Flag of Japan"><span>Japan</span></span></td>
-  <td class="num">122,427,730</td>
+  <td class="num pop">122,427,730 <span class="gap">(+2,326,552)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:8.3%"></span></span><span class="pct">1.5%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Japan: 2,042 births and 4,280 deaths per day"><g><title>2,042 births per day</title><rect x="0" y="2" width="4.9" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="10.9" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,042</text><g><title>4,280 deaths per day</title><rect x="0" y="15" width="10.2" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="16.2" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">4,280</text></svg></td>
   <td class="num">−2,238</td>
@@ -237,7 +243,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">13</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/eg.png"
       width="30" height="20" alt="Flag of Egypt"><span>Egypt</span></span></td>
-  <td class="num">120,101,178</td>
+  <td class="num pop">120,101,178 <span class="gap">(+2,376,705)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:8.1%"></span></span><span class="pct">1.4%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Egypt: 6,733 births and 1,841 deaths per day"><g><title>6,733 births per day</title><rect x="0" y="2" width="16.0" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="22.0" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">6,733</text><g><title>1,841 deaths per day</title><rect x="0" y="15" width="4.4" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="10.4" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,841</text></svg></td>
   <td class="num">+4,892</td>
@@ -246,7 +252,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">14</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/ph.png"
       width="30" height="20" alt="Flag of Philippines"><span>Philippines</span></span></td>
-  <td class="num">117,724,473</td>
+  <td class="num pop">117,724,473 <span class="gap">(+1,272,311)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:8.0%"></span></span><span class="pct">1.4%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Philippines: 5,075 births and 2,124 deaths per day"><g><title>5,075 births per day</title><rect x="0" y="2" width="12.1" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="18.1" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">5,075</text><g><title>2,124 deaths per day</title><rect x="0" y="15" width="5.1" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="11.1" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,124</text></svg></td>
   <td class="num">+2,951</td>
@@ -255,7 +261,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">15</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/cd.png"
       width="30" height="20" alt="Flag of DR Congo"><span>DR Congo</span></span></td>
-  <td class="num">116,452,162</td>
+  <td class="num pop">116,452,162 <span class="gap">(+14,274,728)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:7.9%"></span></span><span class="pct">1.4%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="DR Congo: 12,690 births and 2,625 deaths per day"><g><title>12,690 births per day</title><rect x="0" y="2" width="30.2" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="36.2" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">12,690</text><g><title>2,625 deaths per day</title><rect x="0" y="15" width="6.3" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="12.3" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,625</text></svg></td>
   <td class="num">+10,065</td>
@@ -264,7 +270,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">16</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/vn.png"
       width="30" height="20" alt="Flag of Vietnam"><span>Vietnam</span></span></td>
-  <td class="num">102,177,434</td>
+  <td class="num pop">102,177,434 <span class="gap">(+9,008,942)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:6.9%"></span></span><span class="pct">1.2%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vietnam: 3,580 births and 1,904 deaths per day"><g><title>3,580 births per day</title><rect x="0" y="2" width="8.5" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="14.5" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">3,580</text><g><title>1,904 deaths per day</title><rect x="0" y="15" width="4.5" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="10.5" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,904</text></svg></td>
   <td class="num">+1,676</td>
@@ -273,7 +279,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">17</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/ir.png"
       width="30" height="20" alt="Flag of Iran"><span>Iran</span></span></td>
-  <td class="num">93,168,492</td>
+  <td class="num pop">93,168,492 <span class="gap">(+5,242,409)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:6.3%"></span></span><span class="pct">1.1%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Iran: 3,016 births and 1,262 deaths per day"><g><title>3,016 births per day</title><rect x="0" y="2" width="7.2" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="13.2" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">3,016</text><g><title>1,262 deaths per day</title><rect x="0" y="15" width="3.0" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="9.0" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,262</text></svg></td>
   <td class="num">+1,754</td>
@@ -282,7 +288,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">18</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/tr.png"
       width="30" height="20" alt="Flag of Turkey"><span>Turkey</span></span></td>
-  <td class="num">87,926,083</td>
+  <td class="num pop">87,926,083 <span class="gap">(+4,281,826)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:6.0%"></span></span><span class="pct">1.1%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Turkey: 2,863 births and 1,548 deaths per day"><g><title>2,863 births per day</title><rect x="0" y="2" width="6.8" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="12.8" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,863</text><g><title>1,548 deaths per day</title><rect x="0" y="15" width="3.7" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="9.7" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,548</text></svg></td>
   <td class="num">+1,315</td>
@@ -291,7 +297,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">19</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/de.png"
       width="30" height="20" alt="Flag of Germany"><span>Germany</span></span></td>
-  <td class="num">83,644,257</td>
+  <td class="num pop">83,644,257 <span class="gap">(+11,080,479)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:5.7%"></span></span><span class="pct">1.0%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Germany: 1,889 births and 2,854 deaths per day"><g><title>1,889 births per day</title><rect x="0" y="2" width="4.5" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="10.5" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,889</text><g><title>2,854 deaths per day</title><rect x="0" y="15" width="6.8" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="12.8" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,854</text></svg></td>
   <td class="num">−965</td>
@@ -300,7 +306,7 @@ of everyone alive; all twenty hold 69.3 percent.</p>
   <td class="rank">20</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/tz.png"
       width="30" height="20" alt="Flag of Tanzania"><span>Tanzania</span></span></td>
-  <td class="num">72,563,778</td>
+  <td class="num pop">72,563,778 <span class="gap">(+1,004,159)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:4.9%"></span></span><span class="pct">0.9%</span></td>
   <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tanzania: 6,734 births and 1,111 deaths per day"><g><title>6,734 births per day</title><rect x="0" y="2" width="16.0" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="22.0" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">6,734</text><g><title>1,111 deaths per day</title><rect x="0" y="15" width="2.6" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="8.6" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,111</text></svg></td>
   <td class="num">+5,623</td>
