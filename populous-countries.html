@@ -12,7 +12,7 @@
 * { box-sizing:border-box; }
 body { margin:0; background:var(--bg); color:var(--text);
   font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
-.wrap { max-width:1000px; margin:0 auto; padding:32px 20px 70px; }
+.wrap { max-width:1040px; margin:0 auto; padding:32px 20px 70px; }
 header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
   display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
 .brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
@@ -20,7 +20,7 @@ header.site { border-top:4px solid var(--accent); padding-top:22px; margin-botto
 nav.site a { color:var(--muted); text-decoration:none; font-size:14px; }
 nav.site a:hover { color:var(--accent); }
 h1 { margin:0 0 6px; font-size:26px; }
-h2 { font-size:16px; margin:34px 0 12px; letter-spacing:.02em; }
+h2 { font-size:16px; margin:34px 0 10px; letter-spacing:.02em; }
 .lede { color:var(--muted); font-size:14.5px; margin:0 0 6px; max-width:720px; }
 .stamp { color:var(--ink-3); font-size:12.5px; margin:0 0 22px; }
 
@@ -30,44 +30,39 @@ h2 { font-size:16px; margin:34px 0 12px; letter-spacing:.02em; }
 .tile .val { font-size:26px; font-weight:600; margin-top:2px; line-height:1.2; }
 .tile .sub { color:var(--ink-3); font-size:12px; margin-top:2px; }
 
-table { width:100%; border-collapse:collapse; margin-top:6px; }
+.legend { display:flex; gap:18px; font-size:12.5px; color:var(--ink-2);
+  margin:26px 0 0; }
+.legend .sw { width:11px; height:11px; border-radius:3px; display:inline-block; margin-right:6px; }
+
+table { width:100%; border-collapse:collapse; margin-top:4px; }
 th { text-align:right; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
   color:var(--ink-3); font-weight:600; padding:0 10px 8px; border-bottom:1px solid var(--line); }
 th.l { text-align:left; }
-td { padding:9px 10px; border-bottom:1px solid var(--line); font-size:14px; }
-td.num { text-align:right; font-variant-numeric:tabular-nums; }
+td { padding:8px 10px; border-bottom:1px solid var(--line); font-size:14px; }
+td.num { text-align:right; font-variant-numeric:tabular-nums; color:var(--ink-2); }
 td.rank { color:var(--ink-3); width:26px; font-variant-numeric:tabular-nums; }
 td.ct { white-space:nowrap; }
 .cw { display:flex; align-items:center; gap:10px; }
 img.flag { width:30px; height:20px; object-fit:cover; border-radius:2px;
   box-shadow:0 0 0 1px rgba(255,255,255,.14); display:block; flex:none; }
-td.share { width:190px; white-space:nowrap; }
-.track { display:inline-block; width:110px; height:9px; background:#242424; border-radius:5px;
+td.share { width:180px; white-space:nowrap; }
+.track { display:inline-block; width:104px; height:9px; background:#242424; border-radius:5px;
   vertical-align:middle; overflow:hidden; }
 .fill { display:block; height:100%; background:var(--share); border-radius:0 4px 4px 0; }
-.pct { display:inline-block; width:46px; text-align:right; font-variant-numeric:tabular-nums;
+.pct { display:inline-block; width:44px; text-align:right; font-variant-numeric:tabular-nums;
   color:var(--ink-2); font-size:13px; margin-left:8px; }
-td.up { color:#0ca30c; }
-td.down { color:var(--deaths); }
+td.flow { width:266px; padding-top:6px; padding-bottom:6px; }
+svg.flow { display:block; width:100%; height:auto; }
+svg.flow rect { transition:opacity .12s; }
+svg.flow g:hover rect { opacity:.72; }
 tr.total td { border-bottom:none; color:var(--muted); font-size:13px; padding-top:12px; }
-
-.figure { background:var(--panel); border:1px solid var(--line); border-radius:12px;
-  padding:16px 18px 10px; margin-top:6px; position:relative; }
-.figure svg { width:100%; height:auto; display:block; }
-.legend { display:flex; gap:18px; font-size:12.5px; color:var(--ink-2); margin-bottom:6px; }
-.legend .sw { width:11px; height:11px; border-radius:3px; display:inline-block; margin-right:6px; }
-#tip { position:absolute; pointer-events:none; background:#0d0d0d; border:1px solid var(--line);
-  border-radius:8px; padding:6px 9px; font-size:12.5px; color:var(--text); opacity:0;
-  transition:opacity .12s; white-space:nowrap; }
-g.bar rect { transition:opacity .12s; }
-g.bar:hover rect { opacity:.75; }
 
 .note { color:var(--muted); font-size:12.5px; max-width:760px; }
 .refs { font-size:13px; color:var(--ink-2); max-width:760px; }
 .refs p { padding-left:2.2em; text-indent:-2.2em; margin:0 0 .8em; }
 .refs a { color:var(--accent); }
-@media (max-width:700px) {
-  td.share { width:auto; } .track { width:60px; }
+@media (max-width:820px) {
+  td.share, td.flow { width:auto; } .track { width:56px; }
 }
 </style>
 </head>
@@ -81,8 +76,9 @@ g.bar:hover rect { opacity:.75; }
 <h1>World's Most Populous Countries</h1>
 <p class="lede">The twenty largest countries by population, with the share of the
 world each one holds and how many people are born and die in each per day. The
-first ten alone hold 56.6 percent of everyone alive; all twenty hold
-69.3 percent.</p>
+paired bars run on one scale across every country, so their lengths compare
+between rows as well as within one. The first ten alone hold 56.6 percent
+of everyone alive; all twenty hold 69.3 percent.</p>
 <p class="stamp">Snapshot taken August 14, 2026, using United Nations projections for 2026.</p>
 
 <div class="tiles">
@@ -100,14 +96,18 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
     <div class="sub">births minus deaths</div></div>
 </div>
 
+<div class="legend">
+  <span><span class="sw" style="background:var(--births)"></span>Births per day</span>
+  <span><span class="sw" style="background:var(--deaths)"></span>Deaths per day</span>
+</div>
+
 <h2>The first ten</h2>
 <table>
 <thead><tr>
   <th class="l" colspan="2">Country</th>
   <th>Population</th>
   <th class="l">Share of world</th>
-  <th>Births / day</th>
-  <th>Deaths / day</th>
+  <th class="l">Births and deaths per day</th>
   <th>Net / day</th>
 </tr></thead>
 <tbody>
@@ -117,9 +117,8 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of India"><span>India</span></span></td>
   <td class="num">1,476,625,571</td>
   <td class="share"><span class="track"><span class="fill" style="width:100.0%"></span></span><span class="pct">17.8%</span></td>
-  <td class="num">62,939</td>
-  <td class="num">27,073</td>
-  <td class="num up">+35,866</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="India: 62,939 births and 27,073 deaths per day"><g><title>62,939 births per day</title><rect x="0" y="2" width="150.0" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="156.0" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">62,939</text><g><title>27,073 deaths per day</title><rect x="0" y="15" width="64.5" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="70.5" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">27,073</text></svg></td>
+  <td class="num">+35,866</td>
 </tr>
 <tr>
   <td class="rank">2</td>
@@ -127,9 +126,8 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of China"><span>China</span></span></td>
   <td class="num">1,412,914,090</td>
   <td class="share"><span class="track"><span class="fill" style="width:95.7%"></span></span><span class="pct">17.0%</span></td>
-  <td class="num">23,615</td>
-  <td class="num">31,436</td>
-  <td class="num down">−7,821</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="China: 23,615 births and 31,436 deaths per day"><g><title>23,615 births per day</title><rect x="0" y="2" width="56.3" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="62.3" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">23,615</text><g><title>31,436 deaths per day</title><rect x="0" y="15" width="74.9" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="80.9" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">31,436</text></svg></td>
+  <td class="num">−7,821</td>
 </tr>
 <tr>
   <td class="rank">3</td>
@@ -137,9 +135,8 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of United States"><span>United States</span></span></td>
   <td class="num">349,035,484</td>
   <td class="share"><span class="track"><span class="fill" style="width:23.6%"></span></span><span class="pct">4.2%</span></td>
-  <td class="num">10,057</td>
-  <td class="num">8,586</td>
-  <td class="num up">+1,471</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="United States: 10,057 births and 8,586 deaths per day"><g><title>10,057 births per day</title><rect x="0" y="2" width="24.0" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="30.0" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">10,057</text><g><title>8,586 deaths per day</title><rect x="0" y="15" width="20.5" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="26.5" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">8,586</text></svg></td>
+  <td class="num">+1,471</td>
 </tr>
 <tr>
   <td class="rank">4</td>
@@ -147,9 +144,8 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of Indonesia"><span>Indonesia</span></span></td>
   <td class="num">287,886,782</td>
   <td class="share"><span class="track"><span class="fill" style="width:19.5%"></span></span><span class="pct">3.5%</span></td>
-  <td class="num">12,101</td>
-  <td class="num">6,153</td>
-  <td class="num up">+5,948</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Indonesia: 12,101 births and 6,153 deaths per day"><g><title>12,101 births per day</title><rect x="0" y="2" width="28.8" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="34.8" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">12,101</text><g><title>6,153 deaths per day</title><rect x="0" y="15" width="14.7" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="20.7" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">6,153</text></svg></td>
+  <td class="num">+5,948</td>
 </tr>
 <tr>
   <td class="rank">5</td>
@@ -157,9 +153,8 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of Pakistan"><span>Pakistan</span></span></td>
   <td class="num">259,299,792</td>
   <td class="share"><span class="track"><span class="fill" style="width:17.6%"></span></span><span class="pct">3.1%</span></td>
-  <td class="num">18,989</td>
-  <td class="num">4,556</td>
-  <td class="num up">+14,433</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pakistan: 18,989 births and 4,556 deaths per day"><g><title>18,989 births per day</title><rect x="0" y="2" width="45.3" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="51.3" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">18,989</text><g><title>4,556 deaths per day</title><rect x="0" y="15" width="10.9" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="16.9" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">4,556</text></svg></td>
+  <td class="num">+14,433</td>
 </tr>
 <tr>
   <td class="rank">6</td>
@@ -167,9 +162,8 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of Nigeria"><span>Nigeria</span></span></td>
   <td class="num">242,431,835</td>
   <td class="share"><span class="track"><span class="fill" style="width:16.4%"></span></span><span class="pct">2.9%</span></td>
-  <td class="num">21,114</td>
-  <td class="num">7,613</td>
-  <td class="num up">+13,501</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nigeria: 21,114 births and 7,613 deaths per day"><g><title>21,114 births per day</title><rect x="0" y="2" width="50.3" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="56.3" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">21,114</text><g><title>7,613 deaths per day</title><rect x="0" y="15" width="18.1" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="24.1" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">7,613</text></svg></td>
+  <td class="num">+13,501</td>
 </tr>
 <tr>
   <td class="rank">7</td>
@@ -177,9 +171,8 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of Brazil"><span>Brazil</span></span></td>
   <td class="num">213,562,666</td>
   <td class="share"><span class="track"><span class="fill" style="width:14.5%"></span></span><span class="pct">2.6%</span></td>
-  <td class="num">6,825</td>
-  <td class="num">4,288</td>
-  <td class="num up">+2,537</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Brazil: 6,825 births and 4,288 deaths per day"><g><title>6,825 births per day</title><rect x="0" y="2" width="16.3" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="22.3" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">6,825</text><g><title>4,288 deaths per day</title><rect x="0" y="15" width="10.2" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="16.2" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">4,288</text></svg></td>
+  <td class="num">+2,537</td>
 </tr>
 <tr>
   <td class="rank">8</td>
@@ -187,9 +180,8 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of Bangladesh"><span>Bangladesh</span></span></td>
   <td class="num">177,818,039</td>
   <td class="share"><span class="track"><span class="fill" style="width:12.0%"></span></span><span class="pct">2.1%</span></td>
-  <td class="num">9,330</td>
-  <td class="num">2,501</td>
-  <td class="num up">+6,829</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bangladesh: 9,330 births and 2,501 deaths per day"><g><title>9,330 births per day</title><rect x="0" y="2" width="22.2" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="28.2" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">9,330</text><g><title>2,501 deaths per day</title><rect x="0" y="15" width="6.0" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="12.0" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,501</text></svg></td>
+  <td class="num">+6,829</td>
 </tr>
 <tr>
   <td class="rank">9</td>
@@ -197,9 +189,8 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of Russia"><span>Russia</span></span></td>
   <td class="num">143,394,457</td>
   <td class="share"><span class="track"><span class="fill" style="width:9.7%"></span></span><span class="pct">1.7%</span></td>
-  <td class="num">3,322</td>
-  <td class="num">5,115</td>
-  <td class="num down">−1,793</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Russia: 3,322 births and 5,115 deaths per day"><g><title>3,322 births per day</title><rect x="0" y="2" width="7.9" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="13.9" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">3,322</text><g><title>5,115 deaths per day</title><rect x="0" y="15" width="12.2" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="18.2" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">5,115</text></svg></td>
+  <td class="num">−1,793</td>
 </tr>
 <tr>
   <td class="rank">10</td>
@@ -207,11 +198,10 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of Ethiopia"><span>Ethiopia</span></span></td>
   <td class="num">138,902,185</td>
   <td class="share"><span class="track"><span class="fill" style="width:9.4%"></span></span><span class="pct">1.7%</span></td>
-  <td class="num">11,535</td>
-  <td class="num">2,177</td>
-  <td class="num up">+9,358</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ethiopia: 11,535 births and 2,177 deaths per day"><g><title>11,535 births per day</title><rect x="0" y="2" width="27.5" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="33.5" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">11,535</text><g><title>2,177 deaths per day</title><rect x="0" y="15" width="5.2" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="11.2" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,177</text></svg></td>
+  <td class="num">+9,358</td>
 </tr>
-<tr class="total"><td></td><td>These ten together</td><td class="num">4,701,870,901</td><td>56.6% of the world</td><td class="num">179,827</td><td class="num">99,498</td><td class="num">+80,329</td></tr>
+<tr class="total"><td></td><td>These ten together</td><td class="num">4,701,870,901</td><td>56.6% of the world</td><td>179,827 births, 99,498 deaths</td><td class="num">+80,329</td></tr>
 </tbody>
 </table>
 
@@ -221,8 +211,7 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
   <th class="l" colspan="2">Country</th>
   <th>Population</th>
   <th class="l">Share of world</th>
-  <th>Births / day</th>
-  <th>Deaths / day</th>
+  <th class="l">Births and deaths per day</th>
   <th>Net / day</th>
 </tr></thead>
 <tbody>
@@ -232,9 +221,8 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of Mexico"><span>Mexico</span></span></td>
   <td class="num">132,997,658</td>
   <td class="share"><span class="track"><span class="fill" style="width:9.0%"></span></span><span class="pct">1.6%</span></td>
-  <td class="num">5,446</td>
-  <td class="num">2,312</td>
-  <td class="num up">+3,134</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mexico: 5,446 births and 2,312 deaths per day"><g><title>5,446 births per day</title><rect x="0" y="2" width="13.0" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="19.0" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">5,446</text><g><title>2,312 deaths per day</title><rect x="0" y="15" width="5.5" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="11.5" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,312</text></svg></td>
+  <td class="num">+3,134</td>
 </tr>
 <tr>
   <td class="rank">12</td>
@@ -242,9 +230,8 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of Japan"><span>Japan</span></span></td>
   <td class="num">122,427,730</td>
   <td class="share"><span class="track"><span class="fill" style="width:8.3%"></span></span><span class="pct">1.5%</span></td>
-  <td class="num">2,042</td>
-  <td class="num">4,280</td>
-  <td class="num down">−2,238</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Japan: 2,042 births and 4,280 deaths per day"><g><title>2,042 births per day</title><rect x="0" y="2" width="4.9" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="10.9" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,042</text><g><title>4,280 deaths per day</title><rect x="0" y="15" width="10.2" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="16.2" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">4,280</text></svg></td>
+  <td class="num">−2,238</td>
 </tr>
 <tr>
   <td class="rank">13</td>
@@ -252,9 +239,8 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of Egypt"><span>Egypt</span></span></td>
   <td class="num">120,101,178</td>
   <td class="share"><span class="track"><span class="fill" style="width:8.1%"></span></span><span class="pct">1.4%</span></td>
-  <td class="num">6,733</td>
-  <td class="num">1,841</td>
-  <td class="num up">+4,892</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Egypt: 6,733 births and 1,841 deaths per day"><g><title>6,733 births per day</title><rect x="0" y="2" width="16.0" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="22.0" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">6,733</text><g><title>1,841 deaths per day</title><rect x="0" y="15" width="4.4" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="10.4" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,841</text></svg></td>
+  <td class="num">+4,892</td>
 </tr>
 <tr>
   <td class="rank">14</td>
@@ -262,9 +248,8 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of Philippines"><span>Philippines</span></span></td>
   <td class="num">117,724,473</td>
   <td class="share"><span class="track"><span class="fill" style="width:8.0%"></span></span><span class="pct">1.4%</span></td>
-  <td class="num">5,075</td>
-  <td class="num">2,124</td>
-  <td class="num up">+2,951</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Philippines: 5,075 births and 2,124 deaths per day"><g><title>5,075 births per day</title><rect x="0" y="2" width="12.1" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="18.1" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">5,075</text><g><title>2,124 deaths per day</title><rect x="0" y="15" width="5.1" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="11.1" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,124</text></svg></td>
+  <td class="num">+2,951</td>
 </tr>
 <tr>
   <td class="rank">15</td>
@@ -272,9 +257,8 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of DR Congo"><span>DR Congo</span></span></td>
   <td class="num">116,452,162</td>
   <td class="share"><span class="track"><span class="fill" style="width:7.9%"></span></span><span class="pct">1.4%</span></td>
-  <td class="num">12,690</td>
-  <td class="num">2,625</td>
-  <td class="num up">+10,065</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="DR Congo: 12,690 births and 2,625 deaths per day"><g><title>12,690 births per day</title><rect x="0" y="2" width="30.2" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="36.2" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">12,690</text><g><title>2,625 deaths per day</title><rect x="0" y="15" width="6.3" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="12.3" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,625</text></svg></td>
+  <td class="num">+10,065</td>
 </tr>
 <tr>
   <td class="rank">16</td>
@@ -282,9 +266,8 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of Vietnam"><span>Vietnam</span></span></td>
   <td class="num">102,177,434</td>
   <td class="share"><span class="track"><span class="fill" style="width:6.9%"></span></span><span class="pct">1.2%</span></td>
-  <td class="num">3,580</td>
-  <td class="num">1,904</td>
-  <td class="num up">+1,676</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vietnam: 3,580 births and 1,904 deaths per day"><g><title>3,580 births per day</title><rect x="0" y="2" width="8.5" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="14.5" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">3,580</text><g><title>1,904 deaths per day</title><rect x="0" y="15" width="4.5" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="10.5" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,904</text></svg></td>
+  <td class="num">+1,676</td>
 </tr>
 <tr>
   <td class="rank">17</td>
@@ -292,9 +275,8 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of Iran"><span>Iran</span></span></td>
   <td class="num">93,168,492</td>
   <td class="share"><span class="track"><span class="fill" style="width:6.3%"></span></span><span class="pct">1.1%</span></td>
-  <td class="num">3,016</td>
-  <td class="num">1,262</td>
-  <td class="num up">+1,754</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Iran: 3,016 births and 1,262 deaths per day"><g><title>3,016 births per day</title><rect x="0" y="2" width="7.2" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="13.2" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">3,016</text><g><title>1,262 deaths per day</title><rect x="0" y="15" width="3.0" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="9.0" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,262</text></svg></td>
+  <td class="num">+1,754</td>
 </tr>
 <tr>
   <td class="rank">18</td>
@@ -302,9 +284,8 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of Turkey"><span>Turkey</span></span></td>
   <td class="num">87,926,083</td>
   <td class="share"><span class="track"><span class="fill" style="width:6.0%"></span></span><span class="pct">1.1%</span></td>
-  <td class="num">2,863</td>
-  <td class="num">1,548</td>
-  <td class="num up">+1,315</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Turkey: 2,863 births and 1,548 deaths per day"><g><title>2,863 births per day</title><rect x="0" y="2" width="6.8" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="12.8" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,863</text><g><title>1,548 deaths per day</title><rect x="0" y="15" width="3.7" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="9.7" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,548</text></svg></td>
+  <td class="num">+1,315</td>
 </tr>
 <tr>
   <td class="rank">19</td>
@@ -312,9 +293,8 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of Germany"><span>Germany</span></span></td>
   <td class="num">83,644,257</td>
   <td class="share"><span class="track"><span class="fill" style="width:5.7%"></span></span><span class="pct">1.0%</span></td>
-  <td class="num">1,889</td>
-  <td class="num">2,854</td>
-  <td class="num down">−965</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Germany: 1,889 births and 2,854 deaths per day"><g><title>1,889 births per day</title><rect x="0" y="2" width="4.5" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="10.5" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,889</text><g><title>2,854 deaths per day</title><rect x="0" y="15" width="6.8" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="12.8" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,854</text></svg></td>
+  <td class="num">−965</td>
 </tr>
 <tr>
   <td class="rank">20</td>
@@ -322,142 +302,20 @@ first ten alone hold 56.6 percent of everyone alive; all twenty hold
       width="30" height="20" alt="Flag of Tanzania"><span>Tanzania</span></span></td>
   <td class="num">72,563,778</td>
   <td class="share"><span class="track"><span class="fill" style="width:4.9%"></span></span><span class="pct">0.9%</span></td>
-  <td class="num">6,734</td>
-  <td class="num">1,111</td>
-  <td class="num up">+5,623</td>
+  <td class="flow"><svg class="flow" viewBox="0 0 250 27" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tanzania: 6,734 births and 1,111 deaths per day"><g><title>6,734 births per day</title><rect x="0" y="2" width="16.0" height="10" rx="3" fill="#3987e5"/><rect x="0" y="2" width="3" height="10" fill="#3987e5"/></g><text x="22.0" y="10.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">6,734</text><g><title>1,111 deaths per day</title><rect x="0" y="15" width="2.6" height="10" rx="3" fill="#d55181"/><rect x="0" y="15" width="3" height="10" fill="#d55181"/></g><text x="8.6" y="23.5" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,111</text></svg></td>
+  <td class="num">+5,623</td>
 </tr>
-<tr class="total"><td></td><td>Ranks eleven to twenty together</td><td class="num">1,049,183,245</td><td>12.6% of the world</td><td class="num">50,068</td><td class="num">21,861</td><td class="num">+28,207</td></tr>
+<tr class="total"><td></td><td>Ranks eleven to twenty together</td><td class="num">1,049,183,245</td><td>12.6% of the world</td><td>50,068 births, 21,861 deaths</td><td class="num">+28,207</td></tr>
 </tbody>
 </table>
-
-<h2>Births and deaths per day</h2>
-<div class="figure">
-  <div class="legend">
-    <span><span class="sw" style="background:var(--births)"></span>Births per day</span>
-    <span><span class="sw" style="background:var(--deaths)"></span>Deaths per day</span>
-  </div>
-  <svg viewBox="0 0 720 860" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Births and deaths per day in the twenty most populous countries">
-<line x1="132.0" y1="24" x2="132.0" y2="834" stroke="#2c2c2a"/>
-<text x="132.0" y="848" text-anchor="middle" font-size="11" fill="#898781">0</text>
-<line x1="295.3" y1="24" x2="295.3" y2="834" stroke="#2c2c2a"/>
-<text x="295.3" y="848" text-anchor="middle" font-size="11" fill="#898781">20,000</text>
-<line x1="458.7" y1="24" x2="458.7" y2="834" stroke="#2c2c2a"/>
-<text x="458.7" y="848" text-anchor="middle" font-size="11" fill="#898781">40,000</text>
-<line x1="622.0" y1="24" x2="622.0" y2="834" stroke="#2c2c2a"/>
-<text x="622.0" y="848" text-anchor="middle" font-size="11" fill="#898781">60,000</text>
-<text x="122" y="47" text-anchor="end" font-size="12" fill="#c3c2b7">India</text>
-<g class="bar" data-t="India: 62,939 births per day"><rect x="132" y="32" width="514.0" height="13" rx="4" fill="#3987e5"/><rect x="132" y="32" width="4" height="13" fill="#3987e5"/></g>
-<text x="653.0" y="43" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">62,939</text>
-<g class="bar" data-t="India: 27,073 deaths per day"><rect x="132" y="48" width="221.1" height="13" rx="4" fill="#d55181"/><rect x="132" y="48" width="4" height="13" fill="#d55181"/></g>
-<text x="360.1" y="59" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">27,073</text>
-<text x="122" y="87" text-anchor="end" font-size="12" fill="#c3c2b7">China</text>
-<g class="bar" data-t="China: 23,615 births per day"><rect x="132" y="72" width="192.9" height="13" rx="4" fill="#3987e5"/><rect x="132" y="72" width="4" height="13" fill="#3987e5"/></g>
-<text x="331.9" y="83" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">23,615</text>
-<g class="bar" data-t="China: 31,436 deaths per day"><rect x="132" y="88" width="256.7" height="13" rx="4" fill="#d55181"/><rect x="132" y="88" width="4" height="13" fill="#d55181"/></g>
-<text x="395.7" y="99" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">31,436</text>
-<text x="122" y="127" text-anchor="end" font-size="12" fill="#c3c2b7">United States</text>
-<g class="bar" data-t="United States: 10,057 births per day"><rect x="132" y="112" width="82.1" height="13" rx="4" fill="#3987e5"/><rect x="132" y="112" width="4" height="13" fill="#3987e5"/></g>
-<text x="221.1" y="123" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">10,057</text>
-<g class="bar" data-t="United States: 8,586 deaths per day"><rect x="132" y="128" width="70.1" height="13" rx="4" fill="#d55181"/><rect x="132" y="128" width="4" height="13" fill="#d55181"/></g>
-<text x="209.1" y="139" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">8,586</text>
-<text x="122" y="167" text-anchor="end" font-size="12" fill="#c3c2b7">Indonesia</text>
-<g class="bar" data-t="Indonesia: 12,101 births per day"><rect x="132" y="152" width="98.8" height="13" rx="4" fill="#3987e5"/><rect x="132" y="152" width="4" height="13" fill="#3987e5"/></g>
-<text x="237.8" y="163" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">12,101</text>
-<g class="bar" data-t="Indonesia: 6,153 deaths per day"><rect x="132" y="168" width="50.2" height="13" rx="4" fill="#d55181"/><rect x="132" y="168" width="4" height="13" fill="#d55181"/></g>
-<text x="189.2" y="179" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">6,153</text>
-<text x="122" y="207" text-anchor="end" font-size="12" fill="#c3c2b7">Pakistan</text>
-<g class="bar" data-t="Pakistan: 18,989 births per day"><rect x="132" y="192" width="155.1" height="13" rx="4" fill="#3987e5"/><rect x="132" y="192" width="4" height="13" fill="#3987e5"/></g>
-<text x="294.1" y="203" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">18,989</text>
-<g class="bar" data-t="Pakistan: 4,556 deaths per day"><rect x="132" y="208" width="37.2" height="13" rx="4" fill="#d55181"/><rect x="132" y="208" width="4" height="13" fill="#d55181"/></g>
-<text x="176.2" y="219" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">4,556</text>
-<text x="122" y="247" text-anchor="end" font-size="12" fill="#c3c2b7">Nigeria</text>
-<g class="bar" data-t="Nigeria: 21,114 births per day"><rect x="132" y="232" width="172.4" height="13" rx="4" fill="#3987e5"/><rect x="132" y="232" width="4" height="13" fill="#3987e5"/></g>
-<text x="311.4" y="243" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">21,114</text>
-<g class="bar" data-t="Nigeria: 7,613 deaths per day"><rect x="132" y="248" width="62.2" height="13" rx="4" fill="#d55181"/><rect x="132" y="248" width="4" height="13" fill="#d55181"/></g>
-<text x="201.2" y="259" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">7,613</text>
-<text x="122" y="287" text-anchor="end" font-size="12" fill="#c3c2b7">Brazil</text>
-<g class="bar" data-t="Brazil: 6,825 births per day"><rect x="132" y="272" width="55.7" height="13" rx="4" fill="#3987e5"/><rect x="132" y="272" width="4" height="13" fill="#3987e5"/></g>
-<text x="194.7" y="283" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">6,825</text>
-<g class="bar" data-t="Brazil: 4,288 deaths per day"><rect x="132" y="288" width="35.0" height="13" rx="4" fill="#d55181"/><rect x="132" y="288" width="4" height="13" fill="#d55181"/></g>
-<text x="174.0" y="299" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">4,288</text>
-<text x="122" y="327" text-anchor="end" font-size="12" fill="#c3c2b7">Bangladesh</text>
-<g class="bar" data-t="Bangladesh: 9,330 births per day"><rect x="132" y="312" width="76.2" height="13" rx="4" fill="#3987e5"/><rect x="132" y="312" width="4" height="13" fill="#3987e5"/></g>
-<text x="215.2" y="323" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">9,330</text>
-<g class="bar" data-t="Bangladesh: 2,501 deaths per day"><rect x="132" y="328" width="20.4" height="13" rx="4" fill="#d55181"/><rect x="132" y="328" width="4" height="13" fill="#d55181"/></g>
-<text x="159.4" y="339" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,501</text>
-<text x="122" y="367" text-anchor="end" font-size="12" fill="#c3c2b7">Russia</text>
-<g class="bar" data-t="Russia: 3,322 births per day"><rect x="132" y="352" width="27.1" height="13" rx="4" fill="#3987e5"/><rect x="132" y="352" width="4" height="13" fill="#3987e5"/></g>
-<text x="166.1" y="363" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">3,322</text>
-<g class="bar" data-t="Russia: 5,115 deaths per day"><rect x="132" y="368" width="41.8" height="13" rx="4" fill="#d55181"/><rect x="132" y="368" width="4" height="13" fill="#d55181"/></g>
-<text x="180.8" y="379" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">5,115</text>
-<text x="122" y="407" text-anchor="end" font-size="12" fill="#c3c2b7">Ethiopia</text>
-<g class="bar" data-t="Ethiopia: 11,535 births per day"><rect x="132" y="392" width="94.2" height="13" rx="4" fill="#3987e5"/><rect x="132" y="392" width="4" height="13" fill="#3987e5"/></g>
-<text x="233.2" y="403" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">11,535</text>
-<g class="bar" data-t="Ethiopia: 2,177 deaths per day"><rect x="132" y="408" width="17.8" height="13" rx="4" fill="#d55181"/><rect x="132" y="408" width="4" height="13" fill="#d55181"/></g>
-<text x="156.8" y="419" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,177</text>
-<line x1="14" y1="423" x2="706" y2="423" stroke="#383835"/>
-<text x="122" y="447" text-anchor="end" font-size="12" fill="#c3c2b7">Mexico</text>
-<g class="bar" data-t="Mexico: 5,446 births per day"><rect x="132" y="432" width="44.5" height="13" rx="4" fill="#3987e5"/><rect x="132" y="432" width="4" height="13" fill="#3987e5"/></g>
-<text x="183.5" y="443" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">5,446</text>
-<g class="bar" data-t="Mexico: 2,312 deaths per day"><rect x="132" y="448" width="18.9" height="13" rx="4" fill="#d55181"/><rect x="132" y="448" width="4" height="13" fill="#d55181"/></g>
-<text x="157.9" y="459" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,312</text>
-<text x="122" y="487" text-anchor="end" font-size="12" fill="#c3c2b7">Japan</text>
-<g class="bar" data-t="Japan: 2,042 births per day"><rect x="132" y="472" width="16.7" height="13" rx="4" fill="#3987e5"/><rect x="132" y="472" width="4" height="13" fill="#3987e5"/></g>
-<text x="155.7" y="483" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,042</text>
-<g class="bar" data-t="Japan: 4,280 deaths per day"><rect x="132" y="488" width="35.0" height="13" rx="4" fill="#d55181"/><rect x="132" y="488" width="4" height="13" fill="#d55181"/></g>
-<text x="174.0" y="499" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">4,280</text>
-<text x="122" y="527" text-anchor="end" font-size="12" fill="#c3c2b7">Egypt</text>
-<g class="bar" data-t="Egypt: 6,733 births per day"><rect x="132" y="512" width="55.0" height="13" rx="4" fill="#3987e5"/><rect x="132" y="512" width="4" height="13" fill="#3987e5"/></g>
-<text x="194.0" y="523" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">6,733</text>
-<g class="bar" data-t="Egypt: 1,841 deaths per day"><rect x="132" y="528" width="15.0" height="13" rx="4" fill="#d55181"/><rect x="132" y="528" width="4" height="13" fill="#d55181"/></g>
-<text x="154.0" y="539" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,841</text>
-<text x="122" y="567" text-anchor="end" font-size="12" fill="#c3c2b7">Philippines</text>
-<g class="bar" data-t="Philippines: 5,075 births per day"><rect x="132" y="552" width="41.4" height="13" rx="4" fill="#3987e5"/><rect x="132" y="552" width="4" height="13" fill="#3987e5"/></g>
-<text x="180.4" y="563" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">5,075</text>
-<g class="bar" data-t="Philippines: 2,124 deaths per day"><rect x="132" y="568" width="17.3" height="13" rx="4" fill="#d55181"/><rect x="132" y="568" width="4" height="13" fill="#d55181"/></g>
-<text x="156.3" y="579" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,124</text>
-<text x="122" y="607" text-anchor="end" font-size="12" fill="#c3c2b7">DR Congo</text>
-<g class="bar" data-t="DR Congo: 12,690 births per day"><rect x="132" y="592" width="103.6" height="13" rx="4" fill="#3987e5"/><rect x="132" y="592" width="4" height="13" fill="#3987e5"/></g>
-<text x="242.6" y="603" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">12,690</text>
-<g class="bar" data-t="DR Congo: 2,625 deaths per day"><rect x="132" y="608" width="21.4" height="13" rx="4" fill="#d55181"/><rect x="132" y="608" width="4" height="13" fill="#d55181"/></g>
-<text x="160.4" y="619" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,625</text>
-<text x="122" y="647" text-anchor="end" font-size="12" fill="#c3c2b7">Vietnam</text>
-<g class="bar" data-t="Vietnam: 3,580 births per day"><rect x="132" y="632" width="29.2" height="13" rx="4" fill="#3987e5"/><rect x="132" y="632" width="4" height="13" fill="#3987e5"/></g>
-<text x="168.2" y="643" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">3,580</text>
-<g class="bar" data-t="Vietnam: 1,904 deaths per day"><rect x="132" y="648" width="15.5" height="13" rx="4" fill="#d55181"/><rect x="132" y="648" width="4" height="13" fill="#d55181"/></g>
-<text x="154.5" y="659" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,904</text>
-<text x="122" y="687" text-anchor="end" font-size="12" fill="#c3c2b7">Iran</text>
-<g class="bar" data-t="Iran: 3,016 births per day"><rect x="132" y="672" width="24.6" height="13" rx="4" fill="#3987e5"/><rect x="132" y="672" width="4" height="13" fill="#3987e5"/></g>
-<text x="163.6" y="683" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">3,016</text>
-<g class="bar" data-t="Iran: 1,262 deaths per day"><rect x="132" y="688" width="10.3" height="13" rx="4" fill="#d55181"/><rect x="132" y="688" width="4" height="13" fill="#d55181"/></g>
-<text x="149.3" y="699" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,262</text>
-<text x="122" y="727" text-anchor="end" font-size="12" fill="#c3c2b7">Turkey</text>
-<g class="bar" data-t="Turkey: 2,863 births per day"><rect x="132" y="712" width="23.4" height="13" rx="4" fill="#3987e5"/><rect x="132" y="712" width="4" height="13" fill="#3987e5"/></g>
-<text x="162.4" y="723" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,863</text>
-<g class="bar" data-t="Turkey: 1,548 deaths per day"><rect x="132" y="728" width="12.6" height="13" rx="4" fill="#d55181"/><rect x="132" y="728" width="4" height="13" fill="#d55181"/></g>
-<text x="151.6" y="739" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,548</text>
-<text x="122" y="767" text-anchor="end" font-size="12" fill="#c3c2b7">Germany</text>
-<g class="bar" data-t="Germany: 1,889 births per day"><rect x="132" y="752" width="15.4" height="13" rx="4" fill="#3987e5"/><rect x="132" y="752" width="4" height="13" fill="#3987e5"/></g>
-<text x="154.4" y="763" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,889</text>
-<g class="bar" data-t="Germany: 2,854 deaths per day"><rect x="132" y="768" width="23.3" height="13" rx="4" fill="#d55181"/><rect x="132" y="768" width="4" height="13" fill="#d55181"/></g>
-<text x="162.3" y="779" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">2,854</text>
-<text x="122" y="807" text-anchor="end" font-size="12" fill="#c3c2b7">Tanzania</text>
-<g class="bar" data-t="Tanzania: 6,734 births per day"><rect x="132" y="792" width="55.0" height="13" rx="4" fill="#3987e5"/><rect x="132" y="792" width="4" height="13" fill="#3987e5"/></g>
-<text x="194.0" y="803" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">6,734</text>
-<g class="bar" data-t="Tanzania: 1,111 deaths per day"><rect x="132" y="808" width="9.1" height="13" rx="4" fill="#d55181"/><rect x="132" y="808" width="4" height="13" fill="#d55181"/></g>
-<text x="148.1" y="819" font-size="11" fill="#c3c2b7" font-variant-numeric="tabular-nums">1,111</text>
-<line x1="132" y1="24" x2="132" y2="834" stroke="#383835"/>
-</svg>
-  <div id="tip"></div>
-</div>
 
 <h2>Notes</h2>
 <p class="note">Population figures are United Nations projections for 2026 under the
 medium variant, the middle of the range the UN publishes. Daily figures are the
 projected births and deaths for the whole year divided by 365.25, so they are an
-average day rather than any particular one. China, Russia, Japan and Germany are the
-four here whose deaths outnumber their births; all four can still grow through
-migration, which these columns do not count. Flags are served by
+average day rather than any particular one. Where the lower bar is longer, deaths
+outnumber births: that is China, Russia, Japan and Germany. All four can still grow
+through migration, which these columns do not count. Flags are served by
 <a href="https://flagcdn.com" style="color:var(--accent)">FlagCDN</a>.</p>
 
 <h2>References</h2>
@@ -471,18 +329,5 @@ United Nations World Population Prospects (2024). Retrieved August 14, 2026, fro
 <a href="https://population.un.org/wpp/">https://population.un.org/wpp/</a></p>
 </div>
 </div>
-<script>
-const fig=document.querySelector('.figure'), tip=document.getElementById('tip');
-fig.addEventListener('pointermove',e=>{
-  const g=e.target.closest('g.bar');
-  if(!g){ tip.style.opacity=0; return; }
-  const r=fig.getBoundingClientRect();
-  tip.textContent=g.getAttribute('data-t');
-  tip.style.left=Math.min(e.clientX-r.left+14, r.width-tip.offsetWidth-8)+'px';
-  tip.style.top=(e.clientY-r.top-34)+'px';
-  tip.style.opacity=1;
-});
-fig.addEventListener('pointerleave',()=>{ tip.style.opacity=0; });
-</script>
 </body>
 </html>
