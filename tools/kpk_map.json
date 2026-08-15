@@ -1,0 +1,19 @@
+{
+ "slots": 393216,
+ "same": 18240,
+ "kings": 38928,
+ "check": 4696,
+ "legal": 331352,
+ "win": 222564,
+ "draw": 108788,
+ "winW": 124960,
+ "winB": 97604,
+ "drawW": 38368,
+ "drawB": 70420,
+ "legalW": 163328,
+ "legalB": 168024,
+ "capture": 18196,
+ "stalemate": 18,
+ "deepest": 38,
+ "illegal": 61864
+}
