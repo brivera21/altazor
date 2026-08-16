@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El Terrero, Namiquipa · Altazor</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --surface-1: #1a1a1a;
+    --page: #121212;
+    --text-primary: #e6e6e6;
+    --text-secondary: #9a9a9a;
+    --muted: #7d7d7d;
+    --grid: #2b2b2b;
+    --axis: #3a3a3a;
+    --border: #2b2b2b;
+    --accent: #58a6ff;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --link: #4a4a48;
+    --corridor: #cfcfcf;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 32px 20px 60px; }
+  header.site { border-top: 4px solid var(--accent); padding-top: 22px; margin-bottom: 26px;
+    display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
+  .brand { font-weight: 700; font-size: 20px; letter-spacing: .1em; text-decoration: none; color: var(--text-primary); }
+  .brand:hover { color: var(--accent); }
+  nav.site a { color: var(--text-secondary); text-decoration: none; font-size: 14px; }
+  nav.site a:hover { color: var(--accent); }
+  h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  p.sub { margin: 0; color: var(--text-secondary); font-size: 14.5px; line-height: 1.55; max-width: 78ch; }
+
+  .tiles { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 4px; }
+  .tile {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 10px 16px; min-width: 176px;
+  }
+  .tile .k { font-size: 11.5px; color: var(--text-secondary); }
+  .tile .v { font-size: 22px; font-weight: 650; margin-top: 2px; }
+  .tile .v small { font-size: 12.5px; font-weight: 400; color: var(--text-secondary); }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 16px 0 12px; }
+  button.ctl {
+    font: inherit; font-size: 13px;
+    background: var(--surface-1); color: var(--text-secondary);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 12px; cursor: pointer;
+  }
+  button.ctl:hover { color: var(--text-primary); border-color: var(--accent); }
+  button.ctl[aria-pressed="true"] { color: var(--text-primary); border-color: var(--axis); font-weight: 600; }
+  .spacer { flex: 1 1 auto; }
+
+  .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 8px; position: relative; }
+  svg { display: block; width: 100%; height: auto; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 16px 26px; margin: 14px 2px 0; font-size: 13px; color: var(--text-secondary); align-items: center; }
+  .legend .item { display: flex; align-items: center; gap: 7px; }
+  .swatch { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+  .lineswatch { width: 26px; height: 0; flex: none; border-top-width: 2px; border-top-style: solid; }
+
+  #tip {
+    position: fixed; pointer-events: none; opacity: 0;
+    transition: opacity .09s linear;
+    background: var(--surface-1); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 10px;
+    box-shadow: 0 8px 26px rgba(0,0,0,.55);
+    padding: 10px 12px; font-size: 12.5px; line-height: 1.45;
+    max-width: 300px; z-index: 50;
+  }
+  #tip .t-name { font-weight: 650; font-size: 13.5px; margin-bottom: 2px; }
+  #tip .t-mun { color: var(--text-secondary); margin-bottom: 6px; }
+  #tip dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; }
+  #tip dt { color: var(--text-secondary); }
+  #tip dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; }
+  #tip .t-roads { margin-top: 7px; padding-top: 6px; border-top: 1px solid var(--grid); color: var(--text-secondary); }
+  #tip .t-roads b { color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  .node-hit { cursor: pointer; }
+  .node circle.dot { stroke: var(--surface-1); stroke-width: 2; }
+  .node.dim { opacity: .22; }
+  text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .lbl { font-size: 12px; fill: var(--text-primary); }
+  .lbl.small { font-size: 11px; }
+  .pop { font-size: 10.5px; fill: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .ringlbl { font-size: 10px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+  .kmlbl { font-size: 10px; fill: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .compass { font-size: 12px; fill: var(--muted); font-weight: 600; }
+  .hide-labels .lbl, .hide-labels .pop { display: none; }
+  .hide-labels .lbl.keep, .hide-labels .pop.keep { display: block; }
+
+  #tablewrap { margin-top: 22px; display: none; }
+  #tablewrap.on { display: block; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  caption { text-align: left; font-size: 13px; color: var(--text-secondary); padding: 0 0 10px; }
+  th, td { padding: 7px 10px; border-bottom: 1px solid var(--grid); text-align: right; }
+  th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
+  thead th { color: var(--text-secondary); font-weight: 600; border-bottom: 1px solid var(--axis); }
+  td.num { font-variant-numeric: tabular-nums; }
+  td .chip { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; vertical-align: baseline; }
+  h3.tbl { font-size: 14px; margin: 26px 0 8px; }
+
+  footer.note { margin-top: 26px; font-size: 12px; color: var(--muted); line-height: 1.6; max-width: 92ch; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <a class="brand" href="index.html">ALTAZOR</a>
+    <nav class="site"><a href="library.html">&larr; Library</a></nav>
+  </header>
+  <header>
+    <h1>El Terrero, Namiquipa: red carretera regional</h1>
+    <p class="sub">Cada pueblo está en su latitud y longitud reales respecto a El Terrero. Las líneas son carreteras que existen, y el número sobre cada línea es la distancia de manejo entre esos dos pueblos, no la línea recta. El área del círculo va con la población del censo 2020.</p>
+  </header>
+
+  <div class="tiles" id="tiles"></div>
+
+  <div class="controls">
+    <button class="ctl" id="btn-km" aria-pressed="true">Km por carretera</button>
+    <button class="ctl" id="btn-labels" aria-pressed="true">Nombres de pueblos</button>
+    <button class="ctl" id="btn-rings" aria-pressed="true">Anillos de distancia</button>
+    <button class="ctl" id="btn-table" aria-pressed="false">Ver tablas</button>
+  </div>
+
+  <div class="card">
+    <svg id="map" viewBox="0 0 1240 1010" role="img" aria-labelledby="maptitle mapdesc">
+      <title id="maptitle">Red carretera con centro en El Terrero, Namiquipa, Chihuahua</title>
+      <desc id="mapdesc">Pueblos del valle de Namiquipa y las cabeceras municipales vecinas, puestos en sus coordenadas reales y unidos solo donde existe carretera entre ellos. Cada enlace lleva su distancia en kilómetros. La ruta baja al sur hacia Ciudad Cuauhtémoc y de ahí a la ciudad de Chihuahua.</desc>
+      <g id="g-rings"></g>
+      <g id="g-compass"></g>
+      <g id="g-links"></g>
+      <g id="g-kms"></g>
+      <g id="g-nodes"></g>
+    </svg>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <div id="tablewrap">
+    <h3 class="tbl">Pueblos</h3>
+    <table>
+      <caption>Población: INEGI, Censo de Población y Vivienda 2020 (cifras por localidad). La distancia y el rumbo son en línea recta desde El Terrero.</caption>
+      <thead>
+        <tr><th>Lugar</th><th>Municipio</th><th>Población 2020</th><th>Total del municipio</th><th>Altitud (m)</th><th>Línea recta</th><th>Rumbo</th></tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <h3 class="tbl">Enlaces carreteros</h3>
+    <table>
+      <caption>Distancias por carretera calculadas con el ruteador OSRM sobre OpenStreetMap. Solo se unen los pares que sí tienen carretera directa.</caption>
+      <thead>
+        <tr><th>De</th><th>A</th><th>Km por carretera</th></tr>
+      </thead>
+      <tbody id="tbody2"></tbody>
+    </table>
+  </div>
+
+  <footer class="note" id="footnote"></footer>
+</div>
+
+<div id="tip" role="tooltip"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var NODES = [
+    // --- Namiquipa municipality localities ---
+    {id:'terrero',      name:'El Terrero',                    short:'El Terrero',       mun:'Namiquipa', pop:2752,  elev:1854, lat:29.18107, lon:-107.38657, cat:'local', lp:'sw', center:true},
+    {id:'molino',       name:'El Molino',                     short:'El Molino',        mun:'Namiquipa', pop:2272,  elev:1848, lat:29.19339, lon:-107.40758, cat:'local', lp:'w'},
+    {id:'namiquipa',    name:'Namiquipa',                     short:'Namiquipa',        mun:'Namiquipa (cabecera)', pop:1723, elev:1842, lat:29.25056, lon:-107.41278, cat:'local', lp:'nw'},
+    {id:'cruces',       name:'Cruces',                        short:'Cruces',           mun:'Namiquipa', pop:1056,  elev:1740, lat:29.43346, lon:-107.38855, cat:'local', lp:'e'},
+    {id:'santaana',     name:'Santa Ana (Oscar Soto Maynez)', short:'Soto Maynez',      mun:'Namiquipa', pop:3130,  elev:1881, lat:29.03081, lon:-107.47201, cat:'local', lp:'sw'},
+    {id:'indep',        name:'Independencia (Cologachi)',     short:'Independencia',    mun:'Namiquipa', pop:920,   elev:1951, lat:29.08972, lon:-107.54222, cat:'local', lp:'w'},
+    {id:'bjuarez',      name:'Benito Juárez',                 short:'Benito Juárez',    mun:'Namiquipa', pop:2017,  elev:1949, lat:29.16428, lon:-106.95586, cat:'local', lp:'se'},
+    {id:'villela',      name:'Santa Catalina de Villela',     short:'Sta. Catalina',    mun:'Namiquipa', pop:786,   elev:1906, lat:29.18292, lon:-106.97397, cat:'local', lp:'n'},
+
+    // --- neighbouring municipal seats ---
+    {id:'gomezfarias',  name:'Valentín Gómez Farías',         short:'Gómez Farías',     mun:'Gómez Farías', pop:4484, munPop:7023,  elev:2148, lat:29.35786, lon:-107.73900, cat:'seat', lp:'nw'},
+    {id:'zaragoza',     name:'Ignacio Zaragoza',              short:'Ignacio Zaragoza', mun:'Ignacio Zaragoza', pop:2830, munPop:5196, elev:2020, lat:29.64333, lon:-107.76389, cat:'seat', lp:'w'},
+    {id:'buenaventura', name:'San Buenaventura',              short:'San Buenaventura', mun:'Buenaventura', pop:8253, munPop:25146, elev:1553, lat:29.84348, lon:-107.46078, cat:'seat', lp:'e'},
+    {id:'bachiniva',    name:'Bachíniva',                     short:'Bachíniva',        mun:'Bachíniva', pop:2027, munPop:5807,  elev:2023, lat:28.76500, lon:-107.25402, cat:'seat', lp:'w'},
+    {id:'guerrero',     name:'Vicente Guerrero (Cd. Guerrero)', short:'Cd. Guerrero',   mun:'Guerrero', pop:7834, munPop:35473, elev:2002, lat:28.54929, lon:-107.48403, cat:'seat', lp:'w'},
+    {id:'matachi',      name:'Matachí',                       short:'Matachí',          mun:'Matachí', pop:1581, munPop:2742,   elev:1901, lat:28.84335, lon:-107.75511, cat:'seat', lp:'w'},
+    {id:'temosachic',   name:'Temósachic',                    short:'Temósachic',       mun:'Temósachic', pop:1657, munPop:5320, elev:1858, lat:28.95376, lon:-107.83018, cat:'seat', lp:'w'},
+    {id:'madera',       name:'Madera',                        short:'Madera',           mun:'Madera', pop:14755, munPop:25144,  elev:2100, lat:29.19269, lon:-108.14334, cat:'seat', lp:'w'},
+    {id:'sanandres',    name:'San Andrés',                    short:'San Andrés',       mun:'Riva Palacio', pop:702, munPop:7695, elev:1773, lat:28.54673, lon:-106.50390, cat:'seat', lp:'n'},
+
+    // --- towns that carry the route but are neither Namiquipa nor a municipal seat ---
+    {id:'lapinta',      name:'La Pinta',                      short:'La Pinta',         mun:'Gómez Farías', pop:536, elev:2110, lat:29.22883, lon:-107.67422, cat:'way', lp:'s'},
+    {id:'lajunta',      name:'La Junta',                      short:'La Junta',         mun:'Guerrero', pop:8409, elev:1970, lat:28.47577, lon:-107.32790, cat:'way', lp:'e'},
+
+    // --- regional cities ---
+    {id:'cuauhtemoc',   name:'Ciudad Cuauhtémoc',             short:'Cuauhtémoc',       mun:'Cuauhtémoc', pop:135586, munPop:180638, elev:2062, lat:28.40630, lon:-106.86667, cat:'city', lp:'sw'},
+    {id:'chihuahua',    name:'Chihuahua',                     short:'Chihuahua',        mun:'Chihuahua', pop:925762, munPop:937674, elev:1424, lat:28.63528, lon:-106.08889, cat:'city', lp:'sw'}
+  ];
+
+  // [from, to, road km (OSRM over OpenStreetMap), corridor?, optional {t, off} label nudge]
+  var LINKS = [
+    ['cruces','namiquipa',        34.9, false, {off: -17}],
+    ['namiquipa','molino',         7.0, false, {skip: true}],
+    ['molino','terrero',           3.2, false, {skip: true}],
+    ['terrero','santaana',        21.9, true,  {t: 0.72, off: 34}],
+    ['santaana','indep',          10.6, false, {t: 0.32, off: -16}],
+    ['indep','lapinta',           24.8, false, {off: -27}],
+    ['lapinta','gomezfarias',     16.5, false, {t: 0.58, off: -14}],
+    ['gomezfarias','zaragoza',    35.4, false],
+    ['gomezfarias','madera',      71.9, false],
+    ['cruces','buenaventura',     61.4, false],
+    ['zaragoza','buenaventura',   48.9, false],
+    ['santaana','bachiniva',      38.0, true],
+    ['bachiniva','cuauhtemoc',    81.0, true],
+    ['cuauhtemoc','chihuahua',   103.6, true, {t: 0.30, off: 20}],
+    ['cuauhtemoc','lajunta',      48.8, false],
+    ['lajunta','guerrero',        19.2, false],
+    ['lajunta','matachi',         64.0, false],
+    ['matachi','temosachic',      15.6, false],
+    ['cuauhtemoc','sanandres',    44.0, false, {t: 0.42}],
+    ['sanandres','chihuahua',     77.7, false],
+    ['namiquipa','villela',       54.1, false],
+    ['villela','bjuarez',          3.8, false, {off: 22}],
+    ['bjuarez','chihuahua',      137.6, false]
+  ];
+
+  // routed town-to-town separately, for the headline figures
+  var DIRECT = { cuauhtemoc: 134.4, chihuahua: 181.8 };
+
+  var CATS = {
+    local: {label:'Localidades del municipio de Namiquipa', v:'--series-1'},
+    seat:  {label:'Cabeceras municipales vecinas',      v:'--series-2'},
+    city:  {label:'Ciudades de la región',              v:'--series-3'},
+    way:   {label:'Otros pueblos por donde pasa la ruta', v:'--muted'}
+  };
+
+  var byId = {};
+  NODES.forEach(function (n) { byId[n.id] = n; });
+  var CENTER = byId.terrero;
+
+  // ---- geometry -----------------------------------------------------------
+  var R = 6371.0088;
+  function rad(d) { return d * Math.PI / 180; }
+  function haversine(a, b) {
+    var dLat = rad(b.lat - a.lat), dLon = rad(b.lon - a.lon);
+    var s = Math.sin(dLat/2)*Math.sin(dLat/2) +
+            Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dLon/2)*Math.sin(dLon/2);
+    return 2 * R * Math.asin(Math.sqrt(s));
+  }
+  function bearing(a, b) {
+    var y = Math.sin(rad(b.lon-a.lon))*Math.cos(rad(b.lat));
+    var x = Math.cos(rad(a.lat))*Math.sin(rad(b.lat)) -
+            Math.sin(rad(a.lat))*Math.cos(rad(b.lat))*Math.cos(rad(b.lon-a.lon));
+    return (Math.atan2(y, x)*180/Math.PI + 360) % 360;
+  }
+  var COMPASS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'];
+  function compass(deg) { return COMPASS[Math.round(deg/22.5) % 16]; }
+
+  var KM_PER_DEG_LAT = 110.574;
+  var kmPerDegLon = 111.320 * Math.cos(rad(CENTER.lat));
+  NODES.forEach(function (n) {
+    n.kx = (n.lon - CENTER.lon) * kmPerDegLon;
+    n.ky = -(n.lat - CENTER.lat) * KM_PER_DEG_LAT;
+    n.dist = haversine(CENTER, n);
+    n.brg = bearing(CENTER, n);
+  });
+
+  var VW = 1240, VH = 1010, PAD = 118;
+  var xs = NODES.map(function (n) { return n.kx; });
+  var ys = NODES.map(function (n) { return n.ky; });
+  var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
+  var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+  var scale = Math.min((VW - 2*PAD) / (maxX - minX), (VH - 2*PAD) / (maxY - minY));
+  var offX = (VW - (maxX + minX) * scale) / 2;
+  var offY = (VH - (maxY + minY) * scale) / 2;
+  function px(n) { return n.kx * scale + offX; }
+  function py(n) { return n.ky * scale + offY; }
+  function radius(pop) { return Math.max(4.5, 0.60 * Math.pow(pop, 1/3)); }
+
+  var NS = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) if (attrs[k] !== undefined && attrs[k] !== null) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function fmt(n) { return n.toLocaleString('es-MX'); }
+
+  // ---- distance rings -----------------------------------------------------
+  var gRings = document.getElementById('g-rings');
+  var cx = px(CENTER), cy = py(CENTER);
+  [25, 50, 100, 150].forEach(function (km) {
+    gRings.appendChild(el('circle', {cx: cx, cy: cy, r: km * scale, fill: 'none',
+      stroke: 'var(--grid)', 'stroke-width': 1, 'stroke-dasharray': '3 5'}));
+    var rr = km * scale, k = Math.SQRT1_2;
+    var lx = cx + rr * k, ly = cy - rr * k;
+    gRings.appendChild(el('rect', {x: lx - 22, y: ly - 10, width: 44, height: 14, rx: 4, fill: 'var(--surface-1)', opacity: 0.92}));
+    var t = el('text', {x: lx, y: ly, class: 'ringlbl', 'text-anchor': 'middle'});
+    t.textContent = km + ' km';
+    gRings.appendChild(t);
+  });
+
+  // ---- compass ------------------------------------------------------------
+  var gC = document.getElementById('g-compass');
+  var cxa = 74, cya = 84, arm = 30;
+  gC.appendChild(el('line', {x1: cxa, y1: cya - arm, x2: cxa, y2: cya + arm, stroke: 'var(--axis)', 'stroke-width': 1.5}));
+  gC.appendChild(el('line', {x1: cxa - arm, y1: cya, x2: cxa + arm, y2: cya, stroke: 'var(--axis)', 'stroke-width': 1.5}));
+  [['N', cxa, cya - arm - 8, 'middle'], ['S', cxa, cya + arm + 16, 'middle'],
+   ['O', cxa - arm - 10, cya + 4, 'end'], ['E', cxa + arm + 10, cya + 4, 'start']].forEach(function (d) {
+    var t = el('text', {x: d[1], y: d[2], class: 'compass', 'text-anchor': d[3]});
+    t.textContent = d[0];
+    gC.appendChild(t);
+  });
+
+  // ---- links + km labels --------------------------------------------------
+  var gL = document.getElementById('g-links');
+  var gK = document.getElementById('g-kms');
+  var linkEls = [];
+
+  LINKS.forEach(function (L) {
+    var a = byId[L[0]], b = byId[L[1]], km = L[2], corridor = L[3], tweak = L[4] || {};
+    var x1 = px(a), y1 = py(a), x2 = px(b), y2 = py(b);
+
+    var line = el('line', {
+      x1: x1, y1: y1, x2: x2, y2: y2,
+      stroke: corridor ? 'var(--corridor)' : 'var(--link)',
+      'stroke-width': corridor ? 2.6 : 2,
+      'stroke-linecap': 'round',
+      opacity: corridor ? 0.9 : 0.75
+    });
+    line.dataset.a = L[0]; line.dataset.b = L[1];
+    line.dataset.base = corridor ? 0.9 : 0.75;
+    gL.appendChild(line);
+    linkEls.push(line);
+
+    if (tweak.skip) return;
+    var t = tweak.t === undefined ? 0.5 : tweak.t;
+    var mx = x1 + (x2 - x1) * t, my = y1 + (y2 - y1) * t;
+    var dx = x2 - x1, dy = y2 - y1, len = Math.sqrt(dx*dx + dy*dy) || 1;
+    var offv = tweak.off === undefined ? 0 : tweak.off;
+    var lx = mx + (-dy / len) * offv, ly = my + (dx / len) * offv;
+
+    var txt = km.toFixed(0) + ' km';
+    var w = txt.length * 5.7 + 8;
+    var g = el('g');
+    g.dataset.a = L[0]; g.dataset.b = L[1];
+    g.appendChild(el('rect', {x: lx - w/2, y: ly - 8, width: w, height: 14, rx: 4, fill: 'var(--surface-1)', opacity: 0.94}));
+    var tn = el('text', {x: lx, y: ly + 3, class: 'kmlbl', 'text-anchor': 'middle'});
+    tn.textContent = txt;
+    if (corridor) { tn.setAttribute('font-weight', '650'); tn.setAttribute('fill', 'var(--text-primary)'); }
+    g.appendChild(tn);
+    gK.appendChild(g);
+  });
+
+  // ---- nodes --------------------------------------------------------------
+  var gN = document.getElementById('g-nodes');
+  var nodeEls = {};
+  var OFFSETS = {
+    n:  {dx: 0,  dy: -1, anchor: 'middle'},
+    s:  {dx: 0,  dy:  1, anchor: 'middle'},
+    e:  {dx: 1,  dy:  0, anchor: 'start'},
+    w:  {dx: -1, dy:  0, anchor: 'end'},
+    ne: {dx: 1,  dy: -1, anchor: 'start'},
+    nw: {dx: -1, dy: -1, anchor: 'end'},
+    se: {dx: 1,  dy:  1, anchor: 'start'},
+    sw: {dx: -1, dy:  1, anchor: 'end'}
+  };
+
+  NODES.forEach(function (n) {
+    var g = el('g', {class: 'node'});
+    g.dataset.id = n.id;
+    var x = px(n), y = py(n), r = radius(n.pop);
+    var color = 'var(' + CATS[n.cat].v + ')';
+
+    if (n.center) {
+      g.appendChild(el('circle', {cx: x, cy: y, r: r + 9, fill: 'none', stroke: color, 'stroke-width': 1.5, opacity: 0.55}));
+      g.appendChild(el('circle', {cx: x, cy: y, r: r + 15, fill: 'none', stroke: color, 'stroke-width': 1, opacity: 0.28}));
+    }
+    g.appendChild(el('circle', {cx: x, cy: y, r: r, fill: color, class: 'dot'}));
+
+    var o = OFFSETS[n.lp] || OFFSETS.s;
+    var gapX = o.dx === 0 ? 0 : o.dx * (r + 7);
+    var gapY = o.dy === 0 ? 4 : (o.dy < 0 ? -(r + 9) : (r + 15));
+    var lx = x + gapX, ly = y + gapY;
+    var yA = o.dy < 0 ? ly - 12 : ly, yB = o.dy < 0 ? ly : ly + 13;
+
+    var t1 = el('text', {x: lx, y: yA, class: 'lbl' + (n.center ? ' keep' : '') + (n.pop < 1200 ? ' small' : ''), 'text-anchor': o.anchor});
+    t1.textContent = n.short;
+    if (n.center) t1.setAttribute('font-weight', '700');
+    g.appendChild(t1);
+
+    var t2 = el('text', {x: lx, y: yB, class: 'pop' + (n.center ? ' keep' : ''), 'text-anchor': o.anchor});
+    t2.textContent = fmt(n.pop);
+    g.appendChild(t2);
+
+    var hit = el('circle', {cx: x, cy: y, r: Math.max(r + 10, 16), fill: 'transparent', class: 'node-hit'});
+    g.appendChild(hit);
+
+    gN.appendChild(g);
+    nodeEls[n.id] = g;
+
+    hit.addEventListener('mouseenter', function () { showTip(n); highlight(n.id); });
+    hit.addEventListener('mousemove', moveTip);
+    hit.addEventListener('mouseleave', function () { hideTip(); highlight(null); });
+  });
+
+  // ---- adjacency ----------------------------------------------------------
+  var adj = {};
+  LINKS.forEach(function (L) {
+    (adj[L[0]] = adj[L[0]] || []).push({to: L[1], km: L[2]});
+    (adj[L[1]] = adj[L[1]] || []).push({to: L[0], km: L[2]});
+  });
+  function connected(a, b) { return (adj[a] || []).some(function (e) { return e.to === b; }); }
+
+  // ---- tooltip ------------------------------------------------------------
+  var tip = document.getElementById('tip');
+  function showTip(n) {
+    var rows = '<dt>Población 2020</dt><dd>' + fmt(n.pop) + '</dd>';
+    if (n.munPop) rows += '<dt>Total del municipio</dt><dd>' + fmt(n.munPop) + '</dd>';
+    rows += '<dt>Altitud</dt><dd>' + fmt(n.elev) + ' m</dd>';
+    if (!n.center) rows += '<dt>Línea recta</dt><dd>' + n.dist.toFixed(0) + ' km ' + compass(n.brg) + '</dd>';
+
+    var roads = (adj[n.id] || []).slice().sort(function (a, b) { return a.km - b.km; })
+      .map(function (e) { return byId[e.to].short + ' <b>' + e.km.toFixed(0) + '</b>'; })
+      .join(' · ');
+
+    tip.innerHTML =
+      '<div class="t-name">' + n.name + '</div>' +
+      '<div class="t-mun">Mpio. ' + n.mun.replace(' (cabecera)', '') +
+      (n.mun.indexOf('cabecera') > -1 ? ' · cabecera municipal' : '') + '</div>' +
+      '<dl>' + rows + '</dl>' +
+      '<div class="t-roads">Carreteras (km): ' + roads + '</div>';
+    tip.style.opacity = 1;
+  }
+  function moveTip(ev) {
+    var x = ev.clientX + 16, y = ev.clientY + 16;
+    var w = tip.offsetWidth, h = tip.offsetHeight;
+    if (x + w > window.innerWidth - 8) x = ev.clientX - w - 16;
+    if (y + h > window.innerHeight - 8) y = ev.clientY - h - 16;
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  function hideTip() { tip.style.opacity = 0; }
+
+  function highlight(id) {
+    NODES.forEach(function (n) {
+      nodeEls[n.id].classList.toggle('dim', !!id && n.id !== id && !connected(id, n.id));
+    });
+    linkEls.forEach(function (l) {
+      var on = !id || l.dataset.a === id || l.dataset.b === id;
+      l.style.opacity = on ? l.dataset.base : 0.1;
+    });
+    [].forEach.call(gK.children, function (g) {
+      var on = !id || g.dataset.a === id || g.dataset.b === id;
+      g.style.opacity = on ? 1 : 0.12;
+    });
+  }
+
+
+  // ---- valley inset -------------------------------------------------------
+  var CHAIN = ['cruces','namiquipa','molino','terrero','santaana','indep'];
+  var gI = el('g', {id: 'g-inset'});
+  document.getElementById('map').appendChild(gI);
+  (function () {
+    var X = 902, Y = 232, W = 300, ROW = 46;
+    var H = 46 + (CHAIN.length - 1) * ROW + 22;
+    gI.appendChild(el('rect', {x: X, y: Y, width: W, height: H, rx: 12,
+      fill: 'var(--surface-1)', stroke: 'var(--border)', 'stroke-width': 1}));
+    var ttl = el('text', {x: X + 18, y: Y + 26, class: 'lbl'});
+    ttl.setAttribute('font-weight', '650');
+    ttl.textContent = 'El valle, de norte a sur';
+    gI.appendChild(ttl);
+    var sub = el('text', {x: X + 18, y: Y + 41, class: 'pop'});
+    sub.textContent = 'km por carretera entre vecinos';
+    gI.appendChild(sub);
+
+    var sx = X + 34, y0 = Y + 66;
+    gI.appendChild(el('line', {x1: sx, y1: y0, x2: sx, y2: y0 + (CHAIN.length - 1) * ROW,
+      stroke: 'var(--link)', 'stroke-width': 2}));
+
+    CHAIN.forEach(function (id, i) {
+      var n = byId[id], yy = y0 + i * ROW;
+      gI.appendChild(el('circle', {cx: sx, cy: yy, r: n.center ? 7 : 5.5,
+        fill: 'var(' + CATS[n.cat].v + ')', stroke: 'var(--surface-1)', 'stroke-width': 2}));
+      var nm = el('text', {x: sx + 16, y: yy + 1, class: 'lbl'});
+      nm.textContent = n.short;
+      if (n.center) nm.setAttribute('font-weight', '700');
+      gI.appendChild(nm);
+      var pp = el('text', {x: sx + 16, y: yy + 14, class: 'pop'});
+      pp.textContent = fmt(n.pop) + (n.center ? '  · aquí' : '');
+      gI.appendChild(pp);
+
+      if (i < CHAIN.length - 1) {
+        var km = null;
+        LINKS.forEach(function (L) {
+          if ((L[0] === id && L[1] === CHAIN[i+1]) || (L[1] === id && L[0] === CHAIN[i+1])) km = L[2];
+        });
+        var kt = el('text', {x: X + W - 18, y: yy + ROW / 2 + 4, class: 'kmlbl', 'text-anchor': 'end'});
+        kt.textContent = km.toFixed(0) + ' km';
+        gI.appendChild(kt);
+      }
+    });
+  })();
+
+  // ---- stat tiles ---------------------------------------------------------
+  var tiles = document.getElementById('tiles');
+  [['El Terrero', fmt(CENTER.pop), 'habitantes · 1,854 m'],
+   ['Por carretera a Cuauhtémoc', DIRECT.cuauhtemoc.toFixed(0) + ' km', '≈ 2 h de manejo'],
+   ['Por carretera a Chihuahua', DIRECT.chihuahua.toFixed(0) + ' km', '≈ 3 h de manejo'],
+   ['Municipio de Namiquipa', '22,712', 'en 141 localidades']].forEach(function (d) {
+    var e = document.createElement('div');
+    e.className = 'tile';
+    e.innerHTML = '<div class="k">' + d[0] + '</div><div class="v">' + d[1] + ' <small>' + d[2] + '</small></div>';
+    tiles.appendChild(e);
+  });
+
+  // ---- legend -------------------------------------------------------------
+  var legend = document.getElementById('legend');
+  ['local','seat','city','way'].forEach(function (k) {
+    var d = document.createElement('div');
+    d.className = 'item';
+    d.innerHTML = '<span class="swatch" style="background:var(' + CATS[k].v + ')"></span>' + CATS[k].label;
+    legend.appendChild(d);
+  });
+  [['Ruta a Cuauhtémoc y Chihuahua', 'var(--corridor)', 2.6],
+   ['Carretera (km de manejo)', 'var(--link)', 2]].forEach(function (d) {
+    var e = document.createElement('div');
+    e.className = 'item';
+    e.innerHTML = '<span class="lineswatch" style="border-top-color:' + d[1] + ';border-top-width:' + d[2] + 'px"></span>' + d[0];
+    legend.appendChild(e);
+  });
+  var sz = document.createElement('div');
+  sz.className = 'item';
+  sz.innerHTML = '<span class="swatch" style="background:var(--muted);width:7px;height:7px"></span>' +
+                 '<span class="swatch" style="background:var(--muted);width:13px;height:13px"></span>' +
+                 '<span class="swatch" style="background:var(--muted);width:22px;height:22px"></span>' +
+                 '&nbsp;área del círculo ∝ población';
+  legend.appendChild(sz);
+
+  // ---- tables -------------------------------------------------------------
+  var tbody = document.getElementById('tbody');
+  NODES.slice().sort(function (a, b) { return b.pop - a.pop; }).forEach(function (n) {
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><span class="chip" style="background:var(' + CATS[n.cat].v + ')"></span>' + n.name + '</td>' +
+      '<td>' + n.mun.replace(' (cabecera)', '') + '</td>' +
+      '<td class="num">' + fmt(n.pop) + '</td>' +
+      '<td class="num">' + (n.munPop ? fmt(n.munPop) : (n.mun.indexOf('Namiquipa') === 0 ? '22,712' : 'n/d')) + '</td>' +
+      '<td class="num">' + fmt(n.elev) + '</td>' +
+      '<td class="num">' + (n.center ? 'n/d' : n.dist.toFixed(0) + ' km') + '</td>' +
+      '<td>' + (n.center ? 'n/d' : compass(n.brg)) + '</td>';
+    tbody.appendChild(tr);
+  });
+
+  var tbody2 = document.getElementById('tbody2');
+  LINKS.slice().sort(function (a, b) { return a[2] - b[2]; }).forEach(function (L) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + byId[L[0]].short + '</td><td>' + byId[L[1]].short + '</td>' +
+                   '<td class="num">' + L[2].toFixed(1) + '</td>';
+    tbody2.appendChild(tr);
+  });
+
+  // ---- controls -----------------------------------------------------------
+  var svg = document.getElementById('map');
+  function toggle(id, onLabel, offLabel, fn) {
+    var btn = document.getElementById(id);
+    btn.addEventListener('click', function () {
+      var next = btn.getAttribute('aria-pressed') !== 'true';
+      btn.setAttribute('aria-pressed', String(next));
+      btn.textContent = next ? onLabel : offLabel;
+      fn(next);
+    });
+  }
+  toggle('btn-km', 'Km por carretera', 'Km ocultos', function (on) { gK.style.display = on ? '' : 'none'; });
+  toggle('btn-labels', 'Nombres de pueblos', 'Nombres ocultos', function (on) { svg.classList.toggle('hide-labels', !on); });
+  toggle('btn-rings', 'Anillos de distancia', 'Anillos ocultos', function (on) { gRings.style.display = on ? '' : 'none'; });
+  toggle('btn-table', 'Ocultar tablas', 'Ver tablas', function (on) { document.getElementById('tablewrap').classList.toggle('on', on); });
+
+  // ---- footnote -----------------------------------------------------------
+  document.getElementById('footnote').innerHTML =
+    '<strong>Carreteras.</strong> Cada línea es un enlace ruteado y cada número es la distancia de manejo entre los centros de esos dos pueblos, sacada con el ruteador OSRM sobre OpenStreetMap. Los pares que no tienen carretera directa no se unen. ' +
+    'De Namiquipa a Gómez Farías son 80 km por carretera y no los 39 km de la línea recta: la ruta baja de regreso por el valle hasta Soto Maynez, agarra al poniente por Independencia (25 km) y La Pinta (17 km), y sube a Gómez Farías. No hay camino que cruce derecho la sierra. ' +
+    'Cd. Guerrero llega a Cuauhtémoc por La Junta y no atravesando desde Bachíniva. San Andrés queda de ramal de las dos ciudades y no de parada sobre la carretera de Cuauhtémoc a Chihuahua. ' +
+    'Las dos cifras de arriba están ruteadas de pueblo a pueblo y no sumadas a lo largo de la cadena: de El Terrero a Cuauhtémoc <strong>134 km</strong>, de El Terrero a Chihuahua <strong>182 km</strong>. ' +
+    '<br><br><strong>Población.</strong> INEGI, Censo de Población y Vivienda 2020. Para los pueblos se usan cifras por localidad, y en la tabla se agrega el total municipal donde el nodo es cabecera. ' +
+    'El municipio de Namiquipa tenía 22,712 habitantes en 141 localidades en 2020; las ocho localidades de Namiquipa que salen aquí suman ' +
+    fmt(NODES.filter(function (n) { return n.cat === 'local'; }).reduce(function (s, n) { return s + n.pop; }, 0)) + ' de ellos. ' +
+    'Las coordenadas vienen de gaceteros derivados del INEGI (GeoNames y OpenStreetMap). La de La Pinta está triangulada a partir de distancias publicadas, así que es aproximada dentro de unos cientos de metros. ' +
+    'Los anillos y la columna de línea recta son de círculo máximo, para poder compararlos contra los números de carretera.';
+})();
+</script>
+</body>
+</html>
