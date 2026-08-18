@@ -204,25 +204,26 @@ TOPICS = [
       strong=[],
       c="The whole ending at once. Put the white king and the pawn wherever "
         "you like, choose who is to move, and every square is painted with "
-        "the result if the black king stood on it. Click a square to move "
+        "the result if the black king stood on it: green where White wins, "
+        "red where Black holds. Click a square to move "
         "the selected piece. The arrow keys walk the pawn: left and right "
         "change its file, up and down its rank. The figure under the board "
         "counts the table whole.",
       legend=[("win", "White wins with the black king here"),
-              ("drw", "drawn"),
+              ("drw", "Black holds the draw"),
               ("ill", "the black king cannot stand here")],
       notes=["It opens on the position from the line above: king e5, pawn "
              "e4, White to move. Of the 55 squares left to the black king, "
              "e7 is the only one that draws.",
-             "Switch to Black to move and e7 turns gold while d7, f7, d8, "
-             "e8 and f8 turn blue. Black no longer has to be on the "
+             "Switch to Black to move and e7 turns green while d7, f7, d8, "
+             "e8 and f8 turn red. Black no longer has to be on the "
              "opposition square, only to be able to step onto it.",
              "Pull the pawn back to e3 with White still to move and every "
-             "square goes gold. The pawn now has a move to spare, so White "
+             "square goes green. The pawn now has a move to spare, so White "
              "can hand the turn back whenever he likes and take the "
              "opposition himself.",
              "Walk the pawn across to the a-file and the corner fills with "
-             "blue. A rook pawn gives most of the win away.",
+             "red. A rook pawn gives most of the win away.",
              "Counted whole: 393,216 placements, 331,352 of them legal, and "
              "White wins 222,564 of those, a little over two thirds. Every "
              "square here is read from that table, not from a rule."]),
@@ -813,11 +814,11 @@ def census_svg(c):
     a(f'<text class="lab" x="{x_leg + w_leg:.1f}" y="50" text-anchor="end">'
       f'<tspan class="num">{n(c["legal"])}</tspan> legal positions</text>')
     a(f'<text class="cap" x="{x_leg:.1f}" y="80">AND HOW THEY END</text>')
-    a(f'<rect x="{x_leg:.1f}" y="88" width="{w_win:.1f}" height="{H}" rx="3" fill="#c98500">'
+    a(f'<rect x="{x_leg:.1f}" y="88" width="{w_win:.1f}" height="{H}" rx="3" fill="#008300">'
       f'<title>White wins: {n(c["win"])} of {n(c["legal"])} legal positions '
       f'({pc(c["win"], c["legal"])}). White to move {n(c["winW"])}, '
       f'Black to move {n(c["winB"])}.</title></rect>')
-    a(f'<rect x="{x_drw:.1f}" y="88" width="{w_drw:.1f}" height="{H}" rx="3" fill="#4f95ea">'
+    a(f'<rect x="{x_drw:.1f}" y="88" width="{w_drw:.1f}" height="{H}" rx="3" fill="#e66767">'
       f'<title>Drawn: {n(c["draw"])} ({pc(c["draw"], c["legal"])}). '
       f'White to move {n(c["drawW"])}, Black to move {n(c["drawB"])}. '
       f'Black can simply take the pawn in {n(c["capture"])} of them.</title></rect>')
@@ -1032,17 +1033,17 @@ function kpkState(s){
   return kpkWin(mapWK,s,mapWP,mapSTM) ? 'win' : 'drw';
 }
 let mapWK=4*8+4, mapWP=3*8+4, mapSTM=0, mapPiece='K';   // Ke5, e4, White
-const MAPFILL={win:['#dfa42b','#b07400'], drw:['#4f95ea','#2f6cb8'],
-               ill:['#4b5059','#33373e']};
+const MAPFILL={win:['#009a00','#008300'], drw:['#f08585','#e66767'],
+               ill:['#4b5059','#33373e'], piece:['#c3cad4','#7c8494']};
+// dark fills take light ink and light fills take dark ink, so the square
+// names and the dot/dash marks stay readable on every state
+const MAPINK={win:'rgba(255,255,255,0.66)', drw:'rgba(0,0,0,0.46)',
+              ill:'rgba(255,255,255,0.38)', piece:'rgba(0,0,0,0.45)'};
 
 function fillFor(f,r,topic){
   const name=FILESTR[f]+r;
   const dark=(f+r)%2===1;
-  if(topic.map){
-    const st=kpkState(f+(r-1)*8);
-    if(st==='piece') return dark?'#7c8494':'#c3cad4';
-    return MAPFILL[st][dark?1:0];
-  }
+  if(topic.map) return MAPFILL[kpkState(f+(r-1)*8)][dark?1:0];
   if(topic.numbers){
     const n=topic.numbers[name];
     const lo=Math.min(...Object.values(topic.numbers));
@@ -1072,20 +1073,29 @@ function fillFor(f,r,topic){
 }
 
 function sqName(s){ return FILESTR[s&7]+((s>>3)+1); }
-/* a dot for a win, a dash for a draw: the verdict does not rest on colour */
+/* a dot for a win, a dash for a draw: the verdict does not rest on colour.
+   The square's coordinate label is re-inked here too, for the same reason. */
 function mapMarks(){
   let s='';
   for(let f=0;f<8;f++) for(let r=1;r<=8;r++){
     const st=kpkState(f+(r-1)*8);
+    const lb=document.getElementById('lb-'+FILESTR[f]+r);
+    if(lb) lb.setAttribute('fill', MAPINK[st]);
     if(st==='piece') continue;
     const cx=M+f*S+S/2, cy=M+(8-r)*S+S/2;
     if(st==='win')
-      s+=`<circle cx="${cx}" cy="${cy}" r="5" fill="rgba(0,0,0,0.42)" pointer-events="none"/>`;
+      s+=`<circle cx="${cx}" cy="${cy}" r="5" fill="${MAPINK.win}" pointer-events="none"/>`;
     else if(st==='drw')
       s+=`<rect x="${cx-6}" y="${cy-1.6}" width="12" height="3.2" rx="1.6"
-        fill="rgba(0,0,0,0.42)" pointer-events="none"/>`;
+        fill="${MAPINK.drw}" pointer-events="none"/>`;
   }
   return s;
+}
+function resetInk(){
+  for(let f=0;f<8;f++) for(let r=1;r<=8;r++){
+    const lb=document.getElementById('lb-'+FILESTR[f]+r);
+    if(lb) lb.setAttribute('fill','rgba(0,0,0,0.45)');
+  }
 }
 function mapStats(){
   let win=0, drw=0, ill=0;
@@ -1149,6 +1159,7 @@ function paint(){
     ng.innerHTML=s;
   } else if(t.map){ ng.innerHTML=mapMarks(); }
   else ng.innerHTML='';
+  if(!t.map) resetInk();
   renderPieces(pieceList(t,st), st && st.jump);
   // the placement map: controls, live counts, and the whole-table figure
   const mc=document.getElementById('mapctl'), cen=document.getElementById('census');
@@ -1176,7 +1187,7 @@ function paint(){
   document.getElementById('tCap').textContent=t.c;
   const SW={s:'#f09b28',w:'#f3d391',s2:'#4f9bf0',w2:'#a9c8ec',
             g2:'#f6bd55',wk:'#e6c46c',bk:'#7dc48f',chk:'#e8604e',
-            win:'#c98500',drw:'#4f95ea',ill:'#4b5059'};
+            win:'#008300',drw:'#e66767',ill:'#4b5059'};
   document.getElementById('tLegend').innerHTML=(t.legend||[]).map(([k,txt])=>
     `<div><span class="swb" style="background:${SW[k]||'#f09b28'}"></span><span>${txt}</span></div>`).join('');
   const nt=document.getElementById('tNotes');

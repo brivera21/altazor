@@ -11,10 +11,13 @@ from playwright.sync_api import sync_playwright
 HERE = Path(__file__).parent
 D = Path("/home/claude/kbbtb/kpk_dtm.bin").read_bytes()
 F = "abcdefgh"
-WIN = ("#dfa42b", "#b07400")
-DRW = ("#4f95ea", "#2f6cb8")
+WIN = ("#009a00", "#008300")
+DRW = ("#f08585", "#e66767")
 ILL = ("#4b5059", "#33373e")
 PIECE = ("#c3cad4", "#7c8494")
+# the coordinate label ink flips with the fill, so it stays readable
+INK = {"win": "rgba(255,255,255,0.66)", "drw": "rgba(0,0,0,0.46)",
+       "ill": "rgba(255,255,255,0.38)", "piece": "rgba(0,0,0,0.45)"}
 
 
 def sq(n):
@@ -68,6 +71,10 @@ JS = """() => {
     out.fills['ab cdefgh'.replace(' ','')[+r.dataset.f]+r.dataset.r] =
       r.getAttribute('fill').toLowerCase();
   });
+  out.ink={};
+  document.querySelectorAll('[id^="lb-"]').forEach(t=>{
+    out.ink[t.id.slice(3)] = t.getAttribute('fill');
+  });
   const ng=document.getElementById('numbers');
   out.circles=ng.querySelectorAll('circle').length;
   out.dashes=ng.querySelectorAll('rect').length;
@@ -94,12 +101,14 @@ with sync_playwright() as p:
         exp, win, drw, ill = expect(wk, wp, stm)
         wrong = [nm(s) for s in range(64)
                  if got["fills"][nm(s)] != exp[s][1]]
-        ok = not wrong and got["circles"] == win and got["dashes"] == drw
+        badink = [nm(s) for s in range(64)
+                  if got["ink"][nm(s)] != INK[exp[s][0]]]
+        ok = not wrong and not badink and got["circles"] == win and got["dashes"] == drw
         ok = ok and f"{win}" in got["stats"] and f"{drw}" in got["stats"]
         ok = ok and got["census"] != "none"
         print("%-4s %-3s %-5s  win %2d draw %2d illegal %2d   %s"
               % ("K" + wkn, wpn, "W" if stm == 0 else "B", win, drw, ill,
-                 "ok" if ok else "MISMATCH " + ",".join(wrong[:6])))
+                 "ok" if ok else "MISMATCH " + ",".join((wrong + badink)[:6])))
         if not ok:
             fails += 1
             print("   marks:", got["circles"], got["dashes"], "|", got["stats"])
