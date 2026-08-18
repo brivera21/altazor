@@ -205,9 +205,8 @@ TOPICS = [
       c="The whole ending at once. Put the white king and the pawn wherever "
         "you like, choose who is to move, and every square is painted with "
         "the result if the black king stood on it: green where White wins, "
-        "red where Black holds. Click a square to move "
-        "the selected piece. The arrow keys walk the pawn: left and right "
-        "change its file, up and down its rank. The figure under the board "
+        "red where Black holds. Pick a piece, then click a square to put it "
+        "there, or walk it with the arrow keys. The figure under the board "
         "counts the table whole.",
       legend=[("win", "White wins with the black king here"),
               ("drw", "Black holds the draw"),
@@ -1227,12 +1226,7 @@ document.getElementById('mpK').onclick=()=>{ mapPiece='K'; paint(); };
 document.getElementById('mpP').onclick=()=>{ mapPiece='P'; paint(); };
 document.getElementById('msW').onclick=()=>{ setSTM(0); };
 document.getElementById('msB').onclick=()=>{ setSTM(1); };
-function setSTM(v){
-  mapSTM=v;
-  // Black cannot already be in check on White's turn; nudge the pawn if so
-  if(mapSTM===0 && pawnHits(mapWP,mapWK)) mapSTM=1;
-  paint();
-}
+function setSTM(v){ mapSTM=v; paint(); }
 function placeAt(s){
   if(mapPiece==='K'){
     if(s===mapWP) return;
@@ -1244,12 +1238,23 @@ function placeAt(s){
   }
   paint();
 }
-function movePawn(df,dr){
-  const f=(mapWP&7)+df, r=(mapWP>>3)+dr;
-  if(f<0||f>7||r<1||r>6) return;
-  const s=r*8+f;
-  if(s===mapWK) return;
-  mapWP=s; paint();
+/* the arrow keys move whichever piece the Place buttons have selected */
+function moveSel(df,dr){
+  const from = mapPiece==='K' ? mapWK : mapWP;
+  const f=(from&7)+df, r=(from>>3)+dr;
+  if(f<0||f>7) return;
+  if(mapPiece==='P'){                       // a pawn lives on ranks 2 to 7
+    if(r<1||r>6) return;
+    const s=r*8+f;
+    if(s===mapWK) return;
+    mapWP=s;
+  } else {
+    if(r<0||r>7) return;
+    const s=r*8+f;
+    if(s===mapWP) return;
+    mapWK=s;
+  }
+  paint();
 }
 svg.addEventListener('click',e=>{
   if(!TOPICS[cur].map) return;
@@ -1263,10 +1268,10 @@ document.getElementById('next').onclick=()=>show(cur+1);
 document.addEventListener('keydown',e=>{
   const t=TOPICS[cur];
   if(t.map){
-    if(e.key==='ArrowLeft'){ movePawn(-1,0); e.preventDefault(); }
-    if(e.key==='ArrowRight'){ movePawn(1,0); e.preventDefault(); }
-    if(e.key==='ArrowUp'){ movePawn(0,1); e.preventDefault(); }
-    if(e.key==='ArrowDown'){ movePawn(0,-1); e.preventDefault(); }
+    if(e.key==='ArrowLeft'){ moveSel(-1,0); e.preventDefault(); }
+    if(e.key==='ArrowRight'){ moveSel(1,0); e.preventDefault(); }
+    if(e.key==='ArrowUp'){ moveSel(0,1); e.preventDefault(); }
+    if(e.key==='ArrowDown'){ moveSel(0,-1); e.preventDefault(); }
     return;
   }
   if(t.steps){

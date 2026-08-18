@@ -117,10 +117,14 @@ with sync_playwright() as p:
     pg.evaluate("()=>{mapWK=36;mapWP=28;mapSTM=0;mapPiece='K';paint();}")
     pg.click("#msB")
     s1 = pg.evaluate("()=>[mapSTM, document.getElementById('mapstats').textContent]")
+    pg.keyboard.press("ArrowLeft")          # king is still selected: it moves
+    pg.keyboard.press("ArrowUp")
+    sK = pg.evaluate("()=>[mapWK, mapWP]")
+    pg.evaluate("()=>{mapWK=36;paint();}")
     pg.click("#mpP")
     pg.keyboard.press("ArrowLeft")
     pg.keyboard.press("ArrowDown")
-    s2 = pg.evaluate("()=>[mapWP, mapPiece]")
+    s2 = pg.evaluate("()=>[mapWP, mapPiece, mapWK]")
     pg.click("#sq-b7")            # place the pawn by clicking
     s3 = pg.evaluate("()=>mapWP")
     pg.click("#sq-b8")            # rank 8 is not a pawn square: must be ignored
@@ -130,7 +134,9 @@ with sync_playwright() as p:
     s5 = pg.evaluate("()=>mapWK")
     checks = [("side to move toggles", s1[0] == 1),
               ("stats redraw", "Black" in s1[1]),
-              ("arrow keys walk the pawn", s2[0] == sq("d3") and s2[1] == "P"),
+              ("arrows move the king", sK[0] == sq("d6") and sK[1] == sq("e4")),
+              ("arrows move the pawn", s2[0] == sq("d3") and s2[1] == "P"),
+              ("pawn arrows leave the king", s2[2] == sq("e5")),
               ("click places the pawn", s3 == sq("b7")),
               ("rank 8 refused", s4 == sq("b7")),
               ("click places the king", s5 == sq("h1"))]
