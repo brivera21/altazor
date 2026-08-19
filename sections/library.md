@@ -38,14 +38,14 @@ title: Library
 
 ## Mexico
 
-[Roads Around El Terrero, Namiquipa](el-terrero.html)
+[El Terrero, Namiquipa](el-terrero.html)
 
 ## USA
 
-[Every State by Population](us-states.html)
+[50 States and a District](us-states.html)
 
-[Most Populous Cities in the United States](us-cities.html)
+[US Cities](us-cities.html)
 
-## Demography
+## The World's Demography
 
 [World's Most Populous Countries](populous-countries.html)
