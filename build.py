@@ -38,6 +38,7 @@ SECTIONS = [
     {"slug": "library", "title": "Library"},
     {"slug": "film", "title": "Film"},
     {"slug": "chess", "title": "Chess"},
+    {"slug": "science-fiction", "title": "Science Fiction"},
     {"slug": "notes", "title": "Notes"},
     {"slug": "elsewhere", "title": "Elsewhere"},
 ]
@@ -125,6 +126,18 @@ a { color: var(--accent); }
   max-width: 40rem;
 }
 .section-body p, article p { margin: 0 0 1.1rem; }
+.section-body h2 {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 2.4rem 0 0.9rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--line);
+}
+.section-body h2:first-child { margin-top: 0; }
 article h1 { font-family: Georgia, "Times New Roman", serif; }
 time, .date {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
@@ -218,6 +231,7 @@ def nav_html(here=None):
 
 
 def page(title, content, here=None, footer='<a href="index.html">Altazor</a>'):
+    footer += ' · <a href="library.html#abstractions">Abstractions</a>'
     return PAGE_TEMPLATE.format(
         title=title,
         site_title=SITE_TITLE,
