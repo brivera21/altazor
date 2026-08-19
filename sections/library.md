@@ -38,7 +38,14 @@ title: Library
 
 ## Mexico
 
-[El Terrero, Namiquipa](el-terrero.html)
+<details class="dc-drop">
+<summary>Chihuahua</summary>
+<ul>
+<li><a href="el-terrero.html">El Terrero, Namiquipa</a></li>
+<li class="soon">Archivo Namiquipa <span class="tag">coming soon</span></li>
+<li class="soon">Cabalgata Binacional Villista (Villista Binational Cavalcade) <span class="tag">coming soon</span></li>
+</ul>
+</details>
 
 ## USA
 
