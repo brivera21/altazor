@@ -34,8 +34,6 @@ title: Library
 </ul>
 </details>
 
-[Earth's Orbit as a Sine Wave Through Time](orbit-sine.html)
-
 ## Mexico
 
 <details class="dc-drop">
@@ -56,3 +54,7 @@ title: Library
 ## The World's Demography
 
 [World's Most Populous Countries](populous-countries.html)
+
+## Abstractions {: #abstractions }
+
+[Earth's Orbit as a Sine Wave Through Time](orbit-sine.html)
