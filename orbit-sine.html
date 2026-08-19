@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Earth's Orbit as a Sine Wave Through Time · Altazor</title>
+<style>
+  :root {
+    --bg: #05070f;
+    --panel: rgba(13, 18, 34, 0.82);
+    --text: #dbe4f5;
+    --dim: #8593ad;
+    --accent: #5ab0ff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; background: var(--bg); font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+  #space { position: absolute; inset: 0; display: block; cursor: grab; touch-action: none; }
+  #space:active { cursor: grabbing; }
+  #hud {
+    position: absolute; top: 16px; left: 16px; right: 16px;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    pointer-events: none; color: var(--text);
+  }
+  #sitenav { pointer-events: auto; display: flex; gap: 14px; align-items: baseline; margin-bottom: 10px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+  #sitenav .brand { font-weight: 700; font-size: 15px; letter-spacing: 0.1em; text-decoration: none; color: var(--accent); }
+  #sitenav .brand:hover { color: var(--text); }
+  #sitenav a:not(.brand) { color: var(--dim); text-decoration: none; font-size: 13px; }
+  #sitenav a:not(.brand):hover { color: var(--accent); }
+  #hud h1 { font-size: 17px; font-weight: 600; letter-spacing: 0.4px; }
+  #hud p { font-size: 12.5px; color: var(--dim); margin-top: 4px; max-width: 520px; line-height: 1.45; }
+  #readout {
+    text-align: right; font-variant-numeric: tabular-nums;
+    background: var(--panel); border: 1px solid rgba(90,176,255,0.18);
+    border-radius: 10px; padding: 10px 14px; backdrop-filter: blur(6px);
+  }
+  #readout .big { font-size: 20px; font-weight: 600; color: var(--accent); }
+  #readout .lbl { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
+  #controls {
+    position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%);
+    width: min(680px, calc(100% - 32px));
+    background: var(--panel); border: 1px solid rgba(90,176,255,0.18);
+    border-radius: 14px; padding: 14px 18px 12px;
+    backdrop-filter: blur(8px); color: var(--text);
+  }
+  .row { display: flex; align-items: center; gap: 14px; }
+  .row + .row { margin-top: 8px; }
+  label { font-size: 12.5px; color: var(--dim); white-space: nowrap; min-width: 150px; }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px;
+    background: #223046; outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent); border: 2px solid #0b1120; cursor: pointer;
+    box-shadow: 0 0 10px rgba(90,176,255,0.7);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent); border: 2px solid #0b1120; cursor: pointer;
+    box-shadow: 0 0 10px rgba(90,176,255,0.7);
+  }
+  .val { font-size: 13px; font-variant-numeric: tabular-nums; min-width: 78px; text-align: right; color: var(--text); }
+  button {
+    background: #1a2740; color: var(--text); border: 1px solid rgba(90,176,255,0.3);
+    border-radius: 8px; padding: 6px 14px; font-size: 13px; cursor: pointer;
+  }
+  button:hover { background: #223354; }
+  #note {
+    margin-top: 9px; font-size: 11.5px; color: var(--dim); line-height: 1.4;
+  }
+  @media (max-width: 640px) {
+    #hud p { display: none; }
+    label { min-width: 110px; font-size: 11.5px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="space"></canvas>
+
+<div id="hud">
+  <div>
+    <div id="sitenav"><a class="brand" href="index.html">ALTAZOR</a><a href="library.html">&larr; Library</a></div>
+    <h1>Earth's Orbit as a Sine Wave Through Time</h1>
+    <p>Earth circles the Sun once a year (<b>clockwise</b> when viewed from south of the ecliptic). Add a time axis and that circle
+       becomes a helix: every point of Earth's trace slides into the past along the axis while staying fixed in space.
+       Seen from the side, Earth simply bobs <b>up and down</b> — and the trace it leaves behind is a sine wave stretching back through
+       the years. Drag the view or use the slider to swing between the pole view (circle) and the side view (sine wave).</p>
+  </div>
+  <div id="readout">
+    <div class="lbl">Elapsed</div>
+    <div class="big" id="yearsOut">0.0 yr</div>
+    <div class="lbl" style="margin-top:6px">Trace kept</div>
+    <div class="big" id="traceOut" style="font-size:15px">0.0 yr</div>
+  </div>
+</div>
+
+<div id="controls">
+  <div class="row">
+    <label for="past">Years of trace to keep</label>
+    <input type="range" id="past" min="0" max="30" step="0.05" value="30">
+    <div class="val" id="pastVal">30.0 years</div>
+  </div>
+  <div class="row">
+    <label for="tilt">View: pole → side</label>
+    <input type="range" id="tilt" min="0" max="90" step="0.5" value="90">
+    <div class="val" id="tiltVal">90°</div>
+    <button id="viewBtn">Pole view</button>
+  </div>
+  <div class="row">
+    <label for="depth">Time axis scale</label>
+    <input type="range" id="depth" min="0" max="300" step="1" value="110">
+    <div class="val" id="depthVal">110 px/yr</div>
+    <button id="sideBtn">Side view</button>
+  </div>
+  <div class="row">
+    <label for="speed">Orbit speed</label>
+    <input type="range" id="speed" min="0" max="3" step="0.05" value="0.6">
+    <div class="val" id="speedVal">0.6 yr/s</div>
+    <button id="playBtn">Pause</button>
+    <button id="resetBtn">Restart</button>
+  </div>
+  <div id="note">
+    Note on accuracy: the clockwise direction of both Earth's orbit and its spin is correct for a south-of-the-ecliptic viewpoint,
+    and the side-on projection of uniform circular motion really is a sine wave. The horizontal axis is <i>time</i>, not distance —
+    Earth stays ≈1 au (149.6 million km) from the Sun on a nearly circular path. Sizes are not to scale.
+  </div>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('space');
+  const ctx = canvas.getContext('2d');
+  const pastSlider = document.getElementById('past');
+  const speedSlider = document.getElementById('speed');
+  const pastVal = document.getElementById('pastVal');
+  const speedVal = document.getElementById('speedVal');
+  const yearsOut = document.getElementById('yearsOut');
+  const traceOut = document.getElementById('traceOut');
+  const playBtn = document.getElementById('playBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const tiltSlider = document.getElementById('tilt');
+  const tiltVal = document.getElementById('tiltVal');
+  const viewBtn = document.getElementById('viewBtn');
+  const depthSlider = document.getElementById('depth');
+  const depthVal = document.getElementById('depthVal');
+  const sideBtn = document.getElementById('sideBtn');
+
+  let W, H, cx, cy, Rorbit, dpr;
+  let stars = [];
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cx = W / 2;
+    cy = H / 2 - 10;
+    Rorbit = Math.min(W, H) * 0.36;
+    // starfield (deterministic-ish, regenerated on resize)
+    stars = [];
+    for (let i = 0; i < 220; i++) {
+      stars.push({
+        x: Math.random() * W, y: Math.random() * H,
+        r: Math.random() * 1.3 + 0.2, a: Math.random() * 0.55 + 0.1
+      });
+    }
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ---- Simulation state ----
+  // Angle in canvas coordinates (y down): an INCREASING angle appears CLOCKWISE
+  // on screen, which is the correct sense for Earth's orbit seen from the south.
+  const TWO_PI = Math.PI * 2;
+  let simYears = 0;          // elapsed simulated years ("now")
+  let playing = true;
+  let speed = parseFloat(speedSlider.value);   // years per real second
+  let tracePast = parseFloat(pastSlider.value); // how many years of past to spiral through
+
+  const SUN_R = 26;          // sun core radius px
+  const EARTH_R = 9;
+  const TAU_DECAY = 6.5;     // e-folding time (years) of the spiral radius
+
+  // Radius of the "past" position a years ago: shrinks toward the Sun.
+  function pastRadius(a) {
+    // Constant amplitude: the trace keeps Earth's full orbital radius at every age,
+    // so seen from the side it is a clean (undamped) sine wave through time.
+    return Rorbit;
+  }
+  function angleAt(yearsAgo) {
+    // orbit angle at (now - yearsAgo); increasing with time => clockwise on screen
+    return (simYears - yearsAgo) * TWO_PI - Math.PI / 2;
+  }
+  // ---- View rotation (3D) ----
+  // The orbit lives in a flat plane (world x,y; z = 0, z pointing toward the viewer
+  // on the south side). `tilt` rotates that plane about the screen's horizontal axis
+  // so you can look at it edge-on ("sideways"); `spin` turns it about the vertical
+  // screen axis. Drag on the canvas to rotate freely; the slider sets tilt directly.
+  let tilt = 90 * Math.PI / 180; // radians, 0 = looking straight at the south pole, 90 = side view
+  let spin = 0;       // radians, rotation about the vertical screen axis
+  const PERSP = 0; // orthographic: keeps the side view a true sine wave
+  let timeDepth = 110;   // px per year: how far each year of history drops below the orbital plane
+
+  function project(wx, wy, wz) {
+    // tilt about the VERTICAL screen axis: swings the time axis (wz) from
+    // pointing at the viewer (pole view) to lying horizontally on screen
+    // (side view, past to the left) — so Earth's circular motion becomes a
+    // vertical up-and-down, and its trace a sine wave through time.
+    const ct = Math.cos(tilt), st = Math.sin(tilt);
+    let x = wx * ct + wz * st;
+    let z = -wx * st + wz * ct;
+    let y = wy;
+    // spin about the horizontal screen axis (free drag), for a 3D look
+    const cs = Math.cos(spin), ss = Math.sin(spin);
+    const y2 = y * cs - z * ss;
+    const z2 = y * ss + z * cs;
+    const s = 1 / (1 - z2 * PERSP);  // z2 > 0 = toward viewer = slightly larger
+    return { x: cx + x * s * viewScale, y: cy + y2 * s * viewScale, s };
+  }
+  // Auto-fit: keep the whole tilted figure (orbit + history helix) inside the
+  // area between the header and the control panel, whatever the tilt/depth.
+  let viewScale = 1;
+  function fitView() {
+    const controls = document.getElementById('controls');
+    const top = 175, bottom = H - controls.offsetHeight - 40;
+    const left = 30, right = W - 30;
+    const shown = Math.min(simYears, tracePast);
+    // sample with cx=cy=0, viewScale=1
+    const savedCx = cx, savedCy = cy, savedScale = viewScale;
+    cx = 0; cy = 0; viewScale = 1;
+    let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+    const depths = [0, Math.max(shown, 0.5)];
+    for (const a of depths) {
+      const r = a === 0 ? Rorbit : pastRadius(a);
+      for (let i = 0; i < 36; i++) {
+        const th = (i / 36) * TWO_PI;
+        const p = project(r * Math.cos(th), r * Math.sin(th), -timeDepth * a);
+        minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+        minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+      }
+    }
+    // include Sun glow / labels
+    minY -= 30; maxY += 30; minX -= 30; maxX += 30;
+    const sc = Math.min(1, (bottom - top) / (maxY - minY), (right - left) / (maxX - minX));
+    viewScale = sc;
+    cx = (left + right) / 2 - sc * (minX + maxX) / 2;
+    cy = (top + bottom) / 2 - sc * (minY + maxY) / 2;
+    void savedCx; void savedCy; void savedScale;
+  }
+  function world(a) {
+    const th = angleAt(a);
+    const r = a === 0 ? Rorbit : pastRadius(a);
+    // z: the history axis. Older points drop further "below" the orbital plane
+    // (negative z = away from the south-side viewer), so when the view is tilted
+    // the trace reads as a helix descending into the past.
+    return { x: r * Math.cos(th), y: r * Math.sin(th), z: -timeDepth * a };
+  }
+  function pos(a) {
+    const w = world(a);
+    return project(w.x, w.y, w.z);
+  }
+
+  // ---- UI ----
+  function fmt(v, unit) { return v.toFixed(1) + ' ' + unit; }
+  pastSlider.addEventListener('input', () => {
+    tracePast = parseFloat(pastSlider.value);
+  });
+  speedSlider.addEventListener('input', () => {
+    speed = parseFloat(speedSlider.value);
+    speedVal.textContent = fmt(speed, 'yr/s');
+  });
+  playBtn.addEventListener('click', () => {
+    playing = !playing;
+    playBtn.textContent = playing ? 'Pause' : 'Play';
+  });
+  resetBtn.addEventListener('click', () => { simYears = 0; });
+  tiltSlider.addEventListener('input', () => {
+    tilt = parseFloat(tiltSlider.value) * Math.PI / 180;
+    tiltVal.textContent = tiltSlider.value + '°';
+  });
+  viewBtn.addEventListener('click', () => {
+    tilt = 0; spin = 0;
+    tiltSlider.value = 0; tiltVal.textContent = '0°';
+  });
+  sideBtn.addEventListener('click', () => {
+    tilt = Math.PI / 2; spin = 0;
+    tiltSlider.value = (tilt * 180 / Math.PI).toFixed(1);
+    tiltVal.textContent = Math.round(tilt * 180 / Math.PI) + '°';
+  });
+  depthSlider.addEventListener('input', () => {
+    timeDepth = parseFloat(depthSlider.value);
+    depthVal.textContent = depthSlider.value + ' px/yr';
+  });
+  // Drag on the canvas to rotate freely (vertical drag = tilt, horizontal = spin)
+  let dragging = false, lastX = 0, lastY = 0;
+  canvas.addEventListener('pointerdown', e => {
+    dragging = true; lastX = e.clientX; lastY = e.clientY;
+    canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const dx = e.clientX - lastX, dy = e.clientY - lastY;
+    lastX = e.clientX; lastY = e.clientY;
+    tilt = Math.max(0, Math.min(Math.PI / 2, tilt + dx * 0.008));
+    spin = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, spin + dy * 0.008));
+    tiltSlider.value = (tilt * 180 / Math.PI).toFixed(1);
+    tiltVal.textContent = Math.round(tilt * 180 / Math.PI) + '°';
+  });
+  canvas.addEventListener('pointerup', () => { dragging = false; });
+  canvas.addEventListener('pointercancel', () => { dragging = false; });
+
+  // ---- Drawing ----
+  function drawStars() {
+    for (const s of stars) {
+      ctx.globalAlpha = s.a;
+      ctx.fillStyle = '#cdd9f0';
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, TWO_PI);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawSun() {
+    const o = project(0, 0, 0);
+    const cx = o.x, cy = o.y;
+    // glow
+    let g = ctx.createRadialGradient(cx, cy, 0, cx, cy, SUN_R * 5);
+    g.addColorStop(0, 'rgba(255, 210, 100, 0.55)');
+    g.addColorStop(0.25, 'rgba(255, 170, 60, 0.18)');
+    g.addColorStop(1, 'rgba(255, 150, 40, 0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(cx, cy, SUN_R * 5, 0, TWO_PI); ctx.fill();
+    // body
+    g = ctx.createRadialGradient(cx - 6, cy - 6, 2, cx, cy, SUN_R);
+    g.addColorStop(0, '#fff7d6');
+    g.addColorStop(0.55, '#ffd257');
+    g.addColorStop(1, '#f59f1e');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(cx, cy, SUN_R, 0, TWO_PI); ctx.fill();
+    ctx.fillStyle = 'rgba(255,240,200,0.9)';
+    ctx.font = '11px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Sun', cx, cy + SUN_R + 16);
+  }
+
+  function drawCurrentOrbit() {
+    ctx.strokeStyle = 'rgba(120, 160, 220, 0.35)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([5, 7]);
+    ctx.beginPath();
+    for (let i = 0; i <= 120; i++) {
+      const th = (i / 120) * TWO_PI;
+      const p = project(Rorbit * Math.cos(th), Rorbit * Math.sin(th), 0);
+      if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function drawTimeAxis() {
+    // History (time) axis through the Sun: "now" at the orbital plane, past along -z.
+    const shown = Math.min(simYears, tracePast);
+    const depthYears = Math.max(shown, 1);
+    const top = project(0, 0, 0);
+    const bot = project(0, 0, -timeDepth * depthYears);
+    if (Math.hypot(bot.x - top.x, bot.y - top.y) < 4) return; // looking straight down
+    ctx.strokeStyle = 'rgba(255,200,120,0.35)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 5]);
+    ctx.beginPath(); ctx.moveTo(top.x, top.y); ctx.lineTo(bot.x, bot.y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(255,200,120,0.6)';
+    ctx.font = '10.5px system-ui, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('← past', bot.x - 40, bot.y - 8);
+  }
+
+  function drawSpiral() {
+    // The trace only exists where Earth has actually been: it is laid down
+    // as the animation runs, then each point sinks toward the Sun as it ages.
+    const shown = Math.min(simYears, tracePast);
+    if (shown <= 0.002) return;
+
+    // Draw from the oldest surviving point forward to Earth "now".
+    // Every point keeps the angle it was deposited at (fixed in space);
+    // only its radius decays with age — so the trail is left behind, not rotated.
+    const steps = Math.max(60, Math.round(shown * 90));
+    let prev = pos(shown);
+    for (let i = steps - 1; i >= 0; i--) {
+      const a = (i / steps) * shown;             // age (years ago) of this segment end
+      const p = pos(a);
+      const frac = tracePast > 0 ? a / tracePast : 0;  // 0 = fresh, 1 = about to expire
+      const alpha = 0.9 - 0.65 * frac;
+      const rC = Math.round(90 + 165 * frac);
+      const gC = Math.round(160 + 20 * frac);
+      const bC = Math.round(255 - 140 * frac);
+      ctx.strokeStyle = `rgba(${rC},${gC},${bC},${alpha})`;
+      ctx.lineWidth = 2.4 - 1.4 * frac;
+      ctx.beginPath();
+      ctx.moveTo(prev.x, prev.y);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      prev = p;
+    }
+
+    // Year markers: dropped at each whole year of the simulation, at the point
+    // in space where Earth was at that moment. They do NOT rotate — every
+    // whole-year mark sits on the same fixed ray and only slides inward as it ages.
+    ctx.font = '10.5px system-ui, sans-serif';
+    ctx.textAlign = 'left';
+    const kMax = Math.floor(simYears + 1e-9);
+    const kMin = Math.max(0, Math.ceil(simYears - shown - 1e-9));
+    const nMarks = kMax - kMin + 1;
+    const labelEvery = nMarks > 18 ? 5 : (nMarks > 8 ? 2 : 1);
+    for (let k = kMin; k <= kMax; k++) {
+      const age = simYears - k;
+      if (age < 0 || age > shown) continue;
+      const p = pos(age);
+      const frac = tracePast > 0 ? age / tracePast : 0;
+      ctx.fillStyle = `rgba(220,230,250,${0.9 - 0.5 * frac})`;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 2.8, 0, TWO_PI); ctx.fill();
+      if (k % labelEvery === 0) {
+        ctx.fillStyle = `rgba(180,200,235,${0.95 - 0.45 * frac})`;
+        ctx.fillText(k === 0 ? 'start' : 'yr ' + k, p.x + 8, p.y + 3.5);
+      }
+    }
+
+    // oldest surviving end of the trace
+    const tail = pos(shown);
+    ctx.fillStyle = 'rgba(255,190,120,0.9)';
+    ctx.beginPath(); ctx.arc(tail.x, tail.y, 3.2, 0, TWO_PI); ctx.fill();
+  }
+
+  function drawEarth() {
+    const p = pos(0);
+    // atmosphere glow
+    let g = ctx.createRadialGradient(p.x, p.y, 1, p.x, p.y, EARTH_R * 2.6);
+    g.addColorStop(0, 'rgba(110,180,255,0.5)');
+    g.addColorStop(1, 'rgba(110,180,255,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(p.x, p.y, EARTH_R * 2.6, 0, TWO_PI); ctx.fill();
+
+    // body — lit from the Sun's direction
+    const sunP = project(0, 0, 0);
+    const sunAng = Math.atan2(sunP.y - p.y, sunP.x - p.x);
+    g = ctx.createRadialGradient(
+      p.x + Math.cos(sunAng) * EARTH_R * 0.6, p.y + Math.sin(sunAng) * EARTH_R * 0.6, 1,
+      p.x, p.y, EARTH_R * 1.35
+    );
+    g.addColorStop(0, '#9fd4ff');
+    g.addColorStop(0.5, '#2e7fd6');
+    g.addColorStop(1, '#0b2b5e');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(p.x, p.y, EARTH_R, 0, TWO_PI); ctx.fill();
+
+    // spin arrow: Earth's rotation also looks clockwise from the south.
+    // Static direction indicator (does not rotate).
+    ctx.strokeStyle = 'rgba(220,235,255,0.85)';
+    ctx.lineWidth = 1.4;
+    const sr = EARTH_R + 5;
+    // The spin ring lies in the orbital plane too, so project it like everything else.
+    const w = world(0);
+    const a0 = 0.9; // fixed arc, clockwise sense shown by the arrowhead
+    ctx.beginPath();
+    for (let i = 0; i <= 24; i++) {
+      const th = a0 + (i / 24) * 1.9;
+      const q = project(w.x + sr * Math.cos(th), w.y + sr * Math.sin(th), 0);
+      if (i === 0) ctx.moveTo(q.x, q.y); else ctx.lineTo(q.x, q.y);
+    }
+    ctx.stroke();
+    const tipA = a0 + 1.9;
+    const t1 = project(w.x + sr * Math.cos(tipA), w.y + sr * Math.sin(tipA), 0);
+    const t2 = project(w.x + sr * Math.cos(tipA + 0.05), w.y + sr * Math.sin(tipA + 0.05), 0);
+    const tx = t1.x, ty = t1.y;
+    const tang = Math.atan2(t2.y - t1.y, t2.x - t1.x); // projected clockwise direction
+    ctx.fillStyle = 'rgba(220,235,255,0.85)';
+    ctx.beginPath();
+    ctx.moveTo(tx + 5 * Math.cos(tang), ty + 5 * Math.sin(tang));
+    ctx.lineTo(tx + 4 * Math.cos(tang + 2.6), ty + 4 * Math.sin(tang + 2.6));
+    ctx.lineTo(tx + 4 * Math.cos(tang - 2.6), ty + 4 * Math.sin(tang - 2.6));
+    ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = 'rgba(200,225,255,0.95)';
+    ctx.font = '11px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Earth (now)', p.x, p.y - EARTH_R - 12);
+  }
+
+  function drawOrbitDirectionArrow() {
+    // small arrow on the orbit circle ahead of Earth showing clockwise motion
+    const lead = angleAt(0) + 0.45;
+    const pa = project(Rorbit * Math.cos(lead), Rorbit * Math.sin(lead), 0);
+    const pb = project(Rorbit * Math.cos(lead + 0.05), Rorbit * Math.sin(lead + 0.05), 0);
+    const ax = pa.x, ay = pa.y;
+    const tang = Math.atan2(pb.y - pa.y, pb.x - pa.x); // projected direction of motion
+    ctx.fillStyle = 'rgba(120,160,220,0.6)';
+    ctx.beginPath();
+    ctx.moveTo(ax + 7 * Math.cos(tang), ay + 7 * Math.sin(tang));
+    ctx.lineTo(ax + 6 * Math.cos(tang + 2.5), ay + 6 * Math.sin(tang + 2.5));
+    ctx.lineTo(ax + 6 * Math.cos(tang - 2.5), ay + 6 * Math.sin(tang - 2.5));
+    ctx.closePath(); ctx.fill();
+  }
+
+  // ---- Main loop ----
+  let last = performance.now();
+  function frame(t) {
+    const dt = Math.min((t - last) / 1000, 0.05);
+    last = t;
+    if (playing) simYears += dt * speed;
+
+    fitView();
+    ctx.clearRect(0, 0, W, H);
+    drawStars();
+    drawCurrentOrbit();
+    drawTimeAxis();
+    drawSpiral();
+    drawSun();
+    drawOrbitDirectionArrow();
+    drawEarth();
+
+    pastVal.textContent = fmt(tracePast, 'years');
+    yearsOut.textContent = fmt(simYears, 'yr');
+    traceOut.textContent = fmt(Math.min(simYears, tracePast), 'yr');
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
