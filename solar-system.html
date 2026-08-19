@@ -30,14 +30,14 @@
 
   #controls {
     position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%);
-    width: min(860px, calc(100% - 24px));
+    width: min(1010px, calc(100% - 24px));
     background: var(--panel); border: 1px solid var(--line);
     border-radius: 14px; padding: 10px 14px; backdrop-filter: blur(8px); color: var(--text);
   }
   #chips { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
   .chip {
     background: #16203a; color: var(--dim); border: 1px solid var(--line);
-    border-radius: 999px; padding: 4px 12px; font-size: 12.5px; cursor: pointer;
+    border-radius: 999px; padding: 4px 10px; font-size: 12px; cursor: pointer;
   }
   .chip:hover { color: var(--text); border-color: var(--accent); }
   .chip.on { color: #0b1120; background: var(--accent); border-color: var(--accent); font-weight: 600; }
@@ -267,8 +267,9 @@
     chips.appendChild(b);
   }
   addChip("Overview", null);
-  addChip("Sun", SUN);
-  PLANETS.forEach(p => addChip(p.name, p));
+  addChip("I. SUN", SUN);
+  const NUMERALS = ["II","III","IV","V","VI","VII","VIII","IX"];
+  PLANETS.forEach((p, i) => addChip(NUMERALS[i] + ". " + p.name.toUpperCase(), p));
 
   const scaleBtn = document.getElementById("scaleBtn");
   const modeNote = document.getElementById("modeNote");
