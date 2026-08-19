@@ -83,10 +83,10 @@
 <div id="hud">
   <div id="sitenav"><a class="brand" href="index.html">ALTAZOR</a><a href="library.html">&larr; Library</a></div>
   <h1>The Solar System, Aligned</h1>
-  <p>All eight planets lined up on one side of the Sun — a moment real orbits never quite produce.
-     Click a planet (or a chip below) to zoom in and read about it. Press <b>Make to scale</b> and both the
-     distances and the sizes become true: the planets collapse to dots, correctly spaced, and the room between
-     them becomes the point. Drag to pan, scroll to zoom.</p>
+  <p>All eight planets lined up on one side of the Sun, a moment real orbits never quite produce.
+     Click a planet or a chip below to zoom in and read about it. Press <b>Make to scale</b> to place
+     the planets at their true distances and sizes. They shrink to dots with vast space between them.
+     Drag to pan, scroll to zoom.</p>
 </div>
 
 <div id="info">
@@ -109,7 +109,7 @@
   <div id="chips"></div>
   <div id="row2">
     <button id="scaleBtn">Make to scale</button>
-    <span id="modeNote">Lenient scale — sizes and spacing exaggerated so every planet is visible.</span>
+    <span id="modeNote">Lenient scale: sizes and spacing are exaggerated so every planet is visible.</span>
   </div>
 </div>
 
@@ -131,31 +131,31 @@
     name: "Sun", type: "G-type main-sequence star", rKm: 695700,
     area: "6.09 × 10<sup>12</sup> km²",
     mass: "1.989 × 10<sup>30</sup> kg (333,000 Earths)",
-    moons: "— (8 planets, plus dwarf planets, asteroids and comets)",
+    moons: "None. It holds 8 planets, plus dwarf planets, asteroids and comets",
     made: "Plasma: ~73% hydrogen, ~25% helium by mass",
     disc: "Known to every human culture",
     probe: "Parker Solar Probe flew through the corona, 2021; closest pass 6.1 million km, 2024",
-    distText: "—"
+    distText: "n/a"
   };
   const PLANETS = [
     { name:"Mercury", type:"Rocky planet", au:0.387, rKm:2439.7, lenR:9,
       area:"7.48 × 10<sup>7</sup> km²", mass:"3.301 × 10<sup>23</sup> kg (0.055 Earths)",
-      moons:"0", made:"Rock and metal — an iron core spanning ~85% of its radius under a silicate mantle and crust",
+      moons:"0", made:"Rock and metal: an iron core spanning ~85% of its radius under a silicate mantle and crust",
       disc:"Known since antiquity (visible to the naked eye)",
       probe:"Mariner 10, flyby, March 29, 1974; first orbited by MESSENGER, 2011" },
     { name:"Venus", type:"Rocky planet", au:0.723, rKm:6051.8, lenR:15,
       area:"4.60 × 10<sup>8</sup> km²", mass:"4.867 × 10<sup>24</sup> kg (0.815 Earths)",
-      moons:"0", made:"Rock and metal — iron core and silicate mantle under a crushing CO₂ atmosphere with sulfuric-acid clouds",
+      moons:"0", made:"Rock and metal: iron core and silicate mantle under a crushing CO₂ atmosphere with sulfuric-acid clouds",
       disc:"Known since antiquity",
-      probe:"Mariner 2, flyby, December 14, 1962 — the first successful visit to another planet; Venera 7 made the first landing, 1970" },
+      probe:"Mariner 2, flyby, December 14, 1962, the first successful visit to another planet; Venera 7 made the first landing, 1970" },
     { name:"Earth", type:"Rocky planet", au:1.000, rKm:6371.0, lenR:16,
       area:"5.10 × 10<sup>8</sup> km²", mass:"5.972 × 10<sup>24</sup> kg",
-      moons:"1 — the Moon", made:"Iron–nickel core, silicate mantle and crust; 71% of the surface covered by ocean",
-      disc:"Home — recognized as a planet after the Copernican revolution, 16th century",
+      moons:"1, the Moon", made:"Iron–nickel core, silicate mantle and crust; 71% of the surface covered by ocean",
+      disc:"Home. Recognized as a planet after the Copernican revolution, 16th century",
       probe:"First orbited from space by Sputnik 1, October 4, 1957" },
     { name:"Mars", type:"Rocky planet", au:1.524, rKm:3389.5, lenR:11,
       area:"1.44 × 10<sup>8</sup> km²", mass:"6.417 × 10<sup>23</sup> kg (0.107 Earths)",
-      moons:"2 — Phobos and Deimos", made:"Rock — iron-sulfide core, basaltic mantle, and a surface rusted red by iron-oxide dust",
+      moons:"2, Phobos and Deimos", made:"Rock: iron-sulfide core, basaltic mantle, and a surface rusted red by iron-oxide dust",
       disc:"Known since antiquity",
       probe:"Mariner 4, flyby, July 15, 1965; Viking 1 made the first working landing, 1976" },
     { name:"Jupiter", type:"Gas giant", au:5.204, rKm:69911, lenR:46,
@@ -165,19 +165,19 @@
       probe:"Pioneer 10, flyby, December 3, 1973; first orbited by Galileo, 1995" },
     { name:"Saturn", type:"Gas giant", au:9.573, rKm:58232, lenR:38,
       area:"4.27 × 10<sup>10</sup> km² (cloud tops)", mass:"5.683 × 10<sup>26</sup> kg (95 Earths)",
-      moons:"285 recognized (2026) — the most of any planet", made:"Hydrogen and helium; rings of almost pure water ice",
+      moons:"285 recognized (2026), the most of any planet", made:"Hydrogen and helium; rings of almost pure water ice",
       disc:"Known since antiquity; rings first seen by Galileo, 1610",
       probe:"Pioneer 11, flyby, September 1, 1979; first orbited by Cassini, 2004" },
     { name:"Uranus", type:"Ice giant", au:19.19, rKm:25362, lenR:24,
       area:"8.08 × 10<sup>9</sup> km² (cloud tops)", mass:"8.681 × 10<sup>25</sup> kg (14.5 Earths)",
       moons:"29 known (incl. S/2025 U1, found by JWST in 2025)", made:"Water, methane and ammonia “ices” over a rocky core, under a hydrogen–helium envelope; methane absorbs red light, leaving its cyan color",
-      disc:"William Herschel, March 13, 1781 — the first planet found with a telescope",
-      probe:"Voyager 2, flyby, January 24, 1986 — still the only visit" },
+      disc:"William Herschel, March 13, 1781, the first planet found with a telescope",
+      probe:"Voyager 2, flyby, January 24, 1986, still the only visit" },
     { name:"Neptune", type:"Ice giant", au:30.07, rKm:24622, lenR:23,
       area:"7.62 × 10<sup>9</sup> km² (cloud tops)", mass:"1.024 × 10<sup>26</sup> kg (17 Earths)",
       moons:"16 known", made:"Water, methane and ammonia ices over a rocky core, under hydrogen and helium; the deepest blue of the planets",
       disc:"Predicted mathematically by Le Verrier; observed by Johann Galle, September 23, 1846",
-      probe:"Voyager 2, flyby, August 25, 1989 — still the only visit" },
+      probe:"Voyager 2, flyby, August 25, 1989, still the only visit" },
   ];
 
   // ---------- Layouts (world units u) ----------
@@ -238,8 +238,8 @@
   function showInfo(o) {
     el("iName").textContent = o.name;
     el("iType").textContent = o.type;
-    el("iDist").innerHTML = o === SUN ? "—" :
-      `${o.au.toFixed(3)} au — ${(o.au * AU / 1e6).toFixed(1)} million km (average)`;
+    el("iDist").innerHTML = o === SUN ? "n/a (it is the center)" :
+      `${o.au.toFixed(3)} au (${(o.au * AU / 1e6).toFixed(1)} million km, average)`;
     el("iDiam").innerHTML = `${(2 * o.rKm).toLocaleString("en-US")} km` +
       (o === SUN ? " (109 Earths across)" : "");
     el("iArea").innerHTML = o.area;
@@ -278,8 +278,8 @@
     scaleBtn.classList.toggle("on", mTarget === 1);
     scaleBtn.textContent = mTarget === 1 ? "To scale ✓" : "Make to scale";
     modeNote.textContent = mTarget === 1
-      ? "True scale — sizes AND spacing are both correct. Zoom into a dot to see the planet."
-      : "Lenient scale — sizes and spacing exaggerated so every planet is visible.";
+      ? "True scale: spacing is exact. Dots are drawn at the smallest visible size, larger than true; zoom in and each planet appears at its real size."
+      : "Lenient scale: sizes and spacing are exaggerated so every planet is visible.";
     scalebar.style.display = mTarget === 1 ? "block" : "none";
     if (selected) focusOn(selected); else fitAll();
   });
@@ -355,7 +355,7 @@
     labelQueue = [];
   }
 
-  // Feature painters — all clipped to the planet disc; deterministic shapes.
+  // Feature painters, all clipped to the planet disc; deterministic shapes.
   function shade(x, y, r, base, dark) {
     // sun is to the LEFT: light the left limb
     const g = ctx.createRadialGradient(x - r*0.45, y - r*0.2, r*0.1, x, y, r*1.25);
@@ -433,7 +433,7 @@
   function drawPlanet(p) {
     const wr = pr(p) * cam.z;
     const x = sx(px(p));
-    const r = Math.max(wr, 1.6);
+    const r = Math.max(wr, 0.9);
     if (x + r < -60 || x - r > W + 60) { return; }
     const detailed = r > 3.5;
 
