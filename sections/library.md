@@ -22,4 +22,4 @@ Nothing here yet.
 
 ## Solar System
 
-[Earth Right Now](populous-countries.html). The twenty largest countries in 2026: population, share of the world total, and births and deaths per day, from the United Nations projections.
+[Earth Right Now](populous-countries.html). Every country and area the United Nations counts, largest to smallest, with population, share of the world total, and births and deaths per day, from the 2026 projections.
