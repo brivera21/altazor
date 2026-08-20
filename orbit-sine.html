@@ -82,10 +82,6 @@
   <div>
     <div id="sitenav"><a class="brand" href="index.html">ALTAZOR</a><a href="library.html">&larr; Library</a></div>
     <h1>Earth's Orbit as a Sine Wave Through Time</h1>
-    <p>Earth circles the Sun once a year (<b>clockwise</b> when viewed from south of the ecliptic). Add a time axis and that circle
-       becomes a helix: every point of Earth's trace slides into the past along the axis while staying fixed in space.
-       Seen from the side, Earth simply bobs <b>up and down</b> — and the trace it leaves behind is a sine wave stretching back through
-       the years. Drag the view or use the slider to swing between the pole view (circle) and the side view (sine wave).</p>
   </div>
   <div id="readout">
     <div class="lbl">Elapsed</div>
@@ -121,8 +117,12 @@
     <button id="resetBtn">Restart</button>
   </div>
   <div id="note">
+    Earth circles the Sun once a year, clockwise when seen from south of the ecliptic. With a time axis added, the circle
+    becomes a helix: from the side, Earth simply bobs up and down, and the trace it leaves stretches back through the years
+    as a sine wave. The view swings freely between the pole (circle) and the side (wave).
+    <br><br>
     Note on accuracy: the clockwise direction of both Earth's orbit and its spin is correct for a south-of-the-ecliptic viewpoint,
-    and the side-on projection of uniform circular motion really is a sine wave. The horizontal axis is <i>time</i>, not distance —
+    and the side-on projection of uniform circular motion really is a sine wave. The horizontal axis is <i>time</i>, not distance;
     Earth stays ≈1 au (149.6 million km) from the Sun on a nearly circular path. Sizes are not to scale.
   </div>
 </div>
@@ -206,7 +206,7 @@
   function project(wx, wy, wz) {
     // tilt about the VERTICAL screen axis: swings the time axis (wz) from
     // pointing at the viewer (pole view) to lying horizontally on screen
-    // (side view, past to the left) — so Earth's circular motion becomes a
+    // (side view, past to the left), so Earth's circular motion becomes a
     // vertical up-and-down, and its trace a sine wave through time.
     const ct = Math.cos(tilt), st = Math.sin(tilt);
     let x = wx * ct + wz * st;
@@ -224,7 +224,7 @@
   let viewScale = 1;
   function fitView() {
     const controls = document.getElementById('controls');
-    const top = 175, bottom = H - controls.offsetHeight - 40;
+    const top = 120, bottom = H - controls.offsetHeight - 40;
     const left = 30, right = W - 30;
     const shown = Math.min(simYears, tracePast);
     // sample with cx=cy=0, viewScale=1
@@ -386,7 +386,7 @@
 
     // Draw from the oldest surviving point forward to Earth "now".
     // Every point keeps the angle it was deposited at (fixed in space);
-    // only its radius decays with age — so the trail is left behind, not rotated.
+    // only its radius decays with age, so the trail is left behind, not rotated.
     const steps = Math.max(60, Math.round(shown * 90));
     let prev = pos(shown);
     for (let i = steps - 1; i >= 0; i--) {
@@ -407,7 +407,7 @@
     }
 
     // Year markers: dropped at each whole year of the simulation, at the point
-    // in space where Earth was at that moment. They do NOT rotate — every
+    // in space where Earth was at that moment. They do NOT rotate: every
     // whole-year mark sits on the same fixed ray and only slides inward as it ages.
     ctx.font = '10.5px system-ui, sans-serif';
     ctx.textAlign = 'left';
@@ -443,7 +443,7 @@
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(p.x, p.y, EARTH_R * 2.6, 0, TWO_PI); ctx.fill();
 
-    // body — lit from the Sun's direction
+    // body, lit from the Sun's direction
     const sunP = project(0, 0, 0);
     const sunAng = Math.atan2(sunP.y - p.y, sunP.x - p.x);
     g = ctx.createRadialGradient(
