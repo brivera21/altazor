@@ -112,7 +112,9 @@
   <div id="about">All eight planets lined up on one side of the Sun, a moment real orbits never quite produce.
     Each planet opens up close, with its numbers: area, mass, moons, what it is made of, when it was discovered
     and when a probe first reached it. <b>Make to scale</b> sets the true distances and sizes; almost everything
-    left is space. The view pans and zooms freely.</div>
+    left is space. There, a pulse of light leaves the Sun and crosses the diagram in true proportion,
+    carrying its elapsed time, and under each planet sits how long sunlight takes to reach it.
+    The view pans and zooms freely.</div>
 </div>
 
 <div id="scalebar" style="display:none">
@@ -200,6 +202,9 @@
   let camT = { c: SPAN / 2, z: 1 };
   let selected = null;                    // planet object, SUN, or null
   let stars = [];
+  let lightClock = 0;                     // seconds since the light pulse left the Sun (scaled)
+  const C_KM_S = 299792.458;              // speed of light
+  const LIGHT_SPEEDUP = 480;              // 1 real second = 480 light-seconds (8 light-minutes)
 
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -278,6 +283,7 @@
   const scalebar = document.getElementById("scalebar");
   scaleBtn.addEventListener("click", () => {
     mTarget = mTarget === 1 ? 0 : 1;
+    lightClock = 0;
     scaleBtn.classList.toggle("on", mTarget === 1);
     scaleBtn.textContent = mTarget === 1 ? "To scale ✓" : "Make to scale";
     modeNote.textContent = mTarget === 1
@@ -475,6 +481,59 @@
       Jupiter:"#d8bd97", Saturn:"#e2cb98", Uranus:"#bfe9ec", Neptune:"#4a7ae0" }[p.name];
   });
 
+  function fmtLight(sec) {
+    if (sec < 60) return sec.toFixed(0) + " s";
+    const min = sec / 60;
+    if (min < 60) return min.toFixed(1) + " min";
+    const h = Math.floor(min / 60), m2 = Math.round(min % 60);
+    return h + " h " + m2 + " min";
+  }
+
+  function drawLightTimes() {
+    // Only meaningful at true scale, where the line IS the distance.
+    const a = Math.max(0, (m - 0.5) * 2);
+    if (a <= 0) return;
+
+    // travel time of sunlight to each planet, under its dot
+    ctx.font = "10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.textAlign = "center";
+    const items = PLANETS.map(p => ({ x: sx(px(p)), t: p.au * AU / C_KM_S }))
+      .filter(it => it.x > -40 && it.x < W + 40)
+      .sort((q, r) => q.x - r.x);
+    let prevX = -1e9, level = 0;
+    for (const it of items) {
+      level = (it.x - prevX < 56) ? level + 1 : 0;
+      prevX = it.x;
+      ctx.fillStyle = `rgba(255,214,140,${0.75 * a})`;
+      ctx.fillText(fmtLight(it.t), it.x, y0 + 18 + level * 13);
+    }
+
+    // the pulse itself: light leaving the Sun, in true proportion
+    if (m < 0.98) return;
+    const tNep = PLANETS[PLANETS.length - 1].au * AU / C_KM_S;   // ~4 h 10 min
+    const cycle = tNep / LIGHT_SPEEDUP + 3;                       // + 3 s rest
+    const tReal = lightClock % cycle;
+    const tLight = tReal * LIGHT_SPEEDUP;
+    if (tLight > tNep) return;
+    const wx = tLight * C_KM_S * KM2U;
+    const x = sx(wx);
+    if (x < -20 || x > W + 20) return;
+    // covered path
+    ctx.strokeStyle = "rgba(255,236,180,0.35)";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(sx(0), y0); ctx.lineTo(x, y0); ctx.stroke();
+    // the pulse
+    const g = ctx.createRadialGradient(x, y0, 0, x, y0, 7);
+    g.addColorStop(0, "rgba(255,255,240,0.95)"); g.addColorStop(1, "rgba(255,230,160,0)");
+    ctx.fillStyle = g; circle(x, y0, 7); ctx.fill();
+    ctx.fillStyle = "#fffbe8"; circle(x, y0, 1.8); ctx.fill();
+    // elapsed time rides with it
+    ctx.font = "10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(255,240,200,0.9)";
+    ctx.fillText("light · " + fmtLight(tLight), x, y0 - 12);
+  }
+
   function drawScalebar() {
     if (mTarget !== 1) return;
     // pick a nice 1–2–5 length near 120 px
@@ -494,6 +553,7 @@
   let last = performance.now();
   function frame(t) {
     const dt = Math.min((t - last) / 1000, 0.05); last = t;
+    lightClock += dt;
     // animate mode & camera
     m += (mTarget - m) * Math.min(1, dt * 3.5);
     if (Math.abs(mTarget - m) < 0.0005) m = mTarget;
@@ -518,6 +578,7 @@
     drawSun();
     for (const p of PLANETS) drawPlanet(p);
     flushLabels();
+    drawLightTimes();
     drawScalebar();
     window.__dbg = { m, mTarget, camc: cam.c, camz: cam.z, tracking,
       sel: selected && selected.name, ex: selected ? sx(px(selected)) : null,
