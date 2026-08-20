@@ -21,13 +21,14 @@ from pathlib import Path
 ROOT = Path(__file__).parent.parent
 PAGES = [
     dict(file="us-states.html", title="Every State by Population",
-         last_lead=False, diverging=True),
+         last_lead=False, diverging=True, explainer=True),
     dict(file="us-cities.html", title="Most Populous Cities in the United States",
-         last_lead=True, diverging=True),
+         last_lead=True, diverging=True, explainer=True),
+    # Earth Right Now lists every country, so nothing follows the last row and
+    # Brian dropped its explainer entirely.
     dict(file="populous-countries.html", title="Earth Right Now",
-         last_lead=True, diverging=False),
+         last_lead=False, diverging=False, explainer=False),
 ]
-TAIL = ["How to read this", "Notes", "References"]
 fails = []
 
 
@@ -49,15 +50,19 @@ def check(page):
     elif m.group(1).strip() != page["title"]:
         bad(f"{name}: title reads {m.group(1).strip()!r}")
     heads = re.findall(r"<h2>(.*?)</h2>", h)
-    if heads[-3:] != TAIL:
-        bad(f"{name}: the closing headings are {heads[-3:]}, expected {TAIL}")
+    tail = (["How to read this"] if page["explainer"] else []) + ["Notes", "References"]
+    if heads[-len(tail):] != tail:
+        bad(f"{name}: the closing headings are {heads[-len(tail):]}, expected {tail}")
     if "—" in h:
         bad(f"{name}: contains an em dash")
 
-    # the explanation must survive the move, not just vanish
-    body = h.split("<h2>How to read this</h2>", 1)
-    if len(body) < 2 or len(re.sub(r"<[^>]+>", "", body[1].split("<h2>")[0])) < 200:
-        bad(f"{name}: the How to read this block is missing or too short")
+    if page["explainer"]:
+        # the explanation must have survived the move, not just vanished
+        body = h.split("<h2>How to read this</h2>", 1)
+        if len(body) < 2 or len(re.sub(r"<[^>]+>", "", body[1].split("<h2>")[0])) < 200:
+            bad(f"{name}: the How to read this block is missing or too short")
+    elif "How to read this" in h:
+        bad(f"{name}: still carries a How to read this block")
 
     # ---- ranked rows ----
     rows = re.findall(r"<tr>\s*<td class=\"rank\">(\d+)</td>(.*?)</tr>", h, re.S)

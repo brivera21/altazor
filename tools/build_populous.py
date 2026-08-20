@@ -1,55 +1,27 @@
 #!/usr/bin/env python3
-"""Generate populous-countries.html: the twenty most populous countries, their
-share of world population, and how many people are born and die in each per
-day.
+"""Generate populous-countries.html, the Earth Right Now page: every country
+and area the United Nations counts, its share of world population, and how
+many people are born and die in it per day.
 
 Each row carries its own paired bars, births above deaths, on one scale shared
 by every country, so the balance between the two is visible in place rather
-than in a separate chart.
+than in a separate chart. One shared scale across 237 rows means most bars are
+short: that is the point, and the figure beside each bar carries the value.
 
-Figures are UN World Population Prospects 2024 (medium variant) values for
-2026, retrieved through Our World in Data. Daily figures are the projected
-annual totals divided by 365.25.
+Figures live in world_data.py. See its docstring for the retrieval route.
 
 Usage: python3 build_populous.py
 """
 
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent))
+from world_data import ROWS as SRC, WORLD, FLAG   # noqa: E402
 
 OUT = Path(__file__).parent.parent / "populous-countries.html"
 
-SNAPSHOT = "August 14, 2026"
-
-# UN WPP 2024, medium variant, 2026: population, annual births, annual deaths
-WORLD = dict(pop=8_300_678_396, births=132_503_470, deaths=63_637_310)
-
-# name, ISO 3166-1 alpha-2 (for the flag), population, births/yr, deaths/yr
-ROWS = [
-    ("India",         "in", 1_476_625_571, 22_988_460,  9_888_274),
-    ("China",         "cn", 1_412_914_090,  8_625_232, 11_482_042),
-    ("United States", "us",   349_035_484,  3_673_260,  3_136_204),
-    ("Indonesia",     "id",   287_886_782,  4_419_970,  2_247_436),
-    ("Pakistan",      "pk",   259_299_792,  6_935_665,  1_664_084),
-    ("Nigeria",       "ng",   242_431_835,  7_711_752,  2_780_787),
-    ("Brazil",        "br",   213_562_666,  2_492_914,  1_566_180),
-    ("Bangladesh",    "bd",   177_818_039,  3_407_860,    913_455),
-    ("Russia",        "ru",   143_394_457,  1_213_374,  1_868_411),
-    ("Ethiopia",      "et",   138_902_185,  4_213_081,    795_185),
-    ("Mexico",        "mx",   132_997_658,  1_989_217,    844_431),
-    ("Japan",         "jp",   122_427_730,    745_943,  1_563_215),
-    ("Egypt",         "eg",   120_101_178,  2_459_317,    672_441),
-    ("Philippines",   "ph",   117_724_473,  1_853_794,    775_841),
-    ("DR Congo",      "cd",   116_452_162,  4_634_979,    958_931),
-    ("Vietnam",       "vn",   102_177_434,  1_307_471,    695_502),
-    ("Iran",          "ir",    93_168_492,  1_101_751,    460_933),
-    ("Turkey",        "tr",    87_926_083,  1_045_681,    565_455),
-    ("Germany",       "de",    83_644_257,    689_997,  1_042_382),
-    ("Tanzania",      "tz",    72_563_778,  2_459_538,    405_954),
-]
-
-# The country just past the end of the list, so the twentieth row can also
-# show how far ahead it is.
-NEXT_UP = ("Thailand", 71_559_619)
+SNAPSHOT = "August 20, 2026"
 
 DAYS = 365.25
 C_BIRTH = "#3987e5"   # categorical slot 1, dark step
@@ -66,26 +38,39 @@ def commas(n):
     return f"{n:,}"
 
 
+def day_txt(n):
+    """A country can average less than one a day. Say so rather than zero."""
+    return commas(n) if n else "&lt;1"
+
+
+def pct_txt(s):
+    if s >= 0.1:
+        return f"{s:.1f}%"
+    if s >= 0.01:
+        return f"{s:.2f}%"
+    return "&lt;0.01%"
+
+
 rows = []
-for name, cc, pop, births, deaths in ROWS:
+for code, name, pop, births, deaths in SRC:
     rows.append(dict(
-        name=name, cc=cc, pop=pop,
+        code=code, name=name, cc=FLAG[code], pop=pop,
         share=pop / WORLD["pop"] * 100,
         b=per_day(births), d=per_day(deaths),
         net=per_day(births) - per_day(deaths),
     ))
 
-# how many more people than the country one rank below
+# how many more people than the country one rank below; the last has none
 for i, r in enumerate(rows):
-    below = rows[i + 1]["pop"] if i + 1 < len(rows) else NEXT_UP[1]
-    r["gap"] = r["pop"] - below
+    r["gap"] = r["pop"] - rows[i + 1]["pop"] if i + 1 < len(rows) else None
 
-first10, next10 = rows[:10], rows[10:]
-share10 = sum(r["pop"] for r in first10) / WORLD["pop"] * 100
-share20 = sum(r["pop"] for r in rows) / WORLD["pop"] * 100
+listed = sum(r["pop"] for r in rows)
+share_listed = listed / WORLD["pop"] * 100
 w_b, w_d = per_day(WORLD["births"]), per_day(WORLD["deaths"])
 max_share = max(r["share"] for r in rows)
 max_flow = max(max(r["b"], r["d"]) for r in rows)
+shrinking = [r for r in rows if r["net"] < 0]
+top10 = sum(r["pop"] for r in rows[:10]) / WORLD["pop"] * 100
 
 # ---- the paired bars that live inside each row ----
 VW, PLOT = 250, 150      # viewBox width, bar plot width
@@ -106,13 +91,13 @@ def flow_svg(r):
             f'<rect x="0" y="{y}" width="{w:.1f}" height="{BH}" rx="3" fill="{color}"/>'
             f'<rect x="0" y="{y}" width="3" height="{BH}" fill="{color}"/></g>')
         parts.append(f'<text x="{w + 6:.1f}" y="{y + BH - 1.5}" font-size="10.5" '
-                     f'fill="#c3c2b7" font-variant-numeric="tabular-nums">{commas(val)}</text>')
+                     f'fill="#c3c2b7" font-variant-numeric="tabular-nums">{day_txt(val)}</text>')
     parts.append('</svg>')
     return "".join(parts)
 
 
 HEAD = """<thead><tr>
-  <th class="l" colspan="2">Country</th>
+  <th class="l" colspan="2">Country or area</th>
   <th>Population</th>
   <th class="l">Share of world</th>
   <th class="l">Births and deaths per day</th>
@@ -122,13 +107,15 @@ HEAD = """<thead><tr>
 
 def tr(i, r):
     bar_w = r["share"] / max_share * 100
-    net_txt = ("+" if r["net"] > 0 else "−") + commas(abs(r["net"]))
+    net_txt = ("+" if r["net"] > 0 else "−" if r["net"] < 0 else "") + commas(abs(r["net"]))
+    lead = (f' <span class="gap">(+{commas(r["gap"])})</span>'
+            if r["gap"] is not None else "")
     return f"""<tr>
   <td class="rank">{i}</td>
   <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/{r['cc']}.png"
       width="30" height="20" alt="Flag of {r['name']}"><span>{r['name']}</span></span></td>
-  <td class="num pop">{commas(r['pop'])} <span class="gap">(+{commas(r['gap'])})</span></td>
-  <td class="share"><span class="track"><span class="fill" style="width:{bar_w:.1f}%"></span></span><span class="pct">{r['share']:.1f}%</span></td>
+  <td class="num pop">{commas(r['pop'])}{lead}</td>
+  <td class="share"><span class="track"><span class="fill" style="width:{bar_w:.1f}%"></span></span><span class="pct">{pct_txt(r['share'])}</span></td>
   <td class="flow">{flow_svg(r)}</td>
   <td class="num">{net_txt}</td>
 </tr>"""
@@ -142,22 +129,15 @@ def totals(label, block):
     sign = "+" if n > 0 else "−"
     return (f'<tr class="total"><td></td><td>{label}</td>'
             f'<td class="num">{commas(p)}</td>'
-            f'<td>{p / WORLD["pop"] * 100:.1f}% of the world</td>'
+            f'<td>{p / WORLD["pop"] * 100:.2f}% of the world</td>'
             f'<td>{commas(b)} births, {commas(d)} deaths</td>'
             f'<td class="num">{sign}{commas(abs(n))}</td></tr>')
 
 
-def table(block, start, label, total_over=None):
-    """Render one table. total_over lets the closing row sum a different set
-    than the rows above it, so the last table can end on the grand total."""
-    body = "\n".join(tr(start + i, r) for i, r in enumerate(block))
-    return (f'<table>\n{HEAD}\n<tbody>\n{body}\n'
-            f'{totals(label, total_over if total_over is not None else block)}\n'
-            f'</tbody>\n</table>')
-
-
-table1 = table(first10, 1, "These ten together")
-table2 = table(next10, 11, "All twenty together", total_over=rows)
+body = "\n".join(tr(i + 1, r) for i, r in enumerate(rows))
+table_all = (f'<table>\n{HEAD}\n<tbody>\n{body}\n'
+             f'{totals("All " + str(len(rows)) + " together", rows)}\n'
+             f'</tbody>\n</table>')
 
 HTML = f"""<!DOCTYPE html>
 <html lang="en">
@@ -182,7 +162,6 @@ nav.site a {{ color:var(--muted); text-decoration:none; font-size:14px; }}
 nav.site a:hover {{ color:var(--accent); }}
 h1 {{ margin:0 0 6px; font-size:26px; }}
 h2 {{ font-size:16px; margin:34px 0 10px; letter-spacing:.02em; }}
-.lede {{ color:var(--muted); font-size:14.5px; margin:0 0 6px; max-width:720px; }}
 .stamp {{ color:var(--ink-3); font-size:12.5px; margin:0 0 22px; }}
 
 .tiles {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; }}
@@ -201,7 +180,7 @@ th {{ text-align:right; font-size:11.5px; letter-spacing:.06em; text-transform:u
 th.l {{ text-align:left; }}
 td {{ padding:8px 10px; border-bottom:1px solid var(--line); font-size:14px; }}
 td.num {{ text-align:right; font-variant-numeric:tabular-nums; color:var(--ink-2); }}
-td.rank {{ color:var(--ink-3); width:26px; font-variant-numeric:tabular-nums; }}
+td.rank {{ color:var(--ink-3); width:34px; font-variant-numeric:tabular-nums; }}
 td.pop {{ white-space:nowrap; }}
 .gap {{ color:{C_GAP}; font-size:12.5px; font-variant-numeric:tabular-nums;
   margin-left:7px; }}
@@ -209,11 +188,11 @@ td.ct {{ white-space:nowrap; }}
 .cw {{ display:flex; align-items:center; gap:10px; }}
 img.flag {{ width:30px; height:20px; object-fit:cover; border-radius:2px;
   box-shadow:0 0 0 1px rgba(255,255,255,.14); display:block; flex:none; }}
-td.share {{ width:180px; white-space:nowrap; }}
+td.share {{ width:190px; white-space:nowrap; }}
 .track {{ display:inline-block; width:104px; height:9px; background:#242424; border-radius:5px;
   vertical-align:middle; overflow:hidden; }}
 .fill {{ display:block; height:100%; background:var(--share); border-radius:0 4px 4px 0; }}
-.pct {{ display:inline-block; width:44px; text-align:right; font-variant-numeric:tabular-nums;
+.pct {{ display:inline-block; width:60px; text-align:right; font-variant-numeric:tabular-nums;
   color:var(--ink-2); font-size:13px; margin-left:8px; }}
 td.flow {{ width:266px; padding-top:6px; padding-bottom:6px; }}
 svg.flow {{ display:block; width:100%; height:auto; }}
@@ -260,28 +239,23 @@ tr.total td {{ border-bottom:none; color:var(--muted); font-size:13px; padding-t
   <span><span class="sw" style="background:var(--deaths)"></span>Deaths per day</span>
 </div>
 
-<h2>The first ten</h2>
-{table1}
-
-<h2>The next ten</h2>
-{table2}
-
-<h2>How to read this</h2>
-<p class="note">The twenty largest countries by population, with each one's share
-of the world total and its births and deaths per day. The green figure after a
-population is how many more people that country has than the one ranked below
-it; for Tanzania, last on the list, the comparison is {NEXT_UP[0]} at rank
-twenty-one. The paired bars use one scale for all twenty, so lengths compare
-across rows as well as within a row. The first ten hold {share10:.1f} percent of
-the world, all twenty hold {share20:.1f} percent.</p>
+<h2>Every country and area</h2>
+{table_all}
 
 <h2>Notes</h2>
-<p class="note">Population figures are United Nations projections for 2026 under the
-medium variant, the middle of the range the UN publishes. Daily figures are the
-projected births and deaths for the whole year divided by 365.25, so they are an
-average day rather than any particular one. Where the lower bar is longer, deaths
-outnumber births: that is China, Russia, Japan and Germany. All four can still grow
-through migration, which these columns do not count. Flags are served by
+<p class="note">Every country and area the United Nations counts separately,
+{len(rows)} of them, from India down to the Vatican. Population figures are
+projections for 2026 under the medium variant, the middle of the range the UN
+publishes. Daily figures are the projected births and deaths for the whole year
+divided by 365.25, so they describe an average day rather than any particular
+one; where that average is below one, the cell says so instead of showing zero.
+The ten largest hold {top10:.1f} percent of the world between them.
+In {len(shrinking)} of these {len(rows)} places the lower bar is longer, meaning
+deaths outnumber births; all of them can still grow through migration, which
+these columns do not count. The rows add to {commas(listed)}, which is
+{share_listed:.2f} percent of the UN's own world figure. The remainder is a gap
+in the source rather than a missing country: the UN's world record is larger
+than the sum of the places it lists. Flags are served by
 <a href="https://flagcdn.com" style="color:var(--accent)">FlagCDN</a>.</p>
 
 <h2>References</h2>
@@ -300,4 +274,5 @@ United Nations World Population Prospects (2024). Retrieved {SNAPSHOT}, from
 """
 
 OUT.write_text(HTML, encoding="utf-8")
-print(f"wrote {OUT} ({len(HTML)} bytes): {len(rows)} countries")
+print(f"wrote {OUT} ({len(HTML)} bytes): {len(rows)} countries and areas, "
+      f"{len(shrinking)} shrinking, listed {listed:,} = {share_listed:.2f}% of the world")
