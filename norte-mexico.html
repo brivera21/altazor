@@ -39,6 +39,9 @@ input[type=range]{flex:1;min-width:200px;accent-color:var(--riv);height:22px}
 color:var(--ink2);font-size:.95rem}
 .notes h2{font-size:1.05rem;font-weight:400;color:var(--ink);margin:0 0 .6rem}
 .notes p{margin:0 0 1rem}
+.method{margin-top:1.5rem;color:var(--ink3);font-size:.88rem}
+.method h2{font-size:.95rem;font-weight:400;color:var(--ink2);margin:0 0 .6rem}
+.method p{margin:0 0 .9rem}
 path.st{fill:var(--st);stroke:var(--edge);stroke-width:.8;cursor:pointer}
 path.st.hi{fill:var(--sthi)}
 path.riv{fill:none;stroke:var(--riv);stroke-linecap:round;stroke-linejoin:round;cursor:pointer}
@@ -112,6 +115,10 @@ longitud dentro del cuadro y los estados por los que pasa.</p>
 <p>La costa es la línea real, no un trazo aproximado: viene de GSHHG a
 resolución completa, así que el Golfo de California, el Pacífico y el Golfo de
 México quedan donde están. Los ríos y las fronteras vienen de WDBII.</p>
+</div>
+
+<div class="method">
+<h2>Método y fuentes</h2>
 <p>Los seis estados no existen como polígonos en esos datos. Se arman cortando
 la costa con los arcos de frontera y quedándose con la cara que contiene un
 punto conocido de cada estado. Cada una se comparó contra la superficie
