@@ -43,7 +43,7 @@ title: Library
 <summary>Chihuahua</summary>
 <ul>
 <li><a href="el-terrero.html">El Terrero, Namiquipa</a></li>
-<li><a href="linea-misiones.html">La línea de misiones, 1560 a 1720</a></li>
+<li><a href="linea-misiones.html">Misiones en Chihuahua (1560-1720)</a></li>
 <li class="soon">Archivo Namiquipa <span class="tag">coming soon</span></li>
 <li class="soon">Cabalgata Binacional Villista (Villista Binational Cavalcade) <span class="tag">coming soon</span></li>
 </ul>
