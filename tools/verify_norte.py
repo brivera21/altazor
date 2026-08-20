@@ -91,6 +91,62 @@ for L, g in colorado:
     print(f"  Río Colorado{L:6.0f} km, delta anchors "
           f"{near(g,(-115.0,32.0)):.1f} / {near(g,(-114.8,31.9)):.1f} km")
 
+print("--- rugged ground ---")
+# The relief layer is a roughness threshold, so the test is whether it agrees
+# with ground truth: known sierras must be inside it, known basins and plains
+# outside. These twenty points were not used to build the layer.
+sierras = pickle.load(open(DATA / "sierras.pkl", "rb"))
+SIERRA, ALTA = sierras["sierra"], sierras["alta"]
+RUGGED = [("Sierra de San Pedro Mártir", -115.40, 30.95),
+          ("Sierra de Juárez, BC", -115.95, 32.05),
+          ("Sierra Madre Occidental, Sonora", -109.30, 29.30),
+          ("Barrancas del Cobre", -107.85, 27.35),
+          ("Cerro Mohinora", -107.05, 25.95),
+          ("Sierra Madre Oriental, Nuevo León", -100.30, 25.30),
+          ("Sierra de Arteaga", -100.60, 25.35),
+          ("Sierra Madre Oriental, Tamaulipas", -99.20, 23.60),
+          ("Serranías del Burro", -102.00, 29.05),
+          ("Sierra del Carmen", -102.55, 29.00)]
+FLAT = [("Desierto de Altar", -113.50, 32.00),
+        ("Llanos de Chihuahua", -106.80, 30.20),
+        ("Cuenca de Casas Grandes", -107.90, 30.40),
+        ("Laguna de Mayrán", -103.00, 25.60),
+        ("Planicie de Tamaulipas", -97.90, 25.50),
+        ("Sabinas, Coahuila", -101.10, 27.85),
+        ("Bolsón de Mapimí", -103.60, 26.60),
+        ("Valle de Juárez", -106.10, 31.45),
+        ("Llanos de Hermosillo", -111.20, 29.20),
+        ("Delta del Colorado", -114.95, 32.20)]
+miss_r = [n for n, lo, la in RUGGED if not SIERRA.contains(Point(lo, la))]
+miss_f = [n for n, lo, la in FLAT if SIERRA.contains(Point(lo, la))]
+print(f"  {len(RUGGED)-len(miss_r)}/{len(RUGGED)} known sierras fall inside the layer")
+print(f"  {len(FLAT)-len(miss_f)}/{len(FLAT)} known basins and plains fall outside it")
+if miss_r:
+    print(f"    sierras missed: {', '.join(miss_r)}")
+if miss_f:
+    print(f"    flats wrongly included: {', '.join(miss_f)}")
+if len(miss_r) > 1:
+    fails.append(f"the rugged layer misses {len(miss_r)} known sierras: {miss_r}")
+if len(miss_f) > 2:
+    fails.append(f"the rugged layer swallows {len(miss_f)} known flats: {miss_f}")
+
+six = unary_union(list(states.values()))
+frac = SIERRA.intersection(six).area / six.area
+if not 0.30 < frac < 0.60:
+    fails.append(f"rugged ground covers {frac*100:.0f}% of the six states")
+print(f"  covers {frac*100:.0f}% of the six states, the high tier "
+      f"{ALTA.intersection(six).area/six.area*100:.0f}%")
+
+# every labelled range must sit on rugged ground, inside the state claimed
+LABELS = {"Sierra de San Pedro Mártir": "Baja California"}
+for nm, st_nm in LABELS.items():
+    p = Point(-115.25, 30.75)
+    if not SIERRA.contains(p):
+        fails.append(f"{nm}: its label does not sit on rugged ground")
+    if not states[st_nm].contains(p):
+        fails.append(f"{nm}: its label is not inside {st_nm}")
+    print(f"  {nm} label: on rugged ground, inside {st_nm}")
+
 print("--- the page ---")
 html = PAGE.read_text(encoding="utf-8")
 if "—" in html:
@@ -122,6 +178,20 @@ try:
             fails.append(f"labels are {got['labels']}")
         if got["named"] < 3:
             fails.append("fewer than three rivers are labelled on the page")
+        rng = pg.evaluate("()=>[...document.querySelectorAll('text.rng')]"
+                          ".map(t=>t.textContent)")
+        want = ["Sierra Madre Occidental", "Sierra Madre Oriental",
+                "Sierra de San Pedro Mártir"]
+        if sorted(rng) != sorted(want):
+            fails.append(f"range labels on the page are {rng}")
+        if pg.evaluate("()=>document.querySelectorAll('#sierras path').length") != 2:
+            fails.append("the rugged layer is not drawn in two tiers")
+        h1_first = pg.evaluate("""()=>{const h=document.querySelector('h1'),
+            f=document.querySelector('figure');
+            return !!(h && f && (h.compareDocumentPosition(f) & 4));}""")
+        if not h1_first:
+            fails.append("the title does not come before the map")
+        print(f"  title above the map, {len(rng)} ranges labelled: {', '.join(rng)}")
         pg.hover('path.st[data-i="2"]')
         pg.wait_for_timeout(150)
         hov = pg.evaluate("()=>[hovname.textContent, hovsub.textContent]")

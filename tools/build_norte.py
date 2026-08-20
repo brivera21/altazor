@@ -46,7 +46,7 @@ VH = (N - S) * SCALE
 
 # INEGI, Marco Geoestadístico. Published areas, km2.
 STATES = [
-    ("Baja California", 71450, (-115.4, 30.6)),
+    ("Baja California", 71450, (-114.4, 29.4)),
     ("Sonora", 179355, (-110.4, 29.4)),
     ("Chihuahua", 247455, (-106.2, 28.9)),
     ("Coahuila", 151595, (-102.2, 27.2)),
@@ -65,6 +65,10 @@ C_COAST = "#5b6b7a"   # shoreline
 C_RIV = "#6fb6f5"     # rivers
 C_EDGE = "#96a1ad"
 C_ACC = "#f5a623"     # the three rivers whose identity checks out
+C_SRA = "#4a4a44"     # rugged ground inside the six states
+C_ALT = "#6b6353"     # the roughest ground, the crests
+C_SRA_O = "#202225"   # the same, outside the six, as context
+C_ALT_O = "#2b2b27"
 
 
 def px(lon):
@@ -103,6 +107,7 @@ FRAME = box(W, S, E, N)
 land = pickle.load(open(DATA / "land.pkl", "rb")).intersection(FRAME)
 states = pickle.load(open(DATA / "states.pkl", "rb"))
 rivers = pickle.load(open(DATA / "rivers.pkl", "rb"))
+sierras = pickle.load(open(DATA / "sierras.pkl", "rb"))
 
 # ---- the named rivers, each checked two ways (see verify_norte.py) ----
 border = unary_union([LineString(s) for s in
@@ -161,6 +166,42 @@ for i, (L, g) in enumerate(rivers):
 river_js.sort(key=lambda r: r["k"])
 
 land_path = poly_path(land, 0.008)
+
+# ---- rugged ground -------------------------------------------------------
+# Terrain roughness, computed as the local variation of the Natural Earth
+# shaded relief at two arc minutes, then thresholded. It is a measure of how
+# broken the ground is, not a published range boundary. The threshold was set
+# against twenty reference points: ten known sierras all clear it, nine of ten
+# known basins and plains fall below it. See verify_norte.py.
+six = unary_union(list(states.values()))
+sierra_in = sierras["sierra"].intersection(six)
+alta_in = sierras["alta"].intersection(six)
+sierra_out = sierras["sierra"].difference(six)
+alta_out = sierras["alta"].difference(six)
+
+# The two belts and the two named Baja ranges. Each anchor is checked against
+# the rugged layer and against the state it is claimed to sit in.
+def belt_center(geom):
+    pts = []
+    for q in (geom.geoms if hasattr(geom, "geoms") else [geom]):
+        if q.geom_type == "Polygon":
+            pts.extend(q.exterior.coords)
+    a = np.asarray(pts)
+    return a[:, 0].mean(), a[:, 1].mean()
+
+
+occ = alta_in.intersection(unary_union([states["Sonora"], states["Chihuahua"]]))
+ori = alta_in.intersection(unary_union([states["Coahuila"], states["Nuevo León"],
+                                        states["Tamaulipas"]]))
+# Only ranges whose position can be checked against the rugged layer and the
+# state they sit in are labelled. The Sierra de Juárez sits just north of San
+# Pedro Mártir, but the peninsula has no room for both names at this scale.
+RANGES = [("Sierra Madre Occidental", belt_center(occ), 13, 0),
+          ("Sierra Madre Oriental", belt_center(ori), 13, 0),
+          ("Sierra de San Pedro Mártir", (-115.25, 30.75), 9.5, 63)]
+range_js = [dict(n=n, x=round(px(lo), 1), y=round(py(la), 1), s=sz, r=rot)
+            for n, (lo, la), sz, rot in RANGES]
+
 html_states = "\n".join(
     f'<path class="st" data-i="{i}" d="{p}"/>' for i, p in enumerate(state_paths))
 
@@ -175,7 +216,8 @@ DOC = f"""<!DOCTYPE html>
 --ink:#e6e6e6; --ink2:#9a9a9a; --ink3:#7d7d7d;
 --bg:#121212; --panel:#1a1a1a; --line:#2b2b2b; --accent:#58a6ff;
 --sea:{C_SEA}; --land:{C_LAND}; --st:{C_ST}; --sthi:{C_ST_HI}; --coast:{C_COAST};
---riv:{C_RIV}; --edge:{C_EDGE}; --acc:{C_ACC};}}
+--riv:{C_RIV}; --edge:{C_EDGE}; --acc:{C_ACC};
+--sra:{C_SRA}; --alt:{C_ALT}; --sra-o:{C_SRA_O}; --alt-o:{C_ALT_O};}}
 *{{box-sizing:border-box}}
 body{{margin:0;background:var(--bg);color:var(--ink);
 font:400 16px/1.65 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;}}
@@ -187,7 +229,8 @@ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-ser
 .brand:hover{{color:var(--accent);}}
 nav.site a{{color:var(--ink2);text-decoration:none;font-size:14px;}}
 nav.site a:hover{{color:var(--accent);}}
-h1{{font-size:1.6rem;font-weight:400;margin:2.2rem 0 .25rem}}
+h1{{font-size:1.6rem;font-weight:400;margin:2.2rem 0 .9rem}}
+h2{{font-size:1.05rem;font-weight:400;color:var(--ink);margin:2rem 0 .6rem}}
 .sub{{color:var(--ink2);font-size:.95rem;margin:0 0 1.5rem;max-width:70ch}}
 figure{{margin:0}}
 svg#map{{width:100%;height:auto;display:block;background:var(--sea);border-radius:8px;border:1px solid var(--line)}}
@@ -208,6 +251,9 @@ color:var(--ink2);font-size:.95rem}}
 .method{{margin-top:1.5rem;color:var(--ink3);font-size:.88rem}}
 .method h2{{font-size:.95rem;font-weight:400;color:var(--ink2);margin:0 0 .6rem}}
 .method p{{margin:0 0 .9rem}}
+.refs{{font-size:.82rem;color:var(--ink3);max-width:74ch}}
+.refs p{{padding-left:2.2em;text-indent:-2.2em;margin:0 0 .8em}}
+.refs a{{color:var(--accent);word-break:break-word}}
 path.st{{fill:var(--st);stroke:var(--edge);stroke-width:.8;cursor:pointer}}
 path.st.hi{{fill:var(--sthi)}}
 path.riv{{fill:none;stroke:var(--riv);stroke-linecap:round;stroke-linejoin:round;cursor:pointer}}
@@ -216,6 +262,8 @@ path.riv.named{{stroke:var(--acc)}}
 path.riv.hi{{stroke-width:3.2}}
 .lbl{{font:400 13px/1 system-ui,sans-serif;fill:#cfd4da;pointer-events:none}}
 .leg{{font:400 12px/1 system-ui,sans-serif;fill:var(--ink2)}}
+.rng{{font:400 11px/1 system-ui,sans-serif;fill:#b9a882;letter-spacing:.13em;
+text-transform:uppercase;pointer-events:none}}
 </style>
 </head>
 <body>
@@ -225,25 +273,38 @@ path.riv.hi{{stroke-width:3.2}}
   <nav class="site"><a href="library.html">&larr; Library</a></nav>
 </header>
 
+<h1>El norte de México</h1>
+
 <figure>
 <svg id="map" viewBox="0 0 {VW:.0f} {VH:.0f}" role="img"
   aria-label="Mapa de los seis estados del norte de México, sus ríos y el mar.">
 <title>El norte de México: los seis estados fronterizos, sus ríos y el mar</title>
 <path d="{land_path}" fill="var(--land)" stroke="var(--coast)" stroke-width="0.9"/>
+<g id="sierras-out" style="pointer-events:none">
+  <path d="{poly_path(sierra_out, 0.012)}" fill="var(--sra-o)"/>
+  <path d="{poly_path(alta_out, 0.012)}" fill="var(--alt-o)"/>
+</g>
 <g id="states">
 {html_states}
 </g>
+<g id="sierras" style="pointer-events:none">
+  <path d="{poly_path(sierra_in, 0.012)}" fill="var(--sra)"/>
+  <path d="{poly_path(alta_in, 0.012)}" fill="var(--alt)"/>
+</g>
 <g id="rivers"></g>
+<g id="ranges"></g>
 <g id="labels"></g>
 <g id="legend">
-  <rect x="18" y="{VH-96:.0f}" width="16" height="4" rx="2" fill="var(--riv)"/>
-  <text class="leg" x="42" y="{VH-89:.0f}">río</text>
-  <rect x="18" y="{VH-72:.0f}" width="16" height="4" rx="2" fill="var(--acc)"/>
-  <text class="leg" x="42" y="{VH-65:.0f}">río identificado</text>
-  <rect x="18" y="{VH-50:.0f}" width="16" height="10" rx="2" fill="var(--st)" stroke="var(--edge)"/>
-  <text class="leg" x="42" y="{VH-41:.0f}">los seis estados</text>
-  <rect x="18" y="{VH-26:.0f}" width="16" height="10" rx="2" fill="var(--land)"/>
-  <text class="leg" x="42" y="{VH-17:.0f}">tierra alrededor</text>
+  <rect x="18" y="{VH-122:.0f}" width="16" height="4" rx="2" fill="var(--riv)"/>
+  <text class="leg" x="42" y="{VH-115:.0f}">río</text>
+  <rect x="18" y="{VH-98:.0f}" width="16" height="4" rx="2" fill="var(--acc)"/>
+  <text class="leg" x="42" y="{VH-91:.0f}">río identificado</text>
+  <rect x="18" y="{VH-76:.0f}" width="16" height="10" rx="2" fill="var(--st)" stroke="var(--edge)"/>
+  <text class="leg" x="42" y="{VH-67:.0f}">los seis estados</text>
+  <rect x="18" y="{VH-52:.0f}" width="16" height="10" rx="2" fill="var(--alt)"/>
+  <text class="leg" x="42" y="{VH-43:.0f}">terreno escarpado</text>
+  <rect x="18" y="{VH-28:.0f}" width="16" height="10" rx="2" fill="var(--land)"/>
+  <text class="leg" x="42" y="{VH-19:.0f}">tierra alrededor</text>
 </g>
 </svg>
 </figure>
@@ -262,48 +323,55 @@ path.riv.hi{{stroke-width:3.2}}
     <div class="sub2" id="hovsub"></div></div>
 </div>
 
-<h1>El norte de México</h1>
-<p class="sub">Baja California, Sonora, Chihuahua, Coahuila, Nuevo León y Tamaulipas,
-con todos los ríos que trae la capa y el mar que los rodea. Instantánea del
-{SNAPSHOT}.</p>
-
 <div class="notes">
 <h2>Sobre el mapa</h2>
+<p class="sub">Baja California, Sonora, Chihuahua, Coahuila, Nuevo León y
+Tamaulipas. Instantánea del {SNAPSHOT}.</p>
 <p>La barra va quitando los ríos cortos hasta dejar solo el esqueleto de los
 grandes drenajes. Un estado bajo el cursor muestra su superficie y cuántos
 kilómetros de río lo cruzan; un río, su longitud dentro del cuadro y los
 estados por los que pasa.</p>
-<p>La costa es la línea real, no un trazo aproximado: viene de GSHHG a
-resolución completa, así que el Golfo de California, el Pacífico y el Golfo de
-México quedan donde están. Los ríos y las fronteras vienen de WDBII.</p>
+<p>La costa es la línea real y no un trazo aproximado, así que el Golfo de
+California, el Pacífico y el Golfo de México quedan donde están.</p>
+<p>El terreno escarpado mide qué tan quebrado está el suelo; no es el límite
+publicado de cada sierra. De ahí salen las dos Sierras Madre: la Occidental
+por el oriente de Sonora y el poniente de Chihuahua, la Oriental por Coahuila,
+Nuevo León y Tamaulipas.</p>
 </div>
 
-<div class="method">
-<h2>Método y fuentes</h2>
-<p>Los seis estados no existen como polígonos en esos datos. Se arman cortando
-la costa con los arcos de frontera y quedándose con la cara que contiene un
-punto conocido de cada estado. Cada una se comparó contra la superficie
-publicada por el INEGI antes de usarla, y las seis caen dentro del cuatro por
-ciento. Tamaulipas es la que más se aleja, porque la cifra publicada incluye
-las lagunas costeras que la línea de costa deja fuera.</p>
-<p>La frontera entre Baja California y Sonora se corta en WDBII a los 31.97
-grados. De ahí al Golfo la sigue el propio cauce del Colorado, que es por donde
-corre el límite.</p>
-<p>La capa de ríos no trae nombres. Solo se rotulan los que se pueden
-comprobar de dos maneras distintas: el Bravo porque su cauce es la frontera
-internacional y coincide con ella en toda su longitud, el Conchos porque
-desemboca en Ojinaga y pasa junto a Delicias, y el Colorado porque es el tramo
-del delta que además carga el límite estatal. Los demás se dibujan sin nombre
-en lugar de adivinarles uno.</p>
-<p>Superficies: INEGI, Marco Geoestadístico. Costas, ríos y fronteras: GSHHG y
-WDBII, versión distribuida con basemap-data-hires.</p>
+<h2>Referencias</h2>
+<div class="refs">
+<p>Instituto Nacional de Estadística y Geografía. (2023). <em>Marco
+geoestadístico, diciembre 2023</em> [Conjunto de datos]. INEGI.
+<a href="https://www.inegi.org.mx/temas/mg/">https://www.inegi.org.mx/temas/mg/</a></p>
+<p>Natural Earth. (2022). <em>Natural Earth II with shaded relief</em>
+(1:10m, versión 5.1) [Conjunto de datos]. North American Cartographic
+Information Society.
+<a href="https://www.naturalearthdata.com/">https://www.naturalearthdata.com/</a></p>
+<p>Soluri, E. A., &amp; Woodson, V. A. (1990). World Vector Shoreline.
+<em>International Hydrographic Review, 67</em>(1), 27-35.</p>
+<p>Wessel, P., &amp; Smith, W. H. F. (1996). A global, self-consistent,
+hierarchical, high-resolution shoreline database. <em>Journal of Geophysical
+Research: Solid Earth, 101</em>(B4), 8741-8743.
+<a href="https://doi.org/10.1029/96JB00104">https://doi.org/10.1029/96JB00104</a></p>
 </div>
 </main>
 <script>
 var ST={json.dumps(state_js, ensure_ascii=False)};
 var RV={json.dumps(river_js, ensure_ascii=False)};
+var RG={json.dumps(range_js, ensure_ascii=False)};
 var NS="http://www.w3.org/2000/svg";
 var rg=document.getElementById("rivers"), lg=document.getElementById("labels");
+var gg=document.getElementById("ranges");
+
+RG.forEach(function(r){{
+  var t=document.createElementNS(NS,"text");
+  t.setAttribute("class","rng"); t.setAttribute("x",r.x); t.setAttribute("y",r.y);
+  t.setAttribute("text-anchor","middle");
+  t.setAttribute("style","font-size:"+r.s+"px");
+  if (r.r) t.setAttribute("transform","rotate("+r.r+" "+r.x+" "+r.y+")");
+  t.textContent=r.n; gg.appendChild(t);
+}});
 var hl=document.getElementById("hovlab"), hn=document.getElementById("hovname"),
     hs=document.getElementById("hovsub");
 function fmt(n){{return n.toLocaleString("es-MX");}}
