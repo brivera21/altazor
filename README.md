@@ -30,6 +30,31 @@ Personal site for short pieces of writing and diagrams. Static HTML built from m
    git push
    ```
 
+## The copy rule
+
+Every diagram page opens with the diagram. Nothing above it explains it: a
+title, a date stamp, the controls and the nav, and then the thing itself.
+
+The description goes underneath.
+
+- 40 to 80 words per paragraph is the comfortable length, 100 is the ceiling
+- the whole description runs 180 words or fewer, usually in one or two paragraphs
+- sources, citations and method notes are not description. They go last, in a
+  `.refs` or `.method` block, and have no word limit
+- no em dashes in page copy
+- do not state a count that will grow
+
+`tools/verify_copy_rule.py` checks all of this in a headless browser, so it
+reads the page as rendered rather than as written. Run it after any build.
+
+## Building a diagram page
+
+Each diagram page has a generator in `tools/`, named `build_<page>.py`, which
+writes the flat HTML at the repo root. `build.py` only handles the markdown
+posts and the section index pages. Rebuild a diagram by running its generator,
+then run `tools/verify_copy_rule.py` and whichever `tools/verify_<page>.py`
+exists for it.
+
 ## Setup notes
 
 - `SITE_URL` at the top of `build.py` is the published URL, used for RSS feed links
