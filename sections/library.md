@@ -20,6 +20,6 @@ Nothing here yet.
 
 [Most Populous Cities in the United States](us-cities.html). The twenty largest cities in 2025: population, share of the country, and how much each has grown or shrunk since the 2020 census, from Census Bureau estimates.
 
-## Demography
+## Solar System
 
-[World's Most Populous Countries](populous-countries.html). The twenty largest countries in 2026: population, share of the world total, and births and deaths per day, from the United Nations projections.
+[Earth Right Now](populous-countries.html). The twenty largest countries in 2026: population, share of the world total, and births and deaths per day, from the United Nations projections.
