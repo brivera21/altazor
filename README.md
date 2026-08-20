@@ -41,8 +41,12 @@ The description goes underneath.
 - the whole description runs 180 words or fewer, usually in one or two paragraphs
 - sources, citations and method notes are not description. They go last, in a
   `.refs` or `.method` block, and have no word limit
+- third person throughout. The copy says what the page does, not what the
+  reader should do: "the wheel zooms", not "scroll to zoom"; "un estado bajo el
+  cursor muestra su superficie", not "pasa el cursor sobre un estado". This
+  covers hint labels and legends too, not just the paragraphs
 - no em dashes in page copy
-- do not state a count that will grow
+- no count that will grow
 
 `tools/verify_copy_rule.py` checks all of this in a headless browser, so it
 reads the page as rendered rather than as written. Run it after any build.
