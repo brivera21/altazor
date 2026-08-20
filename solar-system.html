@@ -534,6 +534,64 @@
     ctx.fillText("light · " + fmtLight(tLight), x, y0 - 12);
   }
 
+  function drawGhostEarth() {
+    // A ghost of Earth for size comparison, wherever you are zoomed in.
+    // Not on Earth itself (it IS Earth) and not on Jupiter, by request.
+    if (!selected || selected.name === "Earth" || selected.name === "Jupiter") return;
+    const isSun = selected === SUN;
+    const x = isSun ? sx(0) : sx(px(selected));
+    const Rd = (isSun ? sunR() : pr(selected)) * cam.z;   // drawn radius of the selected body
+    if (Rd < 40) return;                                   // only when actually zoomed in
+    const gr = Math.max(Rd * 6371 / selected.rKm, 1.2);    // Earth radius at the same drawn scale
+    ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+    if (isSun) {
+      // a speck on the Sun's disc (left side, clear of the info panel)
+      const gx = x - Rd * 0.72, gy = y0;
+      ctx.fillStyle = "rgba(74,122,200,0.95)";
+      circle(gx, gy, gr); ctx.fill();
+      ctx.strokeStyle = "rgba(20,40,80,0.9)"; ctx.lineWidth = 1;
+      circle(gx, gy, gr + 0.8); ctx.stroke();
+      const lx = x - Rd - 44, ly = y0 - 26;
+      ctx.strokeStyle = "rgba(190,215,245,0.55)";
+      ctx.beginPath(); ctx.moveTo(lx + 4, ly + 4); ctx.lineTo(gx - gr - 2, gy - 2); ctx.stroke();
+      ctx.textAlign = "right";
+      ctx.fillStyle = "rgba(200,225,255,0.9)";
+      ctx.fillText("Earth, to scale", lx, ly);
+    } else if (gr >= Rd) {
+      // Earth is the bigger one: draw its outline around the planet, concentric
+      ctx.fillStyle = "rgba(90,157,224,0.10)";
+      circle(x, y0, gr); ctx.fill();
+      ctx.strokeStyle = "rgba(150,195,240,0.75)";
+      ctx.setLineDash([4, 4]); ctx.lineWidth = 1.2;
+      circle(x, y0, gr); ctx.stroke();
+      ctx.setLineDash([]);
+      const ly = y0 - gr - 14;
+      ctx.strokeStyle = "rgba(190,215,245,0.45)";
+      ctx.beginPath(); ctx.moveTo(x, ly + 4); ctx.lineTo(x, y0 - gr - 2); ctx.stroke();
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(200,225,255,0.9)";
+      ctx.fillText("Earth, to scale", x, ly);
+    } else {
+      // Earth is the smaller one: set it beside the planet, on the open left side
+      const side = selected.name === "Saturn" ? Rd * 2.15 : selected.name === "Uranus" ? Rd * 1.3 : Rd;
+      const gx = x - side - gr - 34, gy = y0;
+      if (gx + gr < -40) return;
+      ctx.fillStyle = "rgba(90,157,224,0.5)";
+      circle(gx, gy, gr); ctx.fill();
+      ctx.strokeStyle = "rgba(190,215,245,0.8)";
+      ctx.setLineDash([3, 3]); ctx.lineWidth = 1;
+      circle(gx, gy, gr + 1.5); ctx.stroke();
+      ctx.setLineDash([]);
+      const ly = gy - gr - 14;
+      ctx.strokeStyle = "rgba(190,215,245,0.45)";
+      ctx.beginPath(); ctx.moveTo(gx, ly + 4); ctx.lineTo(gx, gy - gr - 3); ctx.stroke();
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(200,225,255,0.9)";
+      ctx.fillText("Earth, to scale", gx, ly);
+    }
+  }
+
   function drawScalebar() {
     if (mTarget !== 1) return;
     // pick a nice 1–2–5 length near 120 px
@@ -578,6 +636,7 @@
     drawSun();
     for (const p of PLANETS) drawPlanet(p);
     flushLabels();
+    drawGhostEarth();
     drawLightTimes();
     drawScalebar();
     window.__dbg = { m, mTarget, camc: cam.c, camz: cam.z, tracking,
