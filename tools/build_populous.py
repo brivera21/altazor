@@ -164,7 +164,7 @@ HTML = f"""<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>World's Most Populous Countries · Altazor</title>
+<title>Earth Right Now · Altazor</title>
 <style>
 :root {{ --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
         --line:#2b2b2b; --accent:#58a6ff;
@@ -237,7 +237,7 @@ tr.total td {{ border-bottom:none; color:var(--muted); font-size:13px; padding-t
   <nav class="site"><a href="library.html">&larr; Library</a></nav>
 </header>
 
-<h1>World's Most Populous Countries</h1>
+<h1>Earth Right Now</h1>
 <p class="stamp">Snapshot taken {SNAPSHOT}, using United Nations projections for 2026.</p>
 
 <div class="tiles">

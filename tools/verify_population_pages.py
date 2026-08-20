@@ -24,7 +24,7 @@ PAGES = [
          last_lead=False, diverging=True),
     dict(file="us-cities.html", title="Most Populous Cities in the United States",
          last_lead=True, diverging=True),
-    dict(file="populous-countries.html", title="World's Most Populous Countries",
+    dict(file="populous-countries.html", title="Earth Right Now",
          last_lead=True, diverging=False),
 ]
 TAIL = ["How to read this", "Notes", "References"]
