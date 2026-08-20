@@ -923,7 +923,6 @@ g.pc text { paint-order: stroke; transition: transform .55s ease; }
   <nav class="site"><a href="chess.html">&larr; Chess</a></nav>
 </header>
 <h1>Endgames</h1>
-<p class="lede">King and pawn against king, then the basic checkmates, played out one move at a time. Black always plays the reply that holds out longest, taken from a solved table of each ending, so every verdict here is exact. Use the arrows or the arrow keys to step through a line, and hover any square to name it. Every placement paints the whole king and pawn table on the board at once.</p>
 <div class="stage">
   <div class="menu" id="menu"></div>
   <div class="boardcol">
@@ -958,8 +957,14 @@ g.pc text { paint-order: stroke; transition: transform .55s ease; }
     <div id="sqName"></div>
   </div></div>
 </div>
-<p class="note">After the Board intuition trainer diagrams. The same reference
-board underlies every topic; only the paint changes.</p>
+<p class="note">King and pawn against king, then the basic checkmates, played
+out one move at a time. Use the arrows or the arrow keys to step through a line,
+and hover any square to name it. Every placement paints the whole king and pawn
+table on the board at once.</p>
+<p class="note">Black always plays the reply that holds out longest, taken from a
+solved table of each ending, so every verdict here is exact. After the Board
+intuition trainer diagrams; the same reference board underlies every topic, only
+the paint changes.</p>
 </div>
 <script>
 const TOPICS=__TOPICS__;
