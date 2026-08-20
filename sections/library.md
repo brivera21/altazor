@@ -4,22 +4,54 @@ title: Library
 
 ## Digital Concepts
 
-Nothing here yet.
+<style>
+.dc-drop { margin: 0 0 1.1rem; }
+.dc-drop summary {
+  cursor: pointer; list-style: none; color: var(--accent);
+  font-family: Georgia, "Times New Roman", serif; font-size: 1.05rem;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.dc-drop summary::-webkit-details-marker { display: none; }
+.dc-drop summary::before { content: "\25B8"; display: inline-block; margin-right: 0.5rem;
+  color: var(--muted); transition: transform 0.15s; text-decoration: none; }
+.dc-drop[open] summary::before { transform: rotate(90deg); }
+.dc-drop ul { list-style: none; margin: 0.6rem 0 0; padding: 0 0 0 1.35rem;
+  border-left: 1px solid var(--line); }
+.dc-drop li { margin: 0.45rem 0; font-family: Georgia, "Times New Roman", serif; font-size: 1.02rem; }
+.dc-drop li.soon { color: var(--muted); }
+.dc-drop li.soon .tag { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; margin-left: 8px; }
+</style>
+
+<details class="dc-drop">
+<summary>The Solar System</summary>
+<ul>
+<li><a href="solar-system.html">The Solar System</a></li>
+<li><a href="populous-countries.html">Earth Right Now</a></li>
+<li><a href="orbit-sine.html">The Year: Earth's Loop</a></li>
+<li class="soon">The Month: The Moon's Loop <span class="tag">coming soon</span></li>
+<li class="soon">The History of Earth <span class="tag">coming soon</span></li>
+</ul>
+</details>
 
 ## Mexico
 
-Nothing here yet.
-
-## Chihuahua
-
-[Roads Around El Terrero, Namiquipa](el-terrero.html). The towns of the Namiquipa valley and the municipal seats around them, each at its real coordinates and joined only where a road exists, with the driving distance along every link. Population from the 2020 census, distances routed over OpenStreetMap. The page is in Spanish.
+<details class="dc-drop">
+<summary>Chihuahua</summary>
+<ul>
+<li><a href="el-terrero.html">El Terrero, Namiquipa</a></li>
+<li class="soon">Archivo Namiquipa <span class="tag">coming soon</span></li>
+<li class="soon">Cabalgata Binacional Villista (Villista Binational Cavalcade) <span class="tag">coming soon</span></li>
+</ul>
+</details>
 
 ## USA
 
-[Every State by Population](us-states.html). All fifty states in order, largest to smallest, with each one's share of the country and its change since the 2020 census, from Census Bureau estimates.
+[50 States and a District](us-states.html)
 
-[Most Populous Cities in the United States](us-cities.html). The twenty largest cities in 2025: population, share of the country, and how much each has grown or shrunk since the 2020 census, from Census Bureau estimates.
+[US Cities](us-cities.html)
 
-## Solar System
+## Abstractions {: #abstractions }
 
-[Earth Right Now](populous-countries.html). Every country and area the United Nations counts, largest to smallest, with population, share of the world total, and births and deaths per day, from the 2026 projections.
+Nothing here yet.
