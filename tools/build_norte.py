@@ -257,7 +257,7 @@ path.riv.hi{{stroke-width:3.2}}
 <div class="readout">
   <div class="box"><div class="lab">ríos en el cuadro</div>
     <div class="val" id="nriv"></div><div class="sub2" id="krivs"></div></div>
-  <div class="box wide"><div class="lab" id="hovlab">pasa el cursor</div>
+  <div class="box wide"><div class="lab" id="hovlab">nada bajo el cursor</div>
     <div class="val" id="hovname" style="font-size:1.05rem"></div>
     <div class="sub2" id="hovsub"></div></div>
 </div>
@@ -269,10 +269,10 @@ con todos los ríos que trae la capa y el mar que los rodea. Instantánea del
 
 <div class="notes">
 <h2>Sobre el mapa</h2>
-<p>Mueve la barra y desaparecen los ríos cortos, hasta que solo queda el
-esqueleto de los grandes drenajes. Pasa el cursor sobre un estado para ver su
-superficie y cuántos kilómetros de río lo cruzan, y sobre un río para ver su
-longitud dentro del cuadro y los estados por los que pasa.</p>
+<p>La barra va quitando los ríos cortos hasta dejar solo el esqueleto de los
+grandes drenajes. Un estado bajo el cursor muestra su superficie y cuántos
+kilómetros de río lo cruzan; un río, su longitud dentro del cuadro y los
+estados por los que pasa.</p>
 <p>La costa es la línea real, no un trazo aproximado: viene de GSHHG a
 resolución completa, así que el Golfo de California, el Pacífico y el Golfo de
 México quedan donde están. Los ríos y las fronteras vienen de WDBII.</p>

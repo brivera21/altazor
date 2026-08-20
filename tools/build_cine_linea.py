@@ -116,16 +116,16 @@ h1 { margin:0 0 6px; font-size:26px; }
   <div id="tl"></div>
   <div class="side"><div class="card">
     <img id="poster" alt="Póster">
-    <div id="filmTxt">Pasa el cursor sobre una película</div>
+    <div id="filmTxt">Ninguna película bajo el cursor</div>
     <div id="dirTxt"></div>
     <div id="eraTxt"></div>
     <div id="yearTxt"></div>
   </div></div>
 </div>
 <div class="legend" id="legend"></div>
-<p class="note">Las 1,712 películas de la lista maestra, ahora una por una. Haz
-clic en la banda de una década para entrar a ella y ver cada entrada con su
-año; pasa el cursor sobre una película para ver su póster. Ctrl (o &#8984;) +
+<p class="note">Las 1,712 películas de la lista maestra, ahora una por una. Un
+clic en la banda de una década entra a ella y muestra cada entrada con su
+año; una película bajo el cursor muestra su póster. Ctrl (o &#8984;) +
 rueda para acercar; la rueda sola sube y baja dentro del recuadro y arrastrar
 mueve la vista en ambas direcciones. Con la vista completa solo se muestran puntos; las fichas
 aparecen al entrar a una década.</p>
@@ -220,7 +220,7 @@ function render(){
         data-dot="${f.fi}" data-dec="${Math.floor(f.y/10)*10}"/>`;
     }
     s+=`<text x="${W/2}" y="${H-40}" text-anchor="middle" font-size="13"
-      fill="#777">Haz clic en una década para ver sus fichas</text>`;
+      fill="#777">Un clic en una década muestra sus fichas</text>`;
   } else {
     for(const f of fs){
       const c=ERAS[f.e].c;

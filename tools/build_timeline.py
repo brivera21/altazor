@@ -150,8 +150,9 @@ h1 { margin:0 0 6px; font-size:26px; }
 <div id="tl"></div>
 <div class="legend" id="legend"></div>
 <p class="note">The fifty games worth knowing, the world champions, and the eras
-they belong to, from As-Suli in 950 to Gukesh in 2024. Scroll or pinch to zoom,
-drag to pan, click an era band to zoom into it, hover anything for details.</p>
+they belong to, from As-Suli in 950 to Gukesh in 2024. The wheel or a pinch zooms,
+dragging pans, a click on an era band zooms into it, and anything under the
+cursor shows its details.</p>
 <p class="note">Games are placed at the year they were played and colored by
 era; champions sit below the axis at the start of each reign. The game list is
 a personal selection. The axis starts at 1800; the medieval and early games

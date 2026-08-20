@@ -114,7 +114,7 @@ h1 { margin:0 0 6px; font-size:26px; }
 <div class="stage">
   <div id="tl"></div>
   <div class="side"><div class="card">
-    <div id="selTitle">Haz clic en un año o una era</div>
+    <div id="selTitle">Un año o una era, sin seleccionar</div>
     <div id="selSub"></div>
     <ul id="filmList"></ul>
   </div></div>
@@ -122,8 +122,8 @@ h1 { margin:0 0 6px; font-size:26px; }
 <div class="legend" id="legend"></div>
 <p class="note">Una lista maestra del cine mexicano: 1,712 películas de 1896
 a 2025, mostradas como películas por año. Ctrl (o &#8984;) + rueda para
-acercar; arrastra para desplazarte. Haz clic en la barra de un año para listar sus películas, o
-en la banda de una era para acercarte a ella y listarla. El auge de la Época de
+acercar; arrastrar desplaza. Un clic en la barra de un año lista sus
+películas, y uno en la banda de una era acerca a ella y la lista. El auge de la Época de
 Oro y el repunte posterior al 2000 saltan a la vista.</p>
 <p class="note">Compilada a partir de Letterboxd, Cine Mexicano, Su
 Historia, Somos Cine y las películas enviadas por México al premio Óscar;

@@ -186,14 +186,14 @@ TOPICS = [
               "a-file for the white king to use, so it can never drive the "
               "black king out of the corner."),
       ],
-      notes=["Do put the king in front of the pawn and move it first. A "
+      notes=["The king belongs in front of the pawn, and it moves first. A "
              "pawn that runs ahead of its king draws at best.",
-             "Do take the opposition: kings on the same file with one "
-             "square between them, with the other side to move. The side "
-             "that has to move gives way.",
-             "Do not push the pawn to give check when a quiet king move "
-             "wins. Checking the enemy king toward the corner it wants is "
-             "how wins turn into stalemates.",
+             "The opposition is the thing to hold: kings on the same file "
+             "with one square between them, with the other side to move. "
+             "The side that has to move gives way.",
+             "A pawn push that gives check, where a quiet king move wins, "
+             "is the losing idea. Checking the enemy king toward the corner "
+             "it wants is how wins turn into stalemates.",
              "Rook pawns, on the a-file and the h-file, are the exception "
              "to all of it. If the defending king reaches the corner, or "
              "even the square beside it, no amount of technique wins.",
@@ -202,12 +202,12 @@ TOPICS = [
              "are exact, not rules of thumb."]),
  dict(id="kpkmap", g="Working Backwards", t="Every placement", map=True,
       strong=[],
-      c="The whole ending at once. Put the white king and the pawn wherever "
-        "you like, choose who is to move, and every square is painted with "
-        "the result if the black king stood on it: green where White wins, "
-        "red where Black holds. Pick a piece, then click a square to put it "
-        "there, or walk it with the arrow keys. The figure under the board "
-        "counts the table whole.",
+      c="The whole ending at once. The white king and the pawn go anywhere, "
+        "either side can be to move, and every square is painted with the "
+        "result if the black king stood on it: green where White wins, red "
+        "where Black holds. A selected piece follows a click on a square, or "
+        "walks with the arrow keys. The figure under the board counts the "
+        "table whole.",
       legend=[("win", "White wins with the black king here"),
               ("drw", "Black holds the draw"),
               ("ill", "the black king cannot stand here")],
@@ -260,8 +260,8 @@ TOPICS = [
             c="2... Kd5. Marking time; the box does not move."),
        dict(pieces=[["bK", "bK", "d5"], ["wK", "wK", "c3"],
                     ["QN", "wQ", "e7"]],
-            c="3. Kc3. Closer. Note that White is in no hurry to check: "
-              "checks push the king around, the king traps it."),
+            c="3. Kc3. Closer. White is in no hurry to check: checks push "
+              "the king around, the king traps it."),
        dict(pieces=[["bK", "bK", "c6"], ["wK", "wK", "c3"],
                     ["QN", "wQ", "e7"]],
             c="3... Kc6. Black's only move."),
@@ -296,11 +296,11 @@ TOPICS = [
       ],
       notes=["Black's moves come from a computed tablebase of this "
              "ending, so this is the longest resistance possible.",
-             "The danger in this ending is stalemate, not difficulty: "
-             "keep the king a square until the mate arrives, and prefer "
-             "quiet king moves to checks.",
-             "Use the arrows or the arrow keys to play through the line "
-             "one move at a time."]),
+             "The danger in this ending is stalemate, not difficulty: the "
+             "black king keeps a square until the mate arrives, and quiet "
+             "king moves beat checks.",
+             "The arrows and the arrow keys play through the line one "
+             "move at a time."]),
  dict(id="rookmate", g="Checkmates", t="The rook mate",
       c="A rook and king against a bare king. The rook fences a whole "
         "rank or file at a time; the kings fight for the squares in "
@@ -409,8 +409,8 @@ TOPICS = [
       ],
       notes=["Black's moves come from a computed tablebase of this "
              "ending, so this is the longest resistance possible.",
-             "Use the arrows or the arrow keys to play through the line "
-             "one move at a time."]),
+             "The arrows and the arrow keys play through the line one "
+             "move at a time."]),
  dict(id="twobishops", g="Checkmates", t="The two-bishop mate",
       c="Two bishops form diagonal fences a king cannot cross. Black is "
         "not scripted: it plays the tablebase defence, the reply that "
@@ -529,8 +529,8 @@ TOPICS = [
       notes=["Black's moves come from a computed tablebase of this "
              "ending, so this is the longest resistance possible, not a "
              "scripted defence.",
-             "Use the arrows or the arrow keys to play through the line "
-             "one move at a time."]),
+             "The arrows and the arrow keys play through the line one "
+             "move at a time."]),
  dict(id="twobishops2", g="Checkmates", t="The two-bishop mate in the "
       "corner",
       c="The same start, with both sides playing perfectly: White takes "
@@ -643,8 +643,8 @@ TOPICS = [
       notes=["This is the fastest mate from the starting position against "
              "the tablebase defence. With best play from both sides the "
              "king ends up in the corner.",
-             "Use the arrows or the arrow keys to play through the line "
-             "one move at a time."]),
+             "The arrows and the arrow keys play through the line one "
+             "move at a time."]),
 ]
 
 def _mate_shade(pieces):
@@ -958,8 +958,8 @@ g.pc text { paint-order: stroke; transition: transform .55s ease; }
   </div></div>
 </div>
 <p class="note">King and pawn against king, then the basic checkmates, played
-out one move at a time. Use the arrows or the arrow keys to step through a line,
-and hover any square to name it. Every placement paints the whole king and pawn
+out one move at a time. The arrows and the arrow keys step through a line, and
+any square under the cursor names itself. Every placement paints the whole king and pawn
 table on the board at once.</p>
 <p class="note">Black always plays the reply that holds out longest, taken from a
 solved table of each ending, so every verdict here is exact. After the Board

@@ -104,7 +104,7 @@ h1 { margin:0 0 6px; font-size:26px; }
   <div id="tl"></div>
   <div class="side"><div class="card">
     <img id="cover" alt="Cover">
-    <div id="bookTxt">Hover over a book</div>
+    <div id="bookTxt">No book under the cursor</div>
     <div id="authTxt"></div>
     <div id="badgeTxt"></div>
     <div id="yearTxt"></div>
@@ -369,10 +369,10 @@ emit(
     "Hugo and Nebula Winners",
     "Hugo and Nebula Winners",
     "Every Best Novel winner of both awards on one timeline. A book that "
-    "won both appears once, in green. Click the band of a decade to enter "
-    "it and see each book with its year; hover over a book to see its "
-    "cover. Ctrl (or ⌘) + wheel zooms; the wheel alone scrolls "
-    "inside the frame and dragging pans the view.",
+    "won both appears once, in green. A click on the band of a decade "
+    "enters it and shows each book with its year, and a book under the "
+    "cursor shows its cover. Ctrl (or ⌘) with the wheel zooms; the wheel "
+    "alone scrolls inside the frame and dragging pans the view.",
     award_books, AWARD_CATS, 1948, 2028,
     ' &nbsp;·&nbsp; <a href="scifi-canon.html">The canon</a>',
     " The Hugo year is the year the award was presented; the Nebula year "
@@ -392,9 +392,9 @@ emit(
     "A Canon of Science Fiction",
     "A Canon of Science Fiction",
     "The books that built the genre, from Frankenstein forward, colored "
-    "by era. Click the band of a decade to enter it; hover over a book "
-    "to see its cover. Ctrl (or ⌘) + wheel zooms; the wheel alone "
-    "scrolls inside the frame and dragging pans the view.",
+    "by era. A click on the band of a decade enters it, and a book under "
+    "the cursor shows its cover. Ctrl (or ⌘) with the wheel zooms; the "
+    "wheel alone scrolls inside the frame and dragging pans the view.",
     canon_books, canon_cats, 1810, 2028,
     ' &nbsp;·&nbsp; <a href="hugo-nebula.html">Hugo and Nebula</a>',
     " The list is editorial: the books here are the ones that defined "

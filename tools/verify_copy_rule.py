@@ -8,7 +8,10 @@ underneath it, and stays short.
   2. Each descriptive paragraph below the diagram runs 100 words or fewer, and
      the description as a whole runs 180 words or fewer. The comfortable target
      is 40 to 80 words per paragraph.
-  3. No em dashes anywhere.
+  3. The copy does not give orders. It says what the page does, not what the
+     reader should do: "the wheel zooms", not "scroll to zoom". Third person
+     for the whole site, English and Spanish alike.
+  4. No em dashes anywhere.
 
 Sources, citations and method notes are a different kind of text: they are
 reference material, not description, so they sit below the description in a
@@ -53,6 +56,33 @@ CONTENT = ("svg", "canvas", "table", "#tl", ".board", ".chessboard", ".grid",
            ".diagram", ".chart", "#map", ".map", ".cols", ".rows", ".poster",
            ".card", "#stage", ".stage", ".bars", ".timeline")
 
+# Verbs that are giving the reader an order when they open a sentence or a
+# clause. These have no plausible third-person reading in this site's copy, so
+# a hit is a failure.
+ORDERS = ("click", "hover", "scroll", "drag", "pinch", "tap", "press",
+          "haz", "arrastra", "mueve", "presiona", "oprime", "desliza",
+          "fíjate", "fijate", "acércate", "acercate", "pasa el", "pasa la")
+
+# Verbs that are usually orders but have a legitimate third-person or noun
+# reading, so a hit is reported for a human to read rather than failed. In
+# Spanish the third-person singular and the informal imperative are the same
+# word, which is why "acerca" and "ve" cannot be decided by pattern alone.
+WATCH = ("use", "pick", "choose", "select", "zoom", "keep", "prefer", "put",
+         "take", "avoid", "notice", "remember", "imagine", "watch", "look",
+         "try", "elige", "escoge", "selecciona", "observa", "mira",
+         "acerca", "aleja", "prueba", "recuerda", "toca", "abre", "busca")
+
+
+def order_re(words):
+    """Match one of `words` opening a sentence or a coordinated clause."""
+    return re.compile(
+        r"(?:(?<=^)|(?<=[.;:!?]\s)|(?<=[.;:!?]\s\s)|(?<=,\sy\s)|"
+        r"(?<=,\sand\s)|(?<=;\s))(" + "|".join(words) + r")\b\s+\w+",
+        re.IGNORECASE)
+
+
+ORDER_RE, WATCH_RE = order_re(ORDERS), order_re(WATCH)
+
 JS = """([sel, ref, furn]) => {
   let diagram = null;
   const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT);
@@ -78,6 +108,22 @@ JS = """([sel, ref, furn]) => {
   return out;
 }"""
 
+# All visible copy, including labels, legends and hint text, but not the data
+# itself: a table of country names is not prose and cannot give an order.
+COPY_JS = """() => {
+  const skip = new Set(['SCRIPT', 'STYLE', 'TABLE']);
+  const out = [];
+  const walk = el => {
+    for (const c of el.childNodes) {
+      if (c.nodeType === 3) { const t = c.textContent.trim(); if (t) out.push(t); }
+      else if (c.nodeType === 1 && !skip.has(c.tagName)
+               && c.id !== 'filmList' && !c.closest('table')) walk(c);
+    }
+  };
+  walk(document.body);
+  return out;
+}"""
+
 pages = sorted(p.name for p in ROOT.glob("*.html"))
 fails, notes = [], []
 
@@ -99,6 +145,16 @@ with sync_playwright() as pw:
                 fails.append(f"{name}: em dash in page copy")
         pg.goto(f.as_uri())
         pg.wait_for_timeout(450)
+        for frag in pg.evaluate(COPY_JS):
+            if len(frag.split()) < 3:
+                continue
+            for m in ORDER_RE.finditer(frag):
+                fails.append(f"{name}: the copy gives an order: "
+                             f"{frag[max(0, m.start() - 25):m.end() + 30]!r}")
+            for m in WATCH_RE.finditer(frag):
+                notes.append(f"{name}: reads like an order, check it: "
+                             f"{frag[max(0, m.start() - 25):m.end() + 30]!r}")
+
         got = pg.evaluate(JS, [list(CONTENT), list(REFERENCE), list(FURNITURE)])
         above = [a for a in got["above"] if a["n"] > MAX_ABOVE]
         tail = sum(b["n"] for b in got["below"])
