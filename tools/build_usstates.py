@@ -302,11 +302,12 @@ the national total above but has no rank here.</p>
 
 <h2>How to read this</h2>
 <p class="note">All fifty states from largest to smallest, with each one's share
-of the country and how far it has moved since the 2020 census. The green figure
-after a population is how many more people that state has than the one ranked
-below it; Wyoming has none because nothing is below it. The change bars use one
-scale for all fifty, growth to the right and decline to the left.
+of the country and how far it has moved since the 2020 census. Growth runs right
+on the change bars and decline runs left, on one scale for all fifty.
 {len(grew)} states have grown since 2020 and {len(shrank)} have lost people.</p>
+<p class="note">The green figure after a population is how many more people that
+state has than the one ranked below it. Wyoming has none because nothing is
+below it.</p>
 
 <h2>Notes</h2>
 <p class="note">Populations are Census Bureau estimates for July 1, 2025, and the

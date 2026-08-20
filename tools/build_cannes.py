@@ -1,0 +1,340 @@
+#!/usr/bin/env python3
+"""Generate palme-dor.html, the Palme d'Or winners timeline for the Film section.
+
+Winners and eras extracted from Brian's Mathematica notebook (Pale dOr
+Winners.nb); years are festival years. It Was Just an Accident (2025) appended.
+Posters are fetched by the page at view time from Wikipedia's public REST API
+(candidate titles tried in order); none are stored in the repo.
+
+Usage: python3 build_cannes.py
+"""
+
+import json
+from pathlib import Path
+
+OUT = Path(__file__).parent.parent / "palme-dor.html"
+
+FILMS = [
+    (1946, "The Lost Weekend"), (1947, "Antoine and Antoinette"),
+    (1949, "The Third Man"), (1951, "Miracle in Milan"),
+    (1952, "Two Cents Worth of Hope"), (1953, "The Wages of Fear"),
+    (1954, "Gate of Hell"), (1955, "Marty"), (1956, "The Silent World"),
+    (1957, "Friendly Persuasion"), (1958, "The Cranes Are Flying"),
+    (1959, "Black Orpheus"), (1960, "La Dolce Vita"), (1961, "Viridiana"),
+    (1962, "The Given Word"), (1963, "The Leopard"),
+    (1964, "The Umbrellas of Cherbourg"),
+    (1965, "The Knack ...and How to Get It"), (1966, "A Man and a Woman"),
+    (1967, "Blow-Up"), (1969, "If...."), (1970, "MASH"),
+    (1971, "The Go-Between"), (1972, "The Working Class Goes to Heaven"),
+    (1973, "The Hireling"), (1974, "The Conversation"),
+    (1975, "Chronicle of the Years of Fire"), (1976, "Taxi Driver"),
+    (1977, "Padre Padrone"), (1978, "The Tree of Wooden Clogs"),
+    (1979, "The Tin Drum"), (1979, "Apocalypse Now"), (1980, "All That Jazz"),
+    (1981, "Man of Iron"), (1982, "Missing"), (1982, "Yol"),
+    (1983, "The Ballad of Narayama"), (1984, "Paris, Texas"),
+    (1985, "When Father Was Away on Business"), (1986, "The Mission"),
+    (1987, "Under the Sun of Satan"), (1988, "Pelle the Conqueror"),
+    (1989, "Sex, Lies, and Videotape"), (1990, "Wild at Heart"),
+    (1991, "Barton Fink"), (1992, "The Best Intentions"),
+    (1993, "Farewell My Concubine"), (1993, "The Piano"),
+    (1994, "Pulp Fiction"), (1995, "Underground"), (1996, "Secrets & Lies"),
+    (1997, "The Eel"), (1997, "The Taste of Cherry"),
+    (1998, "Eternity and a Day"), (1999, "Rosetta"),
+    (2000, "Dancer in the Dark"), (2001, "The Son's Room"),
+    (2002, "The Pianist"), (2003, "Elephant"), (2004, "Fahrenheit 9/11"),
+    (2005, "L'Enfant"), (2006, "The Wind That Shakes the Barley"),
+    (2007, "4 Months, 3 Weeks and 2 Days"), (2008, "The Class"),
+    (2009, "The White Ribbon"),
+    (2010, "Uncle Boonmee Who Can Recall His Past Lives"),
+    (2011, "The Tree of Life"), (2012, "Amour"),
+    (2013, "Blue Is the Warmest Color"), (2014, "Winter Sleep"),
+    (2015, "Dheepan"), (2016, "I, Daniel Blake"), (2017, "The Square"),
+    (2018, "Shoplifters"), (2019, "Parasite"), (2021, "Titane"),
+    (2022, "Triangle of Sadness"), (2023, "Anatomy of a Fall"),
+    (2024, "Anora"), (2025, "It Was Just an Accident"),
+]
+
+ERAS = [
+    (1946, 1954, "Early Festival Era"),
+    (1955, 1965, "Palme d'Or Establishment"),
+    (1966, 1980, "European Art Cinema Boom"),
+    (1981, 1991, "International Auteur Recognition"),
+    (1992, 2001, "Asian Cinema Emergence"),
+    (2002, 2012, "Global Arthouse Renaissance"),
+    (2013, 2025, "Contemporary World Cinema"),
+]
+
+ERA_COLORS = ["#ff5c4d", "#58a6ff", "#31d67a", "#ffb02e",
+              "#b48cf2", "#c9814b", "#8b93a7"]
+
+
+def era_index(year):
+    for i, (a, b, _) in enumerate(ERAS):
+        if year <= b:
+            return i
+    return len(ERAS) - 1
+
+
+films_js = json.dumps([{"y": y, "n": n, "e": era_index(y)} for y, n in FILMS],
+                      separators=(",", ":"))
+eras_js = json.dumps([{"a": a, "b": b, "n": n, "c": ERA_COLORS[i]}
+                      for i, (a, b, n) in enumerate(ERAS)],
+                     separators=(",", ":"))
+
+HTML = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Palme d'Or Winners · Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 6px; font-size:26px; }
+.lede { color:var(--muted); font-size:14.5px; margin:0 0 14px; max-width:760px; }
+.controls { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
+.controls button { background:var(--panel); border:1px solid var(--line); color:var(--text);
+  padding:7px 13px; border-radius:8px; cursor:pointer; font-size:13.5px; }
+.controls button:hover { border-color:var(--accent); }
+.controls .info { color:var(--muted); font-size:13px; margin-left:6px; }
+.stage { display:flex; gap:22px; align-items:flex-start; }
+#tl { flex:1 1 640px; min-width:0; }
+#tl svg { width:100%; height:auto; display:block; cursor:grab; user-select:none; }
+#tl.panning, #tl.panning * { cursor:grabbing !important; }
+.side { flex:0 0 260px; position:sticky; top:16px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:14px; }
+#poster { width:100%; aspect-ratio:2/3; object-fit:contain; background:#101010;
+  border-radius:6px; display:block; }
+#filmTxt { font-weight:700; margin:10px 0 2px; font-size:15px; }
+#eraTxt { font-size:13px; min-height:1.2em; }
+#yearTxt { color:var(--muted); font-size:13px; margin-top:4px; }
+.legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-size:12.5px; color:var(--muted); }
+.legend span.sw { width:11px; height:11px; border-radius:3px; display:inline-block; margin-right:5px; }
+.note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;}
+  #poster{max-width:220px; margin:0 auto;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="film.html">&larr; Film</a></nav>
+</header>
+<h1>Palme d'Or Winners</h1>
+<div class="controls">
+  <button id="reset">Reset view</button>
+  <span class="info" id="info"></span>
+</div>
+<div class="stage">
+  <div id="tl"></div>
+  <div class="side"><div class="card">
+    <img id="poster" alt="Film poster">
+    <div id="filmTxt">Hover a film</div>
+    <div id="eraTxt"></div>
+    <div id="yearTxt"></div>
+  </div></div>
+</div>
+<div class="legend" id="legend"></div>
+<p class="note">The top prize at Cannes, from the Grand Prix years through the
+Palme d'Or, 1946 to 2025, grouped into seven festival eras. Scroll to zoom,
+drag to pan, click an era band to zoom into it, hover a film to see its
+poster.</p>
+<p class="note">Years are festival years; before 1955 the prize was the Grand
+Prix du Festival. Gaps (1948, 1950, 1968, 2020) are years with no festival or
+no award. Posters are loaded at view time from Wikipedia's public API for
+identification and are not stored on this site; a few may fail to resolve.</p>
+</div>
+<script>
+const FILMS=__FILMS__, ERAS=__ERAS__;
+const W=980,H=780,CY=385,MINY=1943,MAXY=2028;
+let view={a:MINY,b:MAXY};
+
+const el=document.getElementById('tl');
+const X=y=>(y-view.a)/(view.b-view.a)*W;
+const YR=x=>view.a+x/W*(view.b-view.a);
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+function ticks(){
+  const span=view.b-view.a;
+  const step=span>60?10:span>25?5:span>12?2:1;
+  const out=[];
+  for(let y=Math.ceil(view.a/step)*step;y<=view.b;y+=step) out.push(y);
+  return out;
+}
+function lanes(items,estw){
+  const ends=[];
+  for(const it of items){
+    const w=estw(it), x0=it.cx-w/2;
+    let l=0;
+    while(l<ends.length && ends[l]>x0) l++;
+    it.lane=l; ends[l]=it.cx+w/2+8;
+  }
+}
+function render(){
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" id="tlsvg">`;
+  s+=`<rect width="${W}" height="${H}" fill="#121212"/>`;
+  for(const y of ticks()){
+    const x=X(y);
+    s+=`<line x1="${x}" y1="26" x2="${x}" y2="${H-26}" stroke="#242424"/>`;
+    s+=`<text x="${x}" y="${CY+20}" text-anchor="middle" font-size="12.5" font-weight="700"
+      fill="#9a9a9a">${y}</text>`;
+  }
+  s+=`<line x1="0" y1="${CY}" x2="${W}" y2="${CY}" stroke="#3a3a3a" stroke-width="2"/>`;
+  for(let d=Math.floor(view.a/10)*10; d<view.b; d+=10){
+    const x0=Math.max(0,X(d)), x1=Math.min(W,X(d+10));
+    if(x1-x0<2) continue;
+    s+=`<rect x="${x0}" y="26" width="${x1-x0}" height="${H-52}" fill="transparent"
+      data-dec-band="${d}"/>`;
+  }
+  ERAS.forEach((p,i)=>{
+    if(p.b<view.a||p.a>view.b) return;
+    const x0=Math.max(0,X(p.a)), x1=Math.min(W,X(p.b));
+    s+=`<rect x="${x0}" y="${CY+30}" width="${Math.max(2,x1-x0)}" height="22" rx="6"
+      fill="${p.c}22" stroke="${p.c}" stroke-width="1" data-era="${i}" style="cursor:pointer"/>`;
+    if(x1-x0>150) s+=`<text x="${(x0+x1)/2}" y="${CY+45}" text-anchor="middle" font-size="11.5"
+      fill="${p.c}" pointer-events="none">${esc(p.n)} (${p.a}-${p.b})</text>`;
+  });
+  const fs=FILMS.filter(f=>f.y>=view.a-30&&f.y<=view.b+30)
+                .map(f=>({...f,x:X(f.y),fi:FILMS.indexOf(f)}))
+                .sort((a,b)=>a.x-b.x);
+  fs.forEach((f,i)=>{const w=Math.min(215,(f.n.length+7)*6.2)+14;
+    f.w=w; f.cx=Math.min(W-w/2-4,Math.max(w/2+4,f.x)); f.up=(i%2===0);});
+  const ups=fs.filter(f=>f.up), dns=fs.filter(f=>!f.up);
+  lanes(ups,f=>f.w-14); lanes(dns,f=>f.w-14);
+  for(const f of fs){
+    const c=ERAS[f.e].c;
+    const ly=f.up ? CY-42-f.lane*26 : CY+108+f.lane*26;
+    const dotY=f.up ? CY-6 : CY+6;
+    const tipY=f.up ? ly+9 : ly-9;
+    const label=`${f.n} (${f.y})`;
+    s+=`<g data-f="${f.fi}" data-dec="${Math.floor(f.y/10)*10}" style="cursor:default">
+      <line x1="${f.x}" y1="${dotY}" x2="${f.x}" y2="${tipY}" stroke="${c}" stroke-width="1.1" opacity="0.7"/>
+      <circle cx="${f.x}" cy="${dotY}" r="3.2" fill="${c}"/>
+      <rect x="${f.cx-f.w/2}" y="${ly-8}" width="${f.w}" height="20" rx="7"
+        fill="#1a1a1a" stroke="${c}" stroke-width="1.1"/>
+      <text x="${f.cx}" y="${ly+6}" text-anchor="middle" font-size="11.3" font-weight="600"
+        fill="#e6e6e6" pointer-events="none">${esc(label).slice(0,40)}</text></g>`;
+  }
+  s+='</svg>';
+  el.innerHTML=s;
+  document.getElementById('info').textContent=
+    `${Math.round(view.a)} to ${Math.round(view.b)}`;
+}
+function clampView(a,b){
+  const span=Math.min(MAXY-MINY,Math.max(6,b-a));
+  a=Math.max(MINY,Math.min(a,MAXY-span));
+  return {a,b:a+span};
+}
+function hook(){
+  const px=e=>{const r=el.getBoundingClientRect();return (e.clientX-r.left)/r.width*W;};
+  el.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const f=e.deltaY>0?1.18:1/1.18, yr=YR(px(e));
+    view=clampView(yr-(yr-view.a)*f, yr+(view.b-yr)*f);
+    render();
+  },{passive:false});
+  let drag=null, dragged=false;
+  el.addEventListener('pointerdown',e=>{drag={x:px(e),a:view.a,b:view.b};dragged=false;el.classList.add('panning');el.setPointerCapture(e.pointerId);});
+  el.addEventListener('pointermove',e=>{
+    if(!drag) return;
+    const dx=px(e)-drag.x;
+    if(Math.abs(dx)>2) dragged=true;
+    const dyr=dx/W*(drag.b-drag.a);
+    view=clampView(drag.a-dyr, drag.b-dyr);
+    render();
+  });
+  el.addEventListener('pointerup',()=>{drag=null;el.classList.remove('panning');});
+  el.addEventListener('pointercancel',()=>{drag=null;el.classList.remove('panning');});
+  el.addEventListener('click',e=>{
+    if(dragged){dragged=false;return;}
+    const g=e.target.closest('[data-era]');
+    if(g){const p=ERAS[+g.getAttribute('data-era')];
+      view=clampView(p.a-2,p.b+2);render();}
+  });
+  el.addEventListener('pointerover',e=>{
+    const g=e.target.closest('[data-f]');
+    if(g){ showFilm(+g.getAttribute('data-f')); setFocus(+g.getAttribute('data-dec')); return; }
+    const b=e.target.closest('[data-era]');
+    if(b){ const p=ERAS[+b.getAttribute('data-era')];
+      document.getElementById('info').textContent=p.n+' ('+p.a+'-'+p.b+') \u00b7 click to zoom';
+      setFocus(null); return; }
+    const db=e.target.closest('[data-dec-band]');
+    setFocus(db ? +db.getAttribute('data-dec-band') : null);
+  });
+  el.addEventListener('pointerleave',()=>setFocus(null));
+}
+
+function setFocus(d){
+  document.querySelectorAll('#tlsvg g[data-dec]').forEach(g=>{
+    g.setAttribute('opacity', d===null||+g.getAttribute('data-dec')===d ? 1 : 0.22);
+  });
+  document.querySelectorAll('#tlsvg rect[data-dec-band]').forEach(r=>{
+    r.setAttribute('fill', d!==null&&+r.getAttribute('data-dec-band')===d
+      ? 'rgba(255,255,255,0.03)' : 'transparent');
+  });
+}
+
+// ---- poster panel: Wikipedia REST API, candidates tried in order ----
+const cache={};
+let current=-1;
+function candidates(f){
+  return [f.n, `${f.n} (film)`, `${f.n} (${f.y} film)`, `${f.n} (${f.y-1} film)`];
+}
+async function lookup(title){
+  const r=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+
+    encodeURIComponent(title.replace(/ /g,'_')));
+  if(!r.ok) throw 0;
+  const j=await r.json();
+  if(j.type!=='standard') throw 0;
+  const d=((j.description||'')+' '+(j.extract||'')).toLowerCase();
+  if(!d.includes('film')) throw 0;
+  return j.thumbnail?j.thumbnail.source:null;
+}
+async function posterFor(f){
+  if(f.n in cache) return cache[f.n];
+  for(const t of candidates(f)){
+    try{ const u=await lookup(t); cache[f.n]=u; return u; }catch(e){}
+  }
+  cache[f.n]=null; return null;
+}
+async function showFilm(i){
+  const f=FILMS[i]; current=i;
+  document.getElementById('filmTxt').textContent=`${f.n}`;
+  const et=document.getElementById('eraTxt');
+  et.textContent=ERAS[f.e].n; et.style.color=ERAS[f.e].c;
+  document.getElementById('yearTxt').textContent=`Palme d'Or, ${f.y}`;
+  const img=document.getElementById('poster');
+  img.removeAttribute('src'); img.alt='Loading poster\\u2026';
+  const u=await posterFor(f);
+  if(current!==i) return;
+  if(u){ img.src=u; img.alt=`${f.n} poster`; }
+  else { img.alt='No poster found'; }
+}
+document.getElementById('reset').onclick=()=>{view={a:MINY,b:MAXY};render();};
+const lg=document.getElementById('legend');
+lg.innerHTML=ERAS.map(p=>
+  `<span><span class="sw" style="background:${p.c}"></span>${esc(p.n)}</span>`).join('');
+render();
+showFilm(FILMS.length-1);
+hook();
+</script>
+</body>
+</html>
+"""
+
+html = HTML.replace("__FILMS__", films_js).replace("__ERAS__", eras_js)
+OUT.write_text(html, encoding="utf-8")
+print(f"wrote {OUT} ({len(html)} bytes): {len(FILMS)} films, {len(ERAS)} eras")

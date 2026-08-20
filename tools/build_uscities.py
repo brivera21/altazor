@@ -253,12 +253,12 @@ July 1, 2025.</p>
 
 <h2>How to read this</h2>
 <p class="note">The twenty largest cities by population, with each one's share of
-the country and how far it has moved since the 2020 census. The green figure
-after a population is how many more people that city has than the one ranked
-below it; for Nashville, last on the list, the comparison is {NEXT_UP[0]} at
-rank twenty-one. The change bars use one scale for all twenty, growth to the
-right and decline to the left. {len(grew)} of the twenty have grown since 2020
-and {len(shrank)} have lost people.</p>
+the country and how far it has moved since the 2020 census. Growth runs right on
+the change bars and decline runs left, on one scale for all twenty. {len(grew)}
+of them have grown since 2020 and {len(shrank)} have lost people.</p>
+<p class="note">The green figure after a population is how many more people that
+city has than the one ranked below it. Nashville is last on the list, so its
+comparison is {NEXT_UP[0]} at rank twenty-one.</p>
 
 <h2>Notes</h2>
 <p class="note">Populations are Census Bureau estimates for July 1, 2025, and the

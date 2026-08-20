@@ -246,16 +246,17 @@ tr.total td {{ border-bottom:none; color:var(--muted); font-size:13px; padding-t
 <p class="note">Every country and area the United Nations counts separately,
 {len(rows)} of them, from India down to the Vatican. Population figures are
 projections for 2026 under the medium variant, the middle of the range the UN
-publishes. Daily figures are the projected births and deaths for the whole year
-divided by 365.25, so they describe an average day rather than any particular
-one; where that average is below one, the cell says so instead of showing zero.
-The ten largest hold {top10:.1f} percent of the world between them.
-In {len(shrinking)} of these {len(rows)} places the lower bar is longer, meaning
-deaths outnumber births; all of them can still grow through migration, which
-these columns do not count. The rows add to {commas(listed)}, which is
-{share_listed:.2f} percent of the UN's own world figure. The remainder is a gap
-in the source rather than a missing country: the UN's world record is larger
-than the sum of the places it lists. Flags are served by
+publishes. The ten largest hold {top10:.1f} percent of the world between them.</p>
+<p class="note">Daily figures are the projected births and deaths for the whole
+year divided by 365.25, so they describe an average day rather than any
+particular one. Where that average is below one, the cell says so instead of
+showing zero. In {len(shrinking)} of these {len(rows)} places the lower bar is
+longer, meaning deaths outnumber births, though all of them can still grow
+through migration, which these columns do not count.</p>
+<p class="note">The rows add to {commas(listed)}, which is {share_listed:.2f}
+percent of the UN's own world figure. The remainder is a gap in the source
+rather than a missing country: the UN's world record is larger than the sum of
+the places it lists. Flags are served by
 <a href="https://flagcdn.com" style="color:var(--accent)">FlagCDN</a>.</p>
 
 <h2>References</h2>
