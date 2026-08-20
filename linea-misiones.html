@@ -61,13 +61,13 @@ color:var(--ink2);font-size:.95rem}
 <path id="ctx" fill="none" stroke="var(--line)" stroke-width="0.6"/>
 <g id="mun"></g>
 <g id="nodes"></g>
-<text id="hovname" class="nm" x="512" y="66"></text>
-<text id="hovsub" class="nm2" x="512" y="84"></text>
-<circle cx="518" cy="500" r="4.5" fill="var(--jes)"/><text class="leg" x="530" y="504">jesuita</text>
-<circle cx="518" cy="522" r="4.5" fill="var(--fra)"/><text class="leg" x="530" y="526">franciscano</text>
-<circle cx="518" cy="544" r="4.5" fill="var(--civ)"/><text class="leg" x="530" y="548">civil, presidio, real</text>
-<circle cx="518" cy="566" r="7" fill="none" stroke="var(--rup)" stroke-width="1.5"/><text class="leg" x="530" y="570">rebelión o epidemia</text>
-<circle cx="518" cy="588" r="4.5" fill="none" stroke="var(--acc)" stroke-width="1.5" stroke-dasharray="2 2"/><text class="leg" x="530" y="592">El Terrero, actual</text>
+<circle cx="518" cy="40" r="4.5" fill="var(--jes)"/><text class="leg" x="530" y="44">jesuita</text>
+<circle cx="518" cy="62" r="4.5" fill="var(--fra)"/><text class="leg" x="530" y="66">franciscano</text>
+<circle cx="518" cy="84" r="4.5" fill="var(--civ)"/><text class="leg" x="530" y="88">civil, presidio, real</text>
+<circle cx="518" cy="106" r="7" fill="none" stroke="var(--rup)" stroke-width="1.5"/><text class="leg" x="530" y="110">rebelión o epidemia</text>
+<circle cx="518" cy="128" r="4.5" fill="none" stroke="var(--rup)" stroke-width="1.5" stroke-dasharray="2 2"/><text class="leg" x="530" y="132">El Terrero, actual</text>
+<text id="hovname" class="nm" x="512" y="176"></text>
+<text id="hovsub" class="nm2" x="512" y="194"></text>
 </svg>
 </figure>
 <div class="controls">
@@ -118,7 +118,7 @@ mg.appendChild(p);});
 var g=document.getElementById("nodes"),G=[];
 var et=document.createElementNS(NS,"circle");
 et.setAttribute("cx",px(-107.3872));et.setAttribute("cy",py(29.1808));et.setAttribute("r","5");
-et.setAttribute("fill","none");et.setAttribute("stroke","var(--acc)");
+et.setAttribute("fill","none");et.setAttribute("stroke","var(--rup)");
 et.setAttribute("stroke-width","1.5");et.setAttribute("stroke-dasharray","2 2");
 et.style.cursor="pointer";
 et.addEventListener("mouseenter",function(){hov("El Terrero","localidad actual, sin registro colonial");});
