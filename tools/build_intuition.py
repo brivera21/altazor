@@ -65,6 +65,42 @@ def king_counts():
     return out
 
 
+def ray_counts(dirs, blocked=()):
+    """Squares a sliding piece reaches from each square, stopping before any
+    square in `blocked`. The blocked squares get no count of their own."""
+    out = {}
+    for f in range(8):
+        for r in range(1, 9):
+            if sq(f, r) in blocked:
+                continue
+            n = 0
+            for df, dr in dirs:
+                ff, rr = f + df, r + dr
+                while 0 <= ff <= 7 and 1 <= rr <= 8 and sq(ff, rr) not in blocked:
+                    n += 1
+                    ff += df
+                    rr += dr
+            out[sq(f, r)] = n
+    return out
+
+
+DIAG = ((1, 1), (1, -1), (-1, 1), (-1, -1))
+ORTHO = ((1, 0), (-1, 0), (0, 1), (0, -1))
+ROOK_PAWN = "e4"          # one white pawn, to cast a shadow across the board
+
+
+def bishop_counts():
+    return ray_counts(DIAG)
+
+
+def rook_counts():
+    return ray_counts(ORTHO)
+
+
+def rook_counts_blocked():
+    return ray_counts(ORTHO, blocked={ROOK_PAWN})
+
+
 dark_squares = [sq(f, r) for f in range(8) for r in range(1, 9)
                 if (f + r) % 2 == 1]
 
@@ -134,6 +170,30 @@ TOPICS = [
         "edge, eight in the middle. Endgame kings belong in the middle.",
       strong=[], soft=[], numbers=king_counts(), heat=True,
       legend=[("s", "more squares reached"), ("w", "fewer")]),
+ dict(id="bishop", g="Piece vision", t="Bishop mobility",
+      c="The number of squares a bishop attacks from each square. Seven "
+        "anywhere on the rim, rising by two with each ring inward to thirteen "
+        "on the four center squares. A bishop never changes color, so even at "
+        "its best it sees thirteen of the thirty two squares it can ever "
+        "reach.",
+      strong=[], soft=[], numbers=bishop_counts(), heat=True,
+      legend=[("s", "more squares attacked"), ("w", "fewer")]),
+ dict(id="rook", g="Piece vision", t="Rook mobility",
+      c="Fourteen from every square on the board. The rook is the only piece "
+        "whose reach does not change with where it stands, so on an empty "
+        "board a1 is worth as much as e5 and the only question is what "
+        "stands in the way.",
+      strong=[], soft=[], numbers=rook_counts(), heat=True,
+      legend=[("s", "fourteen squares, the same from everywhere")]),
+ dict(id="rookpawn", g="Piece vision", t="Rook behind its own pawn",
+      c="The same board with one white pawn on e4. Off the e-file and the "
+        "fourth rank nothing changes. On the cross through the pawn the count "
+        "falls to nine or ten, and the three squares behind it, e1 to e3, are "
+        "the worst at nine: the file shuts at once and only the rank is left.",
+      strong=[], soft=[], numbers=rook_counts_blocked(), heat=True,
+      pieces={ROOK_PAWN: "wP"},
+      legend=[("s", "more squares reached"), ("w", "fewer"),
+              ("blocked", "e4, where the pawn stands")]),
  dict(id="soft", g="Piece vision", t="f2 and f7, the soft squares",
       c="In the starting position these two squares are defended by the king "
         "and nothing else. Most early tactics against beginners aim here.",
@@ -427,9 +487,10 @@ function fillFor(f,r,topic){
   const dark=(f+r)%2===1;
   if(topic.numbers){
     const n=topic.numbers[name];
+    if(n===undefined) return dark?'#4b515a':'#5d646e';   // the blocking piece
     const lo=Math.min(...Object.values(topic.numbers));
     const hi=Math.max(...Object.values(topic.numbers));
-    const t=(n-lo)/(hi-lo);
+    const t=hi===lo ? 0.6 : (n-lo)/(hi-lo);              // a flat count is flat
     const base=dark?getCss('--sq-dark'):getCss('--sq-light');
     // blend toward strong amber by mobility
     return mix(base, dark?'#e08a18':'#f7b449', 0.15+0.85*t);
@@ -492,9 +553,11 @@ function paint(){
   if(t.numbers){
     let s='';
     for(let f=0;f<8;f++) for(let r=1;r<=8;r++){
+      const v=t.numbers[FILESTR[f]+r];
+      if(v===undefined) continue;
       const x=M+f*S, y=M+(8-r)*S;
       s+=`<text x="${x+S/2}" y="${y+S/2+9}" text-anchor="middle" font-size="26"
-        font-weight="700" fill="rgba(0,0,0,0.72)" pointer-events="none">${t.numbers[FILESTR[f]+r]}</text>`;
+        font-weight="700" fill="rgba(0,0,0,0.72)" pointer-events="none">${v}</text>`;
     }
     ng.innerHTML=s;
   } else ng.innerHTML='';
@@ -510,7 +573,7 @@ function paint(){
   document.getElementById('tTitle').textContent=t.t;
   document.getElementById('tCap').textContent=t.c;
   const SW={s:'#f09b28',w:'#f3d391',s2:'#4f9bf0',w2:'#a9c8ec',
-            g2:'#f6bd55',wk:'#e6c46c',bk:'#7dc48f',chk:'#e8604e'};
+            g2:'#f6bd55',wk:'#e6c46c',bk:'#7dc48f',chk:'#e8604e',blocked:'#5d646e'};
   document.getElementById('tLegend').innerHTML=(t.legend||[]).map(([k,txt])=>
     `<div><span class="swb" style="background:${SW[k]||'#f09b28'}"></span><span>${txt}</span></div>`).join('');
   const nt=document.getElementById('tNotes');
