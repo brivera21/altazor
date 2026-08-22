@@ -71,6 +71,13 @@ FACTS = [
     ("Pluto is the largest member at 2,377 km",
      2377 > max(1560, 1430, 1090)),
     ("Eris, in the scattered disc, is larger than Makemake", 2326 > 1430),
+    # --- the light pulse ---
+    ("light reaches Neptune in 4 h 10 min",
+     abs(NEPTUNE_AU * AU_KM / 299792.458 / 60 - 250) < 2),
+    ("light reaches the far edge of the Kuiper belt in 6 h 56 min",
+     abs(KUIPER_OUT * AU_KM / 299792.458 / 60 - 416) < 2),
+    ("that is two thirds again as far as Neptune",
+     1.6 < KUIPER_OUT / NEPTUNE_AU < 1.7),
 ]
 
 fails = []
@@ -282,6 +289,34 @@ with sync_playwright() as pw:
         fails.append("at true scale the belt edges are not in the right ratio")
     print(f"  ok   true scale: edges in the ratio {ratio_in:.4f}, "
           f"against {BELT_IN / BELT_OUT:.4f} from the au figures")
+
+    # The pulse has to reach the far edge of the Kuiper belt, not stop at
+    # Neptune. Sampled over a full cycle at true scale, the furthest it gets
+    # must be the belt's outer edge.
+    pg.click('.chip:text-is("Overview")')
+    pg.wait_for_timeout(2600)
+    end = pg.evaluate("()=>__dbg.lightEnd")
+    speedup = pg.evaluate("()=>__dbg.speedup")
+    cross = end / speedup
+    if cross > 45:
+        fails.append(f"the pulse takes {cross:.0f} seconds to cross, too long "
+                     "a wait")
+    far, samples = 0.0, 0
+    for _ in range(int(cross / 1.5) + 8):
+        pg.wait_for_timeout(1500)
+        st = pg.evaluate("()=>__dbg.light")
+        if st:
+            samples += 1
+            far = max(far, st["au"])
+    if samples == 0:
+        fails.append("the pulse never appeared at true scale")
+    elif far < KUIPER_OUT * 0.9:
+        fails.append(f"the pulse only reached {far:.1f} au, short of the "
+                     f"belt's outer edge at {KUIPER_OUT} au")
+    elif far > KUIPER_OUT * 1.02:
+        fails.append(f"the pulse ran past the belt to {far:.1f} au")
+    print(f"  ok   the pulse crosses in {cross:.0f} s and reaches {far:.1f} au, "
+          f"{end / 3600:.1f} light-hours from the Sun")
 
     if errs:
         fails.append(f"javascript errors: {errs}")
