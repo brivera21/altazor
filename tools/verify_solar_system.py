@@ -79,10 +79,53 @@ with sync_playwright() as pw:
         print(f"  ok   {len(chips)} chips, the belt is VI and Neptune is X")
 
     d = pg.evaluate("()=>window.__dbg")
-    if abs(d["belt"]["auIn"] - BELT_IN) > 1e-9 or abs(d["belt"]["auOut"] - BELT_OUT) > 1e-9:
-        fails.append(f"the belt claims {d['belt']['auIn']} to {d['belt']['auOut']} au")
-    print(f"  ok   the belt runs {d['belt']['auIn']} to {d['belt']['auOut']} au, "
-          f"{d['belt']['rocks']} rocks drawn")
+    b = d["belt"]
+    if abs(b["auIn"] - BELT_IN) > 1e-9 or abs(b["auOut"] - BELT_OUT) > 1e-9:
+        fails.append(f"the belt claims {b['auIn']} to {b['auOut']} au")
+    print(f"  ok   the belt runs {b['auIn']} to {b['auOut']} au, "
+          f"{b['rocks']} rocks drawn")
+
+    # the belt stands across the diagram: taller than it is wide, at both zooms
+    for label, act in (("zoomed out", None),
+                       ("zoomed in", '.chip[data-name="Asteroid Belt"]')):
+        if act:
+            pg.click(act)
+            pg.wait_for_timeout(1500)
+        g = pg.evaluate("()=>({w: __dbg.belt.xOut - __dbg.belt.xIn, "
+                        "hh: __dbg.belt.halfH, z: __dbg.camz, h: innerHeight})")
+        wpx = g["w"] * g["z"]
+        if 2 * g["hh"] <= wpx:
+            fails.append(f"{label}: the belt is {wpx:.0f}px wide and only "
+                         f"{2 * g['hh']:.0f}px tall, so it lies along the "
+                         "diagram instead of across it")
+        if 2 * g["hh"] < g["h"] * 0.5:
+            fails.append(f"{label}: the curtain covers only "
+                         f"{2 * g['hh'] / g['h']:.0%} of the window height")
+        print(f"  ok   {label}: {wpx:.0f}px wide, {2 * g['hh']:.0f}px tall "
+              f"({2 * g['hh'] / g['h']:.0%} of the window)")
+    pg.click('.chip:text-is("Overview")')
+    pg.wait_for_timeout(1200)
+
+    # the vertical spread must be a spread, not a line
+    vs = pg.evaluate("()=>__dbg.belt.rockV")
+    if max(vs) < 0.9 or min(vs) > -0.9:
+        fails.append("the rocks do not reach the full height of the curtain")
+    print(f"  ok   the rocks span v = {min(vs):.2f} to {max(vs):.2f}")
+
+    # the Kirkwood gaps must actually be empty of rocks
+    gaps = pg.evaluate("()=>__dbg.belt.gaps")
+    aus = pg.evaluate("()=>__dbg.belt.rockAu")
+    for g in gaps:
+        inside = [a for a in aus if abs(a - g["au"]) < g["half"]]
+        if inside:
+            fails.append(f"the {g['ratio']} gap at {g['au']:.3f} au holds "
+                         f"{len(inside)} rocks")
+    for g, quoted in zip(gaps, (2.50, 2.82, 2.95, 3.28)):
+        if abs(g["au"] - quoted) > 0.02:
+            fails.append(f"the {g['ratio']} gap is drawn at {g['au']:.3f} au "
+                         f"but the panel says {quoted}")
+    print("  ok   all four Kirkwood gaps are empty and sit where the panel "
+          "says they do")
 
     # lenient layout: the belt must sit strictly between Mars and Jupiter
     pos = pg.evaluate("""()=>{
