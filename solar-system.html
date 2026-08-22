@@ -319,7 +319,7 @@
   let stars = [];
   let lightClock = 0;                     // seconds since the light pulse left the Sun (scaled)
   const C_KM_S = 299792.458;              // speed of light
-  const LIGHT_SPEEDUP = 480;              // 1 real second = 480 light-seconds (8 light-minutes)
+  const LIGHT_SPEEDUP = 720;              // 1 real second = 12 light-minutes
 
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -710,6 +710,7 @@
     return h + " h " + m2 + " min";
   }
 
+  let lightState = null;                 // what the pulse is doing, for checks
   function drawLightTimes() {
     // Only meaningful at true scale, where the line IS the distance.
     const a = Math.max(0, (m - 0.5) * 2);
@@ -719,6 +720,8 @@
     ctx.font = "10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
     ctx.textAlign = "center";
     const items = PLANETS.map(p => ({ x: sx(px(p)), t: p.au * AU / C_KM_S }))
+      .concat(REGIONS.map(g => ({ x: sx(g.edgeOut()),
+                                  t: g.auOut * AU / C_KM_S })))
       .filter(it => it.x > -40 && it.x < W + 40)
       .sort((q, r) => q.x - r.x);
     let prevX = -1e9, level = 0;
@@ -731,13 +734,16 @@
 
     // the pulse itself: light leaving the Sun, in true proportion
     if (m < 0.98) return;
-    const tNep = PLANETS[PLANETS.length - 1].au * AU / C_KM_S;   // ~4 h 10 min
-    const cycle = tNep / LIGHT_SPEEDUP + 3;                       // + 3 s rest
+    // Neptune is 4 h 10 min out; the far edge of the Kuiper belt is nearly
+    // seven hours, which is where the pulse now runs to.
+    const tEdge = KUIPER.auOut * AU / C_KM_S;                     // ~6 h 56 min
+    const cycle = tEdge / LIGHT_SPEEDUP + 3;                      // + 3 s rest
     const tReal = lightClock % cycle;
     const tLight = tReal * LIGHT_SPEEDUP;
-    if (tLight > tNep) return;
+    if (tLight > tEdge) return;
     const wx = tLight * C_KM_S * KM2U;
     const x = sx(wx);
+    lightState = { tLight, tEdge, au: tLight * C_KM_S / AU, wx };
     if (x < -20 || x > W + 20) return;
     // covered path
     ctx.strokeStyle = "rgba(255,236,180,0.35)";
@@ -879,7 +885,9 @@
               rockAu: ROCKS.map(k => BELT.auIn + k.u * (BELT.auOut - BELT.auIn)),
               rockV: ROCKS.map(k => k.v) },
       kuiper: { plutino: KUIPER.plutino, twotino: KUIPER.twotino,
-                cliff: KUIPER.cliff } };
+                cliff: KUIPER.cliff },
+      light: lightState, speedup: LIGHT_SPEEDUP,
+      lightEnd: KUIPER.auOut * AU / C_KM_S };
     requestAnimationFrame(frame);
   }
   resize();
