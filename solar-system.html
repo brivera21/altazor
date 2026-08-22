@@ -206,6 +206,26 @@
     probe: "Pioneer 10 was the first to cross it, in 1972. Galileo made the first close pass of a belt asteroid, 951 Gaspra, on October 29, 1991; Dawn orbited Vesta in 2011 and Ceres in 2015"
   };
 
+  // Beyond Neptune. Figures: NASA and JPL overviews; diameters from New
+  // Horizons (Pluto) and stellar occultations. The mass range and the
+  // primordial estimate are from Nice-model work on Neptune's migration.
+  const KUIPER = {
+    name: "Kuiper Belt", type: "Region of icy bodies, not a body",
+    auIn: 30, auOut: 50, isBelt: true, icy: true,
+    labels: { diam: "Width of the belt", area: "Why there is no planet here",
+              moons: "Largest members", extra: "The Kuiper cliff" },
+    dist: "About 30 to 50 au (4.5 to 7.5 billion km). It starts at Neptune's orbit, so Neptune is its inner edge",
+    diam: "Roughly 20 au from inner to outer edge, about 3 billion km, some seventeen times the width of the asteroid belt",
+    area: "This far out the material moved too slowly and was spread too thin to gather into anything large before the solar system finished forming. Neptune then migrated outward and scattered most of what was there. The bodies that survive are held in place by Neptune rather than destroyed by it: Pluto and the ones like it cross its orbit but circle twice for every three turns Neptune makes, so the two are never in the same place at the same time",
+    mass: "Somewhere between a hundredth and a tenth of Earth. That is far too little to have grown the bodies now in it, so the belt must have started with perhaps ten to thirty Earths and lost almost all of it",
+    moons: "Pluto, 2,377 km across, then Haumea, Makemake at 1,430 km and Quaoar at 1,090 km. Eris is larger than Makemake but belongs to the scattered disc beyond",
+    made: "Ice and rock: water, methane, ammonia and nitrogen ices over rocky cores, many of them reddened by organics that sunlight has worked on for billions of years",
+    extra: "Past about 48 au the objects almost stop. The edge is sharp, sharper than any model of a slowly thinning disc predicts, and there is no agreed explanation for it",
+    disc: "Kenneth Edgeworth in 1943 and Gerard Kuiper in 1951 argued that the solar system did not simply end at Neptune. Clyde Tombaugh had already found Pluto on February 18, 1930 without knowing what it belonged to. The second member, Albion, was found by David Jewitt and Jane Luu on August 30, 1992",
+    probe: "New Horizons passed Pluto on July 14, 2015, then Arrokoth on January 1, 2019 at 44 au, the most distant object a spacecraft has ever reached"
+  };
+  const REGIONS = [BELT, KUIPER];
+
   // ---------- Layouts (world units u) ----------
   // Lenient: even spacing, exaggerated radii. True: everything ∝ km.
   const LEN_GAP = 150, LEN_START = 170, LEN_SUN_R = 62;
@@ -216,10 +236,19 @@
   const SPAN = PLANETS[PLANETS.length - 1].xLen;           // Neptune's x in both layouts
   const KM2U = SPAN / (PLANETS[PLANETS.length - 1].au * AU); // u per km
   PLANETS.forEach(p => { p.xTrue = p.au * AU * KM2U; p.rTrue = p.rKm * KM2U; });
-  BELT.xLenIn = LEN_START + BELT_SLOT * LEN_GAP - LEN_GAP * 0.40;
-  BELT.xLenOut = LEN_START + BELT_SLOT * LEN_GAP + LEN_GAP * 0.40;
-  BELT.xTrueIn = BELT.auIn * AU * KM2U;
-  BELT.xTrueOut = BELT.auOut * AU * KM2U;
+  // Each region gets a lenient slot of its own; at true scale it sits at its
+  // real distance, which is where the two layouts part company most sharply.
+  BELT.slot = BELT_SLOT;                       // between Mars and Jupiter
+  BELT.lenHalf = LEN_GAP * 0.40;
+  KUIPER.slot = PLANETS.length + 1;            // past Neptune
+  KUIPER.lenHalf = LEN_GAP * 0.46;             // it really is the wider one
+  REGIONS.forEach(g => {
+    const c = LEN_START + g.slot * LEN_GAP;
+    g.xLenIn = c - g.lenHalf;
+    g.xLenOut = c + g.lenHalf;
+    g.xTrueIn = g.auIn * AU * KM2U;
+    g.xTrueOut = g.auOut * AU * KM2U;
+  });
 
   // Kirkwood gaps: an orbit whose period is a simple ratio of Jupiter's takes
   // the same pull in the same place every time and is emptied out. Positions
@@ -230,26 +259,53 @@
     { au: 5.204 * Math.pow(3 / 7, 2 / 3), half: 0.015, ratio: "7:3" },
     { au: 5.204 * Math.pow(1 / 2, 2 / 3), half: 0.040, ratio: "2:1" },
   ];
-  // One deterministic swarm, reused every frame so the belt never shimmers.
+  // Density across the asteroid belt: full, except in the gaps.
+  BELT.density = au => BELT.gaps.some(g => Math.abs(au - g.au) < g.half) ? 0 : 1;
+
+  // The Kuiper belt is not flat either. The stretch just past Neptune is
+  // mostly empty; the plutinos pile up at the 3:2 resonance, 39.4 au; the
+  // classical belt runs 42 to 48; and past 48 the population falls off a
+  // cliff. Same physics as the Kirkwood gaps, gathering instead of clearing.
+  KUIPER.plutino = 30.07 * Math.pow(3 / 2, 2 / 3);     // ≈ 39.4 au
+  KUIPER.twotino = 30.07 * Math.pow(2 / 1, 2 / 3);     // ≈ 47.8 au
+  KUIPER.cliff = 48;
+  KUIPER.density = au => {
+    if (au > KUIPER.cliff) return 0.03;                    // over the cliff
+    if (Math.abs(au - KUIPER.plutino) < 0.7) return 1.00;  // plutinos, piled up
+    if (Math.abs(au - KUIPER.twotino) < 0.5) return 0.75;  // twotinos, which
+    if (au < 38) return 0.06;                              // sit at the edge
+    if (au < 42) return 0.12;
+    return 0.45;                                           // the classical belt
+  };
+  // The asteroid belt really is centrally concentrated, so its rocks are drawn
+  // from a peaked prior. The Kuiper belt's shape is all in its density curve,
+  // so a peaked prior there would invent a concentration that is not real.
+  BELT.prior = rnd => (rnd() + rnd() + rnd()) / 3;
+  KUIPER.prior = rnd => rnd();
+
+  // One deterministic swarm per region, reused every frame so nothing shimmers.
   // u is the position across the belt, v the position up and down it.
-  const ROCKS = (() => {
-    let seed = 20260101;                       // Ceres, January 1, 1801
-    const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
-    const span = BELT.auOut - BELT.auIn;
-    const inGap = au => BELT.gaps.some(g => Math.abs(au - g.au) < g.half);
+  function makeSwarm(g, n, seed) {
+    let st = seed;
+    const rnd = () => (st = (st * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+    const span = g.auOut - g.auIn;
     const out = [];
     let guard = 0;
-    while (out.length < 620 && guard++ < 40000) {
-      // denser through the middle of the belt, thinning toward both edges
-      const u = (rnd() + rnd() + rnd()) / 3;
-      if (inGap(BELT.auIn + u * span)) continue;     // the gaps really are empty
+    while (out.length < n && guard++ < 400000) {
+      const u = g.prior(rnd);
+      if (rnd() > g.density(g.auIn + u * span)) continue;
       out.push({ u, v: rnd() * 2 - 1, r: 0.5 + rnd() * 1.1,
                  a: 0.3 + rnd() * 0.55 });
     }
     return out;
-  })();
-  function beltIn() { return mix(BELT.xLenIn, BELT.xTrueIn, ease(m)); }
-  function beltOut() { return mix(BELT.xLenOut, BELT.xTrueOut, ease(m)); }
+  }
+  BELT.rocks = makeSwarm(BELT, 620, 20260101);      // Ceres, January 1, 1801
+  KUIPER.rocks = makeSwarm(KUIPER, 1150, 19920830); // Albion, August 30, 1992
+  REGIONS.forEach(g => {
+    g.edgeIn = () => mix(g.xLenIn, g.xTrueIn, ease(m));
+    g.edgeOut = () => mix(g.xLenOut, g.xTrueOut, ease(m));
+  });
+  const ROCKS = BELT.rocks;                          // kept for the debug hook
   const SUN_R_TRUE = SUN.rKm * KM2U;
 
   // ---------- State ----------
@@ -286,10 +342,15 @@
   function sunR() { return mix(LEN_SUN_R, SUN_R_TRUE, ease(m)); }
   function sx(wx) { return (wx - cam.c) * cam.z + W / 2; }
 
+  // Neptune is no longer the outer edge of the picture: the Kuiper belt runs
+  // to 50 au, well past it, and the two layouts disagree about how far that is.
+  function outerEdge() {
+    return mix(KUIPER.xLenOut, KUIPER.xTrueOut, mTarget);
+  }
   function fitAll() {
-    const rNep = 30;
-    camT.z = (W - 120) / (SPAN + rNep + mix(LEN_SUN_R, SUN_R_TRUE, mTarget) + 60);
-    camT.c = (SPAN + 30) / 2;
+    const outer = outerEdge();
+    camT.z = (W - 120) / (outer + mix(LEN_SUN_R, SUN_R_TRUE, mTarget) + 70);
+    camT.c = (outer + 30) / 2;
   }
   let tracking = false; // camera follows the selected object through transitions
   function focusOn(obj) {
@@ -297,7 +358,7 @@
     if (obj === SUN) { camT.c = 0; camT.z = Math.min(H, W) * 0.28 / sunR(); }
     else if (obj.isBelt) {
       // frame it so it still stands taller than it is wide, in any window
-      const a = beltIn(), b = beltOut();
+      const a = obj.edgeIn(), b = obj.edgeOut();
       const wantW = Math.min(W * 0.42, beltHalfHeight() * 2 * 0.8);
       camT.c = (a + b) / 2; camT.z = wantW / Math.max(b - a, 1e-9);
     }
@@ -364,8 +425,9 @@
   }
   addChip("Overview", null);
   addChip("I. SUN", SUN);
-  const ORDER = [...PLANETS.slice(0, BELT_SLOT), BELT, ...PLANETS.slice(BELT_SLOT)];
-  const NUMERALS = ["II","III","IV","V","VI","VII","VIII","IX","X"];
+  const ORDER = [...PLANETS.slice(0, BELT_SLOT), BELT,
+                 ...PLANETS.slice(BELT_SLOT), KUIPER];
+  const NUMERALS = ["II","III","IV","V","VI","VII","VIII","IX","X","XI"];
   ORDER.forEach((o, i) => addChip(NUMERALS[i] + ". " + o.name.toUpperCase(), o));
 
   const scaleBtn = document.getElementById("scaleBtn");
@@ -399,9 +461,10 @@
       const mx = e.clientX;
       let hit = null;
       if (Math.abs(sx(0) - mx) < Math.max(sunR() * cam.z, 14) && Math.abs(e.clientY - y0) < Math.max(sunR() * cam.z, 20)) hit = SUN;
-      const bIn = sx(beltIn()), bOut = sx(beltOut());
-      if (mx > bIn - 6 && mx < bOut + 6 &&
-          Math.abs(e.clientY - y0) < beltHalfHeight()) hit = BELT;
+      for (const g of REGIONS) {
+        if (mx > sx(g.edgeIn()) - 6 && mx < sx(g.edgeOut()) + 6 &&
+            Math.abs(e.clientY - y0) < beltHalfHeight()) hit = g;
+      }
       for (const p of PLANETS) {
         const r = Math.max(pr(p) * cam.z, 12);
         if (Math.abs(sx(px(p)) - mx) < r && Math.abs(e.clientY - y0) < r + 8) hit = p;
@@ -539,16 +602,16 @@
   function beltHalfHeight() { return H * 0.36; }
 
   const WASH = {};
-  function washTile(hot) {
-    const key = hot ? "hot" : "cool";
+  function washTile(hot, icy) {
+    const key = hot ? "hot" : icy ? "ice" : "cool";
     if (WASH[key]) return WASH[key];
     const S = 256, c = document.createElement("canvas");
     c.width = S; c.height = S;
     const x = c.getContext("2d");
-    const body = hot ? "140,170,225" : "150,140,125";
+    const body = hot ? "140,170,225" : icy ? "150,175,200" : "150,140,125";
     const v = x.createLinearGradient(0, 0, 0, S);
     v.addColorStop(0, `rgba(${body},0)`);
-    v.addColorStop(0.5, `rgba(${body},${hot ? 0.13 : 0.08})`);
+    v.addColorStop(0.5, `rgba(${body},${hot ? 0.13 : icy ? 0.06 : 0.08})`);
     v.addColorStop(1, `rgba(${body},0)`);
     x.fillStyle = v; x.fillRect(0, 0, S, S);
     x.globalCompositeOperation = "destination-in";     // multiply in the sides
@@ -561,11 +624,11 @@
     return (WASH[key] = c);
   }
 
-  function drawBelt() {
-    const a = sx(beltIn()), b = sx(beltOut());
+  function drawBelt(g) {
+    const a = sx(g.edgeIn()), b = sx(g.edgeOut());
     if (b < -60 || a > W + 60) return;
     const w = Math.max(b - a, 1);
-    const hot = selected === BELT;
+    const hot = selected === g;
     const hh = beltHalfHeight();
     const top = y0 - hh, bot = y0 + hh;
 
@@ -573,16 +636,17 @@
     // curtain never reads as a drawn box. Both fades are multiplied together
     // in a small offscreen tile and then stretched, which keeps it seamless:
     // painting it as strips leaves a visible seam wherever they overlap.
-    ctx.drawImage(washTile(hot), a, top, w, bot - top);
+    ctx.drawImage(washTile(hot, g.icy), a, top, w, bot - top);
 
-    for (const k of ROCKS) {
+    const tone = hot ? "#9fc2f5" : g.icy ? "#a6c3d4" : "#b3a894";
+    for (const k of g.rocks) {
       const x = a + k.u * w;
       if (x < -4 || x > W + 4) continue;
       const fade = 1 - Math.pow(Math.abs(k.v), 3);   // no hard edge top or bottom
       if (fade <= 0.02) continue;
-      ctx.globalAlpha = k.a * fade;
-      ctx.fillStyle = hot ? "#9fc2f5" : "#b3a894";
-      circle(x, y0 + k.v * hh, k.r); ctx.fill();
+      ctx.globalAlpha = k.a * fade * (g.icy ? 0.8 : 1);
+      ctx.fillStyle = tone;
+      circle(x, y0 + k.v * hh, k.r * (g.icy ? 0.85 : 1)); ctx.fill();
     }
     ctx.globalAlpha = 1;
 
@@ -590,8 +654,10 @@
     ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
     ctx.textAlign = "center";
     ctx.fillStyle = hot ? "#58a6ff" : "rgba(190,205,235,0.85)";
-    ctx.fillText("Asteroid belt",
-                 Math.min(Math.max((a + b) / 2, 62), W - 62), top - 8);
+    const lx = Math.min(Math.max((a + b) / 2, 62),
+                        W - 62 - (selected && selected.isBelt ? 0 : 0));
+    ctx.fillText(g.name === "Kuiper Belt" ? "Kuiper belt" : "Asteroid belt",
+                 lx, top - 8);
   }
 
   function drawPlanet(p) {
@@ -790,7 +856,7 @@
     ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(W, y0); ctx.stroke();
 
     drawSun();
-    drawBelt();
+    for (const g of REGIONS) drawBelt(g);
     for (const p of PLANETS) drawPlanet(p);
     flushLabels();
     drawGhostEarth();
@@ -800,12 +866,20 @@
       sel: selected && selected.name,
       ex: selected && !selected.isBelt ? sx(px(selected)) : null,
       er: selected && !selected.isBelt ? pr(selected) * cam.z : null,
+      regions: REGIONS.map(g => ({
+        name: g.name, auIn: g.auIn, auOut: g.auOut,
+        xIn: g.edgeIn(), xOut: g.edgeOut(), rocks: g.rocks.length,
+        trueIn: g.xTrueIn, trueOut: g.xTrueOut, halfH: beltHalfHeight(),
+        rockAu: g.rocks.map(k => g.auIn + k.u * (g.auOut - g.auIn)),
+        rockV: g.rocks.map(k => k.v) })),
       belt: { auIn: BELT.auIn, auOut: BELT.auOut,
-              xIn: beltIn(), xOut: beltOut(), rocks: ROCKS.length,
+              xIn: BELT.edgeIn(), xOut: BELT.edgeOut(), rocks: ROCKS.length,
               trueIn: BELT.xTrueIn, trueOut: BELT.xTrueOut,
               gaps: BELT.gaps, halfH: beltHalfHeight(),
               rockAu: ROCKS.map(k => BELT.auIn + k.u * (BELT.auOut - BELT.auIn)),
-              rockV: ROCKS.map(k => k.v) } };
+              rockV: ROCKS.map(k => k.v) },
+      kuiper: { plutino: KUIPER.plutino, twotino: KUIPER.twotino,
+                cliff: KUIPER.cliff } };
     requestAnimationFrame(frame);
   }
   resize();
