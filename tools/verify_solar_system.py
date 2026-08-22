@@ -1,9 +1,10 @@
-"""Check solar-system.html, with attention to the asteroid belt.
+"""Check solar-system.html, with attention to its two regions.
 
-The belt is a region rather than a body, so the things worth checking are that
-its edges land where the real belt is, that it sits between Mars and Jupiter in
-both layouts, that it is numbered VI with everything past it moved up one, and
-that selecting it does not fall through code written for bodies with a radius.
+The asteroid belt and the Kuiper belt are regions rather than bodies, so the
+things worth checking are that their edges land where the real belts are, that
+they stand across the diagram rather than along it at every zoom, that the
+structure drawn into each swarm matches what the panel claims, and that
+selecting one does not fall through code written for bodies with a radius.
 
 Usage: python3 verify_solar_system.py
 """
@@ -19,7 +20,10 @@ MARS_AU, JUPITER_AU = 1.524, 5.204
 
 WANT_CHIPS = ["Overview", "I. SUN", "II. MERCURY", "III. VENUS", "IV. EARTH",
               "V. MARS", "VI. ASTEROID BELT", "VII. JUPITER", "VIII. SATURN",
-              "IX. URANUS", "X. NEPTUNE"]
+              "IX. URANUS", "X. NEPTUNE", "XI. KUIPER BELT"]
+
+NEPTUNE_AU = 30.07
+KUIPER_IN, KUIPER_OUT = 30, 50
 
 # Facts the panel states, each checked against the arithmetic it claims.
 FACTS = [
@@ -44,6 +48,29 @@ FACTS = [
     ("the 2:1 gap likewise", abs(5.204 * (1 / 2) ** (2 / 3) - 3.28) < 0.02),
     ("the belt lies between Mars and Jupiter",
      MARS_AU < BELT_IN and BELT_OUT < JUPITER_AU),
+    # --- the Kuiper belt ---
+    ("the Kuiper belt is 20 au wide",
+     abs((KUIPER_OUT - KUIPER_IN) - 20) < 1e-9),
+    ("that is about 3 billion km",
+     abs((KUIPER_OUT - KUIPER_IN) * AU_KM / 1e9 - 3) < 0.05),
+    ("its inner edge is 4.5 billion km out",
+     abs(KUIPER_IN * AU_KM / 1e9 - 4.5) < 0.05),
+    ("its outer edge is 7.5 billion km out",
+     abs(KUIPER_OUT * AU_KM / 1e9 - 7.5) < 0.05),
+    ("it is about seventeen times the width of the asteroid belt",
+     16 < (KUIPER_OUT - KUIPER_IN) / (BELT_OUT - BELT_IN) < 18),
+    ("it starts at Neptune's orbit", abs(KUIPER_IN - NEPTUNE_AU) < 0.1),
+    ("it starts where the planets end", KUIPER_IN >= NEPTUNE_AU - 0.1),
+    ("the plutinos sit where a body circles twice for three Neptune years",
+     abs(NEPTUNE_AU * (3 / 2) ** (2 / 3) - 39.4) < 0.1),
+    ("the twotinos likewise, one for two",
+     abs(NEPTUNE_AU * 2 ** (2 / 3) - 47.8) < 0.2),
+    ("both resonances fall inside the belt",
+     all(KUIPER_IN < a < KUIPER_OUT
+         for a in (NEPTUNE_AU * (3 / 2) ** (2 / 3), NEPTUNE_AU * 2 ** (2 / 3)))),
+    ("Pluto is the largest member at 2,377 km",
+     2377 > max(1560, 1430, 1090)),
+    ("Eris, in the scattered disc, is larger than Makemake", 2326 > 1430),
 ]
 
 fails = []
@@ -76,45 +103,57 @@ with sync_playwright() as pw:
     if chips != WANT_CHIPS:
         fails.append(f"the chips read {chips}")
     else:
-        print(f"  ok   {len(chips)} chips, the belt is VI and Neptune is X")
+        print(f"  ok   {len(chips)} chips, asteroid belt VI, Neptune X, "
+              "Kuiper belt XI")
 
-    d = pg.evaluate("()=>window.__dbg")
-    b = d["belt"]
-    if abs(b["auIn"] - BELT_IN) > 1e-9 or abs(b["auOut"] - BELT_OUT) > 1e-9:
-        fails.append(f"the belt claims {b['auIn']} to {b['auOut']} au")
-    print(f"  ok   the belt runs {b['auIn']} to {b['auOut']} au, "
-          f"{b['rocks']} rocks drawn")
+    WANT = {"Asteroid Belt": (BELT_IN, BELT_OUT),
+            "Kuiper Belt": (KUIPER_IN, KUIPER_OUT)}
+    regions = {r["name"]: r for r in pg.evaluate("()=>__dbg.regions")}
+    if set(regions) != set(WANT):
+        fails.append(f"the page draws regions {sorted(regions)}")
+    for name, (lo, hi) in WANT.items():
+        r = regions.get(name)
+        if not r:
+            continue
+        if abs(r["auIn"] - lo) > 1e-9 or abs(r["auOut"] - hi) > 1e-9:
+            fails.append(f"{name} claims {r['auIn']} to {r['auOut']} au")
+        print(f"  ok   {name} runs {r['auIn']} to {r['auOut']} au, "
+              f"{r['rocks']} rocks drawn")
 
-    # the belt stands across the diagram: taller than it is wide, at both zooms
-    for label, act in (("zoomed out", None),
-                       ("zoomed in", '.chip[data-name="Asteroid Belt"]')):
-        if act:
-            pg.click(act)
-            pg.wait_for_timeout(1500)
-        g = pg.evaluate("()=>({w: __dbg.belt.xOut - __dbg.belt.xIn, "
-                        "hh: __dbg.belt.halfH, z: __dbg.camz, h: innerHeight})")
-        wpx = g["w"] * g["z"]
-        if 2 * g["hh"] <= wpx:
-            fails.append(f"{label}: the belt is {wpx:.0f}px wide and only "
-                         f"{2 * g['hh']:.0f}px tall, so it lies along the "
-                         "diagram instead of across it")
-        if 2 * g["hh"] < g["h"] * 0.5:
-            fails.append(f"{label}: the curtain covers only "
-                         f"{2 * g['hh'] / g['h']:.0%} of the window height")
-        print(f"  ok   {label}: {wpx:.0f}px wide, {2 * g['hh']:.0f}px tall "
-              f"({2 * g['hh'] / g['h']:.0%} of the window)")
+    # each region stands across the diagram: taller than it is wide, at any zoom
+    for name in WANT:
+        for label, chip in (("zoomed out", None), ("zoomed in", name)):
+            if chip:
+                pg.click(f'.chip[data-name="{chip}"]')
+            else:
+                pg.click('.chip:text-is("Overview")')
+            pg.wait_for_timeout(1600)
+            g = pg.evaluate("(n)=>{const r=__dbg.regions.find(x=>x.name===n);"
+                            "return {w:r.xOut-r.xIn, hh:r.halfH, z:__dbg.camz,"
+                            " h:innerHeight};}", name)
+            wpx = g["w"] * g["z"]
+            if 2 * g["hh"] <= wpx:
+                fails.append(f"{name} {label}: {wpx:.0f}px wide against "
+                             f"{2 * g['hh']:.0f}px tall, so it lies along the "
+                             "diagram instead of across it")
+            if 2 * g["hh"] < g["h"] * 0.5:
+                fails.append(f"{name} {label}: the curtain covers only "
+                             f"{2 * g['hh'] / g['h']:.0%} of the window height")
+            print(f"  ok   {name}, {label}: {wpx:.0f}px wide, "
+                  f"{2 * g['hh']:.0f}px tall")
     pg.click('.chip:text-is("Overview")')
-    pg.wait_for_timeout(1200)
+    pg.wait_for_timeout(1400)
 
     # the vertical spread must be a spread, not a line
-    vs = pg.evaluate("()=>__dbg.belt.rockV")
-    if max(vs) < 0.9 or min(vs) > -0.9:
-        fails.append("the rocks do not reach the full height of the curtain")
-    print(f"  ok   the rocks span v = {min(vs):.2f} to {max(vs):.2f}")
+    for name in WANT:
+        vs = regions[name]["rockV"]
+        if max(vs) < 0.9 or min(vs) > -0.9:
+            fails.append(f"{name}: the rocks do not reach the full height")
+    print("  ok   both swarms reach the full height of their curtain")
 
     # the Kirkwood gaps must actually be empty of rocks
     gaps = pg.evaluate("()=>__dbg.belt.gaps")
-    aus = pg.evaluate("()=>__dbg.belt.rockAu")
+    aus = regions["Asteroid Belt"]["rockAu"]
     for g in gaps:
         inside = [a for a in aus if abs(a - g["au"]) < g["half"]]
         if inside:
@@ -127,13 +166,39 @@ with sync_playwright() as pw:
     print("  ok   all four Kirkwood gaps are empty and sit where the panel "
           "says they do")
 
+    # The Kuiper belt's structure: a sparse inner stretch, the plutino pile-up,
+    # the classical belt, and the cliff. Measured as rocks per au in each band.
+    k = pg.evaluate("()=>__dbg.kuiper")
+    kau = regions["Kuiper Belt"]["rockAu"]
+
+    def per_au(lo, hi):
+        return len([a for a in kau if lo <= a < hi]) / (hi - lo)
+
+    inner, classical, beyond = per_au(30, 38), per_au(42, 48), per_au(48, 50)
+    spike = per_au(k["plutino"] - 0.7, k["plutino"] + 0.7)
+    if not classical > inner * 3:
+        fails.append(f"the classical belt is {classical:.0f} rocks per au "
+                     f"against {inner:.0f} inside 38 au, not the contrast "
+                     "the panel describes")
+    if not beyond < classical * 0.15:
+        fails.append(f"past the cliff the density is {beyond:.0f} per au "
+                     f"against {classical:.0f}, so there is no cliff")
+    if not spike > classical:
+        fails.append(f"the plutinos are not piled up: {spike:.0f} per au at "
+                     f"{k['plutino']:.1f} au against {classical:.0f} "
+                     "in the classical belt")
+    if abs(k["plutino"] - 39.4) > 0.1 or abs(k["twotino"] - 47.8) > 0.2:
+        fails.append(f"the resonances are drawn at {k['plutino']:.2f} and "
+                     f"{k['twotino']:.2f} au")
+    print(f"  ok   Kuiper structure: {inner:.0f} rocks per au inside 38, "
+          f"{spike:.0f} at the plutinos ({k['plutino']:.1f} au), "
+          f"{classical:.0f} through the classical belt, {beyond:.0f} past "
+          f"the cliff at {k['cliff']} au")
+
     # lenient layout: the belt must sit strictly between Mars and Jupiter
-    pos = pg.evaluate("""()=>{
-      const out={};
-      for (const c of document.querySelectorAll('.chip')) out[c.textContent.trim()]=1;
-      return {lenIn: __dbg.belt.xIn, lenOut: __dbg.belt.xOut};
-    }""")
-    print(f"  ok   lenient edges at {pos['lenIn']:.0f} and {pos['lenOut']:.0f} u")
+    pos = pg.evaluate("()=>__dbg.regions.map(r=>[r.name, r.xIn, r.xOut])")
+    for name, lo, hi in pos:
+        print(f"  ok   {name} lenient edges at {lo:.0f} and {hi:.0f} u")
 
     # selecting the belt: the panel fills, the relabelled rows show, nothing throws
     pg.click('.chip[data-name="Asteroid Belt"]')
