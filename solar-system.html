@@ -53,8 +53,9 @@
     border-top: 1px solid var(--line); padding-top: 8px; }
 
   #info {
-    position: absolute; top: 14px; right: 16px; width: 295px; max-height: calc(100% - 130px);
-    overflow-y: auto;
+    position: absolute; top: 14px; right: 16px; width: 295px;
+    max-height: calc(100vh - 150px); max-height: calc(100dvh - 150px);
+    overflow-y: auto; overscroll-behavior: contain; z-index: 3;
     background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
     padding: 16px 18px; color: var(--text); backdrop-filter: blur(8px);
     display: none;
@@ -92,12 +93,13 @@
   <h2 id="iName"></h2>
   <div class="type" id="iType"></div>
   <dl>
-    <dt>Distance from the Sun</dt><dd id="iDist"></dd>
-    <dt>Diameter</dt><dd id="iDiam"></dd>
-    <dt>Surface area</dt><dd id="iArea"></dd>
-    <dt>Mass</dt><dd id="iMass"></dd>
-    <dt>Moons</dt><dd id="iMoons"></dd>
-    <dt>Made of</dt><dd id="iMade"></dd>
+    <dt id="lDist">Distance from the Sun</dt><dd id="iDist"></dd>
+    <dt id="lDiam">Diameter</dt><dd id="iDiam"></dd>
+    <dt id="lArea">Surface area</dt><dd id="iArea"></dd>
+    <dt id="lMass">Mass</dt><dd id="iMass"></dd>
+    <dt id="lMoons">Moons</dt><dd id="iMoons"></dd>
+    <dt id="lMade">Made of</dt><dd id="iMade"></dd>
+    <span id="rowExtra" style="display:contents"><dt id="lExtra"></dt><dd id="iExtra"></dd></span>
     <dt>Discovered</dt><dd id="iDisc"></dd>
     <dt>First visited by a probe</dt><dd id="iProbe"></dd>
   </dl>
@@ -184,13 +186,56 @@
       probe:"Voyager 2, flyby, August 25, 1989, still the only visit" },
   ];
 
+  // The main belt. Not a body but a region, so it carries its own edges and
+  // its own row labels for the panel. Figures: JPL Small-Body Database and the
+  // NASA asteroid overview; masses from Dawn (Vesta, Ceres) and Hygiea from
+  // VLT/SPHERE, 2019. Kirkwood gap positions are the Jupiter resonances.
+  const BELT = {
+    name: "Asteroid Belt", type: "Region of small bodies, not a body",
+    auIn: 2.1, auOut: 3.3, isBelt: true,
+    labels: { diam: "Width of the belt", area: "Why there is no planet here",
+              moons: "Largest members", extra: "How empty it is" },
+    dist: "2.1 to 3.3 au (314 to 494 million km). Ceres, the largest member, orbits at 2.77 au",
+    diam: "About 1.2 au from inner to outer edge, roughly 180 million km",
+    area: "Jupiter stirs the orbits until collisions shatter rather than stick, so the material here never accreted into a planet. Orbits that beat against Jupiter's are swept nearly empty, leaving the Kirkwood gaps at 2.50 au (3:1), 2.82 au (5:2), 2.95 au (7:3) and 3.28 au (2:1)",
+    mass: "About 2.4 × 10<sup>21</sup> kg, some 3% of the Moon and 0.04% of Earth. Ceres alone holds roughly a third of it, and the four largest bodies about half",
+    moons: "Ceres, 939 km across and a dwarf planet in its own right, then Vesta 525 km, Pallas 512 km and Hygiea 434 km",
+    made: "Rock and metal near the inner edge, turning carbon-rich and increasingly icy outward. Ceres carries water ice and briny material under its crust",
+    extra: "Sparse enough that spacecraft cross it without maneuvering: the objects large enough to have been catalogued are on the order of a million kilometres apart",
+    disc: "Giuseppe Piazzi found Ceres on January 1, 1801 and took it for a planet. Pallas, Juno and Vesta followed by 1807. The run of discoveries that began in 1845 turned what had looked like four small planets into a belt",
+    probe: "Pioneer 10 was the first to cross it, in 1972. Galileo made the first close pass of a belt asteroid, 951 Gaspra, on October 29, 1991; Dawn orbited Vesta in 2011 and Ceres in 2015"
+  };
+
   // ---------- Layouts (world units u) ----------
   // Lenient: even spacing, exaggerated radii. True: everything ∝ km.
   const LEN_GAP = 150, LEN_START = 170, LEN_SUN_R = 62;
-  PLANETS.forEach((p, i) => { p.xLen = LEN_START + i * LEN_GAP; });
+  const BELT_SLOT = 4;              // between Mars and Jupiter, a slot of its own
+  PLANETS.forEach((p, i) => {
+    p.xLen = LEN_START + (i < BELT_SLOT ? i : i + 1) * LEN_GAP;
+  });
   const SPAN = PLANETS[PLANETS.length - 1].xLen;           // Neptune's x in both layouts
   const KM2U = SPAN / (PLANETS[PLANETS.length - 1].au * AU); // u per km
   PLANETS.forEach(p => { p.xTrue = p.au * AU * KM2U; p.rTrue = p.rKm * KM2U; });
+  BELT.xLenIn = LEN_START + BELT_SLOT * LEN_GAP - LEN_GAP * 0.40;
+  BELT.xLenOut = LEN_START + BELT_SLOT * LEN_GAP + LEN_GAP * 0.40;
+  BELT.xTrueIn = BELT.auIn * AU * KM2U;
+  BELT.xTrueOut = BELT.auOut * AU * KM2U;
+
+  // One deterministic swarm, reused every frame so the belt never shimmers.
+  const ROCKS = (() => {
+    let seed = 20260101;                       // Ceres, January 1, 1801
+    const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+    const out = [];
+    for (let i = 0; i < 520; i++) {
+      // denser in the middle of the belt, thinning toward both edges
+      const u = (rnd() + rnd() + rnd()) / 3;
+      out.push({ u, dy: (rnd() + rnd() - 1), r: 0.5 + rnd() * 1.1,
+                 a: 0.25 + rnd() * 0.55 });
+    }
+    return out;
+  })();
+  function beltIn() { return mix(BELT.xLenIn, BELT.xTrueIn, ease(m)); }
+  function beltOut() { return mix(BELT.xLenOut, BELT.xTrueOut, ease(m)); }
   const SUN_R_TRUE = SUN.rKm * KM2U;
 
   // ---------- State ----------
@@ -236,18 +281,44 @@
   function focusOn(obj) {
     tracking = true;
     if (obj === SUN) { camT.c = 0; camT.z = Math.min(H, W) * 0.28 / sunR(); }
+    else if (obj.isBelt) {
+      const a = beltIn(), b = beltOut();
+      camT.c = (a + b) / 2; camT.z = (W * 0.62) / Math.max(b - a, 1e-9);
+    }
     else { camT.c = px(obj); camT.z = Math.min(H, W) * 0.20 / pr(obj); }
   }
 
   // ---------- Info panel ----------
   const info = document.getElementById("info");
   const el = id => document.getElementById(id);
+  // The control bar sits at the bottom and overlaps the panel's column, so the
+  // panel's ceiling is the top of that bar rather than the bottom of the window.
+  function fitPanel() {
+    const bar = document.getElementById("controls");
+    if (!bar) return;
+    const top = bar.getBoundingClientRect().top;
+    const room = (top > 0 ? top : window.innerHeight) - 14 - 14;
+    info.style.maxHeight = Math.max(160, room) + "px";
+  }
+  window.addEventListener("resize", fitPanel);
+  const DEFAULT_LABELS = { dist: "Distance from the Sun", diam: "Diameter",
+    area: "Surface area", mass: "Mass", moons: "Moons", made: "Made of" };
   function showInfo(o) {
     el("iName").textContent = o.name;
     el("iType").textContent = o.type;
-    el("iDist").innerHTML = o === SUN ? "n/a (it is the center)" :
+    // a region carries its own row labels; a body uses the standard ones
+    for (const k in DEFAULT_LABELS)
+      el("l" + k[0].toUpperCase() + k.slice(1)).textContent =
+        (o.labels && o.labels[k]) || DEFAULT_LABELS[k];
+    el("rowExtra").style.display = o.extra ? "" : "none";
+    if (o.extra) {
+      el("lExtra").textContent = (o.labels && o.labels.extra) || "Also";
+      el("iExtra").innerHTML = o.extra;
+    }
+    el("iDist").innerHTML = o.dist ? o.dist : o === SUN ? "n/a (it is the center)" :
       `${o.au.toFixed(3)} au (${(o.au * AU / 1e6).toFixed(1)} million km, average)`;
-    el("iDiam").innerHTML = `${(2 * o.rKm).toLocaleString("en-US")} km` +
+    el("iDiam").innerHTML = o.diam ? o.diam :
+      `${(2 * o.rKm).toLocaleString("en-US")} km` +
       (o === SUN ? " (109 Earths across)" : "");
     el("iArea").innerHTML = o.area;
     el("iMass").innerHTML = o.mass;
@@ -256,6 +327,8 @@
     el("iDisc").innerHTML = o.disc;
     el("iProbe").innerHTML = o.probe;
     info.classList.add("show");
+    fitPanel();
+    info.scrollTop = 0;
   }
   function select(o) {
     selected = o;
@@ -275,8 +348,9 @@
   }
   addChip("Overview", null);
   addChip("I. SUN", SUN);
-  const NUMERALS = ["II","III","IV","V","VI","VII","VIII","IX"];
-  PLANETS.forEach((p, i) => addChip(NUMERALS[i] + ". " + p.name.toUpperCase(), p));
+  const ORDER = [...PLANETS.slice(0, BELT_SLOT), BELT, ...PLANETS.slice(BELT_SLOT)];
+  const NUMERALS = ["II","III","IV","V","VI","VII","VIII","IX","X"];
+  ORDER.forEach((o, i) => addChip(NUMERALS[i] + ". " + o.name.toUpperCase(), o));
 
   const scaleBtn = document.getElementById("scaleBtn");
   const modeNote = document.getElementById("modeNote");
@@ -290,6 +364,7 @@
       ? "True scale: spacing is exact. Dots are drawn at the smallest visible size, larger than true; zoom in and each planet appears at its real size."
       : "Lenient scale: sizes and spacing are exaggerated so every planet is visible.";
     scalebar.style.display = mTarget === 1 ? "block" : "none";
+    fitPanel();
     if (selected) focusOn(selected); else fitAll();
   });
 
@@ -308,6 +383,8 @@
       const mx = e.clientX;
       let hit = null;
       if (Math.abs(sx(0) - mx) < Math.max(sunR() * cam.z, 14) && Math.abs(e.clientY - y0) < Math.max(sunR() * cam.z, 20)) hit = SUN;
+      const bIn = sx(beltIn()), bOut = sx(beltOut());
+      if (mx > bIn - 6 && mx < bOut + 6 && Math.abs(e.clientY - y0) < 18) hit = BELT;
       for (const p of PLANETS) {
         const r = Math.max(pr(p) * cam.z, 12);
         if (Math.abs(sx(px(p)) - mx) < r && Math.abs(e.clientY - y0) < r + 8) hit = p;
@@ -439,6 +516,33 @@
     ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rot, a0, a1); ctx.stroke();
   }
 
+  function drawBelt() {
+    const a = sx(beltIn()), b = sx(beltOut());
+    if (b < -60 || a > W + 60) return;
+    const w = b - a;
+    const hot = selected === BELT;
+    // a faint wash so the region reads even when the rocks are sub-pixel
+    const g = ctx.createLinearGradient(a, 0, b, 0);
+    g.addColorStop(0, "rgba(150,140,125,0)");
+    g.addColorStop(0.5, hot ? "rgba(140,170,225,0.20)" : "rgba(150,140,125,0.13)");
+    g.addColorStop(1, "rgba(150,140,125,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(a, y0 - 11, Math.max(w, 1), 22);
+    // the swarm: vertical spread stays in screen pixels, since the whole
+    // diagram puts every body on one line and the scatter is only legibility
+    const spread = Math.min(30, 4 + w * 0.02);
+    for (const k of ROCKS) {
+      const x = a + k.u * w;
+      if (x < -4 || x > W + 4) continue;
+      ctx.globalAlpha = k.a;
+      ctx.fillStyle = hot ? "#9fc2f5" : "#b3a894";
+      circle(x, y0 + k.dy * spread, k.r); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    label("Asteroid belt", (Math.max(a, 0) + Math.min(b, W)) / 2,
+          y0 - spread - 12, hot);
+  }
+
   function drawPlanet(p) {
     const wr = pr(p) * cam.z;
     const x = sx(px(p));
@@ -537,7 +641,8 @@
   function drawGhostEarth() {
     // A ghost of Earth for size comparison, wherever you are zoomed in.
     // Not on Earth itself (it IS Earth) and not on Jupiter, by request.
-    if (!selected || selected.name === "Earth" || selected.name === "Jupiter") return;
+    if (!selected || selected.isBelt) return;
+    if (selected.name === "Earth" || selected.name === "Jupiter") return;
     const isSun = selected === SUN;
     const x = isSun ? sx(0) : sx(px(selected));
     const Rd = (isSun ? sunR() : pr(selected)) * cam.z;   // drawn radius of the selected body
@@ -634,14 +739,19 @@
     ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(W, y0); ctx.stroke();
 
     drawSun();
+    drawBelt();
     for (const p of PLANETS) drawPlanet(p);
     flushLabels();
     drawGhostEarth();
     drawLightTimes();
     drawScalebar();
     window.__dbg = { m, mTarget, camc: cam.c, camz: cam.z, tracking,
-      sel: selected && selected.name, ex: selected ? sx(px(selected)) : null,
-      er: selected ? pr(selected) * cam.z : null };
+      sel: selected && selected.name,
+      ex: selected && !selected.isBelt ? sx(px(selected)) : null,
+      er: selected && !selected.isBelt ? pr(selected) * cam.z : null,
+      belt: { auIn: BELT.auIn, auOut: BELT.auOut,
+              xIn: beltIn(), xOut: beltOut(), rocks: ROCKS.length,
+              trueIn: BELT.xTrueIn, trueOut: BELT.xTrueOut } };
     requestAnimationFrame(frame);
   }
   resize();
