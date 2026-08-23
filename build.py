@@ -3,7 +3,7 @@
 
 Sources:
     posts/*.md      pieces for the Notes section (title/date frontmatter)
-    sections/*.md   body text for Digital Concepts, Film, Elsewhere (title frontmatter)
+    sections/*.md   body text for Library, Film, Elsewhere (title frontmatter)
 
 Output (flat, upload-ready):
     index.html      landing page with a card per section
@@ -35,7 +35,7 @@ SECTIONS_DIR = ROOT / "sections"
 # Landing cards, in order. Notes is generated from posts/; the others
 # take their body from sections/<slug>.md.
 SECTIONS = [
-    {"slug": "library", "title": "Digital Concepts"},
+    {"slug": "library", "title": "Library"},
     {"slug": "film", "title": "Film"},
     {"slug": "chess", "title": "Chess"},
     {"slug": "science-fiction", "title": "Science Fiction"},
