@@ -527,7 +527,7 @@ let last = 0;
 function frame(now) {
   const dt = last ? Math.min(0.1, (now - last)/1000) : 0;
   last = now;
-  if (runDay) jd += dt*0.6;            // a bit over half a day a second
+  if (runDay) jd += dt*0.3;            // one turn about every three seconds
   if (runYear) {
     yearAcc += dt*10;                  // ten days a second, a year in five weeks
     const step = Math.floor(yearAcc);  // whole days only, so the hour holds
