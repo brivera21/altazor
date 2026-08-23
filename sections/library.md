@@ -28,10 +28,12 @@ title: Library
 <summary>The Solar System</summary>
 <ul>
 <li><a href="solar-system.html">The Solar System</a></li>
-<li><a href="populous-countries.html">Earth Right Now</a></li>
+<li><a href="earth.html">The Earth</a></li>
+<li><a href="populous-countries.html">Earth's Population Right Now</a></li>
 <li><a href="orbit-sine.html">The Year: Earth's Loop</a></li>
 <li class="soon">The Month: The Moon's Loop <span class="tag">coming soon</span></li>
 <li class="soon">The History of Earth <span class="tag">coming soon</span></li>
+<li class="soon">History of Homo Sapiens Population <span class="tag">coming soon</span></li>
 </ul>
 </details>
 
