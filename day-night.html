@@ -113,16 +113,17 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}
 
 <div class="notes">
 <h2>About the map</h2>
-<p>The lit half is always a half. The shadow's edge is a great circle, so it
-cuts the globe in two whatever the date, and the hour only slides it west at
-fifteen degrees an hour. What the date changes is the lean: the axis is tilted
-23.44 degrees, so the point with the Sun overhead runs that far north in June
-and that far south in December, and the terminator tips over with it.</p>
-<p>In June it clears the Arctic entirely and buries the Antarctic; in December
-they trade. The curve beside the map is the same thing counted in hours: how
-long the Sun stays up at every latitude on the chosen date. It is flat at
-twelve hours at the equinoxes and splays open at the solstices, and the
-latitude where it first reaches twenty four is the polar circle.</p>
+<p>The lit half is always a half: the shadow's edge is a great circle whatever
+the date, and the hour only slides it west at fifteen degrees an hour. What the
+date changes is the lean. The axis is tilted 23.44 degrees, so the point with
+the Sun overhead runs that far north in June and that far south in
+December.</p>
+<p>In June the shadow clears the Arctic and buries the Antarctic; in December
+they trade. Running the year holds the clock at one time of day, so the
+terminator stops sliding and only its lean moves: the Sun draws a slender figure
+of eight on the map, its width the quarter hour a sundial runs ahead of or
+behind a clock, and the daylight curve stacks up between its two solstice
+limits.</p>
 <p>The ground wears the colours those climates show from orbit, and the lights
 that come up behind the terminator are cities, placed and sized by how many
 people live in them.</p>
@@ -153,6 +154,13 @@ const cu = el('curve'), cx2 = cu.getContext('2d');
 let ground = null, glow = null, baseCv = null;
 let showGrat = true, bands = false, showLights = true;
 let runDay = false, runYear = false, hover = null;
+// Running the year at any watchable speed spins the planet dozens of times a
+// second, and the shadow just flickers. So the year run holds the clock at one
+// time of day and steps whole days: the terminator stops sliding and only its
+// lean changes, which is the thing the year does. What the Sun draws while that
+// happens is kept: the figure of eight on the map, and the daylight curves
+// stacked up behind the current one.
+let yearMode = false, yearAcc = 0, analemma = null, ghosts = [];
 let jd = jdNow();
 
 // ---------- the Sun, from Meeus chapters 25 and 28 ----------
@@ -339,6 +347,51 @@ function shade(s) {
   lightCtx.putImageData(lightImg, 0, 0);
 }
 
+// A year of sub-solar points, all read at the same time of day. The Sun is
+// overhead on very nearly the same meridian each time, so the trace is narrow:
+// its whole width is the equation of time, the up to sixteen minutes a sundial
+// runs ahead of or behind a clock. Its height is the tilt, twice over.
+function buildYear() {
+  const lon0 = solar(jd).slon;
+  analemma = [];
+  for (let n = 0; n <= 365; n++) {
+    const s = solar(jd + n);
+    const dlon = ((s.slon - lon0 + 540) % 360) - 180;
+    analemma.push([(lon0 + 180 + dlon)*W/360, (90 - s.dec)*H/180, n]);
+  }
+  ghosts = [solar(jd).dec];
+}
+
+// a curve is kept whenever the Sun has moved far enough for a new one to read
+function noteGhost() {
+  if (!yearMode) return;
+  const d = solar(jd).dec;
+  if (!ghosts.length || Math.abs(d - ghosts[ghosts.length - 1]) > 0.7) {
+    ghosts.push(d);
+    if (ghosts.length > 90) ghosts.shift();
+  }
+}
+
+function drawYear(s) {
+  if (!analemma) return;
+  const u = W/1000;
+  ctx.save();
+  // the trace can straddle the edge of the map, so it is stroked three times
+  for (const shift of [-W, 0, W]) {
+    ctx.strokeStyle = 'rgba(242,198,107,0.55)'; ctx.lineWidth = 1.6*u;
+    ctx.beginPath();
+    analemma.forEach(([x, y], i) =>
+      i ? ctx.lineTo(x + shift, y) : ctx.moveTo(x + shift, y));
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(242,198,107,0.75)';
+    for (let n = 0; n < 365; n += 30) {        // one dot a month
+      const [x, y] = analemma[n];
+      ctx.beginPath(); ctx.arc(x + shift, y, 2.4*u, 0, 7); ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
 function draw() {
   const s = solar(jd);
   ctx.drawImage(baseCv, 0, 0);
@@ -369,6 +422,8 @@ function draw() {
     }
     ctx.restore();
   }
+
+  drawYear(s);
 
   // where the Sun is straight overhead, and the midnight point opposite it
   const sx = (s.slon + 180)*W/360, sy = (90 - s.dec)*H/180;
@@ -413,13 +468,22 @@ function curve(s) {
   cx2.fillStyle = 'rgba(160,175,200,0.75)';
   cx2.textAlign = 'center';
   for (const t of [0, 12, 24]) cx2.fillText(t + 'h', 8 + t/24*(w - 16), 9);
-  cx2.beginPath();
-  for (let y = 12; y <= h - 4; y++) {
-    const lat = 90 - (y - 12)/(h - 16)*180;
-    const x = 8 + daylight(lat, s.dec)/24*(w - 16);
-    y === 12 ? cx2.moveTo(x, y) : cx2.lineTo(x, y);
+  const trace = dec => {
+    cx2.beginPath();
+    for (let y = 12; y <= h - 4; y++) {
+      const lat = 90 - (y - 12)/(h - 16)*180;
+      const x = 8 + daylight(lat, dec)/24*(w - 16);
+      y === 12 ? cx2.moveTo(x, y) : cx2.lineTo(x, y);
+    }
+    cx2.stroke();
+  };
+  // every curve the year has been through so far, so the envelope between the
+  // two solstices fills in as it runs
+  if (yearMode) {
+    cx2.strokeStyle = 'rgba(242,198,107,0.16)'; cx2.lineWidth = 1;
+    for (const d of ghosts) trace(d);
   }
-  cx2.strokeStyle = '#f2c66b'; cx2.lineWidth = 1.8; cx2.stroke();
+  cx2.strokeStyle = '#f2c66b'; cx2.lineWidth = 1.8; trace(s.dec);
   if (hover) {
     const y = 12 + (90 - hover.lat)/180*(h - 16);
     const x = 8 + daylight(hover.lat, s.dec)/24*(w - 16);
@@ -464,7 +528,11 @@ function frame(now) {
   const dt = last ? Math.min(0.1, (now - last)/1000) : 0;
   last = now;
   if (runDay) jd += dt*0.6;            // a bit over half a day a second
-  if (runYear) jd += dt*24;            // a bit under a month a second
+  if (runYear) {
+    yearAcc += dt*10;                  // ten days a second, a year in five weeks
+    const step = Math.floor(yearAcc);  // whole days only, so the hour holds
+    if (step) { yearAcc -= step; jd += step; noteGhost(); }
+  }
   frameOnce();
   requestAnimationFrame(frame);
 }
@@ -474,7 +542,9 @@ function frameOnce() {
   curve(s);
   panel(s);
   window.__day = {jd, ut: s.ut, dec: s.dec, eqt: s.eqt, slon: s.slon,
-                  runDay, runYear, bands, showGrat, showLights, hover};
+                  runDay, runYear, yearMode, ghosts: ghosts.length,
+                  analemma: analemma ? analemma.length : 0,
+                  bands, showGrat, showLights, hover};
 }
 
 // The share of the surface the shadow leaves alone, read off the overlay that
@@ -512,23 +582,29 @@ window.__lit = () => {
 function press(id, on) { el(id).setAttribute('aria-pressed', on); }
 el('hour').addEventListener('input', e => {
   jd = midnight(jd) + (+e.target.value)/1440;
-  runDay = false; press('bDay', false); frameOnce();
+  runDay = false; press('bDay', false);
+  if (yearMode) buildYear();          // a new hour is a new figure of eight
+  frameOnce();
 });
 el('doy').addEventListener('input', e => {
   const d = jdToDate(jd), frac = jd - midnight(jd);
   jd = jdOf(d.getUTCFullYear(), 0, 1 + (+e.target.value), 0) + frac;
   runYear = false; press('bYear', false); frameOnce();
 });
+function leaveYear() {
+  yearMode = false; analemma = null; ghosts = [];
+}
 el('bDay').addEventListener('click', () => {
-  runDay = !runDay; runYear = false;
-  press('bDay', runDay); press('bYear', false);
+  runDay = !runDay; runYear = false; leaveYear();
+  press('bDay', runDay); press('bYear', false); frameOnce();
 });
 el('bYear').addEventListener('click', () => {
   runYear = !runYear; runDay = false;
-  press('bYear', runYear); press('bDay', false);
+  if (!yearMode) { yearMode = true; buildYear(); }
+  press('bYear', runYear); press('bDay', false); frameOnce();
 });
 el('bNow').addEventListener('click', () => {
-  jd = jdNow(); runDay = runYear = false;
+  jd = jdNow(); runDay = runYear = false; leaveYear();
   press('bDay', false); press('bYear', false); frameOnce();
 });
 el('bGrat').addEventListener('click', () => {
@@ -551,7 +627,8 @@ function at(ev) {
 cv.addEventListener('mousemove', e => { hover = at(e); frameOnce(); });
 cv.addEventListener('mouseleave', () => { hover = null; frameOnce(); });
 window.__setTime = (y, mo, d, h) => {
-  jd = jdOf(y, mo - 1, d, h); runDay = runYear = false; frameOnce(); return jd;
+  jd = jdOf(y, mo - 1, d, h); runDay = runYear = false; leaveYear();
+  frameOnce(); return jd;
 };
 window.__probe = (lat, lon) => {
   const s = solar(jd);
