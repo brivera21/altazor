@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Generate moon.html, The Month: The Moon's Loop.
+"""Generate moon.html, The Month: The Moon's Cycle.
 
-The companion to The Year: Earth's Loop. That page turns one circle into a
+The companion to The Year: Earth's Cycle. That page turns one circle into a
 helix; this one is about the two lengths a month can have, and about the shape
 the Moon actually traces through space.
 
@@ -141,7 +141,7 @@ def main():
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Month: The Moon's Loop · Altazor</title>
+<title>The Month: The Moon's Cycle · Altazor</title>
 <style>
   :root { --text:#e8ecf4; --dim:#8b97ad; --accent:#5ab0ff; --warm:#f2c66b;
           --bg:#05070d; --panel:rgba(10,15,26,0.82); --line:rgba(90,176,255,0.22); }
@@ -195,7 +195,7 @@ def main():
 <div id="hud">
   <div>
     <div id="sitenav"><a class="brand" href="index.html">ALTAZOR</a><a href="library.html">&larr; Library</a></div>
-    <h1>The Month: The Moon's Loop</h1>
+    <h1>The Month: The Moon's Cycle</h1>
   </div>
   <div id="readout">
     <div class="lbl">Phase</div>

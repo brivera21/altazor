@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate earth.html: the Earth as continents, with what covers it.
+"""Generate earth.html, Earth's Climate: the continents, and what covers them.
 
 No countries. The land is drawn from real coastlines, split into the seven
 conventional continents, and shaded by the main Koppen-Geiger climate group.
@@ -112,7 +112,7 @@ def main():
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Earth · Altazor</title>
+<title>Earth's Climate · Altazor</title>
 <style>
 :root{{color-scheme:dark;
 --ink:#e6e6e6; --ink2:#9aa3ad; --ink3:#7d848c;
@@ -191,7 +191,7 @@ table.mix td{{font-variant-numeric:tabular-nums}}
   <nav class="site"><a href="library.html">&larr; Library</a></nav>
 </header>
 
-<h1>The Earth</h1>
+<h1>Earth's Climate</h1>
 <p class="stamp">Coastlines from GSHHG; climates from Beck and others, 2018.</p>
 
 <div class="tiles">

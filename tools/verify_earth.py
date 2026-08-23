@@ -154,7 +154,7 @@ print("--- the page ---")
 html = PAGE.read_text(encoding="utf-8")
 if "—" in re.sub(r"<script[\s\S]*?</script>", "", html):
     fails.append("an em dash in the page copy")
-for want in ("The Earth", "library.html", "ALTAZOR"):
+for want in ("Earth's Climate", "library.html", "ALTAZOR"):
     if want not in html:
         fails.append(f"the page is missing {want!r}")
 if len(html) > 400_000:
