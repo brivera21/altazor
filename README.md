@@ -61,7 +61,7 @@ exists for it.
 
 The page is laid out in this order, top to bottom:
 
-1. the site header, the brand and the link back to the Library
+1. the site header, the brand and the link back to the section
 2. the `h1`, and nothing else in prose above the diagram
 3. the fixed facts, as a `.tiles` row: the handful of constants the diagram is
    about, each a label, a value and a one line gloss. They sit above the diagram
