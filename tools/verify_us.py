@@ -12,7 +12,9 @@ compared:
               segment the page labelled
   rugged      twenty reference places, ten broken and ten flat, none of which
               were used to set the threshold
-  regions     the two Census regions are checked against the Bureau's own lists
+  regions     the four Census regions and the nine divisions are typed out
+              again here from the Bureau's document and compared, and they have
+              to cover the fifty states and the district exactly once each
   capitals    every seat of government is looked up again in GeoNames, by name
               and by state, and the two the dataset is too coarse to carry have
               to be exactly the two the page says they are
@@ -31,23 +33,37 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
 from make_us_data import BM, ROUGH_REF, SMOOTH_REF, read_wdb, sph_area_km2
-from build_us import AREA, CAPITALS, NAME, NAMED_RIVERS, OFF_THE_LIST, REGIONS
+from build_us import (AREA, CAPITALS, CENSUS_DIVISIONS, CENSUS_REGIONS, NAME,
+                      NAMED_RIVERS, OFF_THE_LIST, VERNACULAR)
 
 HERE = Path(__file__).parent
 PAGE = HERE.parent / "us.html"
 fails = []
 
-# The Census Bureau's own two regions, typed out from its regions and divisions
-# document rather than copied from the generator.
+# The Census Bureau's own regions and divisions, typed out from its regions
+# and divisions document rather than copied from the generator.
 CENSUS = {
-    "The Midwest": set("OH IN IL MI WI MN IA MO ND SD NE KS".split()),
-    "The South": set("DE MD DC VA WV NC SC GA FL KY TN AL MS AR LA OK TX".split()),
+    "Northeast": "CT ME MA NH RI VT NJ NY PA",
+    "Midwest": "IL IN MI OH WI IA KS MN MO NE ND SD",
+    "South": "DE DC FL GA MD NC SC VA WV AL KY MS TN AR LA OK TX",
+    "West": "AZ CO ID MT NV NM UT WY AK CA HI OR WA",
+}
+DIVISIONES = {
+    "New England": ("Northeast", "CT ME MA NH RI VT"),
+    "Middle Atlantic": ("Northeast", "NJ NY PA"),
+    "East North Central": ("Midwest", "IL IN MI OH WI"),
+    "West North Central": ("Midwest", "IA KS MN MO NE ND SD"),
+    "South Atlantic": ("South", "DE DC FL GA MD NC SC VA WV"),
+    "East South Central": ("South", "AL KY MS TN"),
+    "West South Central": ("South", "AR LA OK TX"),
+    "Mountain": ("West", "AZ CO ID MT NV NM UT WY"),
+    "Pacific": ("West", "AK CA HI OR WA"),
 }
 
 html = PAGE.read_text(encoding="utf-8")
 print("--- the page itself ---")
 for want in ("The United States", "library.html", "ALTAZOR", "References",
-             "Albers"):
+             "Albers", "Census divisions"):
     ok = want in html
     print(f"  {'ok  ' if ok else 'FAIL'} the page carries {want!r}")
     if not ok:
@@ -55,22 +71,50 @@ for want in ("The United States", "library.html", "ALTAZOR", "References",
 if "—" in re.sub(r"<script[\s\S]*?</script>", "", html):
     fails.append("an em dash in the page copy")
 
-print("--- the regions against the Census Bureau ---")
-for name, _, kind, _, codes in REGIONS:
+print("--- the regions and divisions against the Census Bureau ---")
+for name, _c, codes in CENSUS_REGIONS:
+    got, want = set(codes.split()), set(CENSUS[name].split())
+    ok = got == want
+    print(f"  {'ok  ' if ok else 'FAIL'} {name}: {len(got)} states, and the "
+          f"Bureau lists {len(want)}")
+    if not ok:
+        fails.append(f"{name} differs from the Census list: {got ^ want}")
+for name, region, _c, codes in CENSUS_DIVISIONS:
     got = set(codes.split())
-    if name in CENSUS:
-        ok = got == CENSUS[name]
-        print(f"  {'ok  ' if ok else 'FAIL'} {name}: {len(got)} states, "
-              f"and the Bureau lists {len(CENSUS[name])}")
-        if not ok:
-            fails.append(f"{name} differs from the Census list: "
-                         f"{got ^ CENSUS[name]}")
-    else:
-        ok = kind == "vernacular"
-        print(f"  {'ok  ' if ok else 'FAIL'} {name}: {len(got)} states, "
-              "marked vernacular on the page")
-        if not ok:
-            fails.append(f"{name} is not marked vernacular")
+    reg_want, codes_want = DIVISIONES[name]
+    ok = got == set(codes_want.split()) and region == reg_want
+    print(f"  {'ok  ' if ok else 'FAIL'} {name}: {len(got)} states, inside the "
+          f"{region}")
+    if not ok:
+        fails.append(f"{name} differs: {got ^ set(codes_want.split())} "
+                     f"or region {region} against {reg_want}")
+
+TODOS = set(AREA)
+union_reg = [c for _n, _col, codes in CENSUS_REGIONS for c in codes.split()]
+union_div = [c for _n, _r, _col, codes in CENSUS_DIVISIONS for c in codes.split()]
+for cual, u in (("regions", union_reg), ("divisions", union_div)):
+    ok = len(u) == len(TODOS) and set(u) == TODOS
+    print(f"  {'ok  ' if ok else 'FAIL'} the {cual} cover the {len(TODOS)} "
+          "states and the district once each")
+    if not ok:
+        fails.append(f"the {cual} do not partition the country: "
+                     f"{sorted(set(u) ^ TODOS)}, {len(u)} entries")
+for name, region, _c, codes in CENSUS_DIVISIONS:
+    padre = next(cs for n, _col, cs in CENSUS_REGIONS if n == region)
+    fuera = set(codes.split()) - set(padre.split())
+    if fuera:
+        fails.append(f"{name} has states outside the {region}: {fuera}")
+print(f"  {'ok  ' if not fails else 'FAIL'} every division sits inside its own "
+      "region")
+
+print("--- the vernacular areas ---")
+for name, _c, note, codes in VERNACULAR:
+    n = len(codes.split())
+    print(f"  ok   {name}: {n} states, no official line, drawn as an outline")
+ok = not any(n in CENSUS for n, _c, _note, _codes in VERNACULAR)
+print(f"  {'ok  ' if ok else 'FAIL'} none of them is named after a Census region")
+if not ok:
+    fails.append("a vernacular area carries a Census region name")
 
 print("--- state areas against the Census Bureau ---")
 import pickle
@@ -224,15 +268,60 @@ with sync_playwright() as pw:
     if not ok:
         fails.append(f"inset overlap: {hit[:4]}")
 
+    print("--- the three ways of grouping the states ---")
+    for bid, modo, cuantos in (("mReg", "reg", len(CENSUS_REGIONS)),
+                               ("mDiv", "div", len(CENSUS_DIVISIONS)),
+                               ("mVer", "vern", len(VERNACULAR))):
+        pg.click("#" + bid)
+        pg.wait_for_timeout(120)
+        u = pg.evaluate("()=>{const u=window.__us();"
+                        "return {modo:u.modo,grupos:u.grupos,areas:u.areas,"
+                        "leyenda:document.querySelectorAll('#legend button').length}}")
+        ok = (u["modo"] == modo and len(u["grupos"]) == cuantos
+              and u["leyenda"] == cuantos
+              and u["areas"] == (0 if modo == "vern" else cuantos))
+        print(f"  {'ok  ' if ok else 'FAIL'} {bid} shows {len(u['grupos'])} "
+              f"groups, {u['leyenda']} legend buttons and {u['areas']} names "
+              "written on the map")
+        if not ok:
+            fails.append(f"{bid} gives {u}")
+
+    print("--- the colour of a state is the colour of its group ---")
+    pg.click("#mReg")
+    pg.wait_for_timeout(120)
+    for code, name in (("TX", "South"), ("CA", "West"), ("ME", "Northeast"),
+                       ("OH", "Midwest")):
+        quiero = next(c for n, c, _cs in CENSUS_REGIONS if n == name)
+        got = pg.evaluate("(c)=>window.__us().tinte(c)", code)
+        ok = got.strip().lower() == quiero.lower()
+        print(f"  {'ok  ' if ok else 'FAIL'} {code} is painted {got.strip()} "
+              f"and the {name} is {quiero}")
+        if not ok:
+            fails.append(f"{code} is painted {got!r}, not {quiero}")
+    pg.click("#mDiv")
+    pg.wait_for_timeout(120)
+    for code, name in (("TX", "West South Central"), ("HI", "Pacific"),
+                       ("MN", "West North Central")):
+        quiero = next(c for n, _r, c, _cs in CENSUS_DIVISIONS if n == name)
+        got = pg.evaluate("(c)=>window.__us().tinte(c)", code)
+        ok = got.strip().lower() == quiero.lower()
+        print(f"  {'ok  ' if ok else 'FAIL'} {code} is painted {got.strip()} "
+              f"and the {name} is {quiero}")
+        if not ok:
+            fails.append(f"{code} is painted {got!r}, not {quiero}")
+    pg.click("#mReg")
+    pg.wait_for_timeout(100)
+
     print("--- the panel answers for a state ---")
     pg.hover("#fills path[data-c='TX']")
     pg.wait_for_timeout(200)
     nm = pg.text_content("#selName")
     ar = pg.text_content("#selArea")
     rg = pg.text_content("#selRegions")
-    ok = nm == "Texas" and "695,662" in ar and "The South" in rg
-    print(f"  {'ok  ' if ok else 'FAIL'} Texas reads {nm!r}, {ar!r}, and is "
-          f"counted in {rg.split('Counted in ')[-1]!r}")
+    ok = (nm == "Texas" and "695,662" in ar and "South" in rg
+          and "West South Central" in rg)
+    print(f"  {'ok  ' if ok else 'FAIL'} Texas reads {nm!r}, {ar!r}, and "
+          f"{rg!r}")
     if not ok:
         fails.append(f"the panel gives {nm!r} {ar!r} {rg!r} for Texas")
 
@@ -264,7 +353,7 @@ with sync_playwright() as pw:
           "rivers and the rugged ground stay")
     if not ok:
         fails.append(f"the bare view reads {off}")
-    pg.click(".lg[data-r='0']")     # the legend toggles this region off again
+    pg.click("#legend button")      # the legend toggles this area off again
     pg.wait_for_timeout(150)
     back = pg.evaluate("()=>({lines: window.__us().lines,"
                        " l: getComputedStyle(document.getElementById('lines')).display,"
@@ -276,7 +365,7 @@ with sync_playwright() as pw:
           "lines back with it")
     if not ok:
         fails.append(f"the region legend in the bare view reads {back}")
-    pg.click(".lg[data-r='0']")     # and back on, so the page is left as found
+    pg.click("#legend button")      # and back on, so the page is left as found
     pg.wait_for_timeout(100)
     on0 = pg.evaluate("()=>window.__us().on[0]")
     if on0 is not True:

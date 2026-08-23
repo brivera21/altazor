@@ -343,6 +343,34 @@ with sync_playwright() as pw:
     if not ok:
         fails.append("la página no nombra el kilómetro de la cima")
 
+    print("--- el tablero va arriba y se mueve ---")
+    n = pg.evaluate("()=>[document.querySelectorAll('.tiles .tile').length,"
+                    "document.querySelectorAll('.readout').length]")
+    ok = n[0] == 5 and n[1] == 0
+    print(f"  {'ok  ' if ok else 'FALLA'} {n[0]} casillas arriba y {n[1]} filas "
+          "de lecturas abajo")
+    if not ok:
+        fails.append(f"la página trae {n[0]} casillas y {n[1]} filas abajo")
+    arriba = ("()=>['rKm','rAlt','rTiempo','rMun','rCerca']"
+              ".map(i=>document.getElementById(i).textContent)")
+    dentro = pg.evaluate("()=>[...document.querySelectorAll('.tiles')]"
+                         ".some(x=>x.contains(document.getElementById('rKm')))")
+    print(f"  {'ok  ' if dentro else 'FALLA'} las lecturas viven dentro de las "
+          "casillas de arriba")
+    if not dentro:
+        fails.append("las lecturas no están en las casillas de arriba")
+    visto = []
+    for k in (0, 7, 14, 21, 28):
+        pg.evaluate("(k)=>{const s=document.getElementById('km');s.value=k;"
+                    "s.dispatchEvent(new Event('input'))}", k)
+        pg.wait_for_timeout(70)
+        visto.append(tuple(pg.evaluate(arriba)))
+    ok = len(set(visto)) == len(visto)
+    print(f"  {'ok  ' if ok else 'FALLA'} las cinco posiciones del deslizador "
+          "dan cinco tableros distintos")
+    if not ok:
+        fails.append(f"el tablero se repite: {visto}")
+
     print("--- los municipios en la página ---")
     st = pg.evaluate("()=>window.__ruta()")
     ok = st["cruzados"] == CRUZA

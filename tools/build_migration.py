@@ -123,7 +123,7 @@ def main():
     }
     blob = json.dumps(js, separators=(",", ":"))
 
-    facts = "\n".join(
+    facts = "\n".join(          # ya no se usa: las casillas de arriba cambian
         f'<div class="tile"><div class="k">{n}</div>'
         f'<div class="v">{v}</div><div class="d">{d}</div></div>'
         for n, v, d in FACTS)
@@ -219,7 +219,16 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}
 
 <h1>Homo Sapiens Migration</h1>
 
-<div class="tiles">__FACTS__</div>
+<div class="tiles">
+  <div class="tile"><div class="k">estimated year</div>
+    <div class="v" id="tWhen">--</div><div class="d" id="tWhenSub"></div></div>
+  <div class="tile"><div class="k">estimated population</div>
+    <div class="v" id="tPop">--</div><div class="d" id="tPopSub"></div></div>
+  <div class="tile"><div class="k">sites reached</div>
+    <div class="v" id="tSites">--</div><div class="d" id="tSitesSub"></div></div>
+  <div class="tile"><div class="k">where most people are</div>
+    <div class="v" id="tCont">--</div><div class="d" id="tContSub"></div></div>
+</div>
 
 <div class="stage">
   <div class="mapwrap"><canvas id="map"></canvas></div>
@@ -465,6 +474,38 @@ function draw() {
   }
 }
 
+// las casillas de arriba llevan la cuenta del año y de la gente, y cambian
+// con el deslizador igual que el mapa
+function tiles(t, world, c) {
+  el('tWhen').textContent = whenLabel(t);
+  // el letrero grande alterna entre años atrás y año del calendario, así que
+  // el chico lleva siempre la otra cuenta
+  const yr = 1950 - Math.round(t);
+  el('tWhenSub').textContent = t > 60
+    ? (yr > 0 ? 'about AD ' + fmt(yr) : 'about ' + fmt(-yr) + ' BC')
+    : fmt(Math.round(t)) + ' years before 1950';
+  el('tPop').textContent = bigPop(world);
+  el('tPopSub').textContent = 'people alive, interpolated between the '
+    + 'published figures';
+  const llegados = D.sites.filter(s => s.t >= t).length;
+  el('tSites').textContent = fmt(llegados) + ' of ' + fmt(D.sites.length);
+  el('tSitesSub').textContent = llegados
+    ? 'of the arrivals this page follows'
+    : 'the oldest fossils are 315,000 years old';
+  if (!c) {
+    el('tCont').textContent = 'not split yet';
+    el('tContSub').textContent = 'the split by continent starts at seven '
+      + 'thousand years ago';
+    return;
+  }
+  const tot = c.reduce((a, b) => a + b, 0);
+  let k = 0;
+  c.forEach((v, i) => { if (v > c[k]) k = i; });
+  el('tCont').textContent = D.continents[k];
+  el('tContSub').textContent = (c[k] / tot * 100).toFixed(0)
+    + ' per cent of the people alive';
+}
+
 function panel() {
   const t = ybpOf(p);
   el('tout').textContent = whenLabel(t);
@@ -473,6 +514,7 @@ function panel() {
   el('pop').textContent = bigPop(world);
   el('popsub').textContent = 'people alive, ' + whenLabel(t);
   const c = interpCont(t);
+  tiles(t, world, c);
   if (!c) {
     el('bars').innerHTML = '';
     el('barnote').textContent = 'The split by continent starts at seven '

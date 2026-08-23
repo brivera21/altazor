@@ -111,6 +111,48 @@ with sync_playwright() as pw:
     if worst[0] >= 0.5:
         fails.append(f"the population is {worst[0]:.1f}% out at {worst[1]}")
 
+    print("--- the boxes at the top follow the slider ---")
+    leer = ("()=>['tWhen','tWhenSub','tPop','tSites','tCont']"
+            ".map(i=>document.getElementById(i).textContent)")
+    visto = []
+    for v in (0, 300, 600, 900, 1000):
+        pg.evaluate("(v)=>{const s=document.getElementById('t');s.value=v;"
+                    "s.dispatchEvent(new Event('input'))}", v)
+        pg.wait_for_timeout(90)
+        visto.append(pg.evaluate(leer))
+    ok = len({tuple(v) for v in visto}) == len(visto)
+    print(f"  {'ok  ' if ok else 'FAIL'} five places on the slider give five "
+          "different sets of boxes")
+    if not ok:
+        fails.append(f"the boxes repeat themselves: {visto}")
+    # el año y la población de las casillas son los mismos que los del tablero
+    for v in (150, 500, 850):
+        pg.evaluate("(v)=>{const s=document.getElementById('t');s.value=v;"
+                    "s.dispatchEvent(new Event('input'))}", v)
+        pg.wait_for_timeout(90)
+        a = pg.evaluate("()=>[document.getElementById('tWhen').textContent,"
+                        "document.getElementById('tPop').textContent,"
+                        "document.getElementById('tout').textContent,"
+                        "document.getElementById('pop').textContent]")
+        ok = a[0] == a[2] and a[1] == a[3]
+        print(f"  {'ok  ' if ok else 'FAIL'} at {a[0]} the box reads {a[1]} and "
+              f"the panel {a[3]}")
+        if not ok:
+            fails.append(f"the top box and the panel disagree: {a}")
+    # y el número de sitios alcanzados crece con el tiempo, nunca al revés
+    n = []
+    for v in (0, 250, 500, 750, 1000):
+        pg.evaluate("(v)=>{const s=document.getElementById('t');s.value=v;"
+                    "s.dispatchEvent(new Event('input'))}", v)
+        pg.wait_for_timeout(70)
+        n.append(int(pg.evaluate("()=>document.getElementById('tSites')"
+                                 ".textContent.split(' ')[0].replace(',','')")))
+    ok = n == sorted(n) and n[-1] == len(live)
+    print(f"  {'ok  ' if ok else 'FAIL'} the count of sites reached goes {n} and "
+          f"ends at the {len(live)} the page follows")
+    if not ok:
+        fails.append(f"the count of sites reached goes {n}")
+
     print("--- the continental split is only drawn where it is evidence ---")
     for t, want in [(300000, False), (20000, False), (CONT_FROM + 500, False),
                     (CONT_FROM - 500, True), (0, True)]:

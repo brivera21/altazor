@@ -88,21 +88,42 @@ NAME = {
 # divisions of the United States. The other three are vernacular: they have no
 # official boundary, they overlap the Census regions and each other, and where
 # they stop is a matter of who is asked. The page says which is which.
-REGIONS = [
-    ("East Coast", "#386bb6", "vernacular",
-     "the states with an Atlantic shoreline",
-     "ME NH MA RI CT NY NJ DE MD VA NC SC GA FL"),
-    ("West Coast", "#47a566", "vernacular",
-     "the three states on the Pacific",
-     "CA OR WA"),
-    ("The South", "#a84e7c", "Census Bureau",
-     "Census Region 3, its South",
+# The Census Bureau's own four regions and nine divisions, typed from its
+# regions and divisions document. Every state and the district belongs to
+# exactly one of each, so these are drawn as fills.
+#
+# Colour carries the region and lightness carries the division inside it, and
+# every area is also written on the map, which is what keeps the four hues
+# apart for a reader who cannot separate them by colour alone.
+CENSUS_REGIONS = [
+    ("Northeast", "#3692ca", "ME NH VT MA RI CT NY NJ PA"),
+    ("Midwest", "#bd7634", "OH IN IL MI WI MN IA MO ND SD NE KS"),
+    ("South", "#b16dac",
      "DE MD DC VA WV NC SC GA FL KY TN AL MS AR LA OK TX"),
-    ("The Midwest", "#b17600", "Census Bureau",
-     "Census Region 2, its Midwest",
-     "OH IN IL MI WI MN IA MO ND SD NE KS"),
-    ("The Northwest", "#dbe6f0", "vernacular",
-     "the Pacific Northwest as it is usually drawn",
+    ("West", "#4d9d61", "MT ID WY CO NM AZ UT NV WA OR CA AK HI"),
+]
+
+CENSUS_DIVISIONS = [
+    ("New England", "Northeast", "#6dbbef", "ME NH VT MA RI CT"),
+    ("Middle Atlantic", "Northeast", "#006aa0", "NY NJ PA"),
+    ("East North Central", "Midwest", "#e3a068", "OH IN IL MI WI"),
+    ("West North Central", "Midwest", "#934f00", "MN IA MO ND SD NE KS"),
+    ("South Atlantic", "South", "#d898d2", "DE MD DC VA WV NC SC GA FL"),
+    ("East South Central", "South", "#b16dac", "KY TN AL MS"),
+    ("West South Central", "South", "#884784", "AR LA OK TX"),
+    ("Mountain", "West", "#7dc48c", "MT ID WY CO NM AZ UT NV"),
+    ("Pacific", "West", "#21753c", "WA OR CA AK HI"),
+]
+
+# The vernacular areas have no official line, they overlap each other and the
+# Census regions, and where they stop depends on who is asked. They stay as
+# outlines for that reason.
+VERNACULAR = [
+    ("East Coast", "#dbe6f0", "the states with an Atlantic shoreline",
+     "ME NH MA RI CT NY NJ DE MD VA NC SC GA FL"),
+    ("West Coast", "#c9dfd0", "the three states on the Pacific",
+     "CA OR WA"),
+    ("The Northwest", "#e6ddc9", "the Pacific Northwest as it is usually drawn",
      "WA OR ID"),
 ]
 
@@ -317,8 +338,7 @@ button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
 .lg[aria-pressed="false"] .sw{opacity:.25}
 .sep{width:1px;height:20px;background:var(--line);margin:0 .3rem}
 
-st{}
-.state{fill:var(--land);stroke:none;cursor:pointer}
+.state{fill:var(--tint,var(--land));stroke:none;cursor:pointer}
 .state:hover{fill:#4c5763}
 .state.on{fill:#5b6774}
 #lines path{fill:none;stroke:#9aa7b4;stroke-width:.8;
@@ -333,13 +353,21 @@ svg.bare .state:hover{fill:var(--land)}
 svg.bare .state.on{fill:var(--land)}
 #labels text{fill:#bcd9f2;font-size:9px;font-family:inherit;
 paint-order:stroke;stroke:#0d1a26;stroke-width:2.6;pointer-events:none}
-#rugged path{fill:#6d6455;stroke:none;pointer-events:none}
-#rugged path.high{fill:#8a7c66}
+/* over a coloured region the rugged ground reads as texture, not as its own
+   layer, so it goes translucent; with the lines off it is the map again */
+#rugged path{fill:#6d6455;fill-opacity:.42;stroke:none;pointer-events:none}
+#rugged path.high{fill:#8a7c66;fill-opacity:.5}
+svg.bare #rugged path{fill-opacity:1}
 #rivers path{fill:none;stroke:var(--riv);stroke-width:.7;
 stroke-linejoin:round;stroke-linecap:round;pointer-events:none}
 #rivers path.named{stroke:#8fd0ff;stroke-width:1.25}
 #regions path{fill:none;stroke-width:2.2;stroke-linejoin:round;
 pointer-events:none;paint-order:stroke}
+#areas text{font-size:11px;font-family:inherit;letter-spacing:.06em;
+text-transform:uppercase;text-anchor:middle;pointer-events:none;
+paint-order:stroke;stroke:#0d1a26;stroke-width:3;fill:#e8eef5}
+.lg .sw{width:22px;height:3px;border-radius:2px;display:inline-block}
+.lg.fill .sw{height:11px;border-radius:3px}
 .inset{fill:none;stroke:var(--line);stroke-width:1;stroke-dasharray:3 4}
 .ilbl{fill:var(--ink3);font-size:11px;font-family:inherit}
 
@@ -372,6 +400,7 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}
     <g id="lines"></g>
     <g id="labels"></g>
     <g id="regions"></g>
+    <g id="areas"></g>
     <g id="capital"></g>
     <g id="frames"></g>
   </svg></div>
@@ -386,12 +415,16 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}
 </div>
 
 <div class="controls">
-  __LEGEND__
+  <button id="mReg" aria-pressed="true">Census regions</button>
+  <button id="mDiv" aria-pressed="false">Census divisions</button>
+  <button id="mVer" aria-pressed="false">Vernacular</button>
   <span class="sep"></span>
   <button id="bRiv" aria-pressed="true">Rivers</button>
   <button id="bMtn" aria-pressed="true">Rugged ground</button>
   <button id="bLine" aria-pressed="true">State lines</button>
 </div>
+
+<div class="controls" id="legend"></div>
 
 <div class="notes">
 <h2>About the map</h2>
@@ -400,11 +433,11 @@ on, so a state covers the share of the page it covers of the ground. Alaska and
 Hawaii sit in the corners on cones of their own and at their own scales: Alaska
 is a fifth of the country and reaches further west than Hawaii, and drawing all
 three to one scale leaves the lower 48 too small to read.</p>
-<p>The five broad regions are outlines rather than fills because they overlap
-and most have no official line. The South and the Midwest are the Census
-Bureau's own regions; East Coast, West Coast and the Northwest are vernacular,
-and where they stop depends on who is asked. A state under the cursor lists the
-ones claiming it.</p>
+<p>The Census Bureau sorts every state and the district into one of four
+regions and one of nine divisions inside them, so both are drawn as fills:
+colour for the region, lightness for the division, the name written across the
+states. East Coast, West Coast and the Northwest have no official line and
+stay as outlines.</p>
 <p>Rugged ground comes from a relief image, not an elevation grid, so it marks
 broken country rather than any named range, and a river is named only where one
 course passes a town on it and nothing else is near. With the lines off, what
@@ -436,7 +469,9 @@ const TOTAL_KM2 = D.meta.reduce((a, m) => a + (m.km2 || 0), 0);
 const TOTAL_POP = D.meta.reduce((a, m) => a + (m.pop || 0), 0);
 
 let hover = null, sel = null;
-const on = D.regions.map(() => true);
+const GRUPOS = {reg: D.regions, div: D.divisions, vern: D.vern};
+let modo = 'reg';
+let on = GRUPOS[modo].map(() => true);
 
 function make(tag, attrs, parent) {
   const e = document.createElementNS(NS, tag);
@@ -451,7 +486,7 @@ for (const c in D.states) {
   make('path', {d: D.states[c]}, gl);
   p.addEventListener('mouseenter', () => { hover = c; show(); });
   p.addEventListener('mouseleave', () => { hover = null; show(); });
-  p.addEventListener('click', () => { sel = sel === c ? null : c; paint(); show(); });
+  p.addEventListener('click', () => { sel = sel === c ? null : c; legend(); paint(); show(); });
 }
 const gm = el('rugged');
 D.rugged.forEach(m => make('path', {d: m.d, class: m.t === 'high' ? 'high' : ''}, gm));
@@ -466,8 +501,8 @@ D.rivers.forEach(r => {
   }
 });
 const gg = el('regions');
-const regEls = D.regions.map(r =>
-  make('path', {d: r.d, stroke: r.c}, gg));
+const vernEls = D.vern.map(r => make('path', {d: r.d, stroke: r.c}, gg));
+const ga = el('areas');
 
 // the two insets are on their own scales, so they are boxed and labelled
 for (const [x, y, w, h, t] of [[6, 514, 338, 226, 'Alaska'],
@@ -478,11 +513,62 @@ for (const [x, y, w, h, t] of [[6, 514, 338, 226, 'Alaska'],
     + 'not to the same scale';
 }
 
+// Every state carries the colour of the group it belongs to, and the name of
+// the group is written on the map: the colour says which one, the writing says
+// which one it is.
 function paint() {
-  for (const p of gs.children)
+  const grupo = GRUPOS[modo];
+  const color = {};
+  grupo.forEach((r, i) => { if (on[i]) r.codes.forEach(c => color[c] = r.c); });
+  for (const p of gs.children) {
     p.classList.toggle('on', p.getAttribute('data-c') === sel);
-  regEls.forEach((e, i) => e.style.display = on[i] ? '' : 'none');
+    const c = color[p.getAttribute('data-c')];
+    if (c && modo !== 'vern' && lines) p.style.setProperty('--tint', c);
+    else p.style.removeProperty('--tint');
+  }
+  vernEls.forEach((e, i) =>
+    e.style.display = (modo === 'vern' && on[i] && lines) ? '' : 'none');
+  while (ga.firstChild) ga.removeChild(ga.firstChild);
+  if (modo === 'vern' || !lines) return;
+  grupo.forEach((r, i) => {
+    if (!on[i] || !r.lab) return;
+    const t = make('text', {x: r.lab[0], y: r.lab[1]}, ga);
+    t.textContent = r.n;
+  });
 }
+
+function legend() {
+  const box = el('legend');
+  box.innerHTML = '';
+  GRUPOS[modo].forEach((r, i) => {
+    const b = document.createElement('button');
+    b.className = 'lg' + (modo === 'vern' ? '' : ' fill');
+    b.setAttribute('aria-pressed', on[i]);
+    b.title = r.note;
+    b.innerHTML = `<span class="sw" style="background:${r.c}"></span>${r.n}`;
+    b.addEventListener('click', () => {
+      on[i] = !on[i];
+      b.setAttribute('aria-pressed', on[i]);
+      if (!lines) setLines(true);   // an area asked for is an area shown
+      paint();
+    });
+    box.appendChild(b);
+  });
+}
+
+function setModo(m) {
+  modo = m;
+  on = GRUPOS[m].map(() => true);
+  for (const [id, k] of [['mReg', 'reg'], ['mDiv', 'div'], ['mVer', 'vern']])
+    el(id).setAttribute('aria-pressed', k === m);
+  if (!lines) setLines(true);
+  legend();
+  paint();
+  show();
+}
+el('mReg').addEventListener('click', () => setModo('reg'));
+el('mDiv').addEventListener('click', () => setModo('div'));
+el('mVer').addEventListener('click', () => setModo('vern'));
 
 const gcap = el('capital');
 function markCapital(m) {
@@ -509,27 +595,16 @@ function show() {
     ? (m.km2 / TOTAL_KM2 * 100).toFixed(1) + '% of the area'
     : 'the fifty states and the district';
   if (!m) {
-    el('selRegions').innerHTML = D.regions.map(r =>
-      `<b>${r.n}</b>, ${r.k === 'vernacular' ? 'vernacular' : 'Census Bureau'}: `
-      + r.note).join('<br>');
+    el('selRegions').innerHTML = GRUPOS[modo].map(r =>
+      `<b>${r.n}</b>: ${r.note}`).join('<br>');
     return;
   }
-  const claims = D.regions.filter(r => r.codes.includes(c));
-  el('selRegions').innerHTML = claims.length
-    ? 'Counted in ' + claims.map(r => `<b>${r.n}</b>`).join(', ')
-    : 'In none of the five regions drawn here';
+  const vern = D.vern.filter(r => r.codes.includes(c)).map(r => r.n);
+  el('selRegions').innerHTML =
+    `Census region <b>${m.reg}</b>, division <b>${m.div}</b>`
+    + (vern.length ? '<br>Also called ' + vern.join(', ') : '');
 }
 
-D.regions.forEach((r, i) => {
-  const b = document.querySelector(`.lg[data-r="${i}"]`);
-  b.title = (r.k === 'vernacular' ? 'vernacular: ' : 'Census Bureau: ') + r.note;
-  b.addEventListener('click', () => {
-    on[i] = !on[i];
-    b.setAttribute('aria-pressed', on[i]);
-    if (!lines) setLines(true);      // a region asked for is a region shown
-    paint();
-  });
-});
 el('bRiv').addEventListener('click', () => {
   const v = el('bRiv').getAttribute('aria-pressed') !== 'true';
   el('bRiv').setAttribute('aria-pressed', v);
@@ -551,14 +626,19 @@ function setLines(v) {
   gl.style.display = v ? '' : 'none';
   gg.style.display = v ? '' : 'none';
   document.getElementById('map').classList.toggle('bare', !v);
+  paint();               // sin líneas tampoco hay colores de región
 }
 el('bLine').addEventListener('click', () => setLines(!lines));
 
-paint(); show();
+legend(); paint(); show();
 window.__us = () => ({states: Object.keys(D.states).length, lines,
   capital: gcap.querySelector('text') ? gcap.querySelector('text').textContent : null,
   rivers: D.rivers.length, named: D.rivers.filter(r => r.n).length,
-  rugged: D.rugged.length, regions: D.regions.map(r => r.n),
+  rugged: D.rugged.length, modo,
+  grupos: GRUPOS[modo].map(r => r.n),
+  areas: document.querySelectorAll('#areas text').length,
+  tinte: (c) => {const p = gs.querySelector(`path[data-c="${c}"]`);
+    return p ? p.style.getPropertyValue('--tint') : null;},
   totalKm2: TOTAL_KM2, hover, sel, on: on.slice()});
 </script>
 </body>
@@ -596,19 +676,43 @@ def main():
         p = pops.get(NAME.get(code, ""), (None, None))
         cn, cla, clo = caps[code]
         cx, cy = T(clo, cla)
+        reg = next(n for n, _c, cs in CENSUS_REGIONS if code in cs.split())
+        div = next(n for n, _r, _c, cs in CENSUS_DIVISIONS if code in cs.split())
         meta.append({"c": code, "n": NAME.get(code, code),
                      "km2": AREA.get(code), "pop": p[1] or p[0],
-                     "cap": cn, "cx": round(cx, 1), "cy": round(cy, 1)})
+                     "cap": cn, "cx": round(cx, 1), "cy": round(cy, 1),
+                     "reg": reg, "div": div})
 
-    # regions, as the outline of the union of their states
-    regs = []
-    for name, colour, kind, note, codes in REGIONS:
+    def rotulo(cs):
+        """Where the name of a group of states goes on the map.
+
+        Only the lower 48 count: Alaska and Hawaii sit in boxes of their own
+        at their own scale, and a label placed across the two would land in
+        the ocean."""
+        dentro = [c for c in cs if c in st and c not in ("AK", "HI", "PR")]
+        if not dentro:
+            return None
+        u = unary_union([st[c] for c in dentro])
+        pt = u.representative_point()
+        x, y = T_of("CONUS")(pt.x, pt.y)
+        return [round(x, 1), round(y, 1)]
+
+    regiones, divisiones, vern = [], [], []
+    for name, colour, codes in CENSUS_REGIONS:
         cs = codes.split()
-        u = unary_union([st[c] for c in cs if c in st])
+        regiones.append({"n": name, "c": colour, "codes": cs,
+                         "lab": rotulo(cs),
+                         "note": f"Census Region, {len(cs)} states"})
+    for name, region, colour, codes in CENSUS_DIVISIONS:
+        cs = codes.split()
+        divisiones.append({"n": name, "c": colour, "codes": cs,
+                           "lab": rotulo(cs), "reg": region,
+                           "note": f"Census Division, inside the {region}"})
+    for name, colour, note, codes in VERNACULAR:
+        cs = codes.split()
         d = "".join(path_of(g, T_of(c), 0.02) for c, g in
                     [(c, st[c]) for c in cs if c in st])
-        regs.append({"n": name, "c": colour, "k": kind, "note": note,
-                     "codes": cs, "d": d})
+        vern.append({"n": name, "c": colour, "codes": cs, "note": note, "d": d})
 
     # rivers: the long ones, so the map is a river system and not a hairball
     courses = pickle.load(open(DATA / "courses.pkl", "rb"))
@@ -660,7 +764,8 @@ def main():
             if d:
                 mt.append({"d": d, "t": tier})
 
-    js = {"states": paths, "meta": meta, "regions": regs,
+    js = {"states": paths, "meta": meta,
+          "regions": regiones, "divisions": divisiones, "vern": vern,
           "rivers": rv, "rugged": mt, "vw": VW, "vh": VH}
     blob = json.dumps(js, separators=(",", ":"))
 
@@ -668,17 +773,12 @@ def main():
         f'<div class="tile"><div class="k">{n}</div>'
         f'<div class="v">{v}</div><div class="d">{d}</div></div>'
         for n, v, d in FACTS)
-    legend = "\n".join(
-        f'<button class="lg" data-r="{i}" aria-pressed="true">'
-        f'<span class="sw" style="background:{r["c"]}"></span>{r["n"]}</button>'
-        for i, r in enumerate(regs))
-
-    doc = TEMPLATE.replace("__DATA__", blob).replace("__FACTS__", facts) \
-                  .replace("__LEGEND__", legend)
+    doc = TEMPLATE.replace("__DATA__", blob).replace("__FACTS__", facts)
     OUT.write_text(doc, encoding="utf-8")
     print(f"wrote {OUT} ({len(doc):,} bytes): {len(paths)} states, "
           f"{len(rv)} river segments ({len(named)} named), "
-          f"{len(mt)} patches of rugged ground")
+          f"{len(mt)} patches of rugged ground, "
+          f"{len(regiones)} Census regions and {len(divisiones)} divisions")
 
 
 if __name__ == "__main__":
