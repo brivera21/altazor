@@ -36,6 +36,7 @@ title: Digital Concepts
 <p><a href="us.html">The United States</a></p>
 <p><a href="us-states.html">50 States and a District</a></p>
 <p><a href="us-cities.html">US Cities</a></p>
+<p><a href="mexico.html">Mexico</a></p>
 <p><a href="norte-mexico.html">El norte de México</a></p>
 <p><a href="el-terrero.html">El Terrero, Namiquipa</a></p>
 <p><a href="linea-misiones.html">Misiones en Chihuahua (1560-1720)</a></p>
