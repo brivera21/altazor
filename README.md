@@ -59,6 +59,28 @@ posts and the section index pages. Rebuild a diagram by running its generator,
 then run `tools/verify_copy_rule.py` and whichever `tools/verify_<page>.py`
 exists for it.
 
+The page is laid out in this order, top to bottom:
+
+1. the site header, the brand and the link back to the Library
+2. the `h1`, and nothing else in prose above the diagram
+3. the fixed facts, as a `.tiles` row: the handful of constants the diagram is
+   about, each a label, a value and a one line gloss. They sit above the diagram
+   because they do not change while it runs, and they set up what is about to
+   move. Pages with no such constants skip the row
+4. the diagram, then its controls
+5. the description, under the copy rule above
+6. `References`, in APA, with no word limit
+
+Nothing else goes above the diagram: no source line, no date stamp, no
+explanation of what is about to happen.
+
+A canvas page that fills the window rather than sitting in the flow follows the
+same order in the overlay: brand and `h1` at the top left, readouts at the top
+right, the control bar at the foot, and the description in that bar. Anything
+drawn on the canvas is sized off a measurement of that furniture, never off the
+window alone, or it ends up printed over the diagram. `verify_<page>.py` should
+walk several window sizes and fail when the two collide.
+
 ## Setup notes
 
 - `SITE_URL` at the top of `build.py` is the published URL, used for RSS feed links
