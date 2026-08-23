@@ -406,7 +406,7 @@ function drawEarthView(p) {
   moonDisc(mx, my, 6.5, p.k, -(eAng + Math.PI), true);
 
   // the two months, counted out where they happen
-  const box = W*0.5 + Rorb*0.06;
+  colR = Math.max(150, Math.min(466, cx - Rorb - 42));
   const lines = [
     ['rgba(190,205,235,0.9)', 'round to the same star',
      (sinceStar/360*D.SID).toFixed(2) + ' of ' + D.SID.toFixed(2) + ' days'],
@@ -418,11 +418,12 @@ function drawEarthView(p) {
     ctx.fillStyle = c;
     ctx.beginPath(); ctx.arc(52, y - 4, 4, 0, 7); ctx.fill();
     label(a, 64, y, 'rgba(160,175,200,0.85)', 'left');
-    label(b2, 258, y, c, 'left');
+    label(b2, colR, y, c, 'right');
+    colInk = Math.max(colInk, colR);
   });
-  label("Earth's orbit is to scale; the Moon's is drawn " + D.EXAG
-        + " times too wide so it can be seen at all",
-        46, 296, 'rgba(120,133,155,0.85)', 'left');
+  wrapLabel("Earth's orbit is to scale; the Moon's is drawn " + D.EXAG
+            + " times too wide so it can be seen at all",
+            46, 292, 'rgba(120,133,155,0.85)', colR - 46, 15);
 
   wave(p);
 
@@ -436,7 +437,8 @@ function drawEarthView(p) {
 }
 
 function wave(p) {
-  const x0 = 46, x1 = Math.min(W - 46, x0 + 420), y = 150, h = 34;
+  const x0 = 46, x1 = Math.max(x0 + 120, Math.min(W - 46, colR)), y = 150, h = 34;
+  colInk = Math.max(colInk, x1 + 22);   // 'new' is centred on the far end
   ctx.strokeStyle = 'rgba(120,150,200,0.25)'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(x0, y + h); ctx.lineTo(x1, y + h); ctx.stroke();
   ctx.beginPath();
@@ -464,6 +466,7 @@ function drawSunView(p) {
   // Earth's path and the Moon's, seen from above the ecliptic. Sixty days of
   // orbit is too flat an arc to read, so the window is nearer four months and
   // the arc is sized to fill the frame rather than to any fixed scale.
+  colR = Math.min(W - 46, 466);
   const days = 110, span = 360*days/D.YEAR, half = span/2*D2R;
   const Rpx = Math.min(W*0.82/(2*Math.sin(half)), H*0.52/(1 - Math.cos(half)));
   const cx = W*0.5, cy = H*0.26 + Rpx;
@@ -528,6 +531,32 @@ function drawSunView(p) {
         46, 140, 'rgba(160,175,200,0.75)', 'left');
 }
 
+// Everything in the top left shares one column. Its right edge is set to
+// clear whatever the diagram reaches, so no readout is ever printed over an
+// orbit, at any window size.
+let colR = 466, colInk = 0;
+// the furthest right anything in the column was actually drawn, so the
+// check can see an overlap rather than trust the intent
+function wrapLabel(t, x, y, c, maxW, lineH) {
+  ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  const words = t.split(' ');
+  let line = '', n = 0;
+  for (const w of words) {
+    const test = line ? line + ' ' + w : w;
+    if (line && ctx.measureText(test).width > maxW) {
+      label(line, x, y + n*lineH, c, 'left');
+      colInk = Math.max(colInk, x + ctx.measureText(line).width);
+      line = w; n++;
+    } else line = test;
+  }
+  if (line) {
+    label(line, x, y + n*lineH, c, 'left');
+    colInk = Math.max(colInk, x + ctx.measureText(line).width);
+    n++;
+  }
+  return n;
+}
+
 function label(t, x, y, c, align) {
   ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
   ctx.textAlign = align || 'left';
@@ -565,6 +594,7 @@ function frame(t) {
     ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
   }
   ctx.globalAlpha = 1;
+  colInk = 0;
   const p = positions(jd);
   if (view === 'earth') drawEarthView(p); else drawSunView(p);
   readout(p);
@@ -573,7 +603,10 @@ function frame(t) {
                     earthPath: view === 'sun' ? drawSunView.earth : null,
                     k: p.k, elong: p.elong, dist: p.dist, lam: p.lam,
                     slon: p.slon, phase: phaseName(p.elong),
-                    nextNew: cachedNew, nextFull: cachedFull };
+                    nextNew: cachedNew, nextFull: cachedFull,
+                    colR: colR, colInk: colInk,
+                    orbitLeft: view === 'earth'
+                      ? W*0.5 - Math.min(W, H)*0.29 : null };
   requestAnimationFrame(frame);
 }
 
