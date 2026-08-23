@@ -197,6 +197,58 @@ with sync_playwright() as pw:
     if not ok:
         fails.append(f"the lights stay on at {off}/255 with the button off")
 
+    print("--- running the year ---")
+    # The complaint this answers: at any watchable speed the planet turned dozens
+    # of times a second and the shadow only flickered. So the year run has to
+    # hold the clock still and step whole days.
+    pg.evaluate("()=>window.__setTime(2026,1,10,15)")
+    pg.click("#bYear")
+    pg.wait_for_timeout(4200)
+    a = pg.evaluate("()=>window.__day")
+    pg.wait_for_timeout(4200)
+    b = pg.evaluate("()=>window.__day")
+    pg.click("#bYear")
+    held = abs(a["ut"] - 15) < 1e-6 and abs(b["ut"] - 15) < 1e-6
+    moved = abs(b["dec"] - a["dec"]) > 3
+    print(f"  {'ok  ' if held else 'FAIL'} the clock holds at "
+          f"{a['ut']:.4f}h while the year runs")
+    print(f"  {'ok  ' if moved else 'FAIL'} the Sun's declination moves "
+          f"{a['dec']:.1f} to {b['dec']:.1f} degrees in eight seconds")
+    if not held:
+        fails.append(f"the year run moves the clock to {b['ut']:.4f}h")
+    if not moved:
+        fails.append("the year run does not move the date")
+
+    ok = b["yearMode"] and b["analemma"] == 366 and b["ghosts"] > 5
+    print(f"  {'ok  ' if ok else 'FAIL'} it traces {b['analemma']} days of "
+          f"sub-solar points and keeps {b['ghosts']} daylight curves")
+    if not ok:
+        fails.append(f"the year run traced {b['analemma']} points and kept "
+                     f"{b['ghosts']} curves")
+
+    # the figure of eight: as tall as twice the tilt, and no wider than the
+    # equation of time can make it
+    pg.evaluate("()=>window.__setTime(2026,1,10,15)")
+    pg.click("#bYear")
+    pg.wait_for_timeout(300)
+    pg.click("#bYear")
+    span = pg.evaluate("""()=>{
+      let dlo = 0, dhi = 0, ylo = 1e9, yhi = -1e9;
+      const W = window.__day ? 0 : 0;
+      for (const [x, y] of analemma) { if (y < ylo) ylo = y; if (y > yhi) yhi = y; }
+      let xs = analemma.map(p => p[0]);
+      return {lat: (yhi - ylo)/document.getElementById('map').height*180,
+              lon: (Math.max(...xs) - Math.min(...xs))
+                   /document.getElementById('map').width*360};
+    }""")
+    okl = abs(span["lat"] - 2*OBLIQUITY) < 1.5 and 4 < span["lon"] < 10
+    print(f"  {'ok  ' if okl else 'FAIL'} the figure of eight is "
+          f"{span['lat']:.1f} degrees tall, twice the tilt, and "
+          f"{span['lon']:.1f} wide")
+    if not okl:
+        fails.append(f"the analemma spans {span['lat']:.1f} by {span['lon']:.1f} "
+                     "degrees")
+
     print("--- the poles through the year ---")
     POLES = [("the north pole in June", 6, 21, 89.0, 24),
              ("the north pole in December", 12, 21, 89.0, 0),
