@@ -28,8 +28,8 @@ title: Digital Concepts
 <p><a href="moon.html">The Month: The Moon's Cycle</a></p>
 <p><a href="orbit-sine.html">The Year: Earth's Cycle</a></p>
 <p><a href="populous-countries.html">Earth's Population Right Now</a></p>
-<p class="soon">The History of Earth <span class="tag">coming soon</span></p>
-<p class="soon">History of Homo Sapiens Population <span class="tag">coming soon</span></p>
+<p><a href="earth-history.html">The History of Earth</a></p>
+<p><a href="migration.html">Homo Sapiens Migration</a></p>
 </div>
 <div>
 <h2>USA and Mexico</h2>
