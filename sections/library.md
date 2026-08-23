@@ -1,5 +1,5 @@
 ---
-title: Digital Concepts
+title: Library
 ---
 
 <style>
@@ -15,6 +15,8 @@ title: Digital Concepts
 }
 @media (max-width: 54rem) { .dc-cols { grid-template-columns: 1fr; } }
 </style>
+
+## Digital Concepts
 
 <div class="dc-cols">
 <div>
