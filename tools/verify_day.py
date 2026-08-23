@@ -197,6 +197,21 @@ with sync_playwright() as pw:
     if not ok:
         fails.append(f"the lights stay on at {off}/255 with the button off")
 
+    print("--- running the day ---")
+    pg.evaluate("()=>window.__setTime(2026,4,10,6)")
+    pg.click("#bDay")
+    pg.wait_for_timeout(600)
+    t0 = pg.evaluate("()=>window.__day.jd")
+    pg.wait_for_timeout(3000)
+    t1 = pg.evaluate("()=>window.__day.jd")
+    pg.click("#bDay")
+    rate = (t1 - t0)/3.0
+    ok = 0.2 < rate < 0.42          # one turn in roughly three seconds
+    print(f"  {'ok  ' if ok else 'FAIL'} the day runs at {rate:.2f} days a "
+          f"second, one turn every {1/rate:.1f} seconds")
+    if not ok:
+        fails.append(f"the day runs at {rate:.2f} days a second")
+
     print("--- running the year ---")
     # The complaint this answers: at any watchable speed the planet turned dozens
     # of times a second and the shadow only flickered. So the year run has to
