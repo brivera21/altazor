@@ -1,62 +1,47 @@
 ---
-title: Library
+title: Digital Concepts
 ---
 
-## Digital Concepts
-
 <style>
-.dc-drop { margin: 0 0 1.1rem; }
-.dc-drop summary {
-  cursor: pointer; list-style: none; color: var(--accent);
-  font-family: Georgia, "Times New Roman", serif; font-size: 1.05rem;
-  text-decoration: underline; text-underline-offset: 3px;
-}
-.dc-drop summary::-webkit-details-marker { display: none; }
-.dc-drop summary::before { content: "\25B8"; display: inline-block; margin-right: 0.5rem;
-  color: var(--muted); transition: transform 0.15s; text-decoration: none; }
-.dc-drop[open] summary::before { transform: rotate(90deg); }
-.dc-drop ul { list-style: none; margin: 0.6rem 0 0; padding: 0 0 0 1.35rem;
-  border-left: 1px solid var(--line); }
-.dc-drop li { margin: 0.45rem 0; font-family: Georgia, "Times New Roman", serif; font-size: 1.02rem; }
-.dc-drop li.soon { color: var(--muted); }
-.dc-drop li.soon .tag { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+.section-body { max-width: none; }
+.dc-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 2.4rem; }
+.dc-cols h2:first-child { margin-top: 0; }
+.dc-cols p { margin: 0.45rem 0; }
+.dc-cols p.soon { color: var(--muted); }
+.dc-cols p.soon .tag {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
-  border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; margin-left: 8px; }
+  border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; margin-left: 8px;
+}
+@media (max-width: 54rem) { .dc-cols { grid-template-columns: 1fr; } }
 </style>
 
-<details class="dc-drop">
-<summary>The Solar System</summary>
-<ul>
-<li><a href="solar-system.html">The Solar System</a></li>
-<li><a href="earth.html">Earth's Climate</a></li>
-<li><a href="populous-countries.html">Earth's Population Right Now</a></li>
-<li><a href="day-night.html">The Day: Earth's Night and Day Cycle</a></li>
-<li><a href="moon.html">The Month: The Moon's Cycle</a></li>
-<li><a href="orbit-sine.html">The Year: Earth's Cycle</a></li>
-<li class="soon">The History of Earth <span class="tag">coming soon</span></li>
-<li class="soon">History of Homo Sapiens Population <span class="tag">coming soon</span></li>
-</ul>
-</details>
-
-## Mexico
-
-[El norte de México](norte-mexico.html)
-
-<details class="dc-drop">
-<summary>Chihuahua</summary>
-<ul>
-<li><a href="el-terrero.html">El Terrero, Namiquipa</a></li>
-<li><a href="linea-misiones.html">Misiones en Chihuahua (1560-1720)</a></li>
-<li class="soon">Archivo Namiquipa <span class="tag">coming soon</span></li>
-<li class="soon">Cabalgata Binacional Villista (Villista Binational Cavalcade) <span class="tag">coming soon</span></li>
-</ul>
-</details>
-
-## USA
-
-[50 States and a District](us-states.html)
-
-[US Cities](us-cities.html)
+<div class="dc-cols">
+<div>
+<h2>The Solar System</h2>
+<p><a href="solar-system.html">The Solar System</a></p>
+</div>
+<div>
+<h2>Earth</h2>
+<p><a href="earth.html">Earth's Climate</a></p>
+<p><a href="day-night.html">The Day: Earth's Night and Day Cycle</a></p>
+<p><a href="moon.html">The Month: The Moon's Cycle</a></p>
+<p><a href="orbit-sine.html">The Year: Earth's Cycle</a></p>
+<p><a href="populous-countries.html">Earth's Population Right Now</a></p>
+<p class="soon">The History of Earth <span class="tag">coming soon</span></p>
+<p class="soon">History of Homo Sapiens Population <span class="tag">coming soon</span></p>
+</div>
+<div>
+<h2>USA and Mexico</h2>
+<p><a href="us-states.html">50 States and a District</a></p>
+<p><a href="us-cities.html">US Cities</a></p>
+<p><a href="norte-mexico.html">El norte de México</a></p>
+<p><a href="el-terrero.html">El Terrero, Namiquipa</a></p>
+<p><a href="linea-misiones.html">Misiones en Chihuahua (1560-1720)</a></p>
+<p class="soon">Archivo Namiquipa <span class="tag">coming soon</span></p>
+<p class="soon">Cabalgata Binacional Villista <span class="tag">coming soon</span></p>
+</div>
+</div>
 
 ## Abstractions {: #abstractions }
 
