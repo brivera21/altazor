@@ -170,6 +170,32 @@ with sync_playwright() as pw:
     else:
         print("  ok   the month runs through its phases in order")
 
+    print("--- the readouts against the diagram ---")
+    # The counters, the wave and the scale caveat share the top left. The page
+    # reports how far right it actually drew them and where the orbit reaches,
+    # so an overlap is measured rather than eyeballed at one window size.
+    worst = None
+    for w, h in [(1920, 1200), (1440, 900), (1280, 800), (1100, 760),
+                 (900, 700), (760, 640)]:
+        pg.set_viewport_size({"width": w, "height": h})
+        pg.wait_for_timeout(420)
+        for day in (2.0, 9.0, 16.0, 24.0):
+            pg.evaluate("(d)=>{const s=document.getElementById('scrub');"
+                        "s.value=d;s.dispatchEvent(new Event('input'));}", day)
+            pg.wait_for_timeout(150)
+            m = pg.evaluate("()=>window.__moon")
+            slack = m["orbitLeft"] - m["colInk"]
+            if worst is None or slack < worst[0]:
+                worst = (slack, w, h, day)
+            if slack < 0:
+                fails.append(f"at {w}x{h} on day {day} the readouts run "
+                             f"{-slack:.0f}px into the orbit")
+        print(f"  {'ok  ' if worst[0] >= 0 else 'FAIL'} {w}x{h}  "
+              f"nothing printed within {m['orbitLeft'] - m['colInk']:.0f}px "
+              "of the orbit")
+    pg.set_viewport_size({"width": 1440, "height": 900})
+    pg.wait_for_timeout(420)
+
     print("--- the heliocentric path ---")
     pg.click("#viewBtn")
     pg.wait_for_timeout(700)
