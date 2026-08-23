@@ -127,12 +127,14 @@ with sync_playwright() as pw:
       const bx = innerWidth - R - 46, by = innerHeight - R - 132;
       const d = x.getImageData((bx-R)*dpr, (by-R)*dpr, 2*R*dpr, 2*R*dpr).data;
       const w = 2*R*dpr;
+      // shadow is #0b0e14, so red 11; the darkest sea is about red 120 and
+      // the highlands 200. Anything above 60 is lit ground.
       let lit = 0, tot = 0, left = 0;
       for (let i = 0; i < d.length; i += 4) {
         const p = i/4, px = p % w, py = Math.floor(p/w);
         if (Math.hypot(px - R*dpr, py - R*dpr) > R*dpr - 2) continue;
         tot++;
-        if (d[i] > 150 && d[i+1] > 150) { lit++; if (px < R*dpr) left++; }
+        if (d[i] > 60) { lit++; if (px < R*dpr) left++; }
       }
       return {k: lit/tot, left: left/(lit || 1)};
     }"""

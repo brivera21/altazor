@@ -31,6 +31,7 @@ Usage: python3 build_moon.py
 """
 
 import json
+import math
 from pathlib import Path
 
 from moon_terms import LR, B
@@ -42,6 +43,72 @@ SIDEREAL = 27.321662     # days, back to the same star
 ANOMALISTIC = 27.554550  # days, perigee to perigee
 DRACONIC = 27.212221     # days, node to node
 YEAR = 365.256363        # sidereal year
+
+# The near side never turns away, so its features sit at fixed places on the
+# disc. Each sea is listed by the patch of the Moon it actually covers, in
+# selenographic latitude and longitude, and projected below the way the Moon is
+# really seen: orthographic, north up, east to the right. Projecting the edges
+# rather than the centre is what matters near the limb, where a degree of
+# longitude is worth almost nothing: it is why Oceanus Procellarum is squeezed
+# into a tall band along the western edge and Crisium into a small oval on the
+# eastern one. The bounds are read off the standard near-side map to the
+# nearest degree or so, so this is a likeness rather than an atlas, but nothing
+# about the arrangement is invented.
+#
+#     name, latitude and longitude of the centre, half extent in each
+MARIA_LL = [
+    ("Oceanus Procellarum", 20.0, -52.5, 25.0, 32.5),
+    ("Mare Imbrium", 33.0, -16.0, 15.0, 16.0),
+    ("Mare Frigoris", 55.5, -10.0, 7.5, 50.0),
+    ("Mare Serenitatis", 28.0, 18.0, 11.0, 12.0),
+    ("Mare Tranquillitatis", 8.5, 31.5, 12.5, 13.5),
+    ("Mare Crisium", 17.0, 59.5, 6.0, 10.5),
+    ("Mare Fecunditatis", -7.5, 51.5, 13.5, 10.5),
+    ("Mare Nectaris", -15.5, 35.5, 6.5, 7.5),
+    ("Mare Nubium", -21.0, -16.0, 11.0, 11.0),
+    ("Mare Cognitum", -10.0, -21.5, 6.0, 7.5),
+    ("Mare Insularum", 7.5, -31.0, 9.5, 11.0),
+    ("Mare Humorum", -24.5, -39.0, 6.5, 7.0),
+    ("Mare Vaporum", 13.5, 3.5, 5.5, 7.5),
+    ("Sinus Aestuum", 11.0, -9.0, 7.0, 6.0),
+    ("Sinus Medii", 0.0, 1.5, 4.0, 4.5),
+    ("Plato", 51.6, -9.3, 1.7, 2.8),
+]
+#     name, latitude, longitude, diameter in km, ray system
+CRATERS_LL = [
+    ("Tycho", -43.3, -11.4, 86, 1),
+    ("Copernicus", 9.6, -20.1, 93, 1),
+    ("Kepler", 8.1, -38.0, 32, 1),
+    ("Aristarchus", 23.7, -47.4, 40, 1),
+]
+MOON_R = 1737.4          # km, which turns a crater's width into a fraction
+
+
+def _project(lat, lon):
+    """Where a place on the near side falls on the disc, orthographically."""
+    la, lo = math.radians(lat), math.radians(lon)
+    return math.cos(la) * math.sin(lo), -math.sin(la)
+
+
+MARIA = []
+for _nm, _la, _lo, _dla, _dlo in MARIA_LL:
+    _xw, _ = _project(_la, _lo - _dlo)
+    _xe, _ = _project(_la, _lo + _dlo)
+    _, _yn = _project(_la + _dla, _lo)
+    _, _ys = _project(_la - _dla, _lo)
+    _x, _rx = (_xw + _xe) / 2, abs(_xe - _xw) / 2
+    _y, _ry = (_yn + _ys) / 2, abs(_ys - _yn) / 2
+    # near the limb a north-south feature leans, because the meridians converge
+    _rot = -math.radians(_lo) * math.sin(math.radians(_la)) * 0.9
+    MARIA.append((round(_x, 3), round(_y, 3), round(_rx, 3),
+                  round(_ry, 3), round(_rot, 3), _nm))
+
+CRATERS = []
+for _nm, _la, _lo, _km, _rays in CRATERS_LL:
+    _x, _y = _project(_la, _lo)
+    CRATERS.append((round(_x, 3), round(_y, 3),
+                    round(_km / 2 / MOON_R, 4), _rays, _nm))
+MOON_EXAG = 90           # the Moon's orbit, widened so it can be seen at all
 
 MOON_V = 1.022           # km/s around Earth
 EARTH_V = 29.78          # km/s around the Sun
@@ -61,7 +128,9 @@ def main():
         "B": [list(t) for t in B],
         "SYN": SYNODIC, "SID": SIDEREAL, "ANO": ANOMALISTIC, "DRA": DRACONIC,
         "YEAR": YEAR, "CUSP": round(CUSP, 2),
-        "MOONV": MOON_V, "EARTHV": EARTH_V,
+        "MOONV": MOON_V, "EARTHV": EARTH_V, "EXAG": MOON_EXAG,
+        "MARIA": [list(m[:5]) for m in MARIA],
+        "CRATERS": [list(c[:4]) for c in CRATERS],
     }
     facts = "\n".join(
         f'<div class="fact"><div class="fn">{n}</div><div class="fv">{v}</div>'
@@ -169,12 +238,13 @@ def main():
 const D = __DATA__;
 const D2R = Math.PI / 180, R2D = 180 / Math.PI;
 const NOTE_EARTH =
-  "The Earth and the Moon are drawn to scale here, distance and sizes together: sixty Earths fit in the gap. "
-  + "Three rays leave the Earth. The pale one points at a fixed star, and the Moon comes back to it every 27.32 "
-  + "days. The bright one points at the Sun, and it swings about a degree a day, so the Moon needs 2.21 days more "
-  + "to catch it and return to the same phase. That is the month everyone counts, 29.53 days. The inset is lit on "
-  + "the right while the Moon waxes and on the left while it wanes, which is how it hangs in a northern sky; from "
-  + "the south it is the other way round.";
+  "The Sun holds still, Earth goes round it once a year, and the Moon goes round Earth. "
+  + "The pale arc closes after 27.32 days, when the Moon is back at the same star. Earth has moved along its "
+  + "orbit by then, so the line to the Sun has swung about 27 degrees, and the Moon needs 2.21 days more to "
+  + "catch it. That is the amber arc, and the month everyone counts: 29.53 days. The inset is lit on the right "
+  + "while the Moon waxes and on the left while it wanes, which is how it hangs in a northern sky; from the south "
+  + "it is the other way round. Its face never turns away, so the markings stay put while the light moves across "
+  + "them.";
 
 // ---------- the Moon and the Sun, from Meeus chapters 25, 47 and 48 ----------
 function positions(jd) {
@@ -263,6 +333,7 @@ function resize() {
   W = window.innerWidth; H = window.innerHeight;
   cv.width = W*dpr; cv.height = H*dpr;
   ctx.setTransform(dpr,0,0,dpr,0,0);
+  face = null;                   // the cached near side is dpr-sized
   stars = [];
   for (let i = 0; i < 260; i++)
     stars.push({x: Math.random()*W, y: Math.random()*H,
@@ -270,112 +341,233 @@ function resize() {
 }
 window.addEventListener('resize', resize);
 
-function moonDisc(cx, cy, R, k, sunAng) {
-  // the terminator projects to an ellipse; t runs -1 at new to +1 at full
+let face = null;
+function moonFace(R) {
+  // The near side is the same picture every night, so it is painted once and
+  // kept. The seas go down together on their own layer and are blurred as one
+  // sheet, which is what makes Procellarum, Imbrium and Frigoris run into each
+  // other across the north west the way they do in the sky. Blurring each sea
+  // on its own leaves a dozen round spots and the disc reads as a golf ball.
+  const px = Math.max(32, Math.round(2*R*dpr));
+  if (face && face.px === px) return face.cv;
+  const s = px/(2*R);
+  const cv2 = document.createElement('canvas');
+  cv2.width = cv2.height = px;
+  const g = cv2.getContext('2d');
+  g.setTransform(s, 0, 0, s, 0, 0);
+  g.translate(R, R);
+  g.beginPath(); g.arc(0, 0, R, 0, 7); g.clip();
+
+  g.fillStyle = '#c9c6bd';                       // the highlands
+  g.beginPath(); g.arc(0, 0, R, 0, 7); g.fill();
+
+  // The seas are laid down as overlapping circles on their own sheet, blurred,
+  // then drawn over themselves several times. Compounding the alpha turns the
+  // blur's soft halo back into an edge, and where two seas were close enough
+  // for their halos to meet the edge closes around both of them. That is what
+  // gives a coastline instead of a row of ovals, and it is why Procellarum,
+  // Imbrium and Frigoris run together across the north west the way they do in
+  // the sky.
+  const sea = document.createElement('canvas');
+  sea.width = sea.height = px;
+  const q = sea.getContext('2d');
+  q.setTransform(s, 0, 0, s, 0, 0);
+  q.translate(R, R);
+  q.fillStyle = '#000';
+  // angle round the sea, how far out the lobe sits, how big it is. The reach
+  // of each one differs, which is what keeps the outline from closing back
+  // into a circle.
+  const LOBE = [[0.35, 0.55, 0.45], [1.20, 0.42, 0.42], [2.00, 0.62, 0.36],
+                [3.00, 0.38, 0.52], [3.90, 0.52, 0.32], [5.00, 0.46, 0.48]];
+  // thresholding a blur puts the edge outside the shape that was drawn, by
+  // roughly the blur's own width, so each sea is drawn that much smaller and
+  // comes back out the right size
+  const grow = R*0.066;
+  D.MARIA.forEach(([x, y, rx, ry, rot], i) => {
+    q.save();
+    q.translate(x*R, y*R); q.rotate(rot);
+    q.scale(Math.max(R*0.015, rx*R - grow), Math.max(R*0.015, ry*R - grow));
+    // the sea fills the patch it is listed as covering, corners rounded off,
+    // rather than an ellipse inscribed in it: two seas listed as touching have
+    // to touch
+    q.beginPath(); q.roundRect(-0.9, -0.9, 1.8, 1.8, 0.62); q.fill();
+    for (const [a2, d, r] of LOBE) {
+      const th = a2 + i*0.9;                   // fixed, but no two seas alike
+      q.beginPath();
+      q.arc(Math.cos(th)*d, Math.sin(th)*d, r, 0, 7);
+      q.fill();
+    }
+    q.restore();
+  });
+
+  const coast = document.createElement('canvas');
+  coast.width = coast.height = px;
+  const w = coast.getContext('2d');
+  w.filter = 'blur(' + Math.max(1, R*0.062).toFixed(2) + 'px)';
+  w.drawImage(sea, 0, 0);
+  w.filter = 'none';
+  for (let i = 0; i < 7; i++) w.drawImage(coast, 0, 0);
+  w.globalCompositeOperation = 'source-in';   // keep the shape, take the colour
+  w.fillStyle = '#6b7280';
+  w.fillRect(0, 0, px, px);
+
+  g.save();
+  g.filter = 'blur(' + Math.max(0.6, R*0.014).toFixed(2) + 'px)';
+  g.drawImage(coast, -R, -R, 2*R, 2*R);
+  g.restore();
+
+  // Young craters threw bright material a long way out. At this size the rays
+  // are a wash of light rather than the spokes a telescope shows, so that is
+  // what gets drawn: a hard spoke pattern reads as a lens flare.
+  for (const [x, y, r, rays] of D.CRATERS) {
+    if (rays) {
+      const reach = R*(0.10 + r*17);
+      const halo = g.createRadialGradient(x*R, y*R, r*R, x*R, y*R, reach);
+      halo.addColorStop(0, 'rgba(240,238,230,0.30)');
+      halo.addColorStop(0.45, 'rgba(240,238,230,0.13)');
+      halo.addColorStop(1, 'rgba(240,238,230,0)');
+      g.fillStyle = halo;
+      g.beginPath(); g.arc(x*R, y*R, reach, 0, 7); g.fill();
+    }
+    g.fillStyle = 'rgba(240,237,229,0.62)';
+    g.beginPath(); g.arc(x*R, y*R, Math.max(0.8, r*R*0.9), 0, 7); g.fill();
+  }
+  // the limb falls away from the eye, so it darkens
+  const lim = g.createRadialGradient(0, 0, R*0.55, 0, 0, R);
+  lim.addColorStop(0, 'rgba(0,0,0,0)');
+  lim.addColorStop(1, 'rgba(20,22,28,0.45)');
+  g.fillStyle = lim;
+  g.beginPath(); g.arc(0, 0, R, 0, 7); g.fill();
+
+  face = {px: px, cv: cv2};
+  return cv2;
+}
+
+function moonDisc(cx, cy, R, k, sunAng, plain) {
+  // The face never turns away from us, so it is drawn in one fixed
+  // orientation. Only the lighting moves: the lit region is clipped out of the
+  // disc and the face painted inside it. Rotating the face along with the Sun
+  // would mirror the Moon every time it started to wane.
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.fillStyle = '#0b0e14';
+  ctx.beginPath(); ctx.arc(0, 0, R, 0, 7); ctx.fill();
+
   const t = 2*k - 1;
-  ctx.save(); ctx.translate(cx, cy); ctx.rotate(sunAng);
-  ctx.fillStyle = '#1d2330';
-  ctx.beginPath(); ctx.arc(0,0,R,0,7); ctx.fill();
-  ctx.strokeStyle = 'rgba(200,214,240,0.30)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.arc(0,0,R,0,7); ctx.stroke();
-  ctx.fillStyle = '#e9e4d6';
+  ctx.save();
+  ctx.rotate(sunAng);
   ctx.beginPath();
-  // The lit limb is the half facing the Sun. The terminator closes it: for a
-  // gibbous the ellipse must sweep the far side (adding to the half disc), for
-  // a crescent it sweeps back across the near side (cutting into it). Getting
-  // that direction backwards draws every phase as its own opposite.
   ctx.arc(0, 0, R, -Math.PI/2, Math.PI/2, false);
   ctx.ellipse(0, 0, R*Math.abs(t), R, 0, Math.PI/2, -Math.PI/2, t < 0);
-  ctx.closePath(); ctx.fill();
+  ctx.closePath();
+  ctx.restore();
+  ctx.clip();
+
+  if (plain || R <= 14) {
+    ctx.fillStyle = '#c9c6bd';
+    ctx.beginPath(); ctx.arc(0, 0, R, 0, 7); ctx.fill();
+  } else {
+    ctx.drawImage(moonFace(R), -R, -R, 2*R, 2*R);
+  }
+  ctx.restore();
+
+  ctx.save(); ctx.translate(cx, cy);
+  ctx.strokeStyle = 'rgba(200,214,240,0.30)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(0, 0, R, 0, 7); ctx.stroke();
   ctx.restore();
 }
 
 function drawEarthView(p) {
-  const cx = W*0.5, cy = H*0.52;
-  // true scale: 384,400 km against Earth's 6,371 km radius
-  const orbit = Math.min(W, H)*0.34;
-  const kmPerPx = 384400/orbit;
-  const rE = 6371/kmPerPx, rM = 1737.4/kmPerPx;
-  const rNow = p.dist/kmPerPx;
+  // The Sun holds still, Earth goes round it, the Moon goes round Earth. The
+  // Moon's orbit is 1/389 of Earth's, which is a hair at any zoom that fits the
+  // year in, so it is drawn wider by a stated factor.
+  const cx = W*0.5, cy = H*0.55;
+  const Rorb = Math.min(W, H)*0.29;
+  const rMoon = Rorb*384400/149597870.7*D.EXAG;
 
-  const sunAng = (p.slon + 180)*D2R;          // direction from Earth to the Sun
-  const sun0 = (start().slon + 180)*D2R;
-  const moonAng = (p.lam + 180)*D2R;          // geocentric, drawn from above
-  const star0 = (start().lam + 180)*D2R;
+  const eAng = (p.slon + 180)*D2R;                 // Earth, seen from the Sun
+  const ex = cx + Math.cos(eAng)*Rorb, ey = cy - Math.sin(eAng)*Rorb;
+  const mAng = p.lam*D2R;                          // the Moon, seen from Earth
+  const mx = ex + Math.cos(mAng)*rMoon, my = ey - Math.sin(mAng)*rMoon;
 
-  const at = (ang, r) => [cx + Math.cos(ang)*r, cy - Math.sin(ang)*r];
+  // Earth's orbit, and the stretch of it just travelled
+  ctx.strokeStyle = 'rgba(90,176,255,0.16)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(cx, cy, Rorb, 0, 7); ctx.stroke();
+  const trailDays = 40;
+  const a0 = (positions(jd - trailDays).slon + 180)*D2R;
+  ctx.strokeStyle = 'rgba(90,176,255,0.55)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(cx, cy, Rorb, -a0, -eAng, true); ctx.stroke();
 
-  // the orbit, and the range perigee to apogee
-  ctx.strokeStyle = 'rgba(120,150,200,0.13)'; ctx.lineWidth = 1;
-  for (const d of [356500, 406700]) {
-    ctx.beginPath(); ctx.arc(cx, cy, d/kmPerPx, 0, 7); ctx.stroke();
-  }
-  ctx.setLineDash([3,5]);
-  ctx.strokeStyle = 'rgba(120,150,200,0.30)';
-  ctx.beginPath(); ctx.arc(cx, cy, rNow, 0, 7); ctx.stroke();
+  // the Sun
+  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, Rorb*0.30);
+  g.addColorStop(0, 'rgba(255,214,120,0.42)');
+  g.addColorStop(0.24, 'rgba(255,180,70,0.10)');
+  g.addColorStop(1, 'rgba(255,170,60,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, Rorb*0.30, 0, 7); ctx.fill();
+  ctx.fillStyle = '#ffd257';
+  ctx.beginPath(); ctx.arc(cx, cy, 11, 0, 7); ctx.fill();
+  label('Sun', cx, cy + 26, 'rgba(242,198,107,0.9)', 'center');
+
+  // the line Earth stands on, which is what the phase is measured against
+  ctx.strokeStyle = 'rgba(242,198,107,0.45)'; ctx.setLineDash([5,6]); ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
   ctx.setLineDash([]);
 
-  // the ray to a fixed star, where the Moon stood when the clock started
-  const [sx1, sy1] = at(star0, Math.min(W,H)*0.47);
-  ctx.strokeStyle = 'rgba(190,205,235,0.45)'; ctx.setLineDash([6,7]); ctx.lineWidth = 1.2;
-  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(sx1, sy1); ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.fillStyle = 'rgba(215,228,250,0.9)';
-  ctx.beginPath(); ctx.arc(sx1, sy1, 2.4, 0, 7); ctx.fill();
-  label('a fixed star', sx1, sy1 - 12, 'rgba(190,205,235,0.75)', star0 > Math.PI/2 && star0 < 3*Math.PI/2 ? 'right' : 'left');
+  // a fixed direction in space, where the Moon stood when the clock started
+  const star0 = start().lam*D2R;
+  ctx.strokeStyle = 'rgba(190,205,235,0.42)'; ctx.setLineDash([6,7]); ctx.lineWidth = 1.1;
+  ctx.beginPath(); ctx.moveTo(ex, ey);
+  ctx.lineTo(ex + Math.cos(star0)*rMoon*2.1, ey - Math.sin(star0)*rMoon*2.1);
+  ctx.stroke(); ctx.setLineDash([]);
+  label('a fixed star', ex + Math.cos(star0)*rMoon*2.2, ey - Math.sin(star0)*rMoon*2.2 - 5,
+        'rgba(190,205,235,0.8)', Math.cos(star0) < 0 ? 'right' : 'left');
 
-  // the Sun now, and where it stood when the clock started
-  const [ox1, oy1] = at(sun0, Math.min(W,H)*0.44);
-  ctx.strokeStyle = 'rgba(242,198,107,0.22)'; ctx.setLineDash([4,6]);
-  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ox1, oy1); ctx.stroke();
-  ctx.setLineDash([]);
-  const [ux, uy] = at(sunAng, Math.min(W,H)*0.44);
-  ctx.strokeStyle = 'rgba(242,198,107,0.75)'; ctx.lineWidth = 1.6;
-  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ux, uy); ctx.stroke();
-  const g = ctx.createRadialGradient(ux, uy, 0, ux, uy, 26);
-  g.addColorStop(0,'rgba(255,214,120,0.95)'); g.addColorStop(1,'rgba(255,190,80,0)');
-  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(ux, uy, 26, 0, 7); ctx.fill();
-  ctx.fillStyle = '#ffd76a'; ctx.beginPath(); ctx.arc(ux, uy, 5, 0, 7); ctx.fill();
-  label('to the Sun', ux, uy - 15, 'rgba(242,198,107,0.9)',
-        sunAng > Math.PI/2 && sunAng < 3*Math.PI/2 ? 'right' : 'left');
+  // the Moon's orbit, and the two cycles measured round it
+  ctx.strokeStyle = 'rgba(200,214,240,0.22)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(ex, ey, rMoon, 0, 7); ctx.stroke();
 
-  // how far the Sun has moved since the clock started
-  const swept = ((p.slon - start().slon) % 360 + 360) % 360;
-  if (swept > 1.2) {
-    ctx.strokeStyle = 'rgba(242,198,107,0.5)'; ctx.lineWidth = 1.4;
-    ctx.beginPath();
-    ctx.arc(cx, cy, Math.min(W,H)*0.40, -sun0, -sunAng, true);
-    ctx.stroke();
-    const mid = (sun0 + swept*D2R/2);
-    const [mx, my] = at(mid, Math.min(W,H)*0.40 + 15);
-    label(swept.toFixed(1) + '\\u00b0 of Sun', mx, my, 'rgba(242,198,107,0.85)', 'center');
-  }
+  const sinceStar = ((p.lam - start().lam) % 360 + 360) % 360;
+  ctx.strokeStyle = 'rgba(190,205,235,0.65)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(ex, ey, rMoon*0.62, -star0, -mAng, true); ctx.stroke();
+  ctx.strokeStyle = 'rgba(242,198,107,0.75)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(ex, ey, rMoon*0.84, -(eAng + Math.PI), -mAng, true); ctx.stroke();
 
-  // Earth
+  // Earth, then the Moon on top of it
   ctx.fillStyle = '#3d7fd0';
-  ctx.beginPath(); ctx.arc(cx, cy, Math.max(rE, 2), 0, 7); ctx.fill();
-  label('Earth', cx, cy + Math.max(rE,2) + 15, 'rgba(180,205,240,0.85)', 'center');
+  ctx.beginPath(); ctx.arc(ex, ey, 6.5, 0, 7); ctx.fill();
+  ctx.strokeStyle = 'rgba(140,190,255,0.5)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(ex, ey, 9, 0, 7); ctx.stroke();
+  label('Earth', ex, ey + 24, 'rgba(180,205,240,0.92)', 'center');
+  moonDisc(mx, my, 6.5, p.k, -(eAng + Math.PI), true);
 
-  // the Moon, at true size and true distance
-  const [mx2, my2] = at(moonAng, rNow);
-  // screen y runs down, so a world direction theta is drawn at -theta; the lit
-  // limb has to face the Sun, not away from it
-  moonDisc(mx2, my2, Math.max(rM, 2), p.k, -sunAng);
-  ctx.strokeStyle = 'rgba(233,228,214,0.5)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.arc(mx2, my2, Math.max(rM,2) + 5, 0, 7); ctx.stroke();
+  // the two months, counted out where they happen
+  const box = W*0.5 + Rorb*0.06;
+  const lines = [
+    ['rgba(190,205,235,0.9)', 'round to the same star',
+     (sinceStar/360*D.SID).toFixed(2) + ' of ' + D.SID.toFixed(2) + ' days'],
+    ['rgba(242,198,107,0.95)', 'round to the same phase',
+     (p.elong/360*D.SYN).toFixed(2) + ' of ' + D.SYN.toFixed(2) + ' days'],
+  ];
+  lines.forEach(([c, a, b2], i) => {
+    const y = 236 + i*20;
+    ctx.fillStyle = c;
+    ctx.beginPath(); ctx.arc(52, y - 4, 4, 0, 7); ctx.fill();
+    label(a, 64, y, 'rgba(160,175,200,0.85)', 'left');
+    label(b2, 258, y, c, 'left');
+  });
+  label("Earth's orbit is to scale; the Moon's is drawn " + D.EXAG
+        + " times too wide so it can be seen at all",
+        46, 296, 'rgba(120,133,155,0.85)', 'left');
 
-  // the same Moon, drawn large enough to read
+  wave(p);
+
+  // the same Moon, drawn large enough to have a face
   const bigR = Math.min(96, Math.min(W, H)*0.12);
   const bx = W - bigR - 46, by = H - bigR - 132;
   // Waxing is lit on the right, waning on the left, which is the northern
-  // hemisphere's view. The real tilt depends on where you stand and how high
-  // the Moon is, so any fixed orientation is a convention.
+  // hemisphere's view. The real tilt depends on where you stand.
   moonDisc(bx, by, bigR, p.k, p.elong < 180 ? 0 : Math.PI);
   label('as it looks from Earth', bx, by + bigR + 17, 'rgba(160,175,200,0.8)', 'center');
-
-  // the month as a wave, one synodic period wide
-  wave(p);
-  scaleBar(kmPerPx);
 }
 
 function wave(p) {
@@ -401,17 +593,6 @@ function wave(p) {
     ctx.beginPath(); ctx.moveTo(px, y); ctx.lineTo(px, y + h); ctx.stroke();
     label(t, px, y + h + 13, 'rgba(140,155,180,0.7)', 'center');
   }
-}
-
-function scaleBar(kmPerPx) {
-  const px = 100, km = px*kmPerPx;
-  const nice = Math.pow(10, Math.floor(Math.log10(km)));
-  const step = (km/nice < 1.5 ? 1 : km/nice < 3.5 ? 2 : km/nice < 7.5 ? 5 : 10)*nice;
-  const w = step/kmPerPx;
-  const x = 46, y = 232;
-  ctx.strokeStyle = 'rgba(160,175,200,0.55)'; ctx.lineWidth = 1.4;
-  ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + w, y); ctx.stroke();
-  label(step.toLocaleString('en-US') + ' km', x, y - 7, 'rgba(160,175,200,0.8)', 'left');
 }
 
 function drawSunView(p) {
