@@ -160,9 +160,9 @@ with sync_playwright() as pw:
                              f"{side}, which is the wrong limb")
         print(f"  ok   day {day:5.1f}  panel {m['k']*100:5.1f}%  "
               f"disc {drawn*100:5.1f}%  lit {side:5}  {m['phase']}")
-    order = ["New moon", "Waxing crescent", "First quarter",
-             "Waxing gibbous", "Full moon", "Waning gibbous", "Last quarter",
-             "Waning crescent"]
+    order = ["New Moon", "Waxing Crescent", "First Quarter",
+             "Waxing Gibbous", "Full Moon", "Waning Gibbous", "Last Quarter",
+             "Waning Crescent"]
     for want, got_ in zip(order, seen):
         if want != got_:
             fails.append(f"the month reads {seen}, expected {order}")
@@ -195,6 +195,32 @@ with sync_playwright() as pw:
               "of the orbit")
     pg.set_viewport_size({"width": 1440, "height": 900})
     pg.wait_for_timeout(420)
+
+    print("--- the diagram against the control bar ---")
+    # The bar is fixed to the foot of the window and its height changes with
+    # the view, so the diagram has to be sized from a measurement of it. The
+    # page reports how far down and right its drawing actually reaches.
+    for w, h in [(1920, 1200), (1440, 900), (1280, 800), (1100, 780), (960, 720)]:
+        pg.set_viewport_size({"width": w, "height": h})
+        pg.wait_for_timeout(450)
+        for day in (3.0, 11.0, 19.0, 27.0):
+            pg.evaluate("(d)=>{const s=document.getElementById('scrub');"
+                        "s.value=d;s.dispatchEvent(new Event('input'));}", day)
+            pg.wait_for_timeout(140)
+            m = pg.evaluate("()=>window.__moon")
+            r = m["reach"]
+            under = m["controlsTop"] - r["bottom"]
+            beside = m["panelLeft"] - r["right"]
+            if under < 0:
+                fails.append(f"at {w}x{h} on day {day} the orbit runs "
+                             f"{-under:.0f}px into the controls")
+            if beside < 0:
+                fails.append(f"at {w}x{h} on day {day} the orbit runs "
+                             f"{-beside:.0f}px into the readout panel")
+        print(f"  {'ok  ' if under >= 0 and beside >= 0 else 'FAIL'} {w}x{h}  "
+              f"{under:.0f}px above the controls, {beside:.0f}px left of the panel")
+    pg.set_viewport_size({"width": 1440, "height": 900})
+    pg.wait_for_timeout(450)
 
     print("--- the heliocentric path ---")
     pg.click("#viewBtn")

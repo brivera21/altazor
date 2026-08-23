@@ -114,12 +114,6 @@ MOON_V = 1.022           # km/s around Earth
 EARTH_V = 29.78          # km/s around the Sun
 CUSP = EARTH_V / MOON_V  # exaggeration at which the heliocentric path cusps
 
-FACTS = [
-    ("Synodic month", f"{SYNODIC:.6f} days", "new moon to new moon, the month of phases"),
-    ("Sidereal month", f"{SIDEREAL:.6f} days", "back to the same place against the stars"),
-    ("Anomalistic month", f"{ANOMALISTIC:.6f} days", "perigee to perigee, which sets the apparent size"),
-    ("Draconic month", f"{DRACONIC:.6f} days", "node to node, which decides whether an eclipse can happen"),
-]
 
 
 def main():
@@ -132,10 +126,6 @@ def main():
         "MARIA": [list(m[:5]) for m in MARIA],
         "CRATERS": [list(c[:4]) for c in CRATERS],
     }
-    facts = "\n".join(
-        f'<div class="fact"><div class="fn">{n}</div><div class="fv">{v}</div>'
-        f'<div class="fd">{d}</div></div>' for n, v, d in FACTS)
-
     doc = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -177,13 +167,8 @@ def main():
   button:hover { background:#1c2a48; }
   button[aria-pressed="true"] { border-color:var(--accent); color:var(--accent); }
   #note { margin-top:9px; font-size:11.5px; color:var(--dim); line-height:1.45; max-width:118ch; }
-  #facts { display:flex; gap:16px; flex-wrap:wrap; margin-top:8px; }
-  .fact { font-size:11.5px; }
-  .fn { color:var(--dim); }
-  .fv { font-variant-numeric:tabular-nums; color:var(--text); }
-  .fd { color:#6c7688; font-size:11px; }
   @media (max-width: 760px) {
-    #facts, #note { display:none; }
+    #note { display:none; }
     label { min-width:104px; }
     #readout { min-width:0; }
   }
@@ -199,14 +184,9 @@ def main():
   </div>
   <div id="readout">
     <div class="lbl">Phase</div>
-    <div class="big" id="phaseName">Full moon</div>
+    <div class="big" id="phaseName">Full Moon</div>
     <div class="rr"><span>Lit</span><span id="lit"></span></div>
     <div class="rr"><span>Age of the moon</span><span id="age"></span></div>
-    <div class="rr"><span>Distance</span><span id="dist"></span></div>
-    <div class="rr"><span>Apparent size</span><span id="size"></span></div>
-    <div class="rr"><span>Date</span><span id="when"></span></div>
-    <div class="rr" style="margin-top:6px"><span>Next new</span><span id="nextNew"></span></div>
-    <div class="rr"><span>Next full</span><span id="nextFull"></span></div>
   </div>
 </div>
 
@@ -230,7 +210,6 @@ def main():
     <div class="val" id="exagVal">&times;1, true scale</div>
     <span id="cuspNote" style="font-size:11.5px;color:var(--dim)"></span>
   </div>
-  <div id="facts">""" + facts + """</div>
   <div id="note" data-view="earth"></div>
 </div>
 
@@ -288,14 +267,14 @@ function positions(jd) {
 // almanac labels the day a phase falls on.
 const NAMED = 4;
 function phaseName(e) {
-  if (e < NAMED || e > 360 - NAMED) return 'New moon';
-  if (Math.abs(e - 90) < NAMED) return 'First quarter';
-  if (Math.abs(e - 180) < NAMED) return 'Full moon';
-  if (Math.abs(e - 270) < NAMED) return 'Last quarter';
-  if (e < 90) return 'Waxing crescent';
-  if (e < 180) return 'Waxing gibbous';
-  if (e < 270) return 'Waning gibbous';
-  return 'Waning crescent';
+  if (e < NAMED || e > 360 - NAMED) return 'New Moon';
+  if (Math.abs(e - 90) < NAMED) return 'First Quarter';
+  if (Math.abs(e - 180) < NAMED) return 'Full Moon';
+  if (Math.abs(e - 270) < NAMED) return 'Last Quarter';
+  if (e < 90) return 'Waxing Crescent';
+  if (e < 180) return 'Waxing Gibbous';
+  if (e < 270) return 'Waning Gibbous';
+  return 'Waning Crescent';
 }
 
 // The next time the elongation passes a target. The elongation only ever
@@ -477,13 +456,33 @@ function moonDisc(cx, cy, R, k, sunAng, plain) {
   ctx.restore();
 }
 
+// The band the diagram is allowed to fill: under the heading, above the
+// control bar, and clear of the readout panel on the right. The bar is fixed to
+// the bottom and changes height when the view changes, so it is measured rather
+// than assumed; a diagram sized off the window alone runs its orbit straight
+// through the sliders.
+function fitBand() {
+  const c = document.getElementById('controls').getBoundingClientRect();
+  const r = document.getElementById('readout').getBoundingClientRect();
+  return {top: 104, bot: Math.max(240, c.top - 14), right: r.left - 16};
+}
+
 function drawEarthView(p) {
   // The Sun holds still, Earth goes round it, the Moon goes round Earth. The
   // Moon's orbit is 1/389 of Earth's, which is a hair at any zoom that fits the
   // year in, so it is drawn wider by a stated factor.
-  const cx = W*0.5, cy = H*0.55;
-  const Rorb = Math.min(W, H)*0.29;
-  const rMoon = Rorb*384400/149597870.7*D.EXAG;
+  const band = fitBand();
+  const kMoon = 384400/149597870.7*D.EXAG;   // the Moon's orbit, as a fraction
+  const cx = W*0.5, cy = (band.top + band.bot)/2;
+  const Rorb = Math.max(80, Math.min(
+    Math.min(W, H)*0.29,
+    ((band.bot - band.top)/2 - 26)/(1 + kMoon),   // the labels need the 26
+    (band.right - cx)/(1 + kMoon)));
+  const rMoon = Rorb*kMoon;
+  // the furthest the drawing gets from the Sun, labels included
+  drawEarthView.reach = {bottom: cy + Rorb + rMoon + 24,
+                         right: cx + Rorb + rMoon + 6,
+                         left: cx - Rorb - rMoon};
 
   const eAng = (p.slon + 180)*D2R;                 // Earth, seen from the Sun
   const ex = cx + Math.cos(eAng)*Rorb, ey = cy - Math.sin(eAng)*Rorb;
@@ -541,7 +540,7 @@ function drawEarthView(p) {
   moonDisc(mx, my, 6.5, p.k, -(eAng + Math.PI), true);
 
   // the two months, counted out where they happen
-  colR = Math.max(150, Math.min(466, cx - Rorb - 42));
+  colR = Math.max(140, Math.min(466, cx - Rorb - rMoon - 42));
   const lines = [
     ['rgba(190,205,235,0.9)', 'round to the same star',
      (sinceStar/360*D.SID).toFixed(2) + ' of ' + D.SID.toFixed(2) + ' days'],
@@ -602,9 +601,15 @@ function drawSunView(p) {
   // orbit is too flat an arc to read, so the window is nearer four months and
   // the arc is sized to fill the frame rather than to any fixed scale.
   colR = Math.min(W - 46, 466);
+  const band = fitBand();
   const days = 110, span = 360*days/D.YEAR, half = span/2*D2R;
-  const Rpx = Math.min(W*0.82/(2*Math.sin(half)), H*0.52/(1 - Math.cos(half)));
-  const cx = W*0.5, cy = H*0.26 + Rpx;
+  const Rpx = Math.max(200, Math.min(W*0.82/(2*Math.sin(half)),
+    (band.bot - 158 - 110)/(1 - Math.cos(half))));   // 110 for the Sun arrow
+  // the arc is usually limited by the width, so it is centred in the band
+  // rather than hung from the top, which would leave the space all at the foot
+  const drop = Rpx*(1 - Math.cos(half)) + 110;
+  const apex = Math.max(158, band.top + (band.bot - band.top - drop)/2);
+  const cx = W*0.5, cy = apex + Rpx;
   const centre = -Math.PI/2;
 
   const earthAt = t => {
@@ -701,20 +706,10 @@ function label(t, x, y, c, align) {
 
 // ---------- readouts ----------
 const el = id => document.getElementById(id);
-let lastEvent = 0, cachedNew = 0, cachedFull = 0;
 function readout(p) {
   el('phaseName').textContent = phaseName(p.elong);
   el('lit').textContent = (p.k*100).toFixed(1) + '%';
   el('age').textContent = (p.elong/360*D.SYN).toFixed(2) + ' d';
-  el('dist').textContent = Math.round(p.dist).toLocaleString('en-US') + ' km';
-  el('size').textContent = (2*Math.atan(1737.4/p.dist)*R2D*60).toFixed(1) + "'";
-  el('when').textContent = fmtDate(jd);
-  if (Math.abs(jd - lastEvent) > 0.4) {
-    lastEvent = jd;
-    cachedNew = nextPhase(jd, 0); cachedFull = nextPhase(jd, 180);
-  }
-  el('nextNew').textContent = fmtDate(cachedNew);
-  el('nextFull').textContent = fmtDate(cachedFull);
   el('scrub').value = (p.elong/360*D.SYN).toFixed(2);
   el('scrubVal').textContent = (p.elong/360*D.SYN).toFixed(2) + ' d';
 }
@@ -733,15 +728,17 @@ function frame(t) {
   const p = positions(jd);
   if (view === 'earth') drawEarthView(p); else drawSunView(p);
   readout(p);
+  const bandNow = fitBand();
   window.__moon = { jd, view, exag, playing, speed,
+                    controlsTop: bandNow.bot + 14, panelLeft: bandNow.right + 16,
+                    reach: drawEarthView.reach || null,
                     sunPath: view === 'sun' ? drawSunView.path : null,
                     earthPath: view === 'sun' ? drawSunView.earth : null,
                     k: p.k, elong: p.elong, dist: p.dist, lam: p.lam,
                     slon: p.slon, phase: phaseName(p.elong),
-                    nextNew: cachedNew, nextFull: cachedFull,
                     colR: colR, colInk: colInk,
-                    orbitLeft: view === 'earth'
-                      ? W*0.5 - Math.min(W, H)*0.29 : null };
+                    orbitLeft: view === 'earth' && drawEarthView.reach
+                      ? drawEarthView.reach.left : null };
   requestAnimationFrame(frame);
 }
 
