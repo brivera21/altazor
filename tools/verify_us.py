@@ -13,6 +13,9 @@ compared:
   rugged      twenty reference places, ten broken and ten flat, none of which
               were used to set the threshold
   regions     the two Census regions are checked against the Bureau's own lists
+  capitals    every seat of government is looked up again in GeoNames, by name
+              and by state, and the two the dataset is too coarse to carry have
+              to be exactly the two the page says they are
   the drawing the two insets have to sit clear of the lower 48, and the page
               has to answer for what it drew
 
@@ -28,7 +31,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
 from make_us_data import BM, ROUGH_REF, SMOOTH_REF, read_wdb, sph_area_km2
-from build_us import AREA, NAME, NAMED_RIVERS, REGIONS
+from build_us import AREA, CAPITALS, NAME, NAMED_RIVERS, OFF_THE_LIST, REGIONS
 
 HERE = Path(__file__).parent
 PAGE = HERE.parent / "us.html"
@@ -133,6 +136,47 @@ if missed:
 if caught:
     fails.append(f"rugged ground wrongly includes {caught}")
 
+
+print("--- the capitals, looked up again in GeoNames ---")
+import geonamescache
+_gc = geonamescache.GeonamesCache()
+_us = [c for c in _gc.get_cities().values() if c["countrycode"] == "US"]
+missing, wrong = [], []
+for code, name in CAPITALS.items():
+    hit = [c for c in _us if c["admin1code"] == code
+           and c["name"].lower() == name.lower()]
+    if not hit:
+        missing.append(name)
+        continue
+    c = max(hit, key=lambda c: c["population"])
+    # the seat has to fall inside its own state
+    from shapely.geometry import Point as _P
+    if not st[code].buffer(0.02).contains(_P(c["longitude"], c["latitude"])):
+        wrong.append(f"{name} does not fall inside {NAME[code]}")
+ok = len(CAPITALS) == 51 and not wrong
+print(f"  {'ok  ' if ok else 'FAIL'} {len(CAPITALS) - len(missing)} of "
+      f"{len(CAPITALS)} capitals resolve by name and state, and each one falls "
+      "inside its own state")
+if len(CAPITALS) != 51:
+    fails.append(f"{len(CAPITALS)} capitals listed, expected 51")
+if wrong:
+    fails.append(f"capitals outside their state: {wrong}")
+want = {CAPITALS[c] for c in OFF_THE_LIST}
+ok = set(missing) == want
+print(f"  {'ok  ' if ok else 'FAIL'} the ones GeoNames is too coarse to carry "
+      f"are {', '.join(sorted(missing)) or 'none'}, and the page names "
+      f"{', '.join(sorted(want))}")
+if not ok:
+    fails.append(f"GeoNames is missing {sorted(missing)}, the page expects "
+                 f"{sorted(want)}")
+for code in OFF_THE_LIST:
+    la, lo = OFF_THE_LIST[code]
+    from shapely.geometry import Point as _P
+    if not st[code].buffer(0.02).contains(_P(lo, la)):
+        fails.append(f"{CAPITALS[code]} is placed outside {NAME[code]}")
+print(f"  ok   {', '.join(CAPITALS[c] for c in OFF_THE_LIST)} are placed by "
+      "hand, and both fall inside their own state")
+
 try:
     from playwright.sync_api import sync_playwright
 except ImportError:
@@ -191,6 +235,52 @@ with sync_playwright() as pw:
           f"counted in {rg.split('Counted in ')[-1]!r}")
     if not ok:
         fails.append(f"the panel gives {nm!r} {ar!r} {rg!r} for Texas")
+
+    sub = pg.text_content("#selSub")
+    lab = pg.evaluate("()=>window.__us().capital")
+    ok = sub == "capital: Austin" and lab == "Austin"
+    print(f"  {'ok  ' if ok else 'FAIL'} the panel reads {sub!r} and the map "
+          f"labels {lab!r}")
+    if not ok:
+        fails.append(f"Texas gives sub {sub!r} and map label {lab!r}")
+    ok = "a state" not in sub
+    print(f"  {'ok  ' if ok else 'FAIL'} the old line about a state under the "
+          "cursor is gone")
+    if not ok:
+        fails.append("the panel still says a state is under the cursor")
+
+    print("--- the state lines come off ---")
+    pg.click("#bLine")
+    pg.wait_for_timeout(150)
+    off = pg.evaluate("()=>({lines: window.__us().lines,"
+                      " l: getComputedStyle(document.getElementById('lines')).display,"
+                      " g: getComputedStyle(document.getElementById('regions')).display,"
+                      " bare: document.getElementById('map').classList.contains('bare'),"
+                      " riv: getComputedStyle(document.getElementById('rivers')).display,"
+                      " mtn: getComputedStyle(document.getElementById('rugged')).display})")
+    ok = (off["lines"] is False and off["l"] == "none" and off["g"] == "none"
+          and off["bare"] and off["riv"] != "none" and off["mtn"] != "none")
+    print(f"  {'ok  ' if ok else 'FAIL'} the lines and the regions go, and the "
+          "rivers and the rugged ground stay")
+    if not ok:
+        fails.append(f"the bare view reads {off}")
+    pg.click(".lg[data-r='0']")     # the legend toggles this region off again
+    pg.wait_for_timeout(150)
+    back = pg.evaluate("()=>({lines: window.__us().lines,"
+                       " l: getComputedStyle(document.getElementById('lines')).display,"
+                       " g: getComputedStyle(document.getElementById('regions')).display,"
+                       " bare: document.getElementById('map').classList.contains('bare')})")
+    ok = (back["lines"] is True and back["l"] != "none"
+          and back["g"] != "none" and not back["bare"])
+    print(f"  {'ok  ' if ok else 'FAIL'} touching the region legend brings the "
+          "lines back with it")
+    if not ok:
+        fails.append(f"the region legend in the bare view reads {back}")
+    pg.click(".lg[data-r='0']")     # and back on, so the page is left as found
+    pg.wait_for_timeout(100)
+    on0 = pg.evaluate("()=>window.__us().on[0]")
+    if on0 is not True:
+        fails.append("the region legend does not toggle back on")
 
     for bid in ("bRiv", "bMtn"):
         pg.click("#" + bid)

@@ -106,6 +106,52 @@ REGIONS = [
      "WA OR ID"),
 ]
 
+
+# The seat of each state's government. Forty nine of the fifty one are
+# confirmed against GeoNames at build time, by name and by state. Pierre and
+# Montpelier are not in that dataset at all: it carries places over fifteen
+# thousand people and those two are the smallest capitals in the country, so
+# their coordinates are given here and verify_us.py says which two they are.
+CAPITALS = {
+    "AL": "Montgomery", "AK": "Juneau", "AZ": "Phoenix", "AR": "Little Rock",
+    "CA": "Sacramento", "CO": "Denver", "CT": "Hartford", "DE": "Dover",
+    "FL": "Tallahassee", "GA": "Atlanta", "HI": "Honolulu", "ID": "Boise",
+    "IL": "Springfield", "IN": "Indianapolis", "IA": "Des Moines",
+    "KS": "Topeka", "KY": "Frankfort", "LA": "Baton Rouge", "ME": "Augusta",
+    "MD": "Annapolis", "MA": "Boston", "MI": "Lansing", "MN": "Saint Paul",
+    "MS": "Jackson", "MO": "Jefferson City", "MT": "Helena", "NE": "Lincoln",
+    "NV": "Carson City", "NH": "Concord", "NJ": "Trenton", "NM": "Santa Fe",
+    "NY": "Albany", "NC": "Raleigh", "ND": "Bismarck", "OH": "Columbus",
+    "OK": "Oklahoma City", "OR": "Salem", "PA": "Harrisburg",
+    "RI": "Providence", "SC": "Columbia", "SD": "Pierre", "TN": "Nashville",
+    "TX": "Austin", "UT": "Salt Lake City", "VT": "Montpelier",
+    "VA": "Richmond", "WA": "Olympia", "WV": "Charleston", "WI": "Madison",
+    "WY": "Cheyenne", "DC": "Washington",
+}
+OFF_THE_LIST = {"SD": (44.3683, -100.3510), "VT": (44.2601, -72.5754)}
+
+
+def capital_places():
+    """Name and position of every capital, checked against GeoNames."""
+    import geonamescache
+    gc = geonamescache.GeonamesCache()
+    us = [c for c in gc.get_cities().values() if c["countrycode"] == "US"]
+    out, off = {}, []
+    for code, name in CAPITALS.items():
+        hit = [c for c in us if c["admin1code"] == code
+               and c["name"].lower() == name.lower()]
+        if hit:
+            c = max(hit, key=lambda c: c["population"])
+            out[code] = (name, round(c["latitude"], 4), round(c["longitude"], 4))
+        elif code in OFF_THE_LIST:
+            out[code] = (name, ) + OFF_THE_LIST[code]
+            off.append(name)
+        else:
+            raise SystemExit(f"{name} does not resolve in {code}")
+    print(f"capitals: {len(out) - len(off)} confirmed against GeoNames, "
+          f"{len(off)} too small for that dataset ({', '.join(off)})")
+    return out
+
 FACTS = [
     ("States", "50 and a district", "and five inhabited territories besides"),
     ("Area", "9,833,520 km&sup2;", "land and inland water, third or fourth "
@@ -277,6 +323,14 @@ st{}
 .state.on{fill:#5b6774}
 #lines path{fill:none;stroke:#9aa7b4;stroke-width:.8;
 stroke-linejoin:round;pointer-events:none}
+#capital circle{fill:#f2c66b;stroke:#0d1a26;stroke-width:1.2;pointer-events:none}
+#capital text{fill:#f7dfa8;font-size:10px;font-family:inherit;
+paint-order:stroke;stroke:#0d1a26;stroke-width:2.6;pointer-events:none}
+/* neighbouring fills leave an anti-aliased hairline where they meet, which
+   reads as a ghost of the border; stroking each in its own colour closes it */
+svg.bare .state{stroke:var(--land);stroke-width:.9}
+svg.bare .state:hover{fill:var(--land)}
+svg.bare .state.on{fill:var(--land)}
 #labels text{fill:#bcd9f2;font-size:9px;font-family:inherit;
 paint-order:stroke;stroke:#0d1a26;stroke-width:2.6;pointer-events:none}
 #rugged path{fill:#6d6455;stroke:none;pointer-events:none}
@@ -318,6 +372,7 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}
     <g id="lines"></g>
     <g id="labels"></g>
     <g id="regions"></g>
+    <g id="capital"></g>
     <g id="frames"></g>
   </svg></div>
   <div class="side"><div class="card">
@@ -335,6 +390,7 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}
   <span class="sep"></span>
   <button id="bRiv" aria-pressed="true">Rivers</button>
   <button id="bMtn" aria-pressed="true">Rugged ground</button>
+  <button id="bLine" aria-pressed="true">State lines</button>
 </div>
 
 <div class="notes">
@@ -349,9 +405,10 @@ and most have no official line. The South and the Midwest are the Census
 Bureau's own regions; East Coast, West Coast and the Northwest are vernacular,
 and where they stop depends on who is asked. A state under the cursor lists the
 ones claiming it.</p>
-<p>Rugged ground is measured from a relief image, not an elevation grid, so it
-marks broken country rather than any named range, and a river is named only
-where one course passes a town on it and nothing else is near.</p>
+<p>Rugged ground comes from a relief image, not an elevation grid, so it marks
+broken country rather than any named range, and a river is named only where one
+course passes a town on it and nothing else is near. With the lines off, what
+is left is the ground.</p>
 </div>
 
 <div class="refs">
@@ -427,12 +484,25 @@ function paint() {
   regEls.forEach((e, i) => e.style.display = on[i] ? '' : 'none');
 }
 
+const gcap = el('capital');
+function markCapital(m) {
+  while (gcap.firstChild) gcap.removeChild(gcap.firstChild);
+  if (!m) return;
+  make('circle', {cx: m.cx, cy: m.cy, r: 3.4}, gcap);
+  const right = m.cx < 820;
+  const t = make('text', {x: m.cx + (right ? 7 : -7), y: m.cy + 3.4,
+    'text-anchor': right ? 'start' : 'end'}, gcap);
+  t.textContent = m.cap;
+}
+
 function show() {
   const c = hover || sel;
   const m = c ? META[c] : null;
+  markCapital(m);
   el('selName').textContent = m ? m.n : 'The lower 48, Alaska and Hawaii';
-  el('selSub').textContent = m ? (m.c === 'DC' ? 'a federal district' : 'a state')
-    : 'a state under the cursor fills this panel';
+  el('selSub').textContent = m
+    ? (m.c === 'DC' ? 'the national capital' : 'capital: ' + m.cap)
+    : 'capital: Washington, DC';
   el('selArea').textContent = (m ? fmt(m.km2) : fmt(TOTAL_KM2)) + ' km²';
   el('selPop').textContent = m ? fmt(m.pop) : fmt(TOTAL_POP);
   el('selShare').textContent = m
@@ -456,6 +526,7 @@ D.regions.forEach((r, i) => {
   b.addEventListener('click', () => {
     on[i] = !on[i];
     b.setAttribute('aria-pressed', on[i]);
+    if (!lines) setLines(true);      // a region asked for is a region shown
     paint();
   });
 });
@@ -470,9 +541,22 @@ el('bMtn').addEventListener('click', () => {
   el('bMtn').setAttribute('aria-pressed', v);
   gm.style.display = v ? '' : 'none';
 });
+// With the state lines off the regions go too, since they are made of states,
+// and the hover stops lighting one state up: the point is to see the country
+// as ground rather than as fifty shapes.
+let lines = true;
+function setLines(v) {
+  lines = v;
+  el('bLine').setAttribute('aria-pressed', v);
+  gl.style.display = v ? '' : 'none';
+  gg.style.display = v ? '' : 'none';
+  document.getElementById('map').classList.toggle('bare', !v);
+}
+el('bLine').addEventListener('click', () => setLines(!lines));
 
 paint(); show();
-window.__us = () => ({states: Object.keys(D.states).length,
+window.__us = () => ({states: Object.keys(D.states).length, lines,
+  capital: gcap.querySelector('text') ? gcap.querySelector('text').textContent : null,
   rivers: D.rivers.length, named: D.rivers.filter(r => r.n).length,
   rugged: D.rugged.length, regions: D.regions.map(r => r.n),
   totalKm2: TOTAL_KM2, hover, sel, on: on.slice()});
@@ -487,6 +571,7 @@ def main():
     riv = pickle.load(open(DATA / "rivers.pkl", "rb"))
     rug = pickle.load(open(DATA / "rugged.pkl", "rb"))
     pops = {n: (a, b) for n, _, a, b in state_pops()}
+    caps = capital_places()
 
     lower = {k: g for k, g in st.items() if k not in ("AK", "HI", "PR")}
     # the lower 48 fill the frame; the two insets sit in the corners below it
@@ -509,8 +594,11 @@ def main():
         tol = 0.004 if code in WHERE else 0.012
         paths[code] = path_of(g, T, tol)
         p = pops.get(NAME.get(code, ""), (None, None))
+        cn, cla, clo = caps[code]
+        cx, cy = T(clo, cla)
         meta.append({"c": code, "n": NAME.get(code, code),
-                     "km2": AREA.get(code), "pop": p[1] or p[0]})
+                     "km2": AREA.get(code), "pop": p[1] or p[0],
+                     "cap": cn, "cx": round(cx, 1), "cy": round(cy, 1)})
 
     # regions, as the outline of the union of their states
     regs = []
