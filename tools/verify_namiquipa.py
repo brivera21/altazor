@@ -8,6 +8,9 @@
   malla       la altitud del GPS contra la malla del terreno, punto por punto:
               es la comprobación que la página presume
   lugares     los pueblos y ranchos caen dentro del cuadro y del lado que dice
+  municipios  los 67 límites de OpenStreetMap suman lo que mide el estado, seis
+              lugares conocidos caen en el municipio que les toca, y el cruce
+              de la traza de un municipio a otro se vuelve a calcular aquí
   la página   responde por lo que dibujó, en el navegador
 
 Uso: pip install playwright && python3 verify_namiquipa.py
@@ -194,6 +197,93 @@ print(f"  {'ok  ' if ok else 'FALLA'} el pueblo de Namiquipa queda a {d:.0f} km 
 if not ok:
     fails.append(f"Namiquipa está a {d:.0f} km de la salida")
 
+print("--- los municipios ---")
+from shapely.geometry import Polygon
+from shapely.ops import unary_union
+from make_us_data import sph_area_km2
+
+MUN = HERE / "data" / "chihuahua_municipios.txt"
+CHIHUAHUA_KM2 = 247_455        # superficie publicada del estado
+
+
+def leer_municipios():
+    grueso, fino = {}, {}
+    for line in MUN.read_text(encoding="utf-8").splitlines():
+        if line.startswith("#") or not line.strip():
+            continue
+        tipo, nombre, *anillos = line.split("\t")
+        rings = []
+        for a in anillos:
+            v = [int(x) for x in a.split(",")]
+            lon, lat = v[0], v[1]
+            q = [(lon / 1e5, lat / 1e5)]
+            for i in range(2, len(v), 2):
+                lon += v[i]
+                lat += v[i + 1]
+                q.append((lon / 1e5, lat / 1e5))
+            if len(q) > 3:
+                rings.append(q)
+        (grueso if tipo == "G" else fino)[nombre] = rings
+    return grueso, fino
+
+
+def forma(rings):
+    ps = [Polygon(r).buffer(0) for r in rings if len(r) > 3]
+    return unary_union([q for q in ps if q.area > 0])
+
+
+grueso, fino = leer_municipios()
+ok = len(grueso) == 67
+print(f"  {'ok  ' if ok else 'FALLA'} {len(grueso)} municipios en el archivo, "
+      f"y {len(fino)} con el límite fino")
+if not ok:
+    fails.append(f"el archivo trae {len(grueso)} municipios, no 67")
+suma = sum(sph_area_km2(forma(r)) for r in grueso.values())
+err = abs(suma - CHIHUAHUA_KM2) / CHIHUAHUA_KM2 * 100
+ok = err < 3
+print(f"  {'ok  ' if ok else 'FALLA'} juntos miden {suma:,.0f} km2, "
+      f"{err:.1f}% menos que los {CHIHUAHUA_KM2:,} km2 que se publican del estado")
+if not ok:
+    fails.append(f"los municipios suman {suma:,.0f} km2, {err:.1f}% fuera")
+
+formas = {n: forma(r) for n, r in fino.items()}
+from shapely.geometry import Point as _P
+CONOCIDOS = [("Santa Ana de Bavícora", 29.0322, -107.4705, "Namiquipa"),
+             ("Independencia (Cologachi)", 29.0897, -107.5421, "Namiquipa"),
+             ("el pueblo de Namiquipa", 29.2507, -107.4151, "Namiquipa"),
+             ("El Terrero", 29.1774, -107.3885, "Namiquipa"),
+             ("el pueblo de Temósachic", 28.9538, -107.8302, "Temósachic"),
+             ("Ciudad Madera", 29.1927, -108.1433, "Madera")]
+mal = []
+for n, la, lo, quiero in CONOCIDOS:
+    cae = [k for k, g in formas.items() if g.contains(_P(lo, la))]
+    if cae != [quiero]:
+        mal.append(f"{n} cae en {cae}, no en {quiero}")
+print(f"  {'ok  ' if not mal else 'FALLA'} los {len(CONOCIDOS)} lugares "
+      "conocidos caen en el municipio que les toca")
+if mal:
+    fails.append(f"municipios equivocados: {mal}")
+
+paso, cruces = [], []
+for la, lo, k in pts:
+    aqui = next((n for n, g in formas.items() if g.contains(_P(lo, la))), None)
+    paso.append(aqui)
+    if not cruces or cruces[-1][0] != aqui:
+        cruces.append([aqui, k, k])
+    else:
+        cruces[-1][2] = k
+CRUZA = [c[0] for c in cruces]
+ok = CRUZA == ["Temósachic", "Namiquipa"]
+print(f"  {'ok  ' if ok else 'FALLA'} la traza pasa por {' y luego '.join(str(c) for c in CRUZA)}")
+if not ok:
+    fails.append(f"la traza pasa por {CRUZA}")
+km_en = {}
+for n, k0, k1 in cruces:
+    km_en[n] = km_en.get(n, 0.0) + (k1 - k0)
+print(f"  ok   {km_en.get('Temósachic', 0):.1f} km en Temósachic y "
+      f"{km_en.get('Namiquipa', 0):.1f} km en Namiquipa")
+CRUCE_KM = cruces[1][1] if len(cruces) > 1 else None
+
 html = PAGE.read_text(encoding="utf-8")
 print("--- la página ---")
 import re
@@ -253,7 +343,34 @@ with sync_playwright() as pw:
     if not ok:
         fails.append("la página no nombra el kilómetro de la cima")
 
-    for bid, gid in (("bRel", "relieve"), ("bCur", "curvas"), ("bPue", "pueblos")):
+    print("--- los municipios en la página ---")
+    st = pg.evaluate("()=>window.__ruta()")
+    ok = st["cruzados"] == CRUZA
+    print(f"  {'ok  ' if ok else 'FALLA'} la página marca {st['cruzados']} y aquí "
+          f"salen {CRUZA}")
+    if not ok:
+        fails.append(f"la página marca {st['cruzados']} y aquí salen {CRUZA}")
+    n = pg.evaluate("()=>document.querySelectorAll('#municipios path.cruza').length")
+    todos = pg.evaluate("()=>document.querySelectorAll('#municipios path').length")
+    ok = n == 2 and todos == 67
+    print(f"  {'ok  ' if ok else 'FALLA'} el mapa chico dibuja {todos} municipios "
+          f"y pinta {n}")
+    if not ok:
+        fails.append(f"el mapa chico dibuja {todos} municipios y pinta {n}")
+    for k, quiero in ((1.0, CRUZA[0]), (CRUCE_KM - 1, CRUZA[0]),
+                      (CRUCE_KM + 1, CRUZA[1]), (28.0, CRUZA[1])):
+        pg.evaluate("(k)=>{const s=document.getElementById('km');s.value=k;"
+                    "s.dispatchEvent(new Event('input'))}", k)
+        pg.wait_for_timeout(60)
+        dice = pg.evaluate("()=>window.__ruta().municipio")
+        ok = dice == quiero
+        print(f"  {'ok  ' if ok else 'FALLA'} en el km {k:.1f} la página dice "
+              f"{dice!r} y aquí sale {quiero!r}")
+        if not ok:
+            fails.append(f"en el km {k:.1f} la página dice {dice!r}, no {quiero!r}")
+
+    for bid, gid in (("bRel", "relieve"), ("bCur", "curvas"), ("bPue", "pueblos"),
+                     ("bMun", "raya")):
         pg.click("#" + bid)
         pg.wait_for_timeout(80)
         d = pg.evaluate(f"()=>getComputedStyle(document.getElementById('{gid}')).display")

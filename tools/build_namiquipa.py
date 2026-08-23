@@ -24,6 +24,7 @@ import namiquipa_data as D
 
 OUT = Path(__file__).parent.parent / "ruta-namiquipa.html"
 DEM = Path(__file__).parent / "data" / "namiquipa_dem.txt"
+MUN = Path(__file__).parent / "data" / "chihuahua_municipios.txt"
 NMEX = Path("/home/claude/nmex")
 
 # la malla, y con ella el cuadro del mapa
@@ -165,9 +166,64 @@ lugares_js = [dict(n=n, x=round(px(lo), 1), y=round(py(la), 1), t=t)
 cur_html = "\n".join(
     f'<path class="cur{" mil" if lv % 500 == 0 else ""}" d="{d}"/>' for lv, d in cur)
 
-# el mapa chico: Chihuahua, el cuadro, y los dos pueblos de referencia
+def municipios():
+    """Los 67 municipios de Chihuahua, de OpenStreetMap.
+
+    El archivo trae dos versiones de cada límite: una gruesa para dibujar el
+    mapa chico y una fina, solo de los municipios de por aquí, para saber en
+    cuál cae cada punto de la traza."""
+    grueso, fino = {}, {}
+    for line in MUN.read_text(encoding="utf-8").splitlines():
+        if line.startswith("#") or not line.strip():
+            continue
+        tipo, nombre, *anillos = line.split("\t")
+        rings = []
+        for a in anillos:
+            v = [int(x) for x in a.split(",")]
+            lon, lat = v[0], v[1]
+            pts = [(lon / 1e5, lat / 1e5)]
+            for i in range(2, len(v), 2):
+                lon += v[i]
+                lat += v[i + 1]
+                pts.append((lon / 1e5, lat / 1e5))
+            if len(pts) > 3:
+                rings.append(pts)
+        (grueso if tipo == "G" else fino)[nombre] = rings
+    return grueso, fino
+
+
+def area_de(rings):
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    ps = [Polygon(r).buffer(0) for r in rings if len(r) > 3]
+    return unary_union([q for q in ps if q.area > 0])
+
+
+GRUESO, FINO = municipios()
+FORMAS = {n: area_de(r) for n, r in FINO.items()}
+print(f"municipios: {len(GRUESO)} en el mapa chico, {len(FINO)} con límite fino")
+
+from shapely.geometry import Point as _Pt
+paso, tramos = [], []
+for la, lo, km in pts:
+    aqui = next((n for n, g in FORMAS.items() if g.contains(_Pt(lo, la))), None)
+    paso.append(aqui)
+    if not tramos or tramos[-1][0] != aqui:
+        tramos.append([aqui, km, km])
+    else:
+        tramos[-1][2] = km
+CRUZADOS = [t[0] for t in tramos]
+for n, k0, k1 in tramos:
+    print(f"  {n}: del km {k0:.2f} al {k1:.2f}")
+if any(n is None for n in CRUZADOS):
+    raise SystemExit("hay puntos de la traza fuera de todo municipio")
+KM_EN = {}
+for n, k0, k1 in tramos:
+    KM_EN[n] = KM_EN.get(n, 0.0) + (k1 - k0)
+
+# el mapa chico: Chihuahua por municipios, el cuadro, y el pueblo de Namiquipa
 chi = pickle.load(open(NMEX / "states.pkl", "rb"))["Chihuahua"].simplify(0.02)
-cw, ch = 118.0, 150.0
+cw, ch = 150.0, 190.0
 bx0, by0, bx1, by1 = chi.bounds
 cs = min(cw / ((bx1 - bx0) * np.cos(np.radians(28.5))), ch / (by1 - by0)) * 0.92
 def ix(lon):
@@ -175,6 +231,34 @@ def ix(lon):
 def iy(lat):
     return 12 + (by1 - lat) * cs
 chi_d = "M" + " ".join(f"{ix(x):.1f},{iy(y):.1f}" for x, y in chi.exterior.coords) + "Z"
+
+
+def anillos_d(rings, fx, fy):
+    return "".join("M" + " ".join(f"{fx(x):.1f},{fy(y):.1f}" for x, y in r) + "Z"
+                   for r in rings)
+
+
+mun_d = "\n".join(
+    f'<path class="mun{" cruza" if n in CRUZADOS else ""}" d="{anillos_d(r, ix, iy)}"/>'
+    for n, r in GRUESO.items())
+# el letrero de cada municipio cruzado, en su centro
+etq_mun = []
+for n in CRUZADOS:
+    c = FORMAS[n].representative_point()
+    etq_mun.append(dict(n=n, x=round(ix(c.x), 1), y=round(iy(c.y), 1),
+                        km=round(KM_EN[n], 1)))
+
+# el límite entre los municipios cruzados, dentro del cuadro del mapa grande
+from shapely.geometry import box as _box
+marco = _box(W, S, E, N)
+linea = []
+for a, b in zip(CRUZADOS, CRUZADOS[1:]):
+    comun = FORMAS[a].boundary.intersection(FORMAS[b].boundary).intersection(marco)
+    for g in (comun.geoms if hasattr(comun, "geoms") else [comun]):
+        if g.geom_type == "LineString" and len(g.coords) > 1:
+            linea.append("M" + " ".join(f"{px(x):.1f},{py(y):.1f}" for x, y in g.coords))
+raya_d = "".join(linea)
+print(f"límite municipal dentro del cuadro: {len(linea)} tramos")
 # a esta escala los dos pueblos caen en el mismo punto, así que va uno
 inset_pts = [dict(n=D.LEJOS[0][0], x=round(ix(D.LEJOS[0][2]), 1),
                   y=round(iy(D.LEJOS[0][1]), 1))]
@@ -242,6 +326,10 @@ color:var(--ink2);font-size:.95rem}}
 .refs p{{padding-left:2.2em;text-indent:-2.2em;margin:0 0 .8em}}
 .refs a{{color:var(--accent);word-break:break-word}}
 path.cur{{fill:none;stroke:#cfd6dd;stroke-opacity:.16;stroke-width:.7}}
+path.mun{{fill:none;stroke:#7f8b96;stroke-opacity:.5;stroke-width:.5}}
+path.mun.cruza{{fill:var(--traza);fill-opacity:.5;stroke:var(--traza);stroke-opacity:1;stroke-width:.8}}
+path.mun.aqui{{fill-opacity:.85}}
+#raya path{{fill:none;stroke:#e8dcc0;stroke-opacity:.85;stroke-width:1.6;stroke-dasharray:7 5}}
 path.cur.mil{{stroke-opacity:.34;stroke-width:1.1}}
 #traza{{fill:none;stroke:var(--traza);stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}}
 #hecho{{fill:none;stroke:var(--hecho);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}}
@@ -270,6 +358,9 @@ paint-order:stroke;stroke:#10141a;stroke-width:2.6}}
     <div class="g">del filo a Santa Ana de Bavícora</div></div>
   <div class="tile"><div class="k">trazo</div><div class="v">2016</div>
     <div class="g">un recorrido grabado el 24 de septiembre</div></div>
+  <div class="tile"><div class="k">municipios</div>
+    <div class="v" style="font-size:17px">{" y ".join(CRUZADOS)}</div>
+    <div class="g">{KM_EN[CRUZADOS[0]]:.1f} km en el primero, {KM_EN[CRUZADOS[1]]:.1f} en el segundo</div></div>
 </div>
 
 <figure>
@@ -281,26 +372,35 @@ paint-order:stroke;stroke:#10141a;stroke-width:2.6}}
 <g id="curvas">
 {cur_html}
 </g>
+<g id="raya"><path d="{raya_d}"/></g>
 <path id="traza" d=""/>
 <path id="hecho" d=""/>
 <g id="pueblos"></g>
 <circle id="marca" r="5.5" fill="#fff3d6" stroke="#7a4d0d" stroke-width="1.5"/>
 <g id="mapachico" transform="translate({VW - cw - 34:.0f},10)">
-  <rect x="0" y="0" width="{cw + 24:.0f}" height="{ch + 40:.0f}" rx="8"
-    fill="#0f1216" fill-opacity=".8"/>
-  <text class="leg" x="12" y="{ch + 32:.0f}">Chihuahua</text>
-  <path d="{chi_d}" fill="#2a3138" stroke="#8d98a4" stroke-width="0.8"/>
+  <rect x="0" y="0" width="{cw + 24:.0f}" height="{ch + 54:.0f}" rx="8"
+    fill="#0f1216" fill-opacity=".82"/>
+  <text class="leg" x="12" y="{ch + 26:.0f}" fill="{C_TRAZA}">{" y ".join(CRUZADOS)}</text>
+  <text class="leg" x="12" y="{ch + 44:.0f}">los municipios que cruza</text>
+  <path d="{chi_d}" fill="#232a31" stroke="#8d98a4" stroke-width="0.8"/>
+  <g id="municipios">
+{mun_d}
+  </g>
+  <path d="{chi_d}" fill="none" stroke="#8d98a4" stroke-width="0.9"/>
   <rect x="{inset_box['x']}" y="{inset_box['y']}" width="{max(inset_box['w'], 6)}"
     height="{max(inset_box['h'], 6)}" fill="none" stroke="{C_TRAZA}" stroke-width="1.4"/>
 </g>
 <g id="legend">
-  <rect x="8" y="{VH - 78:.0f}" width="196" height="70" rx="8" fill="#0f1216" fill-opacity=".72"/>
+  <rect x="8" y="{VH - 112:.0f}" width="206" height="104" rx="8" fill="#0f1216" fill-opacity=".72"/>
   <rect x="18" y="{VH - 62:.0f}" width="16" height="4" rx="2" fill="{C_TRAZA}"/>
   <text class="leg" x="42" y="{VH - 55:.0f}">el recorrido</text>
   <circle cx="26" cy="{VH - 38:.0f}" r="4" fill="{C_PUEBLO}"/>
   <text class="leg" x="42" y="{VH - 34:.0f}">pueblo o rancho</text>
   <line x1="18" y1="{VH - 18:.0f}" x2="34" y2="{VH - 18:.0f}" stroke="#cfd6dd" stroke-opacity=".34"/>
   <text class="leg" x="42" y="{VH - 14:.0f}">curva de nivel, cada 100 m</text>
+  <line x1="18" y1="{VH - 96:.0f}" x2="34" y2="{VH - 96:.0f}" stroke="#e8dcc0"
+    stroke-opacity=".85" stroke-width="1.6" stroke-dasharray="5 4"/>
+  <text class="leg" x="42" y="{VH - 92:.0f}">raya entre municipios</text>
 </g>
 </svg>
 
@@ -321,6 +421,7 @@ paint-order:stroke;stroke:#10141a;stroke-width:2.6}}
   <button class="ctl" id="bRel" aria-pressed="true">Relieve</button>
   <button class="ctl" id="bCur" aria-pressed="true">Curvas</button>
   <button class="ctl" id="bPue" aria-pressed="true">Pueblos</button>
+  <button class="ctl" id="bMun" aria-pressed="true">Municipios</button>
 </div>
 
 <div class="readout">
@@ -330,6 +431,9 @@ paint-order:stroke;stroke:#10141a;stroke-width:2.6}}
     <div class="val" id="rAlt"></div><div class="sub2" id="rPend"></div></div>
   <div class="box"><div class="lab">tiempo</div>
     <div class="val" id="rTiempo"></div><div class="sub2" id="rVel"></div></div>
+  <div class="box"><div class="lab">municipio</div>
+    <div class="val" id="rMun" style="font-size:1.05rem"></div>
+    <div class="sub2" id="rMunSub"></div></div>
   <div class="box wide"><div class="lab">cerca</div>
     <div class="val" id="rCerca" style="font-size:1.05rem"></div>
     <div class="sub2" id="rCercaSub"></div></div>
@@ -340,6 +444,9 @@ paint-order:stroke;stroke:#10141a;stroke-width:2.6}}
 Bavícora, sube al filo en el kilómetro {prof.index(max(prof)) * D.PASO_KM:.1f} y
 de ahí se deja ir: novecientos metros de bajada en los últimos veinte
 kilómetros, hasta el llano.</p>
+<p>Los primeros {KM_EN[CRUZADOS[0]]:.0f} kilómetros van por el municipio de
+{CRUZADOS[0]}; la raya municipal queda en el kilómetro {tramos[1][1]:.1f}, ya
+en la bajada, y de ahí el camino entra a {CRUZADOS[1]}.</p>
 <p>La traza es un solo recorrido grabado con GPS en 2016, no el trazo oficial
 de ninguna edición. El relieve del fondo viene de una malla de trescientos
 metros, y la altitud que marcó el GPS coincide con ella dentro de veinticinco
@@ -354,7 +461,10 @@ cada punto es el del recorrido completo, no el de la línea simplificada. El per
 GPS cada cien metros, no la de la malla, y la velocidad sale de las horas
 grabadas en el archivo. Las curvas de nivel están calculadas sobre la malla
 remuestreada: sirven para leer la forma del terreno, no para medir alturas
-exactas. Los pueblos y ranchos vienen de OpenStreetMap.</p>
+exactas. Los pueblos, los ranchos y los límites municipales vienen de
+OpenStreetMap: los sesenta y siete municipios del estado juntos miden un dos
+por ciento menos que la superficie que se publica de Chihuahua, y el pueblo de
+Namiquipa, El Terrero y Santa Ana de Bavícora caen del lado que les toca.</p>
 </div>
 
 <h2>Referencias</h2>
@@ -378,6 +488,9 @@ const PROF={json.dumps(prof)};
 const SEC={json.dumps(secs)};
 const LUG={json.dumps(lugares_js, ensure_ascii=False)};
 const LEJOS={json.dumps(inset_pts, ensure_ascii=False)};
+const PASO_MUN={json.dumps([[round(k, 3), n] for (la, lo, k), n in zip(pts, paso)], ensure_ascii=False)};
+const TRAMOS={json.dumps([[n, round(k0, 2), round(k1, 2)] for n, k0, k1 in tramos], ensure_ascii=False)};
+const ETQ_MUN={json.dumps(etq_mun, ensure_ascii=False)};
 const PASO={D.PASO_KM};
 const TOTAL={total_km:.3f};
 const PW={PW}, PH={PH};
@@ -393,15 +506,26 @@ LUG.forEach(l=>{{
   make('circle',{{cx:l.x,cy:l.y,r:l.t==='pueblo'?5:3.5,fill:'{C_PUEBLO}',
     stroke:'#10141a','stroke-width':1.2}},gp);
   const der=l.x<{VW * 0.62:.0f};
-  const t=make('text',{{class:'lbl',x:l.x+(der?9:-9),y:l.y+4,
+  const bajo=l.x>{VW * 0.72:.0f};      // por debajo del mapa chico
+  const t=make('text',{{class:'lbl',x:l.x+(der?9:-9),y:l.y+(bajo?18:4),
     'text-anchor':der?'start':'end'}},gp); t.textContent=l.n;
 }});
 {{
   const gi=el('mapachico');
   LEJOS.forEach(p=>{{
-    make('circle',{{cx:p.x,cy:p.y,r:2.6,fill:'#dfe4e9'}},gi);
-    const t=make('text',{{class:'lbl chico',x:p.x+6,y:p.y+3.5}},gi); t.textContent=p.n;
+    make('circle',{{cx:p.x,cy:p.y,r:2.4,fill:'#dfe4e9'}},gi);
   }});
+}}
+function municipioEn(km){{
+  for(const [n,k0,k1] of TRAMOS) if(km>=k0&&km<=k1) return n;
+  return TRAMOS[TRAMOS.length-1][0];
+}}
+const gMun=el('municipios');
+function marcarMunicipio(n){{
+  [...gMun.children].forEach(p=>p.classList.remove('aqui'));
+  const i=ETQ_MUN.findIndex(m=>m.n===n);
+  const cruz=[...gMun.children].filter(p=>p.classList.contains('cruza'));
+  if(i>=0&&cruz[i]) cruz[i].classList.add('aqui');
 }}
 
 const elMin=Math.min(...PROF), elMax=Math.max(...PROF);
@@ -456,6 +580,13 @@ function ver(km){{
   el('rTiempo').textContent=reloj(seg);
   const ds=SEC[i1]-SEC[i0];
   el('rVel').textContent=ds>0?(dl/1000/(ds/3600)).toFixed(0)+' km/h':'parado';
+  const mun=municipioEn(km);
+  marcarMunicipio(mun);
+  el('rMun').textContent=mun;
+  const tr=TRAMOS.find(t=>t[0]===mun);
+  el('rMunSub').textContent = TRAMOS.length>1 && mun===TRAMOS[0][0]
+    ? 'hasta el km '+TRAMOS[1][1].toFixed(1)
+    : 'desde el km '+tr[1].toFixed(1);
   let best=null;
   LUG.forEach(l=>{{const dd=Math.hypot(l.x-x,l.y-y); if(!best||dd<best[1]) best=[l,dd];}});
   const kmPorPx=({(E - W) * 111.32 * np.cos(np.radians(LAT0)):.4f})/{VW:.0f};
@@ -489,9 +620,12 @@ function toggle(id,g){{
   }});
 }}
 toggle('bRel','relieve'); toggle('bCur','curvas'); toggle('bPue','pueblos');
+toggle('bMun','raya');
 
 ver(0);
 window.__ruta=()=>({{puntos:TR.length,total:TOTAL,km:+el('km').value,
+  municipio:el('rMun').textContent,cruzados:ETQ_MUN.map(m=>m.n),
+  raya:getComputedStyle(el('raya')).display,
   alt:el('rAlt').textContent,vel:el('rVel').textContent,tiempo:el('rTiempo').textContent,
   cerca:el('rCerca').textContent,curvas:document.querySelectorAll('#curvas path').length,
   relieve:getComputedStyle(el('relieve')).display,
