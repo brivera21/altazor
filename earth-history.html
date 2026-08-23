@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The History of Earth &middot; Altazor</title>
+<style>
+:root{color-scheme:dark;
+--ink:#e6e6e6; --ink2:#9aa3ad; --ink3:#7d848c;
+--bg:#121212; --panel:#171a1d; --line:#2b2f34; --accent:#58a6ff;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font:400 16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:2rem 1.25rem 4rem}
+header.site{border-top:4px solid var(--accent);padding-top:22px;margin-bottom:26px;
+display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}
+.brand{font-weight:700;font-size:20px;letter-spacing:.1em;text-decoration:none;color:var(--ink)}
+.brand:hover{color:var(--accent)}
+nav.site a{color:var(--ink2);text-decoration:none;font-size:14px}
+nav.site a:hover{color:var(--accent)}
+h1{font-size:1.7rem;font-weight:600;margin:0 0 1.1rem}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+gap:10px;margin:0 0 16px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 14px}
+.tile .k{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em}
+.tile .v{font-size:1.16rem;font-weight:650;margin-top:3px;font-variant-numeric:tabular-nums}
+.tile .d{font-size:.78rem;color:var(--ink3);margin-top:2px;line-height:1.45}
+
+.stage{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.colwrap{flex:1 1 660px;min-width:320px}
+svg{width:100%;height:auto;display:block;border-radius:10px;
+border:1px solid var(--line);background:#0f1216}
+.side{flex:1 1 260px;min-width:250px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+.card h2{font-size:1.08rem;font-weight:600;margin:0 0 2px}
+.card .sub{font-size:.8rem;color:var(--ink3);margin-bottom:9px}
+.row{display:flex;justify-content:space-between;gap:12px;font-size:.87rem;padding:2.5px 0}
+.row span:last-child{font-variant-numeric:tabular-nums;color:var(--ink2)}
+.blurb{margin-top:10px;font-size:.84rem;color:var(--ink2);line-height:1.5}
+.src{margin-top:6px;font-size:.75rem;color:var(--ink3);line-height:1.45}
+
+.controls{margin:13px 0 0;display:flex;gap:.55rem;flex-wrap:wrap;align-items:center;
+font-size:.85rem;color:var(--ink3)}
+button{font:inherit;font-size:.85rem;background:none;color:var(--ink);
+border:1px solid var(--line);border-radius:999px;padding:5px 13px;cursor:pointer}
+button:hover{background:#20242a}
+button:disabled{opacity:.4;cursor:default}
+button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+#crumb{color:var(--ink2)}
+#crumb b{color:var(--ink);font-weight:600}
+
+.unit{cursor:pointer}
+.unit rect{stroke:#0f1216;stroke-width:.8}
+.unit:hover rect{stroke:#e6e6e6;stroke-width:1.4}
+.unit text{fill:#0c0f12;font-size:11px;font-weight:600;pointer-events:none}
+.unit text.pale{fill:#f0f3f6}
+.lane{fill:#9aa3ad;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.tick{stroke:#39414a;stroke-width:1}
+.ticklbl{fill:#7d848c;font-size:10px;font-variant-numeric:tabular-nums}
+.ev{cursor:pointer}
+.ev circle{fill:#f2c66b;stroke:#0f1216;stroke-width:1}
+.ev:hover circle{fill:#fff}
+.ev text{fill:#c7ceda;font-size:10px;pointer-events:none}
+#over rect.all{fill:#1b2027;stroke:#2b2f34}
+#over rect.win{fill:rgba(88,166,255,.28);stroke:#58a6ff;stroke-width:1}
+#over text{fill:#7d848c;font-size:10px}
+
+.notes{margin-top:2.6rem;border-top:1px solid var(--line);padding-top:1.5rem;
+color:var(--ink2);font-size:.95rem;max-width:74ch}
+.notes h2{font-size:1.05rem;font-weight:400;color:var(--ink);margin:0 0 .6rem}
+.notes p{margin:0 0 1rem}
+.refs{margin-top:1.5rem;color:var(--ink3);font-size:.86rem;max-width:78ch}
+.refs h2{font-size:.95rem;font-weight:400;color:var(--ink2);margin:0 0 .6rem}
+.refs p{margin:0 0 .7rem;padding-left:2.2em;text-indent:-2.2em}
+</style>
+</head>
+<body>
+<main>
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="library.html">&larr; Digital Concepts</a></nav>
+</header>
+
+<h1>The History of Earth</h1>
+
+<div class="tiles"><div class="tile"><div class="k">Age of the Earth</div><div class="v">4,567 Ma</div><div class="d">dated from the oldest solids in the Solar System</div></div>
+<div class="tile"><div class="k">Oldest intact rock</div><div class="v">4,031 Ma</div><div class="d">the Acasta gneiss, which is also where the Archean begins</div></div>
+<div class="tile"><div class="k">Earliest accepted fossils</div><div class="v">3,480 Ma</div><div class="d">stromatolites in the Dresser Formation of Western Australia</div></div>
+<div class="tile"><div class="k">The chart</div><div class="v">ICS v2026/06</div><div class="d">the version this page is drawn from</div></div></div>
+
+<div class="stage">
+  <div class="colwrap"><svg id="col" viewBox="0 0 1000 560"
+       preserveAspectRatio="xMidYMid meet">
+    <g id="over"></g>
+    <g id="lanes"></g>
+    <g id="ruler"></g>
+    <g id="events"></g>
+  </svg></div>
+  <div class="side"><div class="card">
+    <h2 id="selName">All of time</h2>
+    <div class="sub" id="selSub">4,567 million years</div>
+    <div class="row"><span>Begins</span><span id="selA"></span></div>
+    <div class="row"><span>Ends</span><span id="selB"></span></div>
+    <div class="row"><span>Lasts</span><span id="selD"></span></div>
+    <div class="row"><span>Share of Earth's life</span><span id="selS"></span></div>
+    <div class="blurb" id="selBlurb"></div>
+    <div class="src" id="selSrc"></div>
+  </div></div>
+</div>
+
+<div class="controls">
+  <button id="bOut" disabled>Zoom out</button>
+  <button id="bAll">All of time</button>
+  <span id="crumb"></span>
+</div>
+
+<div class="notes">
+<h2>About the chart</h2>
+<p>Deep time will not sit on one scale. The Phanerozoic, the part with shells
+and bones and everything a museum can hang on a wall, is the last eighth of the
+planet's life, and nearly every named unit falls inside it. So the column
+zooms: any band clicked becomes the whole width, its children fill the lane
+below, and the bar along the top keeps all 4,567 million years in view so the
+window is never lost.</p>
+<p>Boundaries carry the uncertainty the chart prints. A tilde marks the ones
+the chart estimates rather than dates, which is most of the Precambrian: those
+are round numbers agreed on, not golden spikes driven into a cliff.</p>
+<p>The events under the column are dated from the literature and each names its
+source. Several are disputed, and those say so rather than picking a side.</p>
+</div>
+
+<div class="refs">
+<h2>References</h2>
+<p>Cohen, K. M., Harper, D. A. T., Gibbard, P. L., &amp; Car, N. (2025). The ICS international chronostratigraphic chart this decade. <i>Episodes, 48</i>(1), 105-115. https://doi.org/10.18814/epiiugs/2025/025001</p>
+<p>International Commission on Stratigraphy. (2026). <i>International
+chronostratigraphic chart</i> (v2026/06). https://stratigraphy.org/chart</p>
+<p>Peters, S. E., Husson, J. M., &amp; Czaplewski, J. (2018). Macrostrat: A
+platform for geological data integration and deep-time Earth crust research.
+<i>Geochemistry, Geophysics, Geosystems, 19</i>(4), 1393-1409.</p>
+</div>
+</main>
+<script>
+const D = {"units":[{"n":"Hadean","r":0,"p":null,"a":4567.0,"b":4031.0,"u":null,"q":false,"c":"#6b3f6e","k":[]},{"n":"Archean","r":0,"p":null,"a":4031.0,"b":2500.0,"u":3.0,"q":false,"c":"#9a4667","k":["Eoarchean","Paleoarchean","Mesoarchean","Neoarchean"]},{"n":"Proterozoic","r":0,"p":null,"a":2500.0,"b":538.8,"u":null,"q":false,"c":"#ad6a40","k":["Paleoproterozoic","Mesoproterozoic","Neoproterozoic"]},{"n":"Phanerozoic","r":0,"p":null,"a":538.8,"b":0.0,"u":0.6,"q":false,"c":"#4f7f74","k":["Paleozoic","Mesozoic","Cenozoic"]},{"n":"Eoarchean","r":1,"p":"Archean","a":4031.0,"b":3600.0,"u":3.0,"q":false,"c":"#8a3f63","k":[]},{"n":"Paleoarchean","r":1,"p":"Archean","a":3600.0,"b":3200.0,"u":null,"q":false,"c":"#9a4667","k":[]},{"n":"Mesoarchean","r":1,"p":"Archean","a":3200.0,"b":2800.0,"u":null,"q":false,"c":"#a94f6a","k":[]},{"n":"Neoarchean","r":1,"p":"Archean","a":2800.0,"b":2500.0,"u":null,"q":false,"c":"#b7596e","k":[]},{"n":"Paleoproterozoic","r":1,"p":"Proterozoic","a":2500.0,"b":1600.0,"u":null,"q":false,"c":"#a85a45","k":["Siderian","Rhyacian","Orosirian","Statherian"]},{"n":"Mesoproterozoic","r":1,"p":"Proterozoic","a":1600.0,"b":1000.0,"u":null,"q":false,"c":"#b06b3f","k":["Calymmian","Ectasian","Stenian"]},{"n":"Neoproterozoic","r":1,"p":"Proterozoic","a":1000.0,"b":538.8,"u":null,"q":false,"c":"#b57f3a","k":["Tonian","Cryogenian","Ediacaran"]},{"n":"Paleozoic","r":1,"p":"Phanerozoic","a":538.8,"b":251.902,"u":0.6,"q":false,"c":"#4d7f5e","k":["Cambrian","Ordovician","Silurian","Devonian","Carboniferous","Permian"]},{"n":"Mesozoic","r":1,"p":"Phanerozoic","a":251.902,"b":66.0,"u":0.024,"q":false,"c":"#3f7f8c","k":["Triassic","Jurassic","Cretaceous"]},{"n":"Cenozoic","r":1,"p":"Phanerozoic","a":66.0,"b":0.0,"u":null,"q":false,"c":"#7f8b3f","k":["Paleogene","Neogene","Quaternary"]},{"n":"Siderian","r":2,"p":"Paleoproterozoic","a":2500.0,"b":2300.0,"u":null,"q":false,"c":"#a85a45","k":[]},{"n":"Rhyacian","r":2,"p":"Paleoproterozoic","a":2300.0,"b":2050.0,"u":null,"q":false,"c":"#a85a45","k":[]},{"n":"Orosirian","r":2,"p":"Paleoproterozoic","a":2050.0,"b":1800.0,"u":null,"q":false,"c":"#a85a45","k":[]},{"n":"Statherian","r":2,"p":"Paleoproterozoic","a":1800.0,"b":1600.0,"u":null,"q":false,"c":"#a85a45","k":[]},{"n":"Calymmian","r":2,"p":"Mesoproterozoic","a":1600.0,"b":1400.0,"u":null,"q":false,"c":"#b06b3f","k":[]},{"n":"Ectasian","r":2,"p":"Mesoproterozoic","a":1400.0,"b":1200.0,"u":null,"q":false,"c":"#b06b3f","k":[]},{"n":"Stenian","r":2,"p":"Mesoproterozoic","a":1200.0,"b":1000.0,"u":null,"q":false,"c":"#b06b3f","k":[]},{"n":"Tonian","r":2,"p":"Neoproterozoic","a":1000.0,"b":720.0,"u":null,"q":false,"c":"#b57f3a","k":[]},{"n":"Cryogenian","r":2,"p":"Neoproterozoic","a":720.0,"b":635.0,"u":null,"q":true,"c":"#b57f3a","k":[]},{"n":"Ediacaran","r":2,"p":"Neoproterozoic","a":635.0,"b":538.8,"u":null,"q":true,"c":"#b57f3a","k":[]},{"n":"Cambrian","r":2,"p":"Paleozoic","a":538.8,"b":486.85,"u":0.6,"q":false,"c":"#4d7f5e","k":["Terreneuvian","Series 2","Miaolingian","Furongian"]},{"n":"Ordovician","r":2,"p":"Paleozoic","a":486.85,"b":443.1,"u":1.5,"q":false,"c":"#4d7f5e","k":["Early Ordovician","Middle Ordovician","Late Ordovician"]},{"n":"Silurian","r":2,"p":"Paleozoic","a":443.1,"b":419.62,"u":0.9,"q":false,"c":"#4d7f5e","k":["Llandovery","Wenlock","Ludlow","Pridoli"]},{"n":"Devonian","r":2,"p":"Paleozoic","a":419.62,"b":358.86,"u":1.36,"q":false,"c":"#4d7f5e","k":["Early Devonian","Middle Devonian","Late Devonian"]},{"n":"Carboniferous","r":2,"p":"Paleozoic","a":358.86,"b":298.9,"u":0.19,"q":false,"c":"#4d7f5e","k":["Mississippian","Pennsylvanian"]},{"n":"Permian","r":2,"p":"Paleozoic","a":298.9,"b":251.902,"u":0.15,"q":false,"c":"#4d7f5e","k":["Cisuralian","Guadalupian","Lopingian"]},{"n":"Triassic","r":2,"p":"Mesozoic","a":251.902,"b":201.4,"u":0.024,"q":false,"c":"#3f7f8c","k":["Early Triassic","Middle Triassic","Late Triassic"]},{"n":"Jurassic","r":2,"p":"Mesozoic","a":201.4,"b":143.1,"u":0.2,"q":false,"c":"#3f7f8c","k":["Early Jurassic","Middle Jurassic","Late Jurassic"]},{"n":"Cretaceous","r":2,"p":"Mesozoic","a":143.1,"b":66.0,"u":0.6,"q":false,"c":"#3f7f8c","k":["Early Cretaceous","Late Cretaceous"]},{"n":"Paleogene","r":2,"p":"Cenozoic","a":66.0,"b":23.04,"u":null,"q":false,"c":"#7f8b3f","k":["Paleocene","Eocene","Oligocene"]},{"n":"Neogene","r":2,"p":"Cenozoic","a":23.04,"b":2.58,"u":null,"q":false,"c":"#7f8b3f","k":["Miocene","Pliocene"]},{"n":"Quaternary","r":2,"p":"Cenozoic","a":2.58,"b":0.0,"u":null,"q":false,"c":"#7f8b3f","k":["Pleistocene","Holocene"]},{"n":"Terreneuvian","r":3,"p":"Cambrian","a":538.8,"b":521.0,"u":0.6,"q":false,"c":"#4d7f5e","k":["Fortunian","Stage 2"]},{"n":"Series 2","r":3,"p":"Cambrian","a":521.0,"b":506.5,"u":null,"q":true,"c":"#4d7f5e","k":["Stage 3","Stage 4"]},{"n":"Miaolingian","r":3,"p":"Cambrian","a":506.5,"b":497.0,"u":null,"q":true,"c":"#4d7f5e","k":["Wuliuan","Drumian","Guzhangian"]},{"n":"Furongian","r":3,"p":"Cambrian","a":497.0,"b":486.85,"u":null,"q":true,"c":"#4d7f5e","k":["Paibian","Jiangshanian","Stage 10"]},{"n":"Early Ordovician","r":3,"p":"Ordovician","a":486.85,"b":471.3,"u":1.5,"q":false,"c":"#4d7f5e","k":["Tremadocian","Floian"]},{"n":"Middle Ordovician","r":3,"p":"Ordovician","a":471.3,"b":458.2,"u":1.4,"q":false,"c":"#4d7f5e","k":["Dapingian","Darriwilian"]},{"n":"Late Ordovician","r":3,"p":"Ordovician","a":458.2,"b":443.1,"u":0.7,"q":false,"c":"#4d7f5e","k":["Sandbian","Katian","Hirnantian"]},{"n":"Llandovery","r":3,"p":"Silurian","a":443.1,"b":432.9,"u":0.9,"q":false,"c":"#4d7f5e","k":["Rhuddanian","Aeronian","Telychian"]},{"n":"Wenlock","r":3,"p":"Silurian","a":432.9,"b":426.7,"u":1.2,"q":false,"c":"#4d7f5e","k":["Sheinwoodian","Homerian"]},{"n":"Ludlow","r":3,"p":"Silurian","a":426.7,"b":422.7,"u":1.5,"q":false,"c":"#4d7f5e","k":["Gorstian","Ludfordian"]},{"n":"Pridoli","r":3,"p":"Silurian","a":422.7,"b":419.62,"u":1.6,"q":false,"c":"#4d7f5e","k":[]},{"n":"Early Devonian","r":3,"p":"Devonian","a":419.62,"b":393.47,"u":1.36,"q":false,"c":"#4d7f5e","k":["Lochkovian","Pragian","Emsian"]},{"n":"Middle Devonian","r":3,"p":"Devonian","a":393.47,"b":382.31,"u":0.99,"q":false,"c":"#4d7f5e","k":["Eifelian","Givetian"]},{"n":"Late Devonian","r":3,"p":"Devonian","a":382.31,"b":358.86,"u":1.36,"q":false,"c":"#4d7f5e","k":["Frasnian","Famennian"]},{"n":"Mississippian","r":3,"p":"Carboniferous","a":358.86,"b":323.4,"u":0.19,"q":false,"c":"#4d7f5e","k":["Tournaisian","Visean","Serpukhovian"]},{"n":"Pennsylvanian","r":3,"p":"Carboniferous","a":323.4,"b":298.9,"u":0.4,"q":false,"c":"#4d7f5e","k":["Bashkirian","Moscovian","Kasimovian","Gzhelian"]},{"n":"Cisuralian","r":3,"p":"Permian","a":298.9,"b":274.4,"u":0.15,"q":false,"c":"#4d7f5e","k":["Asselian","Sakmarian","Artinskian","Kungurian"]},{"n":"Guadalupian","r":3,"p":"Permian","a":274.4,"b":259.857,"u":0.4,"q":false,"c":"#4d7f5e","k":["Roadian","Wordian","Capitanian"]},{"n":"Lopingian","r":3,"p":"Permian","a":259.857,"b":251.902,"u":0.084,"q":false,"c":"#4d7f5e","k":["Wuchiapingian","Changhsingian"]},{"n":"Early Triassic","r":3,"p":"Triassic","a":251.902,"b":247.0,"u":0.024,"q":false,"c":"#3f7f8c","k":["Induan","Olenekian"]},{"n":"Middle Triassic","r":3,"p":"Triassic","a":247.0,"b":237.0,"u":null,"q":false,"c":"#3f7f8c","k":["Anisian","Ladinian"]},{"n":"Late Triassic","r":3,"p":"Triassic","a":237.0,"b":201.4,"u":null,"q":true,"c":"#3f7f8c","k":["Carnian","Norian","Rhaetian"]},{"n":"Early Jurassic","r":3,"p":"Jurassic","a":201.4,"b":174.7,"u":0.2,"q":false,"c":"#3f7f8c","k":["Hettangian","Sinemurian","Pliensbachian","Toarcian"]},{"n":"Middle Jurassic","r":3,"p":"Jurassic","a":174.7,"b":161.5,"u":0.8,"q":false,"c":"#3f7f8c","k":["Aalenian","Bajocian","Bathonian","Callovian"]},{"n":"Late Jurassic","r":3,"p":"Jurassic","a":161.5,"b":143.1,"u":1.0,"q":false,"c":"#3f7f8c","k":["Oxfordian","Kimmeridgian","Tithonian"]},{"n":"Early Cretaceous","r":3,"p":"Cretaceous","a":143.1,"b":100.5,"u":0.6,"q":false,"c":"#3f7f8c","k":["Berriasian","Valanginian","Hauterivian","Barremian","Aptian","Albian"]},{"n":"Late Cretaceous","r":3,"p":"Cretaceous","a":100.5,"b":66.0,"u":0.1,"q":false,"c":"#3f7f8c","k":["Cenomanian","Turonian","Coniacian","Santonian","Campanian","Maastrichtian"]},{"n":"Paleocene","r":3,"p":"Paleogene","a":66.0,"b":56.0,"u":null,"q":false,"c":"#7f8b3f","k":["Danian","Selandian","Thanetian"]},{"n":"Eocene","r":3,"p":"Paleogene","a":56.0,"b":33.9,"u":null,"q":false,"c":"#7f8b3f","k":["Ypresian","Lutetian","Bartonian","Priabonian"]},{"n":"Oligocene","r":3,"p":"Paleogene","a":33.9,"b":23.04,"u":null,"q":false,"c":"#7f8b3f","k":["Rupelian","Chattian"]},{"n":"Miocene","r":3,"p":"Neogene","a":23.04,"b":5.333,"u":null,"q":false,"c":"#7f8b3f","k":["Aquitanian","Burdigalian","Langhian","Serravallian","Tortonian","Messinian"]},{"n":"Pliocene","r":3,"p":"Neogene","a":5.333,"b":2.58,"u":null,"q":false,"c":"#7f8b3f","k":["Zanclean","Piacenzian"]},{"n":"Pleistocene","r":3,"p":"Quaternary","a":2.58,"b":0.0117,"u":null,"q":false,"c":"#7f8b3f","k":["Gelasian","Calabrian","Chibanian","Late Pleistocene"]},{"n":"Holocene","r":3,"p":"Quaternary","a":0.0117,"b":0.0,"u":null,"q":false,"c":"#7f8b3f","k":["Greenlandian","Northgrippian","Meghalayan"]},{"n":"Fortunian","r":4,"p":"Terreneuvian","a":538.8,"b":529.0,"u":0.6,"q":false,"c":"#4d7f5e","k":[]},{"n":"Stage 2","r":4,"p":"Terreneuvian","a":529.0,"b":521.0,"u":null,"q":true,"c":"#4d7f5e","k":[]},{"n":"Stage 3","r":4,"p":"Series 2","a":521.0,"b":514.5,"u":null,"q":true,"c":"#4d7f5e","k":[]},{"n":"Stage 4","r":4,"p":"Series 2","a":514.5,"b":506.5,"u":null,"q":true,"c":"#4d7f5e","k":[]},{"n":"Wuliuan","r":4,"p":"Miaolingian","a":506.5,"b":504.5,"u":null,"q":true,"c":"#4d7f5e","k":[]},{"n":"Drumian","r":4,"p":"Miaolingian","a":504.5,"b":500.5,"u":null,"q":true,"c":"#4d7f5e","k":[]},{"n":"Guzhangian","r":4,"p":"Miaolingian","a":500.5,"b":497.0,"u":null,"q":true,"c":"#4d7f5e","k":[]},{"n":"Paibian","r":4,"p":"Furongian","a":497.0,"b":494.2,"u":null,"q":true,"c":"#4d7f5e","k":[]},{"n":"Jiangshanian","r":4,"p":"Furongian","a":494.2,"b":491.0,"u":null,"q":true,"c":"#4d7f5e","k":[]},{"n":"Stage 10","r":4,"p":"Furongian","a":491.0,"b":486.85,"u":null,"q":true,"c":"#4d7f5e","k":[]},{"n":"Tremadocian","r":4,"p":"Early Ordovician","a":486.85,"b":477.1,"u":1.5,"q":false,"c":"#4d7f5e","k":[]},{"n":"Floian","r":4,"p":"Early Ordovician","a":477.1,"b":471.3,"u":1.2,"q":false,"c":"#4d7f5e","k":[]},{"n":"Dapingian","r":4,"p":"Middle Ordovician","a":471.3,"b":469.4,"u":1.4,"q":false,"c":"#4d7f5e","k":[]},{"n":"Darriwilian","r":4,"p":"Middle Ordovician","a":469.4,"b":458.2,"u":0.9,"q":false,"c":"#4d7f5e","k":[]},{"n":"Sandbian","r":4,"p":"Late Ordovician","a":458.2,"b":452.8,"u":0.7,"q":false,"c":"#4d7f5e","k":[]},{"n":"Katian","r":4,"p":"Late Ordovician","a":452.8,"b":445.2,"u":0.7,"q":false,"c":"#4d7f5e","k":[]},{"n":"Hirnantian","r":4,"p":"Late Ordovician","a":445.2,"b":443.1,"u":0.9,"q":false,"c":"#4d7f5e","k":[]},{"n":"Rhuddanian","r":4,"p":"Llandovery","a":443.1,"b":440.5,"u":0.9,"q":false,"c":"#4d7f5e","k":[]},{"n":"Aeronian","r":4,"p":"Llandovery","a":440.5,"b":438.6,"u":1.0,"q":false,"c":"#4d7f5e","k":[]},{"n":"Telychian","r":4,"p":"Llandovery","a":438.6,"b":432.9,"u":1.0,"q":false,"c":"#4d7f5e","k":[]},{"n":"Sheinwoodian","r":4,"p":"Wenlock","a":432.9,"b":430.6,"u":1.2,"q":false,"c":"#4d7f5e","k":[]},{"n":"Homerian","r":4,"p":"Wenlock","a":430.6,"b":426.7,"u":1.3,"q":false,"c":"#4d7f5e","k":[]},{"n":"Gorstian","r":4,"p":"Ludlow","a":426.7,"b":425.0,"u":1.5,"q":false,"c":"#4d7f5e","k":[]},{"n":"Ludfordian","r":4,"p":"Ludlow","a":425.0,"b":422.7,"u":1.5,"q":false,"c":"#4d7f5e","k":[]},{"n":"Lochkovian","r":4,"p":"Early Devonian","a":419.62,"b":413.02,"u":1.36,"q":false,"c":"#4d7f5e","k":[]},{"n":"Pragian","r":4,"p":"Early Devonian","a":413.02,"b":410.62,"u":1.91,"q":false,"c":"#4d7f5e","k":[]},{"n":"Emsian","r":4,"p":"Early Devonian","a":410.62,"b":393.47,"u":1.95,"q":false,"c":"#4d7f5e","k":[]},{"n":"Eifelian","r":4,"p":"Middle Devonian","a":393.47,"b":387.95,"u":0.99,"q":false,"c":"#4d7f5e","k":[]},{"n":"Givetian","r":4,"p":"Middle Devonian","a":387.95,"b":382.31,"u":1.04,"q":false,"c":"#4d7f5e","k":[]},{"n":"Frasnian","r":4,"p":"Late Devonian","a":382.31,"b":372.15,"u":1.36,"q":false,"c":"#4d7f5e","k":[]},{"n":"Famennian","r":4,"p":"Late Devonian","a":372.15,"b":358.86,"u":0.46,"q":false,"c":"#4d7f5e","k":[]},{"n":"Tournaisian","r":4,"p":"Mississippian","a":358.86,"b":346.7,"u":0.19,"q":false,"c":"#4d7f5e","k":[]},{"n":"Visean","r":4,"p":"Mississippian","a":346.7,"b":330.3,"u":0.4,"q":false,"c":"#4d7f5e","k":[]},{"n":"Serpukhovian","r":4,"p":"Mississippian","a":330.3,"b":323.4,"u":0.4,"q":false,"c":"#4d7f5e","k":[]},{"n":"Bashkirian","r":4,"p":"Pennsylvanian","a":323.4,"b":315.2,"u":0.4,"q":false,"c":"#4d7f5e","k":[]},{"n":"Moscovian","r":4,"p":"Pennsylvanian","a":315.2,"b":307.0,"u":0.2,"q":false,"c":"#4d7f5e","k":[]},{"n":"Kasimovian","r":4,"p":"Pennsylvanian","a":307.0,"b":303.7,"u":0.1,"q":false,"c":"#4d7f5e","k":[]},{"n":"Gzhelian","r":4,"p":"Pennsylvanian","a":303.7,"b":298.9,"u":0.1,"q":false,"c":"#4d7f5e","k":[]},{"n":"Asselian","r":4,"p":"Cisuralian","a":298.9,"b":293.52,"u":0.15,"q":false,"c":"#4d7f5e","k":[]},{"n":"Sakmarian","r":4,"p":"Cisuralian","a":293.52,"b":290.1,"u":0.17,"q":false,"c":"#4d7f5e","k":[]},{"n":"Artinskian","r":4,"p":"Cisuralian","a":290.1,"b":283.3,"u":0.26,"q":false,"c":"#4d7f5e","k":[]},{"n":"Kungurian","r":4,"p":"Cisuralian","a":283.3,"b":274.4,"u":0.4,"q":false,"c":"#4d7f5e","k":[]},{"n":"Roadian","r":4,"p":"Guadalupian","a":274.4,"b":266.9,"u":0.4,"q":false,"c":"#4d7f5e","k":[]},{"n":"Wordian","r":4,"p":"Guadalupian","a":266.9,"b":264.28,"u":0.4,"q":false,"c":"#4d7f5e","k":[]},{"n":"Capitanian","r":4,"p":"Guadalupian","a":264.28,"b":259.857,"u":0.16,"q":false,"c":"#4d7f5e","k":[]},{"n":"Wuchiapingian","r":4,"p":"Lopingian","a":259.857,"b":254.14,"u":0.084,"q":false,"c":"#4d7f5e","k":[]},{"n":"Changhsingian","r":4,"p":"Lopingian","a":254.14,"b":251.902,"u":0.07,"q":false,"c":"#4d7f5e","k":[]},{"n":"Induan","r":4,"p":"Early Triassic","a":251.902,"b":250.8,"u":0.024,"q":false,"c":"#3f7f8c","k":[]},{"n":"Olenekian","r":4,"p":"Early Triassic","a":250.8,"b":247.0,"u":null,"q":false,"c":"#3f7f8c","k":[]},{"n":"Anisian","r":4,"p":"Middle Triassic","a":247.0,"b":241.464,"u":null,"q":false,"c":"#3f7f8c","k":[]},{"n":"Ladinian","r":4,"p":"Middle Triassic","a":241.464,"b":237.0,"u":0.28,"q":false,"c":"#3f7f8c","k":[]},{"n":"Carnian","r":4,"p":"Late Triassic","a":237.0,"b":227.3,"u":null,"q":true,"c":"#3f7f8c","k":[]},{"n":"Norian","r":4,"p":"Late Triassic","a":227.3,"b":205.7,"u":null,"q":true,"c":"#3f7f8c","k":[]},{"n":"Rhaetian","r":4,"p":"Late Triassic","a":205.7,"b":201.4,"u":null,"q":true,"c":"#3f7f8c","k":[]},{"n":"Hettangian","r":4,"p":"Early Jurassic","a":201.4,"b":199.5,"u":0.2,"q":false,"c":"#3f7f8c","k":[]},{"n":"Sinemurian","r":4,"p":"Early Jurassic","a":199.5,"b":192.9,"u":0.3,"q":false,"c":"#3f7f8c","k":[]},{"n":"Pliensbachian","r":4,"p":"Early Jurassic","a":192.9,"b":184.2,"u":0.3,"q":false,"c":"#3f7f8c","k":[]},{"n":"Toarcian","r":4,"p":"Early Jurassic","a":184.2,"b":174.7,"u":0.3,"q":false,"c":"#3f7f8c","k":[]},{"n":"Aalenian","r":4,"p":"Middle Jurassic","a":174.7,"b":170.9,"u":0.8,"q":false,"c":"#3f7f8c","k":[]},{"n":"Bajocian","r":4,"p":"Middle Jurassic","a":170.9,"b":168.2,"u":0.8,"q":false,"c":"#3f7f8c","k":[]},{"n":"Bathonian","r":4,"p":"Middle Jurassic","a":168.2,"b":165.3,"u":1.2,"q":false,"c":"#3f7f8c","k":[]},{"n":"Callovian","r":4,"p":"Middle Jurassic","a":165.3,"b":161.5,"u":1.1,"q":false,"c":"#3f7f8c","k":[]},{"n":"Oxfordian","r":4,"p":"Late Jurassic","a":161.5,"b":154.8,"u":1.0,"q":false,"c":"#3f7f8c","k":[]},{"n":"Kimmeridgian","r":4,"p":"Late Jurassic","a":154.8,"b":149.2,"u":0.8,"q":false,"c":"#3f7f8c","k":[]},{"n":"Tithonian","r":4,"p":"Late Jurassic","a":149.2,"b":143.1,"u":0.7,"q":false,"c":"#3f7f8c","k":[]},{"n":"Berriasian","r":4,"p":"Early Cretaceous","a":143.1,"b":137.05,"u":0.6,"q":false,"c":"#3f7f8c","k":[]},{"n":"Valanginian","r":4,"p":"Early Cretaceous","a":137.05,"b":132.6,"u":0.2,"q":false,"c":"#3f7f8c","k":[]},{"n":"Hauterivian","r":4,"p":"Early Cretaceous","a":132.6,"b":125.77,"u":0.6,"q":false,"c":"#3f7f8c","k":[]},{"n":"Barremian","r":4,"p":"Early Cretaceous","a":125.77,"b":121.4,"u":null,"q":false,"c":"#3f7f8c","k":[]},{"n":"Aptian","r":4,"p":"Early Cretaceous","a":121.4,"b":113.2,"u":0.6,"q":false,"c":"#3f7f8c","k":[]},{"n":"Albian","r":4,"p":"Early Cretaceous","a":113.2,"b":100.5,"u":0.3,"q":false,"c":"#3f7f8c","k":[]},{"n":"Cenomanian","r":4,"p":"Late Cretaceous","a":100.5,"b":93.9,"u":0.1,"q":false,"c":"#3f7f8c","k":[]},{"n":"Turonian","r":4,"p":"Late Cretaceous","a":93.9,"b":89.8,"u":0.2,"q":false,"c":"#3f7f8c","k":[]},{"n":"Coniacian","r":4,"p":"Late Cretaceous","a":89.8,"b":85.7,"u":0.3,"q":false,"c":"#3f7f8c","k":[]},{"n":"Santonian","r":4,"p":"Late Cretaceous","a":85.7,"b":83.6,"u":0.2,"q":false,"c":"#3f7f8c","k":[]},{"n":"Campanian","r":4,"p":"Late Cretaceous","a":83.6,"b":72.2,"u":0.2,"q":false,"c":"#3f7f8c","k":[]},{"n":"Maastrichtian","r":4,"p":"Late Cretaceous","a":72.2,"b":66.0,"u":0.2,"q":false,"c":"#3f7f8c","k":[]},{"n":"Danian","r":4,"p":"Paleocene","a":66.0,"b":61.66,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Selandian","r":4,"p":"Paleocene","a":61.66,"b":59.24,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Thanetian","r":4,"p":"Paleocene","a":59.24,"b":56.0,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Ypresian","r":4,"p":"Eocene","a":56.0,"b":48.07,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Lutetian","r":4,"p":"Eocene","a":48.07,"b":41.03,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Bartonian","r":4,"p":"Eocene","a":41.03,"b":37.71,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Priabonian","r":4,"p":"Eocene","a":37.71,"b":33.9,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Rupelian","r":4,"p":"Oligocene","a":33.9,"b":27.3,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Chattian","r":4,"p":"Oligocene","a":27.3,"b":23.04,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Aquitanian","r":4,"p":"Miocene","a":23.04,"b":20.45,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Burdigalian","r":4,"p":"Miocene","a":20.45,"b":15.98,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Langhian","r":4,"p":"Miocene","a":15.98,"b":13.82,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Serravallian","r":4,"p":"Miocene","a":13.82,"b":11.63,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Tortonian","r":4,"p":"Miocene","a":11.63,"b":7.246,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Messinian","r":4,"p":"Miocene","a":7.246,"b":5.333,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Zanclean","r":4,"p":"Pliocene","a":5.333,"b":3.6,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Piacenzian","r":4,"p":"Pliocene","a":3.6,"b":2.58,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Gelasian","r":4,"p":"Pleistocene","a":2.58,"b":1.8,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Calabrian","r":4,"p":"Pleistocene","a":1.8,"b":0.774,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Chibanian","r":4,"p":"Pleistocene","a":0.774,"b":0.129,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Late Pleistocene","r":4,"p":"Pleistocene","a":0.129,"b":0.0117,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Greenlandian","r":4,"p":"Holocene","a":0.0117,"b":0.0082,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Northgrippian","r":4,"p":"Holocene","a":0.0082,"b":0.0042,"u":null,"q":false,"c":"#7f8b3f","k":[]},{"n":"Meghalayan","r":4,"p":"Holocene","a":0.0042,"b":0.0,"u":null,"q":false,"c":"#7f8b3f","k":[]}],"events":[{"n":"Formation of the Solar System (CAIs)","a":4567.3,"r":[4567.5,4567.1],"d":"Calcium-aluminium-rich inclusions in chondrites, the oldest solids in the Solar System, date to 4567.3 +/- 0.16 Ma; the ICS chart uses 4567 Ma as the base of the Hadean.","s":"Wikipedia 'Age of Earth' (citing Bouvier & Wadhwa 2010); ICS chart v2026/06"},{"n":"Formation of the Earth","a":4540.0,"r":[4590.0,4490.0],"d":"Earth accreted over roughly 30-100 Myr after CAI formation; the canonical figure is 4.54 +/- 0.05 Ga, derived from Pb-Pb dating of meteorites.","s":"Wikipedia 'Age of Earth' (Patterson 1956, 4.55 +/- 0.07 Ga; Dalrymple)"},{"n":"Moon-forming giant impact","a":4510.0,"r":[4530.0,4420.0],"d":"A Mars-sized impactor ('Theia') struck the proto-Earth and formed the Moon; DISPUTED - Hf-W and U-Pb of lunar zircons give 4.51 Ga, other studies argue 4.42-4.45 Ga.","s":"Barboni et al. 2017, Science Advances 3:e1602365 'Early formation of the Moon 4.51 billion years ago'; cf. Thiemens et al. 2019, Nature Geoscience"},{"n":"Jack Hills zircons (oldest known minerals)","a":4404.0,"r":[4412.0,4396.0],"d":"Detrital zircon grains from the Jack Hills, Western Australia, dated 4404 +/- 8 Ma - the oldest dated material of terrestrial origin.","s":"Wilde et al. 2001, Nature 409:175-178; Wikipedia 'Oldest dated rocks'"},{"n":"Nuvvuagittuq greenstone belt (disputed older rock)","a":4280.0,"r":[4280.0,3800.0],"d":"DISPUTED - a 4.28 Ga Sm-Nd mantle-extraction model age from Quebec; the true crystallisation age may be closer to 3.8 Ga, so it is not accepted as the oldest rock.","s":"Wikipedia 'Oldest dated rocks' (O'Neil et al. 2008 and rebuttals)"},{"n":"Oldest claimed biogenic carbon (Jack Hills zircon graphite)","a":4100.0,"r":null,"d":"HIGHLY DISPUTED - isotopically light graphite enclosed in a single 4.1 Ga zircon, argued to be biogenic; no consensus.","s":"Bell et al. 2015, PNAS 112:14518; Wikipedia 'Earliest known life forms'"},{"n":"Oldest widely accepted intact rock (Acasta Gneiss)","a":4031.0,"r":[4034.0,4028.0],"d":"Felsic orthogneiss from the Slave Craton, NW Canada, at 4031 +/- 3 Ma; this age now defines the GSSA base of the Archean Eon on the ICS chart.","s":"Wikipedia 'Oldest dated rocks'; ICS chart v2026/06 (base Archean 4031 +/-3 Ma)"},{"n":"Isua graphite - earliest chemical evidence of life","a":3700.0,"r":[3800.0,3700.0],"d":"Isotopically fractionated graphite in metasedimentary rocks of the Isua belt, Greenland; broadly (not universally) accepted as biogenic.","s":"Wikipedia 'Earliest known life forms' (Rosing 1999; Ohtomo et al. 2014)"},{"n":"Dresser Formation stromatolites - earliest widely accepted fossil life","a":3480.0,"r":[3495.0,3430.0],"d":"Stromatolites in 3.480 Ga geyserite of the Pilbara Craton, Western Australia; the oldest fossils most researchers accept as biological.","s":"Wikipedia 'Earliest known life forms'; Djokic et al. 2017, Nature Communications"},{"n":"Great Oxidation Event (onset)","a":2430.0,"r":[2460.0,2426.0],"d":"Atmospheric free oxygen rose irreversibly, marked by the loss of mass-independent sulphur fractionation; onset constrained to 2460-2426 Ma.","s":"Gumsley et al. 2017, PNAS 114:1811-1816 'Timing and tempo of the Great Oxidation Event'"},{"n":"Huronian glaciation (Paleoproterozoic 'Snowball Earth')","a":2350.0,"r":[2450.0,2100.0],"d":"Three glacial episodes (Ramsay Lake, Bruce, Gowganda formations) spanning ~2.4-2.1 Ga, plausibly triggered by methane collapse during the GOE; the exact bounds are loose.","s":"Wikipedia 'Huronian glaciation' (Bekker 2020; Kopp et al. 2005, PNAS; Tang & Chen 2013)"},{"n":"Great Oxidation Event (end of the oxygen overshoot / stabilisation)","a":2060.0,"r":[2220.0,2060.0],"d":"The GOE interval closes around 2.06 Ga; NOTE published onset estimates 2016-2022 differ by ~500 Myr (2.7-2.3 Ga), so the event's timing is genuinely contested.","s":"Wikipedia 'Great Oxidation Event' (Poulton et al. 2021, Nature; Gumsley et al. 2017)"},{"n":"First eukaryotes (oldest accepted body fossils)","a":1650.0,"r":[1800.0,1600.0],"d":"Ornamented acritarchs (Tappania, Shuiyousphaeridium) from North China at ~1.65 Ga; Ruyang Group forms at 1.8-1.6 Ga may be older but are disputed, and the oldest secure eukaryotic biomarkers are only ~800 Ma.","s":"Wikipedia 'Eukaryote' (Miao et al. 2019; Javaux & Lepot 2018)"},{"n":"Sturtian glaciation (Snowball Earth)","a":688.0,"r":[717.0,660.0],"d":"The longer of the two Cryogenian global glaciations, ~717 to ~660 Ma; its onset coincides with the Franklin large igneous province.","s":"Wikipedia 'Cryogenian' (Rooney et al. 2015, Geology; MacLennan et al. 2018)"},{"n":"Marinoan glaciation (Snowball Earth)","a":640.0,"r":[654.5,632.3],"d":"The end-Cryogenian glaciation; its END is well dated at 632.3 +/- 5.9 Ma, but its START is poorly constrained - no earlier than ~654.5 Ma. The ICS places the base of the Ediacaran (~635 Ma) at the Marinoan cap carbonate.","s":"Wikipedia 'Marinoan glaciation' (Rooney et al. 2015, Geology; Ma et al. 2023, Global and Planetary Change)"},{"n":"Ediacaran biota","a":570.0,"r":[600.0,538.8],"d":"Soft-bodied macroscopic multicellular organisms; they appear ~600 Ma (classic Avalon assemblage ~575 Ma) and the characteristic communities vanish at the Cambrian boundary, 538.8 Ma.","s":"Wikipedia 'Ediacaran biota'; base-Cambrian age from ICS chart v2026/06"},{"n":"Cambrian explosion","a":530.0,"r":[538.8,515.0],"d":"Rapid appearance of most animal phyla in the fossil record over ~13-25 Myr from the base of the Cambrian (538.8 Ma); trilobites appear at the base of Series 2, ~521 Ma.","s":"Wikipedia 'Cambrian explosion'; stage ages from ICS chart v2026/06"},{"n":"First land plants","a":470.0,"r":[473.0,465.0],"d":"Cryptospores (monads, dyads, tetrads) from the Middle Ordovician of Turkey, Saudi Arabia and Argentina - the earliest evidence of plants on land.","s":"Wikipedia 'Timeline of plant evolution' (Rubinstein et al. 2010, New Phytologist)"},{"n":"End-Ordovician mass extinction","a":444.0,"r":[445.2,443.1],"d":"Two pulses across the Hirnantian glaciation killed ~85% of species (~57% of genera); the second-largest extinction by genus loss.","s":"Wikipedia 'Extinction event' (Bambach 2006, Annu. Rev. Earth Planet. Sci.); Hirnantian bounds from ICS chart v2026/06"},{"n":"First vascular plants","a":425.0,"r":[433.0,420.0],"d":"Cooksonia and relatives, the first land plants with conducting tissue, appear in the Silurian (Wenlock-Pridoli).","s":"Wikipedia 'Timeline of plant evolution'; Silurian series ages from ICS chart v2026/06"},{"n":"First tetrapods (trackways)","a":390.0,"r":[393.0,385.0],"d":"Trackways from Zachelmie, Poland, in the Eifelian (Middle Devonian), ~390 Ma; second-oldest are Valentia Island, Ireland, ~385 Ma.","s":"Wikipedia 'Tetrapod' (Niedzwiedzki et al. 2010, Nature)"},{"n":"First forests","a":385.0,"r":[390.0,380.0],"d":"Cladoxylopsid and Archaeopteris trees form the world's first forests in the Middle-Late Devonian (e.g. the Gilboa fossil forest).","s":"Wikipedia 'Timeline of plant evolution'; Stein et al. 2012, Nature"},{"n":"Late Devonian mass extinction (Kellwasser event)","a":372.15,"r":[382.31,372.15],"d":"A protracted crisis peaking at the Frasnian-Famennian boundary (372.15 Ma); at least ~70-75% of species and ~50% of genera lost, with reef ecosystems hit hardest.","s":"Wikipedia 'Extinction event' (Bambach 2006; McGhee 1996); boundary age from ICS chart v2026/06"},{"n":"First tetrapods (body fossils)","a":370.0,"r":[380.0,360.0],"d":"Fragmentary Frasnian forms (Elginerpeton, Obruchevichthys) at ~380 Ma; the oldest near-complete tetrapods, Acanthostega and Ichthyostega, are late Famennian (~365 Ma).","s":"Wikipedia 'Tetrapod'"},{"n":"End-Devonian (Hangenberg) event","a":358.86,"r":null,"d":"A second Devonian crisis at the Devonian-Carboniferous boundary, often counted with the Late Devonian extinction; severely hit early vertebrates.","s":"Wikipedia 'Extinction event'; boundary age from ICS chart v2026/06"},{"n":"First amniotes","a":318.0,"r":[355.0,315.0],"d":"Hylonomus and Asaphestera from Nova Scotia, Bashkirian (~318 Ma), are the oldest crown amniotes from body fossils; DISPUTED 2025 Australian trackways would push the origin back to ~355 Ma.","s":"Wikipedia 'Amniote' (Hylonomus/Asaphestera); Long et al. 2025, Nature (disputed trackways)"},{"n":"End-Permian mass extinction ('the Great Dying')","a":251.9,"r":[251.941,251.88],"d":"The most severe extinction known: ~81% of marine species and ~70% of terrestrial vertebrate species lost in 60 +/- 48 kyr. NOTE the often-quoted '96% of marine species' (Raup 1979) is now regarded as too high.","s":"Wikipedia 'Permian-Triassic extinction event' (Burgess et al. 2014, PNAS for the 251.941-251.880 Ma interval; Stanley 2016, PNAS for 81%)"},{"n":"First dinosaurs","a":233.0,"r":[243.0,230.0],"d":"Gnathovorax and Staurikosaurus from the Santa Maria Formation (233.23 Ma) and Eoraptor/herrerasaurids from Ischigualasto (231-230 Ma); the ~243 Ma Nyasasaurus is too fragmentary to confirm.","s":"Wikipedia 'Dinosaur' (Langer et al.; Nesbitt et al. 2013 for Nyasasaurus)"},{"n":"First mammaliaforms","a":225.0,"r":[230.0,205.0],"d":"Late Triassic mammal-like forms (Adelobasileus, Morganucodon grade) at ~225 Ma under the traditional jaw-joint definition of 'mammal'.","s":"Wikipedia 'Mammal' (Kemp 2005)"},{"n":"End-Triassic mass extinction","a":201.4,"r":null,"d":"At the Triassic-Jurassic boundary; ~70-75% of species and ~48% of genera lost, plausibly driven by the Central Atlantic Magmatic Province.","s":"Wikipedia 'Extinction event' (UCR/Bambach compilations); boundary age 201.4 +/-0.2 Ma from ICS chart v2026/06"},{"n":"First crown-group mammals","a":167.0,"r":[180.0,160.0],"d":"Ambondro, Amphilestes and Amphitherium, all ~167 Ma (Middle Jurassic), bracket the monotreme-therian split and so date the mammal crown group.","s":"Wikipedia 'Mammal'"},{"n":"First birds (Archaeopteryx)","a":150.0,"r":[160.0,148.5],"d":"Archaeopteryx from the Solnhofen limestone, 150.8-148.5 Ma; NOTE it is no longer regarded as the oldest bird - older avialans (Anchiornis, Aurornis, Baminornis) reach ~160 Ma, and Archaeopteryx's placement is itself debated.","s":"Wikipedia 'Archaeopteryx'"},{"n":"First flowering plants (angiosperms)","a":130.0,"r":[135.0,125.0],"d":"Unequivocal angiosperm pollen and fossils appear suddenly and diversely in the Early Cretaceous, ~130 Ma; DISPUTED - molecular clocks imply a much older origin and pre-Cretaceous fossil claims (e.g. Nanjinganthus) are not accepted.","s":"Wikipedia 'Flowering plant'"},{"n":"Chicxulub impact","a":66.043,"r":[66.054,66.032],"d":"A ~10 km bolide struck the Yucatan Peninsula; 40Ar/39Ar dating of Haitian tektites gives 66.043 +/- 0.011 Ma (+/- 0.043 Ma including systematic error).","s":"Renne et al. 2013, Science 339:684-687; Wikipedia 'Chicxulub crater'"},{"n":"End-Cretaceous (K-Pg) mass extinction","a":66.0,"r":null,"d":"~75% of species and ~50% of genera lost, including all non-avian dinosaurs; coincides with the Chicxulub impact and Deccan Traps volcanism.","s":"Wikipedia 'Extinction event' (Raup & Sepkoski 1982); boundary age 66.0 Ma from ICS chart v2026/06"},{"n":"Paleocene-Eocene Thermal Maximum (PETM)","a":56.0,"r":[56.0,55.8],"d":"A 5-8 degC global warming spike lasting ~200 kyr; its carbon isotope excursion onset DEFINES the Paleocene/Eocene GSSP, so the ICS age of the boundary, 56.0 Ma, is the PETM onset.","s":"ICS chart v2026/06 (base Ypresian 56.0 Ma); Britannica 'Paleocene-Eocene Thermal Maximum'; Zeebe & Lourens 2019, Science"},{"n":"First hominins (Sahelanthropus tchadensis)","a":7.0,"r":[7.2,6.8],"d":"Cranial material from Chad radiometrically constrained to 7.2-6.8 Ma; DISPUTED - its hominin status and bipedality are both contested, with some analyses placing it on the gorilla lineage or outside Hominini.","s":"Wikipedia 'Sahelanthropus' (Brunet et al. 2002, Nature; Lebatard et al. 2008, PNAS; Meyer et al. 2023)"},{"n":"First Homo (LD 350-1)","a":2.8,"r":[2.8,2.75],"d":"A mandible from Ledi-Geraru, Ethiopia, dated to ~2.8 Ma, combining Australopithecus-like and derived Homo traits; the oldest attributed to genus Homo.","s":"Villmoare et al. 2015, Science 347:1352-1355; Wikipedia 'LD 350-1'"},{"n":"First Homo sapiens (Jebel Irhoud)","a":0.315,"r":[0.35,0.28],"d":"Hominin remains from Jebel Irhoud, Morocco, thermoluminescence-dated to ~315 +/- 34 ka - the earliest fossils attributed to H. sapiens, pushing back the previous ~200 ka estimate.","s":"Richter et al. 2017, Nature 546:293-296; Hublin et al. 2017, Nature 546:289-292"},{"n":"Last Glacial Maximum","a":0.0225,"r":[0.0265,0.019],"d":"Peak global ice volume of the last glacial cycle; Clark et al. give 26.5-19 ka, while other compilations give 26-20 ka and peak ice area at 25.2-23.1 ka.","s":"Clark et al. 2009, Science 325:710-714; Wikipedia 'Last Glacial Maximum' (Armstrong, Hopcroft & Valdes 2019)"},{"n":"Start of the Holocene","a":0.0117,"r":null,"d":"GSSP at the end of the Younger Dryas in the NGRIP2 Greenland ice core, 11,700 calendar yr before 2000 CE (b2k); ratified 2008.","s":"Walker et al. 2009, J. Quaternary Science 24:3-17; ICS chart v2026/06 (base Holocene 0.0117 Ma)"},{"n":"Proposed Anthropocene - REJECTED","a":5e-05,"r":null,"d":"A proposed epoch with a GSSP at Crawford Lake, Ontario, and a base at ~1952 CE. REJECTED: the ICS Subcommission on Quaternary Stratigraphy voted it down in Feb 2024, and ICS and IUGS ratified the rejection on 20 March 2024. It is NOT part of the ICS chart; we remain in the Meghalayan Age of the Holocene. The term stays in informal use in Earth-system science.","s":"IUGS/ICS joint statement, 20 March 2024; ICS Subcommission on Quaternary Stratigraphy, Anthropocene Working Group page (https://quaternary.stratigraphy.org/working-groups/anthropocene)"}],"age":4567.0,"span":4568.0,"ranks":["eon","era","period","epoch","age"],"version":"v2026/06"};
+const el = id => document.getElementById(id);
+const NS = 'http://www.w3.org/2000/svg';
+const BY = {};
+D.units.forEach(u => BY[u.n] = u);
+const EONS = D.units.filter(u => u.r === 0);
+
+const W = 1000, PAD = 54, TOP = 46, LANE = 30, GAP = 4;
+let win = [D.span, 0];         // older first, in Ma
+let stack = [];                // what was zoomed through to get here
+let hover = null;
+
+const x = ma => PAD + (win[0] - ma) / (win[0] - win[1]) * (W - 2 * PAD);
+const fmtMa = v => v >= 1 ? v.toLocaleString('en-US', {maximumFractionDigits: 1})
+  : v >= 0.001 ? (v * 1000).toFixed(1) + ' ka'.replace(' ka', '')
+  : (v * 1e6).toFixed(0);
+function span(v) {
+  if (v >= 1) return v.toLocaleString('en-US', {maximumFractionDigits: 2}) + ' Ma';
+  if (v >= 0.001) return (v * 1000).toFixed(1) + ' ka';
+  return Math.round(v * 1e6).toLocaleString('en-US') + ' years';
+}
+function make(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  parent.appendChild(e);
+  return e;
+}
+function clear(g) { while (g.firstChild) g.removeChild(g.firstChild); }
+function light(hex) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16),
+        b = parseInt(hex.slice(5,7),16);
+  return (0.299*r + 0.587*g + 0.114*b) < 128;
+}
+
+function draw() {
+  const lanes = el('lanes'), ruler = el('ruler'), evg = el('events'),
+        over = el('over');
+  clear(lanes); clear(ruler); clear(evg); clear(over);
+
+  // the whole of time, with the window marked on it
+  const ow = W - 2 * PAD;
+  make('rect', {x: PAD, y: 12, width: ow, height: 12, rx: 3, class: 'all'}, over);
+  EONS.forEach(u => {
+    make('rect', {x: PAD + (D.span - u.a) / D.span * ow, y: 12,
+      width: Math.max(1, (u.a - u.b) / D.span * ow), height: 12,
+      fill: u.c, 'fill-opacity': .55}, over);
+  });
+  const wx = PAD + (D.span - win[0]) / D.span * ow;
+  const ww = Math.max(2, (win[0] - win[1]) / D.span * ow);
+  make('rect', {x: wx, y: 9, width: ww, height: 18, rx: 3, class: 'win'}, over);
+  const t = make('text', {x: PAD, y: 38}, over);
+  t.textContent = 'all 4,567 million years, with the window shown';
+
+  for (let r = 0; r < D.ranks.length; r++) {
+    const y = TOP + 18 + r * (LANE + GAP);
+    const lt = make('text', {x: 6, y: y + 20, class: 'lane'}, lanes);
+    lt.textContent = D.ranks[r];
+    for (const u of D.units) {
+      if (u.r !== r || u.a <= win[1] || u.b >= win[0]) continue;
+      const a = Math.min(u.a, win[0]), b = Math.max(u.b, win[1]);
+      const x0 = x(a), x1 = x(b);
+      if (x1 - x0 < 0.7) continue;
+      const g = make('g', {class: 'unit'}, lanes);
+      make('rect', {x: x0, y, width: x1 - x0, height: LANE, fill: u.c,
+        'fill-opacity': .88}, g);
+      if (x1 - x0 > 34) {
+        const tx = make('text', {x: (x0 + x1) / 2, y: y + 19,
+          'text-anchor': 'middle',
+          class: light(u.c) ? 'pale' : ''}, g);
+        tx.textContent = u.n;
+        if (tx.getComputedTextLength && tx.getComputedTextLength() > x1 - x0 - 6)
+          tx.textContent = u.n.slice(0, Math.max(1,
+            Math.floor((x1 - x0 - 6) / 6.4))) + '…';
+      }
+      g.addEventListener('mouseenter', () => { hover = u.n; show(); });
+      g.addEventListener('mouseleave', () => { hover = null; show(); });
+      g.addEventListener('click', () => zoom(u));
+    }
+  }
+
+  // the ruler, in millions of years before now
+  const ry = TOP + 18 + D.ranks.length * (LANE + GAP) + 6;
+  const dur = win[0] - win[1];
+  const step = niceStep(dur / 7);
+  make('line', {x1: PAD, y1: ry, x2: W - PAD, y2: ry, class: 'tick'}, ruler);
+  for (let v = Math.ceil(win[1] / step) * step; v <= win[0] + 1e-9; v += step) {
+    const px = x(v);
+    make('line', {x1: px, y1: ry, x2: px, y2: ry + 5, class: 'tick'}, ruler);
+    const lb = make('text', {x: px, y: ry + 17, 'text-anchor': 'middle',
+      class: 'ticklbl'}, ruler);
+    lb.textContent = v === 0 ? '0'
+      : span(v).replace(' Ma', '').replace(' years', '').replace(' ka', '');
+  }
+  const un = make('text', {x: W - PAD, y: ry + 31, 'text-anchor': 'end',
+    class: 'ticklbl'}, ruler);
+  un.textContent = dur >= 2 ? 'millions of years ago'
+    : dur >= 0.002 ? 'thousands of years ago' : 'years ago';
+
+  // the events that fall in the window
+  // Six rows of labels, no more. Nearly every event falls in the last eighth
+  // of the record, so at full zoom they would otherwise stack forty deep and
+  // bury the column. What will not fit keeps its tick and loses its label,
+  // and gets one back as soon as the window is narrow enough.
+  const ey = ry + 48, ROWS = 6;
+  const rows = new Array(ROWS).fill(null);
+  let used = 0, hidden = 0;
+  for (const e of D.events) {
+    if (e.a > win[0] || e.a < win[1]) continue;
+    const px = x(e.a);
+    const flip = px > W - PAD - 150;
+    let row = -1;
+    for (let i = 0; i < ROWS; i++) {
+      const r = rows[i];
+      if (r == null || (flip ? r - px > 150 : px - r > 150)) { row = i; break; }
+    }
+    const g = make('g', {class: 'ev'}, evg);
+    const yy = ey + (row < 0 ? 0 : row) * 15;
+    make('line', {x1: px, y1: ry, x2: px, y2: row < 0 ? ry + 7 : yy,
+      stroke: '#3a4450', 'stroke-width': 1}, g);
+    make('circle', {cx: px, cy: row < 0 ? ry + 7 : yy, r: row < 0 ? 2 : 3.2}, g);
+    if (row >= 0) {
+      rows[row] = px;
+      used = Math.max(used, row + 1);
+      const tx = make('text', {x: px + (flip ? -6 : 6), y: yy + 3.5,
+        'text-anchor': flip ? 'end' : 'start'}, g);
+      tx.textContent = e.n.length > 34 ? e.n.slice(0, 33) + '…' : e.n;
+    } else {
+      hidden++;
+    }
+    g.addEventListener('mouseenter', () => { hover = {e}; show(); });
+    g.addEventListener('mouseleave', () => { hover = null; show(); });
+  }
+  if (hidden) {
+    const nt = make('text', {x: W - PAD, y: ey + used * 15 + 14,
+      'text-anchor': 'end', class: 'ticklbl'}, evg);
+    nt.textContent = hidden + ' more events marked without a label; '
+      + 'zooming in gives them their names back';
+  }
+  el('col').setAttribute('viewBox',
+    `0 0 ${W} ${Math.max(300, ey + used * 15 + (hidden ? 26 : 14))}`);
+}
+
+function niceStep(raw) {
+  const p = Math.pow(10, Math.floor(Math.log10(raw)));
+  for (const m of [1, 2, 2.5, 5, 10]) if (raw <= m * p) return m * p;
+  return 10 * p;
+}
+
+function zoom(u) {
+  stack.push(win.slice());
+  const pad = (u.a - u.b) * 0.04;
+  win = [u.a + pad, Math.max(0, u.b - pad)];
+  sel = u.n;
+  el('bOut').disabled = false;
+  draw(); show();
+}
+let sel = null;
+
+function crumb() {
+  if (!sel) { el('crumb').textContent = ''; return; }
+  const chain = [];
+  let c = sel;
+  while (c) { chain.unshift(c); c = BY[c] ? BY[c].p : null; }
+  el('crumb').innerHTML = chain.map((n, i) =>
+    i === chain.length - 1 ? `<b>${n}</b>` : n).join(' &rsaquo; ');
+}
+
+function show() {
+  const h = hover;
+  if (h && h.e) {
+    const e = h.e;
+    el('selName').textContent = e.n;
+    el('selSub').textContent = 'an event';
+    el('selA').textContent = span(e.a) + ' ago';
+    el('selB').textContent = e.r ? span(e.r[0]) + ' to ' + span(e.r[1]) : 'one date';
+    el('selD').textContent = '--';
+    el('selS').textContent = ((D.age - e.a) / D.age * 100).toFixed(1)
+      + '% of the way to now';
+    el('selBlurb').textContent = e.d;
+    el('selSrc').textContent = 'Source: ' + e.s;
+    return;
+  }
+  const n = (typeof h === 'string' ? h : null) || sel;
+  const u = n ? BY[n] : null;
+  if (!u) {
+    el('selName').textContent = 'All of time';
+    el('selSub').textContent = '4,567 million years';
+    el('selA').textContent = '4,567 Ma';
+    el('selB').textContent = 'now';
+    el('selD').textContent = '4,567 Ma';
+    el('selS').textContent = '100%';
+    el('selBlurb').textContent = 'Any band opens: the eons hold eras, the eras '
+      + 'hold periods, and so on down to the ages, which are the finest units '
+      + 'the chart names.';
+    el('selSrc').textContent = 'Chart ' + D.version;
+    crumb();
+    return;
+  }
+  const dur = u.a - u.b;
+  el('selName').textContent = u.n;
+  el('selSub').textContent = D.ranks[u.r] + (u.p ? ' of the ' + u.p : '');
+  el('selA').textContent = (u.q ? '~' : '') + span(u.a)
+    + (u.u ? ' ± ' + u.u : '') + ' ago';
+  el('selB').textContent = u.b === 0 ? 'now' : span(u.b) + ' ago';
+  el('selD').textContent = span(dur);
+  el('selS').textContent = (dur / D.age * 100).toFixed(dur / D.age > 0.01 ? 1 : 3) + '%';
+  const inside = D.events.filter(e => e.a <= u.a && e.a >= u.b);
+  el('selBlurb').innerHTML = (u.k.length
+    ? 'Holds ' + u.k.length + ' ' + D.ranks[u.r + 1] + (u.k.length > 1 ? 's' : '')
+      + ': ' + u.k.join(', ') + '. '
+    : 'The chart names nothing finer inside it. ')
+    + (inside.length ? 'Events here: ' + inside.map(e => e.n).join('; ') + '.' : '');
+  el('selSrc').textContent = 'Chart ' + D.version
+    + (u.q ? '; the base of this unit is estimated, not dated' : '');
+  crumb();
+}
+
+el('bOut').addEventListener('click', () => {
+  if (!stack.length) return;
+  win = stack.pop();
+  sel = sel && BY[sel] ? BY[sel].p : null;
+  el('bOut').disabled = !stack.length;
+  draw(); show();
+});
+el('bAll').addEventListener('click', () => {
+  win = [D.span, 0]; stack = []; sel = null;
+  el('bOut').disabled = true;
+  draw(); show();
+});
+
+draw(); show();
+window.__hist = () => ({win: win.slice(), sel, depth: stack.length,
+  units: D.units.length, events: D.events.length,
+  drawn: document.querySelectorAll('#lanes .unit').length,
+  shown: document.querySelectorAll('#events .ev').length});
+window.__zoom = n => { const u = BY[n]; if (u) zoom(u); return win.slice(); };
+</script>
+</body>
+</html>
