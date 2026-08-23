@@ -218,7 +218,7 @@ tr.total td {{ border-bottom:none; color:var(--muted); font-size:13px; padding-t
 <div class="wrap">
 <header class="site">
   <a class="brand" href="index.html">ALTAZOR</a>
-  <nav class="site"><a href="library.html">&larr; Digital Concepts</a></nav>
+  <nav class="site"><a href="library.html">&larr; Library</a></nav>
 </header>
 
 <h1>Most Populous Cities in the United States</h1>

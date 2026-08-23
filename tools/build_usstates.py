@@ -264,7 +264,7 @@ tr.total td {{ border-bottom:none; color:var(--muted); font-size:13px; padding-t
 <div class="wrap">
 <header class="site">
   <a class="brand" href="index.html">ALTAZOR</a>
-  <nav class="site"><a href="library.html">&larr; Digital Concepts</a> &nbsp;·&nbsp;
+  <nav class="site"><a href="library.html">&larr; Library</a> &nbsp;·&nbsp;
     <a href="us-cities.html">Cities</a></nav>
 </header>
 
