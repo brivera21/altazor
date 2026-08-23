@@ -25,6 +25,7 @@ import json
 from pathlib import Path
 
 from ics_chart import CHART, EVENTS, CHART_VERSION, CITATION
+from rotations import ROTATIONS, PLATE_NAMES
 
 OUT = Path(__file__).parent.parent / "earth-history.html"
 
@@ -43,6 +44,17 @@ EON_HUE = {"Hadean": "#6b3f6e", "Archean": "#9a4667",
            "Proterozoic": "#ad6a40", "Phanerozoic": "#4f7f74"}
 
 AGE_OF_EARTH = 4567.0
+
+# One colour a plate, so a continent can be followed through the reconstruction.
+PLATE_COLOUR = {101: "#386bb6", 201: "#7e6bd0", 301: "#47a566", 501: "#d0699a",
+                701: "#b17600", 801: "#3fa8a0", 802: "#cfd8e3"}
+PLATE_SHORT = {101: "North America", 201: "South America", 301: "Eurasia",
+               501: "India", 701: "Africa", 801: "Australia",
+               802: "Antarctica"}
+# Before this, carrying Eurasia as one plate stops being true: Siberia, Baltica
+# and the two Chinas were separate continents that had not yet collided.
+EURASIA_BREAKS = 330.0
+PALEO_LIMIT = 1000.0    # how far back the plate model reaches
 # The chart rounds its own base to 4,567 Ma while the oldest solids in the
 # Solar System date a shade older, so the drawing runs to 4,568 and the
 # arithmetic still uses the chart figure.
@@ -88,8 +100,24 @@ def main():
             "d": desc, "s": src} for n, ma, rng, desc, src in EVENTS]
     evs.sort(key=lambda e: -e["a"])
 
+    import json as _json
+    outlines = _json.load(open("/home/claude/paleo/outlines.json"))
+    rots = {}
+    for pid, age, plat, plon, ang, rel in ROTATIONS:
+        assert rel == 0, "the rotations have to be against the anchor plate"
+        # kept at full precision: rounding the pole to four decimals moves a
+        # point near the pole by several metres, which is enough to fail the
+        # comparison against an independent implementation
+        rots.setdefault(str(pid), []).append([age, plat, plon, ang])
+    for v in rots.values():
+        v.sort()
+
     js = {"units": units, "events": evs, "age": AGE_OF_EARTH,
           "span": SPAN,
+          "outlines": outlines, "rot": rots,
+          "pcolour": {str(k): v for k, v in PLATE_COLOUR.items()},
+          "pname": {str(k): v for k, v in PLATE_SHORT.items()},
+          "eurasiaBreaks": EURASIA_BREAKS, "paleoLimit": PALEO_LIMIT,
           "ranks": RANKS, "version": CHART_VERSION}
     blob = json.dumps(js, separators=(",", ":"))
 
@@ -101,8 +129,12 @@ def main():
     doc = TEMPLATE.replace("__DATA__", blob).replace("__FACTS__", facts) \
                   .replace("__CITATION__", CITATION)
     OUT.write_text(doc, encoding="utf-8")
+    npts = sum(sum(len(r) for r in v) for v in outlines.values())
+    ages = sorted({a for v in rots.values() for a, *_ in v})
     print(f"wrote {OUT} ({len(doc):,} bytes): {len(units)} units of "
-          f"{len(RANKS)} ranks, {len(evs)} events, chart {CHART_VERSION}")
+          f"{len(RANKS)} ranks, {len(evs)} events, chart {CHART_VERSION}; "
+          f"{len(outlines)} plates in {npts} points reconstructed at "
+          f"{len(ages)} ages back to {max(ages)} Ma")
 
 
 TEMPLATE = r"""<!DOCTYPE html>
@@ -156,6 +188,20 @@ button:disabled{opacity:.4;cursor:default}
 button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
 #crumb{color:var(--ink2)}
 #crumb b{color:var(--ink);font-weight:600}
+
+.globewrap{margin-top:14px}
+#globe{width:100%;height:auto;display:block;border-radius:10px;
+border:1px solid var(--line);background:#0b0f14}
+#grat path{fill:none;stroke:#232a33;stroke-width:1}
+#grat path.edge{stroke:#39414a}
+#grat text{fill:#5f6873;font-size:10px}
+#plates path{stroke:#0b0f14;stroke-width:.7;stroke-linejoin:round}
+#plates path.doubt{stroke-dasharray:5 4;stroke:#8d9099}
+#plabels text{font-size:11px;font-weight:600;paint-order:stroke;
+stroke:#0b0f14;stroke-width:3;pointer-events:none}
+#gcap text{fill:#9aa3ad;font-size:11.5px}
+#gcap text.big{fill:#e6e6e6;font-size:14px;font-weight:600}
+#gcap text.warn{fill:#c99a4a}
 
 .unit{cursor:pointer}
 .unit rect{stroke:#0f1216;stroke-width:.8}
@@ -213,6 +259,15 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}
   </div></div>
 </div>
 
+<div class="globewrap">
+  <svg id="globe" viewBox="0 0 1000 470" preserveAspectRatio="xMidYMid meet">
+    <g id="grat"></g>
+    <g id="plates"></g>
+    <g id="plabels"></g>
+    <g id="gcap"></g>
+  </svg>
+</div>
+
 <div class="controls">
   <button id="bOut" disabled>Zoom out</button>
   <button id="bAll">All of time</button>
@@ -222,16 +277,18 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}
 <div class="notes">
 <h2>About the chart</h2>
 <p>Deep time will not sit on one scale. The Phanerozoic, the part with shells
-and bones and everything a museum can hang on a wall, is the last eighth of the
-planet's life, and nearly every named unit falls inside it. So the column
-zooms: any band clicked becomes the whole width, its children fill the lane
-below, and the bar along the top keeps all 4,567 million years in view so the
-window is never lost.</p>
-<p>Boundaries carry the uncertainty the chart prints. A tilde marks the ones
-the chart estimates rather than dates, which is most of the Precambrian: those
-are round numbers agreed on, not golden spikes driven into a cliff.</p>
-<p>The events under the column are dated from the literature and each names its
-source. Several are disputed, and those say so rather than picking a side.</p>
+and bones, is the last eighth of the planet's life and holds nearly every named
+unit. So the column zooms: any band clicked becomes the whole width, and the
+bar along the top keeps all 4,567 million years in view.</p>
+<p>Boundaries carry the uncertainty the chart prints, and a tilde marks the
+ones it estimates rather than dates. The events below are dated from the
+literature and each names its source; several are disputed, and say so.</p>
+<p>Under the column the continents are put back where the plate model has them
+at the time in view. It reaches a thousand million years and no further, only
+the last fifth of the record, and before that nothing is drawn. Latitudes are
+meaningful. Longitudes before about two hundred million years are not, because
+the model is tied to old magnetism, which fixes how far from the equator a rock
+formed and says nothing about how far round.</p>
 </div>
 
 <div class="refs">
@@ -239,6 +296,14 @@ source. Several are disputed, and those say so rather than picking a side.</p>
 <p>__CITATION__</p>
 <p>International Commission on Stratigraphy. (2026). <i>International
 chronostratigraphic chart</i> (v2026/06). https://stratigraphy.org/chart</p>
+<p>Merdith, A. S., Williams, S. E., Collins, A. S., Tetley, M. G., Mulder,
+J. A., Blades, M. L., Young, A., Armistead, S. E., Cannon, J., Zahirovic, S.,
+&amp; M&uuml;ller, R. D. (2021). Extending full-plate tectonic models into deep
+time: Linking the Neoproterozoic and the Phanerozoic. <i>Earth-Science Reviews,
+214</i>, 103477. https://doi.org/10.1016/j.earscirev.2020.103477</p>
+<p>EarthByte Group. (2024). <i>GPlates web service</i> [Computer software].
+Rotations for the MERDITH2021 model retrieved from
+https://gws.gplates.org/rotation/get_euler_pole_and_angle</p>
 <p>Peters, S. E., Husson, J. M., &amp; Czaplewski, J. (2018). Macrostrat: A
 platform for geological data integration and deep-time Earth crust research.
 <i>Geochemistry, Geophysics, Geosystems, 19</i>(4), 1393-1409.</p>
@@ -399,7 +464,7 @@ function zoom(u) {
   win = [u.a + pad, Math.max(0, u.b - pad)];
   sel = u.n;
   el('bOut').disabled = false;
-  draw(); show();
+  draw(); show(); globe();
 }
 let sel = null;
 
@@ -462,25 +527,191 @@ function show() {
   crumb();
 }
 
+// ---------- the continents, put back ----------
+// A finite rotation is a pole and an angle: turn the whole plate about that
+// axis and it lands where it was. The model tabulates one every ten million
+// years to three hundred, then every fifty, so the map snaps to the nearest
+// step it holds rather than pretending to a smoothness it has not got.
+const D2R = Math.PI / 180, R2D = 180 / Math.PI;
+const AGES = D.rot['701'].map(r => r[0]);
+
+function nearestAge(ma) {
+  let best = AGES[0];
+  for (const a of AGES) if (Math.abs(a - ma) < Math.abs(best - ma)) best = a;
+  return best;
+}
+function poleOf(pid, age) {
+  const rows = D.rot[String(pid)];
+  if (!rows) return null;
+  for (const r of rows) if (r[0] === age) return r;
+  return null;
+}
+function toXYZ(lat, lon) {
+  const p = lat * D2R, l = lon * D2R;
+  return [Math.cos(p) * Math.cos(l), Math.cos(p) * Math.sin(l), Math.sin(p)];
+}
+function toLL(v) {
+  // normalise first: near the poles asin is steep, and a vector that has
+  // drifted a part in 10^12 off the unit sphere moves the latitude enough to
+  // show up against an independent implementation
+  const n = Math.hypot(v[0], v[1], v[2]) || 1;
+  return [Math.asin(Math.max(-1, Math.min(1, v[2] / n))) * R2D,
+          Math.atan2(v[1], v[0]) * R2D];
+}
+function rotate(lat, lon, plat, plon, ang) {
+  const k = toXYZ(plat, plon), v = toXYZ(lat, lon);
+  const t = ang * D2R, c = Math.cos(t), s = Math.sin(t);
+  const kx = [k[1]*v[2] - k[2]*v[1], k[2]*v[0] - k[0]*v[2], k[0]*v[1] - k[1]*v[0]];
+  const kd = k[0]*v[0] + k[1]*v[1] + k[2]*v[2];
+  return toLL([v[0]*c + kx[0]*s + k[0]*kd*(1 - c),
+               v[1]*c + kx[1]*s + k[1]*kd*(1 - c),
+               v[2]*c + kx[2]*s + k[2]*kd*(1 - c)]);
+}
+
+// Mollweide, which keeps areas honest and gives the poles somewhere to go
+// half the height; the map is twice as wide as it is tall, as Mollweide is
+const GW = 1000, GH = 470, GR = 208, GCX = 500, GCY = 238;
+function moll(lat, lon) {
+  const phi = lat * D2R;
+  let th = phi;
+  for (let i = 0; i < 8; i++) {
+    const d = (2*th + Math.sin(2*th) - Math.PI*Math.sin(phi))
+            / (2 + 2*Math.cos(2*th));
+    th -= d;
+    if (Math.abs(d) < 1e-10) break;
+  }
+  if (Math.abs(Math.abs(phi) - Math.PI/2) < 1e-9) th = phi;
+  return [GCX + (2*GR/Math.PI) * (lon*D2R) * Math.cos(th),
+          GCY - GR * Math.sin(th)];
+}
+
+function ringPath(pts) {
+  // a rotated plate can straddle the edge of the map, so the ring is cut
+  // wherever it jumps the seam and each piece drawn on its own
+  const runs = [[]];
+  let prev = null;
+  for (const [lat, lon] of pts) {
+    if (prev !== null && Math.abs(lon - prev) > 180) runs.push([]);
+    runs[runs.length - 1].push([lat, lon]);
+    prev = lon;
+  }
+  return runs.filter(r => r.length > 2).map(r =>
+    'M' + r.map(([la, lo]) => {
+      const [x, y] = moll(la, lo);
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    }).join('L') + 'Z').join('');
+}
+
+let lastAge = null;
+function globe() {
+  // With the whole record in view the midpoint lands in the Precambrian, where
+  // no model reaches, and the map would open blank. Nothing selected means the
+  // world as it is, which is also the invitation to click a band.
+  const mid = (!sel && !stack.length) ? 0 : (win[0] + win[1]) / 2;
+  const gr = el('grat'), gp = el('plates'), gl = el('plabels'), gc = el('gcap');
+  clear(gr); clear(gp); clear(gl); clear(gc);
+
+  // the outline of the world, and the lines that still mean something
+  let d = 'M';
+  for (let la = -90; la <= 90; la += 2) { const [x, y] = moll(la, 180); d += `${x.toFixed(1)},${y.toFixed(1)}L`; }
+  for (let la = 90; la >= -90; la -= 2) { const [x, y] = moll(la, -180); d += `${x.toFixed(1)},${y.toFixed(1)}L`; }
+  make('path', {d: d.slice(0, -1) + 'Z', class: 'edge'}, gr);
+  for (const [la, nm] of [[66.5634, ''], [23.4366, ''], [0, 'equator'],
+                          [-23.4366, ''], [-66.5634, '']]) {
+    let p2 = 'M';
+    for (let lo = -180; lo <= 180; lo += 4) {
+      const [x, y] = moll(la, lo);
+      p2 += `${x.toFixed(1)},${y.toFixed(1)}L`;
+    }
+    make('path', {d: p2.slice(0, -1)}, gr);
+    if (nm) {
+      const t2 = make('text', {x: moll(la, -180)[0] - 6, y: moll(la, -180)[1] + 4,
+        'text-anchor': 'end'}, gr);
+      t2.textContent = nm;
+    }
+  }
+
+  if (mid > D.paleoLimit) {
+    lastAge = null;
+    const t3 = make('text', {x: GCX, y: GCY, 'text-anchor': 'middle',
+      class: 'big'}, gc);
+    t3.textContent = 'no reconstruction reaches this far back';
+    const t4 = make('text', {x: GCX, y: GCY + 22, 'text-anchor': 'middle'}, gc);
+    t4.textContent = 'the plate model stops at 1,000 million years, which is '
+      + 'the last fifth of the record';
+    return;
+  }
+
+  const age = nearestAge(mid);
+  lastAge = age;
+  for (const pid in D.outlines) {
+    const r = poleOf(pid, age);
+    if (!r) continue;
+    const doubt = pid === '301' && age > D.eurasiaBreaks;
+    let dd = '', big = null;
+    for (const ring of D.outlines[pid]) {
+      const moved = ring.map(([lo, la]) => rotate(la, lo, r[1], r[2], r[3]));
+      dd += ringPath(moved);
+      if (!big || ring.length > big.n) {
+        let sx = 0, sy = 0;
+        for (const [la, lo] of moved) { sx += lo; sy += la; }
+        big = {n: ring.length, la: sy / moved.length, lo: sx / moved.length};
+      }
+    }
+    if (!dd) continue;
+    make('path', {d: dd, fill: D.pcolour[pid],
+      'fill-opacity': doubt ? 0.45 : 0.9,
+      class: doubt ? 'doubt' : ''}, gp);
+    const [lx, ly] = moll(big.la, Math.max(-179, Math.min(179, big.lo)));
+    const tl = make('text', {x: lx, y: ly, 'text-anchor': 'middle',
+      fill: D.pcolour[pid]}, gl);
+    tl.textContent = D.pname[pid];
+  }
+
+  const c1 = make('text', {x: 22, y: 28, class: 'big'}, gc);
+  c1.textContent = age === 0 ? 'the world today'
+    : 'the world at ' + age.toLocaleString('en-US') + ' million years ago';
+  const c2 = make('text', {x: 22, y: 48}, gc);
+  c2.textContent = (!sel && !stack.length)
+    ? 'a band in the column above opens the world at that time'
+    : 'nearest step in the plate model to ' + span(mid)
+      + ', the middle of what is in view';
+  if (age > 200) {
+    const c3 = make('text', {x: 22, y: GH - 34, class: 'warn'}, gc);
+    c3.textContent = 'latitudes are meaningful here, longitudes are not: '
+      + 'the model is tied to old magnetism';
+  }
+  if (age > D.eurasiaBreaks) {
+    const c4 = make('text', {x: 22, y: GH - 16, class: 'warn'}, gc);
+    c4.textContent = 'Eurasia is drawn dashed: Siberia, Baltica and the two '
+      + 'Chinas were still separate continents and are not modelled apart here';
+  }
+}
+
 el('bOut').addEventListener('click', () => {
   if (!stack.length) return;
   win = stack.pop();
   sel = sel && BY[sel] ? BY[sel].p : null;
   el('bOut').disabled = !stack.length;
-  draw(); show();
+  draw(); show(); globe();
 });
 el('bAll').addEventListener('click', () => {
   win = [D.span, 0]; stack = []; sel = null;
   el('bOut').disabled = true;
-  draw(); show();
+  draw(); show(); globe();
 });
 
-draw(); show();
+draw(); show(); globe();
 window.__hist = () => ({win: win.slice(), sel, depth: stack.length,
+  paleoAge: lastAge, plates: document.querySelectorAll('#plates path').length,
   units: D.units.length, events: D.events.length,
   drawn: document.querySelectorAll('#lanes .unit').length,
   shown: document.querySelectorAll('#events .ev').length});
 window.__zoom = n => { const u = BY[n]; if (u) zoom(u); return win.slice(); };
+window.__rot = (lat, lon, pid, age) => {
+  const r = poleOf(pid, age);
+  return r ? rotate(lat, lon, r[1], r[2], r[3]) : null;
+};
 </script>
 </body>
 </html>

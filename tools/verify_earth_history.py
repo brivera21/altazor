@@ -15,6 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from ics_chart import CHART, CHART_VERSION, EVENTS
+from rotations import ROTATIONS, rotate_point
 
 PAGE = Path(__file__).parent.parent / "earth-history.html"
 AGE = 4567.0
@@ -23,7 +24,7 @@ fails = []
 html = PAGE.read_text(encoding="utf-8")
 print("--- the page itself ---")
 for want in ("The History of Earth", "library.html", "ALTAZOR", "References",
-             CHART_VERSION, "Cohen"):
+             CHART_VERSION, "Cohen", "Merdith"):
     ok = want in html
     print(f"  {'ok  ' if ok else 'FAIL'} the page carries {want!r}")
     if not ok:
@@ -126,6 +127,82 @@ with sync_playwright() as pw:
               f"around its {want} children")
         if not ok:
             fails.append(f"zooming to {name} gives {win} and draws {ch} bands")
+
+    import math
+
+    print("--- the reconstruction, against the model's own arithmetic ---")
+    # The page turns each plate about a pole by an angle. The same rotation is
+    # applied here by rotations.py, whose implementation was itself checked
+    # against pygplates, so the page's arithmetic meets a second one rather
+    # than only itself.
+    PROBE = [(-33.9, 18.4, 701), (40.7, -74.0, 101), (-33.9, 151.2, 801),
+             (28.6, 77.2, 501), (55.8, 37.6, 301), (-23.5, -46.6, 201),
+             (-77.8, 166.7, 802)]
+    worst = (0.0, "")
+    n = 0
+    for pid, age, plat, plon, ang, _rel in ROTATIONS:
+        for la, lo, p2 in PROBE:
+            if p2 != pid:
+                continue
+            n += 1
+            got = pg.evaluate("(a)=>window.__rot(a[0],a[1],a[2],a[3])",
+                              [la, lo, pid, age])
+            want = rotate_point(plat, plon, ang, la, lo)
+            # measured as an angle on the sphere: near a pole a longitude
+            # difference is worth almost nothing on the ground, and comparing
+            # the two coordinates separately would call that a failure
+            d = math.degrees(2 * math.asin(min(1, math.sqrt(
+                math.sin(math.radians(got[0] - want[0]) / 2) ** 2
+                + math.cos(math.radians(got[0])) * math.cos(math.radians(want[0]))
+                * math.sin(math.radians(got[1] - want[1]) / 2) ** 2))))
+            if d > worst[0]:
+                worst = (d, f"plate {pid} at {age} Ma")
+    ok = worst[0] < 1e-6
+    print(f"  {'ok  ' if ok else 'FAIL'} {n} rotations agree with the page to "
+          f"{worst[0] * 111000:.3f} metres on the ground, worst at {worst[1]}")
+    if not ok:
+        fails.append(f"the page rotates differently by {worst[0]} deg at {worst[1]}")
+
+    print("--- Pangaea is where it should be ---")
+    # If the reconstruction works at all, west Africa and the east coast of
+    # North America have to be touching in the late Palaeozoic and an ocean
+    # apart now. This asks the page, not the model.
+
+    def gc(a, b):
+        la1, lo1, la2, lo2 = map(math.radians, [a[0], a[1], b[0], b[1]])
+        h = (math.sin((la2 - la1) / 2) ** 2 + math.cos(la1) * math.cos(la2)
+             * math.sin((lo2 - lo1) / 2) ** 2)
+        return 2 * 6371 * math.asin(min(1, math.sqrt(h)))
+
+    MAUR, CHAR = (20.0, -17.0), (32.8, -79.9)
+    for age, want in [(0, "an ocean apart"), (280, "touching")]:
+        a = pg.evaluate("(a)=>window.__rot(a[0],a[1],701,a[2])",
+                        [MAUR[0], MAUR[1], age])
+        b = pg.evaluate("(a)=>window.__rot(a[0],a[1],101,a[2])",
+                        [CHAR[0], CHAR[1], age])
+        d = gc(a, b)
+        ok = (d > 5000) if age == 0 else (d < 1800)
+        print(f"  {'ok  ' if ok else 'FAIL'} at {age} Ma west Africa and "
+              f"Carolina are {d:,.0f} km apart, which is {want}")
+        if not ok:
+            fails.append(f"at {age} Ma the two coasts are {d:,.0f} km apart")
+
+    print("--- how far back it draws ---")
+    for name, want in [("Cretaceous", True), ("Cryogenian", True),
+                       ("Tonian", True), ("Stenian", False),
+                       ("Archean", False), ("Hadean", False)]:
+        pg.evaluate("()=>document.getElementById('bAll').click()")
+        pg.wait_for_timeout(60)
+        pg.evaluate("(n)=>window.__zoom(n)", name)
+        pg.wait_for_timeout(150)
+        st2 = pg.evaluate("()=>window.__hist()")
+        drawn = st2["plates"] > 0
+        ok = drawn == want
+        print(f"  {'ok  ' if ok else 'FAIL'} {name}: "
+              + (f"drawn at {st2['paleoAge']} Ma" if drawn else "nothing drawn"))
+        if not ok:
+            fails.append(f"{name} draws {st2['plates']} plates, expected "
+                         f"{'some' if want else 'none'}")
 
     pg.evaluate("()=>document.getElementById('bAll').click()")
     pg.wait_for_timeout(100)
