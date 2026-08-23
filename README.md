@@ -63,10 +63,13 @@ The page is laid out in this order, top to bottom:
 
 1. the site header, the brand and the link back to the section
 2. the `h1`, and nothing else in prose above the diagram
-3. the fixed facts, as a `.tiles` row: the handful of constants the diagram is
-   about, each a label, a value and a one line gloss. They sit above the diagram
-   because they do not change while it runs, and they set up what is about to
-   move. Pages with no such constants skip the row
+3. the `.tiles` row: a handful of boxes, each a label, a value and a one line
+   gloss. Either the constants the diagram is about, which set up what is
+   about to move, or the readouts themselves where the diagram has a clock or
+   a slider and the reader wants the numbers next to the picture rather than
+   under it. A page carries one or the other, not both rows: if the readouts
+   are up here, there is no second row of them below the controls. Pages with
+   neither skip the row
 4. the diagram, then its controls
 5. the description, under the copy rule above
 6. `References`, in APA, with no word limit

@@ -22,10 +22,12 @@ nav.site a{color:var(--ink2);text-decoration:none;font-size:14px;}
 nav.site a:hover{color:var(--accent);}
 h1{font-size:1.6rem;font-weight:400;margin:1.6rem 0 .9rem}
 h2{font-size:1.05rem;font-weight:400;color:var(--ink);margin:2rem 0 .6rem}
-.tiles{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 1.1rem;
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));
+gap:10px;margin:0 0 1.1rem;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
 .tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;
-padding:10px 16px;min-width:190px;flex:1}
+padding:10px 16px}
+.tile .v{font-variant-numeric:tabular-nums}
 .tile .k{font-size:11.5px;color:var(--ink2)}
 .tile .v{font-size:20px;font-weight:650;margin-top:2px}
 .tile .g{font-size:12.5px;color:var(--ink3);margin-top:2px}
@@ -80,17 +82,18 @@ paint-order:stroke;stroke:#10141a;stroke-width:2.6}
 <h1>La Ruta Namiquipa</h1>
 
 <div class="tiles">
-  <div class="tile"><div class="k">recorrido</div><div class="v">28.1 km</div>
-    <div class="g">de la sierra al llano de Bavícora</div></div>
-  <div class="tile"><div class="k">punto más alto</div><div class="v">2,778 m</div>
-    <div class="g">en el kilómetro 6.4</div></div>
-  <div class="tile"><div class="k">bajada</div><div class="v">895 m</div>
-    <div class="g">del filo a Santa Ana de Bavícora</div></div>
-  <div class="tile"><div class="k">trazo</div><div class="v">2016</div>
-    <div class="g">un recorrido grabado el 24 de septiembre</div></div>
-  <div class="tile"><div class="k">municipios</div>
-    <div class="v" style="font-size:17px">Temósachic y Namiquipa</div>
-    <div class="g">18.7 km en el primero, 9.3 en el segundo</div></div>
+  <div class="tile"><div class="k">kilómetro</div>
+    <div class="v" id="rKm">0.0 km</div><div class="g" id="rFalta"></div></div>
+  <div class="tile"><div class="k">altitud</div>
+    <div class="v" id="rAlt"></div><div class="g" id="rPend"></div></div>
+  <div class="tile"><div class="k">tiempo</div>
+    <div class="v" id="rTiempo"></div><div class="g" id="rVel"></div></div>
+  <div class="tile"><div class="k">municipio</div>
+    <div class="v" id="rMun" style="font-size:17px"></div>
+    <div class="g" id="rMunSub"></div></div>
+  <div class="tile"><div class="k">cerca</div>
+    <div class="v" id="rCerca" style="font-size:17px"></div>
+    <div class="g" id="rCercaSub"></div></div>
 </div>
 
 <figure>
@@ -273,29 +276,16 @@ paint-order:stroke;stroke:#10141a;stroke-width:2.6}
   <button class="ctl" id="bMun" aria-pressed="true">Municipios</button>
 </div>
 
-<div class="readout">
-  <div class="box"><div class="lab">kilómetro</div>
-    <div class="val" id="rKm">0.0</div><div class="sub2" id="rFalta"></div></div>
-  <div class="box"><div class="lab">altitud</div>
-    <div class="val" id="rAlt"></div><div class="sub2" id="rPend"></div></div>
-  <div class="box"><div class="lab">tiempo</div>
-    <div class="val" id="rTiempo"></div><div class="sub2" id="rVel"></div></div>
-  <div class="box"><div class="lab">municipio</div>
-    <div class="val" id="rMun" style="font-size:1.05rem"></div>
-    <div class="sub2" id="rMunSub"></div></div>
-  <div class="box wide"><div class="lab">cerca</div>
-    <div class="val" id="rCerca" style="font-size:1.05rem"></div>
-    <div class="sub2" id="rCercaSub"></div></div>
-</div>
-
 <div class="notes">
-<p>El recorrido empieza arriba, en la sierra al poniente de Santa Ana de
-Bavícora, sube al filo en el kilómetro 6.4 y
-de ahí se deja ir: novecientos metros de bajada en los últimos veinte
-kilómetros, hasta el llano.</p>
+<p>28.1 kilómetros grabados el 24 de septiembre de 2016. El recorrido
+empieza arriba, en la sierra al poniente de Santa Ana de Bavícora, sube al filo
+de 2,778 metros en el kilómetro
+6.4 y de ahí se deja ir:
+895 metros de bajada hasta el llano.</p>
 <p>Los primeros 19 kilómetros van por el municipio de
 Temósachic; la raya municipal queda en el kilómetro 18.8, ya
-en la bajada, y de ahí el camino entra a Namiquipa.</p>
+en la bajada, y los últimos 9 van por
+Namiquipa. Las casillas de arriba llevan la cuenta mientras corre.</p>
 <p>La traza es un solo recorrido grabado con GPS en 2016, no el trazo oficial
 de ninguna edición. El relieve del fondo viene de una malla de trescientos
 metros, y la altitud que marcó el GPS coincide con ella dentro de veinticinco
