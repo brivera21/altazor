@@ -30,7 +30,7 @@ fails = []
 html = PAGE.read_text(encoding="utf-8")
 print("--- the page itself ---")
 for want in ("The Day: Earth's Night and Day Cycle", "library.html", "ALTAZOR",
-             "Earth's Climate", "References"):
+             "GeoNames", "References"):
     ok = want in html
     print(f"  {'ok  ' if ok else 'FAIL'} the page carries {want!r}")
     if not ok:
@@ -160,6 +160,43 @@ with sync_playwright() as pw:
             fails.append(f"on {mo}/{d} at {h}h the lit half is not the half "
                          "around the Sun")
 
+    print("--- the city lights ---")
+    # Lights belong to the dark half. They are read off the layer the page drew,
+    # at real cities, on the night side and then on the day side twelve hours
+    # later, so a layer painted over the whole globe would show up here.
+    CITIES = [("Tokyo", 35.7, 139.7), ("Cairo", 30.0, 31.2),
+              ("Mexico City", 19.4, -99.1), ("Sao Paulo", -23.5, -46.6),
+              ("Mumbai", 19.1, 72.9), ("London", 51.5, -0.1)]
+    for name, lat, lon in CITIES:
+        # midnight and noon in local solar time, near the equinox
+        best = None
+        for h2 in range(0, 24):
+            pg.evaluate("(a)=>window.__setTime(a[0],a[1],a[2],a[3])",
+                        [2026, 3, 20, h2])
+            alt = pg.evaluate("(a)=>window.__probe(a[0],a[1]).alt", [lat, lon])
+            g = pg.evaluate("(a)=>window.__lightAt(a[0],a[1])", [lat, lon])
+            if best is None or alt < best[0]:
+                best = (alt, g, h2)
+            if alt > 40 and g > 2:
+                fails.append(f"{name} is lit up at {h2}h with the Sun "
+                             f"{alt:.0f} degrees up")
+        ok = best[1] > 6
+        print(f"  {'ok  ' if ok else 'FAIL'} {name} glows at {best[1]}/255 "
+              f"at its darkest hour, and not at all in daylight")
+        if not ok:
+            fails.append(f"{name} never lights up at night ({best[1]}/255)")
+
+    pg.click("#bLights")
+    pg.wait_for_timeout(300)
+    off = max(pg.evaluate("(a)=>window.__lightAt(a[0],a[1])", [lat, lon])
+              for _, lat, lon in CITIES)
+    pg.click("#bLights")
+    pg.wait_for_timeout(300)
+    ok = off == 0
+    print(f"  {'ok  ' if ok else 'FAIL'} the lights go out when the button says so")
+    if not ok:
+        fails.append(f"the lights stay on at {off}/255 with the button off")
+
     print("--- the poles through the year ---")
     POLES = [("the north pole in June", 6, 21, 89.0, 24),
              ("the north pole in December", 12, 21, 89.0, 0),
@@ -205,7 +242,7 @@ with sync_playwright() as pw:
         fails.append(f"six hours moves the sub-solar point {swept:.2f} degrees")
 
     for bid, key in [("bGrat", "showGrat"), ("bBands", "bands"),
-                     ("bClim", "showClim")]:
+                     ("bLights", "showLights")]:
         before = pg.evaluate(f"()=>window.__day.{key}")
         pg.click("#" + bid)
         pg.wait_for_timeout(220)
