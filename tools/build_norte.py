@@ -270,7 +270,7 @@ text-transform:uppercase;pointer-events:none}}
 <main>
 <header class="site">
   <a class="brand" href="index.html">ALTAZOR</a>
-  <nav class="site"><a href="library.html">&larr; Library</a></nav>
+  <nav class="site"><a href="library.html">&larr; Digital Concepts</a></nav>
 </header>
 
 <h1>El norte de México</h1>

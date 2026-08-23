@@ -179,7 +179,7 @@ def main():
 
 <div id="hud">
   <div>
-    <div id="sitenav"><a class="brand" href="index.html">ALTAZOR</a><a href="library.html">&larr; Library</a></div>
+    <div id="sitenav"><a class="brand" href="index.html">ALTAZOR</a><a href="library.html">&larr; Digital Concepts</a></div>
     <h1>The Month: The Moon's Cycle</h1>
   </div>
   <div id="readout">

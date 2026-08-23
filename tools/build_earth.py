@@ -188,7 +188,7 @@ table.mix td{{font-variant-numeric:tabular-nums}}
 <main>
 <header class="site">
   <a class="brand" href="index.html">ALTAZOR</a>
-  <nav class="site"><a href="library.html">&larr; Library</a></nav>
+  <nav class="site"><a href="library.html">&larr; Digital Concepts</a></nav>
 </header>
 
 <h1>Earth's Climate</h1>
