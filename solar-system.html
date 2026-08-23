@@ -165,6 +165,8 @@
       disc:"Known since antiquity",
       probe:"Mariner 4, flyby, July 15, 1965; Viking 1 made the first working landing, 1976" },
     { name:"Jupiter", type:"Gas giant", au:5.204, rKm:69911, lenR:46,
+      labels: { extra: "The Great Red Spot" },
+      extra: "A storm a little wider than Earth, drawn here at its measured size. It has been followed since 1831, and perhaps since a spot Cassini recorded in 1665, and it has been narrowing the whole time: nineteenth century measurements put it near three Earths across",
       area:"6.14 × 10<sup>10</sup> km² (cloud tops)", mass:"1.898 × 10<sup>27</sup> kg (318 Earths)",
       moons:"115 recognized (NASA, 2026)", made:"Mostly hydrogen and helium, compressed to liquid metallic hydrogen at depth; likely a dense diluted core",
       disc:"Known since antiquity",
@@ -319,6 +321,12 @@
   let stars = [];
   let lightClock = 0;                     // seconds since the light pulse left the Sun (scaled)
   const C_KM_S = 299792.458;              // speed of light
+  const EARTH_R_KM = 6371, JUP_R_KM = 69911;
+  // The Great Red Spot. It has been narrowing for as long as anyone has
+  // measured it: near 40,000 km in the 19th century, 23,000 at Voyager in
+  // 1979, about 16,000 at Juno in 2017. Drawn at 15,000 by 12,000 km, which
+  // is a little over one Earth across, and placed at its real latitude, 22 S.
+  const GRS = { w: 15000, h: 12000, lat: Math.sin(22 * Math.PI / 180), lon: 0.35 };
   const LIGHT_SPEEDUP = 720;              // 1 real second = 12 light-minutes
 
   function resize() {
@@ -572,10 +580,13 @@
     },
     Jupiter(x, y, r) {
       bands(x, y, r, ["#c8b191","#e8dcc4","#b38f6a","#efe4cf","#a97f57","#e3d3b8","#c2a077","#eadfc9","#bd9a72"]);
-      // Great Red Spot, southern hemisphere
+      // Great Red Spot, drawn at its measured size (see GRS above)
       ctx.save(); circle(x, y, r); ctx.clip();
       ctx.fillStyle = "#c25b3f";
-      ctx.beginPath(); ctx.ellipse(x + 0.35*r, y + 0.38*r, 0.20*r, 0.12*r, 0, 0, 7); ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(x + GRS.lon * r, y + GRS.lat * r,
+                  GRS.w / 2 / JUP_R_KM * r, GRS.h / 2 / JUP_R_KM * r, 0, 0, 7);
+      ctx.fill();
       ctx.restore();
     },
     Saturn(x, y, r) {
@@ -761,17 +772,47 @@
     ctx.fillText("light · " + fmtLight(tLight), x, y0 - 12);
   }
 
+  let ghostState = null;                 // what the ghost did, for checks
   function drawGhostEarth() {
+    ghostState = null;
     // A ghost of Earth for size comparison, wherever you are zoomed in.
-    // Not on Earth itself (it IS Earth) and not on Jupiter, by request.
+    // Not on Earth itself, which IS Earth, and not on a region, which has no
+    // size of its own. Jupiter gets its own treatment, below.
     if (!selected || selected.isBelt) return;
-    if (selected.name === "Earth" || selected.name === "Jupiter") return;
+    if (selected.name === "Earth") return;
     const isSun = selected === SUN;
     const x = isSun ? sx(0) : sx(px(selected));
     const Rd = (isSun ? sunR() : pr(selected)) * cam.z;   // drawn radius of the selected body
     if (Rd < 40) return;                                   // only when actually zoomed in
     const gr = Math.max(Rd * 6371 / selected.rKm, 1.2);    // Earth radius at the same drawn scale
     ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+    if (selected.name === "Jupiter") {
+      // Earth laid on the Great Red Spot, which is the comparison everyone
+      // knows. Both are drawn from their real sizes, so the storm reads as
+      // what it is: a little wider than the planet Earth.
+      const gx = x + GRS.lon * Rd, gy = y0 + GRS.lat * Rd;
+      // Drawn as a ring rather than a disc: Earth covers most of the spot, so
+      // a solid one would hide the very thing it is being measured against.
+      ctx.fillStyle = "rgba(74,122,200,0.30)";
+      circle(gx, gy, gr); ctx.fill();
+      ctx.strokeStyle = "rgba(232,244,255,0.95)"; ctx.lineWidth = 1.4;
+      ctx.setLineDash([4, 3]);
+      circle(gx, gy, gr); ctx.stroke();
+      ctx.setLineDash([]);
+      // the label sits off the disc, where it is legible over the sky
+      const ly = y0 + Rd + 22;
+      ctx.strokeStyle = "rgba(214,232,255,0.45)"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(gx, ly - 12); ctx.lineTo(gx, gy + gr + 3);
+      ctx.stroke();
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(214,232,255,0.92)";
+      ctx.fillText("Earth, to scale, on the Great Red Spot", gx, ly);
+      ghostState = { kind: "spot", r: gr, x: gx, y: gy,
+                     spotHalfW: GRS.w / 2 / JUP_R_KM * Rd,
+                     spotHalfH: GRS.h / 2 / JUP_R_KM * Rd };
+      return;
+    }
 
     if (isSun) {
       // a speck on the Sun's disc (left side, clear of the info panel)
@@ -786,6 +827,7 @@
       ctx.textAlign = "right";
       ctx.fillStyle = "rgba(200,225,255,0.9)";
       ctx.fillText("Earth, to scale", lx, ly);
+      ghostState = { kind: "speck", r: gr, x: gx, y: gy };
     } else if (gr >= Rd) {
       // Earth is the bigger one: draw its outline around the planet, concentric
       ctx.fillStyle = "rgba(90,157,224,0.10)";
@@ -800,6 +842,7 @@
       ctx.textAlign = "center";
       ctx.fillStyle = "rgba(200,225,255,0.9)";
       ctx.fillText("Earth, to scale", x, ly);
+      ghostState = { kind: "around", r: gr, x: x, y: y0 };
     } else {
       // Earth is the smaller one: set it beside the planet, on the open left side
       const side = selected.name === "Saturn" ? Rd * 2.15 : selected.name === "Uranus" ? Rd * 1.3 : Rd;
@@ -817,6 +860,7 @@
       ctx.textAlign = "center";
       ctx.fillStyle = "rgba(200,225,255,0.9)";
       ctx.fillText("Earth, to scale", gx, ly);
+      ghostState = { kind: "beside", r: gr, x: gx, y: gy };
     }
   }
 
@@ -886,6 +930,7 @@
               rockV: ROCKS.map(k => k.v) },
       kuiper: { plutino: KUIPER.plutino, twotino: KUIPER.twotino,
                 cliff: KUIPER.cliff },
+      ghost: ghostState,
       light: lightState, speedup: LIGHT_SPEEDUP,
       lightEnd: KUIPER.auOut * AU / C_KM_S };
     requestAnimationFrame(frame);
