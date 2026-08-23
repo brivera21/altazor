@@ -8,6 +8,7 @@ selecting one does not fall through code written for bodies with a radius.
 
 Usage: python3 verify_solar_system.py
 """
+import math
 import sys
 from pathlib import Path
 
@@ -24,6 +25,10 @@ WANT_CHIPS = ["Overview", "I. SUN", "II. MERCURY", "III. VENUS", "IV. EARTH",
 
 NEPTUNE_AU = 30.07
 KUIPER_IN, KUIPER_OUT = 30, 50
+
+# The Great Red Spot as the page draws it, and Earth to compare it against.
+GRS_W, GRS_H = 15000, 12000
+EARTH_D, JUPITER_R = 12742, 69911
 
 # Facts the panel states, each checked against the arithmetic it claims.
 FACTS = [
@@ -78,6 +83,17 @@ FACTS = [
      abs(KUIPER_OUT * AU_KM / 299792.458 / 60 - 416) < 2),
     ("that is two thirds again as far as Neptune",
      1.6 < KUIPER_OUT / NEPTUNE_AU < 1.7),
+    # --- the Great Red Spot and the ghost Earth on it ---
+    ("the spot as drawn is a little over one Earth wide",
+     1.0 < GRS_W / EARTH_D < 1.4),
+    ("it was near three Earths across in the nineteenth century",
+     2.9 < 40000 / EARTH_D < 3.3),
+    ("the drawn size sits between the Juno measurement and the latest",
+     12000 < GRS_W < 16400),
+    ("the spot is wider than it is tall, as the real one is",
+     1.15 < GRS_W / GRS_H < 1.35),
+    ("22 degrees south puts it where the spot actually is",
+     abs(math.sin(math.radians(22)) - 0.3746) < 0.001),
 ]
 
 fails = []
@@ -317,6 +333,63 @@ with sync_playwright() as pw:
         fails.append(f"the pulse ran past the belt to {far:.1f} au")
     print(f"  ok   the pulse crosses in {cross:.0f} s and reaches {far:.1f} au, "
           f"{end / 3600:.1f} light-hours from the Sun")
+
+    # Every body must offer Earth for scale, Earth itself excepted, and the
+    # two regions, which have no size of their own. Jupiter was skipped in
+    # silence for a long time, so it is checked by name.
+    #
+    # This asks the page what it drew rather than counting blue pixels on the
+    # canvas. Pixel counting looked simpler and was wrong: it also caught
+    # Earth's and Neptune's own blue discs, and getImageData ignores alpha, so
+    # a 10 percent wash counted the same as a solid fill. Every body passed,
+    # including ones drawing no ghost at all.
+    WANT_GHOST = {"Sun": "speck", "Mercury": "around", "Venus": "around",
+                  "Mars": "around", "Jupiter": "spot", "Saturn": "beside",
+                  "Uranus": "beside", "Neptune": "beside"}
+    for name, kind in WANT_GHOST.items():
+        pg.click(f'.chip[data-name="{name}"]')
+        pg.wait_for_timeout(1700)
+        g = pg.evaluate("()=>__dbg.ghost")
+        if not g:
+            fails.append(f"{name}: no Earth drawn for scale")
+        elif g["kind"] != kind:
+            fails.append(f"{name}: Earth drawn as {g['kind']!r}, expected {kind!r}")
+        elif g["r"] < 1:
+            fails.append(f"{name}: Earth drawn at {g['r']:.2f}px, invisible")
+    print(f"  ok   all {len(WANT_GHOST)} bodies offer Earth for scale, "
+          "Jupiter included")
+
+    for name in ("Earth", "Asteroid Belt", "Kuiper Belt"):
+        pg.click(f'.chip[data-name="{name}"]')
+        pg.wait_for_timeout(1500)
+        if pg.evaluate("()=>__dbg.ghost"):
+            fails.append(f"{name} should not be compared against Earth")
+    print("  ok   Earth and the two regions correctly draw none")
+
+    # On Jupiter the ghost belongs on the spot, and the two must be comparable
+    # in size rather than the spot dwarfing Earth.
+    pg.click('.chip[data-name="Jupiter"]')
+    pg.wait_for_timeout(1700)
+    g = pg.evaluate("()=>__dbg.ghost")
+    ratio = g["r"] / g["spotHalfW"]
+    if abs(ratio - EARTH_D / GRS_W) > 0.01:
+        fails.append(f"Earth spans {ratio:.3f} of the spot's width against "
+                     f"{EARTH_D / GRS_W:.3f} from the measurements")
+    if not 0.75 < ratio < 0.95:
+        fails.append(f"Earth fills {ratio:.0%} of the spot, which does not "
+                     "read as 'a little wider than Earth'")
+    if abs(g["y"] - pg.evaluate("()=>__dbg.er") * math.sin(math.radians(22))
+           - pg.evaluate("()=>innerHeight * 0.46")) > 2:
+        fails.append("the ghost is not sitting at the spot's latitude")
+    print(f"  ok   on Jupiter, Earth spans {ratio:.0%} of the Red Spot, "
+          f"against {EARTH_D / GRS_W:.0%} from the measurements, at 22 S")
+
+    labels = pg.evaluate("()=>[...document.querySelectorAll('#info dt')]"
+                         ".map(t=>t.textContent)")
+    if "The Great Red Spot" not in labels:
+        fails.append("Jupiter's panel does not explain the spot")
+    else:
+        print("  ok   Jupiter's panel carries a Great Red Spot row")
 
     if errs:
         fails.append(f"javascript errors: {errs}")
