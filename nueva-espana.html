@@ -239,7 +239,7 @@ function pon(g, texto, x, y, clase, r){
              [x,y-r-6*K,'middle'],[x,y+r+alto,'middle']];
   for(const [tx,ty,anc] of ops){
     const x0 = anc==='start'? tx : anc==='end'? tx-ancho : tx-ancho/2;
-    const c=[x0-2,ty-alto,x0+ancho+2,ty+3];
+    const c=[x0-2*K,ty-alto,x0+ancho+2*K,ty+3*K];
     if(c[0]<caja.x+4||c[2]>caja.x+caja.w-4||c[1]<caja.y+4||c[3]>caja.y+caja.h-4) continue;
     if(cajas.some(o=>!(c[2]<o[0]||c[0]>o[2]||c[3]<o[1]||c[1]>o[3]))) continue;
     const t=make('text',{class:clase,x:tx,y:ty,'text-anchor':anc,
