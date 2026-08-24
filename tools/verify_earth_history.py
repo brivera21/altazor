@@ -187,6 +187,67 @@ with sync_playwright() as pw:
         if not ok:
             fails.append(f"at {age} Ma the two coasts are {d:,.0f} km apart")
 
+    print("--- the slider runs the map ---")
+    pg.evaluate("()=>document.getElementById('bAll').click()")
+    pg.wait_for_timeout(80)
+    pasos = pg.evaluate("()=>+document.getElementById('tage').max") + 1
+    edades = sorted({r[1] for r in ROTATIONS})
+    ok = pasos == len(edades)
+    print(f"  {'ok  ' if ok else 'FAIL'} the slider has {pasos} stops and the "
+          f"model holds {len(edades)} ages")
+    if not ok:
+        fails.append(f"the slider has {pasos} stops against {len(edades)} ages")
+
+    visto, formas = [], []
+    for v in (0, 8, 16, 24, 32, 40, pasos - 1):
+        pg.evaluate("(v)=>{const s=document.getElementById('tage');s.value=v;"
+                    "s.dispatchEvent(new Event('input'))}", v)
+        pg.wait_for_timeout(90)
+        h = pg.evaluate("()=>window.__hist()")
+        visto.append(h["ageSel"])
+        formas.append(h["plateD"])
+        quiere = sorted(edades, reverse=True)[v]
+        if h["ageSel"] != quiere or h["paleoAge"] != quiere:
+            fails.append(f"stop {v} draws {h['paleoAge']} Ma, expected {quiere}")
+    ok = visto == sorted(visto, reverse=True) and len(set(formas)) == len(formas)
+    print(f"  {'ok  ' if ok else 'FAIL'} seven stops give the ages {visto} and "
+          "seven different maps")
+    if not ok:
+        fails.append(f"the slider gives {visto} and {len(set(formas))} maps")
+
+    # el botón de correr avanza solo, y el de hoy regresa
+    pg.evaluate("()=>{const s=document.getElementById('tage');s.value=0;"
+                "s.dispatchEvent(new Event('input'))}")
+    pg.click("#bRun")
+    pg.wait_for_timeout(1400)
+    corriendo = pg.evaluate("()=>window.__hist()")
+    pg.click("#bRun")
+    pg.wait_for_timeout(80)
+    parado = pg.evaluate("()=>window.__hist()")
+    ok = corriendo["ageSel"] < 1000 and corriendo["corriendo"] and not parado["corriendo"]
+    print(f"  {'ok  ' if ok else 'FAIL'} Run time walks the map forward, to "
+          f"{corriendo['ageSel']} Ma in a second and a bit, and stops when told")
+    if not ok:
+        fails.append(f"Run time gives {corriendo} then {parado}")
+    pg.click("#bNow")
+    pg.wait_for_timeout(100)
+    hoy = pg.evaluate("()=>window.__hist()")
+    ok = hoy["ageSel"] == 0 and hoy["paleoAge"] == 0
+    print(f"  {'ok  ' if ok else 'FAIL'} the world today button comes back to 0 Ma")
+    if not ok:
+        fails.append(f"the today button leaves it at {hoy['paleoAge']}")
+
+    # y una banda de la columna le devuelve el mapa a la ventana
+    pg.evaluate("(n)=>window.__zoom(n)", "Jurassic")
+    pg.wait_for_timeout(120)
+    j = pg.evaluate("()=>window.__hist()")
+    marca = pg.evaluate("()=>document.querySelectorAll('#over .now').length")
+    ok = j["ageSel"] is None and j["paleoAge"] and marca == 1
+    print(f"  {'ok  ' if ok else 'FAIL'} a band clicked takes the map back to "
+          f"{j['paleoAge']} Ma, and the column marks where that falls")
+    if not ok:
+        fails.append(f"after a click the map reads {j}, mark {marca}")
+
     print("--- how far back it draws ---")
     for name, want in [("Cretaceous", True), ("Cryogenian", True),
                        ("Tonian", True), ("Stenian", False),
