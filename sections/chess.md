@@ -18,6 +18,7 @@ title: Chess
 <div>
 <h2>Middle Games</h2>
 <p><a href="timeline.html">50 Greatest Games</a></p>
+<p><a href="world-champions.html">World Champions</a></p>
 <p><a href="intuition.html">Board Intuition</a></p>
 </div>
 <div>
