@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El Ariel a Mejor Película · Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 6px; font-size:26px; }
+.lede { color:var(--muted); font-size:14.5px; margin:0 0 14px; max-width:760px; }
+.controls { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
+.controls button { background:var(--panel); border:1px solid var(--line); color:var(--text);
+  padding:7px 13px; border-radius:8px; cursor:pointer; font-size:13.5px; }
+.controls button:hover { border-color:var(--accent); }
+.controls .info { color:var(--muted); font-size:13px; margin-left:6px; }
+.stage { display:flex; gap:22px; align-items:flex-start; }
+#tl { flex:1 1 640px; min-width:0; }
+#tl svg { width:100%; height:auto; display:block; cursor:grab; user-select:none; }
+#tl.panning, #tl.panning * { cursor:grabbing !important; }
+.side { flex:0 0 260px; position:sticky; top:16px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:14px; }
+#poster { width:100%; aspect-ratio:2/3; object-fit:contain; background:#101010;
+  border-radius:6px; display:block; }
+#filmTxt { font-weight:700; margin:10px 0 2px; font-size:15px; }
+#dirTxt { color:var(--muted); font-size:13px; }
+#eraTxt { font-size:13px; min-height:1.2em; margin-top:2px; }
+#yearTxt { color:var(--muted); font-size:13px; margin-top:4px; }
+.legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-size:12.5px; color:var(--muted); }
+.legend span.sw { width:11px; height:11px; border-radius:3px; display:inline-block; margin-right:5px; }
+.note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.note a { color:var(--accent); }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;}
+  #poster{max-width:220px; margin:0 auto;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="film.html">&larr; Film</a></nav>
+</header>
+<h1>El Ariel a Mejor Película</h1>
+<div class="controls">
+  <button id="reset">Vista completa</button>
+  <span class="info" id="info"></span>
+</div>
+<div class="stage">
+  <div id="tl"></div>
+  <div class="side"><div class="card">
+    <img id="poster" alt="Póster de la película">
+    <div id="filmTxt">La película bajo el cursor aparece aquí</div>
+    <div id="dirTxt"></div>
+    <div id="eraTxt"></div>
+    <div id="yearTxt"></div>
+  </div></div>
+</div>
+<div class="legend" id="legend"></div>
+<p class="note">Cada punto es una ganadora del Ariel a Mejor Película, de
+La barraca en la primera entrega de 1947 a la más reciente. La rueda acerca,
+arrastrar recorre, un clic en una época entra en ella y la película bajo el
+cursor muestra su póster.</p>
+<p class="note">Los años son los de cada ceremonia. Las dos primeras ediciones
+se entregaron en 1947; el premio se declaró desierto en 1953 y en 1983, y la
+Academia lo suspendió de 1959 a 1971. Hubo empates en 1972, 1975 y 1978, y un
+triple empate en 1973. La edición LXVIII está anunciada para octubre de 2026.
+Los ganadores se pueden cotejar con la
+<a href="https://www.amacc.org.mx/mejor-pelicula-historico">lista histórica de
+la AMACC</a>. Los pósters se cargan al momento desde la API pública de
+Wikipedia solo para identificación y no se guardan en este sitio; alguno puede
+no aparecer.</p>
+</div>
+<script>
+const FILMS=[{"y":1947,"n":"La barraca","d":"Roberto Gavaldón","ed":"I","e":0},{"y":1947,"n":"Enamorada","d":"Emilio Fernández","ed":"II","e":0},{"y":1948,"n":"La perla","d":"Emilio Fernández","ed":"III","e":0},{"y":1949,"n":"Río Escondido","d":"Emilio Fernández","ed":"IV","e":0},{"y":1950,"n":"Una familia de tantas","d":"Alejandro Galindo","ed":"V","e":0},{"y":1951,"n":"Los olvidados","d":"Luis Buñuel","ed":"VI","e":0},{"y":1952,"n":"En la palma de tu mano","d":"Roberto Gavaldón","ed":"VII","e":0},{"y":1954,"n":"El niño y la niebla","d":"Roberto Gavaldón","ed":"IX","e":0},{"y":1955,"n":"Los Fernández de Peralvillo","d":"Alejandro Galindo","ed":"X","e":0},{"y":1956,"n":"Las aventuras de Robinson Crusoe","d":"Luis Buñuel","ed":"XI","e":0},{"y":1957,"n":"El camino de la vida","d":"Alfonso Corona Blake","ed":"XII","e":0},{"y":1958,"n":"Tizoc","d":"Ismael Rodríguez","ed":"XIII","e":0},{"y":1972,"n":"El águila descalza","d":"Alfonso Arau","ed":"XIV","e":2},{"y":1972,"n":"Las puertas del paraíso","d":"Salomón Laiter","ed":"XIV","e":2},{"y":1973,"n":"El castillo de la pureza","d":"Arturo Ripstein","ed":"XV","e":2},{"y":1973,"n":"Mecánica nacional","d":"Luis Alcoriza","ed":"XV","e":2},{"y":1973,"n":"Reed, México insurgente","d":"Paul Leduc","ed":"XV","e":2},{"y":1974,"n":"El principio","d":"Gonzalo Martínez Ortega","ed":"XVI","e":2},{"y":1975,"n":"La otra virginidad","d":"Juan Manuel Torres","ed":"XVII","e":2},{"y":1975,"n":"La choca","d":"Emilio Fernández","ed":"XVII","e":2},{"y":1976,"n":"Actas de Marusia","d":"Miguel Littín","ed":"XVIII","e":2},{"y":1977,"n":"La pasión según Berenice","d":"Jaime Humberto Hermosillo","ed":"XIX","e":2},{"y":1978,"n":"Naufragio","d":"Jaime Humberto Hermosillo","ed":"XX","e":2},{"y":1978,"n":"El lugar sin límites","d":"Arturo Ripstein","ed":"XX","e":2},{"y":1979,"n":"Cadena perpetua","d":"Arturo Ripstein","ed":"XXI","e":2},{"y":1980,"n":"El año de la peste","d":"Felipe Cazals","ed":"XXII","e":2},{"y":1981,"n":"Las grandes aguas","d":"Servando González","ed":"XXIII","e":3},{"y":1982,"n":"¡Ora sí tenemos que ganar!","d":"Raúl Kamffer","ed":"XXIV","e":3},{"y":1984,"n":"Bajo la metralla","d":"Felipe Cazals","ed":"XXVI","e":3},{"y":1985,"n":"Frida, naturaleza viva","d":"Paul Leduc","ed":"XXVII","e":3},{"y":1986,"n":"Veneno para las hadas","d":"Carlos Enrique Taboada","ed":"XXVIII","e":3},{"y":1987,"n":"El imperio de la fortuna","d":"Arturo Ripstein","ed":"XXIX","e":3},{"y":1988,"n":"Mariana, Mariana","d":"Alberto Isaac","ed":"XXX","e":3},{"y":1989,"n":"Esperanza","d":"Sergio Olhovich","ed":"XXXI","e":3},{"y":1990,"n":"Goitia, un dios para sí mismo","d":"Diego López Rivera","ed":"XXXII","e":3},{"y":1991,"n":"Rojo amanecer","d":"Jorge Fons","ed":"XXXIII","e":3},{"y":1992,"n":"Como agua para chocolate","d":"Alfonso Arau","ed":"XXXIV","e":4},{"y":1993,"n":"Cronos","d":"Guillermo del Toro","ed":"XXXV","e":4},{"y":1994,"n":"Principio y fin","d":"Arturo Ripstein","ed":"XXXVI","e":4},{"y":1995,"n":"El callejón de los milagros","d":"Jorge Fons","ed":"XXXVII","e":4},{"y":1996,"n":"Sin remitente","d":"Carlos Carrera","ed":"XXXVIII","e":4},{"y":1997,"n":"Cilantro y perejil","d":"Rafael Montero","ed":"XXXIX","e":4},{"y":1998,"n":"Por si no te vuelvo a ver","d":"Juan Pablo Villaseñor","ed":"XL","e":4},{"y":1999,"n":"Bajo California: el límite del tiempo","d":"Carlos Bolado","ed":"XLI","e":4},{"y":2000,"n":"La ley de Herodes","d":"Luis Estrada","ed":"XLII","e":4},{"y":2001,"n":"Amores perros","d":"Alejandro González Iñárritu","ed":"XLIII","e":5},{"y":2002,"n":"Cuento de hadas para dormir cocodrilos","d":"Ignacio Ortiz","ed":"XLIV","e":5},{"y":2003,"n":"El crimen del padre Amaro","d":"Carlos Carrera","ed":"XLV","e":5},{"y":2004,"n":"El misterio del Trinidad","d":"José Luis García Agraz","ed":"XLVI","e":5},{"y":2005,"n":"Temporada de patos","d":"Fernando Eimbcke","ed":"XLVII","e":5},{"y":2006,"n":"Mezcal","d":"Ignacio Ortiz","ed":"XLVIII","e":5},{"y":2007,"n":"El laberinto del fauno","d":"Guillermo del Toro","ed":"XLIX","e":5},{"y":2008,"n":"Luz silenciosa","d":"Carlos Reygadas","ed":"L","e":5},{"y":2009,"n":"Lake Tahoe","d":"Fernando Eimbcke","ed":"LI","e":5},{"y":2010,"n":"Cinco días sin Nora","d":"Mariana Chenillo","ed":"LII","e":5},{"y":2011,"n":"El infierno","d":"Luis Estrada","ed":"LIII","e":5},{"y":2012,"n":"Pastorela","d":"Emilio Portes","ed":"LIV","e":5},{"y":2013,"n":"El premio","d":"Paula Markovitch","ed":"LV","e":5},{"y":2014,"n":"La jaula de oro","d":"Diego Quemada-Díez","ed":"LVI","e":6},{"y":2015,"n":"Güeros","d":"Alonso Ruizpalacios","ed":"LVII","e":6},{"y":2016,"n":"Las elegidas","d":"David Pablos","ed":"LVIII","e":6},{"y":2017,"n":"La 4ª compañía","d":"Amir Galván Cervera y Mitzi Vanessa Arreola","ed":"LIX","e":6},{"y":2018,"n":"Sueño en otro idioma","d":"Ernesto Contreras","ed":"LX","e":6},{"y":2019,"n":"Roma","d":"Alfonso Cuarón","ed":"LXI","e":6},{"y":2020,"n":"Ya no estoy aquí","d":"Fernando Frías de la Parra","ed":"LXII","e":6},{"y":2021,"n":"Sin señas particulares","d":"Fernanda Valadez","ed":"LXIII","e":6},{"y":2022,"n":"Noche de fuego","d":"Tatiana Huezo","ed":"LXIV","e":6},{"y":2023,"n":"El norte sobre el vacío","d":"Alejandra Márquez Abella","ed":"LXV","e":6},{"y":2024,"n":"Tótem","d":"Lila Avilés","ed":"LXVI","e":6},{"y":2025,"n":"Sujo","d":"Astrid Rondero y Fernanda Valadez","ed":"LXVII","e":6}], ERAS=[{"a":1946,"b":1958,"n":"Época de Oro","c":"#ffb02e","h":false},{"a":1959,"b":1971,"n":"Suspensión del premio","c":"#6b7280","h":true},{"a":1972,"b":1980,"n":"Nuevo Cine / años de Echeverría","c":"#31d67a","h":false},{"a":1981,"b":1991,"n":"Crisis y video","c":"#d1548e","h":false},{"a":1992,"b":2000,"n":"Nuevo Cine Mexicano","c":"#2fc6a6","h":false},{"a":2001,"b":2013,"n":"Proyección internacional","c":"#58a6ff","h":false},{"a":2014,"b":2026,"n":"Era global y de streaming","c":"#e6c86e","h":false}];
+const W=980,H=780,CY=385,MINY=1944,MAXY=2028;
+let view={a:MINY,b:MAXY};
+
+const el=document.getElementById('tl');
+const X=y=>(y-view.a)/(view.b-view.a)*W;
+const YR=x=>view.a+x/W*(view.b-view.a);
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+function ticks(){
+  const span=view.b-view.a;
+  const step=span>60?10:span>25?5:span>12?2:1;
+  const out=[];
+  for(let y=Math.ceil(view.a/step)*step;y<=view.b;y+=step) out.push(y);
+  return out;
+}
+function lanes(items,estw){
+  const ends=[];
+  for(const it of items){
+    const w=estw(it), x0=it.cx-w/2;
+    let l=0;
+    while(l<ends.length && ends[l]>x0) l++;
+    it.lane=l; ends[l]=it.cx+w/2+8;
+  }
+}
+function render(){
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" id="tlsvg">`;
+  s+=`<rect width="${W}" height="${H}" fill="#121212"/>`;
+  for(const y of ticks()){
+    const x=X(y);
+    s+=`<line x1="${x}" y1="26" x2="${x}" y2="${H-26}" stroke="#242424"/>`;
+    s+=`<text x="${x}" y="${CY+20}" text-anchor="middle" font-size="12.5" font-weight="700"
+      fill="#9a9a9a">${y}</text>`;
+  }
+  s+=`<line x1="0" y1="${CY}" x2="${W}" y2="${CY}" stroke="#3a3a3a" stroke-width="2"/>`;
+  for(let d=Math.floor(view.a/10)*10; d<view.b; d+=10){
+    const x0=Math.max(0,X(d)), x1=Math.min(W,X(d+10));
+    if(x1-x0<2) continue;
+    s+=`<rect x="${x0}" y="26" width="${x1-x0}" height="${H-52}" fill="transparent"
+      data-dec-band="${d}"/>`;
+  }
+  ERAS.forEach((p,i)=>{
+    if(p.b<view.a||p.a>view.b) return;
+    const x0=Math.max(0,X(p.a)), x1=Math.min(W,X(p.b));
+    const dash=p.h?' stroke-dasharray="4 3"':'';
+    s+=`<rect x="${x0}" y="${CY+30}" width="${Math.max(2,x1-x0)}" height="22" rx="6"
+      fill="${p.c}${p.h?'11':'22'}" stroke="${p.c}" stroke-width="1"${dash}
+      data-era="${i}" style="cursor:pointer"/>`;
+    if(x1-x0>150) s+=`<text x="${(x0+x1)/2}" y="${CY+45}" text-anchor="middle" font-size="11.5"
+      fill="${p.c}" pointer-events="none">${esc(p.n)} (${p.a}-${p.b})</text>`;
+  });
+  const fs=FILMS.filter(f=>f.y>=view.a-30&&f.y<=view.b+30)
+                .map(f=>({...f,x:X(f.y),fi:FILMS.indexOf(f)}))
+                .sort((a,b)=>a.x-b.x);
+  fs.forEach((f,i)=>{const w=Math.min(215,(f.n.length+7)*6.2)+14;
+    f.w=w; f.cx=Math.min(W-w/2-4,Math.max(w/2+4,f.x)); f.up=(i%2===0);});
+  const ups=fs.filter(f=>f.up), dns=fs.filter(f=>!f.up);
+  lanes(ups,f=>f.w-14); lanes(dns,f=>f.w-14);
+  for(const f of fs){
+    const c=ERAS[f.e].c;
+    const ly=f.up ? CY-42-f.lane*26 : CY+108+f.lane*26;
+    const dotY=f.up ? CY-6 : CY+6;
+    const tipY=f.up ? ly+9 : ly-9;
+    const label=`${f.n} (${f.y})`;
+    s+=`<g data-f="${f.fi}" data-dec="${Math.floor(f.y/10)*10}" style="cursor:default">
+      <line x1="${f.x}" y1="${dotY}" x2="${f.x}" y2="${tipY}" stroke="${c}" stroke-width="1.1" opacity="0.7"/>
+      <circle cx="${f.x}" cy="${dotY}" r="3.2" fill="${c}"/>
+      <rect x="${f.cx-f.w/2}" y="${ly-8}" width="${f.w}" height="20" rx="7"
+        fill="#1a1a1a" stroke="${c}" stroke-width="1.1"/>
+      <text x="${f.cx}" y="${ly+6}" text-anchor="middle" font-size="11.3" font-weight="600"
+        fill="#e6e6e6" pointer-events="none">${esc(label).slice(0,40)}</text></g>`;
+  }
+  s+='</svg>';
+  el.innerHTML=s;
+  document.getElementById('info').textContent=
+    `${Math.round(view.a)} a ${Math.round(view.b)}`;
+}
+function clampView(a,b){
+  const span=Math.min(MAXY-MINY,Math.max(6,b-a));
+  a=Math.max(MINY,Math.min(a,MAXY-span));
+  return {a,b:a+span};
+}
+function hook(){
+  const px=e=>{const r=el.getBoundingClientRect();return (e.clientX-r.left)/r.width*W;};
+  el.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const f=e.deltaY>0?1.18:1/1.18, yr=YR(px(e));
+    view=clampView(yr-(yr-view.a)*f, yr+(view.b-yr)*f);
+    render();
+  },{passive:false});
+  let drag=null, dragged=false;
+  el.addEventListener('pointerdown',e=>{drag={x:px(e),a:view.a,b:view.b};dragged=false;el.classList.add('panning');el.setPointerCapture(e.pointerId);});
+  el.addEventListener('pointermove',e=>{
+    if(!drag) return;
+    const dx=px(e)-drag.x;
+    if(Math.abs(dx)>2) dragged=true;
+    const dyr=dx/W*(drag.b-drag.a);
+    view=clampView(drag.a-dyr, drag.b-dyr);
+    render();
+  });
+  el.addEventListener('pointerup',()=>{drag=null;el.classList.remove('panning');});
+  el.addEventListener('pointercancel',()=>{drag=null;el.classList.remove('panning');});
+  el.addEventListener('click',e=>{
+    if(dragged){dragged=false;return;}
+    const g=e.target.closest('[data-era]');
+    if(g){const p=ERAS[+g.getAttribute('data-era')];
+      view=clampView(p.a-2,p.b+2);render();}
+  });
+  el.addEventListener('pointerover',e=>{
+    const g=e.target.closest('[data-f]');
+    if(g){ showFilm(+g.getAttribute('data-f')); setFocus(+g.getAttribute('data-dec')); return; }
+    const b=e.target.closest('[data-era]');
+    if(b){ const p=ERAS[+b.getAttribute('data-era')];
+      document.getElementById('info').textContent=p.n+' ('+p.a+'-'+p.b+') · clic para acercar';
+      setFocus(null); return; }
+    const db=e.target.closest('[data-dec-band]');
+    setFocus(db ? +db.getAttribute('data-dec-band') : null);
+  });
+  el.addEventListener('pointerleave',()=>setFocus(null));
+}
+
+function setFocus(d){
+  document.querySelectorAll('#tlsvg g[data-dec]').forEach(g=>{
+    g.setAttribute('opacity', d===null||+g.getAttribute('data-dec')===d ? 1 : 0.22);
+  });
+  document.querySelectorAll('#tlsvg rect[data-dec-band]').forEach(r=>{
+    r.setAttribute('fill', d!==null&&+r.getAttribute('data-dec-band')===d
+      ? 'rgba(255,255,255,0.03)' : 'transparent');
+  });
+}
+
+// ---- póster: API REST de Wikipedia, es primero y en como respaldo ----
+const cache={};
+let current=-1;
+function candidates(f){
+  return [
+    ['es', f.n], ['es', `${f.n} (película)`],
+    ['es', `${f.n} (película de ${f.y})`], ['es', `${f.n} (película de ${f.y-1})`],
+    ['en', f.n], ['en', `${f.n} (film)`], ['en', `${f.n} (${f.y-1} film)`],
+  ];
+}
+async function lookup(lang,title){
+  const r=await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/`+
+    encodeURIComponent(title.replace(/ /g,'_')));
+  if(!r.ok) throw 0;
+  const j=await r.json();
+  if(j.type!=='standard') throw 0;
+  const d=((j.description||'')+' '+(j.extract||'')).toLowerCase();
+  if(!/película|film|cinta/.test(d)) throw 0;
+  return j.thumbnail?j.thumbnail.source:null;
+}
+async function posterFor(f){
+  if(f.n in cache) return cache[f.n];
+  for(const [lg,t] of candidates(f)){
+    try{ const u=await lookup(lg,t); cache[f.n]=u; return u; }catch(e){}
+  }
+  cache[f.n]=null; return null;
+}
+async function showFilm(i){
+  const f=FILMS[i]; current=i;
+  document.getElementById('filmTxt').textContent=f.n;
+  document.getElementById('dirTxt').textContent=f.d;
+  const et=document.getElementById('eraTxt');
+  et.textContent=ERAS[f.e].n; et.style.color=ERAS[f.e].c;
+  document.getElementById('yearTxt').textContent=
+    `Ariel a Mejor Película · ${f.y} (edición ${f.ed})`;
+  const img=document.getElementById('poster');
+  img.removeAttribute('src'); img.alt='Cargando póster…';
+  const u=await posterFor(f);
+  if(current!==i) return;
+  if(u){ img.src=u; img.alt=`Póster de ${f.n}`; }
+  else { img.alt='Sin póster'; }
+}
+document.getElementById('reset').onclick=()=>{view={a:MINY,b:MAXY};render();};
+const lg=document.getElementById('legend');
+lg.innerHTML=ERAS.map(p=>
+  `<span><span class="sw" style="background:${p.c}"></span>${esc(p.n)}</span>`).join('');
+render();
+showFilm(FILMS.length-1);
+hook();
+</script>
+</body>
+</html>
