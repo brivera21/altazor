@@ -15,9 +15,11 @@ Usage: python3 build_ariel.py
 """
 
 import json
+import unicodedata
 from pathlib import Path
 
-OUT = Path(__file__).parent.parent / "premios-ariel.html"
+HERE = Path(__file__).parent
+OUT = HERE.parent / "premios-ariel.html"
 
 # (ceremony year, edition, title, directors)
 FILMS = [
@@ -116,10 +118,34 @@ def era_index(year):
 for y, *_ in FILMS:
     assert not ERAS[era_index(y)][4], f"film in the hiatus band: {y}"
 
+# Poster paths come from the master list's own TMDB manifest
+# (cine_posters.json), matched by title and director; whatever is missing
+# falls back to Wikipedia in the reader's browser.
+def _norm(s):
+    s = unicodedata.normalize("NFD", s.lower())
+    return "".join(c for c in s if unicodedata.category(c) != "Mn")
+
+_titles = json.loads((HERE / "cine_films.json").read_text(encoding="utf-8"))
+_posters = json.loads((HERE / "cine_posters.json").read_text(encoding="utf-8"))
+_idx = {}
+for (_y, _t), (_p, _dir) in zip(_titles, _posters):
+    _idx.setdefault(_norm(_t), []).append((_p, _norm(_dir or "")))
+
+
+def poster_path(title, directors):
+    surname = _norm(directors).split(" y ")[0].split()[-1]
+    for p, d in _idx.get(_norm(title), []):
+        if p and surname in d:
+            return p
+    return None
+
+
 films_js = json.dumps(
-    [{"y": y, "n": n, "d": d, "ed": ed, "e": era_index(y)}
+    [{"y": y, "n": n, "d": d, "ed": ed, "e": era_index(y),
+      "p": poster_path(n, d)}
      for y, ed, n, d in FILMS],
     separators=(",", ":"), ensure_ascii=False)
+_con = sum(1 for y, ed, n, d in FILMS if poster_path(n, d))
 eras_js = json.dumps(
     [{"a": a, "b": b, "n": n, "c": c, "h": h}
      for a, b, n, c, h in ERAS],
@@ -205,9 +231,11 @@ Academia lo suspendió de 1959 a 1971. Hubo empates en 1972, 1975 y 1978, y un
 triple empate en 1973. La edición LXVIII está anunciada para octubre de 2026.
 Los ganadores se pueden cotejar con la
 <a href="https://www.amacc.org.mx/mejor-pelicula-historico">lista histórica de
-la AMACC</a>. Los pósters se cargan al momento desde la API pública de
-Wikipedia solo para identificación y no se guardan en este sitio; alguno puede
-no aparecer.</p>
+la AMACC</a>. Los pósters provienen de
+<a href="https://www.themoviedb.org">TMDB</a> (este sitio usa la API de TMDB
+pero no está avalado ni certificado por TMDB) y, cuando falta la ficha, de la
+API pública de Wikipedia; se cargan solo para identificación, no se guardan
+aquí y alguno puede no aparecer.</p>
 </div>
 <script>
 const FILMS=__FILMS__, ERAS=__ERAS__;
@@ -363,6 +391,7 @@ async function lookup(lang,title){
   return j.thumbnail.source;
 }
 async function posterFor(f){
+  if(f.p) return 'https://image.tmdb.org/t/p/w342'+f.p;
   if(f.n in cache) return cache[f.n];
   for(const [lg,t] of candidates(f)){
     try{ const u=await lookup(lg,t); cache[f.n]=u; return u; }catch(e){}
@@ -399,4 +428,4 @@ hook();
 html = HTML.replace("__FILMS__", films_js).replace("__ERAS__", eras_js)
 OUT.write_text(html, encoding="utf-8")
 print(f"wrote {OUT} ({len(html):,} bytes): {len(FILMS)} winning films, "
-      f"{len(ERAS)} bands")
+      f"{len(ERAS)} bands, {_con} posters from the TMDB manifest")
