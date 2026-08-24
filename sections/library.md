@@ -22,6 +22,8 @@ title: Library
 <div>
 <h2>The Solar System</h2>
 <p><a href="solar-system.html">The Solar System</a></p>
+<p><a href="universe.html">The Universe</a></p>
+<p><a href="matter.html">Matter</a></p>
 </div>
 <div>
 <h2>Earth</h2>
@@ -39,11 +41,14 @@ title: Library
 <p><a href="us-states.html">50 States and a District</a></p>
 <p><a href="us-cities.html">US Cities</a></p>
 <p><a href="mexico.html">Mexico</a></p>
+<p><a href="nueva-espana.html">La Nueva España</a></p>
 <p><a href="norte-mexico.html">El norte de México</a></p>
 <p><a href="el-terrero.html">El Terrero, Namiquipa</a></p>
+<p><a href="valle-santa-maria.html">El valle del Santa María</a></p>
+<p><a href="ruta-namiquipa.html">La Ruta Namiquipa</a></p>
+<p><a href="cabalgata-villista.html">Cabalgata Binacional Villista</a></p>
 <p><a href="linea-misiones.html">Misiones en Chihuahua (1560-1720)</a></p>
 <p class="soon">Archivo Namiquipa <span class="tag">coming soon</span></p>
-<p class="soon">Cabalgata Binacional Villista <span class="tag">coming soon</span></p>
 </div>
 </div>
 
