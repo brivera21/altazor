@@ -23,6 +23,8 @@ h1 { margin:0 0 6px; font-size:26px; }
 .controls button { background:var(--panel); border:1px solid var(--line); color:var(--text);
   padding:7px 13px; border-radius:8px; cursor:pointer; font-size:13.5px; }
 .controls button:hover { border-color:var(--accent); }
+.controls button.on { border-color:var(--accent); color:var(--accent); }
+.controls button.mute { color:var(--muted); }
 .controls .info { color:var(--muted); font-size:13px; margin-left:6px; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
 #tl { flex:1 1 640px; min-width:0; }
@@ -55,6 +57,15 @@ h1 { margin:0 0 6px; font-size:26px; }
 <h1>El Ariel a Mejor Película</h1>
 <div class="controls">
   <button id="reset">Vista completa</button>
+  <button class="dec" data-d="1940">1940</button>
+  <button class="dec" data-d="1950">1950</button>
+  <button class="dec mute" data-d="1960">1960</button>
+  <button class="dec" data-d="1970">1970</button>
+  <button class="dec" data-d="1980">1980</button>
+  <button class="dec" data-d="1990">1990</button>
+  <button class="dec" data-d="2000">2000</button>
+  <button class="dec" data-d="2010">2010</button>
+  <button class="dec" data-d="2020">2020</button>
   <span class="info" id="info"></span>
 </div>
 <div class="stage">
@@ -161,6 +172,11 @@ function render(){
   el.innerHTML=s;
   document.getElementById('info').textContent=
     `${Math.round(view.a)} a ${Math.round(view.b)}`;
+  document.querySelectorAll('.controls button.dec').forEach(b=>{
+    const d=+b.getAttribute('data-d');
+    b.classList.toggle('on', Math.abs(view.a-(d-0.5))<0.6 &&
+                             Math.abs(view.b-(d+10.5))<0.6);
+  });
 }
 function clampView(a,b){
   const span=Math.min(MAXY-MINY,Math.max(6,b-a));
@@ -261,6 +277,10 @@ async function showFilm(i){
   else { img.alt='Sin póster'; }
 }
 document.getElementById('reset').onclick=()=>{view={a:MINY,b:MAXY};render();};
+document.querySelectorAll('.controls button.dec').forEach(b=>{
+  b.onclick=()=>{const d=+b.getAttribute('data-d');
+    view=clampView(d-0.5,d+10.5);render();};
+});
 const lg=document.getElementById('legend');
 lg.innerHTML=ERAS.map(p=>
   `<span><span class="sw" style="background:${p.c}"></span>${esc(p.n)}</span>`).join('');
