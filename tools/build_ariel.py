@@ -239,8 +239,9 @@ cursor muestra su póster.</p>
 <p class="note">Los años son los de cada ceremonia. Las dos primeras ediciones
 se entregaron en 1947; el premio se declaró desierto en 1953 y en 1983, y la
 Academia lo suspendió de 1959 a 1971. Hubo empates en 1972, 1975 y 1978, y un
-triple empate en 1973. La edición LXVIII está anunciada para octubre de 2026.
-Los ganadores se pueden cotejar con la
+triple empate en 1973. La edición LXVIII está anunciada para octubre de
+2026.</p>
+<p class="note">Los ganadores se pueden cotejar con la
 <a href="https://www.amacc.org.mx/mejor-pelicula-historico">lista histórica de
 la AMACC</a>. Los pósters provienen de
 <a href="https://www.themoviedb.org">TMDB</a> (este sitio usa la API de TMDB
@@ -300,7 +301,7 @@ function render(){
     if(x1-x0>150) s+=`<text x="${(x0+x1)/2}" y="${CY+45}" text-anchor="middle" font-size="11.5"
       fill="${p.c}" pointer-events="none">${esc(p.n)} (${p.a}-${p.b})</text>`;
   });
-  const fs=FILMS.filter(f=>f.y>=view.a-30&&f.y<=view.b+30)
+  const fs=FILMS.filter(f=>f.y>=view.a-2&&f.y<=view.b+2)
                 .map(f=>({...f,x:X(f.y),fi:FILMS.indexOf(f)}))
                 .sort((a,b)=>a.x-b.x);
   fs.forEach((f,i)=>{const w=Math.min(215,(f.n.length+7)*6.2)+14;
