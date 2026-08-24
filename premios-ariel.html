@@ -232,7 +232,8 @@ async function lookup(lang,title){
   if(j.type!=='standard') throw 0;
   const d=((j.description||'')+' '+(j.extract||'')).toLowerCase();
   if(!/película|film|cinta/.test(d)) throw 0;
-  return j.thumbnail?j.thumbnail.source:null;
+  if(!j.thumbnail) throw 0;
+  return j.thumbnail.source;
 }
 async function posterFor(f){
   if(f.n in cache) return cache[f.n];
