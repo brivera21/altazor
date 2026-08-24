@@ -207,6 +207,18 @@ with sync_playwright() as pw:
           f"{len(D.VILLAS)} villas aparece el año que le toca, empezando por "
           "Veracruz en 1519")
 
+    # los rótulos se colocan igual de cerca cuando el cuadro está apretado:
+    # el margen de la caja de texto se mide en unidades del cuadro, no de la
+    # pantalla, así que tiene que encogerse con el acercamiento
+    for año, quien in ((1519, "Tenochtitlan"), (1600, "México"),
+                       (1824, "México")):
+        en(año)
+        txt = pg.evaluate("()=>document.getElementById('etiquetas').textContent")
+        ok = quien in txt
+        print(f"  {'ok  ' if ok else 'FALLA'} en {año} el mapa rotula {quien}")
+        if not ok:
+            fails.append(f"en {año} falta el rótulo de {quien}: {txt[:120]}")
+
     # el encuadre se abre con los años
     anchos = []
     for a in (1519, 1560, 1620, 1700, 1790):
