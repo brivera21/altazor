@@ -4,8 +4,10 @@ title: Library
 
 <style>
 .section-body { max-width: none; }
-.dc-cols { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 2.4rem; }
+.dc-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0 2.4rem; }
 .dc-cols > div { margin-bottom: 1.6rem; }
+.dc-cols p.empty { color: var(--muted); }
+@media (max-width: 80rem) { .dc-cols { grid-template-columns: repeat(2, 1fr); } }
 .dc-cols h2:first-child { margin-top: 0; }
 .dc-cols p { margin: 0.45rem 0; }
 .dc-cols p.soon { color: var(--muted); }
@@ -32,9 +34,16 @@ title: Library
 <p><a href="day-night.html">The Day: Earth's Night and Day Cycle</a></p>
 <p><a href="moon.html">The Month: The Moon's Cycle</a></p>
 <p><a href="orbit-sine.html">The Year: Earth's Cycle</a></p>
-<p><a href="populous-countries.html">Earth's Population Right Now</a></p>
 <p><a href="earth-history.html">The History of Earth</a></p>
+</div>
+<div>
+<h2>Life</h2>
+<p class="empty">Nothing here yet.</p>
+</div>
+<div>
+<h2>Homo Sapiens</h2>
 <p><a href="migration.html">Homo Sapiens Migration</a></p>
+<p><a href="populous-countries.html">Earth's Population Right Now</a></p>
 </div>
 <div>
 <h2>USA</h2>
