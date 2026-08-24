@@ -95,6 +95,21 @@ with sync_playwright() as pw:
     ok = n2 < 70 and n2 >= 10
     print(f"  {'ok  ' if ok else 'FALLA'} acercarse a los setenta deja {n2} etiquetas")
     if not ok: fails.append(f"zoom deja {n2}")
+    nd = pg.evaluate("()=>document.querySelectorAll('.controls button.dec').length")
+    pg.evaluate("()=>[...document.querySelectorAll('.controls button.dec')]"
+                ".find(b=>b.getAttribute('data-d')==='1970').click()")
+    span = pg.evaluate("()=>Math.round((view.b-view.a)*10)/10")
+    on = pg.evaluate("()=>document.querySelector('.controls button.dec.on')"
+                     "?.getAttribute('data-d')")
+    n70 = pg.evaluate("()=>[...document.querySelectorAll('#tlsvg g[data-f]')]"
+                      ".filter(g=>{const f=FILMS[+g.getAttribute('data-f')];"
+                      "return f.y>=1970&&f.y<=1979}).length")
+    ok = nd == 9 and span == 11 and on == '1970' and n70 == 13
+    print(f"  {'ok  ' if ok else 'FALLA'} nueve botones de década; el de 1970 "
+          f"acerca a esa década ({span} años, activo {on}, {n70} ganadoras de "
+          "los setenta a la vista)")
+    if not ok:
+        fails.append(f"botones: {nd}, {span}, {on}, {n70}")
     card = pg.evaluate("()=>{showFilm(0);return document.getElementById('filmTxt').textContent}")
     ok = card == "La barraca"
     print(f"  {'ok  ' if ok else 'FALLA'} la tarjeta responde: '{card}'")
