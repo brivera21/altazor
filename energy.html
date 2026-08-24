@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Energy · Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 12px; font-size:26px; }
+.stage { display:flex; gap:22px; align-items:flex-start; }
+#diagram { flex:1 1 640px; min-width:0; }
+#diagram svg { width:100%; height:auto; display:block; user-select:none; }
+.side { flex:0 0 300px; position:sticky; top:16px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:16px; }
+#kindTxt { font-size:12px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--muted); }
+#nameTxt { font-weight:700; font-size:17px; margin:2px 0 2px; }
+#formTxt { font-size:15px; margin-bottom:8px; }
+#bodyTxt { color:var(--muted); font-size:13.5px; line-height:1.55; }
+.note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.note a { color:var(--accent); }
+.refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+.refs p { margin:0 0 8px; }
+.refs a { color:var(--accent); }
+h2.refh { font-size:15px; margin:26px 0 8px; }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="library.html">&larr; Library</a></nav>
+</header>
+<h1>Energy</h1>
+<div class="stage">
+  <div id="diagram"></div>
+  <div class="side"><div class="card">
+    <div id="kindTxt"></div>
+    <div id="nameTxt">Hover a form or an arrow</div>
+    <div id="formTxt"></div>
+    <div id="bodyTxt"></div>
+  </div></div>
+</div>
+<p class="note">The nine forms energy takes, and the arrows physics has found
+between them. A form or an arrow under the cursor fills the card; a click on
+a form keeps only its own arrows lit, and a click on the background lets go.
+The total along any chain of arrows never changes, which is the first law.</p>
+<p class="note">Thermal energy sits at the center for a reason. Four arrows
+point into it and only two lead out, and the one that leads back to motion
+pays a toll set by the two temperatures. That one-way traffic is the second
+law, seen as a picture.</p>
+<h2 class="refh">References</h2>
+<div class="refs">
+<p>Feynman, R. P., Leighton, R. B., &amp; Sands, M. (1963). Conservation of
+energy. In <i>The Feynman lectures on physics</i> (Vol. 1, Ch. 4). Caltech.
+<a href="https://www.feynmanlectures.caltech.edu/I_04.html">https://www.feynmanlectures.caltech.edu/I_04.html</a></p>
+<p>Bureau International des Poids et Mesures. (2019). <i>The International
+System of Units (SI)</i> (9th ed.), where the joule is defined.
+<a href="https://www.bipm.org/en/publications/si-brochure">https://www.bipm.org/en/publications/si-brochure</a></p>
+</div>
+</div>
+<script>
+const FORMS=[{"k":"kin","l":"Kinetic","c":"#ff5c4d","f":"E = ½mv²","b":"The energy of motion. Physics measures it from mass and speed, and it was the first form to get a formula, in the collisions studied by Huygens and Leibniz.","x":645.7,"y":600.7},{"k":"grav","l":"Gravitational","c":"#ffb02e","f":"E = mgh","b":"The energy of height. Lifting a mass stores it, and near Earth's surface it grows by weight times height. On the scale of orbits the formula bends into Newton's, but the bookkeeping is the same.","x":430.0,"y":690.0},{"k":"ela","l":"Elastic","c":"#e6c86e","f":"E = ½kx²","b":"The energy of a stretched or squeezed thing. A spring stores the work done against its stiffness and gives it back on release.","x":214.3,"y":600.7},{"k":"chem","l":"Chemical","c":"#31d67a","f":"bond energies","b":"The energy of electrons bound in molecules. A reaction rearranges the bonds, and the difference between old and new is what a fire, a battery or a muscle spends.","x":645.7,"y":169.3},{"k":"elec","l":"Electrical","c":"#58a6ff","f":"E = qV","b":"The energy of charges pushed through a field. A charge crossing a volt gains one joule per coulomb; currents carry it along wires with almost nothing lost.","x":735.0,"y":385.0},{"k":"rad","l":"Radiant","c":"#b48cf2","f":"E = hf","b":"The energy of light. It travels as electromagnetic waves and is absorbed in packets, each photon carrying Planck's constant times its frequency.","x":430.0,"y":80.0},{"k":"nuc","l":"Nuclear","c":"#d1548e","f":"binding energy","b":"The energy that holds nuclei together. Splitting heavy nuclei or fusing light ones releases about a million times more per atom than any chemical bond.","x":214.3,"y":169.3},{"k":"mass","l":"Rest mass","c":"#f28cb0","f":"E = mc²","b":"Matter itself, read as energy. The conversion rate is the speed of light squared, which is why a gram is worth twenty-five million kilowatt hours.","x":125.0,"y":385.0},{"k":"th","l":"Thermal","c":"#c9814b","f":"E = ³⁄₂NkT","b":"The random motion of atoms, kinetic energy too disordered to see. Temperature measures its average per particle, and every real process leaks some energy here.","x":430,"y":385}], FLOWS=[{"a":"grav","b":"kin","n":"Falling","t":"A dropped mass trades height for speed. Meters of height become meters per second, by the square root."},{"a":"kin","b":"grav","n":"Climbing","t":"A thrown ball or a hiker converts motion back into height, until gravity has taken all of it."},{"a":"ela","b":"kin","n":"Release","t":"A bowstring or a spring gives back its stored work as motion."},{"a":"kin","b":"ela","n":"Impact","t":"A bouncing ball squeezes on landing, parking its motion in the squeeze for a few milliseconds."},{"a":"chem","b":"kin","n":"Muscle","t":"Muscle burns sugar bonds into contraction. About a quarter of the bond energy becomes motion; the rest leaves as body heat."},{"a":"chem","b":"th","n":"Combustion","t":"Fire rearranges fuel and oxygen into tighter bonds and hands the difference to the flame's heat and light."},{"a":"chem","b":"elec","n":"Battery","t":"A battery lets its reaction run only through the outside wire, so the bond energy leaves as current."},{"a":"elec","b":"chem","n":"Charging","t":"Driving the current backwards runs the reaction uphill and stores the energy in bonds again."},{"a":"elec","b":"kin","n":"Motor","t":"A current in a magnetic field pushes; motors turn most of what they draw into torque."},{"a":"kin","b":"elec","n":"Generator","t":"Spinning a coil in a magnetic field pushes charges along the wire. Nearly every watt on the grid passes through this arrow."},{"a":"elec","b":"th","n":"Resistance","t":"Charges bumping through a conductor heat it. A toaster is this arrow and nothing else."},{"a":"elec","b":"rad","n":"Lamp","t":"An LED drops each charge across a junction and emits the energy as a photon."},{"a":"rad","b":"chem","n":"Photosynthesis","t":"Leaves catch photons and park the energy in sugar bonds. Every fuel with a biological past started on this arrow."},{"a":"rad","b":"th","n":"Absorption","t":"Sunlight on a dark surface becomes the random jostling of its atoms. Most of Earth's warmth arrives on this arrow."},{"a":"th","b":"rad","n":"Glow","t":"Everything warm radiates. A stove coil glows red, a body glows in the infrared, the Earth glows back to space."},{"a":"th","b":"kin","n":"Heat engine","t":"Heat flowing from hot to cold can be made to push a piston on the way. Carnot showed the toll: only a fraction converts, set by the two temperatures."},{"a":"nuc","b":"th","n":"Fission and fusion","t":"A reactor splits uranium, the Sun fuses hydrogen; the binding energy difference arrives as heat."},{"a":"mass","b":"nuc","n":"Mass defect","t":"A nucleus weighs less than its parts. That missing sliver of rest mass is the binding energy nuclear processes spend."},{"a":"mass","b":"rad","n":"Annihilation","t":"Matter meeting antimatter converts entirely into photons, the only process that cashes rest mass in full."}];
+const W=980,H=770;
+const el=document.getElementById('diagram');
+const byK={}; for(const f of FORMS) byK[f.k]=f;
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+let sel=null;
+
+function arc(a,b,off){
+  // a gentle curve from node a to node b, trimmed at the node circles
+  const A=byK[a], B=byK[b];
+  const dx=B.x-A.x, dy=B.y-A.y, d=Math.hypot(dx,dy);
+  const ux=dx/d, uy=dy/d;
+  const r=46;
+  const x1=A.x+ux*r, y1=A.y+uy*r, x2=B.x-ux*r, y2=B.y-uy*r;
+  const mx=(x1+x2)/2-uy*off, my=(y1+y2)/2+ux*off;
+  // the label rides its own curve, pushed a little further out on the
+  // same side, so paired arrows keep their names apart
+  const lo=off/2+14;
+  const lx=(x1+x2)/2-uy*lo, ly=(y1+y2)/2+ux*lo-4;
+  return {x1,y1,x2,y2,mx,my,lx,ly};
+}
+function render(){
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" id="ensvg">`;
+  s+=`<rect width="${W}" height="${H}" fill="#121212" data-bg="1"/>`;
+  s+=`<defs>`;
+  for(const f of FORMS)
+    s+=`<marker id="m-${f.k}" viewBox="0 0 10 10" refX="8" refY="5"
+      markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="${f.c}"/></marker>`;
+  s+=`</defs>`;
+  // the arrows: paired flows get opposite bows so they never overlap
+  const pair={};
+  for(const fl of FLOWS) pair[fl.a+'>'+fl.b]=true;
+  FLOWS.forEach((fl,i)=>{
+    const two=pair[fl.b+'>'+fl.a];
+    const g=arc(fl.a,fl.b,two?26:14);
+    const c=byK[fl.a].c;
+    const lit = sel===null || fl.a===sel || fl.b===sel;
+    s+=`<g data-fl="${i}" opacity="${lit?1:0.13}" style="cursor:default">
+      <path d="M${g.x1},${g.y1} Q${g.mx},${g.my} ${g.x2},${g.y2}"
+        fill="none" stroke="${c}" stroke-width="1.7" marker-end="url(#m-${fl.a})"/>
+      <path d="M${g.x1},${g.y1} Q${g.mx},${g.my} ${g.x2},${g.y2}"
+        fill="none" stroke="#fff" stroke-opacity="0" stroke-width="14"/>
+      <text x="${g.lx}" y="${g.ly}"
+        text-anchor="middle" font-size="11" fill="${c}"
+        pointer-events="none">${esc(fl.n)}</text></g>`;
+  });
+  // the forms
+  for(const f of FORMS){
+    const lit = sel===null || f.k===sel ||
+      FLOWS.some(fl=>(fl.a===sel&&fl.b===f.k)||(fl.b===sel&&fl.a===f.k));
+    s+=`<g data-f="${f.k}" opacity="${lit?1:0.2}" style="cursor:default">
+      <circle cx="${f.x}" cy="${f.y}" r="42" fill="${f.c}"
+        fill-opacity="0.16" stroke="${f.c}" stroke-width="${f.k===sel?2.6:1.6}"/>
+      <text x="${f.x}" y="${f.y-2}" text-anchor="middle" font-size="13.5"
+        font-weight="700" fill="#e6e6e6" pointer-events="none">${esc(f.l)}</text>
+      <text x="${f.x}" y="${f.y+16}" text-anchor="middle" font-size="11"
+        fill="${f.c}" pointer-events="none">${esc(f.f)}</text></g>`;
+  }
+  s+='</svg>';
+  el.innerHTML=s;
+}
+function showForm(k){
+  const f=byK[k];
+  document.getElementById('kindTxt').textContent='A form energy takes';
+  document.getElementById('nameTxt').textContent=f.l+' energy';
+  const ft=document.getElementById('formTxt');
+  ft.textContent=f.f; ft.style.color=f.c;
+  document.getElementById('bodyTxt').textContent=f.b;
+}
+function showFlow(i){
+  const fl=FLOWS[i];
+  document.getElementById('kindTxt').textContent=
+    byK[fl.a].l+' \u2192 '+byK[fl.b].l;
+  document.getElementById('nameTxt').textContent=fl.n;
+  const ft=document.getElementById('formTxt');
+  ft.textContent=''; 
+  document.getElementById('bodyTxt').textContent=fl.t;
+}
+el.addEventListener('pointerover',e=>{
+  const g=e.target.closest('[data-f]');
+  if(g){ showForm(g.getAttribute('data-f')); return; }
+  const a=e.target.closest('[data-fl]');
+  if(a){ showFlow(+a.getAttribute('data-fl')); }
+});
+el.addEventListener('click',e=>{
+  const g=e.target.closest('[data-f]');
+  if(g){ const k=g.getAttribute('data-f');
+    sel = sel===k?null:k; render(); showForm(k); return; }
+  if(e.target.closest('[data-bg]')){ sel=null; render(); }
+});
+render();
+showForm('kin');
+window.__en=()=>({sel,forms:FORMS.length,flows:FLOWS.length});
+</script>
+</body>
+</html>
