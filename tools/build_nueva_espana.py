@@ -348,7 +348,7 @@ costa es la de la base GSHHG, a resolución completa.</p>
 {refs}
 <p>Wessel, P., &amp; Smith, W. H. F. (1996). A global, self-consistent,
 hierarchical, high-resolution shoreline database. <em>Journal of Geophysical
-Research, 101</em>(B4), 8741-8743.
+Research: Solid Earth, 101</em>(B4), 8741-8743.
 <a href="https://doi.org/10.1029/96JB00104">https://doi.org/10.1029/96JB00104</a></p>
 </div>
 </main>

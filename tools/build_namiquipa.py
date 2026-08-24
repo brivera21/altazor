@@ -462,8 +462,8 @@ Namiquipa, El Terrero y Santa Ana de Bavícora caen del lado que les toca.</p>
 <p>Leal, M. (2016, 24 de septiembre). <em>Namiquipa</em> [Recorrido con GPS].
 Wikiloc.
 <a href="{D.FUENTE[3]}">{D.FUENTE[3]}</a></p>
-<p>Mapzen. (2026). <em>Terrain tiles</em> [Conjunto de datos]. Registry of Open
-Data on AWS.
+<p>Mapzen. (s. f.). <em>Terrain tiles</em> [Conjunto de datos]. Registry of Open
+Data on AWS. Recuperado en agosto de 2026, de
 <a href="https://registry.opendata.aws/terrain-tiles/">https://registry.opendata.aws/terrain-tiles/</a></p>
 <p>OpenStreetMap contributors. (2026). <em>OpenStreetMap</em> [Conjunto de
 datos]. <a href="https://www.openstreetmap.org/copyright">https://www.openstreetmap.org/copyright</a></p>

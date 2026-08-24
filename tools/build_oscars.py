@@ -159,9 +159,12 @@ h1 { margin:0 0 6px; font-size:26px; }
 first ceremony in 1929 to Anora in 2025, grouped into eight Hollywood eras.
 The wheel zooms, dragging pans, a click on an era band zooms into it, and a
 film under the cursor shows its poster.</p>
-<p class="note">Years are ceremony years. Posters are loaded at view time from
-Wikipedia's public API for identification and are not stored on this site; a
-few may fail to resolve.</p>
+<p class="note">Years are ceremony years, and the winners can be checked against
+the Academy's records via the
+<a href="https://en.wikipedia.org/wiki/Academy_Award_for_Best_Picture"
+style="color:var(--accent)">list of Best Picture winners</a>. Posters are
+loaded at view time from Wikipedia's public API for identification and are not
+stored on this site; a few may fail to resolve.</p>
 </div>
 <script>
 const FILMS=__FILMS__, ERAS=__ERAS__;

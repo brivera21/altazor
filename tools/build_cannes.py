@@ -154,8 +154,11 @@ dragging pans, a click on an era band zooms into it, and a film under the
 cursor shows its poster.</p>
 <p class="note">Years are festival years; before 1955 the prize was the Grand
 Prix du Festival. Gaps (1948, 1950, 1968, 2020) are years with no festival or
-no award. Posters are loaded at view time from Wikipedia's public API for
-identification and are not stored on this site; a few may fail to resolve.</p>
+no award. The winners can be checked against the festival's own
+<a href="https://www.festival-cannes.com/en/retrospective/palmares/"
+style="color:var(--accent)">palmar&egrave;s</a>. Posters are loaded at view
+time from Wikipedia's public API for identification and are not stored on this
+site; a few may fail to resolve.</p>
 </div>
 <script>
 const FILMS=__FILMS__, ERAS=__ERAS__;

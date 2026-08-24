@@ -305,13 +305,15 @@ where one course passes a town on it and nothing else is near.</p>
 <div class="refs">
 <h2>References</h2>
 <p>Instituto Nacional de Estad&iacute;stica y Geograf&iacute;a. (2024).
-<i>Marco Geoestad&iacute;stico</i>. https://www.inegi.org.mx/</p>
-<p>Natural Earth. (2024). <i>Cross-blended hypsometric tints with shaded
+<i>Marco Geoestad&iacute;stico 2024</i> [Data set]. INEGI.
+<a href="https://www.inegi.org.mx/app/biblioteca/ficha.html?upc=794551132173">https://www.inegi.org.mx/app/biblioteca/ficha.html?upc=794551132173</a></p>
+<p>Natural Earth. (2022). <i>Cross-blended hypsometric tints with shaded
 relief</i> [Data set], as distributed with basemap-data-hires.
-https://www.naturalearthdata.com/</p>
+<a href="https://www.naturalearthdata.com/downloads/10m-raster-data/10m-cross-blend-hypso/">https://www.naturalearthdata.com/downloads/10m-raster-data/10m-cross-blend-hypso/</a></p>
 <p>Wessel, P., &amp; Smith, W. H. F. (1996). A global, self-consistent,
 hierarchical, high-resolution shoreline database. <i>Journal of Geophysical
-Research, 101</i>(B4), 8741-8743.</p>
+Research: Solid Earth, 101</i>(B4), 8741-8743.
+<a href="https://doi.org/10.1029/96JB00104">https://doi.org/10.1029/96JB00104</a></p>
 </div>
 </main>
 <script>

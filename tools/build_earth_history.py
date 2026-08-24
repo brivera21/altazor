@@ -312,18 +312,19 @@ round.</p>
 <p>__CITATION__</p>
 <p>This page was built on __BUILT__ from the sources above.</p>
 <p>International Commission on Stratigraphy. (2026). <i>International
-chronostratigraphic chart</i> (v2026/06). https://stratigraphy.org/chart</p>
+chronostratigraphic chart</i> (v2026/06). <a href="https://stratigraphy.org/chart">https://stratigraphy.org/chart</a></p>
 <p>Merdith, A. S., Williams, S. E., Collins, A. S., Tetley, M. G., Mulder,
 J. A., Blades, M. L., Young, A., Armistead, S. E., Cannon, J., Zahirovic, S.,
 &amp; M&uuml;ller, R. D. (2021). Extending full-plate tectonic models into deep
 time: Linking the Neoproterozoic and the Phanerozoic. <i>Earth-Science Reviews,
-214</i>, 103477. https://doi.org/10.1016/j.earscirev.2020.103477</p>
+214</i>, 103477. <a href="https://doi.org/10.1016/j.earscirev.2020.103477">https://doi.org/10.1016/j.earscirev.2020.103477</a></p>
 <p>EarthByte Group. (2024). <i>GPlates web service</i> [Computer software].
 Rotations for the MERDITH2021 model retrieved from
-https://gws.gplates.org/rotation/get_euler_pole_and_angle</p>
+<a href="https://gws.gplates.org/rotation/get_euler_pole_and_angle">https://gws.gplates.org/rotation/get_euler_pole_and_angle</a></p>
 <p>Peters, S. E., Husson, J. M., &amp; Czaplewski, J. (2018). Macrostrat: A
 platform for geological data integration and deep-time Earth crust research.
-<i>Geochemistry, Geophysics, Geosystems, 19</i>(4), 1393-1409.</p>
+<i>Geochemistry, Geophysics, Geosystems, 19</i>(4), 1393-1409.
+<a href="https://doi.org/10.1029/2018GC007467">https://doi.org/10.1029/2018GC007467</a></p>
 </div>
 </main>
 <script>
@@ -361,6 +362,10 @@ function light(hex) {
   return (0.299*r + 0.587*g + 0.114*b) < 128;
 }
 
+let dragging = false;
+for (const e of ['pointerup', 'mouseup', 'pointercancel', 'mouseleave'])
+  window.addEventListener(e, () => { dragging = false; });
+
 function draw() {
   const lanes = el('lanes'), ruler = el('ruler'), evg = el('events'),
         over = el('over');
@@ -394,14 +399,19 @@ function draw() {
   // last, so nothing drawn over the bar swallows the pointer
   const grab = make('rect', {x: PAD, y: 6, width: ow, height: 24,
     fill: 'transparent', class: 'grab'}, over);
-  grab.addEventListener('pointerdown', ev => {
-    stopRun();
-    grab.setPointerCapture(ev.pointerId);
-    scrub(ev);
-  });
-  grab.addEventListener('pointermove', ev => {
-    if (grab.hasPointerCapture(ev.pointerId)) scrub(ev);
-  });
+  // Pointer capture is the tidy way to follow a drag, but it throws where the
+  // pointer id is not one the browser handed out, and a thrown call here would
+  // eat the whole gesture. The drag is tracked with a flag instead, and mouse
+  // events are listened for as well as pointer events so the bar answers
+  // whatever the browser sends.
+  const start = ev => { stopRun(); dragging = true;
+    try { grab.setPointerCapture(ev.pointerId); } catch (e) {}
+    scrub(ev); ev.preventDefault(); };
+  const move = ev => { if (dragging) scrub(ev); };
+  grab.addEventListener('pointerdown', start);
+  grab.addEventListener('mousedown', start);
+  grab.addEventListener('pointermove', move);
+  grab.addEventListener('mousemove', move);
 
   for (let r = 0; r < D.ranks.length; r++) {
     const y = TOP + 18 + r * (LANE + GAP);

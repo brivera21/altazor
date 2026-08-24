@@ -473,8 +473,8 @@ el municipio entero tenía {MUNICIPIO_2020:,} habitantes ese año.</p>
 <p>Instituto Nacional de Estadística y Geografía. (2021). <em>Censo de
 Población y Vivienda 2020</em> [Conjunto de datos]. INEGI.
 <a href="https://www.inegi.org.mx/programas/ccpv/2020/">https://www.inegi.org.mx/programas/ccpv/2020/</a></p>
-<p>Mapzen. (2026). <em>Terrain tiles</em> [Conjunto de datos]. Registry of Open
-Data on AWS.
+<p>Mapzen. (s. f.). <em>Terrain tiles</em> [Conjunto de datos]. Registry of Open
+Data on AWS. Recuperado en agosto de 2026, de
 <a href="https://registry.opendata.aws/terrain-tiles/">https://registry.opendata.aws/terrain-tiles/</a></p>
 <p>OpenStreetMap contributors. (2026). <em>OpenStreetMap</em> [Conjunto de
 datos]. <a href="https://www.openstreetmap.org/copyright">https://www.openstreetmap.org/copyright</a></p>

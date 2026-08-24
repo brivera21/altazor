@@ -273,21 +273,22 @@ rather than evidence.</p>
 
 <div class="refs">
 <h2>References</h2>
-<p>Goldewijk, K. K., Beusen, A., Doelman, J., &amp; Stehfest, E. (2017).
-Anthropogenic land use estimates for the Holocene: HYDE 3.2. <i>Earth System
-Science Data, 9</i>(2), 927-953.</p>
+<p>Klein Goldewijk, K., Beusen, A., Doelman, J., &amp; Stehfest, E. (2017).
+Anthropogenic land use estimates for the Holocene &ndash; HYDE 3.2. <i>Earth System
+Science Data, 9</i>(2), 927-953. <a href="https://doi.org/10.5194/essd-9-927-2017">https://doi.org/10.5194/essd-9-927-2017</a></p>
 <p>Hublin, J.-J., Ben-Ncer, A., Bailey, S. E., Freidline, S. E., Neubauer, S.,
 Skinner, M. M., Bergmann, I., Le Cabec, A., Benazzi, S., Harvati, K., &amp;
 Gunz, P. (2017). New fossils from Jebel Irhoud, Morocco and the pan-African
-origin of Homo sapiens. <i>Nature, 546</i>, 289-292.</p>
+origin of Homo sapiens. <i>Nature, 546</i>(7657), 289-292.
+<a href="https://doi.org/10.1038/nature22336">https://doi.org/10.1038/nature22336</a></p>
 <p>United Nations, Department of Economic and Social Affairs, Population
 Division. (2024). <i>World population prospects 2024</i>.
-https://population.un.org/wpp/</p>
+<a href="https://population.un.org/wpp/">https://population.un.org/wpp/</a></p>
 <p>Bennett, M. R., Bustos, D., Pigati, J. S., Springer, K. B., Urban, T. M.,
 Holliday, V. T., Reynolds, S. C., Budka, M., Honke, J. S., Hudson, A. M.,
 Fenerty, B., Connelly, C., Martinez, P. J., Santucci, V. L., &amp; Odess, D.
 (2021). Evidence of humans in North America during the Last Glacial Maximum.
-<i>Science, 373</i>(6562), 1528-1531.</p>
+<i>Science, 373</i>(6562), 1528-1531. <a href="https://doi.org/10.1126/science.abg7586">https://doi.org/10.1126/science.abg7586</a></p>
 </div>
 </main>
 <script>

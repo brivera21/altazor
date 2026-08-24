@@ -108,8 +108,9 @@ def main():
                 "zooms into that line, a click on the center backs out, and the arc "
                 "under the cursor shows its position.",
         "note": "Arcs cover only the lines above the frequency cutoff of the 394-node "
-                "tree; the gaps are everything rarer. Counts are from the 365chess.com "
-                "Big Database, 3,902,072 games, accessed August 2026. Percentages are "
+                "tree; the gaps are everything rarer. Counts are from the <a "
+                "href=\"https://www.365chess.com/chess-games.php\">365chess.com "
+                "Big Database</a>, 3,902,072 games, accessed August 2026. Percentages are "
                 "the share of all games.",
         "mode": "games",
         "total": ALL_GAMES,

@@ -347,9 +347,10 @@ geoestadístico, diciembre 2023</em> [Conjunto de datos]. INEGI.
 <p>Natural Earth. (2022). <em>Natural Earth II with shaded relief</em>
 (1:10m, versión 5.1) [Conjunto de datos]. North American Cartographic
 Information Society.
-<a href="https://www.naturalearthdata.com/">https://www.naturalearthdata.com/</a></p>
+<a href="https://www.naturalearthdata.com/downloads/10m-raster-data/10m-natural-earth-2/">https://www.naturalearthdata.com/downloads/10m-raster-data/10m-natural-earth-2/</a></p>
 <p>Soluri, E. A., &amp; Woodson, V. A. (1990). World Vector Shoreline.
-<em>International Hydrographic Review, 67</em>(1), 27-35.</p>
+<em>International Hydrographic Review, 67</em>(1), 27-35.
+<a href="https://journals.lib.unb.ca/index.php/ihr/article/view/23315">https://journals.lib.unb.ca/index.php/ihr/article/view/23315</a></p>
 <p>Wessel, P., &amp; Smith, W. H. F. (1996). A global, self-consistent,
 hierarchical, high-resolution shoreline database. <em>Journal of Geophysical
 Research: Solid Earth, 101</em>(B4), 8741-8743.

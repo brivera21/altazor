@@ -67,7 +67,8 @@ CHART_VERSION = "v2026/06"
 CITATION = ("Cohen, K. M., Harper, D. A. T., Gibbard, P. L., &amp; Car, N. (2025). "
             "The ICS international chronostratigraphic chart this decade. "
             "<i>Episodes, 48</i>(1), 105-115. "
-            "https://doi.org/10.18814/epiiugs/2025/025001")
+            "<a href=\"https://doi.org/10.18814/epiiugs/2025/025001\">"
+            "https://doi.org/10.18814/epiiugs/2025/025001</a>")
 
 CHART = [
     # ---------------- EONS / EONOTHEMS ----------------

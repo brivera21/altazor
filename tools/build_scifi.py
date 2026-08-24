@@ -377,7 +377,11 @@ emit(
     ' &nbsp;·&nbsp; <a href="scifi-canon.html">The canon</a>',
     " The Hugo year is the year the award was presented; the Nebula year "
     "is the award's own label. The 2026 Hugo is presented on August 30, "
-    "2026.",
+    "2026. Winners follow the official lists kept by the "
+    '<a href="https://www.thehugoawards.org/hugo-history/" '
+    'style="color:var(--accent)">Hugo Awards</a> and by '
+    '<a href="https://nebulas.sfwa.org/award/best-novel/" '
+    'style="color:var(--accent)">SFWA</a>.',
 )
 
 # ---- canon page ----

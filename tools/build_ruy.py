@@ -232,7 +232,8 @@ config = {
             "shows its position.",
     "note": "The tree is thirteen plies deep and rings stop where a line was not "
             "followed further; gaps are moves below the cut. Counts are from the "
-            "365chess.com Big Database, 3,902,072 games, accessed August 2026. "
+            "<a href=\"https://www.365chess.com/chess-games.php\">365chess.com "
+            "Big Database</a>, 3,902,072 games, accessed August 2026. "
             "Percentages are the share of the Ruy Lopez.",
     "mode": "pct",
     "total": TWO_PI,
