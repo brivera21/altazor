@@ -248,6 +248,39 @@ with sync_playwright() as pw:
     if not ok:
         fails.append(f"after a click the map reads {j}, mark {marca}")
 
+    print("--- the bar over the column moves the map too ---")
+    pg.evaluate("()=>document.getElementById('bAll').click()")
+    pg.evaluate("()=>window.scrollTo(0, 0)")     # the bar has to be on screen
+    pg.wait_for_timeout(120)
+    caja = pg.evaluate("()=>{const r=document.querySelector('#over rect.grab')"
+                       ".getBoundingClientRect();return [r.x,r.y+r.height/2,r.width]}")
+    dentro = pg.evaluate("([x,y])=>{const e=document.elementFromPoint(x,y);"
+                         "return e ? e.getAttribute('class') : null}",
+                         [caja[0] + caja[2] * 0.3, caja[1]])
+    if dentro != "grab":
+        fails.append(f"the bar is covered by {dentro!r} where the drag starts")
+    pg.mouse.move(caja[0] + caja[2] * 0.30, caja[1])
+    pg.mouse.down()
+    pg.wait_for_timeout(120)
+    lejos = pg.evaluate("()=>[window.__hist().paleoAge,"
+                        "document.getElementById('ageOut').textContent]")
+    ok = lejos[0] is None
+    print(f"  {'ok  ' if ok else 'FAIL'} a third of the way along the bar is "
+          f"older than the model, and the map says so: {lejos[1]!r}")
+    if not ok:
+        fails.append(f"the bar draws {lejos} where no model reaches")
+    visto = []
+    for f in (0.85, 0.92, 0.99):
+        pg.mouse.move(caja[0] + caja[2] * f, caja[1])
+        pg.wait_for_timeout(110)
+        visto.append(pg.evaluate("()=>window.__hist().paleoAge"))
+    pg.mouse.up()
+    ok = all(v is not None for v in visto) and visto == sorted(visto, reverse=True)
+    print(f"  {'ok  ' if ok else 'FAIL'} dragging along it walks the map "
+          f"forward through {visto}")
+    if not ok:
+        fails.append(f"dragging the bar gives {visto}")
+
     print("--- how far back it draws ---")
     for name, want in [("Cretaceous", True), ("Cryogenian", True),
                        ("Tonian", True), ("Stenian", False),

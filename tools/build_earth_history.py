@@ -55,6 +55,7 @@ PLATE_SHORT = {101: "North America", 201: "South America", 301: "Eurasia",
 # and the two Chinas were separate continents that had not yet collided.
 EURASIA_BREAKS = 330.0
 PALEO_LIMIT = 1000.0    # how far back the plate model reaches
+BUILT = "24 August 2026"   # printed on the page, so a stale copy is obvious
 # The chart rounds its own base to 4,567 Ma while the oldest solids in the
 # Solar System date a shade older, so the drawing runs to 4,568 and the
 # arithmetic still uses the chart figure.
@@ -127,7 +128,7 @@ def main():
         for n, v, d in FACTS)
 
     doc = TEMPLATE.replace("__DATA__", blob).replace("__FACTS__", facts) \
-                  .replace("__CITATION__", CITATION)
+                  .replace("__CITATION__", CITATION).replace("__BUILT__", BUILT)
     OUT.write_text(doc, encoding="utf-8")
     npts = sum(sum(len(r) for r in v) for v in outlines.values())
     ages = sorted({a for v in rots.values() for a, *_ in v})
@@ -222,7 +223,8 @@ stroke:#0b0f14;stroke-width:3;pointer-events:none}
 .ev text{fill:#c7ceda;font-size:10px;pointer-events:none}
 #over rect.all{fill:#1b2027;stroke:#2b2f34}
 #over rect.win{fill:rgba(88,166,255,.28);stroke:#58a6ff;stroke-width:1}
-#over text{fill:#7d848c;font-size:10px}
+#over text{fill:#7d848c;font-size:10px;pointer-events:none}
+#over rect.grab{cursor:ew-resize}
 
 .notes{margin-top:2.6rem;border-top:1px solid var(--line);padding-top:1.5rem;
 color:var(--ink2);font-size:.95rem;max-width:74ch}
@@ -308,6 +310,7 @@ round.</p>
 <div class="refs">
 <h2>References</h2>
 <p>__CITATION__</p>
+<p>This page was built on __BUILT__ from the sources above.</p>
 <p>International Commission on Stratigraphy. (2026). <i>International
 chronostratigraphic chart</i> (v2026/06). https://stratigraphy.org/chart</p>
 <p>Merdith, A. S., Williams, S. E., Collins, A. S., Tetley, M. G., Mulder,
@@ -366,6 +369,17 @@ function draw() {
   // the whole of time, with the window marked on it
   const ow = W - 2 * PAD;
   make('rect', {x: PAD, y: 12, width: ow, height: 12, rx: 3, class: 'all'}, over);
+  // the bar is the whole record, so it doubles as a way to move the map: a
+  // point on it is a time, and dragging along it walks the world backwards
+  const barAge = ev => {
+    const box = el('col').getBoundingClientRect();
+    const px = (ev.clientX - box.left) / box.width * W;
+    const f = Math.max(0, Math.min(1, (px - PAD) / ow));
+    return D.span - f * D.span;
+  };
+  // the raw time, not the nearest step: past a thousand million years the map
+  // has to say that nothing reaches there rather than snap to its oldest step
+  const scrub = ev => { ageSel = barAge(ev); globe(); syncAge(); };
   EONS.forEach(u => {
     make('rect', {x: PAD + (D.span - u.a) / D.span * ow, y: 12,
       width: Math.max(1, (u.a - u.b) / D.span * ow), height: 12,
@@ -375,7 +389,19 @@ function draw() {
   const ww = Math.max(2, (win[0] - win[1]) / D.span * ow);
   make('rect', {x: wx, y: 9, width: ww, height: 18, rx: 3, class: 'win'}, over);
   const t = make('text', {x: PAD, y: 38}, over);
-  t.textContent = 'all 4,567 million years, with the window shown';
+  t.textContent = 'all 4,567 million years: the window shown, and a point on '
+    + 'the bar opens the world of that time';
+  // last, so nothing drawn over the bar swallows the pointer
+  const grab = make('rect', {x: PAD, y: 6, width: ow, height: 24,
+    fill: 'transparent', class: 'grab'}, over);
+  grab.addEventListener('pointerdown', ev => {
+    stopRun();
+    grab.setPointerCapture(ev.pointerId);
+    scrub(ev);
+  });
+  grab.addEventListener('pointermove', ev => {
+    if (grab.hasPointerCapture(ev.pointerId)) scrub(ev);
+  });
 
   for (let r = 0; r < D.ranks.length; r++) {
     const y = TOP + 18 + r * (LANE + GAP);
