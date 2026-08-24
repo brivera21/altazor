@@ -224,6 +224,10 @@ function light(hex) {
   return (0.299*r + 0.587*g + 0.114*b) < 128;
 }
 
+let dragging = false;
+for (const e of ['pointerup', 'mouseup', 'pointercancel', 'mouseleave'])
+  window.addEventListener(e, () => { dragging = false; });
+
 function draw() {
   const lanes = el('lanes'), ruler = el('ruler'), evg = el('events'),
         over = el('over');
@@ -257,14 +261,19 @@ function draw() {
   // last, so nothing drawn over the bar swallows the pointer
   const grab = make('rect', {x: PAD, y: 6, width: ow, height: 24,
     fill: 'transparent', class: 'grab'}, over);
-  grab.addEventListener('pointerdown', ev => {
-    stopRun();
-    grab.setPointerCapture(ev.pointerId);
-    scrub(ev);
-  });
-  grab.addEventListener('pointermove', ev => {
-    if (grab.hasPointerCapture(ev.pointerId)) scrub(ev);
-  });
+  // Pointer capture is the tidy way to follow a drag, but it throws where the
+  // pointer id is not one the browser handed out, and a thrown call here would
+  // eat the whole gesture. The drag is tracked with a flag instead, and mouse
+  // events are listened for as well as pointer events so the bar answers
+  // whatever the browser sends.
+  const start = ev => { stopRun(); dragging = true;
+    try { grab.setPointerCapture(ev.pointerId); } catch (e) {}
+    scrub(ev); ev.preventDefault(); };
+  const move = ev => { if (dragging) scrub(ev); };
+  grab.addEventListener('pointerdown', start);
+  grab.addEventListener('mousedown', start);
+  grab.addEventListener('pointermove', move);
+  grab.addEventListener('mousemove', move);
 
   for (let r = 0; r < D.ranks.length; r++) {
     const y = TOP + 18 + r * (LANE + GAP);
