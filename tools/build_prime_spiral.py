@@ -1,0 +1,265 @@
+#!/usr/bin/env python3
+"""Generate prime-spiral.html, The Prime Spiral, the first Abstraction.
+
+A point sets out from twelve o'clock and walks clockwise, laying down one
+faint mark per unit of path. Where the distance walked is prime, the mark is
+bright and amber. The first loop is a circle of twenty-four units; when the
+loop closes the path steps outside and keeps circling, so the primes pile up
+ring on ring, in the spirit of Ulam's spiral. The first twenty primes carry
+their numbers; a button lets the walk keep going far past them.
+
+Usage: python3 build_prime_spiral.py
+"""
+
+from pathlib import Path
+
+OUT = Path(__file__).parent.parent / "prime-spiral.html"
+
+HTML = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Prime Spiral · Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff; --prime:#ffb02e; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 12px; font-size:26px; }
+.tiles { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px;
+  max-width:700px; }
+.tile { background:var(--panel); border:1px solid var(--line); border-radius:10px;
+  padding:10px 14px; }
+.tile .k { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+.tile .v { font-size:21px; font-weight:700; margin-top:2px; }
+.tile .s { font-size:12px; color:var(--muted); margin-top:1px; min-height:1.2em; }
+.controls { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
+.controls button { background:var(--panel); border:1px solid var(--line); color:var(--text);
+  padding:7px 13px; border-radius:8px; cursor:pointer; font-size:13.5px; }
+.controls button:hover { border-color:var(--accent); }
+.controls button.on { border-color:var(--accent); color:var(--accent); }
+.controls label { font-size:13px; color:var(--muted); margin-left:8px; }
+.controls input[type=range] { vertical-align:middle; }
+#stage svg { width:100%; max-width:820px; height:auto; display:block; margin:0 auto;
+  user-select:none; }
+.note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.note a { color:var(--accent); }
+.refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+.refs p { margin:0 0 8px; }
+.refs a { color:var(--accent); }
+h2.refh { font-size:15px; margin:26px 0 8px; }
+@media (max-width:760px){ .tiles{grid-template-columns:repeat(3,1fr);} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="library.html#abstractions">&larr; Library</a></nav>
+</header>
+<h1>The Prime Spiral</h1>
+<div class="tiles">
+  <div class="tile"><div class="k">Along the path</div>
+    <div class="v" id="tLen">0</div><div class="s">units walked</div></div>
+  <div class="tile"><div class="k">Primes marked</div>
+    <div class="v" id="tN">0</div><div class="s" id="tNs"></div></div>
+  <div class="tile"><div class="k">Last prime</div>
+    <div class="v" id="tP">&ndash;</div><div class="s" id="tPs"></div></div>
+</div>
+<div class="controls">
+  <button id="bPlay">Pause</button>
+  <button id="bRestart">Restart</button>
+  <button id="bMore">Keep building</button>
+  <label for="spd">Speed</label>
+  <input type="range" id="spd" min="1" max="40" step="1" value="6">
+  <span class="info" id="hover" style="font-size:13px;color:var(--muted);margin-left:8px"></span>
+</div>
+<div id="stage"></div>
+<p class="note">The point sets out from twelve o'clock and walks clockwise,
+one faint mark per unit of path. Where the count is prime the mark is amber.
+The first loop is a circle twenty-four units around; when it closes, the path
+steps outside and keeps circling, so the primes stack ring on ring the way
+they do on Ulam's spiral. The first twenty primes, 2 through 71, carry their
+numbers. Keep building lets the walk run to a thousand, and a dot under the
+cursor names itself.</p>
+<h2 class="refh">References</h2>
+<div class="refs">
+<p>Stein, M. L., Ulam, S. M., &amp; Wells, M. B. (1964). A visual display of
+some properties of the distribution of primes. <i>The American Mathematical
+Monthly, 71</i>(5), 516-520.
+<a href="https://doi.org/10.2307/2312588">https://doi.org/10.2307/2312588</a></p>
+<p>Sacks, R. (2003). <i>Number spiral</i>, where the integers ride an
+Archimedean spiral instead of Ulam's square one.
+<a href="https://numberspiral.com/">https://numberspiral.com/</a></p>
+</div>
+</div>
+<script>
+const W=820,H=820,CX=410,CY=410;
+const UNIT=9;                 // pixels per unit of path
+const R0=24*UNIT/(2*Math.PI); // the first loop is a circle of 24 units
+const PITCH=3.4*UNIT;         // how far the path steps out per loop
+const FIRST=71;               // the twentieth prime
+const TAU=2*Math.PI;
+// the first loop is a true circle; the step outward begins once it closes
+const RADIUS=phi=>phi<TAU ? R0 : R0+PITCH*(phi-TAU)/TAU;
+const CAP=1000;
+
+function isPrime(n){
+  if(n<2) return false;
+  for(let d=2;d*d<=n;d++) if(n%d===0) return false;
+  return true;
+}
+// walk the spiral by arc length, numerically
+const P=[{x:CX,y:CY-R0}];     // P[n] = position after n units
+{
+  let phi=0, r=R0, need=UNIT;
+  const dphi=0.0005;
+  while(P.length<=CAP+2){
+    const r2=RADIUS(phi+dphi);
+    const ds=Math.sqrt(((r2-r)/dphi)**2+((r+r2)/2)**2)*dphi;
+    need-=ds; phi+=dphi; r=r2;
+    if(need<=0){
+      P.push({x:CX+r*Math.sin(phi), y:CY-r*Math.cos(phi)});
+      need+=UNIT;
+    }
+  }
+}
+const FINE=[];                // the moving point's path, finely sampled
+{
+  let phi=0, r=R0, len=0;
+  const dphi=0.004;
+  while(len<=CAP+1){
+    FINE.push({x:CX+r*Math.sin(phi), y:CY-r*Math.cos(phi), len});
+    const r2=RADIUS(phi+dphi);
+    len+=Math.sqrt(((r2-r)/dphi)**2+((r+r2)/2)**2)*dphi/UNIT;
+    phi+=dphi; r=r2;
+  }
+}
+function at(len){
+  // binary search the fine path
+  let lo=0, hi=FINE.length-1;
+  while(hi-lo>1){ const m=(lo+hi)>>1; if(FINE[m].len<=len) lo=m; else hi=m; }
+  const a=FINE[lo], b=FINE[Math.min(hi,FINE.length-1)];
+  const t=(len-a.len)/Math.max(1e-9,b.len-a.len);
+  return {x:a.x+(b.x-a.x)*t, y:a.y+(b.y-a.y)*t};
+}
+
+const stage=document.getElementById('stage');
+stage.innerHTML=`<svg viewBox="0 0 ${W} ${H}" id="psvg">
+  <circle cx="${CX}" cy="${CY}" r="2.4" fill="#3a3a3a"/>
+  <path id="trail" fill="none" stroke="#2b2b2b" stroke-width="1.4"/>
+  <g id="marks"></g><g id="labels"></g>
+  <circle id="tip" r="3.6" fill="#e6e6e6"/>
+</svg>`;
+const trail=document.getElementById('trail'), marks=document.getElementById('marks'),
+      labels=document.getElementById('labels'), tip=document.getElementById('tip');
+
+let LEN=0, TARGET=FIRST+1, playing=true, speed=6, marked=0, lastPrime=null;
+const NTH=['first','second','third','fourth','fifth','sixth','seventh','eighth',
+  'ninth','tenth','eleventh','twelfth','thirteenth','fourteenth','fifteenth',
+  'sixteenth','seventeenth','eighteenth','nineteenth','twentieth'];
+
+function reset(){
+  LEN=0; marked=0; lastPrime=null;
+  marks.innerHTML=''; labels.innerHTML=''; trail.setAttribute('d','');
+  nextMark=1; tiles();
+}
+let nextMark=1;
+function place(n){
+  const p=P[n], prime=isPrime(n);
+  const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  c.setAttribute('cx',p.x); c.setAttribute('cy',p.y);
+  c.setAttribute('r',prime?3.4:1.3);
+  c.setAttribute('fill',prime?'var(--prime)':'#4a4f5a');
+  c.setAttribute('data-n',n);
+  marks.appendChild(c);
+  if(prime){
+    marked++; lastPrime=n;
+    if(marked<=20){
+      const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+      const away=Math.hypot(p.x-CX,p.y-CY)||1;
+      t.setAttribute('x',p.x+(p.x-CX)/away*11);
+      t.setAttribute('y',p.y+(p.y-CY)/away*11+3);
+      t.setAttribute('text-anchor','middle');
+      t.setAttribute('font-size','9'); t.setAttribute('fill','var(--prime)');
+      t.textContent=n;
+      labels.appendChild(t);
+    }
+  }
+}
+function tiles(){
+  document.getElementById('tLen').textContent=Math.floor(LEN);
+  document.getElementById('tN').textContent=marked;
+  document.getElementById('tNs').textContent=
+    marked===0?'':marked<=20?`the ${NTH[marked-1]} prime just passed`:'past the first twenty';
+  document.getElementById('tP').textContent=lastPrime===null?'\\u2013':lastPrime;
+  document.getElementById('tPs').textContent=lastPrime===null?'':'units from the start';
+}
+let d='M'+FINE[0].x.toFixed(1)+','+FINE[0].y.toFixed(1), fineDrawn=0;
+function step(dt){
+  LEN=Math.min(TARGET,LEN+dt*speed);
+  while(fineDrawn<FINE.length-1 && FINE[fineDrawn+1].len<=LEN){
+    fineDrawn++;
+    d+='L'+FINE[fineDrawn].x.toFixed(1)+','+FINE[fineDrawn].y.toFixed(1);
+  }
+  trail.setAttribute('d',d);
+  while(nextMark<=Math.floor(LEN)){ place(nextMark); nextMark++; }
+  const p=at(LEN);
+  tip.setAttribute('cx',p.x); tip.setAttribute('cy',p.y);
+  frame(p);
+  tiles();
+}
+// the view starts tight on the first circle and opens as the rings build
+let half=null;
+function frame(p){
+  const want=Math.max(R0+PITCH+26,
+    Math.hypot(p.x-CX,p.y-CY)+26);
+  half = half===null ? want : Math.max(half, half+(want-half)*0.08);
+  const sv=document.getElementById('psvg');
+  sv.setAttribute('viewBox',
+    `${(CX-half).toFixed(1)} ${(CY-half).toFixed(1)} ${(2*half).toFixed(1)} ${(2*half).toFixed(1)}`);
+}
+let last=null;
+function loop(ts){
+  if(last!==null && playing){ step(Math.min(0.1,(ts-last)/1000)); }
+  last=ts;
+  requestAnimationFrame(loop);
+}
+document.getElementById('bPlay').onclick=e=>{
+  playing=!playing; e.target.textContent=playing?'Pause':'Play';};
+document.getElementById('bRestart').onclick=()=>{
+  d='M'+FINE[0].x.toFixed(1)+','+FINE[0].y.toFixed(1); fineDrawn=0; half=null;
+  TARGET=FIRST+1; document.getElementById('bMore').classList.remove('on');
+  reset();};
+document.getElementById('bMore').onclick=e=>{
+  TARGET=CAP; e.target.classList.add('on'); if(!playing){playing=true;
+    document.getElementById('bPlay').textContent='Pause';}};
+document.getElementById('spd').oninput=e=>{speed=+e.target.value;};
+document.getElementById('psvg').addEventListener('pointerover',e=>{
+  const c=e.target.closest('circle[data-n]');
+  const h=document.getElementById('hover');
+  if(c){const n=+c.getAttribute('data-n');
+    h.textContent=n+(isPrime(n)?', prime':', not prime');}
+});
+reset();
+requestAnimationFrame(loop);
+window.__spiral=()=>({len:LEN,marked,lastPrime,target:TARGET,
+  first:{x:P[1].x,y:P[1].y},start:{x:P[0].x,y:P[0].y},cx:CX,cy:CY,
+  loop24:{x:P[24].x,y:P[24].y}});
+</script>
+</body>
+</html>
+"""
+
+OUT.write_text(HTML, encoding="utf-8")
+print(f"wrote {OUT} ({len(HTML):,} bytes)")
