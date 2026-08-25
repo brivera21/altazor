@@ -90,8 +90,13 @@ one faint mark per unit of path. Where the count is prime the mark is amber.
 The first loop is a circle twenty-four units around; when it closes, the path
 steps outside and keeps circling, so the primes stack ring on ring the way
 they do on Ulam's spiral. The first twenty primes, 2 through 71, carry their
-numbers. Keep building lets the walk run to a thousand, and a dot under the
-cursor names itself.</p>
+numbers.</p>
+<p class="note">Each prime also wears a thin ring of its own color, and every
+multiple of that prime wears the same ring, so the sieve of Eratosthenes is
+in the picture: the color of 2 lands on every second mark, the color of 3 on
+every third, and a mark with several rings is a number with several prime
+factors. Keep building lets the walk run to a thousand, and a mark under the
+cursor gives its factorization.</p>
 <h2 class="refh">References</h2>
 <div class="refs">
 <p>Stein, M. L., Ulam, S. M., &amp; Wells, M. B. (1964). A visual display of
@@ -118,6 +123,32 @@ function isPrime(n){
   if(n<2) return false;
   for(let d=2;d*d<=n;d++) if(n%d===0) return false;
   return true;
+}
+function factors(n){          // distinct prime factors, in order
+  const out=[]; let m=n;
+  for(let d=2;d*d<=m;d++) if(m%d===0){ out.push(d); while(m%d===0) m/=d; }
+  if(m>1) out.push(m);
+  return out;
+}
+function factorization(n){    // 12 -> '2\u00b2 \u00d7 3'
+  const sup={0:'\u2070',1:'\u00b9',2:'\u00b2',3:'\u00b3',4:'\u2074',
+    5:'\u2075',6:'\u2076',7:'\u2077',8:'\u2078',9:'\u2079'};
+  const parts=[]; let m=n;
+  for(let d=2;d*d<=m||m>1;d++){
+    if(d*d>m&&m>1){ parts.push(String(m)); break; }
+    if(m%d===0){ let e=0; while(m%d===0){m/=d;e++;}
+      parts.push(d+(e>1?String(e).split('').map(c=>sup[+c]).join(''):'')); }
+  }
+  return parts.join(' \u00d7 ');
+}
+// each prime, in the order the walk meets them, wears its own color, spread
+// around the wheel by the golden angle
+const primeColor={};
+let primeIdx=0;
+function colorOf(p){
+  if(!(p in primeColor))
+    primeColor[p]=`hsl(${(primeIdx++*137.508)%360},65%,62%)`;
+  return primeColor[p];
 }
 // walk the spiral by arc length, numerically
 const P=[{x:CX,y:CY-R0}];     // P[n] = position after n units
@@ -177,12 +208,27 @@ function reset(){
 let nextMark=1;
 function place(n){
   const p=P[n], prime=isPrime(n);
+  const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+  g.setAttribute('data-n',n);
   const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
   c.setAttribute('cx',p.x); c.setAttribute('cy',p.y);
   c.setAttribute('r',prime?3.4:1.3);
   c.setAttribute('fill',prime?'var(--prime)':'#4a4f5a');
   c.setAttribute('data-n',n);
-  marks.appendChild(c);
+  g.appendChild(c);
+  // the rings: a prime wears its own color, and every multiple wears the
+  // ring of each prime that divides it
+  factors(n).forEach((f,i)=>{
+    const ring=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    ring.setAttribute('cx',p.x); ring.setAttribute('cy',p.y);
+    ring.setAttribute('r',(prime?4.9:2.6)+i*1.5);
+    ring.setAttribute('fill','none');
+    ring.setAttribute('stroke',colorOf(f));
+    ring.setAttribute('stroke-width','1.2');
+    ring.setAttribute('data-n',n);
+    g.appendChild(ring);
+  });
+  marks.appendChild(g);
   if(prime){
     marked++; lastPrime=n;
     if(marked<=20){
@@ -246,10 +292,10 @@ document.getElementById('bMore').onclick=e=>{
     document.getElementById('bPlay').textContent='Pause';}};
 document.getElementById('spd').oninput=e=>{speed=+e.target.value;};
 document.getElementById('psvg').addEventListener('pointerover',e=>{
-  const c=e.target.closest('circle[data-n]');
+  const c=e.target.closest('[data-n]');
   const h=document.getElementById('hover');
   if(c){const n=+c.getAttribute('data-n');
-    h.textContent=n+(isPrime(n)?', prime':', not prime');}
+    h.textContent=n<2?String(n):n+(isPrime(n)?', prime':' = '+factorization(n));}
 });
 reset();
 requestAnimationFrame(loop);

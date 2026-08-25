@@ -62,6 +62,32 @@ with sync_playwright() as pw:
     print(f"  {'ok  ' if ok else 'FAIL'} the amber marks are exactly the "
           f"primes through 71 ({len(primes)})")
     if not ok: fails.append(f"primes {primes}")
+    # the rings: 12 wears the colors of 2 and of 3, and only those
+    rings = pg.evaluate(
+        "(n)=>[...document.querySelectorAll(`#marks g[data-n='${n}'] "
+        "circle[stroke]`)].map(c=>c.getAttribute('stroke'))", 12)
+    own = pg.evaluate(
+        "(n)=>[...document.querySelectorAll(`#marks g[data-n='${n}'] "
+        "circle[stroke]`)].map(c=>c.getAttribute('stroke'))", 2)
+    three = pg.evaluate(
+        "(n)=>[...document.querySelectorAll(`#marks g[data-n='${n}'] "
+        "circle[stroke]`)].map(c=>c.getAttribute('stroke'))", 3)
+    ok = rings == own + three and len(rings) == 2
+    print(f"  {'ok  ' if ok else 'FAIL'} 12 wears the rings of 2 and of 3 "
+          f"({rings})")
+    if not ok: fails.append(f"rings of 12: {rings} vs {own}+{three}")
+    r30 = pg.evaluate(
+        "(n)=>document.querySelectorAll(`#marks g[data-n='${n}'] "
+        "circle[stroke]`).length", 30)
+    ok = r30 == 3
+    print(f"  {'ok  ' if ok else 'FAIL'} 30 wears three rings, one per prime "
+          f"factor ({r30})")
+    if not ok: fails.append(f"rings of 30: {r30}")
+    fz = pg.evaluate("()=>factorization(60)")
+    ok = fz == "2\u00b2 \u00d7 3 \u00d7 5"
+    print(f"  {'ok  ' if ok else 'FAIL'} the hover factorization of 60 reads "
+          f"'{fz}'")
+    if not ok: fails.append(f"factorization {fz!r}")
     nl = pg.evaluate("()=>document.querySelectorAll('#labels text').length")
     ok = nl == 20
     print(f"  {'ok  ' if ok else 'FAIL'} twenty labels ({nl})")
