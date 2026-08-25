@@ -1,0 +1,270 @@
+#!/usr/bin/env python3
+"""Generate oneill-ring.html, O'Neill Ring: A Generation Starship.
+
+A rotating ring habitat drawn spinning in real time, with the physics live:
+radius and spin set the artificial gravity by a = omega^2 r, the comfort
+band comes from the NASA 1975 summer study and from Globus and Hall, and a
+voyage panel turns cruise speed and a destination star into crossing time
+and generations aboard. Presets load the Stanford torus and O'Neill's
+Island Three. Figures update in the boxes above the diagram.
+
+Usage: python3 build_oneill.py
+"""
+
+import json
+from pathlib import Path
+
+OUT = Path(__file__).parent.parent / "oneill-ring.html"
+
+STARS = [
+    ("Proxima Centauri", 4.25),
+    ("Alpha Centauri", 4.37),
+    ("Barnard's Star", 5.96),
+    ("Tau Ceti", 11.9),
+    ("TRAPPIST-1", 40.0),
+]
+stars_js = json.dumps([{"n": n, "ly": d} for n, d in STARS],
+                     separators=(",", ":"))
+
+HTML = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O'Neill Ring · Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 12px; font-size:26px; }
+.tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px; }
+.tile { background:var(--panel); border:1px solid var(--line); border-radius:10px;
+  padding:10px 14px; }
+.tile .k { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+.tile .v { font-size:21px; font-weight:700; margin-top:2px; }
+.tile .s { font-size:12px; color:var(--muted); margin-top:1px; min-height:1.2em; }
+.stage { display:flex; gap:22px; align-items:flex-start; }
+#diagram { flex:1 1 560px; min-width:0; }
+#diagram svg { width:100%; max-width:620px; height:auto; display:block;
+  margin:0 auto; user-select:none; }
+.side { flex:0 0 320px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:16px; }
+.row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.row label { flex:0 0 92px; font-size:13px; color:var(--muted); }
+.row input[type=range] { flex:1; }
+.row .val { flex:0 0 88px; font-size:13px; text-align:right; }
+.presets { display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 14px; }
+.presets button, .dests button { background:var(--bg); border:1px solid var(--line);
+  color:var(--text); padding:5px 10px; border-radius:8px; cursor:pointer; font-size:12.5px; }
+.presets button:hover, .dests button:hover { border-color:var(--accent); }
+.dests { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.dests button.on { border-color:var(--accent); color:var(--accent); }
+.comfort { font-size:12.5px; color:var(--muted); margin-top:10px; line-height:1.5; }
+h3 { font-size:13px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--muted); margin:16px 0 6px; font-weight:600; }
+.note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.note a { color:var(--accent); }
+.refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+.refs p { margin:0 0 8px; }
+.refs a { color:var(--accent); }
+h2.refh { font-size:15px; margin:26px 0 8px; }
+@media (max-width:960px){ .stage{flex-direction:column;} .side{width:100%;}
+  .tiles{grid-template-columns:repeat(2,1fr);} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="science-fiction.html">&larr; Science Fiction</a></nav>
+</header>
+<h1>O'Neill Ring: A Generation Starship</h1>
+<div class="tiles">
+  <div class="tile"><div class="k">Gravity at the rim</div>
+    <div class="v" id="tG"></div><div class="s" id="tGs"></div></div>
+  <div class="tile"><div class="k">Rotation</div>
+    <div class="v" id="tR"></div><div class="s" id="tRs"></div></div>
+  <div class="tile"><div class="k">Rim speed</div>
+    <div class="v" id="tV"></div><div class="s" id="tVs"></div></div>
+  <div class="tile"><div class="k">The voyage</div>
+    <div class="v" id="tT"></div><div class="s" id="tTs"></div></div>
+</div>
+<div class="stage">
+  <div id="diagram"></div>
+  <div class="side"><div class="card">
+    <h3 style="margin-top:0">The ring</h3>
+    <div class="presets">
+      <button id="pTorus">Stanford torus</button>
+      <button id="pIsland">Island Three</button>
+    </div>
+    <div class="row"><label for="rad">Radius</label>
+      <input type="range" id="rad" min="1.7" max="3.65" step="0.01">
+      <div class="val" id="radV"></div></div>
+    <div class="row"><label for="rpm">Spin</label>
+      <input type="range" id="rpm" min="0.1" max="6" step="0.01">
+      <div class="val" id="rpmV"></div></div>
+    <div class="comfort" id="comfort"></div>
+    <h3>The voyage</h3>
+    <div class="row"><label for="spd">Cruise speed</label>
+      <input type="range" id="spd" min="0.1" max="10" step="0.1" value="1">
+      <div class="val" id="spdV"></div></div>
+    <div class="dests" id="dests"></div>
+  </div></div>
+</div>
+<p class="note">The ring spins on the screen at its true rate: at one turn a
+minute the Stanford torus takes a real minute to come around. Spin gravity is
+&omega;&sup2;r, so the same pull can come from a big slow ring or a small
+fast one; the catch is the inner ear. The 1975 NASA study put the limit for
+comfort at one turn a minute, and later reviews allow up to about four. A
+person's head rides a smaller circle than their feet, and the readout keeps
+track of that difference too.</p>
+<p class="note">The voyage panel does the generation arithmetic: distance
+over speed gives the crossing time, and thirty years to a generation counts
+the people born in between. Goddard sketched the idea privately in 1918,
+Tsiolkovsky and Bernal put it before the public in 1928 and 1929, and
+Heinlein's Universe made it fiction in 1941.</p>
+<h2 class="refh">References</h2>
+<div class="refs">
+<p>O'Neill, G. K. (1974). The colonization of space. <i>Physics Today,
+27</i>(9), 32-40.
+<a href="https://doi.org/10.1063/1.3128863">https://doi.org/10.1063/1.3128863</a></p>
+<p>Johnson, R. D., &amp; Holbrow, C. (Eds.). (1977). <i>Space settlements: A
+design study</i> (NASA SP-413). NASA.
+<a href="https://ntrs.nasa.gov/citations/19770014162">https://ntrs.nasa.gov/citations/19770014162</a></p>
+<p>Globus, A., &amp; Hall, T. (2017). Space settlement population rotation
+tolerance. <i>NSS Space Settlement Journal</i>.
+<a href="https://nss.org/wp-content/uploads/Space-Settlement-Population-Rotation-Tolerance-Globus.pdf">https://nss.org/wp-content/uploads/Space-Settlement-Population-Rotation-Tolerance-Globus.pdf</a></p>
+<p>RECONS. (2012). <i>The one hundred nearest star systems</i>.
+<a href="http://www.recons.org/TOP100.posted.htm">http://www.recons.org/TOP100.posted.htm</a></p>
+<p>Science Fiction Encyclopedia. (2025). <i>Generation starships</i>.
+<a href="https://sf-encyclopedia.com/entry/generation_starships">https://sf-encyclopedia.com/entry/generation_starships</a></p>
+</div>
+</div>
+<script>
+const STARS=__STARS__;
+const W=760,H=760,CX=380,CY=380,G=9.80665,C_KMS=299792.458,LY_KM=9.4607e12;
+const el=document.getElementById('diagram');
+let R=830, RPM=1, SPD=1, DEST=0; // meters, rpm, percent of c, star index
+
+const fmt=(x,d)=>x.toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:0});
+
+function draw(){
+  // the ring scaled to fit, a cutaway strip of land, a figure for scale
+  const rr=300;
+  const period=60/RPM; // seconds per revolution, real time
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" id="ringsvg">`;
+  s+=`<rect width="${W}" height="${H}" fill="#121212"/>`;
+  // stars behind
+  for(let i=0;i<70;i++){
+    const a=(i*137.508)%360*Math.PI/180, d=90+((i*97)%280);
+    s+=`<circle cx="${CX+d*Math.cos(a)}" cy="${CY+d*Math.sin(a)}" r="${(i%3===0)?1.1:0.6}"
+      fill="#e6e6e6" opacity="${0.25+(i%5)*0.08}"/>`;
+  }
+  s+=`<g id="spinner">
+    <animateTransform attributeName="transform" type="rotate"
+      from="0 ${CX} ${CY}" to="360 ${CX} ${CY}" dur="${period}s" repeatCount="indefinite"/>`;
+  s+=`<circle cx="${CX}" cy="${CY}" r="${rr}" fill="none" stroke="#2b2b2b" stroke-width="26"/>`;
+  s+=`<circle cx="${CX}" cy="${CY}" r="${rr}" fill="none" stroke="#58a6ff" stroke-width="26"
+    stroke-opacity="0.16"/>`;
+  // land strips on the inner surface
+  for(let i=0;i<36;i++){
+    const a0=i*10*Math.PI/180, a1=(i*10+7)*Math.PI/180, ri=rr-13;
+    const x0=CX+ri*Math.cos(a0), y0=CY+ri*Math.sin(a0);
+    const x1=CX+ri*Math.cos(a1), y1=CY+ri*Math.sin(a1);
+    s+=`<path d="M${x0},${y0} A${ri},${ri} 0 0 1 ${x1},${y1}" fill="none"
+      stroke="${i%4===0?'#2fc6a6':'#31d67a'}" stroke-width="5" stroke-opacity="0.8"/>`;
+  }
+  // six spokes to the hub
+  for(let i=0;i<6;i++){
+    const a=i*60*Math.PI/180;
+    s+=`<line x1="${CX+34*Math.cos(a)}" y1="${CY+34*Math.sin(a)}"
+      x2="${CX+(rr-13)*Math.cos(a)}" y2="${CY+(rr-13)*Math.sin(a)}"
+      stroke="#3a3a3a" stroke-width="4"/>`;
+  }
+  s+=`<circle cx="${CX}" cy="${CY}" r="34" fill="#1a1a1a" stroke="#3a3a3a" stroke-width="3"/>`;
+  s+=`</g>`;
+  // the still figure and vectors at the bottom of the ring (the ring turns
+  // beneath it; spin gravity presses it outward, drawn as its weight)
+  const fy=CY+rr-24;
+  s+=`<g>
+    <line x1="${CX}" y1="${fy-16}" x2="${CX}" y2="${fy+6}" stroke="#e6e6e6" stroke-width="2.4"/>
+    <circle cx="${CX}" cy="${fy-21}" r="4.6" fill="#e6e6e6"/>
+    <line x1="${CX}" y1="${fy-10}" x2="${CX-7}" y2="${fy-2}" stroke="#e6e6e6" stroke-width="2"/>
+    <line x1="${CX}" y1="${fy-10}" x2="${CX+7}" y2="${fy-2}" stroke="#e6e6e6" stroke-width="2"/>
+    <line x1="${CX-3}" y1="${fy+6}" x2="${CX-5}" y2="${fy+15}" stroke="#e6e6e6" stroke-width="2"/>
+    <line x1="${CX+3}" y1="${fy+6}" x2="${CX+5}" y2="${fy+15}" stroke="#e6e6e6" stroke-width="2"/>
+    <line x1="${CX+16}" y1="${fy-12}" x2="${CX+16}" y2="${fy+14}" stroke="#ffb02e"
+      stroke-width="2" marker-end="url(#aw)"/>
+    <text x="${CX+22}" y="${fy+4}" font-size="12" fill="#ffb02e">&omega;&sup2;r</text>
+  </g>`;
+  s+=`<defs><marker id="aw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6"
+    markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ffb02e"/></marker></defs>`;
+  s+=`<text x="${CX}" y="${H-14}" text-anchor="middle" font-size="12.5" fill="#9a9a9a">
+    one turn every ${period>=60?fmt(period/60,1)+' minute'+(period>=120?'s':''):fmt(period,0)+' seconds'},
+    shown in real time</text>`;
+  s+='</svg>';
+  el.innerHTML=s;
+}
+function update(){
+  const om=RPM*2*Math.PI/60;           // rad/s
+  const a=om*om*R;                     // m/s^2
+  const g=a/G;
+  const rim=om*R;                      // m/s
+  const grad=Math.min(100,2/R*100);    // head-to-feet difference, %
+  document.getElementById('tG').textContent=fmt(g,2)+' g';
+  document.getElementById('tGs').textContent=
+    fmt(grad,grad<1?2:1)+'% lighter at the head';
+  document.getElementById('tR').textContent=fmt(RPM,2)+' rpm';
+  document.getElementById('tRs').textContent=
+    RPM<=1?'inside the NASA 1975 limit':RPM<=4?'inside the Globus and Hall band':'past the studied bands';
+  document.getElementById('tV').textContent=fmt(rim,0)+' m/s';
+  document.getElementById('tVs').textContent='at a radius of '+fmt(R,0)+' m';
+  const st=STARS[DEST], yrs=st.ly/(SPD/100), gens=yrs/30;
+  document.getElementById('tT').textContent=fmt(yrs,0)+' years';
+  document.getElementById('tTs').textContent=
+    'to '+st.n+' \\u00b7 about '+fmt(gens,0)+' generations';
+  document.getElementById('radV').textContent=fmt(R,0)+' m';
+  document.getElementById('rpmV').textContent=fmt(RPM,2)+' rpm';
+  document.getElementById('spdV').textContent=fmt(SPD,1)+'% of c';
+  document.getElementById('comfort').textContent=
+    'For 1 g at this radius the ring needs '+
+    fmt(Math.sqrt(G/R)*60/(2*Math.PI),2)+' rpm.';
+  document.querySelectorAll('.dests button').forEach((b,i)=>
+    b.classList.toggle('on', i===DEST));
+  draw();
+}
+const rad=document.getElementById('rad'), rpm=document.getElementById('rpm'),
+      spd=document.getElementById('spd');
+rad.oninput=()=>{ R=Math.round(Math.pow(10,+rad.value)); update(); };
+rpm.oninput=()=>{ RPM=+rpm.value; update(); };
+spd.oninput=()=>{ SPD=+spd.value; update(); };
+function setRing(r,p){ R=r; RPM=p; rad.value=Math.log10(r); rpm.value=p; update(); }
+document.getElementById('pTorus').onclick=()=>setRing(830,1);
+document.getElementById('pIsland').onclick=()=>setRing(3200,0.53);
+const dd=document.getElementById('dests');
+dd.innerHTML=STARS.map((s,i)=>`<button data-i="${i}">${s.n} \\u00b7 ${s.ly} ly</button>`).join('');
+dd.onclick=e=>{ const b=e.target.closest('button[data-i]');
+  if(b){ DEST=+b.getAttribute('data-i'); update(); } };
+setRing(830,1);
+window.__ring=()=>({R,RPM,SPD,DEST,
+  g:(RPM*2*Math.PI/60)**2*R/G,
+  years:STARS[DEST].ly/(SPD/100)});
+</script>
+</body>
+</html>
+"""
+
+html = HTML.replace("__STARS__", stars_js)
+OUT.write_text(html, encoding="utf-8")
+print(f"wrote {OUT} ({len(html):,} bytes): {len(STARS)} destinations")

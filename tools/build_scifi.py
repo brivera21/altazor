@@ -374,7 +374,8 @@ emit(
     "cursor shows its cover. Ctrl (or ⌘) with the wheel zooms; the wheel "
     "alone scrolls inside the frame and dragging pans the view.",
     award_books, AWARD_CATS, 1948, 2028,
-    ' &nbsp;·&nbsp; <a href="scifi-canon.html">The canon</a>',
+    ' &nbsp;·&nbsp; <a href="scifi-canon.html">The canon</a>'
+    ' &nbsp;·&nbsp; <a href="hard-scifi.html">Hard SF</a>',
     " The Hugo year is the year the award was presented; the Nebula year "
     "is the award's own label. The 2026 Hugo is presented on August 30, "
     "2026. Winners follow the official lists kept by the "
@@ -400,7 +401,123 @@ emit(
     "the cursor shows its cover. Ctrl (or ⌘) with the wheel zooms; the "
     "wheel alone scrolls inside the frame and dragging pans the view.",
     canon_books, canon_cats, 1810, 2028,
-    ' &nbsp;·&nbsp; <a href="hugo-nebula.html">Hugo and Nebula</a>',
+    ' &nbsp;·&nbsp; <a href="hugo-nebula.html">Hugo and Nebula</a>'
+    ' &nbsp;·&nbsp; <a href="hard-scifi.html">Hard SF</a>',
     " The list is editorial: the books here are the ones that defined "
     "what science fiction could do, not a complete history.",
+)
+
+# ---- hard SF page ----
+# Works named as hard science fiction by at least one of: the Wikipedia
+# survey of the subgenre (W), the SF Encyclopedia's entries (SFE), the SFWA
+# classics list (SFWA), or the meta-analysis of thirty-six lists (MA).
+# Editorial calls documented in the note on the page.
+HARD_ERAS = [
+    (1860, 1936, "Scientific romance"),
+    (1937, 1957, "Campbell's Astounding"),
+    (1958, 1969, "The space program years"),
+    (1970, 1989, "The physics wave"),
+    (1990, 2009, "The hard SF renaissance"),
+    (2010, 2028, "The contemporary revival"),
+]
+HARD_COLORS = ["#8b93a7", "#ffb02e", "#ff5c4d", "#31d67a", "#58a6ff",
+               "#e6c86e"]
+
+HARD = [
+    (1865, "From the Earth to the Moon", "Jules Verne"),
+    (1870, "Twenty Thousand Leagues Under the Seas", "Jules Verne"),
+    (1950, "I, Robot", "Isaac Asimov"),
+    (1951, "Foundation", "Isaac Asimov"),
+    (1953, "Mission of Gravity", "Hal Clement"),
+    (1954, "The Cold Equations", "Tom Godwin"),
+    (1957, "The Black Cloud", "Fred Hoyle"),
+    (1958, "A Case of Conscience", "James Blish"),
+    (1958, "The Enemy Stars", "Poul Anderson"),
+    (1961, "A Fall of Moondust", "Arthur C. Clarke"),
+    (1964, "The Invincible", "Stanisław Lem"),
+    (1966, "The Moon Is a Harsh Mistress", "Robert A. Heinlein"),
+    (1968, "2001: A Space Odyssey", "Arthur C. Clarke"),
+    (1968, "Stand on Zanzibar", "John Brunner"),
+    (1969, "The Andromeda Strain", "Michael Crichton"),
+    (1970, "Tau Zero", "Poul Anderson"),
+    (1970, "Ringworld", "Larry Niven"),
+    (1972, "The Listeners", "James Gunn"),
+    (1973, "Rendezvous with Rama", "Arthur C. Clarke"),
+    (1974, "The Mote in God's Eye", "Larry Niven and Jerry Pournelle"),
+    (1974, "The Forever War", "Joe Haldeman"),
+    (1975, "Orbitsville", "Bob Shaw"),
+    (1979, "The Fountains of Paradise", "Arthur C. Clarke"),
+    (1979, "The Web Between the Worlds", "Charles Sheffield"),
+    (1979, "The Two Faces of Tomorrow", "James P. Hogan"),
+    (1980, "Dragon's Egg", "Robert L. Forward"),
+    (1980, "Timescape", "Gregory Benford"),
+    (1980, "Sundiver", "David Brin"),
+    (1983, "Startide Rising", "David Brin"),
+    (1985, "Blood Music", "Greg Bear"),
+    (1985, "Eon", "Greg Bear"),
+    (1985, "Contact", "Carl Sagan"),
+    (1985, "Starquake", "Robert L. Forward"),
+    (1985, "Between the Strokes of Night", "Charles Sheffield"),
+    (1990, "Jurassic Park", "Michael Crichton"),
+    (1991, "Raft", "Stephen Baxter"),
+    (1992, "A Fire Upon the Deep", "Vernor Vinge"),
+    (1992, "Red Mars", "Kim Stanley Robinson"),
+    (1993, "Beggars in Spain", "Nancy Kress"),
+    (1994, "Ring", "Stephen Baxter"),
+    (1994, "Permutation City", "Greg Egan"),
+    (1995, "The Killing Star", "Charles Pellegrino and George Zebrowski"),
+    (1997, "Diaspora", "Greg Egan"),
+    (1999, "Starfish", "Peter Watts"),
+    (1999, "Manifold: Time", "Stephen Baxter"),
+    (2000, "Revelation Space", "Alastair Reynolds"),
+    (2002, "Schild's Ladder", "Greg Egan"),
+    (2005, "Accelerando", "Charles Stross"),
+    (2005, "Pushing Ice", "Alastair Reynolds"),
+    (2006, "Blindsight", "Peter Watts"),
+    (2006, "Rainbows End", "Vernor Vinge"),
+    (2008, "The Three-Body Problem", "Cixin Liu"),
+    (2010, "The Quantum Thief", "Hannu Rajaniemi"),
+    (2011, "The Martian", "Andy Weir"),
+    (2011, "Leviathan Wakes", "James S. A. Corey"),
+    (2015, "Seveneves", "Neal Stephenson"),
+    (2015, "Children of Time", "Adrian Tchaikovsky"),
+    (2020, "The Ministry for the Future", "Kim Stanley Robinson"),
+    (2021, "Project Hail Mary", "Andy Weir"),
+]
+
+
+def hard_era(y):
+    for i, (a, b, _n) in enumerate(HARD_ERAS):
+        if y <= b:
+            return i
+    return len(HARD_ERAS) - 1
+
+
+hard_books = [{"y": y, "n": n, "a": a, "e": hard_era(y),
+               "b": HARD_ERAS[hard_era(y)][2]}
+              for y, n, a in HARD]
+hard_cats = [{"n": n, "c": HARD_COLORS[i]}
+             for i, (a, b, n) in enumerate(HARD_ERAS)]
+
+emit(
+    "hard-scifi.html",
+    "Hard Science Fiction",
+    "Hard Science Fiction",
+    "The books that keep the physics honest, from Verne's ballistics "
+    "forward, colored by era. A click on the band of a decade enters it, "
+    "and a book under the cursor shows its cover. Ctrl (or ⌘) with the "
+    "wheel zooms; the wheel alone scrolls inside the frame and dragging "
+    "pans the view.",
+    hard_books, hard_cats, 1860, 2028,
+    ' &nbsp;·&nbsp; <a href="scifi-canon.html">The canon</a>'
+    ' &nbsp;·&nbsp; <a href="hugo-nebula.html">Hugo and Nebula</a>',
+    " What counts as hard is argued about; every book here is named by the "
+    '<a href="https://en.wikipedia.org/wiki/Hard_science_fiction" '
+    'style="color:var(--accent)">survey of the subgenre</a>, the '
+    '<a href="https://sf-encyclopedia.com/entry/hard_sf" '
+    'style="color:var(--accent)">SF Encyclopedia</a> or the '
+    '<a href="https://sfwa.org/2012/11/12/ten-classic-hard-science-fiction-'
+    'novels-featuring-the-physics-and-astronomy-mik/" '
+    'style="color:var(--accent)">SFWA classics list</a>. The term itself '
+    "was coined by P. Schuyler Miller in Astounding in 1957.",
 )
