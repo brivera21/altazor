@@ -70,4 +70,4 @@ title: Library
 
 ## Abstractions {: #abstractions }
 
-Nothing here yet.
+[The Prime Spiral](prime-spiral.html). A point walks a clockwise spiral out from twelve o'clock, one mark per unit of path, with the primes in amber, ring on ring in the spirit of Ulam's spiral.
