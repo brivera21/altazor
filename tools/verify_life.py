@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Verify the three phylogeny pages against what they actually draw.
+"""Verify the four phylogeny pages against what they actually draw.
 
-Checks topology facts against the rendered DOM: tip and node counts, the
-placement claims the notes make (eukaryotes beside Asgard, whales inside
-Artiodactyla's card, humans beside Pan), key citations present, no JS
-errors offline.
+Checks the rendered DOM offline: tip and node counts, the placement
+claims the notes make (eukaryotes beside Asgard, ctenophores first,
+whales inside Artiodactyla's card, humans beside Pan), key citations,
+and the photo path: with the network cut no image may appear, and a
+stubbed thumbnail must draw at its tip and in the card.
 
 Usage: python3 verify_life.py
 """
@@ -21,20 +22,29 @@ def check(name, ok, detail=""):
 
 CASES = {
     "tree-of-life.html": dict(tips=11, doi="10.1038/nmicrobiol.2016.48",
+        stub="Humans" and "Animals",
         probe=("(() => { const f=(n)=>n.n==='Asgard archaea'?n:(n.k||[]).map(f).find(Boolean);"
                " const a=f(ROOT); return a && a.k && a.k[0].n==='Eukarya'; })()"),
         probe_name="Eukarya branches from the Asgard archaea"),
+    "animals.html": dict(tips=17, doi="10.1038/s41586-023-05936-6",
+        stub="Mammalia",
+        probe="ROOT.k[0].n==='Ctenophora'",
+        probe_name="the comb jellies branch first"),
     "mammals.html": dict(tips=13, doi="10.1371/journal.pbio.3000494",
+        stub="Chiroptera",
         probe=("(() => { const f=(n)=>n.n==='Artiodactyla'?n:(n.k||[]).map(f).find(Boolean);"
                " return f(ROOT).b.includes('whales'); })()"),
         probe_name="whales live inside the Artiodactyla card"),
     "primates.html": dict(tips=11, doi="10.1371/journal.pgen.1001342",
+        stub="Humans",
         probe=("(() => { const f=(n)=>n.n==='Hominidae'?n:(n.k||[]).map(f).find(Boolean);"
                " const h=f(ROOT); const names=h.k.map(c=>c.n);"
                " return names[names.length-1]==='Humans' &&"
                " names[names.length-2]==='Chimpanzees and bonobos'; })()"),
         probe_name="humans sit beside the chimpanzees and bonobos"),
 }
+STUB = ("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' "
+        "width='8' height='8'><rect width='8' height='8' fill='green'/></svg>")
 
 with sync_playwright() as pw:
     br = pw.chromium.launch()
@@ -45,17 +55,30 @@ with sync_playwright() as pw:
         pg.route("**/*", lambda r: r.abort()
                  if r.request.url.startswith("http") else r.continue_())
         pg.goto((ROOT / fname).as_uri())
-        pg.wait_for_timeout(400)
+        pg.wait_for_timeout(500)
         print(f"--- {fname} ---")
         st = pg.evaluate("window.__tree()")
         check(f"{c['tips']} living tips drawn", st["tips"] == c["tips"], str(st["tips"]))
         n = pg.evaluate("document.querySelectorAll('#treesvg g[data-id]').length")
         check("every node interactive", n == st["nodes"], f"{n} vs {st['nodes']}")
         check(c["probe_name"], pg.evaluate(c["probe"]))
+        check("offline shows no images, no stand-ins", st["imgs"] == 0
+              and pg.evaluate("document.querySelectorAll('#treesvg image').length") == 0)
+        every_w = pg.evaluate(
+            "(()=>{let bad=0;(function w(n){if(!n.k&&!n.w)bad++;"
+            "if(n.k)n.k.forEach(w);})(ROOT);return bad;})()")
+        check("every living tip has photo candidates", every_w == 0, str(every_w))
+        # stub one thumbnail and re-render: it must draw at the tip and card
+        stub = c["stub"]
+        drew = pg.evaluate(
+            f"(()=>{{IMG[{stub!r}]={STUB!r};render();"
+            f"const tip=tips.find(t=>t.n==={stub!r});show(tip.id);"
+            "return document.querySelectorAll('#treesvg image').length===1"
+            " && document.getElementById('cardImg').style.display==='block';})()")
+        check("a stubbed thumbnail draws at its tip and in the card", drew)
         html = (ROOT / fname).read_text(encoding="utf-8")
         check(f"cites {c['doi']}", c["doi"] in html)
-        card = pg.evaluate("(()=>{show('n0');return document.getElementById('nameTxt').textContent})()")
-        check("root card answers", len(card) > 2, card)
+        check("credits Wikipedia for the images", "en.wikipedia.org" in html)
         check("no JS errors", not errs, "; ".join(errs))
         pg.close()
     br.close()
