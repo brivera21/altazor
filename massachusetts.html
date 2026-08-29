@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Massachusetts · Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+  --line:#2b2b2b; --accent:#58a6ff; --water:#3d9bd6; --nation:#ffb02e;
+  --rem:#e0684b; --set:#7fb8ff; --cap:#ffd24d; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:20px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; margin-right:12px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 10px; font-size:26px; }
+.chips { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; align-items:center; }
+.chips button { font:inherit; font-size:13px; padding:5px 13px; border-radius:999px;
+  border:1px solid var(--line); background:#1a1a1a; color:var(--muted); cursor:pointer; }
+.chips button.on { color:var(--text); border-color:var(--accent); background:#1c2733; }
+.chips button:hover { border-color:var(--accent); }
+.stage { display:flex; gap:20px; align-items:flex-start; }
+#mapwrap { flex:1 1 640px; min-width:0; position:relative; background:#151719;
+  border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+#mapwrap canvas, #mapwrap svg { position:absolute; inset:0; width:100%; height:100%; display:block; }
+#mapwrap svg { position:relative; }
+.side { flex:0 0 320px; position:sticky; top:16px; display:flex;
+  flex-direction:column; gap:14px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+#flagImg { width:100%; max-height:130px; object-fit:contain; background:#0d0d0d;
+  border:1px solid var(--line); border-radius:8px; display:none; }
+#flagNone { color:var(--muted); font-size:13px; padding:20px 0; text-align:center;
+  border:1px dashed var(--line); border-radius:8px; }
+#eraTxt { font-size:13.5px; margin-top:8px; }
+#yearBig { font-size:30px; font-weight:700; }
+#popTxt { color:var(--muted); font-size:13px; line-height:1.55; margin-top:4px; }
+#kindTxt { color:var(--muted); font-size:11.5px; letter-spacing:.09em; text-transform:uppercase; }
+#nameTxt { font-weight:700; font-size:16px; margin:2px 0 6px; }
+#bodyTxt { color:var(--muted); font-size:13px; line-height:1.5; }
+#srcTxt { color:var(--muted); font-size:11.5px; margin-top:8px; border-top:1px solid var(--line);
+  padding-top:6px; overflow-wrap:anywhere; }
+.tl { margin-top:14px; }
+.tlrow { display:flex; gap:10px; align-items:center; }
+.tlrow button { font:inherit; font-size:13.5px; padding:6px 14px; border-radius:999px;
+  border:1px solid var(--line); background:#1a1a1a; color:var(--text); cursor:pointer; }
+.tlrow button:hover { border-color:var(--accent); }
+.tlrow input[type=range] { flex:1; accent-color:var(--accent); }
+#yearTxt { font-family:ui-monospace,Menlo,monospace; font-size:15px; width:52px; text-align:right; }
+.eraband { position:relative; height:14px; margin:6px 62px 0 84px; border-radius:4px;
+  overflow:hidden; border:1px solid var(--line); }
+.eraband div { position:absolute; top:0; bottom:0; }
+.eraband span { position:absolute; top:-2px; width:2px; bottom:-2px; }
+.note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+.refs p { margin:0 0 8px; overflow-wrap:anywhere; }
+.refs a { color:var(--accent); }
+h2.refh { font-size:15px; margin:26px 0 8px; }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;
+  flex-direction:row; flex-wrap:wrap;} .side .card{flex:1 1 260px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="library.html">&larr; Library &middot; USA</a> <a href="california.html">California</a> <a href="pennsylvania.html">Pennsylvania</a> <a href="alabama.html">Alabama</a> <a href="nebraska.html">Nebraska</a> <a href="minnesota.html">Minnesota</a></nav>
+</header>
+<h1>Massachusetts</h1>
+<div class="chips">
+  <button id="cTer" class="on">Terrain</button>
+  <button id="cWoo" class="on">Woods</button>
+  <button id="cRiv" class="on">Rivers</button>
+  <button id="cLak" class="on">Lakes</button>
+  <button id="cCou">Counties</button>
+  <button id="cNat" class="on">Nations</button>
+  <button id="cTow" class="on">Towns</button>
+  <span id="loadTxt" style="color:var(--muted);font-size:12px"></span>
+</div>
+<div class="stage">
+  <div id="mapwrap">
+    <canvas id="terC"></canvas>
+    <canvas id="wooC"></canvas>
+    <svg id="map"></svg>
+  </div>
+  <div class="side">
+    <div class="card">
+      <img id="flagImg" alt="">
+      <div id="flagNone" hidden></div>
+      <div id="eraTxt"></div>
+    </div>
+    <div class="card">
+      <div id="yearBig"></div>
+      <div id="popTxt"></div>
+    </div>
+    <div class="card">
+      <div id="kindTxt"></div>
+      <div id="nameTxt">A mark under the cursor lands here</div>
+      <div id="bodyTxt"></div>
+      <div id="srcTxt"></div>
+    </div>
+  </div>
+</div>
+<div class="tl">
+  <div class="tlrow">
+    <button id="bPlay">Play</button>
+    <input type="range" id="yr" min="1492" max="2025" value="1492" step="1">
+    <div id="yearTxt"></div>
+  </div>
+  <div class="eraband" id="eband"></div>
+</div>
+<p class="note">The map is the real state in Web Mercator: rivers and lakes from Natural Earth, county lines and recent populations from the Census Bureau's cartographic files, terrain shaded at view time from the AWS Terrain Tiles, and the woods layer drawn from the USGS National Land Cover Database, forest classes only. Each chip turns one layer on or off; a mark under the cursor fills the card, a click pins it.</p>
+<p class="note">The slider runs from 1492: the nations who lived here first, with population figures that are scholarly estimates carried with their ranges, then the settlements, capitals and removals year by year, while the flag panel shows whose claim covered the land until the official state flag. The nations named here still exist today. Census values between decades are interpolated; flags load from Wikipedia at view time.</p>
+<h2 class="refh">References</h2>
+<div class="refs"><p>Natural Earth, 10m rivers and lakes.
+<a href="https://www.naturalearthdata.com/">https://www.naturalearthdata.com/</a></p>
+<p>US county geometry: Census cartographic boundaries via Plotly's dataset mirror.
+<a href="https://github.com/plotly/datasets">https://github.com/plotly/datasets</a></p>
+<p>County populations: Balsama US county dataset (Census figures via Wikipedia), 2025.
+<a href="https://github.com/balsama/us_counties_data">https://github.com/balsama/us_counties_data</a></p>
+<p>Terrain: Mapzen/AWS Terrain Tiles (Open Data).
+<a href="https://registry.opendata.aws/terrain-tiles/">https://registry.opendata.aws/terrain-tiles/</a></p>
+<p>Woods: USGS National Land Cover Database 2021, forest classes, via the MRLC WMS.
+<a href="https://www.mrlc.gov/">https://www.mrlc.gov/</a></p>
+<p>Decennial census populations.
+<a href="https://www.census.gov/data/tables/time-series/dec/popchange-data-text.html">https://www.census.gov/data/tables/time-series/dec/popchange-data-text.html</a></p>
+<p>Flags: each era's Wikipedia article image, fetched at view time.
+<a href="https://en.wikipedia.org/">https://en.wikipedia.org/</a></p>
+<p>Bragdon, K. (1996). Native People of Southern New England, 1500-1650. University of Oklahoma Press.
+<a href="https://www.oupress.com/9780806131269/native-people-of-southern-new-england-15001650/">https://www.oupress.com/9780806131269/native-people-of-southern-new-england-15001650/</a></p>
+<p>Snow, D., & Lanphear, K. (1988). European contact and Indian depopulation in the Northeast. Ethnohistory 35(1).
+<a href="https://www.jstor.org/stable/482431">https://www.jstor.org/stable/482431</a></p></div>
+</div>
+<script>
+const ST={"name":"Massachusetts","fips":"25","W":1000,"H":640.1,"m":[-8188454.911139311,5040105.968378473,-7778812.432039469,5302325.021306755],"ll":[-73.558142,41.187964,-69.87826100000001,42.936589],"outline":[[[735.3,494.8],[730.6,481.5],[725.3,478.9],[718.8,483.8],[722.3,493.2],[715.0,486.8],[713.8,496.6],[709.1,498.5],[713.8,512.6],[700.8,516.1],[685.5,527.5],[671.9,523.8],[662.4,528.1],[658.6,468.8],[642.0,463.5],[624.1,435.4],[606.1,425.2],[603.0,415.7],[603.0,383.9],[592.8,383.8],[591.5,338.2],[478.0,342.1],[477.6,336.4],[218.0,331.8],[215.1,343.9],[201.5,345.9],[202.3,331.7],[16.6,326.9],[13.6,313.5],[79.7,70.7],[615.2,88.8],[628.5,71.9],[645.8,73.7],[644.6,54.1],[654.5,44.9],[714.0,19.3],[726.1,20.0],[736.3,28.1],[744.8,23.9],[748.1,57.4],[757.5,85.9],[755.3,90.0],[779.6,104.9],[795.7,90.3],[798.4,92.1],[797.7,102.1],[805.1,102.3],[806.2,109.9],[798.9,114.0],[789.0,131.2],[782.5,126.7],[777.1,132.9],[730.1,144.4],[731.5,153.1],[738.1,154.3],[741.1,160.2],[739.7,165.0],[733.8,165.1],[723.9,175.9],[717.5,173.3],[712.8,177.0],[713.3,184.4],[720.8,192.3],[712.5,191.6],[709.6,177.6],[699.8,189.5],[698.1,197.4],[703.3,202.7],[707.9,218.9],[700.6,214.4],[693.3,217.8],[690.9,225.5],[694.9,234.2],[693.8,241.4],[698.1,247.0],[719.4,247.8],[723.5,237.9],[717.6,233.0],[727.0,231.8],[735.6,246.7],[757.4,253.7],[770.6,268.9],[772.8,283.2],[793.4,315.2],[791.8,328.2],[785.0,331.5],[784.6,342.2],[777.8,340.2],[774.0,345.2],[786.9,359.4],[799.4,366.9],[808.3,363.3],[816.7,370.8],[824.1,396.6],[819.9,412.3],[832.7,427.6],[854.8,438.3],[887.9,442.0],[896.5,449.4],[908.2,438.8],[949.4,428.0],[964.6,417.8],[966.9,386.3],[960.3,382.0],[958.6,370.9],[954.7,370.6],[949.1,377.3],[948.6,389.7],[945.9,350.3],[940.9,333.0],[924.7,322.2],[916.2,326.6],[915.1,337.7],[900.2,321.7],[915.5,314.9],[944.5,325.0],[957.8,338.6],[975.5,377.3],[984.3,414.6],[986.4,457.5],[975.6,480.8],[967.4,511.3],[962.4,508.7],[968.5,499.3],[974.2,473.8],[965.0,464.8],[915.0,474.4],[900.1,480.5],[894.8,487.5],[890.5,478.1],[871.4,478.2],[863.9,486.7],[848.1,488.9],[835.0,507.5],[794.7,513.3],[752.2,546.6],[709.2,560.1],[714.7,552.1],[720.7,554.1],[748.9,541.4],[787.9,511.4],[792.7,499.1],[789.6,489.0],[793.0,481.9],[789.6,477.1],[793.6,471.0],[791.3,462.3],[787.2,461.1],[797.0,455.0],[796.7,449.7],[769.5,442.6],[771.4,459.9],[761.7,456.5],[758.9,475.7],[745.9,470.6],[749.2,480.1],[735.2,481.1],[735.3,494.8]],[[958.4,585.4],[958.5,575.2],[953.6,566.4],[961.9,574.8],[977.7,607.3],[976.2,616.8],[962.8,622.0],[934.7,620.5],[897.3,603.9],[892.0,595.8],[904.5,603.2],[933.1,601.8],[944.6,599.9],[958.4,585.4]],[[813.8,538.4],[818.1,557.7],[829.1,563.3],[831.3,569.1],[844.5,555.9],[844.3,582.2],[774.0,584.5],[763.8,588.8],[756.1,599.3],[739.0,582.5],[756.3,581.8],[776.3,552.2],[802.9,533.5],[813.8,538.4]],[[741.3,496.2],[740.8,488.5],[743.6,497.1],[741.3,496.2]]],"counties":[{"n":"Barnstable","fips":"25001","p":232570,"r":[[[926.9,322.5],[920.8,323.2],[916.2,326.6],[913.8,332.5],[916.2,337.8],[910.4,333.8],[907.5,328.3],[900.2,321.7],[905.6,316.3],[915.5,314.9],[935.4,320.3],[951.0,330.3],[957.8,338.6],[970.7,363.5],[981.8,401.6],[984.3,414.6],[986.4,457.5],[981.2,474.3],[975.6,480.8],[970.1,507.3],[967.4,511.3],[963.8,511.6],[962.4,508.7],[966.5,504.7],[968.5,499.3],[974.2,473.8],[967.9,466.4],[963.1,464.7],[915.0,474.4],[900.1,480.5],[894.8,487.5],[893.8,481.5],[890.5,478.1],[879.5,479.8],[871.4,478.2],[863.9,486.7],[848.1,488.9],[841.6,501.1],[835.0,507.5],[800.9,511.6],[794.7,513.3],[786.5,522.1],[779.0,520.7],[778.1,517.9],[787.9,511.4],[789.2,503.5],[792.7,499.1],[789.6,489.0],[793.0,481.9],[789.6,477.1],[793.6,471.0],[791.3,462.3],[787.2,461.1],[791.4,456.7],[797.0,455.0],[796.7,449.7],[792.2,447.8],[798.0,436.6],[795.0,431.6],[813.3,422.9],[820.9,414.1],[838.8,432.1],[864.9,440.4],[887.9,442.0],[896.5,449.4],[908.2,438.8],[949.4,428.0],[960.2,422.7],[964.6,417.8],[965.9,414.9],[964.5,390.1],[966.9,386.3],[960.3,382.0],[958.6,370.9],[954.7,370.6],[952.1,371.6],[949.1,377.3],[948.6,389.7],[944.2,340.6],[937.6,329.1],[926.9,322.5]]]},{"n":"Berkshire","fips":"25003","p":128726,"r":[[[158.4,140.9],[151.2,253.0],[132.3,290.8],[137.2,330.5],[16.6,326.9],[13.6,313.5],[79.7,70.7],[145.5,72.4],[165.3,85.8],[165.0,109.5],[158.4,140.9]]]},{"n":"Bristol","fips":"25005","p":588593,"r":[[[740.8,488.5],[743.6,497.1],[741.3,496.2],[739.1,492.1],[740.8,488.5]],[[735.2,481.1],[735.1,495.5],[730.6,481.5],[725.3,478.9],[718.8,483.8],[721.1,487.1],[722.0,493.6],[719.4,492.5],[716.9,486.9],[714.3,487.4],[713.8,496.6],[712.0,499.1],[709.1,498.5],[712.1,503.5],[713.8,512.6],[700.8,516.1],[699.7,519.7],[685.5,527.5],[671.9,523.8],[662.4,528.1],[658.6,468.8],[642.0,463.5],[624.1,435.4],[606.1,425.2],[603.0,415.7],[603.0,383.9],[592.8,383.8],[591.5,350.5],[596.0,350.5],[673.4,310.0],[681.7,358.5],[695.2,370.8],[685.2,412.0],[716.4,421.2],[737.8,480.5],[735.2,481.1]]]},{"n":"Dukes","fips":"25007","p":21061,"r":[[[804.9,537.3],[813.8,538.4],[816.6,544.2],[815.9,552.2],[818.1,557.7],[829.1,563.3],[831.3,569.1],[835.3,568.4],[838.5,563.7],[839.0,558.7],[844.5,555.9],[845.7,564.7],[844.3,582.2],[804.1,581.8],[774.0,584.5],[763.8,588.8],[759.3,592.8],[758.0,598.3],[756.1,599.3],[749.0,594.5],[739.0,582.5],[740.3,580.3],[746.2,579.4],[756.3,581.8],[780.3,548.4],[802.9,533.5],[804.9,537.3]],[[778.1,517.9],[779.0,520.7],[783.6,520.1],[785.0,522.3],[767.4,532.1],[760.2,541.3],[752.2,546.6],[739.8,548.2],[731.3,555.3],[708.5,559.1],[714.7,552.1],[720.7,554.1],[734.5,545.7],[748.9,541.4],[764.5,526.8],[778.1,517.9]]]},{"n":"Essex","fips":"25009","p":823938,"r":[[[628.5,71.9],[645.8,73.7],[644.6,54.1],[650.2,47.4],[684.9,30.6],[718.3,18.6],[726.1,20.0],[736.3,28.1],[744.8,23.9],[748.1,57.4],[757.5,85.9],[755.3,90.0],[764.6,94.3],[768.9,101.0],[779.6,104.9],[786.6,95.9],[795.7,90.3],[798.4,92.1],[797.7,102.1],[805.1,102.3],[806.2,109.9],[798.9,114.0],[789.0,131.2],[785.4,131.3],[784.7,127.5],[782.5,126.7],[777.1,132.9],[768.6,135.1],[766.6,133.1],[748.4,138.8],[743.2,142.5],[730.1,144.4],[731.5,153.1],[738.1,154.3],[741.1,160.2],[739.7,165.0],[733.8,165.1],[727.9,169.3],[723.9,175.9],[717.5,173.3],[712.8,177.0],[714.7,186.9],[721.8,190.8],[712.5,191.6],[709.6,177.6],[700.0,186.8],[688.1,181.8],[680.6,170.4],[674.5,123.1],[658.4,124.9],[654.8,119.7],[652.1,119.8],[650.3,125.3],[625.6,103.7],[626.0,75.0],[628.5,71.9]]]},{"n":"Franklin","fips":"25011","p":70871,"r":[[[185.1,146.3],[158.4,140.9],[165.0,109.5],[165.3,85.8],[145.5,72.4],[346.5,79.5],[362.3,110.2],[356.9,156.5],[337.9,219.1],[326.5,233.9],[326.8,220.1],[321.5,190.6],[275.5,188.3],[232.0,196.3],[215.9,174.9],[186.7,167.3],[185.1,146.3]]]},{"n":"Hampden","fips":"25013","p":464151,"r":[[[351.7,277.7],[386.7,285.8],[386.5,334.0],[218.0,331.8],[215.1,343.9],[201.5,345.9],[202.3,331.7],[137.2,330.5],[132.3,290.8],[151.2,253.0],[151.7,230.4],[182.9,223.1],[175.5,257.4],[207.8,258.3],[236.8,277.9],[256.8,240.1],[262.2,267.5],[313.7,260.1],[315.9,277.0],[363.3,255.2],[351.7,277.7]]]},{"n":"Hampshire","fips":"25015","p":165399,"r":[[[337.9,219.1],[368.2,238.3],[365.8,241.4],[365.6,246.1],[364.2,246.1],[366.2,254.5],[315.9,277.0],[313.7,260.1],[262.2,267.5],[256.8,240.1],[236.8,277.9],[207.8,258.3],[175.5,257.4],[182.9,223.1],[151.7,230.4],[158.4,140.9],[185.1,146.3],[186.7,167.3],[215.9,174.9],[232.0,196.3],[275.5,188.3],[321.5,190.6],[326.8,220.1],[326.5,233.9],[337.9,219.1]]]},{"n":"Middlesex","fips":"25017","p":1668956,"r":[[[536.2,231.0],[530.7,224.0],[531.0,221.6],[525.1,216.8],[547.5,173.8],[548.7,145.6],[522.4,152.6],[510.7,150.3],[514.6,120.3],[484.4,108.3],[461.9,112.1],[450.9,83.4],[615.2,88.8],[626.0,75.0],[625.6,103.7],[650.3,125.3],[652.1,119.8],[654.8,119.7],[658.4,124.9],[674.5,123.1],[680.6,170.4],[689.6,184.2],[680.1,203.1],[675.2,201.3],[673.3,205.3],[677.8,209.7],[674.2,213.5],[668.2,215.7],[663.3,214.6],[663.3,210.4],[659.6,207.9],[654.8,212.6],[649.6,213.0],[647.7,216.6],[649.6,222.8],[652.6,224.0],[646.5,229.8],[650.4,233.7],[643.2,241.3],[621.8,224.8],[604.8,254.3],[605.6,259.4],[602.5,262.8],[602.8,266.7],[600.9,266.1],[599.5,269.1],[601.6,271.5],[585.3,276.1],[585.9,279.6],[578.3,279.3],[569.1,287.1],[565.2,287.6],[532.3,262.3],[535.7,249.9],[555.8,247.1],[563.1,231.1],[562.9,224.0],[545.4,225.4],[536.2,231.0]]]},{"n":"Nantucket","fips":"25019","p":14670,"r":[[[941.9,600.4],[949.9,596.5],[958.4,585.4],[958.5,575.2],[953.6,566.4],[957.8,568.5],[961.9,574.8],[977.7,607.3],[977.7,612.4],[976.2,616.8],[966.5,621.5],[934.7,620.5],[897.3,603.9],[892.6,599.1],[892.0,595.8],[899.2,597.6],[904.5,603.2],[941.9,600.4]]]},{"n":"Norfolk","fips":"25021","p":740754,"r":[[[559.8,338.7],[559.0,302.2],[565.1,296.9],[565.2,287.6],[569.1,287.1],[578.3,279.3],[585.9,279.6],[585.3,276.1],[601.6,271.5],[599.5,269.1],[600.9,266.1],[602.8,266.7],[602.5,262.8],[605.6,259.4],[604.8,254.3],[621.8,224.8],[643.2,241.3],[659.6,261.6],[664.5,250.3],[671.1,246.2],[678.4,247.1],[680.1,244.0],[683.5,243.5],[683.8,233.1],[693.7,232.4],[694.9,234.2],[693.8,241.4],[698.1,247.0],[709.0,245.2],[716.0,248.6],[720.6,245.5],[715.6,287.3],[596.0,350.5],[591.5,350.5],[591.5,338.2],[559.8,338.7]]]},{"n":"Plymouth","fips":"25023","p":542090,"r":[[[716.4,421.2],[685.2,412.0],[695.2,370.8],[681.7,358.5],[673.4,310.0],[715.6,287.3],[720.6,245.5],[723.5,237.9],[717.6,233.0],[727.0,231.8],[730.3,240.3],[735.6,246.7],[757.4,253.7],[763.9,263.8],[770.6,268.9],[772.8,283.2],[793.4,315.2],[791.0,317.1],[791.8,328.2],[785.0,331.5],[784.6,342.2],[777.8,340.2],[773.4,342.3],[774.0,345.2],[786.9,359.4],[790.7,359.0],[799.4,366.9],[808.3,363.3],[816.7,370.8],[818.6,379.0],[822.3,385.4],[824.1,396.6],[819.6,406.7],[820.9,414.1],[813.3,422.9],[795.0,431.6],[798.0,436.6],[792.2,447.8],[788.5,448.9],[771.6,441.5],[769.5,442.6],[771.4,459.9],[764.6,455.6],[761.7,456.5],[759.7,466.2],[761.0,471.1],[758.9,475.7],[755.8,472.4],[745.9,470.6],[745.1,474.1],[748.3,475.9],[749.5,479.3],[746.7,481.8],[737.8,480.5],[716.4,421.2]]]},{"n":"Suffolk","fips":"25025","p":793144,"r":[[[683.5,243.5],[680.1,244.0],[678.4,247.1],[671.1,246.2],[664.5,250.3],[659.6,261.6],[643.2,241.3],[650.4,233.7],[646.5,229.8],[652.6,224.0],[649.6,222.8],[647.7,216.6],[649.6,213.0],[654.8,212.6],[659.6,207.9],[663.3,210.4],[663.3,214.6],[668.2,215.7],[674.2,213.5],[677.8,209.7],[673.3,205.3],[675.2,201.3],[680.1,203.1],[689.6,184.2],[688.2,181.8],[700.0,186.8],[705.9,182.2],[699.8,189.5],[697.7,195.7],[700.5,201.4],[703.3,202.7],[702.7,206.7],[707.9,218.9],[700.6,214.4],[693.3,217.8],[690.9,225.5],[693.7,232.4],[683.8,233.1],[683.5,243.5]]]},{"n":"Worcester","fips":"25027","p":881248,"r":[[[366.1,253.0],[364.2,246.1],[365.6,246.1],[365.8,241.4],[368.2,238.3],[337.9,219.1],[356.9,156.5],[362.3,110.2],[346.5,79.5],[450.9,83.4],[461.9,112.1],[484.4,108.3],[514.6,120.3],[510.7,150.3],[522.4,152.6],[548.7,145.6],[547.5,173.8],[525.1,216.8],[531.0,221.6],[530.7,224.0],[536.2,231.0],[545.4,225.4],[562.9,224.0],[563.1,231.1],[555.8,247.1],[535.7,249.9],[532.3,262.3],[565.2,287.6],[565.1,296.9],[559.0,302.2],[559.8,338.7],[478.0,342.1],[477.6,336.4],[386.5,334.0],[386.7,285.8],[351.7,277.7],[363.3,255.2],[366.1,253.0]]]}],"rivers":[{"n":"Connecticut","s":[[[304.2,-111.6],[305.6,-107.7],[301.9,-101.6],[300.3,-86.4],[301.3,-63.7],[295.4,-25.7],[292.8,-19.5],[281.6,-14.4],[277.8,8.3],[272.4,21.8],[275.5,42.1],[294.8,66.0],[295.7,88.0],[289.3,112.8],[283.4,119.9],[266.7,122.2],[266.7,127.7],[270.7,134.1],[268.4,142.6],[270.3,157.6],[263.0,176.3],[262.8,183.1],[266.7,191.8],[251.7,215.5],[257.6,221.1],[253.4,253.6],[260.9,268.6],[253.7,281.1],[259.1,321.2],[253.7,384.0],[245.3,428.0],[248.1,443.8],[253.7,453.9],[251.7,468.8],[253.7,483.7],[246.1,493.9],[267.5,505.1],[272.6,520.0],[289.9,532.3],[303.8,553.3],[319.2,568.5],[320.5,575.6]]]},{"n":"Merrimack","s":[[[553.6,-111.6],[558.6,-93.0],[568.8,-79.0],[573.5,-57.1],[573.1,-42.6],[567.2,-29.8],[572.0,-0.5],[567.6,13.8],[567.1,30.8],[586.1,92.9],[594.2,102.0],[624.0,103.1],[639.7,89.1],[655.8,84.4],[662.6,73.6],[663.4,61.4],[690.2,59.1],[697.8,45.0],[716.6,32.1],[727.1,32.5],[732.2,40.9]]]},{"n":"Blackstone","s":[[[493.3,217.2],[488.3,234.5],[490.3,244.6],[522.9,297.2],[525.2,302.8],[523.7,323.3],[525.4,326.9],[541.8,332.7]],[[541.8,332.7],[554.9,338.9],[565.3,355.5],[587.8,379.9],[592.9,396.1],[588.8,411.2]]]},{"n":"Housatonic","s":[[[54.8,261.3],[52.2,249.0],[57.3,239.2],[78.5,243.7],[83.8,240.8],[82.0,228.2],[86.0,193.5],[79.7,180.0],[86.9,148.4],[79.8,124.6]],[[123.5,642.8],[122.0,626.9],[131.4,597.9],[117.3,583.5],[97.8,555.5],[86.2,552.2],[50.7,527.7],[37.4,498.6],[28.4,491.9],[26.0,481.1],[13.9,462.9],[21.7,440.3],[44.2,416.7],[52.5,385.0],[51.3,348.0],[60.9,311.4],[52.1,292.1],[54.8,261.3]]]},{"n":"Swift","s":[[[328.2,240.8],[331.7,248.9],[331.2,259.1],[321.3,278.3],[311.0,279.8],[303.3,286.6],[296.5,287.9],[284.2,285.6],[255.1,288.8]]]}],"lakes":[]}, HIST={"eras":[{"y0":1492,"y1":1620,"l":"The Dawnland: Wampanoag, Massachusett and their neighbors","f":null},{"y0":1620,"y1":1707,"l":"England (Plymouth 1620, Massachusetts Bay 1630)","f":{"a":"Flag of England"}},{"y0":1707,"y1":1776,"l":"Great Britain","f":{"a":"Flag of Great Britain"}},{"y0":1776,"y1":1908,"l":"United States (6th state, 1788)","f":{"a":"Flag of the United States"}},{"y0":1908,"y1":2026,"l":"State flag adopted 1908","f":{"a":"Flag of Massachusetts"}}],"pre":"Around 1600 New England held on the order of 100,000 Native people; the Wampanoag alone are put as high as 40,000 before the epidemics, with older tribal estimates far lower.","nations":[{"n":"Massachusett","lat":42.3,"lon":-71.05,"note":"Massachusetts Bay coast.","after":{"y":1616,"t":"the 1616-19 epidemic kills a third to nine tenths of the coastal people"}},{"n":"Wampanoag","lat":41.8,"lon":-70.95,"note":"Southeast Massachusetts; as many as 40,000 across 67 villages before the epidemics.","after":{"y":1676,"t":"left effectively landless after King Philip's War; the nation remains, at Mashpee and Aquinnah"}},{"n":"Nauset","lat":41.8,"lon":-69.98,"note":"Outer Cape Cod."},{"n":"Nipmuc","lat":42.15,"lon":-71.9,"note":"Central uplands and lakes."},{"n":"Pocumtuck","lat":42.54,"lon":-72.6,"note":"Middle Connecticut Valley."},{"n":"Mahican","lat":42.4,"lon":-73.25,"note":"Berkshires and Housatonic Valley."},{"n":"Pennacook","lat":42.7,"lon":-71.2,"note":"Merrimack Valley."}],"events":[{"y":1616,"t":"rem","n":"The Great Dying","lat":42.2,"lon":-70.8,"note":"1616 to 1619: epidemic kills between a third and nine tenths of coastal Native New England.","src":"en.wikipedia.org/wiki/Massachusett"},{"y":1620,"t":"set","n":"Plymouth","lat":41.96,"lon":-70.67,"note":"The Mayflower colony, on the emptied village of Patuxet.","src":"en.wikipedia.org/wiki/Plymouth,_Massachusetts"},{"y":1626,"t":"set","n":"Salem","lat":42.52,"lon":-70.9,"note":"Naumkeag.","src":"en.wikipedia.org/wiki/Salem,_Massachusetts"},{"y":1630,"t":"cap","n":"Boston","lat":42.36,"lon":-71.06,"note":"The Winthrop fleet; capital ever since.","src":"en.wikipedia.org/wiki/Boston"},{"y":1636,"t":"set","n":"Springfield","lat":42.1,"lon":-72.59,"note":"Pynchon's Connecticut Valley trading post.","src":"en.wikipedia.org/wiki/Springfield,_Massachusetts"},{"y":1651,"t":"rem","n":"Praying towns","lat":42.28,"lon":-71.35,"note":"Eliot's Christian Indian towns, Natick first.","src":"en.wikipedia.org/wiki/Praying_town"},{"y":1673,"t":"set","n":"Deerfield","lat":42.54,"lon":-72.61,"note":"Frontier town on Pocumtuck land.","src":"en.wikipedia.org/wiki/Deerfield,_Massachusetts"},{"y":1675,"t":"rem","n":"King Philip's War","lat":41.9,"lon":-71.0,"note":"1675 to 1678: some 5,000 Native dead; captives sold into Caribbean slavery; a thousand interned on Deer Island.","src":"en.wikipedia.org/wiki/King_Philip%27s_War"},{"y":1722,"t":"set","n":"Worcester","lat":42.26,"lon":-71.8,"note":"Town incorporated 1722.","src":"en.wikipedia.org/wiki/Worcester,_Massachusetts"},{"y":1787,"t":"set","n":"New Bedford","lat":41.64,"lon":-70.93,"note":"Whaling port.","src":"en.wikipedia.org/wiki/New_Bedford,_Massachusetts"},{"y":1826,"t":"set","n":"Lowell","lat":42.63,"lon":-71.31,"note":"Planned textile mill town.","src":"en.wikipedia.org/wiki/Lowell,_Massachusetts"}],"census":[[1790,378787],[1800,422845],[1810,472040],[1820,523287],[1830,610408],[1840,737699],[1850,994514],[1860,1231066],[1870,1457351],[1880,1783085],[1890,2238943],[1900,2805346],[1910,3366416],[1920,3852356],[1930,4249614],[1940,4316721],[1950,4690514],[1960,5148578],[1970,5689170],[1980,5737037],[1990,6016425],[2000,6349097],[2010,6547629],[2020,7029917]],"colonial":[[1700,55941],[1750,188000],[1780,268627]],"native":[[1600,100000,"New England-wide"],[1620,30000,"after the Great Dying, order of magnitude"],[1680,10000,"after King Philip's War, order of magnitude"]],"geo":{"hp":{"n":"Mount Greylock","el":"1,064 m","lat":42.64,"lon":-73.17}},"refs":[["Bragdon, K. (1996). Native People of Southern New England, 1500-1650. University of Oklahoma Press.","https://www.oupress.com/9780806131269/native-people-of-southern-new-england-15001650/"],["Snow, D., & Lanphear, K. (1988). European contact and Indian depopulation in the Northeast. Ethnohistory 35(1).","https://www.jstor.org/stable/482431"]]};
+const W=ST.W, H=ST.H;
+const [MX0,MY0,MX1,MY1]=ST.m;
+const R=6378137, RAD=Math.PI/180;
+function XY(lat,lon){
+  const mx=R*lon*RAD, my=R*Math.log(Math.tan(Math.PI/4+lat*RAD/2));
+  return [ (mx-MX0)/(MX1-MX0)*W, (MY1-my)/(MY1-MY0)*H ];
+}
+const wrap=document.getElementById('mapwrap');
+wrap.style.aspectRatio=W+' / '+H;
+const svg=document.getElementById('map');
+svg.setAttribute('viewBox','0 0 '+W+' '+H);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const layers={ter:true,woo:true,riv:true,lak:true,cou:false,nat:true,tow:true};
+let year=1492, playing=false, pinned=null;
+
+function ringsPath(rr){ return rr.map(r=>'M'+r.map(p=>p[0]+','+p[1]).join('L')+'Z').join(''); }
+const outlineD=ringsPath(ST.outline);
+
+const maxPop=Math.max(...ST.counties.map(c=>c.p||1));
+function couColor(p){
+  if(!p) return '#20262d';
+  const t=Math.log(p)/Math.log(maxPop);
+  const l=18+t*40;
+  return 'hsl(210,45%,'+l.toFixed(0)+'%)';
+}
+function fmt(x){ return x==null?'?':x.toLocaleString('en-US'); }
+
+function render(){
+  let s='';
+  s+='<defs><clipPath id="stclip"><path d="'+outlineD+'"/></clipPath></defs>';
+  s+='<path d="'+outlineD+'" fill="'+(layers.ter||layers.woo?'none':'#1d2126')+'" stroke="none"/>';
+  if(layers.cou){
+    ST.counties.forEach((c,i)=>{
+      s+='<g data-cty="'+i+'"><path d="'+ringsPath(c.r)+'" fill="'+couColor(c.p)+'" fill-opacity="0.72" stroke="#0e1114" stroke-width="0.7"/></g>';
+    });
+  }
+  if(layers.lak) for(const l of ST.lakes)
+    s+='<path d="'+ringsPath(l.r)+'" fill="var(--water)" fill-opacity="0.85" stroke="none" clip-path="url(#stclip)"/>';
+  if(layers.riv) for(const r of ST.rivers){
+    const wdt=r.n?1.6:0.9;
+    for(const seg of r.s)
+      s+='<path d="M'+seg.map(p=>p[0]+','+p[1]).join('L')+'" fill="none" stroke="var(--water)" stroke-width="'+wdt+'" stroke-opacity="'+(r.n?0.95:0.55)+'" clip-path="url(#stclip)"/>';
+  }
+  s+='<path d="'+outlineD+'" fill="none" stroke="#c9d1d9" stroke-width="1.6"/>';
+  if(layers.ter&&HIST.geo&&HIST.geo.hp){
+    const hp=HIST.geo.hp, [x,y]=XY(hp.lat,hp.lon);
+    s+='<g data-hp="1"><path d="M'+x+','+(y-7)+' L'+(x-6)+','+(y+4)+' L'+(x+6)+','+(y+4)+' Z" fill="#e6e6e6" stroke="#121212" stroke-width="1"/>'
+      +'<text x="'+(x+9)+'" y="'+(y+4)+'" font-size="11" fill="#c9d1d9" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+esc(hp.n)+' '+esc(hp.el)+'</text></g>';
+  }
+  if(layers.nat) HIST.nations.forEach((n,i)=>{
+    const gone=n.after&&year>=n.after.y;
+    const [x,y]=XY(n.lat,n.lon);
+    s+='<g data-nat="'+i+'" opacity="'+(gone?0.45:1)+'" style="cursor:pointer">'
+      +'<text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="13" font-style="italic" fill="var(--nation)" stroke="#121212" stroke-width="3" paint-order="stroke">'+esc(n.n)+'</text>'
+      +(gone?'<text x="'+x+'" y="'+(y+13)+'" text-anchor="middle" font-size="9.5" fill="var(--rem)" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+n.after.y+'</text>':'')
+      +'</g>';
+  });
+  if(layers.tow) HIST.events.forEach((e,i)=>{
+    if(e.y>year) return;
+    const [x,y]=XY(e.lat,e.lon);
+    if(e.t==='rem'){
+      s+='<g data-ev="'+i+'" style="cursor:pointer"><rect x="'+(x-4)+'" y="'+(y-4)+'" width="8" height="8" transform="rotate(45 '+x+' '+y+')" fill="var(--rem)" stroke="#121212" stroke-width="1"/></g>';
+    } else {
+      const cap=e.t==='cap';
+      s+='<g data-ev="'+i+'" style="cursor:pointer">'
+        +(cap?'<path d="'+star(x,y,6)+'" fill="var(--cap)" stroke="#121212" stroke-width="1"/>'
+             :'<circle cx="'+x+'" cy="'+y+'" r="3.6" fill="var(--set)" stroke="#121212" stroke-width="1"/>')
+        +'<text x="'+x+'" y="'+(y-8)+'" text-anchor="middle" font-size="10.5" fill="'+(cap?'var(--cap)':'#c9d1d9')+'" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+esc(e.n)+'</text></g>';
+    }
+  });
+  svg.innerHTML=s;
+}
+function star(x,y,r){
+  let d='';
+  for(let i=0;i<10;i++){
+    const a=-Math.PI/2+i*Math.PI/5, rr=i%2?r*0.45:r;
+    d+=(i?'L':'M')+(x+rr*Math.cos(a)).toFixed(1)+','+(y+rr*Math.sin(a)).toFixed(1);
+  }
+  return d+'Z';
+}
+
+// ---- population and era readouts ----
+const CEN=(HIST.colonial||[]).concat(HIST.census);
+function interp(pts,y){
+  if(!pts.length||y<pts[0][0]) return null;
+  if(y>=pts[pts.length-1][0]) return pts[pts.length-1][1];
+  for(let i=0;i<pts.length-1;i++){
+    const [a,pa]=pts[i], [b,pb]=pts[i+1];
+    if(y>=a&&y<b) return Math.round(pa+(pb-pa)*(y-a)/(b-a));
+  }
+  return null;
+}
+const flagCache={};
+async function flagUrl(f){
+  if(!f) return null;
+  const key=f.a||f.c;
+  if(flagCache[key]!==undefined) return flagCache[key];
+  let u=null;
+  if(f.c) u='https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(f.c)+'?width=320';
+  else{
+    try{
+      const r=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(f.a.replace(/ /g,'_')));
+      if(r.ok){ const j=await r.json(); if(j.thumbnail) u=j.thumbnail.source; }
+    }catch(e){}
+  }
+  flagCache[key]=u; return u;
+}
+async function setYear(y){
+  year=y;
+  document.getElementById('yr').value=y;
+  document.getElementById('yearTxt').textContent=y;
+  document.getElementById('yearBig').textContent=y;
+  const era=HIST.eras.find(e=>y>=e.y0&&y<e.y1)||HIST.eras[HIST.eras.length-1];
+  document.getElementById('eraTxt').textContent=era.l;
+  const img=document.getElementById('flagImg'), none=document.getElementById('flagNone');
+  const u=await flagUrl(era.f);
+  if(y!==year) return;
+  if(u){ img.src=u; img.style.display='block'; none.hidden=true; }
+  else{ img.style.display='none'; none.hidden=false;
+    none.textContent=era.f?'flag unavailable':'No flag: the nations\u2019 own land'; }
+  const cen=interp(CEN,y), nat=interp(HIST.native,y);
+  let t=[];
+  if(cen!=null) t.push((y>=(HIST.census[0][0])?'Census (interpolated): ':'Colonial estimate: ')+fmt(cen));
+  else t.push('Before the counts: '+HIST.pre);
+  if(nat!=null) t.push('Native population (estimate): '+fmt(nat));
+  document.getElementById('popTxt').innerHTML=t.map(esc).join('<br>');
+  render();
+}
+
+// ---- cards ----
+function show(kind,name,body,src){
+  document.getElementById('kindTxt').textContent=kind;
+  document.getElementById('nameTxt').textContent=name;
+  document.getElementById('bodyTxt').textContent=body;
+  document.getElementById('srcTxt').textContent=src||'';
+}
+function target(e){
+  const g=e.target.closest('[data-nat],[data-ev],[data-cty],[data-hp]');
+  if(!g) return null;
+  if(g.dataset.nat!==undefined){ const n=HIST.nations[+g.dataset.nat];
+    return ['A nation of this land',n.n,n.note+(n.after?' '+n.after.t.charAt(0).toUpperCase()+n.after.t.slice(1)+'.':''),'']; }
+  if(g.dataset.ev!==undefined){ const ev=HIST.events[+g.dataset.ev];
+    const k=ev.t==='rem'?'Removal and dispossession':ev.t==='cap'?'Capital \u00b7 '+ev.y:'Settlement \u00b7 '+ev.y;
+    return [k,ev.n,ev.note,ev.src]; }
+  if(g.dataset.cty!==undefined){ const c=ST.counties[+g.dataset.cty];
+    return ['County \u00b7 recent population',c.n,'Population about '+fmt(c.p)+'.','Census figures via the Balsama county dataset, 2025']; }
+  if(g.dataset.hp!==undefined){ const hp=HIST.geo.hp;
+    return ['Highest point',hp.n,'Elevation '+hp.el+'.','']; }
+  return null;
+}
+svg.addEventListener('pointerover',e=>{ if(pinned) return;
+  const t=target(e); if(t) show(...t); });
+svg.addEventListener('click',e=>{
+  const g=e.target.closest('[data-nat],[data-ev],[data-cty],[data-hp]');
+  if(!g){ pinned=null; return; }
+  const id=g.dataset.nat!==undefined?'n'+g.dataset.nat:g.dataset.ev!==undefined?'e'+g.dataset.ev:g.dataset.cty!==undefined?'c'+g.dataset.cty:'hp';
+  pinned = pinned===id?null:id;
+  const t=target(e); if(t) show(...t);
+});
+
+// ---- timeline ----
+document.getElementById('yr').addEventListener('input',e=>{ stop(); setYear(+e.target.value); });
+let timer=null;
+function stop(){ playing=false; document.getElementById('bPlay').textContent='Play';
+  if(timer){ clearInterval(timer); timer=null; } }
+document.getElementById('bPlay').onclick=()=>{
+  if(playing){ stop(); return; }
+  playing=true; document.getElementById('bPlay').textContent='Pause';
+  if(year>=2025) setYear(1492);
+  timer=setInterval(()=>{ if(year>=2025){ stop(); return; } setYear(year+1); },45);
+};
+(function eband(){
+  const eb=document.getElementById('eband'), span=2025-1492;
+  const cols=['#3a3a3a','#7a6a2f','#2f5d7a','#7a2f2f','#2f7a4f','#50407a','#7a5a2f'];
+  HIST.eras.forEach((e,i)=>{
+    const d=document.createElement('div');
+    d.style.left=((e.y0-1492)/span*100)+'%';
+    d.style.width=((Math.min(e.y1,2025)-e.y0)/span*100)+'%';
+    d.style.background=cols[i%cols.length]; d.title=e.y0+' \u00b7 '+e.l;
+    eb.appendChild(d);
+  });
+  HIST.events.forEach(ev=>{
+    const m=document.createElement('span');
+    m.style.left=((ev.y-1492)/span*100)+'%';
+    m.style.background=ev.t==='rem'?'var(--rem)':ev.t==='cap'?'var(--cap)':'var(--set)';
+    m.title=ev.y+' \u00b7 '+ev.n;
+    eb.appendChild(m);
+  });
+})();
+
+// ---- chips ----
+const CH={cTer:'ter',cWoo:'woo',cRiv:'riv',cLak:'lak',cCou:'cou',cNat:'nat',cTow:'tow'};
+for(const id in CH) document.getElementById(id).onclick=e=>{
+  const k=CH[id]; layers[k]=!layers[k];
+  e.target.classList.toggle('on',layers[k]);
+  if(k==='ter'){ document.getElementById('terC').style.display=layers.ter?'':'none'; if(layers.ter) terrain(); }
+  if(k==='woo'){ document.getElementById('wooC').style.display=layers.woo?'':'none'; if(layers.woo) woods(); }
+  render();
+};
+
+// ---- terrain: AWS Terrain Tiles (terrarium), shaded and tinted ----
+let terDone=false, wooDone=false;
+const loadTxt=document.getElementById('loadTxt');
+function clipCtx(ctx,sc){
+  const p=new Path2D();
+  for(const r of ST.outline){ p.moveTo(r[0][0]*sc,r[0][1]*sc);
+    for(let i=1;i<r.length;i++) p.lineTo(r[i][0]*sc,r[i][1]*sc); p.closePath(); }
+  ctx.clip(p);
+}
+async function terrain(){
+  if(terDone) return; terDone=true;
+  const cv=document.getElementById('terC'); const SC=2;
+  cv.width=W*SC; cv.height=Math.round(H*SC);
+  const ctx=cv.getContext('2d');
+  loadTxt.textContent='loading terrain\u2026';
+  try{
+    const world=2*Math.PI*R;
+    let z=Math.round(Math.log2(world/(MX1-MX0)*(W*SC)/256)); z=Math.max(5,Math.min(11,z));
+    let ts,tx0,tx1,ty0,ty1;
+    for(;;){
+      ts=world/(1<<z);
+      tx0=Math.floor((MX0+world/2)/ts); tx1=Math.floor((MX1+world/2)/ts);
+      ty0=Math.floor((world/2-MY1)/ts); ty1=Math.floor((world/2-MY0)/ts);
+      if((tx1-tx0+1)*(ty1-ty0+1)<=80||z<=5) break;
+      z--;
+    }
+    const px=Math.ceil((tx1-tx0+1)*256), py=Math.ceil((ty1-ty0+1)*256);
+    const off=new OffscreenCanvas(px,py), octx=off.getContext('2d');
+    await Promise.all([...Array((tx1-tx0+1)*(ty1-ty0+1))].map(async(_,i)=>{
+      const x=tx0+i%(tx1-tx0+1), y2=ty0+Math.floor(i/(tx1-tx0+1));
+      const r=await fetch('https://s3.amazonaws.com/elevation-tiles-prod/terrarium/'+z+'/'+x+'/'+y2+'.png');
+      const b=await createImageBitmap(await r.blob());
+      octx.drawImage(b,(x-tx0)*256,(y2-ty0)*256);
+    }));
+    const img=octx.getImageData(0,0,px,py), d=img.data;
+    const elev=new Float32Array(px*py);
+    let emin=1e9, emax=-1e9;
+    for(let i=0;i<px*py;i++){
+      const e=d[i*4]*256+d[i*4+1]+d[i*4+2]/256-32768;
+      elev[i]=e; if(e>emax)emax=e; if(e<emin)emin=e;
+    }
+    emin=Math.max(emin,-5);
+    const out=octx.createImageData(px,py), o=out.data;
+    for(let y2=0;y2<py;y2++)for(let x=0;x<px;x++){
+      const i=y2*px+x, e=elev[i];
+      const t=Math.max(0,Math.min(1,(e-emin)/Math.max(1,emax-emin)));
+      const ex=elev[y2*px+Math.min(px-1,x+1)], ey=elev[Math.min(py-1,y2+1)*px+x];
+      const sh=Math.max(0,Math.min(1,0.5+((ex-e)+(e-ey))*0.012));
+      let r0,g0,b0;
+      if(t<0.5){ const u=t/0.5; r0=40+u*120; g0=80+u*70; b0=45+u*45; }
+      else{ const u=(t-0.5)/0.5; r0=160+u*80; g0=150+u*90; b0=90+u*140; }
+      o[i*4]=r0*(0.55+0.65*sh); o[i*4+1]=g0*(0.55+0.65*sh); o[i*4+2]=b0*(0.55+0.65*sh); o[i*4+3]=235;
+    }
+    octx.putImageData(out,0,0);
+    ctx.save(); clipCtx(ctx,SC);
+    const sx=(MX0+world/2)/ts-tx0, sy=(world/2-MY1)/ts-ty0;
+    ctx.drawImage(off, sx*256, sy*256, (MX1-MX0)/ts*256, (MY1-MY0)/ts*256,
+      0, 0, W*SC, Math.round(H*SC));
+    ctx.restore();
+    loadTxt.textContent='';
+  }catch(e){ loadTxt.textContent='terrain unavailable'; }
+}
+// ---- woods: USGS NLCD 2021 forest classes via the MRLC WMS ----
+async function woods(){
+  if(wooDone) return; wooDone=true;
+  const cv=document.getElementById('wooC'); const SC=2;
+  cv.width=W*SC; cv.height=Math.round(H*SC);
+  const ctx=cv.getContext('2d');
+  loadTxt.textContent='loading land cover\u2026';
+  try{
+    const u='https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2021_Land_Cover_L48/wms'
+      +'?service=WMS&version=1.1.1&request=GetMap&layers=NLCD_2021_Land_Cover_L48&styles='
+      +'&bbox='+MX0+','+MY0+','+MX1+','+MY1+'&width='+(W*SC)+'&height='+Math.round(H*SC)
+      +'&srs=EPSG:3857&format=image/png';
+    const b=await createImageBitmap(await (await fetch(u)).blob());
+    const off=new OffscreenCanvas(W*SC,Math.round(H*SC)), octx=off.getContext('2d');
+    octx.drawImage(b,0,0);
+    const img=octx.getImageData(0,0,off.width,off.height), d=img.data;
+    const F=[[104,171,99],[28,99,48],[181,202,143]];
+    for(let i=0;i<d.length;i+=4){
+      let keep=false;
+      for(const [r0,g0,b0] of F)
+        if(Math.abs(d[i]-r0)<14&&Math.abs(d[i+1]-g0)<14&&Math.abs(d[i+2]-b0)<14){ keep=true; break; }
+      if(keep){ d[i]=46; d[i+1]=140; d[i+2]=70; d[i+3]=185; }
+      else d[i+3]=0;
+    }
+    octx.putImageData(img,0,0);
+    ctx.save(); clipCtx(ctx,SC);
+    ctx.drawImage(off,0,0);
+    ctx.restore();
+    loadTxt.textContent='';
+  }catch(e){ loadTxt.textContent='land cover unavailable'; }
+}
+
+setYear(1492);
+terrain(); woods();
+window.__state=()=>({year, layers:{...layers}, counties:ST.counties.length,
+  rivers:ST.rivers.length, lakes:ST.lakes.length, nations:HIST.nations.length,
+  events:HIST.events.length, eras:HIST.eras.length,
+  visEvents:HIST.events.filter(e=>e.y<=year).length, pinned, terDone, wooDone});
+</script>
+</body>
+</html>
