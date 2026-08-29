@@ -629,18 +629,16 @@ el.addEventListener('pointerover',e=>{
 });
 
 // photos: each node's Wikipedia article summary thumbnail, first
-// candidate with a thumbnail wins; no thumbnail means no photo
-async function thumb(titles,big){
+// candidate with a thumbnail wins; no thumbnail means no photo. The
+// thumbnail URL is used exactly as served: rewriting its size breaks it.
+async function thumb(titles){
   for(const t of titles){
     try{
       const r=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'
         +encodeURIComponent(t.replace(/ /g,'_')));
       if(!r.ok) continue;
       const j=await r.json();
-      if(!j.thumbnail) continue;
-      return big&&j.originalimage&&j.originalimage.width>=480
-        ?j.thumbnail.source.replace(/\\/(\\d+)px-/,'/480px-')
-        :j.thumbnail.source;
+      if(j.thumbnail) return j.thumbnail.source;
     }catch(e){}
   }
   return null;
@@ -649,7 +647,7 @@ async function loadImages(){
   const all=[];
   (function walk(n){ if(n.w) all.push(n); if(n.k) n.k.forEach(walk); })(ROOT);
   await Promise.all(all.map(async n=>{
-    const u=await thumb(n.w,true);
+    const u=await thumb(n.w);
     if(u) IMG[n.n]=u;
   }));
   render();
