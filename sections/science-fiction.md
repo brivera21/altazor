@@ -6,8 +6,10 @@ title: Science Fiction
 
 [A Canon of Science Fiction](scifi-canon.html)
 
-[Hard Science Fiction](hard-scifi.html). The books that keep the physics honest, from Verne forward, on the same kind of timeline across six eras of the subgenre.
+[Hard Science Fiction Timeline](hard-scifi-timeline.html). Works of hard science fiction from Verne to Project Hail Mary on a zoomable timeline, colored by the science they lean on, with real milestones underneath.
 
 ## Science Fiction Concepts
 
-[O'Neill Ring: A Generation Starship](oneill-ring.html). A rotating ring habitat spinning in real time: radius and spin set the gravity, the comfort bands come from the NASA studies, and a voyage panel counts the years and generations to the nearby stars.
+[O'Neill Ring](oneill-ring.html). A rotating habitat seen along its axis and from inside: radius and spin set the artificial gravity, rim speed and comfort zone, and a dropped ball traces the Coriolis curve.
+
+[Generation Starship](generation-starship.html). A star, a cruise speed and an acceleration phase give the generations born aboard, the energy the trip costs, the minimum crew, and whether waiting for faster ships would beat leaving now.
