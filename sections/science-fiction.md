@@ -17,3 +17,5 @@ title: Science Fiction
 [Space Elevator](space-elevator.html)
 
 [The Mars of Red Mars](red-mars.html)
+
+[The Solar System of 2312](solar-system-2312.html)
