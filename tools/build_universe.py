@@ -50,12 +50,6 @@ BARYONS = [
      "highly ionized oxygen and broad Lyman-alpha absorbers. About 25 percent, "
      "give or take 8.",
      "Shull, Smith and Danforth 2012"),
-    ("gal", "Galaxies", 7, "#31d67a", False,
-     "Stars and gas in galaxies",
-     "All the stars and the interstellar gas of all the galaxies: about 7 "
-     "percent of the ordinary matter, give or take 2. The stars alone are "
-     "much less than that.",
-     "Shull, Smith and Danforth 2012"),
     ("cgm", "Circumgalactic gas", 5, "#2fc6a6", False,
      "The circumgalactic medium",
      "The gas halo around each galaxy, fuel for future star formation. About "
@@ -79,20 +73,71 @@ BARYONS = [
      "dispersion of fast radio bursts measured all the ionized gas along "
      "their paths and found the full amount.",
      "Shull 2012; Macquart and others 2020"),
+    ("gal", "Galaxies", 7, "#31d67a", False,
+     "Stars and gas in galaxies",
+     "All the stars and the interstellar gas of all the galaxies: about 7 "
+     "percent of the ordinary matter, give or take 2. The bar below opens "
+     "this segment into what a large galaxy is made of.",
+     "Shull, Smith and Danforth 2012"),
+]
+
+# The ordinary matter of one large galaxy, with the Milky Way as the
+# exemplar: percentages of its baryonic mass, about 6.3e10 solar masses.
+# Stars 5e10 (Bland-Hawthorn and Gerhard 2016), remnant share 18 percent of
+# stellar mass (Fukugita and Peebles 2004), HI 8e9 (Kalberla and Kerp 2009),
+# H2 1.2e9 (Miville-Deschenes and others 2017), helium scaled onto the gas,
+# dust about 1e8 (Galliano and others 2018), Sgr A* 4.3e6 (GRAVITY 2022).
+GALAXY = [
+    ("stars", "Living stars", 65, "#31d67a", False,
+     "Living stars",
+     "Stars still burning, from red dwarfs to supergiants: about 65 percent "
+     "of the Milky Way's ordinary matter, some 40 billion solar masses of "
+     "the 50 billion in stars overall.",
+     "Bland-Hawthorn and Gerhard 2016; Fukugita and Peebles 2004"),
+    ("rem", "Stellar remnants", 14, "#7fd6a8", False,
+     "Stellar remnants",
+     "Dead stars: white dwarfs hold most of it, with neutron stars and "
+     "stellar black holes the rest, about 18 percent of the stellar mass.",
+     "Fukugita and Peebles 2004"),
+    ("atom", "Atomic gas", 18, "#a3e635", False,
+     "Atomic gas",
+     "Neutral hydrogen spread through the disk, about 8 billion solar "
+     "masses of hydrogen plus its share of helium, the raw reservoir for "
+     "star formation.",
+     "Kalberla and Kerp 2009"),
+    ("mol", "Molecular gas", 2.7, "#d3f261", False,
+     "Molecular gas",
+     "Cold dense clouds of molecular hydrogen, about 1.2 billion solar "
+     "masses plus helium: the part of the gas that actually collapses into "
+     "new stars.",
+     "Miville-Deschenes, Murray and Lee 2017"),
+    ("dust", "Dust", 0.2, "#e8c78f", False,
+     "Dust",
+     "Grains of silicate and carbon mixed through the gas at about one part "
+     "in a hundred: a rounding error by mass, and the reason the Milky Way "
+     "has dark lanes.",
+     "Galliano, Galametz and Jones 2018"),
+    ("smbh", "Central black hole", 0.007, "#8b93a7", False,
+     "Sagittarius A*",
+     "The supermassive black hole at the center, 4.3 million solar masses: "
+     "drawn here as a hairline, because for all its fame it is a hundred "
+     "thousandth of the galaxy's ordinary matter.",
+     "GRAVITY Collaboration 2022"),
 ]
 
 assert abs(sum(p for *_x, p, _c, _h, _t, _b, _s in
                [(k, l, p, c, h, t, b, s) for k, l, p, c, h, t, b, s in TOP]) - 99.8) < 0.5
 assert abs(sum(p for _k, _l, p, *_r in BARYONS) - 99.7) < 0.5
+assert abs(sum(p for _k, _l, p, *_r in GALAXY) - 99.9) < 0.5
+assert BARYONS[-1][0] == "gal", "Galaxies must sit at the right end"
 
-top_js = json.dumps([{"k": k, "l": l, "p": p, "c": c, "h": h,
-                      "t": t, "b": b, "s": s}
-                     for k, l, p, c, h, t, b, s in TOP],
-                    separators=(",", ":"))
-bar_js = json.dumps([{"k": k, "l": l, "p": p, "c": c, "h": h,
-                      "t": t, "b": b, "s": s}
-                     for k, l, p, c, h, t, b, s in BARYONS],
-                    separators=(",", ":"))
+def _js(rows):
+    return json.dumps([{"k": k, "l": l, "p": p, "c": c, "h": h,
+                        "t": t, "b": b, "s": s}
+                       for k, l, p, c, h, t, b, s in rows],
+                      separators=(",", ":"))
+
+top_js, bar_js, gal_js = _js(TOP), _js(BARYONS), _js(GALAXY)
 
 HTML = """<!DOCTYPE html>
 <html lang="en">
@@ -153,9 +198,14 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 </div>
 <p class="note">The top bar is everything there is, by present-day energy
 content. Ordinary matter, the thin amber sliver, opens below into where its
-atoms actually sit. A segment under the cursor fills the card. Photons of the
-microwave background add about five thousandths of a percent and the known
-neutrino mass roughly a tenth of a percent; both are too thin to draw.</p>
+atoms actually sit, and the galaxies segment opens in turn into what one
+large galaxy is made of, with the Milky Way as the exemplar. A segment under
+the cursor fills the card.</p>
+<p class="note">Photons of the microwave background add about five
+thousandths of a percent and the known neutrino mass roughly a tenth of a
+percent; both are too thin to draw. The bottom bar counts only ordinary
+matter: the galaxy as a whole sits in a dark matter halo that outweighs
+everything drawn there by more than ten to one.</p>
 <h2 class="refh">References</h2>
 <div class="refs">
 <p>Planck Collaboration. (2020). Planck 2018 results. VI. Cosmological
@@ -174,12 +224,35 @@ from localized fast radio bursts. <i>Nature, 581</i>, 391-395.
 <p>Particle Data Group. (2024). Cosmological parameters. In <i>Review of
 particle physics</i>.
 <a href="https://pdg.lbl.gov/2024/reviews/rpp2024-rev-cosmological-parameters.pdf">https://pdg.lbl.gov/2024/reviews/rpp2024-rev-cosmological-parameters.pdf</a></p>
+<p>Bland-Hawthorn, J., &amp; Gerhard, O. (2016). The galaxy in context:
+Structural, kinematic, and integrated properties. <i>Annual Review of
+Astronomy and Astrophysics, 54</i>, 529-596.
+<a href="https://doi.org/10.1146/annurev-astro-081915-023441">https://doi.org/10.1146/annurev-astro-081915-023441</a></p>
+<p>Fukugita, M., &amp; Peebles, P. J. E. (2004). The cosmic energy inventory.
+<i>The Astrophysical Journal, 616</i>(2), 643-668.
+<a href="https://doi.org/10.1086/425155">https://doi.org/10.1086/425155</a></p>
+<p>Kalberla, P. M. W., &amp; Kerp, J. (2009). The Hi distribution of the Milky
+Way. <i>Annual Review of Astronomy and Astrophysics, 47</i>, 27-61.
+<a href="https://doi.org/10.1146/annurev-astro-082708-101823">https://doi.org/10.1146/annurev-astro-082708-101823</a></p>
+<p>Miville-Desch&#234;nes, M.-A., Murray, N., &amp; Lee, E. J. (2017). Physical
+properties of molecular clouds for the entire Milky Way disk. <i>The
+Astrophysical Journal, 834</i>(1), 57.
+<a href="https://doi.org/10.3847/1538-4357/834/1/57">https://doi.org/10.3847/1538-4357/834/1/57</a></p>
+<p>Galliano, F., Galametz, M., &amp; Jones, A. P. (2018). The interstellar
+dust properties of nearby galaxies. <i>Annual Review of Astronomy and
+Astrophysics, 56</i>, 673-713.
+<a href="https://doi.org/10.1146/annurev-astro-081817-051900">https://doi.org/10.1146/annurev-astro-081817-051900</a></p>
+<p>GRAVITY Collaboration. (2022). Mass distribution in the Galactic Center
+based on interferometric astrometry of multiple stellar orbits.
+<i>Astronomy &amp; Astrophysics, 657</i>, L12.
+<a href="https://doi.org/10.1051/0004-6361/202142465">https://doi.org/10.1051/0004-6361/202142465</a></p>
 </div>
 </div>
 <script>
-const TOP=__TOP__, BAR=__BAR__;
-const W=980,H=560;
-const T={x:20,y:60,w:940,h:110}, B={x:20,y:330,w:940,h:110};
+const TOP=__TOP__, BAR=__BAR__, GAL=__GAL__;
+const W=980,H=850;
+const T={x:20,y:60,w:940,h:110}, B={x:20,y:330,w:940,h:110},
+      G={x:20,y:640,w:940,h:110};
 
 const el=document.getElementById('diagram');
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
@@ -200,50 +273,65 @@ function seg(row,d,x,w,i,list){
   s+='</g>';
   return s;
 }
+function lanes(row,list){
+  // labels under a bar for its narrow segments, each dropped to the first
+  // lane where it fits
+  let s='', x=row.x; const ends=[];
+  const tot=list.reduce((a,d)=>a+d.p,0);
+  for(const d of list){
+    const w=d.p/tot*row.w;
+    if(w<=90){
+      const tw=d.l.length*6.4+10;
+      const lx=Math.min(row.x+row.w-tw/2,Math.max(row.x+tw/2,x+w/2));
+      let lane=0;
+      while(lane<ends.length && ends[lane]>lx-tw/2) lane++;
+      ends[lane]=lx+tw/2+10;
+      const ly=row.y+row.h+22+lane*19;
+      s+=`<g data-k="${d.k}" style="cursor:default">
+        <line x1="${x+w/2}" y1="${row.y+row.h+2}" x2="${lx}" y2="${ly-11}" stroke="${d.c}" stroke-width="1" opacity="0.7"/>
+        <text x="${lx}" y="${ly}" text-anchor="middle" font-size="12" fill="${d.c}">${esc(d.l)}</text></g>`;
+    }
+    x+=w;
+  }
+  return s;
+}
 function render(){
   let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" id="uvsvg">`;
   s+=`<rect width="${W}" height="${H}" fill="#121212"/>`;
   s+=`<text x="${T.x}" y="${T.y-18}" font-size="14" fill="#9a9a9a">Everything, by energy content today</text>`;
   s+=`<text x="${B.x}" y="${B.y-18}" font-size="14" fill="#9a9a9a">The ordinary matter alone, atom by atom</text>`;
+  s+=`<text x="${G.x}" y="${G.y-18}" font-size="14" fill="#9a9a9a">The ordinary matter of one large galaxy, the Milky Way</text>`;
   // the wedge from the sliver to the second bar
   const obw=TOP[2].p/100*T.w, obx=T.x+(TOP[0].p+TOP[1].p)/100*T.w;
   s+=`<path d="M${obx},${T.y+T.h} L${obx+obw},${T.y+T.h} L${B.x+B.w},${B.y} L${B.x},${B.y} Z"
     fill="#ffb02e" fill-opacity="0.07" stroke="#ffb02e" stroke-opacity="0.35" stroke-width="1"/>`;
+  // the wedge from the galaxies segment, at the right end, to the third bar
+  const btot=BAR.reduce((a,d)=>a+d.p,0);
+  const gw=BAR[BAR.length-1].p/btot*B.w, gx=B.x+B.w-gw;
+  s+=`<path d="M${gx},${B.y+B.h} L${gx+gw},${B.y+B.h} L${G.x+G.w},${G.y} L${G.x},${G.y} Z"
+    fill="#31d67a" fill-opacity="0.07" stroke="#31d67a" stroke-opacity="0.35" stroke-width="1"/>`;
   let x=T.x;
   for(const d of TOP){ const w=d.p/100*T.w; s+=seg(T,d,x,w); x+=w; }
   x=B.x;
-  const tot=BAR.reduce((a,d)=>a+d.p,0);
-  for(const d of BAR){ const w=d.p/tot*B.w; s+=seg(B,d,x,w); x+=w; }
-  // labels under the second bar for the narrow segments, each dropped to
-  // the first lane where it fits
-  x=B.x; const ends=[];
-  for(const d of BAR){
-    const w=d.p/tot*B.w;
-    if(w<=90){
-      const tw=d.l.length*6.4+10;
-      const lx=Math.min(B.x+B.w-tw/2,Math.max(B.x+tw/2,x+w/2));
-      let lane=0;
-      while(lane<ends.length && ends[lane]>lx-tw/2) lane++;
-      ends[lane]=lx+tw/2+10;
-      const ly=B.y+B.h+22+lane*19;
-      s+=`<g data-k="${d.k}" style="cursor:default">
-        <line x1="${x+w/2}" y1="${B.y+B.h+2}" x2="${lx}" y2="${ly-11}" stroke="${d.c}" stroke-width="1" opacity="0.7"/>
-        <text x="${lx}" y="${ly}" text-anchor="middle" font-size="12" fill="${d.c}">${esc(d.l)}</text></g>`;
-    }
-    x+=w;
-  }
+  for(const d of BAR){ const w=d.p/btot*B.w; s+=seg(B,d,x,w); x+=w; }
+  x=G.x;
+  const gtot=GAL.reduce((a,d)=>a+d.p,0);
+  for(const d of GAL){ const w=d.p/gtot*G.w; s+=seg(G,d,x,w); x+=w; }
+  s+=lanes(B,BAR)+lanes(G,GAL);
   s+='</svg>';
   el.innerHTML=s;
 }
 function show(k){
-  const d=TOP.find(t=>t.k===k)||BAR.find(t=>t.k===k);
+  const d=TOP.find(t=>t.k===k)||BAR.find(t=>t.k===k)||GAL.find(t=>t.k===k);
   if(!d) return;
   document.getElementById('pct').textContent=d.p+'%';
   document.getElementById('pct').style.color=d.c;
   document.getElementById('segTxt').textContent=d.t;
   document.getElementById('bodyTxt').textContent=d.b;
   document.getElementById('srcTxt').textContent=
-    d.s+(TOP.includes(d)?' \\u00b7 share of everything':' \\u00b7 share of the ordinary matter');
+    d.s+(TOP.includes(d)?' \\u00b7 share of everything'
+        :BAR.includes(d)?' \\u00b7 share of the ordinary matter'
+        :' \\u00b7 share of the galaxy\\u2019s ordinary matter');
 }
 el.addEventListener('pointerover',e=>{
   const g=e.target.closest('[data-k]');
@@ -262,7 +350,8 @@ show('de');
 </html>
 """
 
-html = HTML.replace("__TOP__", top_js).replace("__BAR__", bar_js)
+html = (HTML.replace("__TOP__", top_js).replace("__BAR__", bar_js)
+        .replace("__GAL__", gal_js))
 OUT.write_text(html, encoding="utf-8")
 print(f"wrote {OUT} ({len(html):,} bytes): {len(TOP)} components, "
-      f"{len(BARYONS)} baryon phases")
+      f"{len(BARYONS)} baryon phases, {len(GALAXY)} galaxy parts")
