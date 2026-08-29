@@ -124,10 +124,11 @@ COPY_JS = """() => {
   return out;
 }"""
 
-# Pages ported whole from the lab site's Digital Concepts keep that
-# library's fuller notes and are not held to the Altazor copy rule.
+# Pages in the Digital Concepts style (ported from the lab site, or written
+# to match them) keep that library's fuller notes and prose sections and are
+# not held to the Altazor copy rule.
 PORTED = {"oneill-ring.html", "generation-starship.html",
-          "hard-scifi-timeline.html"}
+          "hard-scifi-timeline.html", "space-elevator.html"}
 pages = sorted(p.name for p in ROOT.glob("*.html") if p.name not in PORTED)
 fails, notes = [], []
 
