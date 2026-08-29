@@ -42,6 +42,14 @@ CASES = {
                " return names[names.length-1]==='Humans' &&"
                " names[names.length-2]==='Chimpanzees and bonobos'; })()"),
         probe_name="humans sit beside the chimpanzees and bonobos"),
+    "hominins.html": dict(tips=20, doi="10.1038/nature22336",
+        stub="Homo sapiens",
+        probe=("(() => { const f=(n)=>n.n==='Us and our closest kin'?n:(n.k||[]).map(f).find(Boolean);"
+               " const u=f(ROOT); if(!u) return false;"
+               " const nd=u.k[0], sap=u.k[1];"
+               " return sap.n==='Homo sapiens' && nd.k.length===2 &&"
+               " nd.k[0].n==='Homo neanderthalensis' && nd.k[1].n==='Denisovans'; })()"),
+        probe_name="sapiens is sister to the Neanderthal-Denisovan pair"),
 }
 STUB = ("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' "
         "width='8' height='8'><rect width='8' height='8' fill='green'/></svg>")

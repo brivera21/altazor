@@ -373,8 +373,163 @@ PRIMATES = N(
     ])
 
 
+HOMININS = N(
+    "Hominini",
+    "The human tribe: every species closer to us than to the chimpanzees, "
+    "from the split with the Pan line roughly seven million years ago. "
+    "Polytomies mark relationships the fossils leave unresolved.",
+    "Smithsonian Human Origins; Wood and Boyle 2016",
+    w=["Hominini"],
+    kids=[
+        N("Sahelanthropus tchadensis",
+          "A skull from Chad near the age of the chimpanzee split, with a "
+          "forward-placed foramen magnum hinting at upright posture: the "
+          "oldest candidate hominin, and a contested one.",
+          "Brunet and others 2002", count="~7 to 6 Ma",
+          w=["Sahelanthropus"]),
+        N("Ardipithecus ramidus",
+          "Ardi: a woodland biped that still gripped branches with an "
+          "opposable big toe, described from a remarkable partial skeleton.",
+          "White and others 2009", count="~4.4 Ma",
+          w=["Ardipithecus"]),
+        N("Australopithecus",
+          "The small-brained committed bipeds of Africa, the grade from "
+          "which both Paranthropus and Homo arise; which species is our "
+          "actual ancestor stays unresolved.",
+          "Smithsonian Human Origins", kids=[
+            N("Australopithecus anamensis",
+              "The earliest australopith, shin bones built for walking.",
+              "Smithsonian Human Origins", count="~4.2 to 3.8 Ma",
+              w=["Australopithecus anamensis"]),
+            N("Australopithecus afarensis",
+              "Lucy's species, walking upright at Laetoli while keeping a "
+              "chimp-sized brain.",
+              "Smithsonian Human Origins", count="~3.85 to 2.95 Ma",
+              w=["Australopithecus afarensis", "Lucy (Australopithecus)"]),
+            N("Australopithecus africanus",
+              "The Taung Child's species, southern Africa's gracile "
+              "australopith.",
+              "Smithsonian Human Origins", count="~3.3 to 2.1 Ma",
+              w=["Australopithecus africanus"]),
+            N("Australopithecus sediba",
+              "A late South African species mixing australopith and "
+              "Homo-like traits, proposed and disputed as close to our "
+              "genus's root.",
+              "Berger and others 2010", count="~1.98 Ma",
+              w=["Australopithecus sediba"]),
+            N("Paranthropus",
+              "The robust side branch: massive jaws and grinding teeth for "
+              "hard and fibrous food. A long-lived experiment that left no "
+              "descendants.",
+              "Wood and Boyle 2016", w=["Paranthropus"], kids=[
+                N("Paranthropus aethiopicus",
+                  "The earliest robust form, known best from the Black "
+                  "Skull.", "Smithsonian Human Origins",
+                  count="~2.7 to 2.3 Ma", w=["Paranthropus aethiopicus"]),
+                N("Paranthropus boisei",
+                  "Nutcracker Man of East Africa, the most extreme chewing "
+                  "apparatus of any hominin.", "Smithsonian Human Origins",
+                  count="~2.3 to 1.2 Ma", w=["Paranthropus boisei"]),
+                N("Paranthropus robustus",
+                  "The South African robust species.",
+                  "Smithsonian Human Origins", count="~1.8 to 1.2 Ma",
+                  w=["Paranthropus robustus"]),
+              ]),
+            N("Homo",
+              "The large-brained, tool-dependent genus. Its root among the "
+              "australopiths and the rank of its earliest species remain "
+              "argued.", "Wood and Boyle 2016", w=["Homo"], kids=[
+                N("Homo habilis",
+                  "Handy Man, named for the Oldowan tools found with it; "
+                  "small-bodied, and by some accounts still an "
+                  "australopith.", "Smithsonian Human Origins",
+                  count="~2.4 to 1.4 Ma", w=["Homo habilis"]),
+                N("Homo rudolfensis",
+                  "A larger, flatter-faced early Homo known from Lake "
+                  "Turkana; one skull, many arguments.",
+                  "Smithsonian Human Origins", count="~1.9 to 1.8 Ma",
+                  w=["Homo rudolfensis"]),
+                N("Later Homo",
+                  "The long-legged striders that left Africa.",
+                  "Smithsonian Human Origins", kids=[
+                    N("Homo erectus",
+                      "The first world traveler: modern body proportions, "
+                      "fire and handaxes, from Africa to Java over nearly "
+                      "two million years.", "Smithsonian Human Origins",
+                      count="~1.89 Ma to 110 ka", w=["Homo erectus"]),
+                    N("Homo floresiensis",
+                      "The hobbit of Flores, a meter tall with a tiny "
+                      "brain, likely an isolated dwarfed offshoot of early "
+                      "Homo.", "Brown and others 2004",
+                      count="~100 to 50 ka", w=["Homo floresiensis"]),
+                    N("Homo luzonensis",
+                      "A second island species, from Callao Cave in the "
+                      "Philippines, mixing modern and australopith-like "
+                      "traits.", "Detroit and others 2019",
+                      count="~67 to 50 ka", w=["Homo luzonensis"]),
+                    N("Homo naledi",
+                      "A small-brained species from the Rising Star cave "
+                      "system, surprisingly young for its anatomy.",
+                      "Berger and others 2015; Dirks and others 2017",
+                      count="~335 to 236 ka", w=["Homo naledi"]),
+                    N("The heidelbergensis grade",
+                      "The big-brained middle Pleistocene humans from whom "
+                      "the last three species descend.",
+                      "Smithsonian Human Origins", kids=[
+                        N("Homo antecessor",
+                          "Pioneer of Atapuerca, Spain, with a "
+                          "surprisingly modern face; close to the last "
+                          "common ancestor of the final three.",
+                          "Smithsonian Human Origins",
+                          count="~1.2 to 0.8 Ma", w=["Homo antecessor"]),
+                        N("Homo heidelbergensis",
+                          "The likely ancestor grade of Neanderthals, "
+                          "Denisovans and us: hearths, wooden spears and "
+                          "big-game hunting.", "Smithsonian Human Origins",
+                          count="~700 to 200 ka",
+                          w=["Homo heidelbergensis"]),
+                        N("Us and our closest kin",
+                          "Three species so close they interbred; a tree "
+                          "cannot draw those crossings, but living human "
+                          "genomes record them.",
+                          "Green and others 2010; Reich and others 2010",
+                          kids=[
+                            N("Neanderthals and Denisovans",
+                              "The Eurasian sister pair.",
+                              "Reich and others 2010", kids=[
+                                N("Homo neanderthalensis",
+                                  "Cold-adapted Eurasians with brains as "
+                                  "large as ours, burying their dead; one "
+                                  "to two percent of most living genomes "
+                                  "outside Africa is theirs.",
+                                  "Green and others 2010",
+                                  count="~400 to 40 ka", w=["Neanderthal"]),
+                                N("Denisovans",
+                                  "Known mostly from DNA in a Siberian "
+                                  "cave and a Tibetan jaw; their genes "
+                                  "help Tibetans live at altitude.",
+                                  "Reich and others 2010",
+                                  count="~200 to 30 ka", w=["Denisovan"]),
+                              ]),
+                            N("Homo sapiens",
+                              "The one survivor, in Africa by about "
+                              "300,000 years ago at Jebel Irhoud and "
+                              "everywhere since.",
+                              "Hublin and others 2017", hl=True,
+                              count="~300 ka to now",
+                              w=["Homo sapiens", "Human"]),
+                          ]),
+                      ]),
+                  ]),
+              ]),
+          ]),
+    ])
+
+
 IMG_NOTE = (" Each living tip carries the photograph from its group's "
             "Wikipedia article, fetched at view time.")
+HOM_IMG_NOTE = (" Each species carries the photograph from its Wikipedia "
+                "article, fetched at view time.")
 
 PAGES = [
     ("tree-of-life.html", "Tree of Life", TREE_OF_LIFE,
@@ -490,6 +645,60 @@ PAGES = [
       ("Images: the linked group's Wikipedia article thumbnail, fetched at "
        "view time; each is credited on its article page.",
        "https://en.wikipedia.org/")]),
+    ("hominins.html", "Hominins", HOMININS,
+     "The human tribe from the chimpanzee split to the present: the "
+     "australopiths, the robust Paranthropus side branch, and every named "
+     "branch of Homo down to the three that overlapped last, with fossil "
+     "date ranges beside each species (Ma, millions of years ago; ka, "
+     "thousands). Polytomies mark relationships the fossils leave "
+     "unresolved, and the interbreeding among Neanderthals, Denisovans and "
+     "Homo sapiens, which a tree cannot draw, lives in the cards. A node "
+     "under the cursor fills the card." + HOM_IMG_NOTE,
+     [("Smithsonian National Museum of Natural History. (n.d.). Human "
+       "origins: Species. Human Origins Program.",
+       "https://humanorigins.si.edu/evidence/human-fossils/species"),
+      ("Wood, B., & Boyle, E. K. (2016). Hominin taxic diversity: Fact or "
+       "fantasy? <i>American Journal of Physical Anthropology, 159</i>"
+       "(S61), 37-78.", "https://doi.org/10.1002/ajpa.22902"),
+      ("Brunet, M., et al. (2002). A new hominid from the Upper Miocene of "
+       "Chad, Central Africa. <i>Nature, 418</i>, 145-151.",
+       "https://doi.org/10.1038/nature00879"),
+      ("White, T. D., Asfaw, B., Beyene, Y., Haile-Selassie, Y., Lovejoy, "
+       "C. O., Suwa, G., & WoldeGabriel, G. (2009). Ardipithecus ramidus "
+       "and the paleobiology of early hominids. <i>Science, 326</i>(5949), "
+       "64-86.", "https://doi.org/10.1126/science.1175802"),
+      ("Berger, L. R., de Ruiter, D. J., Churchill, S. E., Schmid, P., "
+       "Carlson, K. J., Dirks, P. H. G. M., & Kibii, J. M. (2010). "
+       "Australopithecus sediba: A new species of Homo-like australopith "
+       "from South Africa. <i>Science, 328</i>(5975), 195-204.",
+       "https://doi.org/10.1126/science.1184944"),
+      ("Brown, P., Sutikna, T., Morwood, M. J., Soejono, R. P., Jatmiko, "
+       "Saptomo, E. W., & Due, R. A. (2004). A new small-bodied hominin "
+       "from the Late Pleistocene of Flores, Indonesia. <i>Nature, "
+       "431</i>, 1055-1061.", "https://doi.org/10.1038/nature02999"),
+      ("Detroit, F., Mijares, A. S., Corny, J., Daver, G., Zanolli, C., "
+       "Dizon, E., Robles, E., Grun, R., & Piper, P. J. (2019). A new "
+       "species of Homo from the Late Pleistocene of the Philippines. "
+       "<i>Nature, 568</i>, 181-186.",
+       "https://doi.org/10.1038/s41586-019-1067-9"),
+      ("Berger, L. R., et al. (2015). Homo naledi, a new species of the "
+       "genus Homo from the Dinaledi Chamber, South Africa. <i>eLife, "
+       "4</i>, e09560.", "https://doi.org/10.7554/eLife.09560"),
+      ("Dirks, P. H. G. M., et al. (2017). The age of Homo naledi and "
+       "associated sediments in the Rising Star Cave, South Africa. "
+       "<i>eLife, 6</i>, e24231.", "https://doi.org/10.7554/eLife.24231"),
+      ("Green, R. E., et al. (2010). A draft sequence of the Neandertal "
+       "genome. <i>Science, 328</i>(5979), 710-722.",
+       "https://doi.org/10.1126/science.1188021"),
+      ("Reich, D., et al. (2010). Genetic history of an archaic hominin "
+       "group from Denisova Cave in Siberia. <i>Nature, 468</i>, "
+       "1053-1060.", "https://doi.org/10.1038/nature09710"),
+      ("Hublin, J.-J., et al. (2017). New fossils from Jebel Irhoud, "
+       "Morocco and the pan-African origin of Homo sapiens. <i>Nature, "
+       "546</i>, 289-292.", "https://doi.org/10.1038/nature22336"),
+      ("Images: the linked species' Wikipedia article thumbnail, fetched "
+       "at view time; each is credited on its article page.",
+       "https://en.wikipedia.org/")]),
 ]
 
 
@@ -588,8 +797,12 @@ function draw(n){
   }
   let lab;
   if(n.k){
-    lab=`<text x="${x+7}" y="${n.y-7}" font-size="12.5"
-      fill="${n.hl?'var(--hl)':'#9a9a9a'}">${esc(n.n)}</text>`;
+    lab = n.depth===0
+      ? `<text x="${x+7}" y="${n.y-7}" font-size="12.5"
+          fill="${n.hl?'var(--hl)':'#9a9a9a'}">${esc(n.n)}</text>`
+      : `<text x="${x-8}" y="${n.y+4}" text-anchor="end" font-size="12.5"
+          fill="${n.hl?'var(--hl)':'#9a9a9a'}" stroke="#121212"
+          stroke-width="3" paint-order="stroke">${esc(n.n)}</text>`;
   } else {
     const u=IMG[n.n], tx=u?x+16+TH:x+9;
     lab=(u?`<image href="${u}" x="${x+10}" y="${n.y-TH/2}" width="${TH}"
@@ -679,7 +892,9 @@ XNAV = {
                      ' <a href="mammals.html">Mammals</a>'),
     "mammals.html": (' <a href="animals.html">Animals</a>'
                      ' <a href="primates.html">Primates</a>'),
-    "primates.html": ' <a href="mammals.html">Mammals</a>',
+    "primates.html": (' <a href="mammals.html">Mammals</a>'
+                      ' <a href="hominins.html">Hominins</a>'),
+    "hominins.html": ' <a href="primates.html">Primates</a>',
 }
 
 for fname, title, data, note, refs in PAGES:
