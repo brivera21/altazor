@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mammals · Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff; --hl:#31d67a; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; margin-right:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 6px; font-size:26px; }
+.stage { display:flex; gap:22px; align-items:flex-start; }
+#diagram { flex:1 1 640px; min-width:0; }
+#diagram svg { width:100%; height:auto; display:block; user-select:none; }
+.side { flex:0 0 300px; position:sticky; top:16px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:16px; }
+#nameTxt { font-weight:700; font-size:17px; }
+#cntTxt { color:var(--hl); font-size:13px; margin-top:2px; }
+#bodyTxt { color:var(--muted); font-size:13.5px; line-height:1.55; margin-top:8px; }
+#srcTxt { color:var(--muted); font-size:12px; margin-top:10px;
+  border-top:1px solid var(--line); padding-top:8px; }
+.note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+.refs p { margin:0 0 8px; }
+.refs a { color:var(--accent); }
+h2.refh { font-size:15px; margin:26px 0 8px; }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="library.html">&larr; Library</a> <a href="tree-of-life.html">Tree of Life</a> <a href="primates.html">Primates</a></nav>
+</header>
+<h1>Mammals</h1>
+<div class="stage">
+  <div id="diagram"></div>
+  <div class="side"><div class="card">
+    <div id="nameTxt">A group under the cursor lands here</div>
+    <div id="cntTxt"></div>
+    <div id="bodyTxt"></div>
+    <div id="srcTxt"></div>
+  </div></div>
+</div>
+<p class="note">The main divisions of the living mammals, from the deepest split at the left to orders at the right; branch lengths carry no time information, and species counts are the Mammal Diversity Database's, rounded. The root inside the placentals is drawn with Afrotheria branching first, one of two arrangements the genomes still allow. A node under the cursor fills the card.</p>
+<h2 class="refh">References</h2>
+<div class="refs"><p>Burgin, C. J., Colella, J. P., Kahn, P. L., & Upham, N. S. (2018). How many species of mammals are there? <i>Journal of Mammalogy, 99</i>(1), 1-14.
+<a href="https://doi.org/10.1093/jmammal/gyx147">https://doi.org/10.1093/jmammal/gyx147</a></p>
+<p>Murphy, W. J., Eizirik, E., O'Brien, S. J., Madsen, O., Scally, M., Douady, C. J., Teeling, E., Ryder, O. A., Stanhope, M. J., de Jong, W. W., & Springer, M. S. (2001). Resolution of the early placental mammal radiation using Bayesian phylogenetics. <i>Science, 294</i>(5550), 2348-2351.
+<a href="https://doi.org/10.1126/science.1067179">https://doi.org/10.1126/science.1067179</a></p>
+<p>Upham, N. S., Esselstyn, J. A., & Jetz, W. (2019). Inferring the mammal tree: Species-level sets of phylogenies for questions in ecology, evolution, and conservation. <i>PLOS Biology, 17</i>(12), e3000494.
+<a href="https://doi.org/10.1371/journal.pbio.3000494">https://doi.org/10.1371/journal.pbio.3000494</a></p>
+<p>Mammal Diversity Database, American Society of Mammalogists. (2025).
+<a href="https://www.mammaldiversity.org/">https://www.mammaldiversity.org/</a></p>
+<p>Foley, N. M., et al. (2023). A genomic timescale for placental mammal evolution. <i>Science, 380</i>(6643), eabl8189.
+<a href="https://doi.org/10.1126/science.abl8189">https://doi.org/10.1126/science.abl8189</a></p></div>
+</div>
+<script>
+const ROOT={"n":"Mammalia","b":"Warm-blooded vertebrates with hair and milk: about 6,800 living species in 27 orders as counted by the Mammal Diversity Database.","s":"Mammal Diversity Database 2025","c":"~6,800 species","k":[{"n":"Monotremata","b":"The egg-laying mammals: the platypus and the echidnas, sole survivors of the deepest split.","s":"Burgin and others 2018","c":"5 species"},{"n":"Theria","b":"The live-bearing mammals, split between marsupials and placentals.","s":"Upham and others 2019","k":[{"n":"Marsupialia","b":"Mammals whose young finish developing in a pouch. Seven orders, most of them Australasian.","s":"Burgin and others 2018","c":"~380 species","k":[{"n":"Didelphimorphia","b":"The opossums of the Americas.","s":"Burgin and others 2018","c":"~111 species"},{"n":"Diprotodontia","b":"Kangaroos, wombats, possums and the koala: the big Australian radiation.","s":"Burgin and others 2018","c":"~155 species"},{"n":"Dasyuromorphia and others","b":"The carnivorous marsupials, bandicoots, the marsupial mole and the monito del monte: five smaller orders.","s":"Burgin and others 2018","c":"~113 species"}]},{"n":"Placentalia","b":"Mammals carried to term inside the mother: four great superorders that split as the continents did.","s":"Murphy and others 2001","c":"~6,400 species","k":[{"n":"Afrotheria","b":"The African root stock: elephants, manatees, hyraxes, aardvark, sengis and tenrecs.","s":"Murphy and others 2001"},{"n":"Xenarthra","b":"The South American originals: armadillos, sloths and anteaters.","s":"Murphy and others 2001"},{"n":"Euarchontoglires","b":"The rodents, rabbits, treeshrews, colugos and primates, humankind included.","s":"Murphy and others 2001","hl":true,"k":[{"n":"Rodentia","b":"Two in every five mammal species are rodents.","s":"Mammal Diversity Database 2025","c":"~2,750 species"},{"n":"Primates","b":"Lemurs to humans; the next diagram opens this branch.","s":"Mammal Diversity Database 2025","c":"~520 species","hl":true},{"n":"Lagomorpha and others","b":"Rabbits and hares, plus the treeshrews and colugos nearest the primates.","s":"Mammal Diversity Database 2025"}]},{"n":"Laurasiatheria","b":"The northern radiation: shrews, bats, carnivorans, pangolins, horses, and the even-toed ungulates including the whales.","s":"Murphy and others 2001","k":[{"n":"Chiroptera","b":"The bats, the only mammals with powered flight.","s":"Mammal Diversity Database 2025","c":"~1,490 species"},{"n":"Carnivora","b":"Cats, dogs, bears, seals and their kin.","s":"Mammal Diversity Database 2025","c":"~320 species"},{"n":"Artiodactyla","b":"The even-toed ungulates, with the whales and dolphins nested inside them.","s":"Mammal Diversity Database 2025","c":"~370 species"},{"n":"Eulipotyphla and others","b":"Shrews, moles and hedgehogs, plus pangolins and the horses, rhinos and tapirs.","s":"Mammal Diversity Database 2025"}]}]}]}]};
+const el=document.getElementById('diagram');
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+// layout: tips evenly spaced down the right, parents at the mean of their
+// children, x by depth
+const tips=[]; let maxd=0;
+(function walk(n,d){ n.depth=d; maxd=Math.max(maxd,d);
+  if(n.k) n.k.forEach(c=>walk(c,d+1)); else tips.push(n); })(ROOT,0);
+const RS=26, PADT=28, PADB=16, PADL=16, PADR=250;
+const W=980, H=PADT+PADB+RS*tips.length;
+tips.forEach((t,i)=>{ t.y=PADT+RS*(i+0.5); });
+(function place(n){ if(n.k){ n.k.forEach(place);
+  n.y=n.k.reduce((a,c)=>a+c.y,0)/n.k.length; } })(ROOT);
+const X=d=>PADL+ (W-PADL-PADR) * d/maxd;
+
+let idc=0; const byId={};
+function draw(n){
+  n.id='n'+(idc++); byId[n.id]=n;
+  const x=X(n.depth), col=n.hl?'var(--hl)':'#c9d1d9';
+  let s='';
+  if(n.k){
+    const x1=X(n.depth+1);
+    for(const c of n.k)
+      s+=`<path d="M${x},${n.y} V${c.y} H${x1}" fill="none"
+        stroke="#3d444d" stroke-width="1.6"/>`;
+    for(const c of n.k) s+=draw(c);
+  }
+  const lab=n.k?`<text x="${x+7}" y="${n.y-7}" font-size="12.5"
+      fill="${n.hl?'var(--hl)':'#9a9a9a'}">${esc(n.n)}</text>`
+    :`<text x="${x+9}" y="${n.y+4.5}" font-size="13.5" font-weight="${n.hl?700:400}"
+      fill="${col}">${esc(n.n)}${n.c?` <tspan fill="#6b7280" font-size="11.5" font-weight="400">${esc(n.c)}</tspan>`:''}</text>`;
+  s+=`<g data-id="${n.id}" style="cursor:default">
+    <circle cx="${x}" cy="${n.y}" r="${n.k?4:4.5}"
+      fill="${n.hl?'var(--hl)':(n.k?'#121212':'#58a6ff')}"
+      stroke="${n.hl?'var(--hl)':'#58a6ff'}" stroke-width="1.6"/>
+    <rect x="${x-10}" y="${n.y-12}" width="${n.k?Math.min(200,n.n.length*7+24):230}" height="24" fill="transparent"/>
+    ${lab}</g>`;
+  return s;
+}
+function render(){
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
+    id="treesvg">`+draw(ROOT)+'</svg>';
+}
+function show(id){
+  const n=byId[id]; if(!n) return;
+  document.getElementById('nameTxt').textContent=n.n;
+  document.getElementById('cntTxt').textContent=n.c||'';
+  document.getElementById('bodyTxt').textContent=n.b;
+  document.getElementById('srcTxt').textContent=n.s;
+}
+el.addEventListener('pointerover',e=>{
+  const g=e.target.closest('[data-id]');
+  if(g) show(g.getAttribute('data-id'));
+});
+render();
+show('n0');
+window.__tree=()=>({tips:tips.length, depth:maxd,
+  nodes:Object.keys(byId).length, h:H});
+</script>
+</body>
+</html>

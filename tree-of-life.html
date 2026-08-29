@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tree of Life · Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff; --hl:#31d67a; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; margin-right:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 6px; font-size:26px; }
+.stage { display:flex; gap:22px; align-items:flex-start; }
+#diagram { flex:1 1 640px; min-width:0; }
+#diagram svg { width:100%; height:auto; display:block; user-select:none; }
+.side { flex:0 0 300px; position:sticky; top:16px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:16px; }
+#nameTxt { font-weight:700; font-size:17px; }
+#cntTxt { color:var(--hl); font-size:13px; margin-top:2px; }
+#bodyTxt { color:var(--muted); font-size:13.5px; line-height:1.55; margin-top:8px; }
+#srcTxt { color:var(--muted); font-size:12px; margin-top:10px;
+  border-top:1px solid var(--line); padding-top:8px; }
+.note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+.refs p { margin:0 0 8px; }
+.refs a { color:var(--accent); }
+h2.refh { font-size:15px; margin:26px 0 8px; }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="library.html">&larr; Library</a> <a href="mammals.html">Mammals</a></nav>
+</header>
+<h1>Tree of Life</h1>
+<div class="stage">
+  <div id="diagram"></div>
+  <div class="side"><div class="card">
+    <div id="nameTxt">A group under the cursor lands here</div>
+    <div id="cntTxt"></div>
+    <div id="bodyTxt"></div>
+    <div id="srcTxt"></div>
+  </div></div>
+</div>
+<p class="note">The tree runs from the last universal common ancestor at the left to living groups at the right; branch lengths carry no time information. The eukaryotes are drawn where current evidence places them, beside the Asgard archaea inside the archaeal branch, which turns Woese's three domains into two; the cards say what each group is. A node under the cursor fills the card.</p>
+<h2 class="refh">References</h2>
+<div class="refs"><p>Woese, C. R., Kandler, O., & Wheelis, M. L. (1990). Towards a natural system of organisms: Proposal for the domains Archaea, Bacteria, and Eucarya. <i>Proceedings of the National Academy of Sciences, 87</i>(12), 4576-4579.
+<a href="https://doi.org/10.1073/pnas.87.12.4576">https://doi.org/10.1073/pnas.87.12.4576</a></p>
+<p>Hug, L. A., Baker, B. J., Anantharaman, K., Brown, C. T., Probst, A. J., Castelle, C. J., Butterfield, C. N., Hernsdorf, A. W., Amano, Y., Ise, K., Suzuki, Y., Dudek, N., Relman, D. A., Finstad, K. M., Amundson, R., Thomas, B. C., & Banfield, J. F. (2016). A new view of the tree of life. <i>Nature Microbiology, 1</i>, 16048.
+<a href="https://doi.org/10.1038/nmicrobiol.2016.48">https://doi.org/10.1038/nmicrobiol.2016.48</a></p>
+<p>Zaremba-Niedzwiedzka, K., Caceres, E. F., Saw, J. H., Backstrom, D., Juzokaite, L., Vancaester, E., Seitz, K. W., Anantharaman, K., Starnawski, P., Kjeldsen, K. U., Stott, M. B., Nunoura, T., Banfield, J. F., Schramm, A., Baker, B. J., Spang, A., & Ettema, T. J. G. (2017). Asgard archaea illuminate the origin of eukaryotic cellular complexity. <i>Nature, 541</i>, 353-358.
+<a href="https://doi.org/10.1038/nature21031">https://doi.org/10.1038/nature21031</a></p>
+<p>Burki, F., Roger, A. J., Brown, M. W., & Simpson, A. G. B. (2020). The new tree of eukaryotes. <i>Trends in Ecology &amp; Evolution, 35</i>(1), 43-55.
+<a href="https://doi.org/10.1016/j.tree.2019.08.008">https://doi.org/10.1016/j.tree.2019.08.008</a></p></div>
+</div>
+<script>
+const ROOT={"n":"Life","b":"The last universal common ancestor of everything alive. Its two deepest branches are Bacteria and Archaea; the eukaryotes arise later, from within the archaeal side.","s":"Woese and others 1990; Hug and others 2016","k":[{"n":"Bacteria","b":"The larger share of the tree's genetic diversity, most of it microbial and much of it never cultivated, including the vast Candidate Phyla Radiation mapped in 2016.","s":"Hug and others 2016"},{"n":"Archaea","b":"Microbes with distinct membranes and machinery, first recognized as a separate domain by Carl Woese in 1990.","s":"Woese and others 1990","k":[{"n":"DPANN","b":"A radiation of tiny archaea with reduced genomes, many living attached to other microbes.","s":"Hug and others 2016"},{"n":"Euryarchaeota","b":"Methane makers, salt lovers and heat lovers: the classic archaea of swamps, salterns and hot springs.","s":"Hug and others 2016"},{"n":"TACK","b":"The superphylum closest to the root of the eukaryote story, named for its first four phyla.","s":"Hug and others 2016"},{"n":"Asgard archaea","b":"Seafloor archaea carrying genes once thought exclusive to eukaryotes. Current evidence places the eukaryotes as their closest relatives, which folds the old three-domain picture into two.","s":"Zaremba-Niedzwiedzka and others 2017","k":[{"n":"Eukarya","b":"Cells with a nucleus and mitochondria, born of an archaeal host and a bacterial partner. Everything visible to the naked eye lives on this one twig.","s":"Burki and others 2020","k":[{"n":"Amorphea","b":"The supergroup holding animals, fungi and the amoebae.","s":"Burki and others 2020","k":[{"n":"Animals","b":"Multicellular eaters, from sponges to vertebrates: one branch of the opisthokonts.","s":"Burki and others 2020","hl":true},{"n":"Fungi","b":"The other great opisthokont branch: molds, yeasts and mushrooms, closer to animals than to plants.","s":"Burki and others 2020","hl":true},{"n":"Amoebozoa","b":"Lobed amoebae and slime molds.","s":"Burki and others 2020"}]},{"n":"Diaphoretickes","b":"The supergroup holding the plants and most of the algae.","s":"Burki and others 2020","k":[{"n":"Land plants and green algae","b":"The green lineage of the Archaeplastida, whose chloroplasts descend from one ancient captured cyanobacterium.","s":"Burki and others 2020","hl":true},{"n":"Red algae","b":"The other big archaeplastid branch, source of the chloroplasts many other algae later borrowed.","s":"Burki and others 2020"},{"n":"SAR","b":"Stramenopiles, alveolates and Rhizaria: kelps, diatoms, ciliates, dinoflagellates and the malaria parasite, most of the ocean's unseen diversity.","s":"Burki and others 2020"}]},{"n":"Discoba","b":"Euglenas and trypanosomes, once filed under the now-abandoned supergroup Excavata.","s":"Burki and others 2020"}]}]}]}]};
+const el=document.getElementById('diagram');
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+// layout: tips evenly spaced down the right, parents at the mean of their
+// children, x by depth
+const tips=[]; let maxd=0;
+(function walk(n,d){ n.depth=d; maxd=Math.max(maxd,d);
+  if(n.k) n.k.forEach(c=>walk(c,d+1)); else tips.push(n); })(ROOT,0);
+const RS=26, PADT=28, PADB=16, PADL=16, PADR=250;
+const W=980, H=PADT+PADB+RS*tips.length;
+tips.forEach((t,i)=>{ t.y=PADT+RS*(i+0.5); });
+(function place(n){ if(n.k){ n.k.forEach(place);
+  n.y=n.k.reduce((a,c)=>a+c.y,0)/n.k.length; } })(ROOT);
+const X=d=>PADL+ (W-PADL-PADR) * d/maxd;
+
+let idc=0; const byId={};
+function draw(n){
+  n.id='n'+(idc++); byId[n.id]=n;
+  const x=X(n.depth), col=n.hl?'var(--hl)':'#c9d1d9';
+  let s='';
+  if(n.k){
+    const x1=X(n.depth+1);
+    for(const c of n.k)
+      s+=`<path d="M${x},${n.y} V${c.y} H${x1}" fill="none"
+        stroke="#3d444d" stroke-width="1.6"/>`;
+    for(const c of n.k) s+=draw(c);
+  }
+  const lab=n.k?`<text x="${x+7}" y="${n.y-7}" font-size="12.5"
+      fill="${n.hl?'var(--hl)':'#9a9a9a'}">${esc(n.n)}</text>`
+    :`<text x="${x+9}" y="${n.y+4.5}" font-size="13.5" font-weight="${n.hl?700:400}"
+      fill="${col}">${esc(n.n)}${n.c?` <tspan fill="#6b7280" font-size="11.5" font-weight="400">${esc(n.c)}</tspan>`:''}</text>`;
+  s+=`<g data-id="${n.id}" style="cursor:default">
+    <circle cx="${x}" cy="${n.y}" r="${n.k?4:4.5}"
+      fill="${n.hl?'var(--hl)':(n.k?'#121212':'#58a6ff')}"
+      stroke="${n.hl?'var(--hl)':'#58a6ff'}" stroke-width="1.6"/>
+    <rect x="${x-10}" y="${n.y-12}" width="${n.k?Math.min(200,n.n.length*7+24):230}" height="24" fill="transparent"/>
+    ${lab}</g>`;
+  return s;
+}
+function render(){
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
+    id="treesvg">`+draw(ROOT)+'</svg>';
+}
+function show(id){
+  const n=byId[id]; if(!n) return;
+  document.getElementById('nameTxt').textContent=n.n;
+  document.getElementById('cntTxt').textContent=n.c||'';
+  document.getElementById('bodyTxt').textContent=n.b;
+  document.getElementById('srcTxt').textContent=n.s;
+}
+el.addEventListener('pointerover',e=>{
+  const g=e.target.closest('[data-id]');
+  if(g) show(g.getAttribute('data-id'));
+});
+render();
+show('n0');
+window.__tree=()=>({tips:tips.length, depth:maxd,
+  nodes:Object.keys(byId).length, h:H});
+</script>
+</body>
+</html>
