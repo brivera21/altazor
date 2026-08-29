@@ -24,6 +24,8 @@ h1 { margin:0 0 6px; font-size:26px; }
 .side { flex:0 0 300px; position:sticky; top:16px; }
 .card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
   padding:16px; }
+#cardImg { width:100%; height:170px; object-fit:cover; border-radius:8px;
+  border:1px solid var(--line); margin-bottom:10px; display:none; background:#0d0d0d; }
 #nameTxt { font-weight:700; font-size:17px; }
 #cntTxt { color:var(--hl); font-size:13px; margin-top:2px; }
 #bodyTxt { color:var(--muted); font-size:13.5px; line-height:1.55; margin-top:8px; }
@@ -32,7 +34,7 @@ h1 { margin:0 0 6px; font-size:26px; }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
-.refs p { margin:0 0 8px; }
+.refs p { margin:0 0 8px; overflow-wrap:anywhere; }
 .refs a { color:var(--accent); }
 h2.refh { font-size:15px; margin:26px 0 8px; }
 @media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
@@ -48,13 +50,14 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <div class="stage">
   <div id="diagram"></div>
   <div class="side"><div class="card">
+    <img id="cardImg" alt="">
     <div id="nameTxt">A group under the cursor lands here</div>
     <div id="cntTxt"></div>
     <div id="bodyTxt"></div>
     <div id="srcTxt"></div>
   </div></div>
 </div>
-<p class="note">The branches of the tree of life that lead to and through the primates, from the mammal superorder at the left to the living great apes at the right; branch lengths carry no time information. The human line sits beside the chimpanzees and bonobos, from whom it parted roughly six to eight million years ago. A node under the cursor fills the card.</p>
+<p class="note">The branches of the tree of life that lead to and through the primates, from the mammal superorder at the left to the living great apes at the right; branch lengths carry no time information. The human line sits beside the chimpanzees and bonobos, from whom it parted roughly six to eight million years ago. A node under the cursor fills the card. Each living tip carries the photograph from its group's Wikipedia article, fetched at view time.</p>
 <h2 class="refh">References</h2>
 <div class="refs"><p>Perelman, P., Johnson, W. E., Roos, C., Seuanez, H. N., Horvath, J. E., Moreira, M. A. M., Kessing, B., Pontius, J., Roelke, M., Rumpler, Y., Schneider, M. P. C., Silva, A., O'Brien, S. J., & Pecon-Slattery, J. (2011). A molecular phylogeny of living primates. <i>PLOS Genetics, 7</i>(3), e1001342.
 <a href="https://doi.org/10.1371/journal.pgen.1001342">https://doi.org/10.1371/journal.pgen.1001342</a></p>
@@ -63,10 +66,12 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <p>Langergraber, K. E., et al. (2012). Generation times in wild chimpanzees and gorillas suggest earlier divergence times in great ape and human evolution. <i>Proceedings of the National Academy of Sciences, 109</i>(39), 15716-15721.
 <a href="https://doi.org/10.1073/pnas.1211740109">https://doi.org/10.1073/pnas.1211740109</a></p>
 <p>Mammal Diversity Database, American Society of Mammalogists. (2025).
-<a href="https://www.mammaldiversity.org/">https://www.mammaldiversity.org/</a></p></div>
+<a href="https://www.mammaldiversity.org/">https://www.mammaldiversity.org/</a></p>
+<p>Images: the linked group's Wikipedia article thumbnail, fetched at view time; each is credited on its article page.
+<a href="https://en.wikipedia.org/">https://en.wikipedia.org/</a></p></div>
 </div>
 <script>
-const ROOT={"n":"Euarchontoglires","b":"The mammal superorder holding rodents, rabbits and the primate lineage. The path to the primates runs through it.","s":"Murphy and others 2001","k":[{"n":"Glires","b":"Rodents and lagomorphs: the sister group to everything below.","s":"Murphy and others 2001"},{"n":"Primatomorpha","b":"Primates plus their closest living relatives.","s":"Janecka and others 2007","k":[{"n":"Dermoptera","b":"The colugos of Southeast Asia, gliding leaf eaters and the primates' nearest kin.","s":"Janecka and others 2007","c":"2 species"},{"n":"Primates","b":"Grasping hands, forward eyes and big brains: about 520 living species.","s":"Mammal Diversity Database 2025","c":"~520 species","k":[{"n":"Strepsirrhini","b":"The wet-nosed primates: the lemurs of Madagascar and the lorises and galagos of Africa and Asia.","s":"Perelman and others 2011"},{"n":"Haplorhini","b":"The dry-nosed primates.","s":"Perelman and others 2011","k":[{"n":"Tarsiers","b":"Tiny nocturnal leapers of island Southeast Asia, the monkeys' deepest cousins.","s":"Perelman and others 2011"},{"n":"Simiiformes","b":"The monkeys and apes.","s":"Perelman and others 2011","k":[{"n":"Platyrrhini","b":"The New World monkeys: capuchins, howlers, marmosets and spider monkeys, many with grasping tails.","s":"Perelman and others 2011"},{"n":"Catarrhini","b":"The Old World monkeys and the apes.","s":"Perelman and others 2011","k":[{"n":"Cercopithecidae","b":"The Old World monkeys: macaques, baboons, langurs and colobus monkeys.","s":"Perelman and others 2011"},{"n":"Hominoidea","b":"The tailless apes.","s":"Perelman and others 2011","k":[{"n":"Hylobatidae","b":"The gibbons, small brachiating apes of Asian forests.","s":"Perelman and others 2011"},{"n":"Hominidae","b":"The great apes.","s":"Perelman and others 2011","k":[{"n":"Orangutans","b":"The Asian great apes, genus Pongo.","s":"Perelman and others 2011"},{"n":"Gorillas","b":"The largest living primates.","s":"Perelman and others 2011"},{"n":"Chimpanzees and bonobos","b":"Genus Pan, our closest living relatives; the human line parted from theirs roughly six to eight million years ago.","s":"Langergraber and others 2012"},{"n":"Humans","b":"Homo sapiens, the one surviving species of its genus.","s":"Perelman and others 2011","hl":true}]}]}]}]}]}]}]}]};
+const ROOT={"n":"Euarchontoglires","b":"The mammal superorder holding rodents, rabbits and the primate lineage. The path to the primates runs through it.","s":"Murphy and others 2001","k":[{"n":"Glires","b":"Rodents and lagomorphs: the sister group to everything below.","s":"Murphy and others 2001","w":["Glires","Rodent"]},{"n":"Primatomorpha","b":"Primates plus their closest living relatives.","s":"Janecka and others 2007","k":[{"n":"Dermoptera","b":"The colugos of Southeast Asia, gliding leaf eaters and the primates' nearest kin.","s":"Janecka and others 2007","c":"2 species","w":["Colugo"]},{"n":"Primates","b":"Grasping hands, forward eyes and big brains: about 520 living species.","s":"Mammal Diversity Database 2025","c":"~520 species","k":[{"n":"Strepsirrhini","b":"The wet-nosed primates: the lemurs of Madagascar and the lorises and galagos of Africa and Asia.","s":"Perelman and others 2011","w":["Strepsirrhini","Ring-tailed lemur"]},{"n":"Haplorhini","b":"The dry-nosed primates.","s":"Perelman and others 2011","k":[{"n":"Tarsiers","b":"Tiny nocturnal leapers of island Southeast Asia, the monkeys' deepest cousins.","s":"Perelman and others 2011","w":["Tarsier"]},{"n":"Simiiformes","b":"The monkeys and apes.","s":"Perelman and others 2011","k":[{"n":"Platyrrhini","b":"The New World monkeys: capuchins, howlers, marmosets and spider monkeys, many with grasping tails.","s":"Perelman and others 2011","w":["New World monkey","Capuchin monkey"]},{"n":"Catarrhini","b":"The Old World monkeys and the apes.","s":"Perelman and others 2011","k":[{"n":"Cercopithecidae","b":"The Old World monkeys: macaques, baboons, langurs and colobus monkeys.","s":"Perelman and others 2011","w":["Old World monkey","Rhesus macaque"]},{"n":"Hominoidea","b":"The tailless apes.","s":"Perelman and others 2011","k":[{"n":"Hylobatidae","b":"The gibbons, small brachiating apes of Asian forests.","s":"Perelman and others 2011","w":["Gibbon"]},{"n":"Hominidae","b":"The great apes.","s":"Perelman and others 2011","k":[{"n":"Orangutans","b":"The Asian great apes, genus Pongo.","s":"Perelman and others 2011","w":["Orangutan"]},{"n":"Gorillas","b":"The largest living primates.","s":"Perelman and others 2011","w":["Gorilla"]},{"n":"Chimpanzees and bonobos","b":"Genus Pan, our closest living relatives; the human line parted from theirs roughly six to eight million years ago.","s":"Langergraber and others 2012","w":["Chimpanzee"]},{"n":"Humans","b":"Homo sapiens, the one surviving species of its genus.","s":"Perelman and others 2011","hl":true,"w":["Human"]}],"w":["Hominidae"]}],"w":["Ape"]}],"w":["Catarrhini"]}],"w":["Simian"]}],"w":["Haplorhini"]}],"w":["Primate"]}],"w":["Primatomorpha"]}],"w":["Euarchontoglires"]};
 const el=document.getElementById('diagram');
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
 
@@ -75,16 +80,17 @@ const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const tips=[]; let maxd=0;
 (function walk(n,d){ n.depth=d; maxd=Math.max(maxd,d);
   if(n.k) n.k.forEach(c=>walk(c,d+1)); else tips.push(n); })(ROOT,0);
-const RS=26, PADT=28, PADB=16, PADL=16, PADR=250;
-const W=980, H=PADT+PADB+RS*tips.length;
+const RS=42, PADT=28, PADB=16, PADL=16, PADR=300, TH=34;
+const W=1010, H=PADT+PADB+RS*tips.length;
 tips.forEach((t,i)=>{ t.y=PADT+RS*(i+0.5); });
 (function place(n){ if(n.k){ n.k.forEach(place);
   n.y=n.k.reduce((a,c)=>a+c.y,0)/n.k.length; } })(ROOT);
 const X=d=>PADL+ (W-PADL-PADR) * d/maxd;
 
+const IMG={};      // node name -> thumbnail url, filled at view time
 let idc=0; const byId={};
 function draw(n){
-  n.id='n'+(idc++); byId[n.id]=n;
+  if(!n.id){ n.id='n'+(idc++); byId[n.id]=n; }
   const x=X(n.depth), col=n.hl?'var(--hl)':'#c9d1d9';
   let s='';
   if(n.k){
@@ -94,15 +100,24 @@ function draw(n){
         stroke="#3d444d" stroke-width="1.6"/>`;
     for(const c of n.k) s+=draw(c);
   }
-  const lab=n.k?`<text x="${x+7}" y="${n.y-7}" font-size="12.5"
-      fill="${n.hl?'var(--hl)':'#9a9a9a'}">${esc(n.n)}</text>`
-    :`<text x="${x+9}" y="${n.y+4.5}" font-size="13.5" font-weight="${n.hl?700:400}"
+  let lab;
+  if(n.k){
+    lab=`<text x="${x+7}" y="${n.y-7}" font-size="12.5"
+      fill="${n.hl?'var(--hl)':'#9a9a9a'}">${esc(n.n)}</text>`;
+  } else {
+    const u=IMG[n.n], tx=u?x+16+TH:x+9;
+    lab=(u?`<image href="${u}" x="${x+10}" y="${n.y-TH/2}" width="${TH}"
+        height="${TH}" preserveAspectRatio="xMidYMid slice"/>
+      <rect x="${x+10}" y="${n.y-TH/2}" width="${TH}" height="${TH}"
+        fill="none" stroke="#2b2b2b" stroke-width="1"/>`:'')
+      +`<text x="${tx}" y="${n.y+4.5}" font-size="13.5" font-weight="${n.hl?700:400}"
       fill="${col}">${esc(n.n)}${n.c?` <tspan fill="#6b7280" font-size="11.5" font-weight="400">${esc(n.c)}</tspan>`:''}</text>`;
+  }
   s+=`<g data-id="${n.id}" style="cursor:default">
     <circle cx="${x}" cy="${n.y}" r="${n.k?4:4.5}"
       fill="${n.hl?'var(--hl)':(n.k?'#121212':'#58a6ff')}"
       stroke="${n.hl?'var(--hl)':'#58a6ff'}" stroke-width="1.6"/>
-    <rect x="${x-10}" y="${n.y-12}" width="${n.k?Math.min(200,n.n.length*7+24):230}" height="24" fill="transparent"/>
+    <rect x="${x-10}" y="${n.y-Math.max(12,TH/2)}" width="${n.k?Math.min(200,n.n.length*7+24):290}" height="${n.k?24:TH}" fill="transparent"/>
     ${lab}</g>`;
   return s;
 }
@@ -110,21 +125,57 @@ function render(){
   el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
     id="treesvg">`+draw(ROOT)+'</svg>';
 }
+let current='n0';
 function show(id){
   const n=byId[id]; if(!n) return;
+  current=id;
   document.getElementById('nameTxt').textContent=n.n;
   document.getElementById('cntTxt').textContent=n.c||'';
   document.getElementById('bodyTxt').textContent=n.b;
   document.getElementById('srcTxt').textContent=n.s;
+  const img=document.getElementById('cardImg');
+  if(IMG[n.n]){ img.src=IMG[n.n]; img.style.display='block'; }
+  else img.style.display='none';
 }
 el.addEventListener('pointerover',e=>{
   const g=e.target.closest('[data-id]');
   if(g) show(g.getAttribute('data-id'));
 });
+
+// photos: each node's Wikipedia article summary thumbnail, first
+// candidate with a thumbnail wins; no thumbnail means no photo
+async function thumb(titles,big){
+  for(const t of titles){
+    try{
+      const r=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'
+        +encodeURIComponent(t.replace(/ /g,'_')));
+      if(!r.ok) continue;
+      const j=await r.json();
+      if(!j.thumbnail) continue;
+      return big&&j.originalimage&&j.originalimage.width>=480
+        ?j.thumbnail.source.replace(/\/(\d+)px-/,'/480px-')
+        :j.thumbnail.source;
+    }catch(e){}
+  }
+  return null;
+}
+async function loadImages(){
+  const all=[];
+  (function walk(n){ if(n.w) all.push(n); if(n.k) n.k.forEach(walk); })(ROOT);
+  await Promise.all(all.map(async n=>{
+    const u=await thumb(n.w,true);
+    if(u) IMG[n.n]=u;
+  }));
+  render();
+  show(current);
+}
+
 render();
 show('n0');
+loadImages();
 window.__tree=()=>({tips:tips.length, depth:maxd,
-  nodes:Object.keys(byId).length, h:H});
+  nodes:Object.keys(byId).length, h:H, imgs:Object.keys(IMG).length,
+  tipImgs:tips.filter(t=>IMG[t.n]).length});
 </script>
 </body>
 </html>

@@ -24,6 +24,8 @@ h1 { margin:0 0 6px; font-size:26px; }
 .side { flex:0 0 300px; position:sticky; top:16px; }
 .card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
   padding:16px; }
+#cardImg { width:100%; height:170px; object-fit:cover; border-radius:8px;
+  border:1px solid var(--line); margin-bottom:10px; display:none; background:#0d0d0d; }
 #nameTxt { font-weight:700; font-size:17px; }
 #cntTxt { color:var(--hl); font-size:13px; margin-top:2px; }
 #bodyTxt { color:var(--muted); font-size:13.5px; line-height:1.55; margin-top:8px; }
@@ -32,7 +34,7 @@ h1 { margin:0 0 6px; font-size:26px; }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
-.refs p { margin:0 0 8px; }
+.refs p { margin:0 0 8px; overflow-wrap:anywhere; }
 .refs a { color:var(--accent); }
 h2.refh { font-size:15px; margin:26px 0 8px; }
 @media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
@@ -42,19 +44,20 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <div class="wrap">
 <header class="site">
   <a class="brand" href="index.html">ALTAZOR</a>
-  <nav class="site"><a href="library.html">&larr; Library</a> <a href="tree-of-life.html">Tree of Life</a> <a href="primates.html">Primates</a></nav>
+  <nav class="site"><a href="library.html">&larr; Library</a> <a href="animals.html">Animals</a> <a href="primates.html">Primates</a></nav>
 </header>
 <h1>Mammals</h1>
 <div class="stage">
   <div id="diagram"></div>
   <div class="side"><div class="card">
+    <img id="cardImg" alt="">
     <div id="nameTxt">A group under the cursor lands here</div>
     <div id="cntTxt"></div>
     <div id="bodyTxt"></div>
     <div id="srcTxt"></div>
   </div></div>
 </div>
-<p class="note">The main divisions of the living mammals, from the deepest split at the left to orders at the right; branch lengths carry no time information, and species counts are the Mammal Diversity Database's, rounded. The root inside the placentals is drawn with Afrotheria branching first, one of two arrangements the genomes still allow. A node under the cursor fills the card.</p>
+<p class="note">The main divisions of the living mammals, from the deepest split at the left to orders at the right; branch lengths carry no time information, and species counts are the Mammal Diversity Database's, rounded. The root inside the placentals is drawn with Afrotheria branching first, one of two arrangements the genomes still allow. A node under the cursor fills the card. Each living tip carries the photograph from its group's Wikipedia article, fetched at view time.</p>
 <h2 class="refh">References</h2>
 <div class="refs"><p>Burgin, C. J., Colella, J. P., Kahn, P. L., & Upham, N. S. (2018). How many species of mammals are there? <i>Journal of Mammalogy, 99</i>(1), 1-14.
 <a href="https://doi.org/10.1093/jmammal/gyx147">https://doi.org/10.1093/jmammal/gyx147</a></p>
@@ -65,10 +68,12 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <p>Mammal Diversity Database, American Society of Mammalogists. (2025).
 <a href="https://www.mammaldiversity.org/">https://www.mammaldiversity.org/</a></p>
 <p>Foley, N. M., et al. (2023). A genomic timescale for placental mammal evolution. <i>Science, 380</i>(6643), eabl8189.
-<a href="https://doi.org/10.1126/science.abl8189">https://doi.org/10.1126/science.abl8189</a></p></div>
+<a href="https://doi.org/10.1126/science.abl8189">https://doi.org/10.1126/science.abl8189</a></p>
+<p>Images: the linked group's Wikipedia article thumbnail, fetched at view time; each is credited on its article page.
+<a href="https://en.wikipedia.org/">https://en.wikipedia.org/</a></p></div>
 </div>
 <script>
-const ROOT={"n":"Mammalia","b":"Warm-blooded vertebrates with hair and milk: about 6,800 living species in 27 orders as counted by the Mammal Diversity Database.","s":"Mammal Diversity Database 2025","c":"~6,800 species","k":[{"n":"Monotremata","b":"The egg-laying mammals: the platypus and the echidnas, sole survivors of the deepest split.","s":"Burgin and others 2018","c":"5 species"},{"n":"Theria","b":"The live-bearing mammals, split between marsupials and placentals.","s":"Upham and others 2019","k":[{"n":"Marsupialia","b":"Mammals whose young finish developing in a pouch. Seven orders, most of them Australasian.","s":"Burgin and others 2018","c":"~380 species","k":[{"n":"Didelphimorphia","b":"The opossums of the Americas.","s":"Burgin and others 2018","c":"~111 species"},{"n":"Diprotodontia","b":"Kangaroos, wombats, possums and the koala: the big Australian radiation.","s":"Burgin and others 2018","c":"~155 species"},{"n":"Dasyuromorphia and others","b":"The carnivorous marsupials, bandicoots, the marsupial mole and the monito del monte: five smaller orders.","s":"Burgin and others 2018","c":"~113 species"}]},{"n":"Placentalia","b":"Mammals carried to term inside the mother: four great superorders that split as the continents did.","s":"Murphy and others 2001","c":"~6,400 species","k":[{"n":"Afrotheria","b":"The African root stock: elephants, manatees, hyraxes, aardvark, sengis and tenrecs.","s":"Murphy and others 2001"},{"n":"Xenarthra","b":"The South American originals: armadillos, sloths and anteaters.","s":"Murphy and others 2001"},{"n":"Euarchontoglires","b":"The rodents, rabbits, treeshrews, colugos and primates, humankind included.","s":"Murphy and others 2001","hl":true,"k":[{"n":"Rodentia","b":"Two in every five mammal species are rodents.","s":"Mammal Diversity Database 2025","c":"~2,750 species"},{"n":"Primates","b":"Lemurs to humans; the next diagram opens this branch.","s":"Mammal Diversity Database 2025","c":"~520 species","hl":true},{"n":"Lagomorpha and others","b":"Rabbits and hares, plus the treeshrews and colugos nearest the primates.","s":"Mammal Diversity Database 2025"}]},{"n":"Laurasiatheria","b":"The northern radiation: shrews, bats, carnivorans, pangolins, horses, and the even-toed ungulates including the whales.","s":"Murphy and others 2001","k":[{"n":"Chiroptera","b":"The bats, the only mammals with powered flight.","s":"Mammal Diversity Database 2025","c":"~1,490 species"},{"n":"Carnivora","b":"Cats, dogs, bears, seals and their kin.","s":"Mammal Diversity Database 2025","c":"~320 species"},{"n":"Artiodactyla","b":"The even-toed ungulates, with the whales and dolphins nested inside them.","s":"Mammal Diversity Database 2025","c":"~370 species"},{"n":"Eulipotyphla and others","b":"Shrews, moles and hedgehogs, plus pangolins and the horses, rhinos and tapirs.","s":"Mammal Diversity Database 2025"}]}]}]}]};
+const ROOT={"n":"Mammalia","b":"Warm-blooded vertebrates with hair and milk: about 6,800 living species in 27 orders as counted by the Mammal Diversity Database.","s":"Mammal Diversity Database 2025","c":"~6,800 species","k":[{"n":"Monotremata","b":"The egg-laying mammals: the platypus and the echidnas, sole survivors of the deepest split.","s":"Burgin and others 2018","c":"5 species","w":["Monotreme","Platypus"]},{"n":"Theria","b":"The live-bearing mammals, split between marsupials and placentals.","s":"Upham and others 2019","k":[{"n":"Marsupialia","b":"Mammals whose young finish developing in a pouch. Seven orders, most of them Australasian.","s":"Burgin and others 2018","c":"~380 species","k":[{"n":"Didelphimorphia","b":"The opossums of the Americas.","s":"Burgin and others 2018","c":"~111 species","w":["Opossum"]},{"n":"Diprotodontia","b":"Kangaroos, wombats, possums and the koala: the big Australian radiation.","s":"Burgin and others 2018","c":"~155 species","w":["Diprotodontia","Kangaroo"]},{"n":"Dasyuromorphia and others","b":"The carnivorous marsupials, bandicoots, the marsupial mole and the monito del monte: five smaller orders.","s":"Burgin and others 2018","c":"~113 species","w":["Dasyuromorphia","Tasmanian devil"]}],"w":["Marsupial"]},{"n":"Placentalia","b":"Mammals carried to term inside the mother: four great superorders that split as the continents did.","s":"Murphy and others 2001","c":"~6,400 species","k":[{"n":"Afrotheria","b":"The African root stock: elephants, manatees, hyraxes, aardvark, sengis and tenrecs.","s":"Murphy and others 2001","w":["Afrotheria","African bush elephant"]},{"n":"Xenarthra","b":"The South American originals: armadillos, sloths and anteaters.","s":"Murphy and others 2001","w":["Xenarthra","Nine-banded armadillo"]},{"n":"Euarchontoglires","b":"The rodents, rabbits, treeshrews, colugos and primates, humankind included.","s":"Murphy and others 2001","hl":true,"k":[{"n":"Rodentia","b":"Two in every five mammal species are rodents.","s":"Mammal Diversity Database 2025","c":"~2,750 species","w":["Rodent"]},{"n":"Primates","b":"Lemurs to humans; the Primates diagram opens this branch.","s":"Mammal Diversity Database 2025","c":"~520 species","hl":true,"w":["Primate"]},{"n":"Lagomorpha and others","b":"Rabbits and hares, plus the treeshrews and colugos nearest the primates.","s":"Mammal Diversity Database 2025","w":["Lagomorpha","European rabbit"]}],"w":["Euarchontoglires"]},{"n":"Laurasiatheria","b":"The northern radiation: shrews, bats, carnivorans, pangolins, horses, and the even-toed ungulates including the whales.","s":"Murphy and others 2001","k":[{"n":"Chiroptera","b":"The bats, the only mammals with powered flight.","s":"Mammal Diversity Database 2025","c":"~1,490 species","w":["Bat"]},{"n":"Carnivora","b":"Cats, dogs, bears, seals and their kin.","s":"Mammal Diversity Database 2025","c":"~320 species","w":["Carnivora","Lion"]},{"n":"Artiodactyla","b":"The even-toed ungulates, with the whales and dolphins nested inside them.","s":"Mammal Diversity Database 2025","c":"~370 species","w":["Even-toed ungulate","Giraffe"]},{"n":"Eulipotyphla and others","b":"Shrews, moles and hedgehogs, plus pangolins and the horses, rhinos and tapirs.","s":"Mammal Diversity Database 2025","w":["Eulipotyphla","European hedgehog"]}],"w":["Laurasiatheria"]}],"w":["Placentalia"]}],"w":["Theria"]}],"w":["Mammal"]};
 const el=document.getElementById('diagram');
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
 
@@ -77,16 +82,17 @@ const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const tips=[]; let maxd=0;
 (function walk(n,d){ n.depth=d; maxd=Math.max(maxd,d);
   if(n.k) n.k.forEach(c=>walk(c,d+1)); else tips.push(n); })(ROOT,0);
-const RS=26, PADT=28, PADB=16, PADL=16, PADR=250;
-const W=980, H=PADT+PADB+RS*tips.length;
+const RS=42, PADT=28, PADB=16, PADL=16, PADR=300, TH=34;
+const W=1010, H=PADT+PADB+RS*tips.length;
 tips.forEach((t,i)=>{ t.y=PADT+RS*(i+0.5); });
 (function place(n){ if(n.k){ n.k.forEach(place);
   n.y=n.k.reduce((a,c)=>a+c.y,0)/n.k.length; } })(ROOT);
 const X=d=>PADL+ (W-PADL-PADR) * d/maxd;
 
+const IMG={};      // node name -> thumbnail url, filled at view time
 let idc=0; const byId={};
 function draw(n){
-  n.id='n'+(idc++); byId[n.id]=n;
+  if(!n.id){ n.id='n'+(idc++); byId[n.id]=n; }
   const x=X(n.depth), col=n.hl?'var(--hl)':'#c9d1d9';
   let s='';
   if(n.k){
@@ -96,15 +102,24 @@ function draw(n){
         stroke="#3d444d" stroke-width="1.6"/>`;
     for(const c of n.k) s+=draw(c);
   }
-  const lab=n.k?`<text x="${x+7}" y="${n.y-7}" font-size="12.5"
-      fill="${n.hl?'var(--hl)':'#9a9a9a'}">${esc(n.n)}</text>`
-    :`<text x="${x+9}" y="${n.y+4.5}" font-size="13.5" font-weight="${n.hl?700:400}"
+  let lab;
+  if(n.k){
+    lab=`<text x="${x+7}" y="${n.y-7}" font-size="12.5"
+      fill="${n.hl?'var(--hl)':'#9a9a9a'}">${esc(n.n)}</text>`;
+  } else {
+    const u=IMG[n.n], tx=u?x+16+TH:x+9;
+    lab=(u?`<image href="${u}" x="${x+10}" y="${n.y-TH/2}" width="${TH}"
+        height="${TH}" preserveAspectRatio="xMidYMid slice"/>
+      <rect x="${x+10}" y="${n.y-TH/2}" width="${TH}" height="${TH}"
+        fill="none" stroke="#2b2b2b" stroke-width="1"/>`:'')
+      +`<text x="${tx}" y="${n.y+4.5}" font-size="13.5" font-weight="${n.hl?700:400}"
       fill="${col}">${esc(n.n)}${n.c?` <tspan fill="#6b7280" font-size="11.5" font-weight="400">${esc(n.c)}</tspan>`:''}</text>`;
+  }
   s+=`<g data-id="${n.id}" style="cursor:default">
     <circle cx="${x}" cy="${n.y}" r="${n.k?4:4.5}"
       fill="${n.hl?'var(--hl)':(n.k?'#121212':'#58a6ff')}"
       stroke="${n.hl?'var(--hl)':'#58a6ff'}" stroke-width="1.6"/>
-    <rect x="${x-10}" y="${n.y-12}" width="${n.k?Math.min(200,n.n.length*7+24):230}" height="24" fill="transparent"/>
+    <rect x="${x-10}" y="${n.y-Math.max(12,TH/2)}" width="${n.k?Math.min(200,n.n.length*7+24):290}" height="${n.k?24:TH}" fill="transparent"/>
     ${lab}</g>`;
   return s;
 }
@@ -112,21 +127,57 @@ function render(){
   el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
     id="treesvg">`+draw(ROOT)+'</svg>';
 }
+let current='n0';
 function show(id){
   const n=byId[id]; if(!n) return;
+  current=id;
   document.getElementById('nameTxt').textContent=n.n;
   document.getElementById('cntTxt').textContent=n.c||'';
   document.getElementById('bodyTxt').textContent=n.b;
   document.getElementById('srcTxt').textContent=n.s;
+  const img=document.getElementById('cardImg');
+  if(IMG[n.n]){ img.src=IMG[n.n]; img.style.display='block'; }
+  else img.style.display='none';
 }
 el.addEventListener('pointerover',e=>{
   const g=e.target.closest('[data-id]');
   if(g) show(g.getAttribute('data-id'));
 });
+
+// photos: each node's Wikipedia article summary thumbnail, first
+// candidate with a thumbnail wins; no thumbnail means no photo
+async function thumb(titles,big){
+  for(const t of titles){
+    try{
+      const r=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'
+        +encodeURIComponent(t.replace(/ /g,'_')));
+      if(!r.ok) continue;
+      const j=await r.json();
+      if(!j.thumbnail) continue;
+      return big&&j.originalimage&&j.originalimage.width>=480
+        ?j.thumbnail.source.replace(/\/(\d+)px-/,'/480px-')
+        :j.thumbnail.source;
+    }catch(e){}
+  }
+  return null;
+}
+async function loadImages(){
+  const all=[];
+  (function walk(n){ if(n.w) all.push(n); if(n.k) n.k.forEach(walk); })(ROOT);
+  await Promise.all(all.map(async n=>{
+    const u=await thumb(n.w,true);
+    if(u) IMG[n.n]=u;
+  }));
+  render();
+  show(current);
+}
+
 render();
 show('n0');
+loadImages();
 window.__tree=()=>({tips:tips.length, depth:maxd,
-  nodes:Object.keys(byId).length, h:H});
+  nodes:Object.keys(byId).length, h:H, imgs:Object.keys(IMG).length,
+  tipImgs:tips.filter(t=>IMG[t.n]).length});
 </script>
 </body>
 </html>
