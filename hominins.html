@@ -57,7 +57,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
     <div id="srcTxt"></div>
   </div></div>
 </div>
-<p class="note">The human tribe from the chimpanzee split to the present: the australopiths, the robust Paranthropus side branch, and every named branch of Homo down to the three that overlapped last, with fossil date ranges beside each species (Ma, millions of years ago; ka, thousands). Polytomies mark relationships the fossils leave unresolved, and the interbreeding among Neanderthals, Denisovans and Homo sapiens, which a tree cannot draw, lives in the cards. A node under the cursor fills the card. Each species carries the photograph from its Wikipedia article, fetched at view time.</p>
+<p class="note">The human tribe from the chimpanzee split to the present: the australopiths, the robust Paranthropus side branch, and every named branch of Homo down to the three that overlapped last, with fossil date ranges beside each species (Ma, millions of years ago; ka, thousands). Polytomies mark relationships the fossils leave unresolved, and X. A node under the cursor fills the card; a click pins it, and a second click lets go. Each species carries the photograph from its Wikipedia article, fetched at view time.</p>
 <h2 class="refh">References</h2>
 <div class="refs"><p>Smithsonian National Museum of Natural History. (n.d.). Human origins: Species. Human Origins Program.
 <a href="https://humanorigins.si.edu/evidence/human-fossils/species">https://humanorigins.si.edu/evidence/human-fossils/species</a></p>
@@ -133,7 +133,10 @@ function draw(n){
       +`<text x="${tx}" y="${n.y+4.5}" font-size="13.5" font-weight="${n.hl?700:400}"
       fill="${col}">${esc(n.n)}${n.c?` <tspan fill="#6b7280" font-size="11.5" font-weight="400">${esc(n.c)}</tspan>`:''}</text>`;
   }
-  s+=`<g data-id="${n.id}" style="cursor:default">
+  s+=`<g data-id="${n.id}" style="cursor:pointer">
+    ${n.id===pinned?`<circle cx="${x}" cy="${n.y}" r="9.5" fill="none"
+      stroke="${n.hl?'var(--hl)':'var(--accent)'}" stroke-width="1.6"
+      opacity="0.9"/>`:''}
     <circle cx="${x}" cy="${n.y}" r="${n.k?4:4.5}"
       fill="${n.hl?'var(--hl)':(n.k?'#121212':'#58a6ff')}"
       stroke="${n.hl?'var(--hl)':'#58a6ff'}" stroke-width="1.6"/>
@@ -145,7 +148,7 @@ function render(){
   el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
     id="treesvg">`+draw(ROOT)+'</svg>';
 }
-let current='n0';
+let current='n0', pinned=null;
 function show(id){
   const n=byId[id]; if(!n) return;
   current=id;
@@ -158,8 +161,18 @@ function show(id){
   else img.style.display='none';
 }
 el.addEventListener('pointerover',e=>{
+  if(pinned) return;
   const g=e.target.closest('[data-id]');
   if(g) show(g.getAttribute('data-id'));
+});
+el.addEventListener('click',e=>{
+  const g=e.target.closest('[data-id]');
+  if(g){
+    const id=g.getAttribute('data-id');
+    pinned = pinned===id ? null : id;
+    show(id);
+  } else pinned=null;
+  render();
 });
 
 // photos: each node's Wikipedia article summary thumbnail, first
@@ -193,7 +206,7 @@ show('n0');
 loadImages();
 window.__tree=()=>({tips:tips.length, depth:maxd,
   nodes:Object.keys(byId).length, h:H, imgs:Object.keys(IMG).length,
-  tipImgs:tips.filter(t=>IMG[t.n]).length});
+  tipImgs:tips.filter(t=>IMG[t.n]).length, pinned, current});
 </script>
 </body>
 </html>
