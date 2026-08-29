@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Space Elevator · Altazor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#121212;--panel:#1a1a1a;--panel2:#202020;--text:#e6e6e6;--muted:#9a9a9a;--line:#2b2b2b;--gold:#e4a01b;
+--teal:#3fb6ad;--coral:#e0684b;--violet:#9b8cf0;--sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+--mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;--maxw:1100px}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.6;margin:0;border-top:4px solid var(--gold);-webkit-font-smoothing:antialiased}
+a{color:var(--teal)}
+.topbar{max-width:var(--maxw);margin:0 auto;padding:10px 20px 0}
+.topbar a{font-size:13px;color:var(--muted);text-decoration:none;letter-spacing:.03em}
+.topbar a:hover{color:var(--gold)}
+header.hero{max-width:var(--maxw);margin:0 auto;padding:8px 20px 8px}
+header.hero h1{font-size:28px;line-height:1.2;margin:0 0 4px;font-weight:600}
+header.hero p.q{margin:0;font-size:17px;color:var(--muted);font-style:italic}
+main{max-width:var(--maxw);margin:0 auto;padding:6px 20px 30px}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.stage canvas{display:block;width:100%;height:auto}
+.row{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end}
+.row.top{margin-bottom:10px}
+.control{display:flex;flex-direction:column;gap:4px;min-width:150px;flex:1 1 200px}
+.control label{font-size:13px;color:var(--muted)}
+.control .val{font-family:var(--mono);font-size:13px;color:var(--text)}
+.control input[type=range]{width:100%;accent-color:var(--gold)}
+.controls{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:inherit;font-size:14px;font-weight:500;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer}
+button:hover{border-color:var(--gold)}
+button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#121212}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px 14px;margin-top:12px;font-family:var(--mono);font-size:13px;color:var(--muted)}
+.readout div b{display:block;color:var(--text);font-weight:500;font-size:15px}
+.outcome{margin-top:12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);font-size:14px}
+.outcome b{color:var(--gold)}
+.fig-note{font-size:14px;color:var(--muted);margin-top:10px}
+section.prose{max-width:760px;margin:26px auto 0}
+section.prose h2{font-size:21px;margin:26px 0 8px;font-weight:600}
+section.prose p{margin:0 0 14px}
+code{font-family:var(--mono);font-size:.92em;background:var(--panel2);padding:1px 5px;border-radius:5px}
+.refs{font-size:14px;color:var(--muted)}
+.refs p{padding-left:1.6em;text-indent:-1.6em;overflow-wrap:anywhere}
+footer{max-width:var(--maxw);margin:0 auto;padding:14px 20px 40px;font-size:13px;color:var(--muted);border-top:1px solid var(--line)}
+@media (max-width:600px){.stage{padding:10px;border-radius:10px}.control{min-width:130px}}
+</style>
+</head>
+<body>
+<div class="topbar"><a href="science-fiction.html">← Science Fiction</a></div>
+<header class="hero">
+  <h1>Space Elevator</h1>
+  <p class="q">A cable from the equator to beyond geostationary orbit, and what happens to anything that lets go of it.</p>
+</header>
+
+<main>
+  <div class="stage">
+    <div class="row top">
+      <div class="btnrow">
+        <button id="pSurf">Surface</button>
+        <button id="pLeo">LEO height</button>
+        <button id="pGeo" aria-pressed="true">GEO</button>
+        <button id="pEsc">Escape point</button>
+        <button id="pTop">Counterweight</button>
+      </div>
+    </div>
+    <canvas id="cv" aria-label="Top panel: the Earth drawn to scale at the left with a cable extending to one hundred thousand kilometers, geostationary orbit and the escape release point marked, a gold climber on the cable, and the dashed orbit a released cargo would follow. Bottom panel: apparent gravity along the cable, falling from one g at the surface through zero at geostationary orbit and turning outward beyond it."></canvas>
+    <div class="row controls">
+      <div class="control">
+        <label for="alt">Climber position <span class="val" id="altv"></span></label>
+        <input type="range" id="alt" min="0" max="1000" value="0" step="1">
+      </div>
+      <div class="control">
+        <label for="spd">Climb speed <span class="val" id="spdv"></span></label>
+        <input type="range" id="spd" min="0" max="1000" value="0" step="1">
+      </div>
+    </div>
+    <div class="readout" id="ro"></div>
+    <div class="outcome" id="oc"></div>
+  </div>
+  <p class="fig-note"><b><i>Note.</i></b> Everything in the top panel is to one scale: the Earth's radius is 6,378 km, geostationary orbit is at a radius of 42,164 km (an altitude of 35,786 km), and the cable runs to a counterweight at 100,000 km, the baseline length of the Edwards (2003) study. The dashed curve is the exact orbit of a cargo released from the climber's current height, computed from the vis-viva relation with the cable's own tangential speed as the release velocity: below about 29,900 km of radius the orbit dips into the atmosphere and the cargo reenters, from there to GEO it is a stable ellipse, at GEO it is the circular orbit, and past 53,123 km the orbit is a hyperbola and the cargo escapes the Earth. The bottom panel plots apparent gravity along the cable, surface gravity times (R/r)² minus ω²r, on a square-root-compressed vertical scale so the zero crossing at GEO stays visible; teal is downward pull, coral is outward. The climb-time readout is the cable distance from the anchor divided by the chosen speed, with the Edwards climber's 200 km/h as the default. Created for Altazor.</p>
+
+  <section class="prose">
+    <h2>The one altitude that stands still</h2>
+    <p>A satellite in a circular orbit of radius r moves at the speed where gravity supplies exactly the needed centripetal pull, v² = GM/r. There is one radius where that orbital period equals the Earth's own rotation period, the sidereal day of 86,164 seconds: r = 42,164 km, geostationary orbit. A point of the cable at that height, turning with the planet, is in orbit already and needs no support. Below GEO the cable moves slower than orbital speed and hangs, pulling down on the anchor; above GEO it moves faster than orbital speed and is flung outward, pulling up. A cable long enough on the far side, or a counterweight, balances the books, and the whole structure stands in tension with no thrust at all (Pearson, 1975; Aravind, 2007).</p>
+
+    <h2>Gravity along the cable</h2>
+    <p>A climber riding the cable feels the difference between true gravity, g(R/r)², and the centrifugal term of the rotating cable, ω²r. That difference is the lower panel's curve: one g at the anchor, about a tenth of a g at 13,000 km of altitude, zero at GEO, and then a growing outward pull, reaching about 0.05 g outward at the 100,000 km counterweight. At GEO the climber floats. Past GEO, "down" points away from the Earth, and a climber continuing outward is descending in every sense that matters to its motors, which is why the outer cable can pay back energy the lower climb spent (Edwards, 2003).</p>
+
+    <h2>Letting go</h2>
+    <p>The cable is also a launcher. A cargo released at radius r is already moving at the cable's tangential speed ωr, and the orbit that follows is fixed by the vis-viva energy, half v squared minus GM over r. Released below a radius of about 29,900 km the resulting ellipse has its perigee inside the atmosphere and the cargo comes home the hard way. Released between there and GEO it settles into an ellipse with apogee at the release point. Released exactly at GEO it stays put. Released beyond GEO the perigee is behind it and the apogee climbs quickly, until at 53,123 km, the point marked on the cable, the orbital energy passes zero and the cargo escapes the Earth entirely, with hyperbolic excess speed growing the farther out it lets go. From the counterweight at 100,000 km the excess is about 6.7 km/s, enough, with timing, to reach most of the solar system without burning anything (Aravind, 2007).</p>
+
+    <h2>The idea's own orbit</h2>
+    <p>Yuri Artsutanov published the concept in Komsomolskaya Pravda in 1960 as an "electric locomotive to the cosmos," a cable lowered from a geostationary satellite and balanced outward (ISEC, n.d.). Jerome Pearson worked out the mechanics independently in 1975, including the taper a real cable needs, thickest at GEO where the load peaks, and the counterweight length that lets the anchor tension stay positive (Pearson, 1975). Arthur C. Clarke's <i>The Fountains of Paradise</i> (1979) built the first great fictional elevator on the island of Taprobane, a lightly displaced Sri Lanka, and Clarke liked to say the elevator would be built fifty years after everyone stopped laughing. Bradley Edwards's NIAC study (2003) made the engineering case for a 100,000 km carbon-nanotube ribbon with 200 km/h mechanical climbers, the numbers this page runs on: at that speed the ride to GEO takes about a week. Kim Stanley Robinson's <i>Red Mars</i> (1993) moved the elevator to Mars, anchored on Pavonis Mons because a Martian elevator wants an equatorial anchor and Pavonis is the one great mountain sitting on the equator; the same novel supplied this site's <a href="red-mars.html">map of the novel's Mars</a>, where the cable's fall in 2061 wraps the equator twice. The material remains the hard part: the taper ratio a cable needs grows exponentially with the ratio of required strength to density, and for steel it is astronomically large, for carbon nanotubes merely a challenge (Aravind, 2007).</p>
+
+    <h2 id="refs">References</h2>
+    <div class="refs">
+      <p>Aravind, P. K. (2007). The physics of the space elevator. <i>American Journal of Physics, 75</i>(2), 125–130. <a href="https://doi.org/10.1119/1.2404957">https://doi.org/10.1119/1.2404957</a></p>
+      <p>Edwards, B. C. (2003). <i>The space elevator: NIAC Phase II final report</i>. NASA Institute for Advanced Concepts. <a href="https://www.niac.usra.edu/files/studies/final_report/521Edwards.pdf">https://www.niac.usra.edu/files/studies/final_report/521Edwards.pdf</a></p>
+      <p>International Space Elevator Consortium. (n.d.). <i>A brief history of the space elevator</i>. <a href="https://www.isec.org/history">https://www.isec.org/history</a></p>
+      <p>Jet Propulsion Laboratory. (n.d.). <i>Astrodynamic parameters</i>. <a href="https://ssd.jpl.nasa.gov/astro_par.html">https://ssd.jpl.nasa.gov/astro_par.html</a></p>
+      <p>Pearson, J. (1975). The orbital tower: A spacecraft launcher using the Earth's rotational energy. <i>Acta Astronautica, 2</i>(9–10), 785–799. <a href="https://doi.org/10.1016/0094-5765(75)90021-1">https://doi.org/10.1016/0094-5765(75)90021-1</a></p>
+    </div>
+  </section>
+</main>
+<footer>Part of Altazor.</footer>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const cv=$('cv'),ctx=cv.getContext('2d');let W=1000,H=560;
+const C={text:'#e6e6e6',muted:'#9a9a9a',line:'#2b2b2b',panel2:'#202020',gold:'#e4a01b',teal:'#3fb6ad',coral:'#e0684b',violet:'#9b8cf0'};
+
+// constants (km, s): JPL astrodynamic parameters
+const MU=398600.4418, RE=6378.137, DAY=86164.0905, OM=2*Math.PI/DAY;
+const RGEO=Math.cbrt(MU/(OM*OM));          // 42164.17 km
+const RESC=Math.cbrt(2)*RGEO;              // 53122.6 km, escape release radius
+const RTOP=100000, G0=MU/(RE*RE)*1000;     // m/s^2 at the surface
+const ATM=RE+100;                          // reentry line, 100 km
+
+const S={r:RGEO, v:200};                   // climber radius (km), speed (km/h)
+
+// apparent gravity, m/s^2, positive toward the Earth
+function grav(r){return 1000*(MU/(r*r)-OM*OM*r);}
+
+// exact release orbit from radius r with tangential speed w*r
+function orbit(r){
+  const v=OM*r, eps=v*v/2-MU/r, h=v*r;
+  const e=Math.sqrt(Math.max(0,1+2*eps*h*h/(MU*MU)));
+  const p=h*h/MU;                          // semi-latus rectum
+  const rp=p/(1+e), ra=e<1?p/(1-e):Infinity;
+  let kind;
+  if(Math.abs(r-RGEO)<1) kind='geo';
+  else if(eps>=0) kind='escape';
+  else if(rp<=ATM) kind='reenter';
+  else kind='ellipse';
+  return {v,eps,e,p,rp,ra,kind,vinf:eps>0?Math.sqrt(2*eps):0};
+}
+
+// ---- layout ----
+function fit(){const rect=cv.getBoundingClientRect();const dpr=window.devicePixelRatio||1;W=rect.width;
+  H=W<560?Math.round(W*1.2):Math.round(Math.max(420,Math.min(600,W*0.56)));
+  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cv.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);}
+function txt(s,x,y,o={}){ctx.font=(o.w||400)+' '+(o.s||12)+'px "IBM Plex Sans",system-ui,sans-serif';ctx.fillStyle=o.c||C.muted;ctx.textAlign=o.a||'left';ctx.textBaseline=o.b||'alphabetic';ctx.fillText(s,x,y);}
+function line(pts,c,w,dash){if(pts.length<2)return;ctx.beginPath();ctx.strokeStyle=c;ctx.lineWidth=w||1.2;ctx.setLineDash(dash||[]);pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.setLineDash([]);}
+function dot(x,y,r,c){ctx.beginPath();ctx.arc(x,y,r,0,6.2832);ctx.fillStyle=c;ctx.fill();}
+function fmt(x,d){return x.toLocaleString(undefined,{maximumFractionDigits:d,minimumFractionDigits:d});}
+
+// ---- top panel: the cable to scale ----
+function drawCable(y0,ph){
+  const pad=14, sc=(W-2*pad-40)/(RTOP+RE+6000);   // km -> px
+  const cx=pad+RE*sc+20, cy=y0+ph*0.5;            // Earth's center
+  const X=r=>cx+r*sc;
+  txt('To scale: the Earth, the cable, and the release orbit',pad+4,y0+16,{c:C.text,w:600,s:13});
+  // released orbit, drawn first so the cable sits on top
+  const ob=orbit(S.r);
+  if(ob.kind!=='geo'){
+    ctx.save();ctx.beginPath();ctx.rect(0,y0,W,ph);ctx.clip();
+    const col=ob.kind==='reenter'?C.coral:ob.kind==='escape'?C.violet:C.teal;
+    // release at angle 0, velocity +y: e vector lies on the x axis
+    const sgn=S.r>=RGEO?1:-1;                     // periapsis toward +x above GEO
+    const pts=[];
+    const numax=ob.e<1?Math.PI:Math.acos(-1/ob.e)-0.06;
+    for(let i=-180;i<=180;i++){
+      const nu=numax*i/180, rr=ob.p/(1+ob.e*Math.cos(nu));
+      if(rr<0||rr>4*RTOP) continue;
+      const th=sgn>0?nu:nu+Math.PI;              // rotate so release lands at angle 0
+      pts.push([cx+rr*Math.cos(th)*sc, cy-rr*Math.sin(th)*sc]);
+    }
+    line(pts,col,1.6,[6,5]);
+    ctx.restore();
+  }
+  // Earth
+  ctx.beginPath();ctx.arc(cx,cy,RE*sc,0,6.2832);ctx.fillStyle='rgba(63,182,173,.18)';ctx.fill();
+  ctx.beginPath();ctx.arc(cx,cy,RE*sc,0,6.2832);ctx.strokeStyle=C.teal;ctx.lineWidth=1.4;ctx.stroke();
+  txt('Earth',cx,cy+RE*sc+14,{a:'center',s:11});
+  // cable
+  line([[X(RE),cy],[X(RTOP),cy]],C.text,1.6);
+  // marks
+  const mark=(r,name,above)=>{line([[X(r),cy-7],[X(r),cy+7]],C.gold,1.4);
+    txt(name,X(r),above?cy-12:cy+20,{a:'center',s:11,c:C.muted});};
+  mark(RGEO,'GEO 42,164 km',true);
+  mark(RESC,'escape 53,123 km',false);
+  mark(RTOP,'counterweight',true);
+  // climber
+  dot(X(S.r),cy,5,C.gold);
+}
+
+// ---- bottom panel: apparent gravity ----
+function drawGrav(y0,ph){
+  const pad=14, sc=(W-2*pad-40)/(RTOP+RE+6000), cx=pad+RE*sc+20;
+  const X=r=>cx+r*sc;
+  txt('Apparent gravity along the cable (sqrt-compressed scale)',pad+4,y0+16,{c:C.text,w:600,s:13});
+  const y1=y0+26, hh=ph-38;
+  const gmax=Math.sqrt(G0);
+  const Y=a=>{const s=Math.sign(a)*Math.sqrt(Math.abs(a));return y1+hh*0.62*(1-s/gmax)-hh*0.0;};
+  const y0g=Y(0);
+  line([[X(RE),y0g],[X(RTOP),y0g]],C.line,1);
+  txt('zero at GEO',X(RGEO)+6,y0g-5,{s:11});
+  line([[X(RGEO),y1],[X(RGEO),y1+hh]],C.line,1,[3,4]);
+  const down=[],out=[];
+  for(let i=0;i<=400;i++){
+    const r=RE+(RTOP-RE)*i/400, a=grav(r), pt=[X(r),Y(a)];
+    (a>=0?down:out).push(pt);
+  }
+  line(down,C.teal,1.8); line(out,C.coral,1.8);
+  txt('1 g down',X(RE)+6,Y(G0)+14,{s:11,c:C.teal});
+  txt('outward past GEO',X(RTOP)-4,Y(grav(RTOP))-8,{s:11,c:C.coral,a:'right'});
+  const a=grav(S.r);
+  dot(X(S.r),Y(a),5,C.gold);
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  const split=Math.round(H*0.56);
+  drawCable(0,split);
+  drawGrav(split,H-split);
+}
+
+// ---- readouts ----
+function fmtTime(hr){
+  if(hr<48) return fmt(hr,1)+' h';
+  return fmt(hr/24,1)+' days';
+}
+function update(){
+  const alt=S.r-RE, ob=orbit(S.r), a=grav(S.r);
+  $('altv').textContent=fmt(alt,0)+' km altitude';
+  $('spdv').textContent=fmt(S.v,0)+' km/h';
+  $('ro').innerHTML=
+    '<div>radius from center<b>'+fmt(S.r,0)+' km</b></div>'+
+    '<div>cable speed there<b>'+fmt(ob.v,2)+' km/s</b></div>'+
+    '<div>apparent gravity<b>'+(Math.abs(a)<0.005?'0.00':fmt(Math.abs(a),2))+' m/s² '+(Math.abs(a)<0.005?'(floating)':a>0?'down':'outward')+'</b></div>'+
+    '<div>climb from anchor<b>'+fmtTime(alt/S.v)+'</b></div>';
+  let t;
+  if(ob.kind==='geo') t='<b>Released at GEO:</b> the cargo is in circular geostationary orbit already, and stays exactly where it was let go.';
+  else if(ob.kind==='reenter') t='<b>Released here:</b> the orbit is an ellipse with its low point '+(ob.rp<RE?'below the ground':'at '+fmt(ob.rp-RE,0)+' km, inside the atmosphere')+'. The cargo reenters.';
+  else if(ob.kind==='ellipse') t='<b>Released here:</b> a stable ellipse, perigee at '+fmt(ob.rp-RE,0)+' km and apogee at '+fmt(ob.ra-RE,0)+' km of altitude.';
+  else t='<b>Released here:</b> the orbit is a hyperbola. The cargo escapes the Earth with an excess speed of '+fmt(ob.vinf,2)+' km/s.';
+  $('oc').innerHTML=t;
+  draw();
+}
+
+// ---- controls ----
+const rFrom=x=>RE+(RTOP-RE)*x/1000, rTo=r=>Math.round((r-RE)/(RTOP-RE)*1000);
+const vFrom=x=>20+x*(980/1000), vTo=v=>Math.round((v-20)/980*1000);
+$('alt').value=rTo(S.r); $('spd').value=vTo(S.v);
+$('alt').addEventListener('input',e=>{S.r=rFrom(+e.target.value);press(null);update();});
+$('spd').addEventListener('input',e=>{S.v=vFrom(+e.target.value);update();});
+const PRE={pSurf:RE,pLeo:RE+400,pGeo:RGEO,pEsc:RESC,pTop:RTOP};
+function press(id){for(const k in PRE)$(k).setAttribute('aria-pressed',String(k===id));}
+for(const k in PRE)$(k).onclick=()=>{S.r=PRE[k];$('alt').value=rTo(S.r);press(k);update();};
+
+addEventListener('resize',()=>{fit();draw();});
+fit();update();
+
+window.__elev=()=>({r:S.r,v:S.v,RGEO,RESC,grav:grav(S.r),orbit:orbit(S.r)});
+})();
+</script>
+</body>
+</html>
