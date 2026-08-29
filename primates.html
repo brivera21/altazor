@@ -44,7 +44,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <div class="wrap">
 <header class="site">
   <a class="brand" href="index.html">ALTAZOR</a>
-  <nav class="site"><a href="library.html">&larr; Library</a> <a href="mammals.html">Mammals</a></nav>
+  <nav class="site"><a href="library.html">&larr; Library</a> <a href="mammals.html">Mammals</a> <a href="hominins.html">Hominins</a></nav>
 </header>
 <h1>Primates</h1>
 <div class="stage">
@@ -102,8 +102,12 @@ function draw(n){
   }
   let lab;
   if(n.k){
-    lab=`<text x="${x+7}" y="${n.y-7}" font-size="12.5"
-      fill="${n.hl?'var(--hl)':'#9a9a9a'}">${esc(n.n)}</text>`;
+    lab = n.depth===0
+      ? `<text x="${x+7}" y="${n.y-7}" font-size="12.5"
+          fill="${n.hl?'var(--hl)':'#9a9a9a'}">${esc(n.n)}</text>`
+      : `<text x="${x-8}" y="${n.y+4}" text-anchor="end" font-size="12.5"
+          fill="${n.hl?'var(--hl)':'#9a9a9a'}" stroke="#121212"
+          stroke-width="3" paint-order="stroke">${esc(n.n)}</text>`;
   } else {
     const u=IMG[n.n], tx=u?x+16+TH:x+9;
     lab=(u?`<image href="${u}" x="${x+10}" y="${n.y-TH/2}" width="${TH}"
