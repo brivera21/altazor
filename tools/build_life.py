@@ -731,7 +731,7 @@ h1 { margin:0 0 6px; font-size:26px; }
 .side { flex:0 0 300px; position:sticky; top:16px; }
 .card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
   padding:16px; }
-#cardImg { width:100%; height:170px; object-fit:cover; border-radius:8px;
+#cardImg { width:100%; height:170px; object-fit:cover; object-position:top; border-radius:8px;
   border:1px solid var(--line); margin-bottom:10px; display:none; background:#0d0d0d; }
 #nameTxt { font-weight:700; font-size:17px; }
 #cntTxt { color:var(--hl); font-size:13px; margin-top:2px; }
@@ -809,7 +809,7 @@ function draw(n){
   } else {
     const u=IMG[n.n], tx=u?x+16+TH:x+9;
     lab=(u?`<image href="${u}" x="${x+10}" y="${n.y-TH/2}" width="${TH}"
-        height="${TH}" preserveAspectRatio="xMidYMid slice"/>
+        height="${TH}" preserveAspectRatio="xMidYMin slice"/>
       <rect x="${x+10}" y="${n.y-TH/2}" width="${TH}" height="${TH}"
         fill="none" stroke="#2b2b2b" stroke-width="1"/>`:'')
       +`<text x="${tx}" y="${n.y+4.5}" font-size="13.5" font-weight="${n.hl?700:400}"
