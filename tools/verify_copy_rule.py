@@ -124,7 +124,11 @@ COPY_JS = """() => {
   return out;
 }"""
 
-pages = sorted(p.name for p in ROOT.glob("*.html"))
+# Pages ported whole from the lab site's Digital Concepts keep that
+# library's fuller notes and are not held to the Altazor copy rule.
+PORTED = {"oneill-ring.html", "generation-starship.html",
+          "hard-scifi-timeline.html"}
+pages = sorted(p.name for p in ROOT.glob("*.html") if p.name not in PORTED)
 fails, notes = [], []
 
 try:
