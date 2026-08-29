@@ -751,7 +751,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <div class="wrap">
 <header class="site">
   <a class="brand" href="index.html">ALTAZOR</a>
-  <nav class="site"><a href="library.html">&larr; Library</a>__XNAV__</nav>
+  <nav class="site"><a href="library.html">&larr; Library &middot; Life</a>__XNAV__</nav>
 </header>
 <h1>__TITLE__</h1>
 <div class="stage">
@@ -769,7 +769,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <div class="refs">__REFS__</div>
 </div>
 <script>
-const ROOT=__DATA__;
+const ROOT=__DATA__, UP=__UP__;
 const el=document.getElementById('diagram');
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
 
@@ -778,7 +778,7 @@ const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const tips=[]; let maxd=0;
 (function walk(n,d){ n.depth=d; maxd=Math.max(maxd,d);
   if(n.k) n.k.forEach(c=>walk(c,d+1)); else tips.push(n); })(ROOT,0);
-const RS=42, PADT=28, PADB=16, PADL=16, PADR=300, TH=34;
+const RS=42, PADT=UP?62:28, PADB=16, PADL=16, PADR=300, TH=34;
 const W=1010, H=PADT+PADB+RS*tips.length;
 tips.forEach((t,i)=>{ t.y=PADT+RS*(i+0.5); });
 (function place(n){ if(n.k){ n.k.forEach(place);
@@ -826,9 +826,21 @@ function draw(n){
     ${lab}</g>`;
   return s;
 }
+function upNode(){
+  if(!UP) return '';
+  const x=X(0), y=20;
+  return `<path d="M${x},${ROOT.y} L${x},${y+8}" fill="none" stroke="#3d444d"
+      stroke-width="1.6" stroke-dasharray="4 4"/>
+    <g data-href="${UP.href}" style="cursor:pointer">
+      <rect x="${x-10}" y="${y-11}" width="${UP.label.length*8+40}" height="24"
+        fill="transparent"/>
+      <circle cx="${x}" cy="${y}" r="4.5" fill="var(--accent)"/>
+      <text x="${x+10}" y="${y+4.5}" font-size="13" fill="var(--accent)"
+        >\u2191 ${UP.label}</text></g>`;
+}
 function render(){
   el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
-    id="treesvg">`+draw(ROOT)+'</svg>';
+    id="treesvg">`+draw(ROOT)+upNode()+'</svg>';
 }
 let current='n0', pinned=null;
 function show(id){
@@ -848,6 +860,8 @@ el.addEventListener('pointerover',e=>{
   if(g) show(g.getAttribute('data-id'));
 });
 el.addEventListener('click',e=>{
+  const up=e.target.closest('[data-href]');
+  if(up){ location.href=up.getAttribute('data-href'); return; }
   const g=e.target.closest('[data-id]');
   if(g){
     const id=g.getAttribute('data-id');
@@ -902,6 +916,15 @@ def refs_html(refs):
     return "\n".join(out)
 
 
+# the tree each page's root grows out of, drawn as a clickable node
+UPLINK = {
+    "tree-of-life.html": None,
+    "animals.html": {"href": "tree-of-life.html", "label": "Tree of Life"},
+    "mammals.html": {"href": "animals.html", "label": "Animals"},
+    "primates.html": {"href": "mammals.html", "label": "Mammals"},
+    "hominins.html": {"href": "primates.html", "label": "Primates"},
+}
+
 XNAV = {
     "tree-of-life.html": ' <a href="animals.html">Animals</a>',
     "animals.html": (' <a href="tree-of-life.html">Tree of Life</a>'
@@ -918,6 +941,7 @@ for fname, title, data, note, refs in PAGES:
             .replace("__XNAV__", XNAV[fname])
             .replace("__NOTE__", note)
             .replace("__REFS__", refs_html(refs))
-            .replace("__DATA__", json.dumps(data, separators=(",", ":"))))
+            .replace("__DATA__", json.dumps(data, separators=(",", ":")))
+            .replace("__UP__", json.dumps(UPLINK[fname])))
     (ROOT / fname).write_text(html, encoding="utf-8")
     print(f"wrote {ROOT / fname} ({len(html):,} bytes)")
