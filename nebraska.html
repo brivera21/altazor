@@ -258,7 +258,9 @@ async function setYear(y){
   if(u){ img.src=u; img.style.display='block'; none.hidden=true; }
   else{ img.style.display='none'; none.hidden=false;
     none.textContent=era.f?'flag unavailable':'No flag: the nations\u2019 own land'; }
-  const cen=interp(CEN,y), nat=interp(HIST.native,y);
+  const cen=interp(CEN,y);
+  const natLast=HIST.native.length?HIST.native[HIST.native.length-1][0]:0;
+  const nat=y<=natLast?interp(HIST.native,y):null;
   let t=[];
   if(cen!=null) t.push((y>=(HIST.census[0][0])?'Census (interpolated): ':'Colonial estimate: ')+fmt(cen));
   else t.push('Before the counts: '+HIST.pre);
