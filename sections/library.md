@@ -42,6 +42,7 @@ title: Library
 <div>
 <h2>Life</h2>
 <p><a href="tree-of-life.html">Tree of Life</a></p>
+<p><a href="animals.html">Animals</a></p>
 <p><a href="mammals.html">Mammals</a></p>
 <p><a href="primates.html">Primates</a></p>
 </div>
