@@ -84,6 +84,20 @@ with sync_playwright() as pw:
             "return document.querySelectorAll('#treesvg image').length===1"
             " && document.getElementById('cardImg').style.display==='block';})()")
         check("a stubbed thumbnail draws at its tip and in the card", drew)
+        # click pins the card against hover; a second click lets go
+        tid = pg.evaluate(f"tips.find(t=>t.n==={c['stub']!r}).id")
+        other = pg.evaluate(f"tips.find(t=>t.n!=={c['stub']!r}).id")
+        pg.click(f'[data-id="{tid}"]')
+        pg.hover(f'[data-id="{other}"]')
+        pg.wait_for_timeout(120)
+        held = pg.evaluate("document.getElementById('nameTxt').textContent")
+        pg.click(f'[data-id="{tid}"]')
+        pg.hover(f'[data-id="{other}"]')
+        pg.wait_for_timeout(120)
+        moved = pg.evaluate("document.getElementById('nameTxt').textContent")
+        check("a click pins the card and a second click lets go",
+              held == c["stub"] and moved != c["stub"],
+              f"held={held} moved={moved}")
         html = (ROOT / fname).read_text(encoding="utf-8")
         check(f"cites {c['doi']}", c["doi"] in html)
         check("credits Wikipedia for the images", "en.wikipedia.org" in html)

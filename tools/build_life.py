@@ -537,7 +537,8 @@ PAGES = [
      "living groups at the right; branch lengths carry no time information. "
      "The eukaryotes are drawn where current evidence places them, beside "
      "the Asgard archaea inside the archaeal branch, which turns Woese's "
-     "three domains into two. A node under the cursor fills the card."
+     "three domains into two. A node under the cursor fills the card; "
+     "a click pins it, and a second click lets go."
      + IMG_NOTE,
      [("Woese, C. R., Kandler, O., & Wheelis, M. L. (1990). Towards a "
        "natural system of organisms: Proposal for the domains Archaea, "
@@ -570,7 +571,7 @@ PAGES = [
      "species from Zhang's 2013 census. The comb jellies branch first, the "
      "placement chromosome-scale genomes settled in 2023, and the fishes "
      "are drawn as one grade of several branches. A node under the cursor "
-     "fills the card." + IMG_NOTE,
+     "fills the card; a click pins it, and a second click lets go." + IMG_NOTE,
      [("Schultz, D. T., Haddock, S. H. D., Bredeson, J. V., Green, R. E., "
        "Simakov, O., & Rokhsar, D. S. (2023). Ancient gene linkages support "
        "ctenophores as sister to other animals. <i>Nature, 618</i>, "
@@ -596,7 +597,8 @@ PAGES = [
      "information, and species counts are the Mammal Diversity Database's, "
      "rounded. The root inside the placentals is drawn with Afrotheria "
      "branching first, one of two arrangements the genomes still allow. A "
-     "node under the cursor fills the card." + IMG_NOTE,
+     "node under the cursor fills the card; a click pins it, and a second "
+     "click lets go." + IMG_NOTE,
      [("Burgin, C. J., Colella, J. P., Kahn, P. L., & Upham, N. S. (2018). "
        "How many species of mammals are there? <i>Journal of Mammalogy, "
        "99</i>(1), 1-14.", "https://doi.org/10.1093/jmammal/gyx147"),
@@ -623,7 +625,8 @@ PAGES = [
      "great apes at the right; branch lengths carry no time information. "
      "The human line sits beside the chimpanzees and bonobos, from whom it "
      "parted roughly six to eight million years ago. A node under the "
-     "cursor fills the card." + IMG_NOTE,
+     "cursor fills the card; a click pins it, and a second click lets go."
+     + IMG_NOTE,
      [("Perelman, P., Johnson, W. E., Roos, C., Seuanez, H. N., Horvath, "
        "J. E., Moreira, M. A. M., Kessing, B., Pontius, J., Roelke, M., "
        "Rumpler, Y., Schneider, M. P. C., Silva, A., O'Brien, S. J., & "
@@ -651,9 +654,9 @@ PAGES = [
      "branch of Homo down to the three that overlapped last, with fossil "
      "date ranges beside each species (Ma, millions of years ago; ka, "
      "thousands). Polytomies mark relationships the fossils leave "
-     "unresolved, and the interbreeding among Neanderthals, Denisovans and "
-     "Homo sapiens, which a tree cannot draw, lives in the cards. A node "
-     "under the cursor fills the card." + HOM_IMG_NOTE,
+     "unresolved, and X. A node "
+     "under the cursor fills the card; a click pins it, and a second click "
+     "lets go." + HOM_IMG_NOTE,
      [("Smithsonian National Museum of Natural History. (n.d.). Human "
        "origins: Species. Human Origins Program.",
        "https://humanorigins.si.edu/evidence/human-fossils/species"),
@@ -812,7 +815,10 @@ function draw(n){
       +`<text x="${tx}" y="${n.y+4.5}" font-size="13.5" font-weight="${n.hl?700:400}"
       fill="${col}">${esc(n.n)}${n.c?` <tspan fill="#6b7280" font-size="11.5" font-weight="400">${esc(n.c)}</tspan>`:''}</text>`;
   }
-  s+=`<g data-id="${n.id}" style="cursor:default">
+  s+=`<g data-id="${n.id}" style="cursor:pointer">
+    ${n.id===pinned?`<circle cx="${x}" cy="${n.y}" r="9.5" fill="none"
+      stroke="${n.hl?'var(--hl)':'var(--accent)'}" stroke-width="1.6"
+      opacity="0.9"/>`:''}
     <circle cx="${x}" cy="${n.y}" r="${n.k?4:4.5}"
       fill="${n.hl?'var(--hl)':(n.k?'#121212':'#58a6ff')}"
       stroke="${n.hl?'var(--hl)':'#58a6ff'}" stroke-width="1.6"/>
@@ -824,7 +830,7 @@ function render(){
   el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
     id="treesvg">`+draw(ROOT)+'</svg>';
 }
-let current='n0';
+let current='n0', pinned=null;
 function show(id){
   const n=byId[id]; if(!n) return;
   current=id;
@@ -837,8 +843,18 @@ function show(id){
   else img.style.display='none';
 }
 el.addEventListener('pointerover',e=>{
+  if(pinned) return;
   const g=e.target.closest('[data-id]');
   if(g) show(g.getAttribute('data-id'));
+});
+el.addEventListener('click',e=>{
+  const g=e.target.closest('[data-id]');
+  if(g){
+    const id=g.getAttribute('data-id');
+    pinned = pinned===id ? null : id;
+    show(id);
+  } else pinned=null;
+  render();
 });
 
 // photos: each node's Wikipedia article summary thumbnail, first
@@ -872,7 +888,7 @@ show('n0');
 loadImages();
 window.__tree=()=>({tips:tips.length, depth:maxd,
   nodes:Object.keys(byId).length, h:H, imgs:Object.keys(IMG).length,
-  tipImgs:tips.filter(t=>IMG[t.n]).length});
+  tipImgs:tips.filter(t=>IMG[t.n]).length, pinned, current});
 </script>
 </body>
 </html>
