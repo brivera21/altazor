@@ -41,6 +41,14 @@ HIST["ca"] = {
         {"y0": 1911, "y1": 2026, "l": "State flag adopted 1911", "f": {"a": "Flag of California"}},
     ],
     "marks": [{"y": 1850, "l": "Statehood, 31st state"}],
+    "border": 1850,
+    "nb": [
+        {"n": "Oregon", "lat": 42.18, "lon": -120.5},
+        {"n": "Nevada", "lat": 39.2, "lon": -116.9},
+        {"n": "Arizona", "lat": 34.3, "lon": -114.02, "v": True},
+        {"n": "Baja California", "lat": 32.32, "lon": -115.9},
+        {"n": "Pacific Ocean", "lat": 35.6, "lon": -123.4, "sea": True},
+    ],
     "pre": "Pre-contact population of the California area: about 310,000 "
            "(Cook), with scholarly estimates from 133,000 (Kroeber) to "
            "well above 300,000.",
@@ -101,6 +109,16 @@ HIST["pa"] = {
         {"y0": 1907, "y1": 2026, "l": "State flag standardized 1907", "f": {"a": "Flag of Pennsylvania"}},
     ],
     "marks": [{"y": 1787, "l": "Statehood, 2nd state"}],
+    "border": 1792,
+    "nb": [
+        {"n": "New York", "lat": 42.45, "lon": -76.6},
+        {"n": "New Jersey", "lat": 40.55, "lon": -74.5, "v": True},
+        {"n": "Delaware", "lat": 39.55, "lon": -75.55},
+        {"n": "Maryland", "lat": 39.52, "lon": -77.3},
+        {"n": "West Virginia", "lat": 39.52, "lon": -79.62},
+        {"n": "Ohio", "lat": 41.0, "lon": -80.72, "v": True},
+        {"n": "Lake Erie", "lat": 42.45, "lon": -80.15, "sea": True},
+    ],
     "pre": "No single scholarly total exists for the Pennsylvania area: the "
            "Susquehannock are put at 5,000 to 8,000 around 1600, and all of "
            "Lenapehoking (Pennsylvania to New York) at 7,500 to 15,000.",
@@ -156,6 +174,15 @@ HIST["ma"] = {
         {"y0": 1908, "y1": 2026, "l": "State flag adopted 1908", "f": {"a": "Flag of Massachusetts"}},
     ],
     "marks": [{"y": 1788, "l": "Statehood, 6th state"}],
+    "border": 1820,
+    "nb": [
+        {"n": "Vermont", "lat": 43.05, "lon": -72.9},
+        {"n": "New Hampshire", "lat": 43.05, "lon": -71.4},
+        {"n": "New York", "lat": 42.2, "lon": -73.68, "v": True},
+        {"n": "Connecticut", "lat": 41.75, "lon": -72.7},
+        {"n": "Rhode Island", "lat": 41.62, "lon": -71.5},
+        {"n": "Atlantic Ocean", "lat": 41.15, "lon": -69.95, "sea": True},
+    ],
     "pre": "Around 1600 New England held on the order of 100,000 Native "
            "people; the Wampanoag alone are put as high as 40,000 before "
            "the epidemics, with older tribal estimates far lower.",
@@ -208,6 +235,14 @@ HIST["al"] = {
         {"y0": 1813, "y1": 1819, "l": "United States (Alabama Territory 1817)", "f": US},
         {"y0": 1819, "y1": 1895, "l": "State of Alabama, 1819", "f": US},
         {"y0": 1895, "y1": 2026, "l": "State flag adopted 1895", "f": {"a": "Flag of Alabama"}},
+    ],
+    "border": 1819,
+    "nb": [
+        {"n": "Tennessee", "lat": 35.25, "lon": -86.7},
+        {"n": "Georgia", "lat": 33.2, "lon": -84.75},
+        {"n": "Florida", "lat": 30.55, "lon": -85.9},
+        {"n": "Mississippi", "lat": 32.6, "lon": -88.62, "v": True},
+        {"n": "Gulf of Mexico", "lat": 30.02, "lon": -87.9, "sea": True},
     ],
     "pre": "The Mississippian center at Moundville held 1,000 to 3,000 "
            "people with some 10,000 in its valley around 1300. At removal "
@@ -264,6 +299,15 @@ HIST["ne"] = {
         {"y0": 1867, "y1": 1925, "l": "State of Nebraska, 1867", "f": US},
         {"y0": 1925, "y1": 2026, "l": "State banner 1925, official flag 1963", "f": {"a": "Flag of Nebraska"}},
     ],
+    "border": 1867,
+    "nb": [
+        {"n": "South Dakota", "lat": 43.18, "lon": -100.0},
+        {"n": "Iowa", "lat": 41.9, "lon": -95.45},
+        {"n": "Missouri", "lat": 40.05, "lon": -95.12, "v": True},
+        {"n": "Kansas", "lat": 39.8, "lon": -98.5},
+        {"n": "Colorado", "lat": 40.55, "lon": -103.3},
+        {"n": "Wyoming", "lat": 42.1, "lon": -104.24, "v": True},
+    ],
     "pre": "Around 1800 the Pawnee alone counted roughly 10,000 to 20,000 "
            "people, the Omaha about 4,000 before the 1800 smallpox, the "
            "Ponca and Otoe-Missouria in the hundreds each.",
@@ -314,6 +358,15 @@ HIST["mn"] = {
         {"y0": 1858, "y1": 1957, "l": "State of Minnesota, 1858", "f": US},
         {"y0": 1957, "y1": 2024, "l": "State flag of 1957, revised 1983", "f": {"c": "Flag of Minnesota (1957-1983).svg"}},
         {"y0": 2024, "y1": 2026, "l": "New state flag adopted May 11, 2024", "f": {"a": "Flag of Minnesota"}},
+    ],
+    "border": 1858,
+    "nb": [
+        {"n": "Canada", "lat": 49.55, "lon": -95.3},
+        {"n": "North Dakota", "lat": 47.5, "lon": -97.42, "v": True},
+        {"n": "South Dakota", "lat": 44.6, "lon": -96.98},
+        {"n": "Iowa", "lat": 43.32, "lon": -94.3},
+        {"n": "Wisconsin", "lat": 44.9, "lon": -91.2},
+        {"n": "Lake Superior", "lat": 47.6, "lon": -90.2, "sea": True},
     ],
     "pre": "The eastern Dakota alone counted more than 7,000 people in "
            "1862; no reliable statewide early figure exists, and the "
@@ -518,13 +571,6 @@ let year=1492, playing=false, pinned=null;
 function ringsPath(rr){ return rr.map(r=>'M'+r.map(p=>p[0]+','+p[1]).join('L')+'Z').join(''); }
 const outlineD=ringsPath(ST.outline);
 
-const maxPop=Math.max(...ST.counties.map(c=>c.p||1));
-function couColor(p){
-  if(!p) return '#20262d';
-  const t=Math.log(p)/Math.log(maxPop);
-  const l=18+t*40;
-  return 'hsl(210,45%,'+l.toFixed(0)+'%)';
-}
 function fmt(x){ return x==null?'?':x.toLocaleString('en-US'); }
 // growing city circle: 0 below 10,000, then log-scaled to 20 million
 function cityR(p){ if(!p||p<1e4) return 0;
@@ -536,17 +582,28 @@ function render(){
   s+='<path d="'+outlineD+'" fill="'+(layers.ter||layers.woo?'none':'#1d2126')+'" stroke="none"/>';
   if(layers.cou){
     ST.counties.forEach((c,i)=>{
-      s+='<g data-cty="'+i+'"><path d="'+ringsPath(c.r)+'" fill="'+couColor(c.p)+'" fill-opacity="0.72" stroke="#0e1114" stroke-width="0.7"/></g>';
+      s+='<g data-cty="'+i+'"><path d="'+ringsPath(c.r)+'" fill="rgba(0,0,0,0)" stroke="#e6e6e6" stroke-opacity="0.75" stroke-width="0.8"/></g>';
     });
   }
   if(layers.lak) for(const l of ST.lakes)
-    s+='<path d="'+ringsPath(l.r)+'" fill="var(--water)" fill-opacity="0.85" stroke="none" clip-path="url(#stclip)"/>';
+    s+='<path d="'+ringsPath(l.r)+'" fill="var(--water)" fill-opacity="0.85" stroke="none"/>';
   if(layers.riv) for(const r of ST.rivers){
     const wdt=r.n?1.6:0.9;
     for(const seg of r.s)
-      s+='<path d="M'+seg.map(p=>p[0]+','+p[1]).join('L')+'" fill="none" stroke="var(--water)" stroke-width="'+wdt+'" stroke-opacity="'+(r.n?0.95:0.55)+'" clip-path="url(#stclip)"/>';
+      s+='<path d="M'+seg.map(p=>p[0]+','+p[1]).join('L')+'" fill="none" stroke="var(--water)" stroke-width="'+wdt+'" stroke-opacity="'+(r.n?0.95:0.55)+'"/>';
   }
-  s+='<path d="'+outlineD+'" fill="none" stroke="#c9d1d9" stroke-width="1.6"/>';
+  // the state border is drawn only once it existed
+  if(year>=HIST.border)
+    s+='<path d="'+outlineD+'" fill="none" stroke="#121212" stroke-width="3.4" stroke-opacity="0.75"/>'
+      +'<path d="'+outlineD+'" fill="none" stroke="#e6e6e6" stroke-width="1.7"/>';
+  for(const nb of (HIST.nb||[])){
+    if(!nb.sea&&year<HIST.border) continue;
+    const [x,y]=XY(nb.lat,nb.lon);
+    const rot=nb.v?' transform="rotate(-90 '+x.toFixed(1)+' '+y.toFixed(1)+')"':'';
+    s+= nb.sea
+      ?'<text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="12.5" font-style="italic" fill="var(--water)" fill-opacity="0.9" stroke="#121212" stroke-width="2.6" paint-order="stroke">'+esc(nb.n)+'</text>'
+      :'<text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="11.5" letter-spacing="2"'+rot+' fill="#9aa4ad" stroke="#121212" stroke-width="2.6" paint-order="stroke">'+esc(nb.n.toUpperCase())+'</text>';
+  }
   if(layers.ter&&HIST.geo&&HIST.geo.hp){
     const hp=HIST.geo.hp, [x,y]=XY(hp.lat,hp.lon);
     s+='<g data-hp="1"><path d="M'+x+','+(y-7)+' L'+(x-6)+','+(y+4)+' L'+(x+6)+','+(y+4)+' Z" fill="#e6e6e6" stroke="#121212" stroke-width="1"/>'
@@ -768,12 +825,6 @@ for(const id in CH) document.getElementById(id).onclick=e=>{
 // ---- terrain: AWS Terrain Tiles (terrarium), shaded and tinted ----
 let terDone=false, wooDone=false;
 const loadTxt=document.getElementById('loadTxt');
-function clipCtx(ctx,sc){
-  const p=new Path2D();
-  for(const r of ST.outline){ p.moveTo(r[0][0]*sc,r[0][1]*sc);
-    for(let i=1;i<r.length;i++) p.lineTo(r[i][0]*sc,r[i][1]*sc); p.closePath(); }
-  ctx.clip(p);
-}
 async function terrain(){
   if(terDone) return; terDone=true;
   const cv=document.getElementById('terC'); const SC=2;
@@ -810,6 +861,7 @@ async function terrain(){
     const out=octx.createImageData(px,py), o=out.data;
     for(let y2=0;y2<py;y2++)for(let x=0;x<px;x++){
       const i=y2*px+x, e=elev[i];
+      if(e<=0){ o[i*4]=30; o[i*4+1]=68; o[i*4+2]=98; o[i*4+3]=235; continue; }
       const t=Math.max(0,Math.min(1,(e-emin)/Math.max(1,emax-emin)));
       const ex=elev[y2*px+Math.min(px-1,x+1)], ey=elev[Math.min(py-1,y2+1)*px+x];
       const sh=Math.max(0,Math.min(1,0.5+((ex-e)+(e-ey))*0.012));
@@ -819,11 +871,9 @@ async function terrain(){
       o[i*4]=r0*(0.55+0.65*sh); o[i*4+1]=g0*(0.55+0.65*sh); o[i*4+2]=b0*(0.55+0.65*sh); o[i*4+3]=235;
     }
     octx.putImageData(out,0,0);
-    ctx.save(); clipCtx(ctx,SC);
     const sx=(MX0+world/2)/ts-tx0, sy=(world/2-MY1)/ts-ty0;
     ctx.drawImage(off, sx*256, sy*256, (MX1-MX0)/ts*256, (MY1-MY0)/ts*256,
       0, 0, W*SC, Math.round(H*SC));
-    ctx.restore();
     loadTxt.textContent='';
   }catch(e){ loadTxt.textContent='terrain unavailable'; }
 }
@@ -852,9 +902,7 @@ async function woods(){
       else d[i+3]=0;
     }
     octx.putImageData(img,0,0);
-    ctx.save(); clipCtx(ctx,SC);
     ctx.drawImage(off,0,0);
-    ctx.restore();
     loadTxt.textContent='';
   }catch(e){ loadTxt.textContent='land cover unavailable'; }
 }
@@ -876,10 +924,11 @@ NOTE1 = ("The map is the real state in Web Mercator: rivers and lakes from "
          "from the AWS Terrain Tiles, and the woods layer drawn from the "
          "USGS National Land Cover Database, forest classes only. Each "
          "chip turns one layer on or off; a mark under the cursor fills "
-         "the card, a click pins it.")
+         "the card, a click pins it. The border and neighbor names appear "
+         "once the border was drawn.")
 NOTE2 = ("The slider runs from 1492: the nations who lived here first as "
-         "colored patches, approximate homelands drawn for orientation "
-         "only, with population figures that are scholarly estimates, "
+         "colored patches, approximate homelands for orientation, their "
+         "population figures scholarly estimates, "
          "then the settlements, capitals and removals year by year, while "
          "the flag panel shows whose claim covered the land until the "
          "official state flag. City circles grow as census counts pass "

@@ -103,14 +103,16 @@ def main():
             g = shape(f["geometry"]).buffer(0)
             shapes[f["id"]] = (f["properties"]["NAME"], g)
         outline = unary_union([g for _, g in shapes.values()]).buffer(0)
-        # drop far-flung island slivers for the view box (keep CA islands)
         minx, miny, maxx, maxy = outline.bounds
-        pad = 0.35
+        # the view keeps a wide margin so the surrounding terrain, ocean
+        # and neighbor states show around the outline
+        VP = 0.30
+        pad = 0.60
         clipbox = box(minx - pad, miny - pad, maxx + pad, maxy + pad)
 
         # mercator view transform
-        mx0, my0 = merc(minx - 0.05, miny - 0.05)
-        mx1, my1 = merc(maxx + 0.05, maxy + 0.05)
+        mx0, my0 = merc(minx - VP, miny - VP)
+        mx1, my1 = merc(maxx + VP, maxy + VP)
         H = round(W * (my1 - my0) / (mx1 - mx0), 1)
 
         def XY(lon, lat):
@@ -127,7 +129,7 @@ def main():
             # mercator bbox for the client's terrain and land cover
             # overlays (EPSG:3857 metres), aligned 1:1 with the view
             "m": [mx0, my0, mx1, my1],
-            "ll": [minx - 0.05, miny - 0.05, maxx + 0.05, maxy + 0.05],
+            "ll": [minx - VP, miny - VP, maxx + VP, maxy + VP],
         }
         data["outline"] = enc_rings(outline, 0.008)
         data["counties"] = []
@@ -147,7 +149,7 @@ def main():
                     continue
                 name = (f["properties"].get("name") or "").strip()
                 g = shape(f["geometry"])
-                if not g.intersects(outline):
+                if not g.intersects(clipbox):
                     continue
                 clipped = g.intersection(clipbox)
                 if clipped.is_empty:
@@ -173,7 +175,7 @@ def main():
                 continue
             name = (f["properties"].get("name") or "").strip()
             g = shape(f["geometry"]).buffer(0)
-            if not g.intersects(outline.buffer(0.02)):
+            if not g.intersects(clipbox):
                 continue
             inter = g.intersection(clipbox)
             if inter.is_empty:

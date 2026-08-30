@@ -58,10 +58,19 @@ with sync_playwright() as pw:
         era0 = pg.evaluate("document.getElementById('eraTxt').textContent")
         none = pg.evaluate("!document.getElementById('flagNone').hidden")
         check("1492 shows the nations' land, no flag", none, era0)
-        # counties chip
+        # 1492: no state border, no neighbor-state names (seas may show)
+        ol = pg.evaluate("document.querySelectorAll('#map path[stroke=\"#e6e6e6\"][fill=\"none\"]').length")
+        nbn = pg.evaluate("HIST.nb.filter(n=>!n.sea).length")
+        nb0 = pg.evaluate("[...document.querySelectorAll('#map text')].filter(t=>t.getAttribute('letter-spacing')).length")
+        check("no border or neighbor names before the border", ol == 0 and nb0 == 0,
+              f"outline {ol}, names {nb0}")
+        # counties chip: borders only, see-through fill
         pg.click("#cCou"); pg.wait_for_timeout(200)
         n = pg.evaluate("document.querySelectorAll('[data-cty]').length")
         check(f"{c['cty']} counties drawn", n == c["cty"], str(n))
+        seethru = pg.evaluate(
+            "[...document.querySelectorAll('[data-cty] path')].every(p=>p.getAttribute('fill')==='rgba(0,0,0,0)')")
+        check("county borders only, no fill", seethru)
         haspop = pg.evaluate("ST.counties.every(x=>x.p>0)")
         check("every county carries a population", haspop)
         # rivers chip off removes rivers
@@ -90,6 +99,11 @@ with sync_playwright() as pw:
         check("a city circle grows over time", grow is True, str(grow))
         legend = pg.evaluate("document.querySelector('#map').innerHTML.includes('City population')")
         check("the circle legend is drawn", legend)
+        # 2020: the border is drawn and the neighbor names are up
+        ol = pg.evaluate("document.querySelectorAll('#map path[stroke=\"#e6e6e6\"][fill=\"none\"]').length")
+        nb1 = pg.evaluate("[...document.querySelectorAll('#map text')].filter(t=>t.getAttribute('letter-spacing')).length")
+        check("border and neighbor names drawn in 2020",
+              ol >= 1 and nb1 == nbn, f"outline {ol}, names {nb1}/{nbn}")
         # slider jump markers land on era boundaries
         tk = pg.evaluate("document.querySelectorAll('#ticks button').length")
         check("jump markers above the slider", tk >= 3, str(tk))
