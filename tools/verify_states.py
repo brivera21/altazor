@@ -36,6 +36,9 @@ CASES = {
     "nebraska.html": dict(cty=93,
         probe=("HIST.eras.some(e=>e.l.includes('Spain'))&&HIST.eras.some(e=>e.l.includes('France'))",
                "Spanish and French eras both present")),
+    "arizona.html": dict(cty=15,
+        probe=("HIST.events.some(e=>e.n==='The Long Walk'&&e.t==='rem')",
+               "the Long Walk is on the timeline")),
     "minnesota.html": dict(cty=87,
         probe=("HIST.events.some(e=>e.n==='Mankato executions'&&e.y===1862)",
                "the Mankato executions are on the timeline")),
@@ -68,7 +71,7 @@ with sync_playwright() as pw:
         pg.click("#cCou"); pg.wait_for_timeout(200)
         n0 = pg.evaluate("document.querySelectorAll('[data-cty]').length")
         check("no counties before any were founded", n0 == 0, str(n0))
-        hasy = pg.evaluate("ST.counties.every(x=>x.y>=1600&&x.y<=1930)")
+        hasy = pg.evaluate("ST.counties.every(x=>x.y>=1600&&x.y<=1990)")
         check("every county carries a founding year", hasy)
         haspop = pg.evaluate("ST.counties.every(x=>x.p>0)")
         check("every county carries a population", haspop)
@@ -94,7 +97,8 @@ with sync_playwright() as pw:
         check("city circles drawn in 2020", big >= 1, str(big))
         bulk_n = {"california.html": 55, "pennsylvania.html": 1,
                   "massachusetts.html": 4, "alabama.html": 0,
-                  "nebraska.html": 0, "minnesota.html": 1}[fname]
+                  "nebraska.html": 0, "minnesota.html": 1,
+                  "arizona.html": 6}[fname]
         bulk = pg.evaluate("document.querySelectorAll('#map [data-ct]').length")
         check("the 100,000-plus cities are all on the map",
               bulk >= bulk_n, f"{bulk} < {bulk_n}")
@@ -121,12 +125,35 @@ with sync_playwright() as pw:
         nb1 = pg.evaluate("[...document.querySelectorAll('#map text')].filter(t=>t.getAttribute('letter-spacing')).length")
         check("border and neighbor names drawn in 2020",
               ol >= 1 and nb1 == nbn, f"outline {ol}, names {nb1}/{nbn}")
+        # colleges chip: institutions appear from their founding years
+        pg.click("#cUni"); pg.wait_for_timeout(250)
+        uni_n = {"california.html": 95, "pennsylvania.html": 110,
+                 "massachusetts.html": 70, "alabama.html": 30,
+                 "nebraska.html": 20, "minnesota.html": 34,
+                 "arizona.html": 7}[fname]
+        un = pg.evaluate("document.querySelectorAll('#map [data-uni]').length")
+        check("the colleges are on the map in 2020", un >= uni_n,
+              f"{un} < {uni_n}")
+        mine_st = {"pennsylvania.html": "F&M", "massachusetts.html": "UMass",
+                   "alabama.html": "UA", "nebraska.html": "UNL",
+                   "minnesota.html": "St. Olaf"}.get(fname)
+        if mine_st:
+            lbl = pg.evaluate(
+                f"[...document.querySelectorAll('#map [data-uni] text')].some(t=>t.textContent==='{mine_st}')")
+            check(f"the {mine_st} mortarboard is labeled", lbl)
+        pg.eval_on_selector("#yr", "el=>{el.value=1492;el.dispatchEvent(new Event('input'))}")
+        pg.wait_for_timeout(250)
+        u0 = pg.evaluate("document.querySelectorAll('#map [data-uni]').length")
+        check("no colleges before any were founded", u0 == 0, str(u0))
+        pg.eval_on_selector("#yr", "el=>{el.value=2020;el.dispatchEvent(new Event('input'))}")
+        pg.click("#cUni"); pg.wait_for_timeout(250)
         # slider jump markers land on era boundaries
         tk = pg.evaluate("document.querySelectorAll('#ticks button').length")
         check("jump markers above the slider", tk >= 3, str(tk))
         sy = {"california.html": 1850, "pennsylvania.html": 1787,
               "massachusetts.html": 1788, "alabama.html": 1819,
-              "nebraska.html": 1867, "minnesota.html": 1858}[fname]
+              "nebraska.html": 1867, "minnesota.html": 1858,
+              "arizona.html": 1912}[fname]
         has = pg.evaluate(
             f"[...document.querySelectorAll('#ticks button')].some(b=>b.textContent==='{sy}')")
         check(f"statehood {sy} is a jump marker", has)

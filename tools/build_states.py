@@ -98,6 +98,70 @@ HIST["ca"] = {
          "https://en.wikipedia.org/wiki/Category:Native_American_tribes_in_California"],],
 }
 
+HIST["az"] = {
+    "eras": [
+        {"y0": 1492, "y1": 1691, "l": "O'odham, Hopi, Diné, Pai and Apache homelands", "f": None},
+        {"y0": 1691, "y1": 1821, "l": "Spain (the Sonora and Nuevo México frontier)", "f": {"a": "Cross of Burgundy"}},
+        {"y0": 1821, "y1": 1848, "l": "Mexico (Sonora and Nuevo México)", "f": {"a": "Flag of Mexico"}},
+        {"y0": 1848, "y1": 1863, "l": "United States (Mexican Cession; Gadsden Purchase 1853)", "f": US},
+        {"y0": 1863, "y1": 1912, "l": "Arizona Territory, 1863", "f": US},
+        {"y0": 1912, "y1": 1917, "l": "Statehood, February 14, 1912", "f": US},
+        {"y0": 1917, "y1": 2026, "l": "State flag adopted 1917", "f": {"a": "Flag of Arizona"}},
+    ],
+    "marks": [{"y": 1853, "l": "Gadsden Purchase"}],
+    "border": 1866,
+    "nb": [
+        {"n": "California", "lat": 34.3, "lon": -114.95},
+        {"n": "Nevada", "lat": 36.6, "lon": -114.6},
+        {"n": "Utah", "lat": 37.35, "lon": -112.3},
+        {"n": "New Mexico", "lat": 34.2, "lon": -108.75, "v": True},
+        {"n": "Sonora, México", "lat": 30.95, "lon": -111.6},
+    ],
+    "pre": "No count survives from before Spain arrived; the O'odham, Hopi, "
+           "Diné, Pai and Apache peoples numbered many tens of thousands.",
+    "nations": [
+        {"n": "Diné (Navajo)", "src": "en.wikipedia.org/wiki/Navajo", "poly": [[-111.5, 35.8], [-109.1, 35.7], [-109.05, 37.0], [-111.3, 37.0]], "lat": 36.35, "lon": -110.2, "note": "The Navajo Nation is today the largest reservation in the country."},
+        {"n": "Hopi", "src": "en.wikipedia.org/wiki/Hopi", "poly": [[-111.0, 35.5], [-110.0, 35.4], [-110.0, 36.3], [-111.1, 36.2]], "lat": 35.85, "lon": -110.55, "note": "Mesa-top villages; Oraibi has been lived in since about 1100."},
+        {"n": "Hualapai and Havasupai", "src": "en.wikipedia.org/wiki/Hualapai", "poly": [[-114.0, 35.0], [-112.4, 35.3], [-112.6, 36.3], [-113.9, 36.0]], "lat": 35.6, "lon": -113.2, "note": "Pai peoples of the plateaus and canyons south of the Colorado."},
+        {"n": "Yavapai", "src": "en.wikipedia.org/wiki/Yavapai", "poly": [[-113.3, 33.9], [-111.9, 34.0], [-112.0, 35.0], [-113.2, 34.9]], "lat": 34.45, "lon": -112.6, "note": "Central highlands, from the Verde Valley to the desert rivers.", "after": {"y": 1875, "t": "marched to San Carlos"}},
+        {"n": "Ndee (Western Apache)", "src": "en.wikipedia.org/wiki/Western_Apache_people", "poly": [[-111.5, 33.2], [-109.5, 33.3], [-109.8, 34.7], [-111.3, 34.5]], "lat": 33.95, "lon": -110.4, "note": "White Mountain, San Carlos, Tonto and Cibecue bands."},
+        {"n": "Chiricahua", "src": "en.wikipedia.org/wiki/Chiricahua", "poly": [[-110.2, 31.35], [-108.9, 31.45], [-109.0, 32.6], [-110.0, 32.5]], "lat": 31.95, "lon": -109.5, "note": "Cochise and Geronimo's people, in the mountains along the border.", "after": {"y": 1886, "t": "deported to Florida"}},
+        {"n": "Tohono O'odham", "src": "en.wikipedia.org/wiki/Tohono_O%CA%BCodham", "poly": [[-113.3, 31.4], [-111.3, 31.5], [-111.5, 32.6], [-113.0, 32.5]], "lat": 32.0, "lon": -112.2, "note": "The desert people; their lands run deep into Sonora."},
+        {"n": "Akimel O'odham and Piipaash", "src": "en.wikipedia.org/wiki/Akimel_O%27odham", "poly": [[-112.6, 32.9], [-111.3, 32.9], [-111.5, 33.6], [-112.5, 33.5]], "lat": 33.15, "lon": -111.9, "note": "River people of the Gila and Salt; Hohokam canals run under Phoenix."},
+        {"n": "Quechan and Mojave", "src": "en.wikipedia.org/wiki/Quechan", "poly": [[-115.0, 32.5], [-114.2, 32.7], [-114.4, 35.0], [-115.1, 34.9]], "lat": 33.9, "lon": -114.55, "note": "Colorado River peoples, farming the floodplain."},
+    ],
+    "events": [
+        {"y": 1691, "t": "set", "n": "Tumacácori", "lat": 31.57, "lon": -111.05, "note": "Father Kino's mission chain reaches the Santa Cruz valley.", "src": "en.wikipedia.org/wiki/Eusebio_Kino"},
+        {"y": 1752, "t": "set", "n": "Tubac", "lat": 31.61, "lon": -111.05, "note": "Spanish presidio built after the O'odham uprising of 1751.", "src": "en.wikipedia.org/wiki/Tubac,_Arizona"},
+        {"y": 1775, "t": "set", "n": "Tucson", "lat": 32.22, "lon": -110.97, "note": "Presidio San Agustín del Tucsón; capital of the territory 1867 to 1877.", "src": "en.wikipedia.org/wiki/Tucson,_Arizona"},
+        {"y": 1854, "t": "set", "n": "Yuma", "lat": 32.69, "lon": -114.62, "note": "Colorado City at the river crossing.", "src": "en.wikipedia.org/wiki/Yuma,_Arizona"},
+        {"y": 1864, "t": "cap", "n": "Prescott", "pp": [[1900, 3559], [1950, 6764], [1980, 20055], [2000, 33938], [2020, 45827]], "lat": 34.54, "lon": -112.47, "note": "Territorial capital 1864 to 1867 and 1877 to 1889.", "src": "en.wikipedia.org/wiki/Prescott,_Arizona"},
+        {"y": 1864, "t": "rem", "n": "The Long Walk", "lat": 36.15, "lon": -109.55, "note": "Thousands of Diné force-marched to Bosque Redondo; the treaty of 1868 lets them return.", "src": "en.wikipedia.org/wiki/Long_Walk_of_the_Navajo"},
+        {"y": 1868, "t": "cap", "n": "Phoenix", "lat": 33.45, "lon": -112.07, "note": "Founded 1868 on reopened Hohokam canals; the capital since 1889.", "src": "en.wikipedia.org/wiki/Phoenix,_Arizona"},
+        {"y": 1871, "t": "rem", "n": "Camp Grant massacre", "lat": 32.85, "lon": -110.75, "note": "April 30, 1871: raiders from Tucson kill more than a hundred Apache, nearly all women and children.", "src": "en.wikipedia.org/wiki/Camp_Grant_massacre"},
+        {"y": 1872, "t": "rem", "n": "Skeleton Cave", "lat": 33.62, "lon": -111.55, "note": "Salt River Canyon, December 1872: cavalry kill 76 Yavapai in a cave.", "src": "en.wikipedia.org/wiki/Battle_of_Salt_River_Canyon"},
+        {"y": 1875, "t": "rem", "n": "March to San Carlos", "lat": 34.56, "lon": -111.85, "note": "February 1875: 1,400 Yavapai and Dilzhe'e marched from Camp Verde; well over a hundred die on the way.", "src": "en.wikipedia.org/wiki/Yavapai_Wars"},
+        {"y": 1876, "t": "set", "n": "Flagstaff", "lat": 35.2, "lon": -111.65, "note": "Railroad and lumber town under the San Francisco Peaks.", "src": "en.wikipedia.org/wiki/Flagstaff,_Arizona"},
+        {"y": 1878, "t": "set", "n": "Mesa", "lat": 33.42, "lon": -111.83, "note": "Latter-day Saint settlers reuse Hohokam canals.", "src": "en.wikipedia.org/wiki/Mesa,_Arizona"},
+        {"y": 1879, "t": "set", "n": "Tombstone", "lat": 31.71, "lon": -110.07, "note": "Silver boom town of 1879.", "src": "en.wikipedia.org/wiki/Tombstone,_Arizona"},
+        {"y": 1886, "t": "rem", "n": "Geronimo's surrender", "lat": 31.58, "lon": -109.06, "note": "September 1886, Skeleton Canyon: the Chiricahua, army scouts included, are deported to Florida.", "src": "en.wikipedia.org/wiki/Geronimo"},
+    ],
+    "census": [[1870, 9658], [1880, 40440], [1890, 88243], [1900, 122931],
+               [1910, 204354], [1920, 334162], [1930, 435573], [1940, 499261],
+               [1950, 749587], [1960, 1302161], [1970, 1770900], [1980, 2718215],
+               [1990, 3665228], [2000, 5130632], [2010, 6392017], [2020, 7151502]],
+    "native": [[1900, 26480, "census"], [1950, 65761, "census"],
+               [2000, 255879, "census"], [2020, 319712, "census"]],
+    "geo": {"hp": {"n": "Humphreys Peak", "el": "3,852 m", "lat": 35.35, "lon": -111.68}},
+    "refs": [
+        ["The Long Walk of the Navajo, 1864 to 1868.", "https://en.wikipedia.org/wiki/Long_Walk_of_the_Navajo"],
+        ["Camp Grant massacre, April 30, 1871.", "https://en.wikipedia.org/wiki/Camp_Grant_massacre"],
+        ["Nation homelands and histories: each nation's Wikipedia article (Diné, Hopi, Hualapai, Havasupai, Yavapai, Ndee, Chiricahua, Tohono O'odham, Akimel O'odham, Quechan, Mojave).",
+         "https://en.wikipedia.org/wiki/Category:Native_American_tribes_in_Arizona"],
+        ["Arizona's censuses, 1870 to 2020, and its American Indian counts.", "https://en.wikipedia.org/wiki/Arizona"],
+    ],
+}
+
 HIST["pa"] = {
     "eras": [
         {"y0": 1492, "y1": 1638, "l": "Lenapehoking and the Susquehannock", "f": None},
@@ -411,11 +475,13 @@ HIST["mn"] = {
 }
 
 PAGES = {
-    "ca": "california.html", "pa": "pennsylvania.html",
+    "ca": "california.html", "az": "arizona.html",
+    "pa": "pennsylvania.html",
     "ma": "massachusetts.html", "al": "alabama.html",
     "ne": "nebraska.html", "mn": "minnesota.html",
 }
-SIBLINGS = [("california.html", "California"), ("pennsylvania.html", "Pennsylvania"),
+SIBLINGS = [("california.html", "California"), ("arizona.html", "Arizona"),
+            ("pennsylvania.html", "Pennsylvania"),
             ("massachusetts.html", "Massachusetts"), ("alabama.html", "Alabama"),
             ("nebraska.html", "Nebraska"), ("minnesota.html", "Minnesota")]
 
@@ -512,6 +578,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   <button id="cCou">Counties</button>
   <button id="cNat" class="on">Nations</button>
   <button id="cTow" class="on">Towns</button>
+  <button id="cUni">Colleges</button>
   <span id="loadTxt" style="color:var(--muted);font-size:12px"></span>
 </div>
 <div class="stage">
@@ -566,7 +633,7 @@ wrap.style.aspectRatio=W+' / '+H;
 const svg=document.getElementById('map');
 svg.setAttribute('viewBox','0 0 '+W+' '+H);
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
-const layers={ter:true,woo:true,riv:true,lak:true,cou:false,nat:true,tow:true};
+const layers={ter:true,woo:true,riv:true,lak:true,cou:false,nat:true,tow:true,uni:false};
 let year=1492, playing=false, pinned=null;
 
 function ringsPath(rr){ return rr.map(r=>'M'+r.map(p=>p[0]+','+p[1]).join('L')+'Z').join(''); }
@@ -656,6 +723,17 @@ function render(){
              :'<circle cx="'+x+'" cy="'+y+'" r="3.6" fill="var(--set)" stroke="#121212" stroke-width="1"/>')
         +'<text x="'+x+'" y="'+(y-8-(R||0))+'" text-anchor="middle" font-size="10.5" fill="'+(cap?'var(--cap)':'#c9d1d9')+'" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+esc(e.n)+'</text></g>';
     }
+  });
+  if(layers.uni) (HIST.unis||[]).forEach((u,i)=>{
+    // each institution appears in its founding year, a mortarboard
+    if(u.y>year) return;
+    const [x,y]=XY(u.lat,u.lon);
+    const sc=u.mine?1.7:1, C=u.mine?'#ffd24d':'#c792ea';
+    s+='<g data-uni="'+i+'" style="cursor:pointer">'
+      +'<rect x="'+(x-3.2*sc).toFixed(1)+'" y="'+(y-3.2*sc).toFixed(1)+'" width="'+(6.4*sc).toFixed(1)+'" height="'+(6.4*sc).toFixed(1)+'" transform="rotate(45 '+x+' '+y+')" fill="'+C+'" stroke="#121212" stroke-width="1"/>'
+      +'<line x1="'+(x+3.2*sc).toFixed(1)+'" y1="'+y+'" x2="'+(x+3.2*sc).toFixed(1)+'" y2="'+(y+6.5*sc).toFixed(1)+'" stroke="'+C+'" stroke-width="1.2"/>'
+      +(u.mine?'<text x="'+x+'" y="'+(y-9)+'" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffd24d" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+esc(u.mine)+'</text>':'')
+      +'</g>';
   });
   if(layers.tow){
     const tiers=[[1e4,'10,000'],[1e5,'100,000'],[1e6,'1,000,000'],[1e7,'10,000,000']];
@@ -755,7 +833,7 @@ function show(kind,name,body,src){
   document.getElementById('srcTxt').textContent=src||'';
 }
 function target(e){
-  const g=e.target.closest('[data-nat],[data-ev],[data-ct],[data-cty],[data-hp]');
+  const g=e.target.closest('[data-nat],[data-ev],[data-ct],[data-uni],[data-cty],[data-hp]');
   if(!g) return null;
   if(g.dataset.nat!==undefined){ const n=HIST.nations[+g.dataset.nat];
     return ['A nation of this land',n.n,
@@ -768,6 +846,11 @@ function target(e){
     if(ev.pp){ const p=interp(ev.pp,year);
       if(p) body+=' Population around '+year+': '+fmt(p)+' (census, interpolated).'; }
     return [k,ev.n,body,ev.src]; }
+  if(g.dataset.uni!==undefined){ const u=HIST.unis[+g.dataset.uni];
+    return ['College \\u00b7 founded '+u.y, u.n,
+      (u.pub?'Public':'Private')+' institution, on the map from its founding year.'
+      +(u.mine?' One of the author\\u2019s alma maters.':''),
+      'en.wikipedia.org/wiki/'+u.n.replace(/ /g,'_')]; }
   if(g.dataset.ct!==undefined){ const c=HIST.cities[+g.dataset.ct];
     const p=interp(c.pp,year);
     return ['City \\u00b7 census', c.n,
@@ -785,9 +868,9 @@ function target(e){
 svg.addEventListener('pointerover',e=>{ if(pinned) return;
   const t=target(e); if(t) show(...t); });
 svg.addEventListener('click',e=>{
-  const g=e.target.closest('[data-nat],[data-ev],[data-ct],[data-cty],[data-hp]');
+  const g=e.target.closest('[data-nat],[data-ev],[data-ct],[data-uni],[data-cty],[data-hp]');
   if(!g){ pinned=null; return; }
-  const id=g.dataset.nat!==undefined?'n'+g.dataset.nat:g.dataset.ev!==undefined?'e'+g.dataset.ev:g.dataset.ct!==undefined?'t'+g.dataset.ct:g.dataset.cty!==undefined?'c'+g.dataset.cty:'hp';
+  const id=g.dataset.nat!==undefined?'n'+g.dataset.nat:g.dataset.ev!==undefined?'e'+g.dataset.ev:g.dataset.ct!==undefined?'t'+g.dataset.ct:g.dataset.uni!==undefined?'u'+g.dataset.uni:g.dataset.cty!==undefined?'c'+g.dataset.cty:'hp';
   pinned = pinned===id?null:id;
   const t=target(e); if(t) show(...t);
 });
@@ -843,7 +926,7 @@ document.getElementById('bPlay').onclick=()=>{
 })();
 
 // ---- chips ----
-const CH={cTer:'ter',cWoo:'woo',cRiv:'riv',cLak:'lak',cCou:'cou',cNat:'nat',cTow:'tow'};
+const CH={cTer:'ter',cWoo:'woo',cRiv:'riv',cLak:'lak',cCou:'cou',cNat:'nat',cTow:'tow',cUni:'uni'};
 for(const id in CH) document.getElementById(id).onclick=e=>{
   const k=CH[id]; layers[k]=!layers[k];
   e.target.classList.toggle('on',layers[k]);
@@ -992,6 +1075,7 @@ def refs_html(hist):
         ("Flags: each era's Wikipedia article image, fetched at view time.", "https://en.wikipedia.org/"),
         ("County founding years: each state's Wikipedia list of counties.", "https://en.wikipedia.org/"),
         ("City census series: the decennial table in each city's Wikipedia article; every city over 100,000 today is on the map.", "https://en.wikipedia.org/"),
+        ("Colleges: the state's Wikipedia list of colleges and universities, four-year public and private; founding years from the list.", "https://en.wikipedia.org/"),
         ("Native Land Digital: the community-sourced map of Indigenous territories; the patches here are rough approximations of the documented homelands, not their data.", "https://native-land.ca/"),
     ] + hist["refs"]
     return "\n".join(f'<p>{t}\n<a href="{u}">{u}</a></p>' for t, u in rows)
@@ -1004,6 +1088,26 @@ CITIES_ALL = json.loads((DATA.parent / "cities.json").read_text())
 
 def norm(n):
     return n.lower().replace("saint ", "st. ").strip()
+
+
+# accredited four-year institutions, public and private, with founding
+# years (tools/data/universities.json, from each state's Wikipedia list)
+UNIS_ALL = json.loads((DATA.parent / "universities.json").read_text())
+
+# the author's alma maters get the gold mortarboard and a label
+def mine_label(st, name):
+    n = name.lower().replace("–", "-").replace("—", "-")
+    if st == "pa" and ("franklin & marshall" in n or "franklin and marshall" in n):
+        return "F&M"
+    if st == "ma" and "massachusetts amherst" in n:
+        return "UMass"
+    if st == "al" and n.strip() == "university of alabama":
+        return "UA"
+    if st == "ne" and "nebraska-lincoln" in n:
+        return "UNL"
+    if st == "mn" and "st. olaf" in n:
+        return "St. Olaf"
+    return None
 
 
 for st, fname in PAGES.items():
@@ -1020,6 +1124,14 @@ for st, fname in PAGES.items():
         cities.append({"n": cname, "lat": c["lat"], "lon": c["lon"],
                        "pp": c["pp"]})
     hist["cities"] = cities
+    unis = []
+    for u in sorted(UNIS_ALL.get(st, []), key=lambda x: (x["y"], x["n"])):
+        u = dict(u)
+        lbl = mine_label(st, u["n"])
+        if lbl:
+            u["mine"] = lbl
+        unis.append(u)
+    hist["unis"] = unis
     sibs = "".join(f' <a href="{f}">{n}</a>' for f, n in SIBLINGS if f != fname)
     html = (HTML.replace("__TITLE__", data["name"])
             .replace("__SIBS__", sibs)

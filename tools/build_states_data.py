@@ -49,6 +49,7 @@ STATES = {
     "al": ("Alabama", "01"),
     "ne": ("Nebraska", "31"),
     "mn": ("Minnesota", "27"),
+    "az": ("Arizona", "04"),
 }
 
 W = 1000  # view width; height follows the state's mercator aspect
