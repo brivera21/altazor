@@ -44,17 +44,17 @@ HIST["ca"] = {
            "(Cook), with scholarly estimates from 133,000 (Kroeber) to "
            "well above 300,000.",
     "nations": [
-        {"n": "Yurok", "poly": [[-124.6, 41.0], [-123.7, 41.2], [-123.5, 41.6], [-124.1, 42.0], [-124.5, 41.7]], "lat": 41.3, "lon": -124.0, "note": "Lower Klamath River and the redwood coast."},
-        {"n": "Pomo", "poly": [[-123.9, 38.6], [-122.7, 38.8], [-122.5, 39.3], [-123.3, 39.6], [-124.0, 39.3]], "lat": 39.0, "lon": -123.1, "note": "Clear Lake and the Mendocino and Sonoma coast."},
-        {"n": "Wintu", "poly": [[-122.9, 40.0], [-121.9, 40.2], [-122.0, 41.1], [-122.9, 41.0]], "lat": 40.6, "lon": -122.4, "note": "Upper Sacramento Valley."},
-        {"n": "Maidu", "poly": [[-121.7, 39.0], [-120.5, 39.3], [-120.4, 40.3], [-121.5, 40.2]], "lat": 39.7, "lon": -121.2, "note": "Feather and American rivers, northern Sierra foothills."},
-        {"n": "Miwok", "poly": [[-121.6, 37.6], [-120.0, 37.7], [-119.8, 38.6], [-121.0, 38.7], [-121.7, 38.2]], "lat": 38.0, "lon": -120.4, "note": "Central Sierra foothills and the Delta."},
-        {"n": "Ohlone", "poly": [[-122.6, 36.5], [-121.3, 36.7], [-121.5, 37.6], [-122.5, 37.8]], "lat": 37.0, "lon": -121.9, "note": "San Francisco Bay to Monterey."},
-        {"n": "Yokuts", "poly": [[-121.0, 35.0], [-118.9, 35.2], [-119.3, 37.0], [-120.9, 37.3]], "lat": 36.5, "lon": -119.8, "note": "San Joaquin Valley."},
-        {"n": "Chumash", "poly": [[-120.7, 34.3], [-118.9, 33.9], [-118.9, 34.5], [-120.6, 34.9]], "lat": 34.45, "lon": -119.8, "note": "Santa Barbara Channel coast."},
-        {"n": "Tongva", "poly": [[-118.7, 33.6], [-117.6, 33.5], [-117.7, 34.2], [-118.6, 34.3]], "lat": 34.05, "lon": -118.2, "note": "Los Angeles Basin."},
-        {"n": "Kumeyaay", "poly": [[-117.4, 32.5], [-116.0, 32.5], [-116.1, 33.2], [-117.3, 33.2]], "lat": 32.8, "lon": -116.8, "note": "San Diego country."},
-        {"n": "Mojave", "poly": [[-114.9, 34.0], [-114.1, 34.0], [-114.3, 35.3], [-115.0, 35.2]], "lat": 34.8, "lon": -114.6, "note": "Colorado River."},
+        {"n": "Yurok", "src": "en.wikipedia.org/wiki/Yurok", "poly": [[-124.6, 41.0], [-123.7, 41.2], [-123.5, 41.6], [-124.1, 42.0], [-124.5, 41.7]], "lat": 41.3, "lon": -124.0, "note": "Lower Klamath River and the redwood coast."},
+        {"n": "Pomo", "src": "en.wikipedia.org/wiki/Pomo", "poly": [[-123.9, 38.6], [-122.7, 38.8], [-122.5, 39.3], [-123.3, 39.6], [-124.0, 39.3]], "lat": 39.0, "lon": -123.1, "note": "Clear Lake and the Mendocino and Sonoma coast."},
+        {"n": "Wintu", "src": "en.wikipedia.org/wiki/Wintu", "poly": [[-122.9, 40.0], [-121.9, 40.2], [-122.0, 41.1], [-122.9, 41.0]], "lat": 40.6, "lon": -122.4, "note": "Upper Sacramento Valley."},
+        {"n": "Maidu", "src": "en.wikipedia.org/wiki/Maidu", "poly": [[-121.7, 39.0], [-120.5, 39.3], [-120.4, 40.3], [-121.5, 40.2]], "lat": 39.7, "lon": -121.2, "note": "Feather and American rivers, northern Sierra foothills."},
+        {"n": "Miwok", "src": "en.wikipedia.org/wiki/Miwok", "poly": [[-121.6, 37.6], [-120.0, 37.7], [-119.8, 38.6], [-121.0, 38.7], [-121.7, 38.2]], "lat": 38.0, "lon": -120.4, "note": "Central Sierra foothills and the Delta."},
+        {"n": "Ohlone", "src": "en.wikipedia.org/wiki/Ohlone", "poly": [[-122.6, 36.5], [-121.3, 36.7], [-121.5, 37.6], [-122.5, 37.8]], "lat": 37.0, "lon": -121.9, "note": "San Francisco Bay to Monterey."},
+        {"n": "Yokuts", "src": "en.wikipedia.org/wiki/Yokuts", "poly": [[-121.0, 35.0], [-118.9, 35.2], [-119.3, 37.0], [-120.9, 37.3]], "lat": 36.5, "lon": -119.8, "note": "San Joaquin Valley."},
+        {"n": "Chumash", "src": "en.wikipedia.org/wiki/Chumash_people", "poly": [[-120.7, 34.3], [-118.9, 33.9], [-118.9, 34.5], [-120.6, 34.9]], "lat": 34.45, "lon": -119.8, "note": "Santa Barbara Channel coast."},
+        {"n": "Tongva", "src": "en.wikipedia.org/wiki/Tongva", "poly": [[-118.7, 33.6], [-117.6, 33.5], [-117.7, 34.2], [-118.6, 34.3]], "lat": 34.05, "lon": -118.2, "note": "Los Angeles Basin."},
+        {"n": "Kumeyaay", "src": "en.wikipedia.org/wiki/Kumeyaay", "poly": [[-117.4, 32.5], [-116.0, 32.5], [-116.1, 33.2], [-117.3, 33.2]], "lat": 32.8, "lon": -116.8, "note": "San Diego country."},
+        {"n": "Mojave", "src": "en.wikipedia.org/wiki/Mohave_people", "poly": [[-114.9, 34.0], [-114.1, 34.0], [-114.3, 35.3], [-115.0, 35.2]], "lat": 34.8, "lon": -114.6, "note": "Colorado River."},
     ],
     "events": [
         {"y": 1769, "t": "set", "n": "San Diego", "lat": 32.72, "lon": -117.16, "note": "First presidio and mission.", "src": "en.wikipedia.org/wiki/History_of_San_Diego"},
@@ -84,7 +84,9 @@ HIST["ca"] = {
     "refs": [
         ["Population of Native California; the estimates of Cook, Kroeber and others.", "https://en.wikipedia.org/wiki/Population_of_Native_California"],
         ["Madley, B. (2016). An American Genocide: The United States and the California Indian Catastrophe. Yale University Press.", "https://en.wikipedia.org/wiki/California_genocide"],
-    ],
+    
+        ["Nation homelands and histories: each nation's Wikipedia article (Yurok, Pomo, Wintu, Maidu, Miwok, Ohlone, Yokuts, Chumash, Tongva, Kumeyaay, Mojave).",
+         "https://en.wikipedia.org/wiki/Category:Native_American_tribes_in_California"],],
 }
 
 HIST["pa"] = {
@@ -101,13 +103,13 @@ HIST["pa"] = {
            "Susquehannock are put at 5,000 to 8,000 around 1600, and all of "
            "Lenapehoking (Pennsylvania to New York) at 7,500 to 15,000.",
     "nations": [
-        {"n": "Lenape", "poly": [[-75.9, 39.8], [-74.8, 40.0], [-75.0, 40.9], [-75.9, 40.6]], "lat": 40.2, "lon": -75.3, "note": "Delaware Valley; about 7,500 to 15,000 across Lenapehoking around 1600.", "after": {"y": 1737, "t": "dispossessed from 1737; diaspora west to Ohio, Kansas, Indian Territory"}},
-        {"n": "Munsee", "poly": [[-75.8, 40.8], [-74.8, 41.0], [-75.0, 41.9], [-75.9, 41.6]], "lat": 41.1, "lon": -75.1, "note": "Northern Lenape of the upper Delaware."},
-        {"n": "Susquehannock", "poly": [[-77.2, 39.8], [-76.0, 40.0], [-76.0, 41.4], [-77.1, 41.3]], "lat": 40.6, "lon": -76.6, "note": "Susquehanna Valley; 5,000 to 8,000 around 1600.", "after": {"y": 1763, "t": "last twenty murdered at Conestoga, 1763"}},
-        {"n": "Erie", "poly": [[-80.6, 41.7], [-79.5, 41.8], [-79.6, 42.3], [-80.6, 42.4]], "lat": 42.0, "lon": -80.2, "note": "Lake Erie shore; dispersed in the 1650s wars."},
-        {"n": "Monongahela", "poly": [[-80.6, 39.7], [-79.2, 39.8], [-79.3, 40.4], [-80.5, 40.4]], "lat": 40.0, "lon": -79.9, "note": "Monongahela Valley; gone by the 1630s."},
-        {"n": "Seneca", "poly": [[-79.6, 41.4], [-77.6, 41.6], [-77.8, 42.1], [-79.7, 42.1]], "lat": 41.9, "lon": -78.7, "note": "Haudenosaunee of the northern tier."},
-        {"n": "Shawnee", "poly": [[-77.8, 40.0], [-76.6, 40.2], [-76.8, 40.9], [-77.9, 40.7]], "lat": 40.3, "lon": -77.0, "note": "Arrived in the 1690s; Susquehanna and Ohio valleys."},
+        {"n": "Lenape", "src": "philadelphiaencyclopedia.org/essays/native-peoples-to-1680/", "poly": [[-75.9, 39.8], [-74.8, 40.0], [-75.0, 40.9], [-75.9, 40.6]], "lat": 40.2, "lon": -75.3, "note": "Delaware Valley; about 7,500 to 15,000 across Lenapehoking around 1600.", "after": {"y": 1737, "t": "dispossessed from 1737; diaspora west to Ohio, Kansas, Indian Territory"}},
+        {"n": "Munsee", "src": "en.wikipedia.org/wiki/Munsee", "poly": [[-75.8, 40.8], [-74.8, 41.0], [-75.0, 41.9], [-75.9, 41.6]], "lat": 41.1, "lon": -75.1, "note": "Northern Lenape of the upper Delaware."},
+        {"n": "Susquehannock", "src": "digitalprojects.scranton.edu/s/native-history-wyoming-valley/page/susquehannocks", "poly": [[-77.2, 39.8], [-76.0, 40.0], [-76.0, 41.4], [-77.1, 41.3]], "lat": 40.6, "lon": -76.6, "note": "Susquehanna Valley; 5,000 to 8,000 around 1600.", "after": {"y": 1763, "t": "last twenty murdered at Conestoga, 1763"}},
+        {"n": "Erie", "src": "en.wikipedia.org/wiki/Erie_people", "poly": [[-80.6, 41.7], [-79.5, 41.8], [-79.6, 42.3], [-80.6, 42.4]], "lat": 42.0, "lon": -80.2, "note": "Lake Erie shore; dispersed in the 1650s wars."},
+        {"n": "Monongahela", "src": "en.wikipedia.org/wiki/Monongahela_culture", "poly": [[-80.6, 39.7], [-79.2, 39.8], [-79.3, 40.4], [-80.5, 40.4]], "lat": 40.0, "lon": -79.9, "note": "Monongahela Valley; gone by the 1630s."},
+        {"n": "Seneca", "src": "en.wikipedia.org/wiki/Seneca_people", "poly": [[-79.6, 41.4], [-77.6, 41.6], [-77.8, 42.1], [-79.7, 42.1]], "lat": 41.9, "lon": -78.7, "note": "Haudenosaunee of the northern tier."},
+        {"n": "Shawnee", "src": "en.wikipedia.org/wiki/Shawnee", "poly": [[-77.8, 40.0], [-76.6, 40.2], [-76.8, 40.9], [-77.9, 40.7]], "lat": 40.3, "lon": -77.0, "note": "Arrived in the 1690s; Susquehanna and Ohio valleys."},
     ],
     "events": [
         {"y": 1643, "t": "set", "n": "Tinicum Island", "lat": 39.87, "lon": -75.29, "note": "The Printzhof, seat of New Sweden.", "src": "en.wikipedia.org/wiki/Printzhof"},
@@ -138,7 +140,9 @@ HIST["pa"] = {
     "refs": [
         ["Native peoples to 1680, Encyclopedia of Greater Philadelphia.", "https://philadelphiaencyclopedia.org/essays/native-peoples-to-1680/"],
         ["The Susquehannock, University of Scranton digital history.", "https://digitalprojects.scranton.edu/s/native-history-wyoming-valley/page/susquehannocks"],
-    ],
+    
+        ["Nation homelands: the Encyclopedia of Greater Philadelphia, the University of Scranton's Susquehannock project, and each nation's Wikipedia article.",
+         "https://en.wikipedia.org/wiki/Category:Native_American_tribes_in_Pennsylvania"],],
 }
 
 HIST["ma"] = {
@@ -153,13 +157,13 @@ HIST["ma"] = {
            "people; the Wampanoag alone are put as high as 40,000 before "
            "the epidemics, with older tribal estimates far lower.",
     "nations": [
-        {"n": "Massachusett", "poly": [[-71.4, 42.0], [-70.7, 42.1], [-70.8, 42.7], [-71.4, 42.6]], "lat": 42.30, "lon": -71.05, "note": "Massachusetts Bay coast.", "after": {"y": 1616, "t": "the 1616-19 epidemic kills a third to nine tenths of the coastal people"}},
-        {"n": "Wampanoag", "poly": [[-71.3, 41.5], [-70.5, 41.6], [-70.7, 42.1], [-71.3, 42.0]], "lat": 41.80, "lon": -70.95, "note": "Southeast Massachusetts; as many as 40,000 across 67 villages before the epidemics.", "after": {"y": 1676, "t": "left effectively landless after King Philip's War; the nation remains, at Mashpee and Aquinnah"}},
-        {"n": "Nauset", "poly": [[-70.3, 41.6], [-69.9, 41.7], [-70.0, 42.1], [-70.4, 41.9]], "lat": 41.80, "lon": -69.98, "note": "Outer Cape Cod."},
-        {"n": "Nipmuc", "poly": [[-72.3, 42.0], [-71.5, 42.0], [-71.6, 42.7], [-72.3, 42.6]], "lat": 42.15, "lon": -71.90, "note": "Central uplands and lakes."},
-        {"n": "Pocumtuck", "poly": [[-72.8, 42.1], [-72.3, 42.1], [-72.4, 42.75], [-72.8, 42.7]], "lat": 42.54, "lon": -72.60, "note": "Middle Connecticut Valley."},
-        {"n": "Mahican", "poly": [[-73.5, 42.05], [-72.9, 42.1], [-73.0, 42.75], [-73.5, 42.7]], "lat": 42.40, "lon": -73.25, "note": "Berkshires and Housatonic Valley."},
-        {"n": "Pennacook", "poly": [[-71.6, 42.5], [-70.9, 42.6], [-71.1, 42.87], [-71.6, 42.8]], "lat": 42.70, "lon": -71.20, "note": "Merrimack Valley."},
+        {"n": "Massachusett", "src": "en.wikipedia.org/wiki/Massachusett", "poly": [[-71.4, 42.0], [-70.7, 42.1], [-70.8, 42.7], [-71.4, 42.6]], "lat": 42.30, "lon": -71.05, "note": "Massachusetts Bay coast.", "after": {"y": 1616, "t": "the 1616-19 epidemic kills a third to nine tenths of the coastal people"}},
+        {"n": "Wampanoag", "src": "en.wikipedia.org/wiki/Wampanoag", "poly": [[-71.3, 41.5], [-70.5, 41.6], [-70.7, 42.1], [-71.3, 42.0]], "lat": 41.80, "lon": -70.95, "note": "Southeast Massachusetts; as many as 40,000 across 67 villages before the epidemics.", "after": {"y": 1676, "t": "left effectively landless after King Philip's War; the nation remains, at Mashpee and Aquinnah"}},
+        {"n": "Nauset", "src": "historyofmassachusetts.org/native-american-tribes/", "poly": [[-70.3, 41.6], [-69.9, 41.7], [-70.0, 42.1], [-70.4, 41.9]], "lat": 41.80, "lon": -69.98, "note": "Outer Cape Cod."},
+        {"n": "Nipmuc", "src": "historyofmassachusetts.org/native-american-tribes/", "poly": [[-72.3, 42.0], [-71.5, 42.0], [-71.6, 42.7], [-72.3, 42.6]], "lat": 42.15, "lon": -71.90, "note": "Central uplands and lakes."},
+        {"n": "Pocumtuck", "src": "historyofmassachusetts.org/native-american-tribes/", "poly": [[-72.8, 42.1], [-72.3, 42.1], [-72.4, 42.75], [-72.8, 42.7]], "lat": 42.54, "lon": -72.60, "note": "Middle Connecticut Valley."},
+        {"n": "Mahican", "src": "en.wikipedia.org/wiki/Mohicans", "poly": [[-73.5, 42.05], [-72.9, 42.1], [-73.0, 42.75], [-73.5, 42.7]], "lat": 42.40, "lon": -73.25, "note": "Berkshires and Housatonic Valley."},
+        {"n": "Pennacook", "src": "en.wikipedia.org/wiki/Pennacook", "poly": [[-71.6, 42.5], [-70.9, 42.6], [-71.1, 42.87], [-71.6, 42.8]], "lat": 42.70, "lon": -71.20, "note": "Merrimack Valley."},
     ],
     "events": [
         {"y": 1616, "t": "rem", "n": "The Great Dying", "lat": 42.2, "lon": -70.8, "note": "1616 to 1619: epidemic kills between a third and nine tenths of coastal Native New England.", "src": "en.wikipedia.org/wiki/Massachusett"},
@@ -187,7 +191,9 @@ HIST["ma"] = {
     "refs": [
         ["Bragdon, K. (1996). Native People of Southern New England, 1500-1650. University of Oklahoma Press.", "https://www.oupress.com/9780806131269/native-people-of-southern-new-england-15001650/"],
         ["Snow, D., & Lanphear, K. (1988). European contact and Indian depopulation in the Northeast. Ethnohistory 35(1).", "https://www.jstor.org/stable/482431"],
-    ],
+    
+        ["Nation homelands: History of Massachusetts Blog's tribes survey and each nation's Wikipedia article.",
+         "https://historyofmassachusetts.org/native-american-tribes/"],],
 }
 
 HIST["al"] = {
@@ -205,12 +211,12 @@ HIST["al"] = {
            "the four nations counted together over 60,000 people across "
            "their wider homelands.",
     "nations": [
-        {"n": "Muscogee (Creek)", "poly": [[-86.8, 31.8], [-85.1, 32.0], [-85.3, 33.7], [-86.6, 33.5]], "lat": 32.6, "lon": -85.8, "note": "East-central Alabama, the Coosa, Tallapoosa and Alabama valleys.", "after": {"y": 1836, "t": "about 23,000 removed to Indian Territory, 1836-37"}},
-        {"n": "Cherokee", "poly": [[-86.6, 33.8], [-85.3, 33.9], [-85.4, 35.0], [-86.5, 34.9]], "lat": 34.5, "lon": -85.8, "note": "Northeast Alabama.", "after": {"y": 1838, "t": "Trail of Tears, 1838; 4,000 to 8,000 died"}},
-        {"n": "Choctaw", "poly": [[-88.5, 31.0], [-87.4, 31.2], [-87.6, 32.8], [-88.4, 32.7]], "lat": 31.9, "lon": -88.2, "note": "Southwest Alabama, Tombigbee basin.", "after": {"y": 1831, "t": "removed 1831-33 under Dancing Rabbit Creek"}},
-        {"n": "Chickasaw", "poly": [[-88.2, 33.9], [-87.0, 34.0], [-87.2, 35.0], [-88.2, 34.95]], "lat": 34.7, "lon": -88.0, "note": "Northwest Alabama.", "after": {"y": 1837, "t": "removed 1837"}},
-        {"n": "Alabama-Coushatta", "poly": [[-87.0, 32.0], [-86.2, 32.1], [-86.3, 32.9], [-87.0, 32.8]], "lat": 32.5, "lon": -86.4, "note": "Upper Alabama River."},
-        {"n": "Moundville", "poly": [[-87.8, 32.85], [-87.4, 32.85], [-87.45, 33.15], [-87.8, 33.1]], "lat": 33.0, "lon": -87.63, "note": "Mississippian mound center, about 1000 to 1450 CE."},
+        {"n": "Muscogee (Creek)", "src": "encyclopediaofalabama.org/article/creeks-in-alabama/", "poly": [[-86.8, 31.8], [-85.1, 32.0], [-85.3, 33.7], [-86.6, 33.5]], "lat": 32.6, "lon": -85.8, "note": "East-central Alabama, the Coosa, Tallapoosa and Alabama valleys.", "after": {"y": 1836, "t": "about 23,000 removed to Indian Territory, 1836-37"}},
+        {"n": "Cherokee", "src": "encyclopediaofalabama.org/article/cherokees-in-alabama/", "poly": [[-86.6, 33.8], [-85.3, 33.9], [-85.4, 35.0], [-86.5, 34.9]], "lat": 34.5, "lon": -85.8, "note": "Northeast Alabama.", "after": {"y": 1838, "t": "Trail of Tears, 1838; 4,000 to 8,000 died"}},
+        {"n": "Choctaw", "src": "encyclopediaofalabama.org/article/choctaws-in-alabama/", "poly": [[-88.5, 31.0], [-87.4, 31.2], [-87.6, 32.8], [-88.4, 32.7]], "lat": 31.9, "lon": -88.2, "note": "Southwest Alabama, Tombigbee basin.", "after": {"y": 1831, "t": "removed 1831-33 under Dancing Rabbit Creek"}},
+        {"n": "Chickasaw", "src": "encyclopediaofalabama.org/article/chickasaws-in-alabama/", "poly": [[-88.2, 33.9], [-87.0, 34.0], [-87.2, 35.0], [-88.2, 34.95]], "lat": 34.7, "lon": -88.0, "note": "Northwest Alabama.", "after": {"y": 1837, "t": "removed 1837"}},
+        {"n": "Alabama-Coushatta", "src": "encyclopediaofalabama.org/article/alabama-coushattas-in-alabama/", "poly": [[-87.0, 32.0], [-86.2, 32.1], [-86.3, 32.9], [-87.0, 32.8]], "lat": 32.5, "lon": -86.4, "note": "Upper Alabama River."},
+        {"n": "Moundville", "src": "en.wikipedia.org/wiki/Moundville_Archaeological_Site", "poly": [[-87.8, 32.85], [-87.4, 32.85], [-87.45, 33.15], [-87.8, 33.1]], "lat": 33.0, "lon": -87.63, "note": "Mississippian mound center, about 1000 to 1450 CE."},
     ],
     "events": [
         {"y": 1540, "t": "rem", "n": "Mabila", "lat": 32.2, "lon": -87.5, "note": "De Soto's entrada fights Tuskaloosa's people; the site is still unknown.", "src": "en.wikipedia.org/wiki/Mabila"},
@@ -240,7 +246,9 @@ HIST["al"] = {
     "refs": [
         ["Trail of Tears: removal counts and mortality ranges by nation.", "https://en.wikipedia.org/wiki/Trail_of_Tears"],
         ["Encyclopedia of Alabama: Creek removal; forest regions.", "https://encyclopediaofalabama.org/article/creek-indian-removal/"],
-    ],
+    
+        ["Nation homelands: the Encyclopedia of Alabama's articles on the Creeks, Cherokees, Choctaws, Chickasaws and Alabama-Coushattas.",
+         "https://encyclopediaofalabama.org/"],],
 }
 
 HIST["ne"] = {
@@ -257,12 +265,12 @@ HIST["ne"] = {
            "people, the Omaha about 4,000 before the 1800 smallpox, the "
            "Ponca and Otoe-Missouria in the hundreds each.",
     "nations": [
-        {"n": "Pawnee", "poly": [[-100.3, 40.4], [-97.5, 40.7], [-97.8, 41.9], [-100.2, 41.7]], "lat": 41.3, "lon": -98.5, "note": "Loup, Republican and Platte valleys; roughly 12,000 around 1800, 633 by 1900.", "after": {"y": 1874, "t": "removed to Indian Territory, 1873-75"}},
-        {"n": "Omaha", "poly": [[-97.2, 41.6], [-95.9, 41.8], [-96.2, 42.9], [-97.4, 42.7]], "lat": 42.2, "lon": -96.5, "note": "Missouri River; about 4,000 in 1700.", "after": {"y": 1854, "t": "ceded east-central Nebraska, 1854; the nation keeps its reservation"}},
-        {"n": "Ponca", "poly": [[-98.9, 42.4], [-97.8, 42.5], [-98.0, 43.0], [-98.9, 42.95]], "lat": 42.7, "lon": -98.2, "note": "Mouth of the Niobrara.", "after": {"y": 1877, "t": "forced to Indian Territory; a third died by 1878"}},
-        {"n": "Otoe-Missouria", "poly": [[-97.0, 40.0], [-95.4, 40.1], [-95.7, 41.2], [-97.0, 41.0]], "lat": 40.4, "lon": -96.2, "note": "Lower Platte.", "after": {"y": 1881, "t": "moved to Indian Territory, 1881"}},
-        {"n": "Lakota", "poly": [[-104.05, 42.2], [-101.5, 42.4], [-101.8, 43.0], [-104.05, 43.0]], "lat": 42.8, "lon": -103.0, "note": "Panhandle and northern plains."},
-        {"n": "Cheyenne and Arapaho", "poly": [[-104.05, 40.99], [-101.7, 41.1], [-102.0, 42.2], [-104.05, 42.1]], "lat": 41.3, "lon": -102.8, "note": "Western plains, per the 1851 Fort Laramie lines."},
+        {"n": "Pawnee", "src": "en.wikipedia.org/wiki/Pawnee_people", "poly": [[-100.3, 40.4], [-97.5, 40.7], [-97.8, 41.9], [-100.2, 41.7]], "lat": 41.3, "lon": -98.5, "note": "Loup, Republican and Platte valleys; roughly 12,000 around 1800, 633 by 1900.", "after": {"y": 1874, "t": "removed to Indian Territory, 1873-75"}},
+        {"n": "Omaha", "src": "en.wikipedia.org/wiki/Omaha_people", "poly": [[-97.2, 41.6], [-95.9, 41.8], [-96.2, 42.9], [-97.4, 42.7]], "lat": 42.2, "lon": -96.5, "note": "Missouri River; about 4,000 in 1700.", "after": {"y": 1854, "t": "ceded east-central Nebraska, 1854; the nation keeps its reservation"}},
+        {"n": "Ponca", "src": "en.wikipedia.org/wiki/Ponca", "poly": [[-98.9, 42.4], [-97.8, 42.5], [-98.0, 43.0], [-98.9, 42.95]], "lat": 42.7, "lon": -98.2, "note": "Mouth of the Niobrara.", "after": {"y": 1877, "t": "forced to Indian Territory; a third died by 1878"}},
+        {"n": "Otoe-Missouria", "src": "en.wikipedia.org/wiki/Otoe-Missouria_Tribe_of_Indians", "poly": [[-97.0, 40.0], [-95.4, 40.1], [-95.7, 41.2], [-97.0, 41.0]], "lat": 40.4, "lon": -96.2, "note": "Lower Platte.", "after": {"y": 1881, "t": "moved to Indian Territory, 1881"}},
+        {"n": "Lakota", "src": "en.wikipedia.org/wiki/Nebraska", "poly": [[-104.05, 42.2], [-101.5, 42.4], [-101.8, 43.0], [-104.05, 43.0]], "lat": 42.8, "lon": -103.0, "note": "Panhandle and northern plains."},
+        {"n": "Cheyenne and Arapaho", "src": "en.wikipedia.org/wiki/Treaty_of_Fort_Laramie_(1868)", "poly": [[-104.05, 40.99], [-101.7, 41.1], [-102.0, 42.2], [-104.05, 42.1]], "lat": 41.3, "lon": -102.8, "note": "Western plains, per the 1851 Fort Laramie lines."},
     ],
     "events": [
         {"y": 1822, "t": "set", "n": "Bellevue", "lat": 41.15, "lon": -95.92, "note": "Fur post from about 1822; the oldest continuous town.", "src": "history.nebraska.gov/bellevue-the-first-twenty-years/"},
@@ -289,7 +297,9 @@ HIST["ne"] = {
     "refs": [
         ["Pawnee people: population and removal.", "https://en.wikipedia.org/wiki/Pawnee_people"],
         ["Standing Bear and the Ponca removal.", "https://en.wikipedia.org/wiki/Standing_Bear"],
-    ],
+    
+        ["Nation homelands and populations: each nation's Wikipedia article (Pawnee, Omaha, Ponca, Otoe-Missouria) and the Fort Laramie treaty lines.",
+         "https://en.wikipedia.org/wiki/Pawnee_people"],],
 }
 
 HIST["mn"] = {
@@ -307,11 +317,11 @@ HIST["mn"] = {
            "Ojibwe expansion from the east through the 1700s reshaped the "
            "north before any census.",
     "nations": [
-        {"n": "Dakota", "poly": [[-96.5, 43.5], [-92.9, 43.6], [-93.3, 45.6], [-96.3, 45.4]], "lat": 44.6, "lon": -94.3, "note": "Minnesota River valley, Mille Lacs origin country, and Bdote, the sacred confluence.", "after": {"y": 1863, "t": "exiled from Minnesota by the Act of 1863 after the US-Dakota War"}},
-        {"n": "Ojibwe", "poly": [[-96.3, 46.3], [-90.2, 46.6], [-91.0, 48.7], [-96.2, 48.9]], "lat": 47.4, "lon": -93.5, "note": "Arrived from Lake Superior in the early 1700s; the northern lake country. The bands remain on seven reservations today."},
-        {"n": "Ioway", "poly": [[-94.3, 43.5], [-92.3, 43.5], [-92.6, 44.3], [-94.3, 44.1]], "lat": 43.9, "lon": -93.8, "note": "Southern Minnesota, earlier era."},
-        {"n": "Cheyenne", "poly": [[-96.8, 44.8], [-95.6, 44.9], [-95.9, 46.0], [-96.8, 45.9]], "lat": 45.3, "lon": -96.0, "note": "Western Minnesota before moving to the plains."},
-        {"n": "Ho-Chunk", "poly": [[-94.7, 43.7], [-93.7, 43.8], [-93.9, 44.4], [-94.7, 44.3]], "lat": 43.9, "lon": -94.2, "note": "Relocated into southern Minnesota in the 1840s.", "after": {"y": 1863, "t": "expelled 1863 despite taking no part in the war"}},
+        {"n": "Dakota", "src": "en.wikipedia.org/wiki/Fort_Snelling", "poly": [[-96.5, 43.5], [-92.9, 43.6], [-93.3, 45.6], [-96.3, 45.4]], "lat": 44.6, "lon": -94.3, "note": "Minnesota River valley, Mille Lacs origin country, and Bdote, the sacred confluence.", "after": {"y": 1863, "t": "exiled from Minnesota by the Act of 1863 after the US-Dakota War"}},
+        {"n": "Ojibwe", "src": "mnhs.org/fortsnelling/learn/native-americans/ojibwe-people", "poly": [[-96.3, 46.3], [-90.2, 46.6], [-91.0, 48.7], [-96.2, 48.9]], "lat": 47.4, "lon": -93.5, "note": "Arrived from Lake Superior in the early 1700s; the northern lake country. The bands remain on seven reservations today."},
+        {"n": "Ioway", "src": "mnhs.org/usdakotawar/glossary/iowa", "poly": [[-94.3, 43.5], [-92.3, 43.5], [-92.6, 44.3], [-94.3, 44.1]], "lat": 43.9, "lon": -93.8, "note": "Southern Minnesota, earlier era."},
+        {"n": "Cheyenne", "src": "accessgenealogy.com/minnesota/minnesota-indian-tribes.htm", "poly": [[-96.8, 44.8], [-95.6, 44.9], [-95.9, 46.0], [-96.8, 45.9]], "lat": 45.3, "lon": -96.0, "note": "Western Minnesota before moving to the plains."},
+        {"n": "Ho-Chunk", "src": "en.wikipedia.org/wiki/Blue_Earth_Reservation", "poly": [[-94.7, 43.7], [-93.7, 43.8], [-93.9, 44.4], [-94.7, 44.3]], "lat": 43.9, "lon": -94.2, "note": "Relocated into southern Minnesota in the 1840s.", "after": {"y": 1863, "t": "expelled 1863 despite taking no part in the war"}},
     ],
     "events": [
         {"y": 1778, "t": "set", "n": "Grand Portage", "lat": 47.96, "lon": -89.68, "note": "North West Company depot on the Ojibwe carrying place.", "src": "en.wikipedia.org/wiki/Grand_Portage_National_Monument"},
@@ -339,7 +349,9 @@ HIST["mn"] = {
     "refs": [
         ["US-Dakota War of 1862: the war, the executions, the exile.", "https://en.wikipedia.org/wiki/Dakota_War_of_1862"],
         ["Treaty of Traverse des Sioux, 1851.", "https://en.wikipedia.org/wiki/Treaty_of_Traverse_des_Sioux"],
-    ],
+    
+        ["Nation homelands: the Minnesota Historical Society on the Ojibwe and Dakota, and the treaty records.",
+         "https://www.mnhs.org/fortsnelling/learn/native-americans"],],
 }
 
 PAGES = {
@@ -634,7 +646,10 @@ function target(e){
   const g=e.target.closest('[data-nat],[data-ev],[data-cty],[data-hp]');
   if(!g) return null;
   if(g.dataset.nat!==undefined){ const n=HIST.nations[+g.dataset.nat];
-    return ['A nation of this land',n.n,n.note+(n.after?' '+n.after.t.charAt(0).toUpperCase()+n.after.t.slice(1)+'.':''),'']; }
+    return ['A nation of this land',n.n,
+      n.note+(n.after?' '+n.after.t.charAt(0).toUpperCase()+n.after.t.slice(1)+'.':'')
+      +' The patch is an approximate homeland, drawn for orientation.',
+      n.src||'']; }
   if(g.dataset.ev!==undefined){ const ev=HIST.events[+g.dataset.ev];
     const k=ev.t==='rem'?'Removal and dispossession':ev.t==='cap'?'Capital \\u00b7 '+ev.y:'Settlement \\u00b7 '+ev.y;
     return [k,ev.n,ev.note,ev.src]; }
