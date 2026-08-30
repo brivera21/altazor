@@ -196,7 +196,7 @@ HIST["pa"] = {
         {"n": "Shawnee", "src": "en.wikipedia.org/wiki/Shawnee", "poly": [[-77.8, 40.0], [-76.6, 40.2], [-76.8, 40.9], [-77.9, 40.7]], "lat": 40.3, "lon": -77.0, "note": "Arrived in the 1690s; Susquehanna and Ohio valleys."},
     ],
     "events": [
-        {"y": 1643, "t": "set", "n": "Tinicum Island", "lat": 39.87, "lon": -75.29, "note": "The Printzhof, seat of New Sweden.", "src": "en.wikipedia.org/wiki/Printzhof"},
+        {"y": 1643, "t": "set", "n": "Tinicum Island", "lat": 39.87, "lon": -75.29, "note": "The Printzhof, seat of New Sweden.", "src": "en.wikipedia.org/wiki/The_Printzhof"},
         {"y": 1682, "t": "set", "n": "Philadelphia", "pp": [[1790, 28522], [1850, 121376], [1890, 1046964], [1950, 2071605], [2020, 1603797]], "lat": 39.95, "lon": -75.16, "note": "Founded by William Penn.", "src": "en.wikipedia.org/wiki/Philadelphia"},
         {"y": 1734, "t": "set", "n": "Lancaster", "lat": 40.04, "lon": -76.31, "note": "State capital 1799 to 1812.", "src": "en.wikipedia.org/wiki/Lancaster,_Pennsylvania"},
         {"y": 1737, "t": "rem", "n": "Walking Purchase", "lat": 40.9, "lon": -75.2, "note": "Penn's heirs take about 1.2 million acres of Lenape land by a rigged walk.", "src": "en.wikipedia.org/wiki/Walking_Purchase"},

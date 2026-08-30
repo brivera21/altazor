@@ -568,8 +568,8 @@ PAGES = [
      "The main divisions of the animals, from the one ancestor at the left "
      "to living phyla and, inside the chordates, the vertebrate classes; "
      "branch lengths carry no time information, and counts are described "
-     "species from Zhang's 2013 census. The comb jellies branch first, the "
-     "placement chromosome-scale genomes settled in 2023, and the fishes "
+     "species from Zhang's 2013 census. The comb jellies branch first, a "
+     "placement settled by chromosome-scale genomes in 2023, and the fishes "
      "are drawn as one grade of several branches. A node under the cursor "
      "fills the card; a click pins it, and a second click lets go." + IMG_NOTE,
      [("Schultz, D. T., Haddock, S. H. D., Bredeson, J. V., Green, R. E., "
@@ -654,7 +654,7 @@ PAGES = [
      "branch of Homo down to the three that overlapped last, with fossil "
      "date ranges beside each species (Ma, millions of years ago; ka, "
      "thousands). Polytomies mark relationships the fossils leave "
-     "unresolved, and X. A node "
+     "unresolved. A node "
      "under the cursor fills the card; a click pins it, and a second click "
      "lets go." + HOM_IMG_NOTE,
      [("Smithsonian National Museum of Natural History. (n.d.). Human "

@@ -228,7 +228,7 @@ a move played.</p>
 left FIDE. This page draws the classical line, reunified when Kramnik beat
 the FIDE champion Topalov in 2006. Carlsen declined to defend in 2023. The
 reigns can be checked against the
-<a href="https://en.wikipedia.org/wiki/List_of_world_chess_champions">list of
+<a href="https://en.wikipedia.org/wiki/World_Chess_Championship">list of
 world chess champions</a>, and the next match is set out in
 <a href="https://www.fide.com/geneva-to-host-fide-world-championship-match-2026/">FIDE's
 announcement</a>. Portraits load at view time from Wikipedia's public API for

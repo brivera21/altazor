@@ -49,7 +49,7 @@ print(f"  {'ok  ' if ok else 'FAIL'} the open reign is Gukesh's, from 2024")
 if not ok: fails.append(f"current champion: {cur}")
 
 s = (Path(__file__).parent.parent / "world-champions.html").read_text(encoding="utf-8")
-for frag in ["Steinitz", "Gukesh", "List_of_world_chess_champions",
+for frag in ["Steinitz", "Gukesh", "World_Chess_Championship",
              "fide.com", "1937-2025"]:
     ok = frag in s
     print(f"  {'ok  ' if ok else 'FAIL'} the page carries '{frag}'")
