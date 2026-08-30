@@ -637,7 +637,7 @@ function render(){
       const p=e.pp?interp(e.pp,year):null;
       const R=cityR(p), C=cityC(p);
       s+='<g data-ev="'+i+'" style="cursor:pointer">'
-        +(R?'<circle cx="'+x+'" cy="'+y+'" r="'+R.toFixed(1)+'" fill="'+C+'" fill-opacity="0.16" stroke="'+C+'" stroke-opacity="0.85" stroke-width="1.2"/>':'')
+        +(R?'<circle cx="'+x+'" cy="'+y+'" r="'+R.toFixed(1)+'" fill="'+C+'" fill-opacity="0.62" stroke="'+C+'" stroke-opacity="0.95" stroke-width="1.2"/>':'')
         +(cap?'<path d="'+star(x,y,6)+'" fill="var(--cap)" stroke="#121212" stroke-width="1"/>'
              :'<circle cx="'+x+'" cy="'+y+'" r="3.6" fill="var(--set)" stroke="#121212" stroke-width="1"/>')
         +'<text x="'+x+'" y="'+(y-8-(R||0))+'" text-anchor="middle" font-size="10.5" fill="'+(cap?'var(--cap)':'#c9d1d9')+'" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+esc(e.n)+'</text></g>';
@@ -648,10 +648,14 @@ function render(){
     const Rmax=cityR(1e7), cx=16+Rmax, by=H-14;
     s+='<g pointer-events="none">';
     s+='<text x="16" y="'+(by-2*Rmax-10)+'" font-size="10" fill="#8b949e" stroke="#121212" stroke-width="2.4" paint-order="stroke">City population</text>';
+    // filled disks, largest painted first so each tier stays visible
+    for(const [p] of [...tiers].reverse()){
+      const r=cityR(p), C=cityC(p);
+      s+='<circle cx="'+cx+'" cy="'+(by-r)+'" r="'+r.toFixed(1)+'" fill="'+C+'" fill-opacity="0.62" stroke="'+C+'" stroke-opacity="0.95" stroke-width="1"/>';
+    }
     for(const [p,lab] of tiers){
       const r=cityR(p), ty=by-2*r, C=cityC(p);
-      s+='<circle cx="'+cx+'" cy="'+(by-r)+'" r="'+r.toFixed(1)+'" fill="none" stroke="'+C+'" stroke-opacity="0.9" stroke-width="1.2"/>'
-        +'<line x1="'+cx+'" y1="'+ty+'" x2="'+(cx+Rmax+8)+'" y2="'+ty+'" stroke="#8b949e" stroke-opacity="0.55" stroke-width="0.7"/>'
+      s+='<line x1="'+cx+'" y1="'+ty+'" x2="'+(cx+Rmax+8)+'" y2="'+ty+'" stroke="#8b949e" stroke-opacity="0.55" stroke-width="0.7"/>'
         +'<text x="'+(cx+Rmax+11)+'" y="'+(ty+3)+'" font-size="9" fill="'+C+'" stroke="#121212" stroke-width="2.2" paint-order="stroke">'+lab+'</text>';
     }
     s+='</g>';

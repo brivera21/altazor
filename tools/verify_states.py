@@ -91,7 +91,7 @@ with sync_playwright() as pw:
         # city circles: by 2020 at least one census-series city over 10,000
         pg.eval_on_selector("#yr", "el=>{el.value=2020;el.dispatchEvent(new Event('input'))}")
         pg.wait_for_timeout(250)
-        big = pg.evaluate("document.querySelectorAll('#map [data-ev] circle[fill-opacity=\"0.16\"]').length")
+        big = pg.evaluate("document.querySelectorAll('#map [data-ev] circle[fill-opacity=\"0.62\"]').length")
         check("city circles drawn in 2020", big >= 1, str(big))
         grow = pg.evaluate(
             "(()=>{const c=HIST.events.find(e=>e.pp);if(!c)return null;"
