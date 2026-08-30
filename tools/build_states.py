@@ -460,6 +460,7 @@ h1 { margin:0 0 10px; font-size:26px; }
 #eraTxt { font-size:13.5px; margin-top:8px; }
 #yearBig { font-size:30px; font-weight:700; }
 #popTxt { color:var(--muted); font-size:13px; line-height:1.55; margin-top:4px; }
+#popTxt .totG { color:#0ca30c; }
 #kindTxt { color:var(--muted); font-size:11.5px; letter-spacing:.09em; text-transform:uppercase; }
 #nameTxt { font-weight:700; font-size:16px; margin:2px 0 6px; }
 #bodyTxt { color:var(--muted); font-size:13px; line-height:1.5; }
@@ -621,13 +622,24 @@ function render(){
     const [x,y]=XY(n.lat,n.lon);
     s+='<g data-nat="'+i+'" style="cursor:pointer">';
     if(n.poly)
-      s+='<path d="'+blob(n.poly)+'" clip-path="url(#stclip)"'
+      s+='<path d="'+blob(n.poly)+'"'
         +' fill="hsl('+hue+',62%,55%)" fill-opacity="'+(gone?0.10:0.30)+'"'
         +' stroke="hsl('+hue+',62%,62%)" stroke-opacity="'+(gone?0.3:0.8)+'" stroke-width="1.3"/>';
     s+='<g opacity="'+(gone?0.5:1)+'">'
       +'<text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="13" font-style="italic" fill="var(--nation)" stroke="#121212" stroke-width="3" paint-order="stroke">'+esc(n.n)+'</text>'
       +(gone?'<text x="'+x+'" y="'+(y+13)+'" text-anchor="middle" font-size="9.5" fill="var(--rem)" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+n.after.y+'</text>':'')
       +'</g></g>';
+  });
+  if(layers.tow) (HIST.cities||[]).forEach((c,i)=>{
+    // bulk cities surface once the census finds 10,000 people
+    const p=interp(c.pp,year); const R=cityR(p);
+    if(!R) return;
+    const [x,y]=XY(c.lat,c.lon); const C=cityC(p);
+    s+='<g data-ct="'+i+'" style="cursor:pointer">'
+      +'<circle cx="'+x+'" cy="'+y+'" r="'+R.toFixed(1)+'" fill="'+C+'" fill-opacity="0.62" stroke="'+C+'" stroke-opacity="0.95" stroke-width="1"/>'
+      +'<circle cx="'+x+'" cy="'+y+'" r="2.2" fill="var(--set)" stroke="#121212" stroke-width="0.8"/>'
+      +(p>=25e4?'<text x="'+x+'" y="'+(y-6-R)+'" text-anchor="middle" font-size="9.5" fill="#c9d1d9" stroke="#121212" stroke-width="2.2" paint-order="stroke">'+esc(c.n)+'</text>':'')
+      +'</g>';
   });
   if(layers.tow) HIST.events.forEach((e,i)=>{
     if(e.y>year) return;
@@ -728,10 +740,10 @@ async function setYear(y){
   const natLast=HIST.native.length?HIST.native[HIST.native.length-1][0]:0;
   const nat=y<=natLast?interp(HIST.native,y):null;
   let t=[];
-  if(cen!=null) t.push((y>=(HIST.census[0][0])?'Census (interpolated): ':'Colonial estimate: ')+fmt(cen));
-  else t.push('Before the counts: '+HIST.pre);
-  if(nat!=null) t.push('Native population (estimate): '+fmt(nat));
-  document.getElementById('popTxt').innerHTML=t.map(esc).join('<br>');
+  if(cen!=null) t.push('<span class="totG">'+esc((y>=(HIST.census[0][0])?'Census (interpolated): ':'Colonial estimate: ')+fmt(cen))+'</span>');
+  else t.push(esc('Before the counts: '+HIST.pre));
+  if(nat!=null) t.push(esc('Native population (estimate): '+fmt(nat)));
+  document.getElementById('popTxt').innerHTML=t.join('<br>');
   render();
 }
 
@@ -743,7 +755,7 @@ function show(kind,name,body,src){
   document.getElementById('srcTxt').textContent=src||'';
 }
 function target(e){
-  const g=e.target.closest('[data-nat],[data-ev],[data-cty],[data-hp]');
+  const g=e.target.closest('[data-nat],[data-ev],[data-ct],[data-cty],[data-hp]');
   if(!g) return null;
   if(g.dataset.nat!==undefined){ const n=HIST.nations[+g.dataset.nat];
     return ['A nation of this land',n.n,
@@ -756,6 +768,12 @@ function target(e){
     if(ev.pp){ const p=interp(ev.pp,year);
       if(p) body+=' Population around '+year+': '+fmt(p)+' (census, interpolated).'; }
     return [k,ev.n,body,ev.src]; }
+  if(g.dataset.ct!==undefined){ const c=HIST.cities[+g.dataset.ct];
+    const p=interp(c.pp,year);
+    return ['City \\u00b7 census', c.n,
+      'Population around '+year+': '+fmt(p)+' (census, interpolated). '
+      +'On the map from the first census over 10,000.',
+      'Census series via the city\\u2019s Wikipedia article']; }
   if(g.dataset.cty!==undefined){ const c=ST.counties[+g.dataset.cty];
     return ['County \\u00b7 recent population',c.n,
       (c.y?'Established '+c.y+'. ':'')+'Population about '+fmt(c.p)+'.',
@@ -767,9 +785,9 @@ function target(e){
 svg.addEventListener('pointerover',e=>{ if(pinned) return;
   const t=target(e); if(t) show(...t); });
 svg.addEventListener('click',e=>{
-  const g=e.target.closest('[data-nat],[data-ev],[data-cty],[data-hp]');
+  const g=e.target.closest('[data-nat],[data-ev],[data-ct],[data-cty],[data-hp]');
   if(!g){ pinned=null; return; }
-  const id=g.dataset.nat!==undefined?'n'+g.dataset.nat:g.dataset.ev!==undefined?'e'+g.dataset.ev:g.dataset.cty!==undefined?'c'+g.dataset.cty:'hp';
+  const id=g.dataset.nat!==undefined?'n'+g.dataset.nat:g.dataset.ev!==undefined?'e'+g.dataset.ev:g.dataset.ct!==undefined?'t'+g.dataset.ct:g.dataset.cty!==undefined?'c'+g.dataset.cty:'hp';
   pinned = pinned===id?null:id;
   const t=target(e); if(t) show(...t);
 });
@@ -973,14 +991,35 @@ def refs_html(hist):
         ("Decennial census populations, state and city; city figures via each city's Wikipedia article.", "https://www.census.gov/data/tables/time-series/dec/popchange-data-text.html"),
         ("Flags: each era's Wikipedia article image, fetched at view time.", "https://en.wikipedia.org/"),
         ("County founding years: each state's Wikipedia list of counties.", "https://en.wikipedia.org/"),
+        ("City census series: the decennial table in each city's Wikipedia article; every city over 100,000 today is on the map.", "https://en.wikipedia.org/"),
         ("Native Land Digital: the community-sourced map of Indigenous territories; the patches here are rough approximations of the documented homelands, not their data.", "https://native-land.ca/"),
     ] + hist["refs"]
     return "\n".join(f'<p>{t}\n<a href="{u}">{u}</a></p>' for t, u in rows)
 
 
+# every city over 100,000 today, with its decennial census series
+# (tools/data/cities.json, from each city's Wikipedia census table)
+CITIES_ALL = json.loads((DATA.parent / "cities.json").read_text())
+
+
+def norm(n):
+    return n.lower().replace("saint ", "st. ").strip()
+
+
 for st, fname in PAGES.items():
     data = json.loads((DATA / f"{st}.json").read_text())
     hist = HIST[st]
+    bulk = CITIES_ALL.get(st, {})
+    ev_by_name = {norm(e["n"]): e for e in hist["events"]}
+    cities = []
+    for cname, c in sorted(bulk.items()):
+        ev = ev_by_name.get(norm(cname))
+        if ev is not None:
+            ev["pp"] = c["pp"]  # the fuller series replaces the sketch
+            continue
+        cities.append({"n": cname, "lat": c["lat"], "lon": c["lon"],
+                       "pp": c["pp"]})
+    hist["cities"] = cities
     sibs = "".join(f' <a href="{f}">{n}</a>' for f, n in SIBLINGS if f != fname)
     html = (HTML.replace("__TITLE__", data["name"])
             .replace("__SIBS__", sibs)

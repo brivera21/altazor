@@ -92,6 +92,19 @@ with sync_playwright() as pw:
         pg.wait_for_timeout(250)
         big = pg.evaluate("document.querySelectorAll('#map [data-ev] circle[fill-opacity=\"0.62\"]').length")
         check("city circles drawn in 2020", big >= 1, str(big))
+        bulk_n = {"california.html": 55, "pennsylvania.html": 1,
+                  "massachusetts.html": 4, "alabama.html": 0,
+                  "nebraska.html": 0, "minnesota.html": 1}[fname]
+        bulk = pg.evaluate("document.querySelectorAll('#map [data-ct]').length")
+        check("the 100,000-plus cities are all on the map",
+              bulk >= bulk_n, f"{bulk} < {bulk_n}")
+        full = pg.evaluate(
+            "HIST.events.filter(e=>e.pp&&e.pp.length>=10).length")
+        check("event cities carry the full census series", full >= 1,
+              str(full))
+        okpp = pg.evaluate(
+            "(HIST.cities||[]).every(c=>c.pp.length&&c.pp.every((q,i)=>!i||q[0]>c.pp[i-1][0]))")
+        check("city census series are ordered", okpp)
         n = pg.evaluate("document.querySelectorAll('[data-cty]').length")
         check(f"{c['cty']} counties drawn by 2020", n == c["cty"], str(n))
         seethru = pg.evaluate(

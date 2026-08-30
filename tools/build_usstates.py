@@ -10,9 +10,11 @@ not a state.
 Usage: python3 build_usstates.py
 """
 
+import json
 from pathlib import Path
 
 OUT = Path(__file__).parent.parent / "us-states.html"
+USMAP = json.loads((Path(__file__).parent / "data" / "usmap.json").read_text())
 
 SNAPSHOT = "August 14, 2026"
 US_POP = 341_784_857          # 50 states plus DC, July 1, 2025
@@ -169,7 +171,7 @@ def tr(i, r, rank=True):
     flag = (DC_FLAG if r["cc"] == "dc" else
             f'<img class="flag" src="https://flagcdn.com/w80/us-{r["cc"]}.png"'
             f' width="30" height="20" alt="Flag of {r["name"]}">')
-    return f"""<tr>
+    return f"""<tr class="strow" data-cc="{r['cc']}">
   <td class="rank">{i if rank else ""}</td>
   <td class="ct"><span class="cw">{flag}<span>{r['name']}</span></span></td>
   <td class="num pop">{commas(r['pop'])}{gap}</td>
@@ -178,6 +180,20 @@ def tr(i, r, rank=True):
   <td class="num">{chg_txt}</td>
 </tr>"""
 
+
+# ---- per-state data for the dashboard swap, and the little US map ----
+for i, r in enumerate(rows):
+    r["next"] = rows[i + 1]["name"] if i + 1 < len(rows) else None
+DATA = {r["cc"]: dict(n=r["name"], pop=r["pop"], chg=r["chg"],
+                      pct=round(r["pct"], 1), share=round(r["share"], 2),
+                      rank=i + 1, gap=r.get("gap"), nxt=r["next"])
+        for i, r in enumerate(rows)}
+DATA["dc"] = dict(n=dc["name"], pop=dc["pop"], chg=dc["chg"],
+                  pct=round(dc["pct"], 1), share=round(dc["share"], 2),
+                  rank=None, gap=None, nxt=None)
+DATA_JS = json.dumps(DATA, separators=(",", ":"))
+MAP_PATHS = "".join(f'<path d="{d}" data-cc="{p.lower()}"/>'
+                    for p, d in USMAP["paths"].items())
 
 body = "\n".join(tr(i + 1, r) for i, r in enumerate(rows))
 p = sum(r["pop"] for r in rows)
@@ -217,7 +233,19 @@ h2 {{ font-size:16px; margin:34px 0 10px; letter-spacing:.02em; }}
 .lede {{ color:var(--muted); font-size:14.5px; margin:0 0 6px; max-width:730px; }}
 .stamp {{ color:var(--ink-3); font-size:12.5px; margin:0 0 22px; }}
 
-.tiles {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; }}
+.dash {{ display:grid; grid-template-columns:minmax(0,1fr) 470px; gap:14px; align-items:stretch; }}
+.mappanel {{ background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:10px 12px 4px; }}
+#usmap {{ display:block; width:100%; height:auto; }}
+#usmap path {{ fill:#262c33; stroke:#121212; stroke-width:0.7; cursor:pointer; transition:fill .12s; }}
+#usmap path:hover {{ fill:#39424d; }}
+#usmap path.sel {{ fill:var(--accent); }}
+.mapcap {{ color:var(--ink-3); font-size:12px; text-align:center; padding:5px 0; }}
+tr.strow {{ cursor:pointer; }}
+tr.strow:hover td {{ background:#1e1e1e; }}
+tr.strow.sel td {{ background:#20303f; }}
+@media (max-width:900px) {{ .dash {{ grid-template-columns:1fr; }} }}
+.tiles {{ display:grid; grid-template-columns:repeat(2,minmax(150px,1fr)); gap:14px; align-content:start; }}
 .tile {{ background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }}
 .tile .lab {{ color:var(--muted); font-size:12.5px; }}
 .tile .val {{ font-size:26px; font-weight:600; margin-top:2px; line-height:1.2; }}
@@ -272,19 +300,26 @@ tr.total td {{ border-bottom:none; color:var(--muted); font-size:13px; padding-t
 <p class="stamp">Snapshot taken {SNAPSHOT}, using Census Bureau estimates for
 July 1, 2025.</p>
 
+<div class="dash">
 <div class="tiles">
-  <div class="tile"><div class="lab">U.S. population</div>
-    <div class="val">{US_POP/1e6:.1f} million</div>
-    <div class="sub">{commas(US_POP)} in 2025</div></div>
-  <div class="tile"><div class="lab">Largest state</div>
-    <div class="val">{rows[0]['name']}</div>
-    <div class="sub">{commas(rows[0]['pop'])} people</div></div>
-  <div class="tile"><div class="lab">Fastest growth</div>
-    <div class="val">+{fastest['pct']:.1f}%</div>
-    <div class="sub">{fastest['name']} since 2020</div></div>
-  <div class="tile"><div class="lab">Steepest decline</div>
-    <div class="val">−{abs(steepest['pct']):.1f}%</div>
-    <div class="sub">{steepest['name']} since 2020</div></div>
+  <div class="tile"><div class="lab" id="l1">U.S. population</div>
+    <div class="val" id="v1">{US_POP/1e6:.1f} million</div>
+    <div class="sub" id="s1">{commas(US_POP)} in 2025</div></div>
+  <div class="tile"><div class="lab" id="l2">Largest state</div>
+    <div class="val" id="v2">{rows[0]['name']}</div>
+    <div class="sub" id="s2">{commas(rows[0]['pop'])} people</div></div>
+  <div class="tile"><div class="lab" id="l3">Fastest growth</div>
+    <div class="val" id="v3">+{fastest['pct']:.1f}%</div>
+    <div class="sub" id="s3">{fastest['name']} since 2020</div></div>
+  <div class="tile"><div class="lab" id="l4">Steepest decline</div>
+    <div class="val" id="v4">−{abs(steepest['pct']):.1f}%</div>
+    <div class="sub" id="s4">{steepest['name']} since 2020</div></div>
+</div>
+<div class="mappanel">
+  <svg id="usmap" viewBox="0 0 {USMAP['w']} {USMAP['h']}" role="img"
+    aria-label="Map of the United States; the chosen state is highlighted">{MAP_PATHS}</svg>
+  <div class="mapcap" id="mapcap">A state, clicked here or in the table, fills the tiles</div>
+</div>
 </div>
 
 <div class="legend">
@@ -324,8 +359,47 @@ Flags are the state flags, served by
 for the United States, regions, states, and Puerto Rico: April 1, 2020 to July 1,
 2025</em> (Vintage 2025 population estimates) [Data set]. Retrieved {SNAPSHOT},
 from <a href="https://www.census.gov/programs-surveys/popest.html">https://www.census.gov/programs-surveys/popest.html</a></p>
+<p>Map outlines: Natural Earth, 50m states and provinces.
+<a href="https://www.naturalearthdata.com/">https://www.naturalearthdata.com/</a></p>
 </div>
 </div>
+<script>
+const DATA={DATA_JS};
+const DEF=[
+  ["U.S. population","{US_POP/1e6:.1f} million","{commas(US_POP)} in 2025"],
+  ["Largest state","{rows[0]['name']}","{commas(rows[0]['pop'])} people"],
+  ["Fastest growth","+{fastest['pct']:.1f}%","{fastest['name']} since 2020"],
+  ["Steepest decline","−{abs(steepest['pct']):.1f}%","{steepest['name']} since 2020"]];
+let sel=null;
+const cap=document.getElementById('mapcap');
+const fmtC=n=>n.toLocaleString('en-US');
+const big=n=>n>=1e6?(n/1e6).toFixed(1)+' million':fmtC(n);
+function setTiles(a){{ a.forEach((t,i)=>{{
+  document.getElementById('l'+(i+1)).textContent=t[0];
+  document.getElementById('v'+(i+1)).textContent=t[1];
+  document.getElementById('s'+(i+1)).textContent=t[2]; }}); }}
+function apply(cc){{
+  sel=cc;
+  document.querySelectorAll('#usmap path').forEach(p=>p.classList.toggle('sel',p.dataset.cc===cc));
+  document.querySelectorAll('tr.strow').forEach(t=>t.classList.toggle('sel',t.dataset.cc===cc));
+  if(!cc){{ setTiles(DEF); cap.textContent='A state, clicked here or in the table, fills the tiles'; return; }}
+  const d=DATA[cc];
+  setTiles([
+    [d.n, big(d.pop), fmtC(d.pop)+(d.rank?' · No. '+d.rank+' of 50':' · not a state')],
+    ["Share of the U.S.", d.share.toFixed(2)+'%', 'of {commas(US_POP)} people'],
+    ["Change since 2020", (d.chg>0?'+':'−')+Math.abs(d.pct).toFixed(1)+'%',
+     (d.chg>0?'+':'−')+fmtC(Math.abs(d.chg))+' people'],
+    d.gap!=null?["Lead over next rank",'+'+fmtC(d.gap),'over '+d.nxt]
+      :["Lead over next rank",'—', d.rank?'the smallest state':'listed outside the ranking']]);
+  cap.textContent=d.n;
+}}
+document.querySelectorAll('tr.strow').forEach(t=>t.addEventListener('click',()=>{{
+  apply(sel===t.dataset.cc?null:t.dataset.cc); }}));
+document.querySelectorAll('#usmap path').forEach(p=>p.addEventListener('click',()=>{{
+  if(DATA[p.dataset.cc]) apply(sel===p.dataset.cc?null:p.dataset.cc); }}));
+window.__uss=()=>({{sel, tiles:[1,2,3,4].map(i=>document.getElementById('v'+i).textContent),
+  mapStates:document.querySelectorAll('#usmap path').length}});
+</script>
 </body>
 </html>
 """
