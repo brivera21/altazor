@@ -585,7 +585,9 @@ function render(){
   s+='<defs><clipPath id="stclip"><path d="'+outlineD+'"/></clipPath></defs>';
   s+='<path d="'+outlineD+'" fill="'+(layers.ter||layers.woo?'none':'#1d2126')+'" stroke="none"/>';
   if(layers.cou){
+    // each county joins the map in its founding year
     ST.counties.forEach((c,i)=>{
+      if(c.y&&c.y>year) return;
       s+='<g data-cty="'+i+'"><path d="'+ringsPath(c.r)+'" fill="rgba(0,0,0,0)" stroke="#e6e6e6" stroke-opacity="0.75" stroke-width="0.8"/></g>';
     });
   }
@@ -755,7 +757,9 @@ function target(e){
       if(p) body+=' Population around '+year+': '+fmt(p)+' (census, interpolated).'; }
     return [k,ev.n,body,ev.src]; }
   if(g.dataset.cty!==undefined){ const c=ST.counties[+g.dataset.cty];
-    return ['County \\u00b7 recent population',c.n,'Population about '+fmt(c.p)+'.','Census figures via the Balsama county dataset, 2025']; }
+    return ['County \\u00b7 recent population',c.n,
+      (c.y?'Established '+c.y+'. ':'')+'Population about '+fmt(c.p)+'.',
+      'Founding year via Wikipedia\\u2019s county list; census figures via the Balsama county dataset, 2025']; }
   if(g.dataset.hp!==undefined){ const hp=HIST.geo.hp;
     return ['Highest point',hp.n,'Elevation '+hp.el+'.','']; }
   return null;
@@ -939,12 +943,12 @@ window.__state=()=>({year, layers:{...layers}, counties:ST.counties.length,
 
 NOTE1 = ("The map is the real state in Web Mercator: rivers and lakes from "
          "Natural Earth, county lines and recent populations from the "
-         "Census Bureau's cartographic files, terrain shaded at view time "
+         "Census Bureau's cartographic files, terrain shaded live "
          "from the AWS Terrain Tiles, and the woods layer drawn from the "
          "USGS National Land Cover Database, forest classes only. Each "
          "chip turns one layer on or off; a mark under the cursor fills "
-         "the card, a click pins it. The border and neighbor names appear "
-         "once the border was drawn.")
+         "the card, a click pins it. The border, neighbor names and "
+         "counties appear from the years they were drawn.")
 NOTE2 = ("The slider runs from 1492: the nations who lived here first as "
          "colored patches, approximate homelands for orientation, their "
          "population figures scholarly estimates, "
@@ -968,6 +972,7 @@ def refs_html(hist):
         ("Woods: USGS National Land Cover Database 2021, forest classes, via the MRLC WMS.", "https://www.mrlc.gov/"),
         ("Decennial census populations, state and city; city figures via each city's Wikipedia article.", "https://www.census.gov/data/tables/time-series/dec/popchange-data-text.html"),
         ("Flags: each era's Wikipedia article image, fetched at view time.", "https://en.wikipedia.org/"),
+        ("County founding years: each state's Wikipedia list of counties.", "https://en.wikipedia.org/"),
         ("Native Land Digital: the community-sourced map of Indigenous territories; the patches here are rough approximations of the documented homelands, not their data.", "https://native-land.ca/"),
     ] + hist["refs"]
     return "\n".join(f'<p>{t}\n<a href="{u}">{u}</a></p>' for t, u in rows)

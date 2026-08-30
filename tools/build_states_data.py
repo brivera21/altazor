@@ -87,6 +87,10 @@ def lines(geom):
 
 def main():
     fetch()
+    # county founding years, keyed by FIPS; from each state's Wikipedia
+    # "List of counties" table (the Est./Created column)
+    county_years = json.loads(
+        (Path(__file__).parent / "data" / "county_years.json").read_text())
     counties_fc = json.loads((GEO / "geojson-counties-fips.json").read_text())
     pops = json.loads((GEO / "counties_pop.json").read_text())
     pop_by_fips = {v["fips"]: v for v in pops.values()}
@@ -106,8 +110,8 @@ def main():
         minx, miny, maxx, maxy = outline.bounds
         # the view keeps a wide margin so the surrounding terrain, ocean
         # and neighbor states show around the outline
-        VP = 0.30
-        pad = 0.60
+        VP = 0.55
+        pad = 0.90
         clipbox = box(minx - pad, miny - pad, maxx + pad, maxy + pad)
 
         # mercator view transform
@@ -138,6 +142,7 @@ def main():
             data["counties"].append({
                 "n": name, "fips": cid,
                 "p": info.get("population"),
+                "y": county_years.get(cid),
                 "r": enc_rings(g, 0.004),
             })
 

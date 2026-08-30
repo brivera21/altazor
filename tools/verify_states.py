@@ -64,13 +64,12 @@ with sync_playwright() as pw:
         nb0 = pg.evaluate("[...document.querySelectorAll('#map text')].filter(t=>t.getAttribute('letter-spacing')).length")
         check("no border or neighbor names before the border", ol == 0 and nb0 == 0,
               f"outline {ol}, names {nb0}")
-        # counties chip: borders only, see-through fill
+        # counties chip: none exist yet in 1492, all carry data
         pg.click("#cCou"); pg.wait_for_timeout(200)
-        n = pg.evaluate("document.querySelectorAll('[data-cty]').length")
-        check(f"{c['cty']} counties drawn", n == c["cty"], str(n))
-        seethru = pg.evaluate(
-            "[...document.querySelectorAll('[data-cty] path')].every(p=>p.getAttribute('fill')==='rgba(0,0,0,0)')")
-        check("county borders only, no fill", seethru)
+        n0 = pg.evaluate("document.querySelectorAll('[data-cty]').length")
+        check("no counties before any were founded", n0 == 0, str(n0))
+        hasy = pg.evaluate("ST.counties.every(x=>x.y>=1600&&x.y<=1930)")
+        check("every county carries a founding year", hasy)
         haspop = pg.evaluate("ST.counties.every(x=>x.p>0)")
         check("every county carries a population", haspop)
         # rivers chip off removes rivers
@@ -93,6 +92,11 @@ with sync_playwright() as pw:
         pg.wait_for_timeout(250)
         big = pg.evaluate("document.querySelectorAll('#map [data-ev] circle[fill-opacity=\"0.62\"]').length")
         check("city circles drawn in 2020", big >= 1, str(big))
+        n = pg.evaluate("document.querySelectorAll('[data-cty]').length")
+        check(f"{c['cty']} counties drawn by 2020", n == c["cty"], str(n))
+        seethru = pg.evaluate(
+            "[...document.querySelectorAll('[data-cty] path')].every(p=>p.getAttribute('fill')==='rgba(0,0,0,0)')")
+        check("county borders only, no fill", seethru)
         grow = pg.evaluate(
             "(()=>{const c=HIST.events.find(e=>e.pp);if(!c)return null;"
             "return cityR(interp(c.pp,2020))>cityR(interp(c.pp,1900));})()")
