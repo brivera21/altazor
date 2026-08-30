@@ -458,10 +458,21 @@ async function terrain(){
       elev[i]=e; if(e>emax)emax=e; if(e<emin)emin=e;
     }
     emin=Math.max(emin,-5);
+    // the sea: below-zero cells connected to the map edge, so a below-sea
+    // valley inland (Death Valley) stays land
+    const water=new Uint8Array(px*py), stk=[];
+    const seed=i=>{ if(elev[i]<=0&&!water[i]){ water[i]=1; stk.push(i); } };
+    for(let x=0;x<px;x++){ seed(x); seed((py-1)*px+x); }
+    for(let y2=0;y2<py;y2++){ seed(y2*px); seed(y2*px+px-1); }
+    while(stk.length){
+      const i=stk.pop(), x=i%px, y2=(i-x)/px;
+      if(x>0) seed(i-1); if(x<px-1) seed(i+1);
+      if(y2>0) seed(i-px); if(y2<py-1) seed(i+px);
+    }
     const out=octx.createImageData(px,py), o=out.data;
     for(let y2=0;y2<py;y2++)for(let x=0;x<px;x++){
       const i=y2*px+x, e=elev[i];
-      if(e<=0){ o[i*4]=30; o[i*4+1]=68; o[i*4+2]=98; o[i*4+3]=235; continue; }
+      if(water[i]){ o[i*4]=30; o[i*4+1]=68; o[i*4+2]=98; o[i*4+3]=235; continue; }
       const t=Math.max(0,Math.min(1,(e-emin)/Math.max(1,emax-emin)));
       const ex=elev[y2*px+Math.min(px-1,x+1)], ey=elev[Math.min(py-1,y2+1)*px+x];
       const sh=Math.max(0,Math.min(1,0.5+((ex-e)+(e-ey))*0.012));
