@@ -79,6 +79,32 @@ with sync_playwright() as pw:
         check("1870 population interpolates the census", "Census" in pop, pop[:60])
         expr, name = c["probe"]
         check(name, pg.evaluate(expr))
+        # city circles: by 2020 at least one census-series city over 10,000
+        pg.eval_on_selector("#yr", "el=>{el.value=2020;el.dispatchEvent(new Event('input'))}")
+        pg.wait_for_timeout(250)
+        big = pg.evaluate("document.querySelectorAll('#map [data-ev] circle[fill-opacity=\"0.16\"]').length")
+        check("city circles drawn in 2020", big >= 1, str(big))
+        grow = pg.evaluate(
+            "(()=>{const c=HIST.events.find(e=>e.pp);if(!c)return null;"
+            "return cityR(interp(c.pp,2020))>cityR(interp(c.pp,1900));})()")
+        check("a city circle grows over time", grow is True, str(grow))
+        legend = pg.evaluate("document.querySelector('#map').innerHTML.includes('City population')")
+        check("the circle legend is drawn", legend)
+        # slider jump markers land on era boundaries
+        tk = pg.evaluate("document.querySelectorAll('#ticks button').length")
+        check("jump markers above the slider", tk >= 3, str(tk))
+        sy = {"california.html": 1850, "pennsylvania.html": 1787,
+              "massachusetts.html": 1788, "alabama.html": 1819,
+              "nebraska.html": 1867, "minnesota.html": 1858}[fname]
+        has = pg.evaluate(
+            f"[...document.querySelectorAll('#ticks button')].some(b=>b.textContent==='{sy}')")
+        check(f"statehood {sy} is a jump marker", has)
+        pg.evaluate("document.querySelector('#ticks button').click()")
+        pg.wait_for_timeout(200)
+        jumped = pg.evaluate("window.__state()")["year"]
+        first = pg.evaluate("HIST.eras.map(e=>e.y0).filter(y=>y>1492).sort((a,b)=>a-b)[0]")
+        check("clicking a marker jumps to its year", jumped == first,
+              f"{jumped} vs {first}")
         check("no JS errors", not errs, "; ".join(errs)[:120])
         pg.close()
     br.close()
