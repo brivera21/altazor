@@ -575,6 +575,10 @@ function fmt(x){ return x==null?'?':x.toLocaleString('en-US'); }
 // growing city circle: 0 below 10,000, then log-scaled to 20 million
 function cityR(p){ if(!p||p<1e4) return 0;
   return 4+4.5*(Math.log10(Math.min(p,2e7))-4); }
+// tier color: green 10 thousand, yellow 100 thousand, orange one
+// million, red ten million
+function cityC(p){ if(p>=1e7) return '#ef5350'; if(p>=1e6) return '#ff9440';
+  if(p>=1e5) return '#ffd24d'; return '#66bb6a'; }
 
 function render(){
   let s='';
@@ -631,9 +635,9 @@ function render(){
     } else {
       const cap=e.t==='cap';
       const p=e.pp?interp(e.pp,year):null;
-      const R=cityR(p);
+      const R=cityR(p), C=cityC(p);
       s+='<g data-ev="'+i+'" style="cursor:pointer">'
-        +(R?'<circle cx="'+x+'" cy="'+y+'" r="'+R.toFixed(1)+'" fill="var(--set)" fill-opacity="0.16" stroke="var(--set)" stroke-opacity="0.8" stroke-width="1.2"/>':'')
+        +(R?'<circle cx="'+x+'" cy="'+y+'" r="'+R.toFixed(1)+'" fill="'+C+'" fill-opacity="0.16" stroke="'+C+'" stroke-opacity="0.85" stroke-width="1.2"/>':'')
         +(cap?'<path d="'+star(x,y,6)+'" fill="var(--cap)" stroke="#121212" stroke-width="1"/>'
              :'<circle cx="'+x+'" cy="'+y+'" r="3.6" fill="var(--set)" stroke="#121212" stroke-width="1"/>')
         +'<text x="'+x+'" y="'+(y-8-(R||0))+'" text-anchor="middle" font-size="10.5" fill="'+(cap?'var(--cap)':'#c9d1d9')+'" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+esc(e.n)+'</text></g>';
@@ -645,10 +649,10 @@ function render(){
     s+='<g pointer-events="none">';
     s+='<text x="16" y="'+(by-2*Rmax-10)+'" font-size="10" fill="#8b949e" stroke="#121212" stroke-width="2.4" paint-order="stroke">City population</text>';
     for(const [p,lab] of tiers){
-      const r=cityR(p), ty=by-2*r;
-      s+='<circle cx="'+cx+'" cy="'+(by-r)+'" r="'+r.toFixed(1)+'" fill="none" stroke="var(--set)" stroke-opacity="0.8" stroke-width="1"/>'
+      const r=cityR(p), ty=by-2*r, C=cityC(p);
+      s+='<circle cx="'+cx+'" cy="'+(by-r)+'" r="'+r.toFixed(1)+'" fill="none" stroke="'+C+'" stroke-opacity="0.9" stroke-width="1.2"/>'
         +'<line x1="'+cx+'" y1="'+ty+'" x2="'+(cx+Rmax+8)+'" y2="'+ty+'" stroke="#8b949e" stroke-opacity="0.55" stroke-width="0.7"/>'
-        +'<text x="'+(cx+Rmax+11)+'" y="'+(ty+3)+'" font-size="9" fill="#8b949e" stroke="#121212" stroke-width="2.2" paint-order="stroke">'+lab+'</text>';
+        +'<text x="'+(cx+Rmax+11)+'" y="'+(ty+3)+'" font-size="9" fill="'+C+'" stroke="#121212" stroke-width="2.2" paint-order="stroke">'+lab+'</text>';
     }
     s+='</g>';
   }
@@ -940,12 +944,13 @@ NOTE1 = ("The map is the real state in Web Mercator: rivers and lakes from "
 NOTE2 = ("The slider runs from 1492: the nations who lived here first as "
          "colored patches, approximate homelands for orientation, their "
          "population figures scholarly estimates, "
-         "then the settlements, capitals and removals year by year, while "
+         "then settlements, capitals and removals year by year, while "
          "the flag panel shows whose claim covered the land until the "
-         "official state flag. City circles grow as census counts pass "
+         "official state flag. City circles grow green, then yellow, "
+         "orange, red as census counts pass "
          "10 thousand, 100 thousand, one million, and the years above the "
          "slider jump to the turning points. "
-         "The nations named here still exist today; "
+         "These nations still exist today; "
          "Native Land Digital maps their territories fully, with "
          "community input, and is the place to see them properly.")
 
