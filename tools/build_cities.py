@@ -413,13 +413,20 @@ HIST["nyc"] = {
     "marks": [{"y": 1626, "l": "The purchase of Manhattan"},
               {"y": 1664, "l": "The English take it"},
               {"y": 1827, "l": "Slavery ends in New York"},
-              {"y": 1898, "l": "The five boroughs join"}],
+              {"y": 1898, "l": "The five boroughs join"},
+              {"y": 1904, "l": "Harlem changes hands"},
+              {"y": 1935, "l": "The Harlem riot"}],
     "border": 1898,
     "nb": [
         {"n": "Hudson River", "lat": 40.85, "lon": -74.02, "sea": True},
         {"n": "Long Island Sound", "lat": 40.90, "lon": -73.72, "sea": True},
         {"n": "Atlantic Ocean", "lat": 40.45, "lon": -73.85, "sea": True},
         {"n": "New Jersey", "lat": 40.75, "lon": -74.30},
+        {"n": "Harlem", "lat": 40.818, "lon": -73.950},
+        {"n": "East Harlem", "lat": 40.792, "lon": -73.934},
+        {"n": "Brooklyn", "lat": 40.678, "lon": -73.950},
+        {"n": "Queens", "lat": 40.740, "lon": -73.820},
+        {"n": "The Bronx", "lat": 40.855, "lon": -73.870},
     ],
     "pre": "Lenapehoking: Munsee-speaking Lenape villages, planting grounds "
            "and oyster beds across the islands and the mainland.",
@@ -442,6 +449,12 @@ HIST["nyc"] = {
         {"y": 1892, "t": "set", "n": "Ellis Island opens", "lat": 40.699, "lon": -74.039, "note": "Twelve million people pass through before it closes in 1954.", "src": "en.wikipedia.org/wiki/Ellis_Island"},
         {"y": 1898, "t": "cap", "n": "The five boroughs", "lat": 40.712, "lon": -74.006, "note": "Manhattan, Brooklyn, Queens, the Bronx and Staten Island consolidate on January 1.", "src": "en.wikipedia.org/wiki/City_of_Greater_New_York"},
         {"y": 1904, "t": "set", "n": "The subway", "lat": 40.751, "lon": -73.977, "note": "The IRT opens and the city's growth follows the lines out into the boroughs.", "src": "en.wikipedia.org/wiki/New_York_City_Subway"},
+        {"y": 1658, "t": "set", "n": "Nieuw Haarlem", "lat": 40.806, "lon": -73.938, "note": "Dutch settlers lay out a village on the flats by the Harlem River and name it for Haarlem; Stuyvesant's council incorporates it in 1660. It stays farmland for two centuries.", "src": "en.wikipedia.org/wiki/Harlem"},
+        {"y": 1904, "t": "set", "n": "Payton's Harlem", "lat": 40.813, "lon": -73.944, "note": "Philip A. Payton Jr. founds the Afro-American Realty Company on 15 June and places Black tenants in the flats of a Harlem built ahead of its demand. By the 1915 state census his own block, white in 1900, is almost wholly Black.", "src": "en.wikipedia.org/wiki/Philip_A._Payton_Jr."},
+        {"y": 1925, "t": "set", "n": "The Harlem Renaissance", "lat": 40.8155, "lon": -73.9405, "note": "Central and West Harlem carry the writing, music and painting of the twenties and thirties, and the idea that a neighborhood could speak for a people.", "src": "en.wikipedia.org/wiki/Harlem_Renaissance"},
+        {"y": 1935, "t": "rem", "n": "The Harlem riot of 1935", "lat": 40.8085, "lon": -73.9475, "note": "On 19 March a rumor that a boy caught shoplifting had been beaten to death empties the avenues: three dead, a hundred injured, two million dollars of damage. Historians count it the first modern riot, aimed at shops and police rather than at neighbors.", "src": "en.wikipedia.org/wiki/Harlem_riot_of_1935"},
+        {"y": 1950, "t": "set", "n": "El Barrio", "lat": 40.795, "lon": -73.936, "note": "Puerto Rican families settle East Harlem after the war, and Italian Harlem becomes Spanish Harlem.", "src": "en.wikipedia.org/wiki/Harlem"},
+        {"y": 1964, "t": "rem", "n": "The Harlem riot of 1964", "lat": 40.8045, "lon": -73.9425, "note": "A police lieutenant shoots James Powell, fifteen, on 16 July. Six nights follow in Harlem and Bedford-Stuyvesant: one dead, 118 injured, 465 arrested, and the grand jury clears the officer.", "src": "en.wikipedia.org/wiki/Harlem_riot_of_1964"},
         {"y": 1969, "t": "set", "n": "Stonewall", "lat": 40.734, "lon": -74.002, "note": "Six nights of resistance to a police raid on Christopher Street.", "src": "en.wikipedia.org/wiki/Stonewall_riots"},
         {"y": 2001, "t": "rem", "n": "September 11", "lat": 40.711, "lon": -74.013, "note": "2,753 people are killed at the World Trade Center.", "src": "en.wikipedia.org/wiki/September_11_attacks"},
     ],
@@ -469,6 +482,10 @@ HIST["nyc"] = {
         ["Lenapehoking and the Lenape of the harbor.", "https://en.wikipedia.org/wiki/Lenape"],
         ["The consolidation of Greater New York, 1898.", "https://en.wikipedia.org/wiki/City_of_Greater_New_York"],
         ["Ellis Island and the years of the great arrival.", "https://en.wikipedia.org/wiki/Ellis_Island"],
+        ["Nieuw Haarlem, and the Harlem that followed it.", "https://en.wikipedia.org/wiki/Harlem"],
+        ["Philip A. Payton Jr. and the Afro-American Realty Company, 1904.", "https://en.wikipedia.org/wiki/Philip_A._Payton_Jr."],
+        ["The Harlem riot of 1935, and why it is counted the first modern one.", "https://en.wikipedia.org/wiki/Harlem_riot_of_1935"],
+        ["The Harlem riot of 1964, after the shooting of James Powell.", "https://en.wikipedia.org/wiki/Harlem_riot_of_1964"],
     ],
 }
 
@@ -491,18 +508,22 @@ MINE = {
     "northfield": ("St. Olaf College", "St. Olaf"),
 }
 
-NOTE1 = ("The ground itself: relief shaded live from the AWS Terrain Tiles, "
-         "woods and water from the USGS land cover, county lines from the "
-         "Census files. Each chip turns a layer on or off; a mark under the "
-         "cursor fills the card and a click pins it.")
+NOTE1 = ("The ground itself: relief shaded live from the AWS Terrain "
+         "Tiles and colored by height above the sea on one scale shared by "
+         "every map here, woods and water from the USGS land cover, county "
+         "lines from the Census files. Green dashes are the city limits. "
+         "Each chip turns a layer on or off; a mark under the cursor fills "
+         "the card and a click pins it.")
+
 NOTE2 = ("The slider runs from 1492: first the peoples whose ground this "
          "was, as colored patches approximating documented homelands, then "
          "the founding, the turns and the losses year by year. The city's "
          "circle grows with its census once it passes ten thousand, green "
-         "through yellow and orange to red. Golden arrows are the "
-         "migrations that filled it, joining "
-         "regions rather than exact places. Mortarboards are colleges, each "
-         "from the year it opened.")
+         "through yellow and orange to red. Golden arrows carry the name of "
+         "the migration each stands for, and join regions rather than exact "
+         "places. Roads carry their route numbers, mortarboards are "
+         "colleges, and a gold square is a founding claim where one is "
+         "documented.")
 
 
 def densify(poly, n=4):
@@ -524,6 +545,7 @@ def densify(poly, n=4):
 def refs_for(key, hist):
     rows = [
         ("County lines and recent populations: Census cartographic files via Plotly's mirror.", "https://github.com/plotly/datasets"),
+        ("City limits: the Census TIGER place boundaries, mirrored as GeoJSON.", "https://github.com/generalpiston/geojson-us-city-boundaries"),
         ("Relief: Mapzen and AWS Terrain Tiles (Open Data).", "https://registry.opendata.aws/terrain-tiles/"),
         ("Woods and water: USGS National Land Cover Database 2021, forest and water classes, via the MRLC service.", "https://www.mrlc.gov/"),
         ("The city's census series, from its Wikipedia article's decennial table.", "https://en.wikipedia.org/"),

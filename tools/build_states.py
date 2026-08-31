@@ -692,6 +692,18 @@ function render(){
       s+='<g data-cty="'+i+'"><path d="'+ringsPath(c.r)+'" fill="'+(mine?'#ffd24d':'rgba(0,0,0,0)')+'" fill-opacity="'+(mine?(ST.homeFill||0.16):1)+'" stroke="'+(mine?'#ffd24d':'#e6e6e6')+'" stroke-opacity="'+(mine?0.95:0.75)+'" stroke-width="'+(mine?2:0.8)+'"/></g>';
     });
   }
+  // the city limits, where the map is a city rather than a state
+  if(layers.cou&&ST.limits&&ST.limits.length){
+    const d=ringsPath(ST.limits);
+    s+='<g data-lim="1" style="cursor:pointer">'
+      +'<path d="'+d+'" fill="none" stroke="#121212" stroke-width="3.6" stroke-opacity="0.6"/>'
+      +'<path d="'+d+'" fill="none" stroke="#7ee0a8" stroke-width="1.8" stroke-dasharray="6 4"/></g>';
+    if(ST.founded&&year>=ST.founded.y){
+      const f=ringsPath(ST.founded.r);
+      s+='<g data-fnd="1" style="cursor:pointer">'
+        +'<path d="'+f+'" fill="#ffd24d" fill-opacity="0.10" stroke="#ffd24d" stroke-width="1.6" stroke-dasharray="3 3"/></g>';
+    }
+  }
   if(layers.lak) for(const l of ST.lakes)
     s+='<path d="'+ringsPath(l.r)+'" fill="var(--water)" fill-opacity="0.85" stroke="none"/>';
   if(layers.riv) for(const r of ST.rivers){
@@ -709,8 +721,14 @@ function render(){
     for(const seg of r.s) d+='M'+seg.map(p=>p[0]+','+p[1]).join('L');
     s+='<g data-rd="'+i+'" style="cursor:pointer">'
       +'<path d="'+d+'" fill="none" stroke="#121212" stroke-opacity="0.55" stroke-width="'+(w+1.6)+'" stroke-linecap="round" stroke-linejoin="round"/>'
-      +'<path d="'+d+'" fill="none" stroke="'+C+'" stroke-opacity="0.92" stroke-width="'+w+'" stroke-linecap="round" stroke-linejoin="round"/>'
-      +'</g>';
+      +'<path d="'+d+'" fill="none" stroke="'+C+'" stroke-opacity="0.92" stroke-width="'+w+'" stroke-linecap="round" stroke-linejoin="round"/>';
+    // the route's own number, on the longest run of it that is on screen
+    const seg=r.s.reduce((a,b)=>segLen(b)>segLen(a)?b:a, r.s[0]||[]);
+    if(seg&&seg.length>1&&segLen(seg)>70){
+      const m=seg[Math.floor(seg.length/2)];
+      s+='<text x="'+m[0]+'" y="'+(m[1]-5)+'" text-anchor="middle" font-size="9.5" fill="'+C+'" stroke="#121212" stroke-width="2.6" paint-order="stroke">'+esc(r.n)+'</text>';
+    }
+    s+='</g>';
   });
   // the state border is drawn only once it existed
   if(year>=HIST.border)
@@ -727,7 +745,7 @@ function render(){
   if(layers.ter&&HIST.geo&&HIST.geo.hp){
     const hp=HIST.geo.hp, [x,y]=XY(hp.lat,hp.lon);
     s+='<g data-hp="1"><path d="M'+x+','+(y-7)+' L'+(x-6)+','+(y+4)+' L'+(x+6)+','+(y+4)+' Z" fill="#e6e6e6" stroke="#121212" stroke-width="1"/>'
-      +'<text x="'+(x+9)+'" y="'+(y+4)+'" font-size="11" fill="#c9d1d9" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+esc(hp.n)+' '+esc(hp.el)+'</text></g>';
+      +'<text x="'+(x+9)+'" y="'+lblY(x+9,y+4,(hp.n+hp.el).length)+'" font-size="11" fill="#c9d1d9" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+esc(hp.n)+' '+esc(hp.el)+'</text></g>';
   }
   if(layers.nat) HIST.nations.forEach((n,i)=>{
     const gone=n.after&&year>=n.after.y;
@@ -770,6 +788,8 @@ function render(){
     s+='<g data-mig="'+i+'" style="cursor:pointer">'
       +'<path d="'+d+'" fill="none" stroke="#121212" stroke-opacity="'+(op*0.6)+'" stroke-width="'+(w+2)+'" stroke-linecap="round"/>'
       +'<path d="'+d+'" fill="none" stroke="#ffc247" stroke-opacity="'+op+'" stroke-width="'+w.toFixed(1)+'" stroke-linecap="round" marker-end="url(#migArrow)"/>'
+      // the wave's own name, at the tail where the arrow comes in
+      +'<text x="'+x1.toFixed(1)+'" y="'+lblY(x1,y1-7,m.n.length)+'" text-anchor="middle" font-size="9.5" fill="#ffc247" fill-opacity="'+(live?1:0.55)+'" stroke="#121212" stroke-width="2.6" paint-order="stroke">'+esc(m.n)+'</text>'
       +'</g>';
   });
   if(layers.tow) (HIST.cities||[]).forEach((c,i)=>{
@@ -839,6 +859,12 @@ function render(){
   svg.innerHTML=s;
 }
 // a smooth closed blob through lon/lat vertices (Catmull-Rom to bezier)
+function segLen(seg){
+  let d=0;
+  for(let i=1;i<seg.length;i++)
+    d+=Math.hypot(seg[i][0]-seg[i-1][0], seg[i][1]-seg[i-1][1]);
+  return d;
+}
 function blob(ll){
   const P=ll.map(([lon,lat])=>XY(lat,lon)), n=P.length;
   let d='M'+P[0][0].toFixed(1)+','+P[0][1].toFixed(1);
@@ -1030,6 +1056,21 @@ for(const id in CH) document.getElementById(id).onclick=e=>{
 };
 
 // ---- terrain: AWS Terrain Tiles (terrarium), shaded and tinted ----
+// One hypsometric ramp for every map on the site: the colour of a pixel
+// is its height above the sea, not its rank within this frame.
+const HYPS=[[0,47,79,55],[50,74,102,58],[200,122,133,69],
+            [500,168,148,88],[1000,156,122,90],[2000,154,148,144],
+            [3000,214,214,214],[4500,240,240,240]];
+function hyps(e){
+  if(e<=HYPS[0][0]) return HYPS[0].slice(1);
+  for(let i=1;i<HYPS.length;i++){
+    if(e<=HYPS[i][0]){
+      const a=HYPS[i-1], b=HYPS[i], u=(e-a[0])/(b[0]-a[0]);
+      return [a[1]+u*(b[1]-a[1]), a[2]+u*(b[2]-a[2]), a[3]+u*(b[3]-a[3])];
+    }
+  }
+  return HYPS[HYPS.length-1].slice(1);
+}
 let terDone=false, wooDone=false;
 const loadTxt=document.getElementById('loadTxt');
 async function terrain(){
@@ -1080,12 +1121,14 @@ async function terrain(){
     for(let y2=0;y2<py;y2++)for(let x=0;x<px;x++){
       const i=y2*px+x, e=elev[i];
       if(water[i]){ o[i*4]=30; o[i*4+1]=68; o[i*4+2]=98; o[i*4+3]=235; continue; }
-      const t=Math.max(0,Math.min(1,(e-emin)/Math.max(1,emax-emin)));
+      // an absolute ramp, keyed to metres above the sea, so a flat town
+      // and a mountain city are coloured on the same scale
       const ex=elev[y2*px+Math.min(px-1,x+1)], ey=elev[Math.min(py-1,y2+1)*px+x];
-      const sh=Math.max(0,Math.min(1,0.5+((ex-e)+(e-ey))*0.012));
-      let r0,g0,b0;
-      if(t<0.5){ const u=t/0.5; r0=40+u*120; g0=80+u*70; b0=45+u*45; }
-      else{ const u=(t-0.5)/0.5; r0=160+u*80; g0=150+u*90; b0=90+u*140; }
+      // flat ground carries almost no shading, so the relief gain rises
+      // as the map's own range falls
+      const gain=Math.max(0.012,Math.min(0.30,26/Math.max(20,emax-emin)));
+      const sh=Math.max(0,Math.min(1,0.5+((ex-e)+(e-ey))*gain));
+      const [r0,g0,b0]=hyps(e);
       o[i*4]=r0*(0.55+0.65*sh); o[i*4+1]=g0*(0.55+0.65*sh); o[i*4+2]=b0*(0.55+0.65*sh); o[i*4+3]=235;
     }
     octx.putImageData(out,0,0);

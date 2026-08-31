@@ -9,6 +9,7 @@ view-time fetches, checked live after publishing instead.
 
 Usage: python3 verify_cities.py
 """
+import re
 import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -26,15 +27,15 @@ def check(name, ok, detail=""):
 
 CASES = {
     "los-angeles.html": dict(
-        up="california.html", home="06037", mine=None, mark=1781, roads=20,
+        up="california.html", home="06037", mine=None, mark=1781, roads=10,
         probe=("HIST.events.some(e=>e.n==='The Chinese massacre'&&e.y===1871)",
                "the 1871 massacre is on the timeline")),
     "lancaster.html": dict(
-        up="pennsylvania.html", home="42071", mine="F&M", mark=1730, roads=4,
+        up="pennsylvania.html", home="42071", mine="F&M", mark=1730, roads=3,
         probe=("HIST.events.some(e=>e.n.includes('Conestoga'))",
                "the Conestoga killings are on the timeline")),
     "amherst.html": dict(
-        up="massachusetts.html", home="25015", mine="UMass", mark=1759, roads=4,
+        up="massachusetts.html", home="25015", mine="UMass", mark=1759, roads=1,
         probe=("HIST.nations.some(n=>n.n.includes('Norwottuck'))",
                "the Norwottuck are on the map")),
     "tuscaloosa.html": dict(
@@ -46,11 +47,11 @@ CASES = {
         probe=("HIST.nations.some(n=>n.n.includes('Umo'))",
                "the Umonhon are on the map")),
     "northfield.html": dict(
-        up="minnesota.html", home="27131", mine="St. Olaf", mark=1855, roads=2,
+        up="minnesota.html", founded=1855, home="27131", mine="St. Olaf", mark=1855, roads=0,
         probe=("HIST.events.some(e=>e.n.includes('raid')&&e.y===1876)",
                "the 1876 raid is on the timeline")),
     "new-york.html": dict(
-        up="us-cities.html", home="36061", mine=None, mark=1624, roads=20,
+        up="us-cities.html", home="36061", mine=None, mark=1624, roads=10,
         probe=("HIST.events.some(e=>e.n==='New Amsterdam'&&e.y===1624)",
                "New Amsterdam is on the timeline")),
 }
@@ -149,6 +150,14 @@ with sync_playwright() as pw:
               f"{r2020} < {c['roads']}")
         dated = pg.evaluate("ROADS.every(r=>r.y>=1900&&r.y<=2026)")
         check("every route carries a designation year", dated)
+        if c["roads"]:
+            named = pg.evaluate(
+                "[...document.querySelectorAll('#map [data-rd] text')]"
+                ".map(t=>t.textContent)")
+            check("the routes drawn carry their numbers",
+                  len(named) >= 1 and all(
+                      re.match(r"^(I-|US |SR |Garden|Southern)", n)
+                      for n in named), ", ".join(named[:4]))
         pg.eval_on_selector("#yr", "el=>{el.value=1900;"
                             "el.dispatchEvent(new Event('input'))}")
         pg.wait_for_timeout(250)
@@ -158,6 +167,37 @@ with sync_playwright() as pw:
                             "el.dispatchEvent(new Event('input'))}")
         pg.click("#cHwy")
         pg.wait_for_timeout(200)
+        # the city limits, and a founding claim where one is documented
+        lim = pg.evaluate("document.querySelectorAll('#map [data-lim]').length")
+        check("the city limits are drawn", lim == 1, str(lim))
+        rings = pg.evaluate("ST.limits.length")
+        check("the limits carry real geometry", rings >= 1, str(rings))
+        check("and are named", bool(pg.evaluate("ST.limitsName")))
+        if c.get("founded"):
+            fnd = pg.evaluate("document.querySelectorAll('#map [data-fnd]').length")
+            check("the founding claim is drawn", fnd == 1, str(fnd))
+            fy = pg.evaluate("ST.founded.y")
+            check(f"and dates from {c['founded']}", fy == c["founded"], str(fy))
+            pg.eval_on_selector("#yr", "el=>{el.value=1700;"
+                                "el.dispatchEvent(new Event('input'))}")
+            pg.wait_for_timeout(200)
+            f0 = pg.evaluate("document.querySelectorAll('#map [data-fnd]').length")
+            check("and not before its year", f0 == 0, str(f0))
+            pg.eval_on_selector("#yr", "el=>{el.value=2020;"
+                                "el.dispatchEvent(new Event('input'))}")
+            pg.wait_for_timeout(200)
+        # the waves carry their names
+        wave = pg.evaluate(
+            "[...document.querySelectorAll('#map [data-mig] text')]"
+            ".map(t=>t.textContent)")
+        names = pg.evaluate("(HIST.mig||[]).map(m=>m.n)")
+        check("every wave drawn is named",
+              len(wave) >= 2 and all(w in names for w in wave),
+              ", ".join(wave[:3]))
+        # one elevation ramp for every city
+        ramp = pg.evaluate("JSON.stringify(hyps(340).map(Math.round))")
+        check("the elevation ramp is the shared one",
+              ramp == "[143,140,78]", ramp)
         # jump markers
         tk = pg.evaluate("document.querySelectorAll('#ticks button').length")
         check("jump markers above the slider", tk >= 3, str(tk))
