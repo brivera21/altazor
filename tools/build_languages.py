@@ -25,9 +25,10 @@ NOTE2 = ("A node holding branches opens and closes when clicked, and the "
          "one under the cursor fills the card. Tips are languages, not "
          "dialects, and a language here is a lineage rather than a state "
          "or a script: Hindi and Urdu part, Chinese does not hold together. "
-         "The count beside a closed node is the languages inside it. "
-         "Sign languages, pidgins, mixed and designed languages sit apart, "
-         "since their history is not descent from a parent.")
+         "A tip's color is Glottolog's endangerment status, green through "
+         "red to the gray of a language no longer spoken. Sign languages, "
+         "pidgins, mixed and designed languages sit apart, since their "
+         "history is not descent from a parent.")
 
 REFS = [
     ("Hammarström, H., Forkel, R., Haspelmath, M., & Bank, S. 2025. "
@@ -67,6 +68,10 @@ h1 { margin:0 0 10px; font-size:26px; }
 .bar button { background:transparent; color:var(--text); border:1px solid var(--line);
   border-radius:999px; padding:6px 14px; font-size:13px; cursor:pointer; }
 .bar button:hover { border-color:var(--accent); color:var(--accent); }
+#legend { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:10px;
+  color:var(--muted); font-size:12px; align-items:center; }
+#legend span { display:flex; gap:5px; align-items:center; }
+#legend i { width:9px; height:9px; border-radius:50%; display:inline-block; }
 #hits { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
 #hits button { background:#0d0d0d; color:var(--accent); border:1px solid var(--line);
   border-radius:999px; padding:4px 11px; font-size:12.5px; cursor:pointer; }
@@ -107,6 +112,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   <button id="bTop">Families only</button>
   <button id="bBig">Open the ten largest</button>
 </div>
+<div id="legend"></div>
 <div id="hits"></div>
 <div class="stage">
   <div id="diagram"></div>
@@ -128,6 +134,14 @@ const ROOT=__DATA__;
 const el=document.getElementById('diagram');
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const fmt=x=>x.toLocaleString('en-US');
+// Glottolog's Agglomerated Endangerment Status, 1 to 6
+const AES=['not endangered','threatened','shifting','moribund',
+  'nearly extinct','no longer spoken'];
+const AESC=['#31d67a','#ffd24d','#ff9440','#f4713f','#ef5350','#6b7280'];
+const vc=n=>n.v?AESC[n.v-1]:'#58a6ff';
+document.getElementById('legend').innerHTML=
+  AES.map((t,i)=>'<span><i style="background:'+AESC[i]+'"></i>'+t+'</span>').join('')
+  +'<span><i style="background:#58a6ff"></i>not assessed</span>';
 
 // every node gets an id, a parent and the number of languages under it
 let idc=0; const byId={}, ALL=[];
@@ -169,7 +183,11 @@ function draw(n){
   s+='<g data-id="'+n.id+'" style="cursor:'+(leaf?'default':'pointer')+'">'
     +(n.id===pinned?'<circle cx="'+x+'" cy="'+n.y+'" r="9" fill="none" stroke="var(--accent)" stroke-width="1.5"/>':'')
     +'<rect x="'+(x-10)+'" y="'+(n.y-11)+'" width="'+(W-PADL-x)+'" height="'+RS+'" fill="'+(n.id===pinned?'#1d2126':'transparent')+'"/>'
-    +'<circle cx="'+x+'" cy="'+n.y+'" r="'+(leaf?4:4.5)+'" fill="'+(leaf?'var(--accent)':(isOpen?'#151515':'var(--hl)'))+'" stroke="'+(leaf?'var(--accent)':'var(--hl)')+'" stroke-width="1.5"/>'
+    // a branch is a square, a language a circle, so the vitality
+    // colours below belong to the tips alone
+    +(leaf
+      ? '<circle cx="'+x+'" cy="'+n.y+'" r="4" fill="'+vc(n)+'" stroke="'+vc(n)+'" stroke-width="1.5"/>'
+      : '<rect x="'+(x-4.5)+'" y="'+(n.y-4.5)+'" width="9" height="9" rx="1.5" fill="'+(isOpen?'#151515':'#8b949e')+'" stroke="#8b949e" stroke-width="1.5"/>')
     +'<text x="'+(x+11)+'" y="'+(n.y+4.5)+'" font-size="'+(leaf?12.5:13)+'" font-weight="'+(leaf?400:600)+'" fill="'+col+'">'+esc(n.n)
     +(leaf?(n.e?' <tspan fill="#6b7280" font-size="10.5">'+esc(n.e)+'</tspan>':'')
           :' <tspan fill="#6b7280" font-size="11" font-weight="400">'+fmt(n.t)+'</tspan>')
@@ -188,8 +206,14 @@ function show(id){
   const n=byId[id]; if(!n) return;
   current=id;
   document.getElementById('nameTxt').textContent=n.n;
-  document.getElementById('cntTxt').textContent =
-    n.k ? fmt(n.t)+(n.t===1?' language':' languages') : (n.a||'language');
+  let cnt;
+  if(n.k){
+    let gone=0;(function w(x){ if(x.k) x.k.forEach(w); else if(x.v===6) gone++; })(n);
+    cnt=fmt(n.t)+(n.t===1?' language':' languages')
+      +(gone?', '+fmt(gone)+' no longer spoken':'');
+  } else cnt=n.v?AES[n.v-1]:'vitality not assessed';
+  const ct=document.getElementById('cntTxt');
+  ct.textContent=cnt; ct.style.color=n.k?'var(--hl)':vc(n);
   document.getElementById('bodyTxt').textContent=n.b||'';
   const path=pathOf(n);
   document.getElementById('pathTxt').textContent=path.length?path.join(' \\u203a '):'';
@@ -218,11 +242,12 @@ el.addEventListener('click',e=>{
 
 // search: the matching languages and families, each opening its own path
 const hits=document.getElementById('hits'), q=document.getElementById('q');
+const fold=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 function search(){
-  const v=q.value.trim().toLowerCase();
+  const v=fold(q.value.trim());
   hits.innerHTML='';
   if(v.length<2) return;
-  const found=ALL.filter(n=>n.n.toLowerCase().includes(v)
+  const found=ALL.filter(n=>fold(n.n).includes(v)
     ||(n.e&&n.e.toLowerCase()===v)).slice(0,40);
   if(!found.length){ hits.innerHTML='<span class="none">nothing by that name</span>'; return; }
   for(const n of found){

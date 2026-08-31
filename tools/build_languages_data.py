@@ -6,13 +6,18 @@ carries a Newick string under the 'subclassification' parameter that
 encodes its whole internal tree by glottocode; languages.csv gives every
 glottocode a name, a level, a macroarea and an ISO 639-3 code.
 
+Each language also carries Glottolog's Agglomerated Endangerment Status
+(1 not endangered to 6 extinct), which folds EGIDS, the UNESCO atlas and
+the Catalogue of Endangered Languages into one scale.
+
 Dialects are pruned, so a tip is a language in Glottolog's sense.
 Glottolog's non-genealogical top-level nodes (sign languages, pidgins,
 mixed and artificial languages, speech registers, the unclassifiable)
 are gathered under one heading rather than shown as families; its
 bookkeeping and unattested entries, which are retired or undocumented
 codes rather than languages, are left out. Node:
-  {"n": name, "g": glottocode, "a": macroarea, "e": iso639-3, "k": [...]}
+  {"n": name, "g": glottocode, "a": macroarea, "e": iso639-3,
+   "v": endangerment 1-6, "k": [...]}
 
 Inputs, cached in /tmp/glot (fetched from raw.githubusercontent.com):
   glot_lang.csv    glottolog-cldf/cldf/languages.csv
@@ -108,11 +113,13 @@ def main():
     with open(SRC / "glot_lang.csv", newline="") as f:
         for r in csv.DictReader(f):
             langs[r["Glottocode"]] = r
-    subs = {}
+    subs, aes = {}, {}
     with open(SRC / "glot_values.csv", newline="") as f:
         for r in csv.DictReader(f):
             if r["Parameter_ID"] == "subclassification":
                 subs[r["Language_ID"]] = r["Value"]
+            elif r["Parameter_ID"] == "aes":
+                aes[r["Language_ID"]] = int(r["Value"])
 
     def build(code):
         """The pruned subtree under one glottocode, or None for a dialect."""
@@ -124,6 +131,8 @@ def main():
             n["a"] = row["Macroarea"]
         if row["ISO639P3code"]:
             n["e"] = row["ISO639P3code"]
+        if code in aes:
+            n["v"] = aes[code]
         return n
 
     def walk(nw):
