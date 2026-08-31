@@ -64,6 +64,13 @@ title: Library
 <p><a href="alabama.html">Alabama</a></p>
 <p><a href="nebraska.html">Nebraska</a></p>
 <p><a href="minnesota.html">Minnesota</a></p>
+<p><a href="new-york.html">New York City</a></p>
+<p><a href="los-angeles.html">Los Angeles</a></p>
+<p><a href="lancaster.html">Lancaster</a></p>
+<p><a href="amherst.html">Amherst</a></p>
+<p><a href="tuscaloosa.html">Tuscaloosa</a></p>
+<p><a href="omaha.html">Omaha</a></p>
+<p><a href="northfield.html">Northfield</a></p>
 </div>
 <div>
 <h2>Mexico</h2>
