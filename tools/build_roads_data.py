@@ -26,6 +26,12 @@ FIPS = {"ca": "06", "az": "04", "pa": "42", "ma": "25", "al": "01",
         "ne": "31", "mn": "27"}
 LV = {"Interstate": "i", "Federal": "us", "State": "sr"}
 
+CITY_DATA = HERE / "data" / "cities"
+# city key -> the road_years table its routes are numbered under
+CITY_STATE = {"la": "ca", "lancaster": "pa", "amherst": "ma",
+              "tuscaloosa": "al", "omaha": "ne", "northfield": "mn",
+              "nyc": "ny"}
+
 
 def state_outline(st):
     """The state's own shape in lon/lat, so only its roads are kept."""
@@ -44,9 +50,52 @@ def lines(geom):
     return [list(g.coords) for g in geoms if len(g.coords) >= 2]
 
 
-def main():
-    years_p = HERE / "data" / "road_years.json"
-    years = json.loads(years_p.read_text()) if years_p.exists() else {}
+def bake(d, clip, want, pre, yst, feats, outp, tol=0.01):
+    """Clip the roads to one view box and write its <name>_roads.json."""
+    import math
+    W, H = d["W"], d["H"]
+    mx0, my0, mx1, my1 = d["m"]
+    R = 6378137.0
+
+    def XY(lon, lat):
+        mx = R * math.radians(lon)
+        my = R * math.log(math.tan(math.pi / 4 + math.radians(lat) / 2))
+        return (round((mx - mx0) / (mx1 - mx0) * W, 1),
+                round((my1 - my) / (my1 - my0) * H, 1))
+
+    # Natural Earth abbreviates a few named roads and carries truck
+    # routes that have no article of their own
+    FIX = {"SR GSP": "Garden State Parkway", "SR SSP": "Southern State Parkway"}
+    DROP = {"US TRK1"}
+    routes = {}
+    for sov, lv, name, g in feats:
+        if sov != want or not g.intersects(clip):
+            continue
+        inter = g.intersection(clip)
+        if inter.is_empty:
+            continue
+        routes.setdefault((lv, name), []).extend(lines(inter.simplify(tol)))
+    # a number cannot predate its system: the US Numbered Highway System
+    # dates from 1926 and the Interstates from the 1956 act
+    FLOOR = {"i": 1956, "us": 1926, "sr": 0}
+    out = []
+    for (lv, name), segs in sorted(routes.items()):
+        label = FIX.get(pre[lv] + name, pre[lv] + name)
+        if label in DROP:
+            continue
+        y = yst.get(label)
+        if y is not None:
+            y = max(y, FLOOR[lv])
+        out.append({"n": label, "lv": lv, "y": y,
+                    "s": [[XY(x, y2) for x, y2 in seg] for seg in segs]})
+    outp.write_text(json.dumps(out, separators=(",", ":")))
+    ny = sum(1 for r in out if r["y"])
+    print(f"{outp.stem}: {len(out)} routes ({ny} with years) "
+          f"-> {outp.name} ({outp.stat().st_size:,} B)")
+    return out
+
+
+def load_feats():
     feats = []
     for f in ROADS["features"]:
         p = f["properties"]
@@ -56,54 +105,36 @@ def main():
         if not lv or not p.get("name") or not f.get("geometry"):
             continue
         feats.append((p["sov_a3"], lv, str(p["name"]), shape(f["geometry"])))
+    return feats
+
+
+def main():
+    years_p = HERE / "data" / "road_years.json"
+    years = json.loads(years_p.read_text()) if years_p.exists() else {}
+    feats = load_feats()
 
     for st in STATES:
         d = json.loads((DATA / f"{st}.json").read_text())
         lo, la0, hi, la1 = d["ll"]
-        W, H = d["W"], d["H"]
-        mx0, my0, mx1, my1 = d["m"]
-        import math
-        R = 6378137.0
-
-        def XY(lon, lat):
-            mx = R * math.radians(lon)
-            my = R * math.log(math.tan(math.pi / 4 + math.radians(lat) / 2))
-            return (round((mx - mx0) / (mx1 - mx0) * W, 1),
-                    round((my1 - my) / (my1 - my0) * H, 1))
-
         clip = state_outline(st).intersection(box(lo, la0, hi, la1))
         want = "MEX" if st.startswith("mx") else "USA"
-        routes = {}
-        for sov, lv, name, g in feats:
-            if sov != want:
-                continue
-            if not g.intersects(clip):
-                continue
-            inter = g.intersection(clip)
-            if inter.is_empty:
-                continue
-            key = (lv, name)
-            routes.setdefault(key, []).extend(lines(inter.simplify(0.01)))
-        out = []
         pre = {"i": "I-", "us": "US ", "sr": "SR "}
         if st.startswith("mx"):
             pre = {"i": "MEX ", "us": "MEX ", "sr": "CHIH "}
-        yst = years.get(st, {})
-        # a number cannot predate its system: the US Numbered Highway
-        # System dates from 1926 and the Interstates from the 1956 act
-        FLOOR = {"i": 1956, "us": 1926, "sr": 0}
-        for (lv, name), segs in sorted(routes.items()):
-            label = pre[lv] + name
-            y = yst.get(label)
-            if y is not None:
-                y = max(y, FLOOR[lv])
-            out.append({"n": label, "lv": lv, "y": y,
-                        "s": [[XY(x, y2) for x, y2 in seg] for seg in segs]})
-        outp = DATA / f"{st}_roads.json"
-        outp.write_text(json.dumps(out, separators=(",", ":")))
-        ny = sum(1 for r in out if r["y"])
-        print(f"{st}: {len(out)} routes ({ny} with years) "
-              f"-> {outp.name} ({outp.stat().st_size:,} B)")
+        bake(d, clip, want, pre, years.get(st, {}), feats,
+             DATA / f"{st}_roads.json")
+
+    # the city boxes: no state outline, since a city's roads run into its
+    # neighbours and the view box is the whole subject
+    pre = {"i": "I-", "us": "US ", "sr": "SR "}
+    for key, st in CITY_STATE.items():
+        p = CITY_DATA / f"{key}.json"
+        if not p.exists():
+            continue
+        d = json.loads(p.read_text())
+        lo, la0, hi, la1 = d["ll"]
+        bake(d, box(lo, la0, hi, la1), "USA", pre, years.get(st, {}),
+             feats, CITY_DATA / f"{key}_roads.json", tol=0.001)
 
 
 if __name__ == "__main__":
