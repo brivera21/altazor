@@ -6,7 +6,7 @@
 <title>The Solar System of 2312 · Altazor</title>
 <style>
 :root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
-        --line:#2b2b2b; --accent:#58a6ff; --site:#ffb02e; --orbit:#2e3742; }
+        --line:#2b2b2b; --accent:#58a6ff; --site:#ffb02e; --hop:#b48cf2; }
 * { box-sizing:border-box; }
 body { margin:0; background:var(--bg); color:var(--text);
   font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
@@ -23,10 +23,12 @@ button { font:inherit; font-size:13.5px; padding:6px 14px; border-radius:999px;
   border:1px solid var(--line); background:#1a1a1a; color:var(--text); cursor:pointer; }
 button:hover { border-color:var(--accent); }
 button.on { background:var(--accent); border-color:var(--accent); color:#0b0b0b; }
+button.step { padding:6px 12px; }
+#legTxt { color:var(--muted); font-size:12.5px; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
 #map { flex:1 1 640px; min-width:0; }
 #map svg { width:100%; height:auto; display:block; user-select:none; }
-.side { flex:0 0 320px; position:sticky; top:16px; }
+.side { flex:0 0 340px; position:sticky; top:16px; }
 .card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
   padding:16px; }
 #kindTxt { color:var(--muted); font-size:11.5px; letter-spacing:.09em;
@@ -35,6 +37,9 @@ button.on { background:var(--accent); border-color:var(--accent); color:#0b0b0b;
 #bookTxt { font-size:13.5px; line-height:1.55; }
 #realTxt { color:var(--muted); font-size:13.5px; line-height:1.55; margin-top:10px;
   border-top:1px solid var(--line); padding-top:10px; }
+#dia { margin-top:12px; }
+#dia svg { width:100%; height:auto; display:block; border:1px solid var(--line);
+  border-radius:10px; }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
@@ -48,12 +53,14 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <div class="wrap">
 <header class="site">
   <a class="brand" href="index.html">ALTAZOR</a>
-  <nav class="site"><a href="science-fiction.html">&larr; Science Fiction &middot; Concepts</a><a href="red-mars.html">The Mars of Red Mars</a></nav>
+  <nav class="site"><a href="science-fiction.html">&larr; Science Fiction</a><a href="red-mars.html">The Mars of Red Mars</a><a href="solar-system.html">The Solar System</a></nav>
 </header>
 <h1>The Solar System of 2312</h1>
 <div class="bar">
-  <button id="bJourney">Swan's journey</button>
-  <span class="note" style="border:0;margin:0;padding:0">amber marks are the novel's places</span>
+  <button id="bJourney" class="on">Swan's jumps</button>
+  <button id="bPrev" class="step">&#8592;</button>
+  <button id="bNext" class="step">&#8594;</button>
+  <span id="legTxt"></span>
 </div>
 <div class="stage">
   <div id="map"></div>
@@ -62,30 +69,31 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
     <div id="nameTxt">A world under the cursor lands here</div>
     <div id="bookTxt"></div>
     <div id="realTxt"></div>
+    <div id="dia"></div>
   </div></div>
 </div>
-<p class="note">The orbits are the real ones, drawn to their JPL semimajor
-axes on a logarithmic radial scale so that Mercury and Pluto share one map;
-each world sits at an arbitrary point of its orbit, spread for legibility.
-Amber diamonds mark where Kim Stanley Robinson's 2312 puts its story, and
-each card pairs what the book says with what is actually there. The journey
-button traces Swan Er Hong's route through the novel in order.</p>
+<p class="note">The worlds sit on one line by distance from the Sun, logarithmic so that Mercury and Pluto share it, and the disks run on a separate logarithmic size scale. Nothing here is a picture of the sky. Amber marks where Kim Stanley Robinson's 2312 puts its story, and each card pairs what the book says with what is actually there.</p>
+<p class="note" style="border-top:none; padding-top:0;">The violet arcs are Swan Er Hong's travel through the novel in order, following the synopsis on the author's own site, and each stop draws the world she lands on to scale, with the novel's structures in amber. Pluto is on the map and off her route: that is where the qubes are gathered at the end.</p>
 <h2 class="refh">References</h2>
 <div class="refs">
-<p>Robinson, K. S. (2012). <i>2312</i>. Orbit. Synopsis and notes:
+<p>Robinson, K. S. (2012). <i>2312</i>. Orbit. Synopsis, and the order of
+Swan's journey followed here:
 <a href="https://www.kimstanleyrobinson.info/content/2312">https://www.kimstanleyrobinson.info/content/2312</a></p>
 <p>Orbital elements: Jet Propulsion Laboratory, Approximate positions of the
 planets.
 <a href="https://ssd.jpl.nasa.gov/planets/approx_pos.html">https://ssd.jpl.nasa.gov/planets/approx_pos.html</a>;
 small bodies via the JPL Small-Body Database,
 <a href="https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html">https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html</a></p>
+<p>Body radii: JPL Solar System Dynamics, planetary and satellite physical
+parameters.
+<a href="https://ssd.jpl.nasa.gov/planets/phys_par.html">https://ssd.jpl.nasa.gov/planets/phys_par.html</a></p>
 <p>NASA planetary science pages for each world:
 <a href="https://science.nasa.gov/mercury/facts/">Mercury</a>,
 <a href="https://science.nasa.gov/venus/venus-facts/">Venus</a>,
 <a href="https://science.nasa.gov/mars/facts/">Mars</a>,
 <a href="https://science.nasa.gov/dwarf-planets/ceres/facts/">Ceres</a>,
 <a href="https://science.nasa.gov/solar-system/asteroids/4-vesta/">Vesta</a>,
-<a href="https://science.nasa.gov/jupiter/moons/io/">Io</a>,
+<a href="https://science.nasa.gov/jupiter/moons/io/facts/">Io</a>,
 <a href="https://science.nasa.gov/saturn/moons/titan/facts/">Titan</a>,
 <a href="https://science.nasa.gov/saturn/moons/iapetus/">Iapetus</a>,
 <a href="https://science.nasa.gov/dwarf-planets/pluto/facts/">Pluto</a></p>
@@ -108,89 +116,164 @@ concept.
 </div>
 </div>
 <script>
-const BODIES=[{"n":"Mercury","a":0.387,"r":62.0,"th":205,"kind":"novel","place":"Terminator","book":"The planet's one city rides giant tracks that circle Mercury, staying just ahead of sunrise; the day side's heat expands the rails behind it and pushes the city west at walking pace, one lap every 176 days. Sunwalkers hike ahead of the dawn for the spectacle. Midway through the book an engineered meteorite swarm destroys the city, and Swan and Wahram walk out through a utility tunnel beneath the tracks.","real":"Mercury's slow turn makes the conceit work: its solar day is 176 Earth days, so at the equator the sunrise line advances at about 3.6 km/h, and slower toward the poles, genuinely outwalkable. No engineering study of thermal-expansion track propulsion exists, but a 2026 rover concept proposes permanently tracking the terminator at just these speeds, citing the novel."},{"n":"Venus","a":0.723,"r":102.0,"th":335,"kind":"novel","place":"The sunshield","book":"Venus cools behind a great parasol while tented cities rise and a faction argues for spinning the planet up with asteroid impacts. The book's climax foils an attack meant to drop the shield.","real":"Venus today runs 467 degrees Celsius under 93 bars of carbon dioxide. A sunshade at the Sun-Venus L1 point is real literature: Paul Birch worked out fast terraforming schemes in 1991, and space-sunshade optics were studied for Earth by Angel in 2006."},{"n":"Earth","a":1.0,"r":122.7,"th":45,"kind":"novel","place":"The drowned coasts","book":"Eleven billion people on a climate-wracked planet of hundreds of ministates; Manhattan is a new Venice, boats in the avenues. In the book's great set piece, thousands of terraria airdrop their preserved animals back onto the continents, the Reanimation.","real":"The flooded-city premise extends a real curve: satellite altimetry has watched global mean sea level rise accelerate from about 2 to more than 4 millimeters a year since 1993."},{"n":"Mars","a":1.524,"r":149.7,"th":130,"kind":"novel","place":"A finished Mars","book":"The Mars trilogy's project stands complete here: a terraformed, politically independent world that has retired from everyone else's quarrels. The book ends with a wedding on Olympus Mons.","real":"Olympus Mons is real and remains the solar system's largest volcano, about 22 km above the datum. The terraforming itself stays fiction: Mars holds a thin carbon dioxide atmosphere near six millibars."},{"n":"Vesta","a":2.36,"r":177.7,"th":255,"kind":"novel","place":"The terraria","book":"Most large asteroids have been hollowed out, spun up, and lit inside: thousands of rolling countryside worlds serving as wilderness arks, farms and ferries. Swan designed them; the investigation tours the Vesta zone.","real":"Vesta is the belt's second most massive body, a differentiated protoplanet the Dawn probe orbited in 2011. Real studies of spun asteroid habitats find the catch the novel skips: many asteroids are loose rubble piles that would need containment to spin at living gravity."},{"n":"Ceres","a":2.77,"r":187.9,"th":285,"kind":"novel","place":"The belt's port","book":"Ceres anchors the asteroid economy the terraria trade through, part of the loose league of space settlements the book calls the Mondragon Accord.","real":"Ceres is the belt's one dwarf planet, 476 km in radius and perhaps a quarter water by mass; Dawn orbited it in 2015 and found brine deposits in Occator crater."},{"n":"Jupiter","a":5.203,"r":228.3,"th":65,"kind":"novel","place":"Io's qube lab","book":"On volcanic Io, the researcher Wang Wei runs one of the system's most powerful qubes, the quantum computers whose humanoid descendants drive the book's conspiracy; his station is attacked during the investigation.","real":"Io is the most volcanically active world known, kneaded by tidal heating from Jupiter and the resonance with Europa and Ganymede; hundreds of volcanoes resurface it continuously."},{"n":"Saturn","a":9.537,"r":267.1,"th":160,"kind":"novel","place":"Titan and the league","book":"The Saturn system runs its own politics as the Saturnian League; Wahram is a Titan diplomat, terraforming has begun under Titan's haze, and between crises the pair go bodysurfing on ring ice.","real":"Titan really is the one moon with a thick atmosphere, nitrogen and methane at one and a half Earth pressures, with methane rain, rivers and cold seas mapped by Cassini. Nearby Iapetus keeps its real two-tone paint job, one hemisphere dark as coal."},{"n":"Uranus","a":19.19,"r":311.8,"th":320,"kind":"quiet"},{"n":"Neptune","a":30.07,"r":340.5,"th":20,"kind":"quiet"},{"n":"Pluto","a":39.5,"r":358.0,"th":100,"kind":"novel","place":"The exile","book":"The story ends at Pluto and Charon, where the rogue humanoid qubes and their maker are gathered and expelled from the solar system aboard a starship named Nix.","real":"Pluto has five known moons, and Nix is really one of them. New Horizons flew past in 2015 and found a geologically young nitrogen-ice heart, Sputnik Planitia."}], JOURNEY=["Mercury","Jupiter","Earth","Venus","Mercury","Saturn","Venus","Mars"];
-const W=840,H=770,CX=420,CY=385;
+const BODIES=[{"n":"Mercury","a":0.387,"x":96.0,"rd":11.1,"rkm":2439.7,"kind":"novel","place":"Terminator","book":"The planet's one city rides giant tracks that circle Mercury, staying just ahead of sunrise; the day side's heat expands the rails behind it and pushes the city west at walking pace, one lap every 176 days. Sunwalkers hike ahead of the dawn for the spectacle. Midway through the book an engineered meteorite swarm destroys the city, and Swan and Wahram walk out through a utility tunnel beneath the tracks.","real":"Mercury's slow turn makes the conceit work: its solar day is 176 Earth days, so at the equator the sunrise line advances at about 3.6 km/h, and slower toward the poles, genuinely outwalkable. No engineering study of thermal-expansion track propulsion exists, but a 2026 rover concept proposes permanently tracking the terminator at just these speeds, citing the novel."},{"n":"Venus","a":0.723,"x":208.7,"rd":13.5,"rkm":6051.8,"kind":"novel","place":"The sunshield","book":"Venus cools behind a great parasol while tented cities rise and a faction argues for spinning the planet up with asteroid impacts. The book's climax foils an attack meant to drop the shield.","real":"Venus today runs 467 degrees Celsius under 93 bars of carbon dioxide. A sunshade at the Sun-Venus L1 point is real literature: Paul Birch worked out fast terraforming schemes in 1991, and space-sunshade optics were studied for Earth by Angel in 2006."},{"n":"Earth","a":1.0,"x":267.2,"rd":13.6,"rkm":6371.0,"kind":"novel","place":"The drowned coasts","book":"Eleven billion people on a climate-wracked planet of hundreds of ministates; Manhattan is a new Venice, boats in the avenues. In the book's great set piece, thousands of terraria airdrop their preserved animals back onto the continents, the Reanimation.","real":"The flooded-city premise extends a real curve: satellite altimetry has watched global mean sea level rise accelerate from about 2 to more than 4 millimeters a year since 1993."},{"n":"Mars","a":1.524,"x":343.1,"rd":11.9,"rkm":3389.5,"kind":"novel","place":"A finished Mars","book":"The Mars trilogy's project stands complete here: a terraformed, politically independent world that has retired from everyone else's quarrels. The book ends with a wedding on Olympus Mons.","real":"Olympus Mons is real and remains the solar system's largest volcano, about 22 km above the datum. The terraforming itself stays fiction: Mars holds a thin carbon dioxide atmosphere near six millibars."},{"n":"Vesta","a":2.36,"x":422.0,"rd":5.1,"rkm":262.7,"kind":"novel","place":"The terraria","book":"Most large asteroids have been hollowed out, spun up, and lit inside: thousands of rolling countryside worlds serving as wilderness arks, farms and ferries. Swan designed them; the investigation tours the Vesta zone.","real":"Vesta is the belt's second most massive body, a differentiated protoplanet the Dawn probe orbited in 2011. Real studies of spun asteroid habitats find the catch the novel skips: many asteroids are loose rubble piles that would need containment to spin at living gravity."},{"n":"Ceres","a":2.77,"x":450.9,"rd":6.7,"rkm":469.7,"kind":"novel","place":"The belt's port","book":"Ceres anchors the asteroid economy the terraria trade through, part of the loose league of space settlements the book calls the Mondragon Accord.","real":"Ceres is the belt's one dwarf planet, 476 km in radius and perhaps a quarter water by mass; Dawn orbited it in 2015 and found brine deposits in Occator crater."},{"n":"Jupiter","a":5.203,"x":564.5,"rd":20.0,"rkm":69911.0,"kind":"novel","place":"Io's qube lab","book":"On volcanic Io, the researcher Wang Wei runs one of the system's most powerful qubes, the quantum computers whose humanoid descendants drive the book's conspiracy; his station is attacked during the investigation.","real":"Io is the most volcanically active world known, kneaded by tidal heating from Jupiter and the resonance with Europa and Ganymede; hundreds of volcanoes resurface it continuously."},{"n":"Saturn","a":9.537,"x":673.8,"rd":19.5,"rkm":58232.0,"kind":"novel","place":"Titan and the league","book":"The Saturn system runs its own politics as the Saturnian League; Wahram is a Titan diplomat, terraforming has begun under Titan's haze, and between crises the pair go bodysurfing on ring ice.","real":"Titan really is the one moon with a thick atmosphere, nitrogen and methane at one and a half Earth pressures, with methane rain, rivers and cold seas mapped by Cassini. Nearby Iapetus keeps its real two-tone paint job, one hemisphere dark as coal."},{"n":"Uranus","a":19.19,"x":799.8,"rd":17.3,"rkm":25362.0,"kind":"quiet"},{"n":"Neptune","a":30.07,"x":880.8,"rd":17.2,"rkm":24622.0,"kind":"quiet"},{"n":"Pluto","a":39.5,"x":930.0,"rd":9.1,"rkm":1188.3,"kind":"novel","place":"The exile","book":"The story ends at Pluto and Charon, where the rogue humanoid qubes and their maker are gathered and expelled from the solar system aboard a starship named Nix.","real":"Pluto has five known moons, and Nix is really one of them. New Horizons flew past in 2015 and found a geologically young nitrogen-ice heart, Sputnik Planitia."}], JOURNEY=[{"n":"Mercury","w":"Terminator","t":"The book opens on Mercury, in the rolling city, after the death of Swan's grandmother Alex."},{"n":"Jupiter","w":"Callisto, then Io","t":"She taxis out on two terraria, meets Wahram on Callisto, and calls on Wang at his qube lab on Io, where an attack fails."},{"n":"Earth","w":"New York","t":"To New York, a city in the water, where she meets Kiran and is nearly taken."},{"n":"Venus","w":"under the shield","t":"She leaves Kiran with a contact on Venus, under the parasol and among the tented cities."},{"n":"Mercury","w":"the tunnel under the tracks","t":"Back on Mercury as the meteorite swarm destroys Terminator. She and Wahram walk the utility tunnel under the tracks for forty-five days."},{"n":"Vesta","w":"the Vesta Zone","t":"Across the system with Wahram through the Vesta Zone of terraria, the hollowed asteroids Swan spent her life designing."},{"n":"Saturn","w":"Iapetus","t":"On with Genette and Wahram to the Saturn system, tracing the swarm back to whoever launched it."},{"n":"Earth","w":"Chad, China, Greenland","t":"Back to Earth for the Reanimation: twelve thousand terraria let their animals down at once, and she goes along with them."},{"n":"Venus","w":"the ETH Mobile","t":"To Venus again, aboard the mobile city, where a pebble attack meant to drop the sunshield nearly kills her."},{"n":"Mars","w":"Olympus Mons","t":"It ends on the one world that stayed out of it, with a wedding on Olympus Mons."}], TICKS=[{"a":0.4,"x":102.0},{"a":1,"x":267.2},{"a":2,"x":392.1},{"a":5,"x":557.3},{"a":10,"x":682.3},{"a":20,"x":807.3},{"a":40,"x":932.3}], DIA={"Mercury":"<svg viewBox=\"0 0 340 240\" xmlns=\"http://www.w3.org/2000/svg\" class=\"dia\"><rect width=\"340\" height=\"240\" fill=\"#131313\"/><defs><marker id=\"dA\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"4.5\" markerHeight=\"4.5\" orient=\"auto-start-reverse\"><path d=\"M0,1 L9,5 L0,9 z\" fill=\"#ffb02e\"/></marker></defs><clipPath id=\"mday\"><rect x=\"58\" y=\"36\" width=\"60\" height=\"120\"/></clipPath><circle cx=\"118\" cy=\"96\" r=\"60\" fill=\"#2b2b2b\"/><circle cx=\"118\" cy=\"96\" r=\"60\" fill=\"#9a917f\" clip-path=\"url(#mday)\"/><path d=\"M118,36 V156\" stroke=\"#e6e6e6\" stroke-width=\"1\" stroke-dasharray=\"2 3\"/><ellipse cx=\"118\" cy=\"96\" rx=\"60\" ry=\"8\" fill=\"none\" stroke=\"#ffb02e\" stroke-width=\"1.2\" stroke-dasharray=\"4 3\"/><rect x=\"114\" y=\"92\" width=\"8\" height=\"8\" fill=\"#ffb02e\" stroke=\"#131313\" stroke-width=\"1\"/><path d=\"M127,96 h26\" stroke=\"#ffb02e\" stroke-width=\"1.4\" marker-end=\"url(#dA)\"/><text x=\"128\" y=\"85\" font-size=\"10\" fill=\"#ffb02e\" stroke=\"#131313\" stroke-width=\"2.4\" paint-order=\"stroke\">Terminator, on the track</text><text x=\"16\" y=\"22\" font-size=\"10.5\" fill=\"#9a9a9a\">sunlit</text><text x=\"324\" y=\"22\" text-anchor=\"end\" font-size=\"10.5\" fill=\"#9a9a9a\">night</text><g stroke=\"#6b7280\" stroke-width=\"1.2\"><path d=\"M16,180 h123.0\"/><path d=\"M16,176 v8\"/><path d=\"M139.0,176 v8\"/></g><text x=\"77.5\" y=\"172\" text-anchor=\"middle\" font-size=\"10\" fill=\"#6b7280\">5,000 km</text><text x=\"16\" y=\"198\" font-size=\"10.5\" fill=\"#9a9a9a\">Mercury, radius 2,440 km. Earth is 2.6 times wider.</text><text x=\"16\" y=\"212\" font-size=\"10.5\" fill=\"#9a9a9a\">Its solar day runs 176 Earth days, so the sunrise line crosses</text><text x=\"16\" y=\"226\" font-size=\"10.5\" fill=\"#9a9a9a\">the equator at about 3.6 km/h, slower toward the poles.</text></svg>","Jupiter":"<svg viewBox=\"0 0 340 240\" xmlns=\"http://www.w3.org/2000/svg\" class=\"dia\"><rect width=\"340\" height=\"240\" fill=\"#131313\"/><defs><marker id=\"dA\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"4.5\" markerHeight=\"4.5\" orient=\"auto-start-reverse\"><path d=\"M0,1 L9,5 L0,9 z\" fill=\"#ffb02e\"/></marker></defs><circle cx=\"118\" cy=\"96\" r=\"60\" fill=\"#c9b558\"/><circle cx=\"98\" cy=\"80\" r=\"8\" fill=\"#8e7b2f\" opacity=\"0.7\"/><circle cx=\"134\" cy=\"118\" r=\"11\" fill=\"#8e7b2f\" opacity=\"0.55\"/><circle cx=\"123\" cy=\"65\" r=\"5\" fill=\"#8e7b2f\" opacity=\"0.6\"/><path d=\"M144.3,42.1 L148.2,34.0\" stroke=\"#ffb02e\" stroke-width=\"1.2\" opacity=\"0.8\"/><circle cx=\"148.2\" cy=\"34.0\" r=\"5\" fill=\"#ffb02e\" opacity=\"0.35\"/><path d=\"M177.7,102.3 L186.6,103.2\" stroke=\"#ffb02e\" stroke-width=\"1.2\" opacity=\"0.8\"/><circle cx=\"186.6\" cy=\"103.2\" r=\"5\" fill=\"#ffb02e\" opacity=\"0.35\"/><path d=\"M77.9,140.6 L71.8,147.3\" stroke=\"#ffb02e\" stroke-width=\"1.2\" opacity=\"0.8\"/><circle cx=\"71.8\" cy=\"147.3\" r=\"5\" fill=\"#ffb02e\" opacity=\"0.35\"/><rect x=\"94\" y=\"106\" width=\"8\" height=\"8\" transform=\"rotate(45 98 110)\" fill=\"#ffb02e\" stroke=\"#131313\" stroke-width=\"1\"/><path d=\"M102,110 h34\" stroke=\"#ffb02e\" stroke-width=\"1\" stroke-dasharray=\"3 3\"/><text x=\"140\" y=\"114\" font-size=\"10\" fill=\"#ffb02e\" stroke=\"#131313\" stroke-width=\"2.4\" paint-order=\"stroke\">the qube lab</text><text x=\"324\" y=\"22\" text-anchor=\"end\" font-size=\"10.5\" fill=\"#9a9a9a\">plumes on the limb</text><g stroke=\"#6b7280\" stroke-width=\"1.2\"><path d=\"M16,180 h65.9\"/><path d=\"M16,176 v8\"/><path d=\"M81.9,176 v8\"/></g><text x=\"48.9\" y=\"172\" text-anchor=\"middle\" font-size=\"10\" fill=\"#6b7280\">2,000 km</text><text x=\"16\" y=\"198\" font-size=\"10.5\" fill=\"#9a9a9a\">Io, radius 1,822 km, orbits Jupiter at 422,000 km. Earth is 3.5 times wider.</text><text x=\"16\" y=\"212\" font-size=\"10.5\" fill=\"#9a9a9a\">Tidal heating from Jupiter and the resonance with Europa and</text><text x=\"16\" y=\"226\" font-size=\"10.5\" fill=\"#9a9a9a\">Ganymede keep hundreds of volcanoes resurfacing it.</text></svg>","Earth":"<svg viewBox=\"0 0 340 240\" xmlns=\"http://www.w3.org/2000/svg\" class=\"dia\"><rect width=\"340\" height=\"240\" fill=\"#131313\"/><defs><marker id=\"dA\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"4.5\" markerHeight=\"4.5\" orient=\"auto-start-reverse\"><path d=\"M0,1 L9,5 L0,9 z\" fill=\"#ffb02e\"/></marker></defs><circle cx=\"118\" cy=\"96\" r=\"60\" fill=\"#22507e\"/><clipPath id=\"eclip\"><circle cx=\"118\" cy=\"96\" r=\"60\"/></clipPath><g clip-path=\"url(#eclip)\" stroke=\"#2f6ba8\" stroke-width=\"1\" fill=\"none\"><path d=\"M58,56 h120\"/><path d=\"M58,76 h120\"/><path d=\"M58,96 h120\"/><path d=\"M58,116 h120\"/><path d=\"M58,136 h120\"/><ellipse cx=\"118\" cy=\"96\" rx=\"22\" ry=\"60\"/><ellipse cx=\"118\" cy=\"96\" rx=\"44\" ry=\"60\"/></g><circle cx=\"118\" cy=\"96\" r=\"60\" fill=\"none\" stroke=\"#4d90d0\" stroke-width=\"1.2\"/><rect x=\"74\" y=\"16\" width=\"8\" height=\"8\" fill=\"#ffb02e\" stroke=\"#131313\" stroke-width=\"1\"/><path d=\"M78,26 V32\" stroke=\"#ffb02e\" stroke-width=\"1.2\" marker-end=\"url(#dA)\"/><rect x=\"100\" y=\"16\" width=\"8\" height=\"8\" fill=\"#ffb02e\" stroke=\"#131313\" stroke-width=\"1\"/><path d=\"M104,26 V32\" stroke=\"#ffb02e\" stroke-width=\"1.2\" marker-end=\"url(#dA)\"/><rect x=\"128\" y=\"16\" width=\"8\" height=\"8\" fill=\"#ffb02e\" stroke=\"#131313\" stroke-width=\"1\"/><path d=\"M132,26 V32\" stroke=\"#ffb02e\" stroke-width=\"1.2\" marker-end=\"url(#dA)\"/><rect x=\"154\" y=\"16\" width=\"8\" height=\"8\" fill=\"#ffb02e\" stroke=\"#131313\" stroke-width=\"1\"/><path d=\"M158,26 V32\" stroke=\"#ffb02e\" stroke-width=\"1.2\" marker-end=\"url(#dA)\"/><text x=\"272\" y=\"24\" text-anchor=\"end\" font-size=\"10\" fill=\"#ffb02e\">the terraria let</text><text x=\"272\" y=\"36\" text-anchor=\"end\" font-size=\"10\" fill=\"#ffb02e\">their animals down</text><g stroke=\"#6b7280\" stroke-width=\"1.2\"><path d=\"M16,180 h94.2\"/><path d=\"M16,176 v8\"/><path d=\"M110.2,176 v8\"/></g><text x=\"63.1\" y=\"172\" text-anchor=\"middle\" font-size=\"10\" fill=\"#6b7280\">10,000 km</text><text x=\"16\" y=\"198\" font-size=\"10.5\" fill=\"#9a9a9a\">Earth, radius 6,371 km, holds eleven billion people in the novel.</text><text x=\"16\" y=\"212\" font-size=\"10.5\" fill=\"#9a9a9a\">Satellite altimetry has watched global mean sea level rise go</text><text x=\"16\" y=\"226\" font-size=\"10.5\" fill=\"#9a9a9a\">from about 2 to more than 4 millimetres a year since 1993.</text></svg>","Venus":"<svg viewBox=\"0 0 340 240\" xmlns=\"http://www.w3.org/2000/svg\" class=\"dia\"><rect width=\"340\" height=\"240\" fill=\"#131313\"/><circle cx=\"118\" cy=\"96\" r=\"60\" fill=\"#c2a067\"/><clipPath id=\"vclip\"><circle cx=\"118\" cy=\"96\" r=\"60\"/></clipPath><g clip-path=\"url(#vclip)\" stroke=\"#d8bd8a\" stroke-width=\"6\" opacity=\"0.55\"><path d=\"M58,60 h120\"/><path d=\"M58,80 h120\"/><path d=\"M58,102 h120\"/><path d=\"M58,124 h120\"/><path d=\"M58,144 h120\"/></g><path d=\"M12,62 V130\" stroke=\"#ffb02e\" stroke-width=\"4\" stroke-linecap=\"round\"/><path d=\"M18,96 H54\" stroke=\"#ffb02e\" stroke-width=\"1\" stroke-dasharray=\"3 4\"/><text x=\"16\" y=\"22\" font-size=\"10\" fill=\"#ffb02e\">the sunshield: L1 lies about a million km</text><text x=\"16\" y=\"34\" font-size=\"10\" fill=\"#9a9a9a\">sunward, far off the left of this frame</text><circle cx=\"118\" cy=\"96\" r=\"63.2\" fill=\"none\" stroke=\"#58a6ff\" stroke-width=\"1.1\" stroke-dasharray=\"3 3\"/><text x=\"188.2\" y=\"100\" font-size=\"9.5\" fill=\"#58a6ff\">Earth, same scale</text><g stroke=\"#6b7280\" stroke-width=\"1.2\"><path d=\"M16,180 h99.1\"/><path d=\"M16,176 v8\"/><path d=\"M115.1,176 v8\"/></g><text x=\"65.6\" y=\"172\" text-anchor=\"middle\" font-size=\"10\" fill=\"#6b7280\">10,000 km</text><text x=\"16\" y=\"198\" font-size=\"10.5\" fill=\"#9a9a9a\">Venus, radius 6,052 km, is Earth's near twin in size.</text><text x=\"16\" y=\"212\" font-size=\"10.5\" fill=\"#9a9a9a\">Its surface runs 467 degrees Celsius under 93 bars of carbon</text><text x=\"16\" y=\"226\" font-size=\"10.5\" fill=\"#9a9a9a\">dioxide, which is what the novel's parasol is there to end.</text></svg>","Vesta":"<svg viewBox=\"0 0 340 240\" xmlns=\"http://www.w3.org/2000/svg\" class=\"dia\"><rect width=\"340\" height=\"240\" fill=\"#131313\"/><defs><marker id=\"dA\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"4.5\" markerHeight=\"4.5\" orient=\"auto-start-reverse\"><path d=\"M0,1 L9,5 L0,9 z\" fill=\"#ffb02e\"/></marker></defs><ellipse cx=\"118\" cy=\"92\" rx=\"60\" ry=\"46.8\" fill=\"#8d8a82\" stroke=\"#a9a69c\" stroke-width=\"1.2\"/><path d=\"M61.0,106.0 A57.0,39.8 0 0 0 175.0,106.0\" fill=\"none\" stroke=\"#ffb02e\" stroke-width=\"1.4\" stroke-dasharray=\"4 3\"/><text x=\"118\" y=\"156.8\" text-anchor=\"middle\" font-size=\"10\" fill=\"#ffb02e\">Rheasilvia, 500 km across</text><g transform=\"translate(200,34)\"><rect x=\"0\" y=\"0\" width=\"62\" height=\"22\" rx=\"11\" fill=\"none\" stroke=\"#ffb02e\" stroke-width=\"1.3\"/><path d=\"M0,11 h62\" stroke=\"#ffb02e\" stroke-width=\"0.8\" stroke-dasharray=\"2 3\"/><path d=\"M70,2 a9,9 0 1 1 -3,6\" fill=\"none\" stroke=\"#ffb02e\" stroke-width=\"1.2\" marker-end=\"url(#dA)\"/><text x=\"0\" y=\"36\" font-size=\"9.5\" fill=\"#ffb02e\">a terrarium, spun</text><text x=\"0\" y=\"47\" font-size=\"9.5\" fill=\"#ffb02e\">and lit inside</text><text x=\"0\" y=\"60\" font-size=\"9.5\" fill=\"#9a9a9a\">kilometres long,</text><text x=\"0\" y=\"71\" font-size=\"9.5\" fill=\"#9a9a9a\">not to this scale</text></g><g stroke=\"#6b7280\" stroke-width=\"1.2\"><path d=\"M16,180 h104.8\"/><path d=\"M16,176 v8\"/><path d=\"M120.8,176 v8\"/></g><text x=\"68.4\" y=\"172\" text-anchor=\"middle\" font-size=\"10\" fill=\"#6b7280\">500 km</text><text x=\"16\" y=\"198\" font-size=\"10.5\" fill=\"#9a9a9a\">Vesta is about 526 km across. Earth is 22.3 times wider.</text><text x=\"16\" y=\"212\" font-size=\"10.5\" fill=\"#9a9a9a\">Rheasilvia takes up almost all of it. Dawn orbited Vesta in 2011</text><text x=\"16\" y=\"226\" font-size=\"10.5\" fill=\"#9a9a9a\">and found a differentiated protoplanet, not a rubble pile.</text></svg>","Saturn":"<svg viewBox=\"0 0 340 240\" xmlns=\"http://www.w3.org/2000/svg\" class=\"dia\"><rect width=\"340\" height=\"240\" fill=\"#131313\"/><clipPath id=\"ilead\"><rect x=\"58\" y=\"36\" width=\"60\" height=\"120\"/></clipPath><circle cx=\"118\" cy=\"96\" r=\"60\" fill=\"#ceccc2\"/><circle cx=\"118\" cy=\"96\" r=\"60\" fill=\"#1f1c19\" clip-path=\"url(#ilead)\"/><circle cx=\"118\" cy=\"96\" r=\"60\" fill=\"none\" stroke=\"#8b949e\" stroke-width=\"1\"/><path d=\"M58,96 h120\" stroke=\"#ffb02e\" stroke-width=\"2.4\"/><text x=\"185\" y=\"100\" font-size=\"10\" fill=\"#ffb02e\">the equatorial ridge</text><text x=\"16\" y=\"22\" font-size=\"10.5\" fill=\"#9a9a9a\">leading side, dark as coal</text><text x=\"324\" y=\"22\" text-anchor=\"end\" font-size=\"10.5\" fill=\"#9a9a9a\">trailing side, bright</text><g stroke=\"#6b7280\" stroke-width=\"1.2\"><path d=\"M16,180 h81.7\"/><path d=\"M16,176 v8\"/><path d=\"M97.7,176 v8\"/></g><text x=\"56.8\" y=\"172\" text-anchor=\"middle\" font-size=\"10\" fill=\"#6b7280\">1,000 km</text><text x=\"16\" y=\"198\" font-size=\"10.5\" fill=\"#9a9a9a\">Iapetus, radius 736 km. Earth is 8.7 times wider.</text><text x=\"16\" y=\"212\" font-size=\"10.5\" fill=\"#9a9a9a\">A chain of mountains 10 km high girdles its equator, and its</text><text x=\"16\" y=\"226\" font-size=\"10.5\" fill=\"#9a9a9a\">leading hemisphere reflects a twentieth of the light of the other.</text></svg>","Mars":"<svg viewBox=\"0 0 340 240\" xmlns=\"http://www.w3.org/2000/svg\" class=\"dia\"><rect width=\"340\" height=\"240\" fill=\"#131313\"/><circle cx=\"118\" cy=\"96\" r=\"60\" fill=\"#a4553a\"/><circle cx=\"100\" cy=\"76\" r=\"13\" fill=\"#8d452f\" opacity=\"0.6\"/><circle cx=\"142\" cy=\"112\" r=\"16\" fill=\"#b96a4a\" opacity=\"0.5\"/><circle cx=\"118\" cy=\"96\" r=\"60\" fill=\"none\" stroke=\"#c47a5c\" stroke-width=\"1\"/><g transform=\"translate(192,120)\"><text x=\"0\" y=\"-42\" font-size=\"10\" fill=\"#ffb02e\">Olympus Mons,</text><text x=\"0\" y=\"-30\" font-size=\"10\" fill=\"#ffb02e\">drawn true</text><path d=\"M0,0 L40,-1.9 L66,-2.6 L92,-1.9 L132,0 Z\" fill=\"#ffb02e\" fill-opacity=\"0.3\" stroke=\"#ffb02e\" stroke-width=\"1.2\"/><path d=\"M0,0 h132\" stroke=\"#6b7280\" stroke-width=\"1\"/><text x=\"0\" y=\"14\" font-size=\"9.5\" fill=\"#9a9a9a\">600 km across,</text><text x=\"0\" y=\"25\" font-size=\"9.5\" fill=\"#9a9a9a\">22 km high: the</text><text x=\"0\" y=\"36\" font-size=\"9.5\" fill=\"#9a9a9a\">flanks rise under</text><text x=\"0\" y=\"47\" font-size=\"9.5\" fill=\"#9a9a9a\">five degrees</text></g><g stroke=\"#6b7280\" stroke-width=\"1.2\"><path d=\"M16,180 h88.5\"/><path d=\"M16,176 v8\"/><path d=\"M104.5,176 v8\"/></g><text x=\"60.3\" y=\"172\" text-anchor=\"middle\" font-size=\"10\" fill=\"#6b7280\">5,000 km</text><text x=\"16\" y=\"198\" font-size=\"10.5\" fill=\"#9a9a9a\">Mars, radius 3,390 km. Earth is 1.9 times wider.</text><text x=\"16\" y=\"212\" font-size=\"10.5\" fill=\"#9a9a9a\">Olympus Mons is the largest volcano in the solar system and the</text><text x=\"16\" y=\"226\" font-size=\"10.5\" fill=\"#9a9a9a\">novel ends with a wedding on it. Terraforming stays fiction.</text></svg>"};
+const W=1000,H=320,AXIS=200,XL=96,XR=930;
 const el=document.getElementById('map');
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
-let journey=false;
+let jumps=true, leg=-1, cur='Mercury';
 
 const at={};
-for(const b of BODIES){
-  const t=b.th*Math.PI/180;
-  b.x=CX+b.r*Math.cos(t); b.y=CY-b.r*Math.sin(t);
-  at[b.n]=b;
+for(const b of BODIES) at[b.n]=b;
+// each jump is an arc over the line; the height stands off by leg so
+// that legs sharing a stop stay apart
+JOURNEY.forEach((j,i)=>{ j.h = 32 + 13*(i%5); });
+
+function arcPath(i){
+  const a=at[JOURNEY[i].n], b=at[JOURNEY[i+1].n];
+  const x1=a.x, x2=b.x, y1=AXIS-a.rd-4, y2=AXIS-b.rd-4;
+  const h=JOURNEY[i+1].h;
+  const mx=(x1+x2)/2;
+  return {d:`M${x1},${y1} C${x1},${y1-h} ${x2},${y2-h} ${x2},${y2}`,
+          mx, my:(y1+y2)/2 - h*0.75};
 }
+
 function render(){
   let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" id="ssvg">`;
+  s+=`<defs><marker id="hopArrow" viewBox="0 0 10 10" refX="8" refY="5"
+      markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="var(--hop)"/></marker></defs>`;
   s+=`<rect width="${W}" height="${H}" fill="#121212"/>`;
-  for(const b of BODIES)
-    s+=`<circle cx="${CX}" cy="${CY}" r="${b.r}" fill="none"
-      stroke="var(--orbit)" stroke-width="1"/>`;
-  // the belt band between Vesta and Ceres
-  const rv=at['Vesta'].r, rc=at['Ceres'].r;
-  s+=`<circle cx="${CX}" cy="${CY}" r="${(rv+rc)/2}" fill="none"
-    stroke="#8b93a7" stroke-opacity="0.25" stroke-width="${rc-rv+10}" stroke-dasharray="1 7"/>`;
-  if(journey){
-    let d='',prev=null;
-    for(const leg of JOURNEY){
-      const b=at[leg];
-      d+=(prev?`Q${CX},${CY} `:'M')+`${b.x},${b.y} `;
-      prev=b;
-    }
-    s+=`<path d="${d}" fill="none" stroke="#b48cf2" stroke-width="1.6"
-      stroke-dasharray="7 5" opacity="0.85"/>`;
-    JOURNEY.forEach((leg,i)=>{
-      const b=at[leg], k=JOURNEY.slice(0,i).filter(x=>x===leg).length;
-      s+=`<text x="${b.x+14}" y="${b.y-10-13*k}" font-size="11"
-        fill="#b48cf2">${i+1}</text>`;
-    });
+  s+=`<text x="16" y="20" font-size="10.5" fill="#6b7280">distance from the
+      Sun, in astronomical units</text>`;
+  s+=`<path d="M40,${AXIS} H${XR+16}" stroke="#2e3742" stroke-width="1.4"/>`;
+  for(const t of TICKS){
+    s+=`<path d="M${t.x},${AXIS-5} v10" stroke="#2e3742" stroke-width="1.2"/>`;
+    // a number under a disk reads as part of it, so those are left off
+    if(BODIES.some(b=>Math.abs(b.x-t.x)<20)) continue;
+    s+=`<text x="${t.x}" y="${AXIS+21}" text-anchor="middle" font-size="10.5"
+        fill="#6b7280">${t.a}</text>`;
   }
-  s+=`<circle cx="${CX}" cy="${CY}" r="9" fill="#ffd24d"/>
-    <text x="${CX}" y="${CY+26}" text-anchor="middle" font-size="11.5"
-    fill="#9a9a9a">Sun</text>`;
+  s+=`<circle cx="40" cy="${AXIS}" r="16" fill="#ffd24d"/>
+    <text x="40" y="${AXIS+32}" text-anchor="middle" font-size="11.5"
+      fill="#9a9a9a">Sun</text>`;
+  s+=`<rect x="${at['Vesta'].x-10}" y="${AXIS-13}"
+      width="${at['Ceres'].x-at['Vesta'].x+20}" height="26" fill="#8b93a7"
+      fill-opacity="0.13"/>`;
+  if(jumps){
+    for(let i=0;i<JOURNEY.length-1;i++){
+      const p=arcPath(i), on=(leg===i+1);
+      s+=`<g data-leg="${i+1}" style="cursor:pointer">
+        <path d="${p.d}" fill="none" stroke="#121212" stroke-width="6"
+          stroke-opacity="0.01"/>
+        <path d="${p.d}" fill="none" stroke="var(--hop)"
+          stroke-width="${on?2.6:1.3}" stroke-opacity="${on?1:0.3}"
+          stroke-dasharray="7 5" marker-end="url(#hopArrow)"/>
+        <circle cx="${p.mx}" cy="${p.my}" r="9"
+          fill="${on?'var(--hop)':'#121212'}" stroke="var(--hop)"
+          stroke-width="1.2" stroke-opacity="${on?1:0.5}"/>
+        <text x="${p.mx}" y="${p.my+3.6}" text-anchor="middle" font-size="10"
+          fill="${on?'#121212':'var(--hop)'}"
+          fill-opacity="${on?1:0.6}">${i+2}</text></g>`;
+    }
+    const st=at[JOURNEY[0].n], on0=(leg===0);
+    s+=`<g data-leg="0" style="cursor:pointer">
+      <circle cx="${st.x}" cy="${AXIS-st.rd-24}" r="9"
+        fill="${on0?'var(--hop)':'#121212'}" stroke="var(--hop)"
+        stroke-width="1.2"/>
+      <text x="${st.x}" y="${AXIS-st.rd-20.4}" text-anchor="middle"
+        font-size="10" fill="${on0?'#121212':'var(--hop)'}">1</text></g>`;
+  }
+  // labels stagger where the log axis crowds the inner worlds
+  const ordered=[...BODIES].sort((a,b)=>a.x-b.x);
+  let row=0, lastx=-999;
+  for(const b of ordered){
+    row = (b.x-lastx < 78) ? 1-row : 0;
+    lastx=b.x; b.row=row;
+  }
   for(const b of BODIES){
     const quiet=b.kind==='quiet';
-    const col=quiet?'#4b5563':'var(--accent)';
-    s+=`<g data-n="${esc(b.n)}" style="cursor:default">
-      <circle cx="${b.x}" cy="${b.y}" r="${quiet?4:5.5}" fill="${col}"/>`;
+    const col=quiet?'#4b5563':'#8fa4bd';
+    const ly=AXIS+b.rd+30+b.row*30;
+    s+=`<g data-n="${esc(b.n)}" style="cursor:pointer">
+      <rect x="${b.x-26}" y="${AXIS-b.rd-6}" width="52"
+        height="${b.rd+6+ly-AXIS+18}" fill="transparent"/>
+      <path d="M${b.x},${AXIS+b.rd+3} V${ly-11}" stroke="#3d444d"
+        stroke-width="1" stroke-opacity="${b.row?0.8:0}"/>
+      <circle cx="${b.x}" cy="${AXIS}" r="${b.rd}" fill="${col}"
+        stroke="${b.n===cur?'#e6e6e6':'#121212'}" stroke-width="1.4"/>`;
     if(!quiet)
-      s+=`<rect x="${b.x-4.4}" y="${b.y-16.4}" width="8.8" height="8.8"
-        transform="rotate(45 ${b.x} ${b.y-12})" fill="var(--site)"
+      s+=`<rect x="${b.x-4.2}" y="${ly-24}" width="8.4" height="8.4"
+        transform="rotate(45 ${b.x} ${ly-19.8})" fill="var(--site)"
         stroke="#121212" stroke-width="1"/>`;
-    s+=`<text x="${b.x}" y="${b.y+21}" text-anchor="middle" font-size="12.5"
-      font-weight="${quiet?400:700}" fill="${quiet?'#6b7280':'#e6e6e6'}"
-      stroke="#121212" stroke-width="2.6" paint-order="stroke">${esc(b.n)}</text>`;
+    s+=`<text x="${b.x}" y="${ly}" text-anchor="middle"
+      font-size="12.5" font-weight="${quiet?400:700}"
+      fill="${quiet?'#6b7280':'#e6e6e6'}">${esc(b.n)}</text>`;
     if(!quiet)
-      s+=`<text x="${b.x}" y="${b.y+36}" text-anchor="middle" font-size="10.5"
-        fill="var(--site)" stroke="#121212" stroke-width="2.2"
-        paint-order="stroke">${esc(b.place)}</text>`;
+      s+=`<text x="${b.x}" y="${ly+14}" text-anchor="middle"
+        font-size="10.5" fill="var(--site)">${esc(b.place)}</text>`;
     s+='</g>';
   }
   s+='</svg>';
   el.innerHTML=s;
 }
-function show(n){
+
+function diagram(n){
+  document.getElementById('dia').innerHTML=DIA[n]||'';
+}
+function showBody(n){
   const b=at[n]; if(!b) return;
+  cur=n; leg=-1;
   const quiet=b.kind==='quiet';
   document.getElementById('kindTxt').textContent=
-    quiet?'Off the book\u2019s map':'In the novel \u00b7 '+b.n+' \u00b7 '+b.a+' AU';
+    quiet?'Off the book\u2019s map':'In the novel \u00b7 '+b.a+' AU';
   document.getElementById('nameTxt').textContent=quiet?b.n:b.place;
   document.getElementById('bookTxt').textContent=
     quiet?'The novel passes this world by.':b.book;
   document.getElementById('realTxt').textContent=quiet?'':b.real;
+  document.getElementById('legTxt').textContent='';
+  diagram(n);
+  render();
+}
+function showLeg(i){
+  if(i<0||i>=JOURNEY.length) return;
+  leg=i; jumps=true;
+  document.getElementById('bJourney').classList.add('on');
+  const j=JOURNEY[i], from=i?JOURNEY[i-1]:null;
+  cur=j.n;
+  document.getElementById('kindTxt').textContent=
+    'Stop '+(i+1)+' of '+JOURNEY.length+(from?' \u00b7 from '+from.n:'');
+  document.getElementById('nameTxt').textContent=j.n+' \u00b7 '+j.w;
+  document.getElementById('bookTxt').textContent=j.t;
+  document.getElementById('realTxt').textContent=at[j.n].real||'';
+  document.getElementById('legTxt').textContent=
+    'stop '+(i+1)+' of '+JOURNEY.length;
+  diagram(j.n);
+  render();
 }
 el.addEventListener('pointerover',e=>{
-  const g=e.target.closest('[data-n]');
-  if(g) show(g.getAttribute('data-n'));
+  const g=e.target.closest('[data-leg]');
+  if(g){ showLeg(+g.getAttribute('data-leg')); return; }
+  const b=e.target.closest('[data-n]');
+  if(b) showBody(b.getAttribute('data-n'));
+});
+el.addEventListener('click',e=>{
+  const g=e.target.closest('[data-leg]');
+  if(g) showLeg(+g.getAttribute('data-leg'));
 });
 document.getElementById('bJourney').onclick=e=>{
-  journey=!journey; e.target.classList.toggle('on',journey); render();
+  jumps=!jumps; e.target.classList.toggle('on',jumps); render();
 };
+document.getElementById('bPrev').onclick=()=>
+  showLeg((leg<=0?JOURNEY.length:leg)-1);
+document.getElementById('bNext').onclick=()=>
+  showLeg((leg+1)%JOURNEY.length);
 render();
-show('Mercury');
+showLeg(0);
 window.__ss2312=()=>({bodies:BODIES.length,
-  novel:BODIES.filter(b=>b.kind==='novel').length, journey,
-  legs:JOURNEY.length});
+  novel:BODIES.filter(b=>b.kind==='novel').length, jumps,
+  legs:JOURNEY.length, leg, cur,
+  diagrams:Object.keys(DIA).length,
+  drawn:!!document.querySelector('#dia svg')});
 </script>
 </body>
 </html>
