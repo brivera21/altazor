@@ -111,9 +111,17 @@ with sync_playwright() as pw:
         check("city census series are ordered", okpp)
         n = pg.evaluate("document.querySelectorAll('[data-cty]').length")
         check(f"{c['cty']} counties drawn by 2020", n == c["cty"], str(n))
-        seethru = pg.evaluate(
-            "[...document.querySelectorAll('[data-cty] path')].every(p=>p.getAttribute('fill')==='rgba(0,0,0,0)')")
-        check("county borders only, no fill", seethru)
+        filled = pg.evaluate(
+            "[...document.querySelectorAll('[data-cty] path')].filter(p=>p.getAttribute('fill')!=='rgba(0,0,0,0)').length")
+        want_home = 1 if pg.evaluate("!!ST.home") else 0
+        check("county borders only, bar the home county",
+              filled == want_home, f"{filled} filled, expected {want_home}")
+        if want_home:
+            gold = pg.evaluate(
+                "(()=>{const i=ST.counties.findIndex(c=>c.fips===ST.home);"
+                "const g=document.querySelector('[data-cty=\"'+i+'\"] path');"
+                "return !!g&&g.getAttribute('stroke')==='#ffd24d';})()")
+            check("the home county is the gold one", gold)
         grow = pg.evaluate(
             "(()=>{const c=HIST.events.find(e=>e.pp);if(!c)return null;"
             "return cityR(interp(c.pp,2020))>cityR(interp(c.pp,1900));})()")
@@ -147,6 +155,28 @@ with sync_playwright() as pw:
         check("no colleges before any were founded", u0 == 0, str(u0))
         pg.eval_on_selector("#yr", "el=>{el.value=2020;el.dispatchEvent(new Event('input'))}")
         pg.click("#cUni"); pg.wait_for_timeout(250)
+        # highways chip: routes appear from their designation years
+        pg.click("#cHwy"); pg.wait_for_timeout(250)
+        r2020 = pg.evaluate("document.querySelectorAll('#map [data-rd]').length")
+        check("highways drawn in 2020", r2020 >= 20, str(r2020))
+        dated = pg.evaluate("ROADS.every(r=>r.y>=1900&&r.y<=2026)")
+        check("every route carries a designation year", dated)
+        lv = pg.evaluate("[...new Set(ROADS.map(r=>r.lv))].sort().join(',')")
+        check("interstate, federal and state routes all present",
+              lv == "i,sr,us", lv)
+        leg = pg.evaluate("document.querySelector('#map').innerHTML.includes('Interstate')")
+        check("the road legend is drawn", leg)
+        pg.eval_on_selector("#yr", "el=>{el.value=1900;el.dispatchEvent(new Event('input'))}")
+        pg.wait_for_timeout(250)
+        r1900 = pg.evaluate("document.querySelectorAll('#map [data-rd]').length")
+        check("no highways before the numbered systems", r1900 == 0, str(r1900))
+        pg.eval_on_selector("#yr", "el=>{el.value=1950;el.dispatchEvent(new Event('input'))}")
+        pg.wait_for_timeout(250)
+        r1950 = pg.evaluate("document.querySelectorAll('#map [data-rd]').length")
+        check("the network grows over time",
+              0 < r1950 < r2020, f"1950 {r1950} vs 2020 {r2020}")
+        pg.eval_on_selector("#yr", "el=>{el.value=2020;el.dispatchEvent(new Event('input'))}")
+        pg.click("#cHwy"); pg.wait_for_timeout(250)
         # slider jump markers land on era boundaries
         tk = pg.evaluate("document.querySelectorAll('#ticks button').length")
         check("jump markers above the slider", tk >= 3, str(tk))

@@ -579,12 +579,15 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   <button id="cNat" class="on">Nations</button>
   <button id="cTow" class="on">Towns</button>
   <button id="cUni">Colleges</button>
+  <button id="cHwy">Highways</button>
+  <button id="cMig" class="on">Migrations</button>
   <span id="loadTxt" style="color:var(--muted);font-size:12px"></span>
 </div>
 <div class="stage">
   <div id="mapwrap">
     <canvas id="terC"></canvas>
     <canvas id="wooC"></canvas>
+    <canvas id="watC"></canvas>
     <svg id="map"></svg>
   </div>
   <div class="side">
@@ -620,7 +623,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <div class="refs">__REFS__</div>
 </div>
 <script>
-const ST=__ST__, HIST=__HIST__;
+const ST=__ST__, HIST=__HIST__, ROADS=__ROADS__;
 const W=ST.W, H=ST.H;
 const [MX0,MY0,MX1,MY1]=ST.m;
 const R=6378137, RAD=Math.PI/180;
@@ -633,7 +636,7 @@ wrap.style.aspectRatio=W+' / '+H;
 const svg=document.getElementById('map');
 svg.setAttribute('viewBox','0 0 '+W+' '+H);
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
-const layers={ter:true,woo:true,riv:true,lak:true,cou:false,nat:true,tow:true,uni:false};
+const layers={ter:true,woo:true,riv:true,lak:true,cou:false,nat:true,tow:true,uni:false,hwy:false,mig:true};
 let year=1492, playing=false, pinned=null;
 
 function ringsPath(rr){ return rr.map(r=>'M'+r.map(p=>p[0]+','+p[1]).join('L')+'Z').join(''); }
@@ -647,16 +650,23 @@ function cityR(p){ if(!p||p<1e4) return 0;
 // million, red ten million
 function cityC(p){ if(p>=1e7) return '#ef5350'; if(p>=1e6) return '#ff9440';
   if(p>=1e5) return '#ffd24d'; return '#66bb6a'; }
+// interstate, federal, state route
+const RDC={i:'#cfe6ff', us:'#ffe3ab', sr:'#d3b0ee'};
+const RDN={i:'Interstate', us:'US route', sr:'State route'};
 
 function render(){
   let s='';
-  s+='<defs><clipPath id="stclip"><path d="'+outlineD+'"/></clipPath></defs>';
+  s+='<defs><clipPath id="stclip"><path d="'+outlineD+'"/></clipPath>'
+    +'<marker id="migArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">'
+    +'<path d="M0,1 L9,5 L0,9 z" fill="#ffc247"/></marker></defs>';
   s+='<path d="'+outlineD+'" fill="'+(layers.ter||layers.woo?'none':'#1d2126')+'" stroke="none"/>';
   if(layers.cou){
-    // each county joins the map in its founding year
+    // each county joins the map in its founding year; the one the author
+    // lived in is drawn in gold
     ST.counties.forEach((c,i)=>{
       if(c.y&&c.y>year) return;
-      s+='<g data-cty="'+i+'"><path d="'+ringsPath(c.r)+'" fill="rgba(0,0,0,0)" stroke="#e6e6e6" stroke-opacity="0.75" stroke-width="0.8"/></g>';
+      const mine=ST.home&&c.fips===ST.home;
+      s+='<g data-cty="'+i+'"><path d="'+ringsPath(c.r)+'" fill="'+(mine?'#ffd24d':'rgba(0,0,0,0)')+'" fill-opacity="'+(mine?0.16:1)+'" stroke="'+(mine?'#ffd24d':'#e6e6e6')+'" stroke-opacity="'+(mine?0.95:0.75)+'" stroke-width="'+(mine?2:0.8)+'"/></g>';
     });
   }
   if(layers.lak) for(const l of ST.lakes)
@@ -666,6 +676,19 @@ function render(){
     for(const seg of r.s)
       s+='<path d="M'+seg.map(p=>p[0]+','+p[1]).join('L')+'" fill="none" stroke="var(--water)" stroke-width="'+wdt+'" stroke-opacity="'+(r.n?0.95:0.55)+'"/>';
   }
+  if(layers.hwy) ROADS.forEach((r,i)=>{
+    // a route joins the map in the year it was designated; where no
+    // year is documented (Mexico) the network is drawn whole instead
+    if(r.y==null){ if(!HIST.hwyAll) return; }
+    else if(r.y>year) return;
+    const C=RDC[r.lv], w=r.lv==='i'?2.8:r.lv==='us'?2.0:1.35;
+    let d='';
+    for(const seg of r.s) d+='M'+seg.map(p=>p[0]+','+p[1]).join('L');
+    s+='<g data-rd="'+i+'" style="cursor:pointer">'
+      +'<path d="'+d+'" fill="none" stroke="#121212" stroke-opacity="0.55" stroke-width="'+(w+1.6)+'" stroke-linecap="round" stroke-linejoin="round"/>'
+      +'<path d="'+d+'" fill="none" stroke="'+C+'" stroke-opacity="0.92" stroke-width="'+w+'" stroke-linecap="round" stroke-linejoin="round"/>'
+      +'</g>';
+  });
   // the state border is drawn only once it existed
   if(year>=HIST.border)
     s+='<path d="'+outlineD+'" fill="none" stroke="#121212" stroke-width="3.4" stroke-opacity="0.75"/>'
@@ -724,6 +747,30 @@ function render(){
         +'<text x="'+x+'" y="'+(y-8-(R||0))+'" text-anchor="middle" font-size="10.5" fill="'+(cap?'var(--cap)':'#c9d1d9')+'" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+esc(e.n)+'</text></g>';
     }
   });
+  if(layers.mig) (HIST.mig||[]).forEach((m,i)=>{
+    // a wave rises over its span, then stays as a faded record
+    if(m.y0>year) return;
+    const live=year<=m.y1;
+    const grow=live?Math.max(0.18,(year-m.y0)/Math.max(1,m.y1-m.y0)):1;
+    const [fx,fy]=XY(m.f[0],m.f[1]), [x2,y2]=XY(m.t[0],m.t[1]);
+    // the origin is usually far outside the frame, so the arrow enters
+    // from that bearing at a readable length instead
+    const ang=Math.atan2(fy-y2,fx-x2);
+    const L=Math.min(Math.hypot(fx-x2,fy-y2), 0.24*Math.min(W,H));
+    const cl=(v,hi)=>Math.max(12,Math.min(hi-12,v));
+    const x1=cl(x2+Math.cos(ang)*L,W), y1=cl(y2+Math.sin(ang)*L,H);
+    const w=(2+5*Math.max(0,Math.min(1,(Math.log10(m.p)-3.5)/3)))*grow;
+    // a bowed path so overlapping waves stay apart
+    const mx=(x1+x2)/2, my=(y1+y2)/2, dx=x2-x1, dy=y2-y1;
+    const len=Math.hypot(dx,dy)||1, bow=(m.b||0.18)*0.6*len;
+    const cx=mx-dy/len*bow, cy=my+dx/len*bow;
+    const d='M'+x1.toFixed(1)+','+y1.toFixed(1)+' Q'+cx.toFixed(1)+','+cy.toFixed(1)+' '+x2.toFixed(1)+','+y2.toFixed(1);
+    const op=live?0.9:0.42;
+    s+='<g data-mig="'+i+'" style="cursor:pointer">'
+      +'<path d="'+d+'" fill="none" stroke="#121212" stroke-opacity="'+(op*0.6)+'" stroke-width="'+(w+2)+'" stroke-linecap="round"/>'
+      +'<path d="'+d+'" fill="none" stroke="#ffc247" stroke-opacity="'+op+'" stroke-width="'+w.toFixed(1)+'" stroke-linecap="round" marker-end="url(#migArrow)"/>'
+      +'</g>';
+  });
   if(layers.uni) (HIST.unis||[]).forEach((u,i)=>{
     // each institution appears in its founding year, a mortarboard
     if(u.y>year) return;
@@ -744,6 +791,15 @@ function render(){
     for(const [p] of [...tiers].reverse()){
       const r=cityR(p), C=cityC(p);
       s+='<circle cx="'+cx+'" cy="'+(by-r)+'" r="'+r.toFixed(1)+'" fill="'+C+'" fill-opacity="0.62" stroke="'+C+'" stroke-opacity="0.95" stroke-width="1"/>';
+    }
+    if(layers.hwy){
+      const keys=['i','us','sr'], lx=cx+Rmax+96;
+      let ly=by-2*Rmax-10;
+      for(const k of keys){
+        s+='<line x1="'+lx+'" y1="'+ly+'" x2="'+(lx+22)+'" y2="'+ly+'" stroke="'+RDC[k]+'" stroke-width="'+(k==='i'?2.8:k==='us'?2.0:1.35)+'"/>'
+          +'<text x="'+(lx+27)+'" y="'+(ly+3)+'" font-size="9" fill="#8b949e" stroke="#121212" stroke-width="2.2" paint-order="stroke">'+RDN[k]+'</text>';
+        ly+=12;
+      }
     }
     for(const [p,lab] of tiers){
       const r=cityR(p), ty=by-2*r, C=cityC(p);
@@ -833,7 +889,7 @@ function show(kind,name,body,src){
   document.getElementById('srcTxt').textContent=src||'';
 }
 function target(e){
-  const g=e.target.closest('[data-nat],[data-ev],[data-ct],[data-uni],[data-cty],[data-hp]');
+  const g=e.target.closest('[data-nat],[data-ev],[data-ct],[data-uni],[data-rd],[data-mig],[data-cty],[data-hp]');
   if(!g) return null;
   if(g.dataset.nat!==undefined){ const n=HIST.nations[+g.dataset.nat];
     return ['A nation of this land',n.n,
@@ -846,6 +902,15 @@ function target(e){
     if(ev.pp){ const p=interp(ev.pp,year);
       if(p) body+=' Population around '+year+': '+fmt(p)+' (census, interpolated).'; }
     return [k,ev.n,body,ev.src]; }
+  if(g.dataset.mig!==undefined){ const m=HIST.mig[+g.dataset.mig];
+    return ['Migration \\u00b7 '+m.y0+' to '+m.y1, m.n,
+      m.note+' Arrow width follows the size of the wave; the ends are '
+      +'regions, not exact places.', m.src]; }
+  if(g.dataset.rd!==undefined){ const r=ROADS[+g.dataset.rd];
+    return [RDN[r.lv]+(r.y?' \\u00b7 '+r.y:''), r.n,
+      (r.y?'First carried this number in '+r.y+'. ':'No designation year is documented for this route. ')
+      +'The line is the route as it runs today, not the alignment of that year.',
+      'Route history: the route\\u2019s Wikipedia article']; }
   if(g.dataset.uni!==undefined){ const u=HIST.unis[+g.dataset.uni];
     return ['College \\u00b7 founded '+u.y, u.n,
       (u.pub?'Public':'Private')+' institution, on the map from its founding year.'
@@ -868,9 +933,9 @@ function target(e){
 svg.addEventListener('pointerover',e=>{ if(pinned) return;
   const t=target(e); if(t) show(...t); });
 svg.addEventListener('click',e=>{
-  const g=e.target.closest('[data-nat],[data-ev],[data-ct],[data-uni],[data-cty],[data-hp]');
+  const g=e.target.closest('[data-nat],[data-ev],[data-ct],[data-uni],[data-rd],[data-mig],[data-cty],[data-hp]');
   if(!g){ pinned=null; return; }
-  const id=g.dataset.nat!==undefined?'n'+g.dataset.nat:g.dataset.ev!==undefined?'e'+g.dataset.ev:g.dataset.ct!==undefined?'t'+g.dataset.ct:g.dataset.uni!==undefined?'u'+g.dataset.uni:g.dataset.cty!==undefined?'c'+g.dataset.cty:'hp';
+  const id=g.dataset.nat!==undefined?'n'+g.dataset.nat:g.dataset.ev!==undefined?'e'+g.dataset.ev:g.dataset.ct!==undefined?'t'+g.dataset.ct:g.dataset.uni!==undefined?'u'+g.dataset.uni:g.dataset.rd!==undefined?'r'+g.dataset.rd:g.dataset.mig!==undefined?'m'+g.dataset.mig:g.dataset.cty!==undefined?'c'+g.dataset.cty:'hp';
   pinned = pinned===id?null:id;
   const t=target(e); if(t) show(...t);
 });
@@ -884,7 +949,7 @@ document.getElementById('bPlay').onclick=()=>{
   if(playing){ stop(); return; }
   playing=true; document.getElementById('bPlay').textContent='Pause';
   if(year>=2025) setYear(1492);
-  timer=setInterval(()=>{ if(year>=2025){ stop(); return; } setYear(year+1); },45);
+  timer=setInterval(()=>{ if(year>=2025){ stop(); return; } setYear(year+1); },130);
 };
 (function eband(){
   const eb=document.getElementById('eband'), span=2025-1492;
@@ -926,12 +991,13 @@ document.getElementById('bPlay').onclick=()=>{
 })();
 
 // ---- chips ----
-const CH={cTer:'ter',cWoo:'woo',cRiv:'riv',cLak:'lak',cCou:'cou',cNat:'nat',cTow:'tow',cUni:'uni'};
+const CH={cTer:'ter',cWoo:'woo',cRiv:'riv',cLak:'lak',cCou:'cou',cNat:'nat',cTow:'tow',cUni:'uni',cHwy:'hwy',cMig:'mig'};
 for(const id in CH) document.getElementById(id).onclick=e=>{
   const k=CH[id]; layers[k]=!layers[k];
   e.target.classList.toggle('on',layers[k]);
   if(k==='ter'){ document.getElementById('terC').style.display=layers.ter?'':'none'; if(layers.ter) terrain(); }
   if(k==='woo'){ document.getElementById('wooC').style.display=layers.woo?'':'none'; if(layers.woo) woods(); }
+  if(k==='lak'){ const w=document.getElementById('watC'); if(w) w.style.display=layers.lak?'':'none'; }
   render();
 };
 
@@ -1017,16 +1083,30 @@ async function woods(){
     const off=new OffscreenCanvas(W*SC,Math.round(H*SC)), octx=off.getContext('2d');
     octx.drawImage(b,0,0);
     const img=octx.getImageData(0,0,off.width,off.height), d=img.data;
+    // the same raster carries the water classes, which is the only
+    // hydrography fine enough to show a city's own river
+    const wimg=octx.createImageData(off.width,off.height), wd=wimg.data;
     const F=[[104,171,99],[28,99,48],[181,202,143]];
+    const WA=[[70,107,159],[187,212,236],[108,159,184]];
+    const near=(i,t)=>Math.abs(d[i]-t[0])<14&&Math.abs(d[i+1]-t[1])<14&&Math.abs(d[i+2]-t[2])<14;
     for(let i=0;i<d.length;i+=4){
+      let wet=false;
+      for(const t of WA) if(near(i,t)){ wet=true; break; }
+      if(wet){ wd[i]=61; wd[i+1]=155; wd[i+2]=214; wd[i+3]=210; }
       let keep=false;
-      for(const [r0,g0,b0] of F)
-        if(Math.abs(d[i]-r0)<14&&Math.abs(d[i+1]-g0)<14&&Math.abs(d[i+2]-b0)<14){ keep=true; break; }
-      if(keep){ d[i]=46; d[i+1]=140; d[i+2]=70; d[i+3]=185; }
+      for(const t of F) if(near(i,t)){ keep=true; break; }
+      if(keep&&!wet){ d[i]=46; d[i+1]=140; d[i+2]=70; d[i+3]=185; }
       else d[i+3]=0;
     }
     octx.putImageData(img,0,0);
     ctx.drawImage(off,0,0);
+    const wcv=document.getElementById('watC');
+    if(wcv){
+      wcv.width=W*SC; wcv.height=Math.round(H*SC);
+      octx.putImageData(wimg,0,0);
+      wcv.getContext('2d').drawImage(off,0,0);
+      wcv.style.display=layers.lak?'':'none';
+    }
     loadTxt.textContent='';
   }catch(e){ loadTxt.textContent='land cover unavailable'; }
 }
@@ -1048,20 +1128,18 @@ NOTE1 = ("The map is the real state in Web Mercator: rivers and lakes from "
          "from the AWS Terrain Tiles, and the woods layer drawn from the "
          "USGS National Land Cover Database, forest classes only. Each "
          "chip turns one layer on or off; a mark under the cursor fills "
-         "the card, a click pins it. The border, neighbor names and "
-         "counties appear from the years they were drawn.")
-NOTE2 = ("The slider runs from 1492: the nations who lived here first as "
-         "colored patches, approximate homelands for orientation, their "
-         "population figures scholarly estimates, "
-         "then settlements, capitals and removals year by year, while "
-         "the flag panel shows whose claim covered the land until the "
-         "official state flag. City circles grow green, then yellow, "
-         "orange, red as census counts pass "
-         "10 thousand, 100 thousand, one million, and the years above the "
-         "slider jump to the turning points. "
-         "These nations still exist today; "
-         "Native Land Digital maps their territories fully, with "
-         "community input, and is the place to see them properly.")
+         "the card, a click pins it. The border, neighbor names and counties "
+         "appear from the years they were drawn, and each highway from the "
+         "year its number reached the state.")
+NOTE2 = ("The slider runs from 1492: first the nations, as colored patches "
+         "approximating documented homelands, their populations scholarly "
+         "estimates; then settlements, capitals and removals year by year, "
+         "while the flag panel shows whose claim covered the land. City "
+         "circles grow green through yellow and orange to red at 10 "
+         "thousand, 100 thousand, one million. Golden arrows are migration "
+         "waves, joining regions rather than exact places. These nations "
+         "still exist today; Native Land Digital maps their territories "
+         "fully, with community input, and is the place to see them.")
 
 
 def refs_html(hist):
@@ -1076,6 +1154,8 @@ def refs_html(hist):
         ("County founding years: each state's Wikipedia list of counties.", "https://en.wikipedia.org/"),
         ("City census series: the decennial table in each city's Wikipedia article; every city over 100,000 today is on the map.", "https://en.wikipedia.org/"),
         ("Colleges: the state's Wikipedia list of colleges and universities, four-year public and private; founding years from the list.", "https://en.wikipedia.org/"),
+        ("Migration waves: each wave's Wikipedia article; the figures are the orders of magnitude those sources give, and the arrows join regions, not exact places.", "https://en.wikipedia.org/"),
+        ("Highways: Natural Earth 10m roads for the lines. A route appears in the earliest year its Wikipedia infobox gives for that number, floored at the year its system began, 1926 for the US routes and 1956 for the Interstates. The line is today's route, not that year's alignment, and routes with no documented year are left off.", "https://www.naturalearthdata.com/"),
         ("Native Land Digital: the community-sourced map of Indigenous territories; the patches here are rough approximations of the documented homelands, not their data.", "https://native-land.ca/"),
     ] + hist["refs"]
     return "\n".join(f'<p>{t}\n<a href="{u}">{u}</a></p>' for t, u in rows)
@@ -1110,8 +1190,433 @@ def mine_label(st, name):
     return None
 
 
+# migration waves: f and t are [lat, lon] region centres, p an order of
+# magnitude for the people who moved, b the bow of the arrow
+MIG = {
+"ca": [
+{
+"y0": 1848,
+"y1": 1855,
+"n": "The Gold Rush",
+"p": 300000,
+"f": [
+39.5,
+-124.9
+],
+"t": [
+38.8,
+-120.9
+],
+"b": 0.2,
+"note": "About 300,000 people reach California in seven years, by sea around the Horn and overland; San Francisco goes from a village to a city.",
+"src": "en.wikipedia.org/wiki/California_gold_rush"
+},
+{
+"y0": 1930,
+"y1": 1940,
+"n": "The Dust Bowl years",
+"p": 400000,
+"f": [
+35.4,
+-100.5
+],
+"t": [
+36.7,
+-119.8
+],
+"b": 0.16,
+"note": "Drought and foreclosure push some 400,000 people out of Oklahoma, Texas, Arkansas and Kansas toward the San Joaquin Valley.",
+"src": "en.wikipedia.org/wiki/Dust_Bowl"
+},
+{
+"y0": 1940,
+"y1": 1970,
+"n": "The Second Great Migration",
+"p": 1300000,
+"f": [
+32.3,
+-92.0
+],
+"t": [
+34.0,
+-118.3
+],
+"b": -0.14,
+"note": "Wartime shipyards and aircraft plants draw Black southerners west; Los Angeles and the Bay Area gain over a million people from the South.",
+"src": "en.wikipedia.org/wiki/Second_Great_Migration_(African_American)"
+},
+{
+"y0": 1965,
+"y1": 2010,
+"n": "Migration from Mexico and Central America",
+"p": 4000000,
+"f": [
+25.5,
+-108.5
+],
+"t": [
+33.9,
+-117.6
+],
+"b": 0.13,
+"note": "After the 1965 immigration act and the 1980s farm crises, millions settle in California; by 2010 Mexican-born residents alone number above four million.",
+"src": "en.wikipedia.org/wiki/Mexican_Americans_in_California"
+},
+{
+"y0": 1975,
+"y1": 1995,
+"n": "Refugees from Southeast Asia",
+"p": 450000,
+"f": [
+13.5,
+-127.0
+],
+"t": [
+37.4,
+-121.9
+],
+"b": 0.2,
+"note": "Vietnamese, Hmong, Cambodian and Lao refugees resettle in Orange County, San Jose and the Central Valley.",
+"src": "en.wikipedia.org/wiki/Vietnamese_Americans"
+}
+],
+"az": [
+{
+"y0": 1946,
+"y1": 1990,
+"n": "The Sun Belt years",
+"p": 2500000,
+"f": [
+41.9,
+-95.0
+],
+"t": [
+33.5,
+-112.1
+],
+"b": 0.15,
+"note": "Air conditioning, defense plants and retirement draw people from the Midwest and Northeast; Phoenix grows from 65,000 to nearly a million.",
+"src": "en.wikipedia.org/wiki/Sun_Belt"
+},
+{
+"y0": 1942,
+"y1": 1964,
+"n": "The Bracero Program",
+"p": 300000,
+"f": [
+27.5,
+-107.0
+],
+"t": [
+33.0,
+-112.3
+],
+"b": -0.16,
+"note": "Contract farm labor from Mexico works Arizona cotton and citrus; many families stay after the program ends.",
+"src": "en.wikipedia.org/wiki/Bracero_Program"
+},
+{
+"y0": 1990,
+"y1": 2010,
+"n": "Migration from Mexico",
+"p": 500000,
+"f": [
+29.5,
+-110.9
+],
+"t": [
+33.4,
+-111.9
+],
+"b": 0.14,
+"note": "Arizona's Mexican-born population grows several times over as Phoenix and Tucson expand.",
+"src": "en.wikipedia.org/wiki/Demographics_of_Arizona"
+}
+],
+"pa": [
+{
+"y0": 1880,
+"y1": 1920,
+"n": "Southern and Eastern European arrivals",
+"p": 1500000,
+"f": [
+46.5,
+-70.0
+],
+"t": [
+40.6,
+-78.5
+],
+"b": 0.16,
+"note": "Italians, Poles, Slovaks, Hungarians and Jews from the Russian Empire fill the steel towns, coal patches and Philadelphia wards.",
+"src": "en.wikipedia.org/wiki/History_of_Pennsylvania"
+},
+{
+"y0": 1916,
+"y1": 1970,
+"n": "The Great Migration",
+"p": 700000,
+"f": [
+32.5,
+-84.5
+],
+"t": [
+39.95,
+-75.16
+],
+"b": -0.15,
+"note": "Black southerners leave the Jim Crow South for Philadelphia and Pittsburgh; Philadelphia's Black population multiplies several times over.",
+"src": "en.wikipedia.org/wiki/Great_Migration_(African_American)"
+},
+{
+"y0": 1683,
+"y1": 1775,
+"n": "Germans and the Scots-Irish",
+"p": 110000,
+"f": [
+47.5,
+-71.5
+],
+"t": [
+40.3,
+-76.3
+],
+"b": 0.13,
+"note": "Penn's tolerance draws German-speaking sects to Lancaster and Berks and Ulster Scots to the frontier counties.",
+"src": "en.wikipedia.org/wiki/Pennsylvania_Dutch"
+}
+],
+"ma": [
+{
+"y0": 1845,
+"y1": 1855,
+"n": "The Irish famine years",
+"p": 130000,
+"f": [
+47.5,
+-70.5
+],
+"t": [
+42.36,
+-71.06
+],
+"b": 0.18,
+"note": "Famine emigration lands tens of thousands in Boston in a decade; by 1855 the Irish-born are more than a quarter of the city.",
+"src": "en.wikipedia.org/wiki/Irish_Americans_in_Boston"
+},
+{
+"y0": 1880,
+"y1": 1920,
+"n": "Italians, Jews and Portuguese",
+"p": 500000,
+"f": [
+45.5,
+-69.5
+],
+"t": [
+42.4,
+-71.3
+],
+"b": 0.13,
+"note": "The North End, Chelsea and the mill cities of Lowell, Lawrence and Fall River take in Southern and Eastern Europeans and Azorean Portuguese.",
+"src": "en.wikipedia.org/wiki/History_of_Massachusetts"
+},
+{
+"y0": 1950,
+"y1": 1990,
+"n": "Puerto Rican migration",
+"p": 150000,
+"f": [
+24.5,
+-70.5
+],
+"t": [
+42.15,
+-72.6
+],
+"b": -0.18,
+"note": "Farm recruitment and factory work bring Puerto Rican families to Springfield, Holyoke and Boston.",
+"src": "en.wikipedia.org/wiki/Puerto_Ricans_in_the_United_States"
+}
+],
+"al": [
+{
+"y0": 1916,
+"y1": 1970,
+"n": "The Great Migration out of Alabama",
+"p": 800000,
+"f": [
+33.0,
+-86.8
+],
+"t": [
+36.6,
+-84.5
+],
+"b": 0.16,
+"note": "Black Alabamians leave for Detroit, Chicago, Cleveland and the North; the state's Black share falls from 45 percent to 26 percent.",
+"src": "en.wikipedia.org/wiki/Great_Migration_(African_American)"
+},
+{
+"y0": 1817,
+"y1": 1840,
+"n": "Alabama Fever",
+"p": 300000,
+"f": [
+35.5,
+-81.0
+],
+"t": [
+32.6,
+-86.6
+],
+"b": -0.15,
+"note": "Planters and enslaved people are moved west from the Carolinas, Georgia and Virginia onto land taken from the Muscogee.",
+"src": "en.wikipedia.org/wiki/History_of_Alabama"
+},
+{
+"y0": 1810,
+"y1": 1860,
+"n": "The domestic slave trade",
+"p": 250000,
+"f": [
+37.0,
+-78.0
+],
+"t": [
+32.4,
+-87.0
+],
+"b": 0.2,
+"note": "Roughly a million people are sold from the Upper South to the cotton states; Alabama's Black Belt is one of the destinations.",
+"src": "en.wikipedia.org/wiki/Slave_trade_in_the_United_States"
+}
+],
+"ne": [
+{
+"y0": 1862,
+"y1": 1900,
+"n": "The Homestead Act",
+"p": 400000,
+"f": [
+41.5,
+-87.0
+],
+"t": [
+41.3,
+-99.5
+],
+"b": 0.15,
+"note": "Free land and Union Pacific promotion bring settlers from the eastern states and from Europe onto the plains.",
+"src": "en.wikipedia.org/wiki/Homestead_Acts"
+},
+{
+"y0": 1870,
+"y1": 1900,
+"n": "Germans from Russia and Czechs",
+"p": 100000,
+"f": [
+49.5,
+-92.0
+],
+"t": [
+40.9,
+-97.6
+],
+"b": -0.16,
+"note": "Volga German, Mennonite and Czech families take the drier western counties, bringing hard winter wheat with them.",
+"src": "en.wikipedia.org/wiki/Germans_from_Russia"
+},
+{
+"y0": 1990,
+"y1": 2015,
+"n": "Meatpacking towns",
+"p": 90000,
+"f": [
+24.0,
+-101.5
+],
+"t": [
+41.0,
+-97.4
+],
+"b": 0.14,
+"note": "Plants in Lexington, Grand Island and Schuyler recruit workers from Mexico, Central America and later Somalia and Sudan.",
+"src": "en.wikipedia.org/wiki/Demographics_of_Nebraska"
+}
+],
+"mn": [
+{
+"y0": 1860,
+"y1": 1900,
+"n": "Scandinavians and Germans",
+"p": 700000,
+"f": [
+49.5,
+-88.0
+],
+"t": [
+45.3,
+-94.5
+],
+"b": 0.15,
+"note": "Swedes, Norwegians and Germans take farms across the state; by 1900 a third of Minnesotans are foreign-born.",
+"src": "en.wikipedia.org/wiki/History_of_Minnesota"
+},
+{
+"y0": 1975,
+"y1": 2005,
+"n": "Hmong resettlement",
+"p": 65000,
+"f": [
+19.0,
+-100.0
+],
+"t": [
+44.95,
+-93.09
+],
+"b": -0.17,
+"note": "After the war in Laos, Hmong refugees resettle in Saint Paul, now home to one of the largest Hmong communities anywhere.",
+"src": "en.wikipedia.org/wiki/Hmong_Americans"
+},
+{
+"y0": 1993,
+"y1": 2015,
+"n": "Somali arrival",
+"p": 80000,
+"f": [
+22.0,
+-88.0
+],
+"t": [
+44.98,
+-93.27
+],
+"b": 0.19,
+"note": "Civil war brings Somali families to Minneapolis and later to Rochester and Saint Cloud.",
+"src": "en.wikipedia.org/wiki/Somali_Americans"
+}
+]
+}
+
+for _st, _waves in MIG.items():
+    HIST[_st]["mig"] = _waves
+
+# the county of the city the author has lived in, drawn in gold
+HOME_COUNTY = {
+    "ca": "06037",   # Los Angeles
+    "pa": "42071",   # Lancaster
+    "ma": "25015",   # Hampshire (Amherst)
+    "al": "01125",   # Tuscaloosa
+    "ne": "31055",   # Douglas (Omaha)
+    "mn": "27131",   # Rice (Northfield)
+}
+
 for st, fname in PAGES.items():
     data = json.loads((DATA / f"{st}.json").read_text())
+    if st in HOME_COUNTY:
+        data["home"] = HOME_COUNTY[st]
     hist = HIST[st]
     bulk = CITIES_ALL.get(st, {})
     ev_by_name = {norm(e["n"]): e for e in hist["events"]}
@@ -1132,14 +1637,21 @@ for st, fname in PAGES.items():
             u["mine"] = lbl
         unis.append(u)
     hist["unis"] = unis
+    roads_p = DATA / f"{st}_roads.json"
+    roads = json.loads(roads_p.read_text()) if roads_p.exists() else []
+    # only routes with a documented designation year take part
+    roads = [r for r in roads if r.get("y")]
+    roads.sort(key=lambda r: (r["y"], r["n"]))
+    hist.pop("hwyAll", None)
     sibs = "".join(f' <a href="{f}">{n}</a>' for f, n in SIBLINGS if f != fname)
     html = (HTML.replace("__TITLE__", data["name"])
             .replace("__SIBS__", sibs)
             .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2)
             .replace("__REFS__", refs_html(hist))
             .replace("__ST__", json.dumps(data, separators=(",", ":")))
-            .replace("__HIST__", json.dumps(hist, separators=(",", ":"))))
+            .replace("__HIST__", json.dumps(hist, separators=(",", ":")))
+            .replace("__ROADS__", json.dumps(roads, separators=(",", ":"))))
     (ROOT / fname).write_text(html, encoding="utf-8")
     print(f"wrote {ROOT / fname} ({len(html):,} B): "
           f"{len(hist['nations'])} nations, {len(hist['events'])} events, "
-          f"{len(hist['eras'])} eras")
+          f"{len(hist['eras'])} eras, {len(roads)} routes")

@@ -61,6 +61,7 @@ def build_data():
             "m": [mx0, my0, mx1, my1],
             "ll": [minx - VP, miny - VP, maxx + VP, maxy + VP]}
     data["outline"] = enc_rings(outline, 0.008)
+    data["home"] = "08048"   # Namiquipa, where El Terrero is
     data["counties"] = []
     missing = []
     for cid, (name, g) in sorted(shapes.items()):
@@ -177,6 +178,7 @@ HIST_CH = {
     "native": [],
     "cities": [],
     "unis": [],
+    "hwyAll": True,
     "geo": {"hp": {"n": "Cerro Mohinora", "el": "3,300 m", "lat": 25.95, "lon": -107.04}},
     "refs": [],
 }
@@ -188,6 +190,7 @@ REFS_ES = [
     ("Relieve: Mapzen/AWS Terrain Tiles (Open Data).", "https://registry.opendata.aws/terrain-tiles/"),
     ("Banderas: la imagen del artículo de Wikipedia de cada era, cargada al vuelo.", "https://en.wikipedia.org/"),
     ("Series urbanas de Ciudad Juárez y Chihuahua: censos del INEGI vía los artículos de Wikipedia.", "https://es.wikipedia.org/wiki/Ciudad_Ju%C3%A1rez"),
+    ("Carreteras: trazos de Natural Earth 10m; las carreteras federales mexicanas no tienen a\u00f1o de apertura documentado por ruta, as\u00ed que la red se dibuja completa.", "https://www.naturalearthdata.com/"),
     ("Las guerras apache-mexicanas y los contratos de cabelleras.", "https://en.wikipedia.org/wiki/Apache%E2%80%93Mexico_Wars"),
     ("La rebelión de Tomóchic, 1891 a 1892.", "https://es.wikipedia.org/wiki/Rebeli%C3%B3n_de_Tom%C3%B3chic"),
     ("El pueblo rarámuri.", "https://es.wikipedia.org/wiki/Pueblo_tarahumara"),
@@ -202,21 +205,22 @@ NOTE1_ES = ("El mapa es el Chihuahua real en Web Mercator: ríos y lagos de "
             "estatal.")
 NOTE2_ES = ("La línea del tiempo corre desde 1492: primero los pueblos "
             "originarios como manchas de color, territorios aproximados "
-            "dibujados para orientar, luego villas, presidios, capitales y "
-            "despojos año por año, mientras el panel muestra de quién fue "
-            "la tierra hasta la bandera actual. Los círculos urbanos crecen "
-            "de verde a amarillo y naranja al pasar los censos de 10 mil, "
-            "100 mil y un millón, y los años sobre la barra saltan a los "
-            "momentos clave. Los pueblos originarios siguen aquí; Native "
-            "Land Digital documenta sus territorios con sus comunidades.")
+            "para orientar, luego villas, presidios, capitales y despojos "
+            "año por año, mientras el panel muestra de quién fue la tierra. "
+            "Los círculos urbanos crecen de verde a amarillo y naranja al "
+            "pasar los censos de 10 mil, 100 mil y un millón. Las "
+            "carreteras se dibujan completas: no hay año de apertura "
+            "documentado ruta por ruta. Los pueblos originarios siguen "
+            "aquí; Native Land Digital documenta sus territorios.")
 
 # English template strings -> Spanish
 TR = [
     ("&larr; Library &middot; USA", "&larr; Library &middot; M&eacute;xico"),
     ('  <button id="cWoo" class="on">Woods</button>\n', ""),
     ('  <button id="cUni">Colleges</button>\n', ""),
-    ("const CH={cTer:'ter',cWoo:'woo',cRiv:'riv',cLak:'lak',cCou:'cou',cNat:'nat',cTow:'tow',cUni:'uni'};",
-     "const CH={cTer:'ter',cRiv:'riv',cLak:'lak',cCou:'cou',cNat:'nat',cTow:'tow'};"),
+    ("const CH={cTer:'ter',cWoo:'woo',cRiv:'riv',cLak:'lak',cCou:'cou',cNat:'nat',cTow:'tow',cUni:'uni',cHwy:'hwy',cMig:'mig'};",
+     "const CH={cTer:'ter',cRiv:'riv',cLak:'lak',cCou:'cou',cNat:'nat',cTow:'tow',cHwy:'hwy'};"),
+    ('  <button id="cMig" class="on">Migrations</button>\n', ""),
     ("{ter:true,woo:true,", "{ter:true,woo:false,"),
     ("terrain(); woods();", "terrain();"),
     (">Terrain</button>", ">Relieve</button>"),
@@ -225,6 +229,16 @@ TR = [
     (">Counties</button>", ">Municipios</button>"),
     (">Nations</button>", ">Pueblos</button>"),
     (">Towns</button>", ">Ciudades</button>"),
+    (">Highways</button>", ">Carreteras</button>"),
+    ("{i:'Interstate', us:'US route', sr:'State route'}",
+     "{i:'Autopista federal', us:'Carretera federal', sr:'Carretera estatal'}"),
+    ("'First carried this number in '+r.y+'. '", "'Lleva este n\\u00famero desde '+r.y+'. '"),
+    ("'No designation year is documented for this route. '",
+     "'No hay a\\u00f1o de apertura documentado para esta ruta. '"),
+    ("'The line is the route as it runs today, not the alignment of that year.'",
+     "'La l\\u00ednea es la ruta actual, no el trazo de ese a\\u00f1o.'"),
+    ("'Route history: the route\\u2019s Wikipedia article'",
+     "'Trazo: Natural Earth; ruta seg\\u00fan su art\\u00edculo de Wikipedia'"),
     (">Play</button>", ">Correr</button>"),
     ("textContent='Play'", "textContent='Correr'"),
     ("textContent='Pause'", "textContent='Pausa'"),
@@ -272,12 +286,15 @@ def main():
             ' <a href="norte-mexico.html">El norte</a>'
             ' <a href="valle-santa-maria.html">El valle del Santa Mar&iacute;a</a>')
     refs = "\n".join(f'<p>{t}\n<a href="{u}">{u}</a></p>' for t, u in REFS_ES)
+    roads = json.loads((Path(__file__).parent / "data" / "states"
+                        / "mx08_roads.json").read_text())
     html = (html.replace("__TITLE__", "Chihuahua")
             .replace("__SIBS__", sibs)
             .replace("__NOTE1__", NOTE1_ES).replace("__NOTE2__", NOTE2_ES)
             .replace("__REFS__", refs)
             .replace("__ST__", json.dumps(data, separators=(",", ":")))
-            .replace("__HIST__", json.dumps(hist, separators=(",", ":"))))
+            .replace("__HIST__", json.dumps(hist, separators=(",", ":")))
+            .replace("__ROADS__", json.dumps(roads, separators=(",", ":"))))
     html = html.replace("<h2 class=\"refh\">References</h2>",
                         "<h2 class=\"refh\">Referencias</h2>")
     out = ROOT / "chihuahua.html"
