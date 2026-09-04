@@ -334,7 +334,7 @@ def main():
                          "the earliest galaxy ever seen", "Space.com", e["u2"])
                  if e["n"] == "The first stars" else
                  apa.wiki(e["u2"]))
-        refs.append((entry, f"Dates {e['n'].lower()} on the line."))
+        refs.append((entry, f"The date and the wording for {e['n']}."))
     refs = [apa.render(refs)]
     html = (HTML.replace("__APACSS__", apa.CSS)
             .replace("__EVENTS__", events_js).replace("__KINDS__", kinds_js)
