@@ -13,6 +13,7 @@ Usage: python3 build_energy.py
 
 import json
 import math
+import apa
 from pathlib import Path
 
 OUT = Path(__file__).parent.parent / "energy.html"
@@ -314,6 +315,7 @@ window.__en=()=>({sel,forms:FORMS.length,flows:FLOWS.length});
 """
 
 html = HTML.replace("__FORMS__", forms_js).replace("__FLOWS__", flows_js)
+html = apa.css_pass(html)
 OUT.write_text(html, encoding="utf-8")
 into_th = sum(1 for a, b, *_ in FLOWS if b == "th")
 outof_th = sum(1 for a, b, *_ in FLOWS if a == "th")

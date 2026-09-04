@@ -26,6 +26,7 @@ Usage: python3 build_norte.py      (needs /home/claude/nmex/*.pkl)
 
 import json
 import pickle
+import apa
 from pathlib import Path
 
 import numpy as np
@@ -426,6 +427,7 @@ draw();
 </html>
 """
 
+DOC = apa.css_pass(DOC)
 OUT.write_text(DOC, encoding="utf-8")
 print(f"wrote {OUT} ({len(DOC):,} bytes): {len(state_js)} states, "
       f"{len(river_js)} river lines, {sum(r['k'] for r in river_js):,} km, "

@@ -22,6 +22,7 @@ Usage: python3 build_mexico.py      (needs /home/claude/mx/*.pkl)
 import json
 import math
 import pickle
+import apa
 from pathlib import Path
 
 import numpy as np
@@ -475,6 +476,7 @@ def main():
         for n, v, d in FACTS)
 
     doc = TEMPLATE.replace("__DATA__", blob).replace("__FACTS__", facts)
+    doc = apa.css_pass(doc)
     OUT.write_text(doc, encoding="utf-8")
     off = [m["n"] for m in meta if abs(m["err"]) > DEFAULT_TOL]
     print(f"wrote {OUT} ({len(doc):,} bytes): {len(paths)} states "

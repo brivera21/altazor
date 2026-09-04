@@ -20,6 +20,7 @@ Usage: python3 build_life.py
 """
 
 import json
+import apa
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
@@ -743,6 +744,7 @@ h1 { margin:0 0 6px; font-size:26px; }
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
 .refs p { margin:0 0 8px; overflow-wrap:anywhere; }
 .refs a { color:var(--accent); }
+__APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
 @media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
 </style>
@@ -910,10 +912,7 @@ window.__tree=()=>({tips:tips.length, depth:maxd,
 
 
 def refs_html(refs):
-    out = []
-    for text, url in refs:
-        out.append(f'<p>{text}\n<a href="{url}">{url}</a></p>')
-    return "\n".join(out)
+    return apa.render([apa.entry(t, u) for t, u in refs])
 
 
 # the tree each page's root grows out of, drawn as a clickable node
@@ -937,7 +936,8 @@ XNAV = {
 }
 
 for fname, title, data, note, refs in PAGES:
-    html = (HTML.replace("__TITLE__", title)
+    html = (HTML.replace("__APACSS__", apa.CSS)
+            .replace("__TITLE__", title)
             .replace("__XNAV__", XNAV[fname])
             .replace("__NOTE__", note)
             .replace("__REFS__", refs_html(refs))

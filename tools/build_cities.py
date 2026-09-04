@@ -15,6 +15,7 @@ Usage: python3 build_cities.py   (after build_states.py)
 """
 
 import json
+import apa
 from pathlib import Path
 
 from build_states import HTML, refs_html
@@ -544,18 +545,30 @@ def densify(poly, n=4):
 
 def refs_for(key, hist):
     rows = [
-        ("County lines and recent populations: Census cartographic files via Plotly's mirror.", "https://github.com/plotly/datasets"),
-        ("City limits: the Census TIGER place boundaries, mirrored as GeoJSON.", "https://github.com/generalpiston/geojson-us-city-boundaries"),
-        ("Relief: Mapzen and AWS Terrain Tiles (Open Data).", "https://registry.opendata.aws/terrain-tiles/"),
-        ("Woods and water: USGS National Land Cover Database 2021, forest and water classes, via the MRLC service.", "https://www.mrlc.gov/"),
-        ("The city's census series, from its Wikipedia article's decennial table.", "https://en.wikipedia.org/"),
-        ("Colleges and their founding years: the state's Wikipedia list, and each institution's own article.", "https://en.wikipedia.org/"),
-        ("Highways: Natural Earth 10m roads; a route appears in the earliest year its Wikipedia infobox gives for that number.", "https://www.naturalearthdata.com/"),
-        ("Migration waves: each wave's Wikipedia article; figures are the orders of magnitude those sources give.", "https://en.wikipedia.org/"),
-        ("Flags: each era's Wikipedia article image, fetched at view time.", "https://en.wikipedia.org/"),
-        ("Native Land Digital: the community map of Indigenous territories; the patches here are approximations, not their data.", "https://native-land.ca/"),
-    ] + hist["refs"]
-    return "\n".join(f'<p>{t}\n<a href="{u}">{u}</a></p>' for t, u in rows)
+        ("https://github.com/plotly/datasets",
+         "County lines, from the Census cartographic boundaries."),
+        ("https://github.com/generalpiston/geojson-us-city-boundaries",
+         "The city limits, from the Census TIGER place files."),
+        ("https://registry.opendata.aws/terrain-tiles/",
+         "The relief, shaded at view time and colored by height above the "
+         "sea on the scale every map here shares."),
+        ("https://www.mrlc.gov/",
+         "Woods and water, from the forest and water classes. At this zoom "
+         "it is the only hydrography fine enough to show a city's own river."),
+        ("https://www.census.gov/data/tables/time-series/dec/popchange-data-text.html",
+         "The city's census series."),
+        ("https://en.wikipedia.org/wiki/Lists_of_American_universities_and_colleges",
+         "Colleges and their founding years."),
+        ("https://www.naturalearthdata.com/",
+         "The road lines. A route appears in the earliest year its article's "
+         "infobox gives for that number."),
+        ("https://native-land.ca/",
+         "The community map of Indigenous territories. The patches drawn here "
+         "are rough approximations of documented homelands, not their data."),
+    ]
+    out = [apa.auto(u, ann) for u, ann in rows]
+    out += [apa.entry(t, u) for t, u in hist["refs"]]
+    return apa.render(out)
 
 
 def main():
@@ -604,7 +617,8 @@ def main():
         sibs = (f' <a href="{up_href}">{up_name}</a>'
                 + "".join(f' <a href="{f}">{n}</a>'
                           for f, n in sibs_all if f != fname))
-        html = (HTML.replace("__TITLE__", title)
+        html = (HTML.replace("__APACSS__", apa.CSS)
+                .replace("__TITLE__", title)
                 .replace("&larr; Library &middot; USA",
                          "&larr; Library &middot; USA &middot; Cities")
                 .replace("__SIBS__", sibs)

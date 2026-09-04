@@ -9,6 +9,7 @@ with the April 1, 2020 estimates base as the starting point.
 Usage: python3 build_uscities.py
 """
 
+import apa
 from pathlib import Path
 
 OUT = Path(__file__).parent.parent / "us-cities.html"
@@ -285,6 +286,7 @@ Retrieved {SNAPSHOT}, from
 </html>
 """
 
+HTML = apa.apa_pass(HTML)
 OUT.write_text(HTML, encoding="utf-8")
 print(f"wrote {OUT} ({len(HTML)} bytes): {len(rows)} cities, "
       f"{len(grew)} grew, {len(shrank)} shrank")

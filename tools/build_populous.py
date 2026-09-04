@@ -14,6 +14,7 @@ Usage: python3 build_populous.py
 """
 
 import sys
+import apa
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -274,6 +275,7 @@ United Nations World Population Prospects (2024). Retrieved {SNAPSHOT}, from
 </html>
 """
 
+HTML = apa.apa_pass(HTML)
 OUT.write_text(HTML, encoding="utf-8")
 print(f"wrote {OUT} ({len(HTML)} bytes): {len(rows)} countries and areas, "
       f"{len(shrinking)} shrinking, listed {listed:,} = {share_listed:.2f}% of the world")

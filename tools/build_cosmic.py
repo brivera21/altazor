@@ -19,6 +19,7 @@ import json
 import math
 from pathlib import Path
 
+import apa
 from cosmic_data import EVENTS, KINDS
 
 ROOT = Path(__file__).parent.parent
@@ -101,6 +102,7 @@ button.on { background:var(--accent); border-color:var(--accent); color:#0b0b0b;
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
 .refs p { margin:0 0 8px; overflow-wrap:anywhere; }
 .refs a { color:var(--accent); }
+__APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
 @media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
 </style>
@@ -320,10 +322,22 @@ window.__cosmic=()=>({events:EV.length, mode, cur, cut,
 
 
 def main():
-    refs = ['<p>Every date on the line, with the study behind it:</p>']
+    refs = []
     for e in EVENTS:
-        refs.append(f'<p>{e["n"]}: {e["s"]}.\n<a href="{e["u2"]}">{e["u2"]}</a></p>')
-    html = (HTML.replace("__EVENTS__", events_js).replace("__KINDS__", kinds_js)
+        entry = (apa.article("Planck Collaboration", 2020,
+                             "Planck 2018 results. VI. Cosmological parameters",
+                             "Astronomy &amp; Astrophysics", 641, None, "A6",
+                             "https://doi.org/10.1051/0004-6361/201833910")
+                 if e["n"] == "The Big Bang" else
+                 apa.web("Space.com", 2025,
+                         "Cosmic miracle! James Webb Space Telescope discovers "
+                         "the earliest galaxy ever seen", "Space.com", e["u2"])
+                 if e["n"] == "The first stars" else
+                 apa.wiki(e["u2"]))
+        refs.append((entry, f"Dates {e['n'].lower()} on the line."))
+    refs = [apa.render(refs)]
+    html = (HTML.replace("__APACSS__", apa.CSS)
+            .replace("__EVENTS__", events_js).replace("__KINDS__", kinds_js)
             .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2)
             .replace("__REFS__", "\n".join(refs)))
     out = ROOT / "cosmic-timeline.html"

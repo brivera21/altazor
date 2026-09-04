@@ -18,6 +18,7 @@ import base64
 import io
 import json
 import math
+import apa
 from pathlib import Path
 
 import numpy as np
@@ -607,5 +608,6 @@ window.__valle=()=>({{lugares:LUG.length,caminos:document.querySelectorAll('#cam
 </html>
 """
 
+DOC = apa.css_pass(DOC)
 OUT.write_text(DOC, encoding="utf-8")
 print(f"escrito {OUT} ({len(DOC):,} bytes)")

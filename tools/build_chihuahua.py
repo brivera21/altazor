@@ -20,6 +20,7 @@ from shapely.geometry import shape, box
 from shapely.ops import unary_union
 
 import build_states_data as gd          # merc, rings, lines, W
+import apa
 from build_states import HTML, refs_html  # template (import rebuilds US pages)
 
 ROOT = Path(__file__).parent.parent
@@ -285,12 +286,13 @@ def main():
     sibs = (' <a href="mexico.html">M&eacute;xico</a>'
             ' <a href="norte-mexico.html">El norte</a>'
             ' <a href="valle-santa-maria.html">El valle del Santa Mar&iacute;a</a>')
-    refs = "\n".join(f'<p>{t}\n<a href="{u}">{u}</a></p>' for t, u in REFS_ES)
+    refs = apa.render([apa.auto_es(u, t) for t, u in REFS_ES])
     roads = json.loads((Path(__file__).parent / "data" / "states"
                         / "mx08_roads.json").read_text())
     html = (html.replace("__TITLE__", "Chihuahua")
             .replace("__SIBS__", sibs)
             .replace("__NOTE1__", NOTE1_ES).replace("__NOTE2__", NOTE2_ES)
+            .replace("__APACSS__", apa.CSS)
             .replace("__REFS__", refs)
             .replace("__ST__", json.dumps(data, separators=(",", ":")))
             .replace("__HIST__", json.dumps(hist, separators=(",", ":")))
@@ -298,6 +300,7 @@ def main():
     html = html.replace("<h2 class=\"refh\">References</h2>",
                         "<h2 class=\"refh\">Referencias</h2>")
     out = ROOT / "chihuahua.html"
+    html = apa.css_pass(html)
     out.write_text(html, encoding="utf-8")
     print(f"wrote {out} ({len(html):,} B): {len(hist['nations'])} pueblos, "
           f"{len(hist['events'])} eventos, {len(hist['eras'])} eras")

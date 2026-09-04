@@ -16,6 +16,7 @@ Usage: python3 build_2312.py
 
 import json
 import math
+import apa
 from pathlib import Path
 
 OUT = Path(__file__).parent.parent / "solar-system-2312.html"
@@ -517,6 +518,7 @@ button.step { padding:6px 12px; }
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
 .refs p { margin:0 0 8px; overflow-wrap:anywhere; }
 .refs a { color:var(--accent); }
+__APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
 @media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
 </style>
@@ -773,7 +775,8 @@ html = (HTML.replace("__BODIES__", bodies_js)
         .replace("__AXIS__", str(AXIS_Y))
         .replace("__XL__", str(XL)).replace("__XR__", str(XR))
         .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2)
-        .replace("__REFS__", REFS))
+        .replace("__REFS__", apa.from_html(REFS)))
+html = apa.css_pass(html)
 OUT.write_text(html, encoding="utf-8")
 print(f"wrote {OUT} ({len(html):,} bytes): {len(BODIES)} bodies, "
       f"{len(PLACES)} novel places, {len(JOURNEY)} stops, "

@@ -22,6 +22,7 @@ Usage: python3 build_earth_history.py
 """
 
 import json
+import apa
 from pathlib import Path
 
 from ics_chart import CHART, EVENTS, CHART_VERSION, CITATION
@@ -129,6 +130,7 @@ def main():
 
     doc = TEMPLATE.replace("__DATA__", blob).replace("__FACTS__", facts) \
                   .replace("__CITATION__", CITATION).replace("__BUILT__", BUILT)
+    doc = apa.apa_pass(doc)
     OUT.write_text(doc, encoding="utf-8")
     npts = sum(sum(len(r) for r in v) for v in outlines.values())
     ages = sorted({a for v in rots.values() for a, *_ in v})

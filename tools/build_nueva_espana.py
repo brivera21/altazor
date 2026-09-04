@@ -19,6 +19,7 @@ Uso: python3 build_nueva_espana.py
 import json
 import math
 import pickle
+import apa
 from pathlib import Path
 
 import numpy as np
@@ -601,5 +602,6 @@ window.__ne=()=>({{ano, entradas:D.entradas.length, villas:D.villas.length,
 </html>
 """
 
+DOC = apa.apa_pass(DOC, es=True)
 OUT.write_text(DOC, encoding="utf-8")
 print(f"escrito {OUT} ({len(DOC):,} bytes), cuadro {VW:.0f} por {VH:.0f}")

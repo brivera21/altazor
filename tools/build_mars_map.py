@@ -12,6 +12,7 @@ Usage: python3 build_mars_map.py
 
 import base64
 import json
+import apa
 from pathlib import Path
 
 HERE = Path(__file__).parent
@@ -358,6 +359,7 @@ html = (HTML.replace("__CANYONS__", canyons_js).replace("__SITES__", sites_js)
         .replace("__VH__", str(round(VY1 - VY0, 1)))
         .replace("__SUMX__", str(SUMX)).replace("__SUMY__", str(SUMY))
         .replace("__G64__", g64).replace("__V64__", v64))
+html = apa.css_pass(html)
 OUT.write_text(html, encoding="utf-8")
 print(f"wrote {OUT} ({len(html):,} bytes): {len(CANYONS)} canyons, "
       f"{len(SITES)} novel sites")

@@ -19,6 +19,7 @@ Uso: python3 build_villista.py
 
 import json
 import pickle
+import apa
 from pathlib import Path
 
 import numpy as np
@@ -533,6 +534,7 @@ window.__villista=()=>({{puntos:TRACK.length,paradas:STOPS.length,
 </html>
 """
 
+DOC = apa.css_pass(DOC)
 OUT.write_text(DOC, encoding="utf-8")
 print(f"escrito {OUT} ({len(DOC):,} bytes): {len(V.STOPS)} paradas, "
       f"{len(riv_paths)} ríos, {len(pts)} puntos de traza")

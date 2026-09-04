@@ -11,6 +11,7 @@ Usage: python3 build_universe.py
 """
 
 import json
+import apa
 from pathlib import Path
 
 OUT = Path(__file__).parent.parent / "universe.html"
@@ -352,6 +353,7 @@ show('de');
 
 html = (HTML.replace("__TOP__", top_js).replace("__BAR__", bar_js)
         .replace("__GAL__", gal_js))
+html = apa.css_pass(html)
 OUT.write_text(html, encoding="utf-8")
 print(f"wrote {OUT} ({len(html):,} bytes): {len(TOP)} components, "
       f"{len(BARYONS)} baryon phases, {len(GALAXY)} galaxy parts")

@@ -11,6 +11,7 @@ Usage: python3 build_languages.py
 """
 
 import json
+import apa
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
@@ -31,14 +32,13 @@ NOTE2 = ("A node holding branches opens and closes when clicked, and the "
          "history is not descent from a parent.")
 
 REFS = [
-    ("Hammarström, H., Forkel, R., Haspelmath, M., & Bank, S. 2025. "
-     "Glottolog 5.2.1. Leipzig: Max Planck Institute for Evolutionary "
-     "Anthropology.", "https://glottolog.org"),
-    ("The classification, names, macroareas and codes come from the "
-     "Glottolog CLDF release, CC-BY 4.0.",
-     "https://github.com/glottolog/glottolog-cldf"),
-    ("Language codes are ISO 639-3, maintained by SIL International.",
-     "https://iso639-3.sil.org/"),
+    ("https://glottolog.org",
+     "The classification the tree draws, and the endangerment status on "
+     "every tip."),
+    ("https://github.com/glottolog/glottolog-cldf",
+     "The release the data was taken from, CC-BY 4.0."),
+    ("https://iso639-3.sil.org/",
+     "The three-letter codes beside the languages."),
 ]
 
 HTML = """<!DOCTYPE html>
@@ -96,6 +96,7 @@ h1 { margin:0 0 10px; font-size:26px; }
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
 .refs p { margin:0 0 8px; overflow-wrap:anywhere; }
 .refs a { color:var(--accent); }
+__APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
 @media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
 </style>
@@ -284,8 +285,9 @@ window.__lang=()=>({nodes:ALL.length, langs:ROOT.t, families:ROOT.k.length,
 
 def main():
     data = json.loads((DATA / "languages.json").read_text(encoding="utf-8"))
-    refs = "\n".join(f'<p>{t}\n<a href="{u}">{u}</a></p>' for t, u in REFS)
-    html = (HTML.replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2)
+    refs = apa.render([apa.auto(u, ann) for u, ann in REFS])
+    html = (HTML.replace("__APACSS__", apa.CSS)
+            .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2)
             .replace("__REFS__", refs)
             .replace("__DATA__", json.dumps(data, separators=(",", ":"),
                                             ensure_ascii=False)))

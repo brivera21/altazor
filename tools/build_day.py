@@ -35,6 +35,7 @@ Usage: python3 build_day.py      (needs /home/claude/earth/*.npy)
 import base64
 import io
 import json
+import apa
 from pathlib import Path
 
 import numpy as np
@@ -766,6 +767,7 @@ window.__probe = (lat, lon) => {{
 </body>
 </html>
 """
+    doc = apa.css_pass(doc)
     OUT.write_text(doc, encoding="utf-8")
     print(f"wrote {OUT} ({len(doc):,} bytes): {W}x{H} ground raster, "
           f"{ncity:,} cities in a {LIGHT_W}x{LIGHT_H} light map")

@@ -29,6 +29,7 @@ Usage: python3 build_us.py      (needs /home/claude/us/*.pkl)
 import json
 import math
 import pickle
+import apa
 from pathlib import Path
 
 import numpy as np
@@ -779,6 +780,7 @@ def main():
         f'<div class="v">{v}</div><div class="d">{d}</div></div>'
         for n, v, d in FACTS)
     doc = TEMPLATE.replace("__DATA__", blob).replace("__FACTS__", facts)
+    doc = apa.apa_pass(doc)
     OUT.write_text(doc, encoding="utf-8")
     print(f"wrote {OUT} ({len(doc):,} bytes): {len(paths)} states, "
           f"{len(rv)} river segments ({len(named)} named), "

@@ -37,6 +37,7 @@ import base64
 import io
 import json
 import math
+import apa
 from pathlib import Path
 
 import numpy as np
@@ -129,6 +130,7 @@ def main():
         for n, v, d in FACTS)
 
     doc = TEMPLATE.replace("__DATA__", blob).replace("__FACTS__", facts)
+    doc = apa.css_pass(doc)
     OUT.write_text(doc, encoding="utf-8")
     print(f"wrote {OUT} ({len(doc):,} bytes): {len(sites)} sites, "
           f"{len(links)} links, {len(js['pop'])} population points, "

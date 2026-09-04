@@ -15,6 +15,7 @@ radius is 2^(1/3) times that, 53122.6 km.
 Usage: python3 build_elevator.py
 """
 
+import apa
 from pathlib import Path
 
 OUT = Path(__file__).parent.parent / "space-elevator.html"
@@ -284,5 +285,6 @@ window.__elev=()=>({r:S.r,v:S.v,RGEO,RESC,grav:grav(S.r),orbit:orbit(S.r)});
 </html>
 """
 
+HTML = apa.css_pass(HTML)
 OUT.write_text(HTML, encoding="utf-8")
 print(f"wrote {OUT} ({len(HTML):,} bytes)")

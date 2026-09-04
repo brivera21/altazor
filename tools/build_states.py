@@ -22,6 +22,7 @@ Usage: python3 build_states.py
 """
 
 import json
+import apa
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
@@ -566,6 +567,7 @@ h1 { margin:0 0 10px; font-size:26px; }
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
 .refs p { margin:0 0 8px; overflow-wrap:anywhere; }
 .refs a { color:var(--accent); }
+__APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
 @media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;
   flex-direction:row; flex-wrap:wrap;} .side .card{flex:1 1 260px;} }
@@ -1215,21 +1217,39 @@ NOTE2 = ("The slider runs from 1492: first the nations, as colored patches "
 
 def refs_html(hist):
     rows = [
-        ("Natural Earth, 10m rivers and lakes.", "https://www.naturalearthdata.com/"),
-        ("US county geometry: Census cartographic boundaries via Plotly's dataset mirror.", "https://github.com/plotly/datasets"),
-        ("County populations: Balsama US county dataset (Census figures via Wikipedia), 2025.", "https://github.com/balsama/us_counties_data"),
-        ("Terrain: Mapzen/AWS Terrain Tiles (Open Data).", "https://registry.opendata.aws/terrain-tiles/"),
-        ("Woods: USGS National Land Cover Database 2021, forest classes, via the MRLC WMS.", "https://www.mrlc.gov/"),
-        ("Decennial census populations, state and city; city figures via each city's Wikipedia article.", "https://www.census.gov/data/tables/time-series/dec/popchange-data-text.html"),
-        ("Flags: each era's Wikipedia article image, fetched at view time.", "https://en.wikipedia.org/"),
-        ("County founding years: each state's Wikipedia list of counties.", "https://en.wikipedia.org/"),
-        ("City census series: the decennial table in each city's Wikipedia article; every city over 100,000 today is on the map.", "https://en.wikipedia.org/"),
-        ("Colleges: the state's Wikipedia list of colleges and universities, four-year public and private; founding years from the list.", "https://en.wikipedia.org/"),
-        ("Migration waves: each wave's Wikipedia article; the figures are the orders of magnitude those sources give, and the arrows join regions, not exact places.", "https://en.wikipedia.org/"),
-        ("Highways: Natural Earth 10m roads for the lines. A route appears in the earliest year its Wikipedia infobox gives for that number, floored at the year its system began, 1926 for the US routes and 1956 for the Interstates. The line is today's route, not that year's alignment, and routes with no documented year are left off.", "https://www.naturalearthdata.com/"),
-        ("Native Land Digital: the community-sourced map of Indigenous territories; the patches here are rough approximations of the documented homelands, not their data.", "https://native-land.ca/"),
-    ] + hist["refs"]
-    return "\n".join(f'<p>{t}\n<a href="{u}">{u}</a></p>' for t, u in rows)
+        ("https://www.naturalearthdata.com/",
+         "Rivers, lakes and the road lines."),
+        ("https://github.com/plotly/datasets",
+         "County geometry, from the Census cartographic boundaries."),
+        ("https://github.com/balsama/us_counties_data",
+         "County populations."),
+        ("https://registry.opendata.aws/terrain-tiles/",
+         "The relief, shaded at view time and colored by height above the sea."),
+        ("https://www.mrlc.gov/",
+         "Woods and water, from the forest and water classes."),
+        ("https://www.census.gov/data/tables/time-series/dec/popchange-data-text.html",
+         "Decennial populations for the state."),
+        ("https://en.wikipedia.org/wiki/List_of_United_States_counties_and_county_equivalents",
+         "County founding years, from each state's list of counties."),
+        ("https://en.wikipedia.org/wiki/List_of_United_States_cities_by_population",
+         "City census series, from each city's article. Every city over "
+         "100,000 today is on the map."),
+        ("https://en.wikipedia.org/wiki/Lists_of_American_universities_and_colleges",
+         "Colleges, four-year public and private, with the founding year each "
+         "list gives."),
+        ("https://en.wikipedia.org/wiki/List_of_Interstate_Highways",
+         "Highways: a route appears in the earliest year its article's infobox "
+         "gives for that number, floored at the year its system began, 1926 "
+         "for the US routes and 1956 for the Interstates. The line is today's "
+         "route, not that year's alignment, and routes with no documented year "
+         "are left off."),
+        ("https://native-land.ca/",
+         "The community map of Indigenous territories. The patches drawn here "
+         "are rough approximations of documented homelands, not their data."),
+    ]
+    out = [apa.auto(u, ann) for u, ann in rows]
+    out += [apa.entry(t, u) for t, u in hist.get("refs", [])]
+    return apa.render(out)
 
 
 # every city over 100,000 today, with its decennial census series
@@ -1718,7 +1738,8 @@ for st, fname in PAGES.items():
     if st in CITY_PAGE:
         cf, cn = CITY_PAGE[st]
         sibs += f' &middot; <a href="{cf}">{cn}</a>'
-    html = (HTML.replace("__TITLE__", data["name"])
+    html = (HTML.replace("__APACSS__", apa.CSS)
+            .replace("__TITLE__", data["name"])
             .replace("__SIBS__", sibs)
             .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2)
             .replace("__REFS__", refs_html(hist))

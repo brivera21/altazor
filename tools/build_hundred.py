@@ -15,6 +15,7 @@ Usage: python3 build_hundred.py
 
 import json
 import re
+import apa
 from pathlib import Path
 
 from scifi_hundred import BOOKS, LANGS, ORIGINAL
@@ -78,27 +79,26 @@ NOTE2 = ("Colour is the language the novel was written in, and ninety-five "
          "mark a Hugo or a Nebula for best novel, an independent signal "
          "beside the count: forty of the hundred hold one.")
 
-REFS = """<p>The ranking, and the citation counts behind it: Classics of
-Science Fiction, Books by Rank.
-<a href="https://classicsofsciencefiction.com/classics-of-science-fiction-list/by-rank/">https://classicsofsciencefiction.com/classics-of-science-fiction-list/by-rank/</a></p>
-<p>How a citation is counted, and why the denominator changes with the
-book: their essay on the statistics.
-<a href="https://classicsofsciencefiction.com/essays/statistics-and-math/">https://classicsofsciencefiction.com/essays/statistics-and-math/</a>,
-and the sources themselves,
-<a href="https://classicsofsciencefiction.com/citations-bibliography/">https://classicsofsciencefiction.com/citations-bibliography/</a></p>
-<p>Hugo and Nebula best novel winners: the same roster this site draws for
-<a href="hugo-nebula.html">Hugo and Nebula Winners</a>, from the World
-Science Fiction Society and SFWA award archives.
-<a href="https://www.thehugoawards.org/hugo-history/">https://www.thehugoawards.org/hugo-history/</a>,
-<a href="https://nebulas.sfwa.org/">https://nebulas.sfwa.org/</a></p>
-<p>Covers, fetched at view time: Open Library.
-<a href="https://openlibrary.org">https://openlibrary.org</a></p>
-<p>Solaris, first published in Polish in 1961 and in English through a
-French translation in 1970.
-<a href="https://en.wikipedia.org/wiki/Solaris_(novel)">https://en.wikipedia.org/wiki/Solaris_(novel)</a></p>
-<p>We, written in Russian in 1920 and 1921, published in English in 1924
-and in Russian in 1952.
-<a href="https://en.wikipedia.org/wiki/We_(novel)">https://en.wikipedia.org/wiki/We_(novel)</a></p>"""
+REFS = [
+    ("https://classicsofsciencefiction.com/classics-of-science-fiction-list/by-rank/",
+     "The ranking, and the citation counts behind it."),
+    ("https://classicsofsciencefiction.com/essays/statistics-and-math/",
+     "How a citation is counted, and why the denominator changes with the "
+     "book."),
+    ("https://classicsofsciencefiction.com/citations-bibliography/",
+     "The lists, polls and anthologies the count is taken over."),
+    ("https://www.thehugoawards.org/hugo-history/",
+     "Hugo best novel winners, for the amber pips."),
+    ("https://nebulas.sfwa.org/",
+     "Nebula best novel winners, for the violet pips."),
+    ("https://openlibrary.org", "The covers, fetched at view time."),
+    ("https://en.wikipedia.org/wiki/Solaris_(novel)",
+     "First published in Polish in 1961 and in English through a French "
+     "translation in 1970."),
+    ("https://en.wikipedia.org/wiki/We_(novel)",
+     "Written in Russian in 1920 and 1921, published in English in 1924 and "
+     "in Russian in 1952."),
+]
 
 HTML = """<!DOCTYPE html>
 <html lang="en">
@@ -156,6 +156,7 @@ button.on { background:var(--accent); border-color:var(--accent); color:#0b0b0b;
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
 .refs p { margin:0 0 8px; overflow-wrap:anywhere; }
 .refs a { color:var(--accent); }
+__APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
 @media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
 </style>
@@ -346,10 +347,11 @@ assert (ENGLISH, AWARDED) == (95, 40), (
     f"the note says ninety-five English and forty awarded; the data says "
     f"{ENGLISH} and {AWARDED}")
 
-html = (HTML.replace("__BOOKS__", books_js).replace("__LANGS__", langs_js)
+html = (HTML.replace("__APACSS__", apa.CSS)
+        .replace("__BOOKS__", books_js).replace("__LANGS__", langs_js)
         .replace("__COVERS__", covers_js)
         .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2)
-        .replace("__REFS__", REFS))
+        .replace("__REFS__", apa.render([apa.auto(u, a) for u, a in REFS])))
 out = ROOT / "scifi-hundred.html"
 out.write_text(html, encoding="utf-8")
 print(f"wrote {out} ({len(html):,} B): {len(rows)} books, "

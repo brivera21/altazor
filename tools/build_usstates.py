@@ -11,6 +11,7 @@ Usage: python3 build_usstates.py
 """
 
 import json
+import apa
 from pathlib import Path
 
 OUT = Path(__file__).parent.parent / "us-states.html"
@@ -404,6 +405,7 @@ window.__uss=()=>({{sel, tiles:[1,2,3,4].map(i=>document.getElementById('v'+i).t
 </html>
 """
 
+HTML = apa.apa_pass(HTML)
 OUT.write_text(HTML, encoding="utf-8")
 print(f"wrote {OUT} ({len(HTML)} bytes): {len(rows)} states, "
       f"{len(grew)} grew, {len(shrank)} shrank; "

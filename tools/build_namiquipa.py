@@ -15,6 +15,7 @@ import base64
 import io
 import json
 import pickle
+import apa
 from pathlib import Path
 
 import numpy as np
@@ -625,5 +626,6 @@ window.__ruta=()=>({{puntos:TR.length,total:TOTAL,km:+el('km').value,
 </html>
 """
 
+DOC = apa.css_pass(DOC)
 OUT.write_text(DOC, encoding="utf-8")
 print(f"escrito {OUT} ({len(DOC):,} bytes)")

@@ -11,6 +11,7 @@ their numbers; a button lets the walk keep going far past them.
 Usage: python3 build_prime_spiral.py
 """
 
+import apa
 from pathlib import Path
 
 OUT = Path(__file__).parent.parent / "prime-spiral.html"
@@ -307,5 +308,6 @@ window.__spiral=()=>({len:LEN,marked,lastPrime,target:TARGET,
 </html>
 """
 
+HTML = apa.css_pass(HTML)
 OUT.write_text(HTML, encoding="utf-8")
 print(f"wrote {OUT} ({len(HTML):,} bytes)")
