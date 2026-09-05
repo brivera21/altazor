@@ -125,6 +125,55 @@ with sync_playwright() as pw:
                         if not any(abs(m[0] - t) < 0.01 for m in D.MARKS)]),
           str(lines))
 
+    # --- the whole span, written out one degree at a time
+    rows = pg.evaluate("document.querySelectorAll('#degrees tbody tr').length")
+    check("a row for every degree of the span",
+          rows == int(D.ZONES[-1][1]) - int(D.ZONES[0][0]) + 1, str(rows))
+    check("and every one of them says something of its own",
+          len(set(D.PER_DEGREE.values())) == len(D.PER_DEGREE)
+          and all(d in D.PER_DEGREE for d in range(10, 49)))
+    check("both scales are columns, not a toggle",
+          pg.evaluate("(()=>{const r=document.querySelectorAll("
+                      "'#degrees tbody tr')[27];"
+                      "return r.children[0].textContent==='37'"
+                      "&&r.children[1].textContent==='98.6';})()"))
+    # a measured figure and a bracketed one are told apart
+    check("a measured metabolic figure is marked as measured",
+          pg.evaluate("(()=>{const r=[...document.querySelectorAll("
+                      "'#degrees tbody tr')].find(x=>x.children[0]"
+                      ".textContent==='37');"
+                      "return r.children[4].classList.contains('m')"
+                      "&&r.children[4].textContent==='100%';})()"))
+    check("and a gap between two of them is marked as a gap",
+          pg.evaluate("(()=>{const r=[...document.querySelectorAll("
+                      "'#degrees tbody tr')].find(x=>x.children[0]"
+                      ".textContent==='30');"
+                      "return r.children[4].classList.contains('b')"
+                      "&&r.children[4].textContent.includes('to');})()"))
+    check("nothing is claimed below the coldest measurement",
+          pg.evaluate("(()=>{const r=[...document.querySelectorAll("
+                      "'#degrees tbody tr')].filter(x=>+x.children[0]"
+                      ".textContent<18);"
+                      "return r.every(x=>x.children[4].textContent"
+                      "==='not measured');})()"))
+    check("or above the hottest one",
+          pg.evaluate("(()=>{const r=[...document.querySelectorAll("
+                      "'#degrees tbody tr')].filter(x=>+x.children[0]"
+                      ".textContent>42);"
+                      "return r.every(x=>x.children[4].textContent"
+                      "==='not measured');})()"))
+    check("the pulse stops where its series stops",
+          pg.evaluate("(()=>{const g=t=>[...document.querySelectorAll("
+                      "'#degrees tbody tr')].find(x=>+x.children[0]"
+                      ".textContent===t).children[5].textContent;"
+                      "return g(19)==='not measured'&&g(20)!=='not measured'"
+                      "&&g(43)==='not measured';})()"))
+    check("the table is only on the view it belongs to",
+          pg.evaluate("(()=>{document.getElementById('vDay').click();"
+                      "const h=document.getElementById('degwrap').hidden;"
+                      "document.getElementById('vRange').click();"
+                      "return h&&!document.getElementById('degwrap').hidden;})()"))
+
     # --- the measurement panel: points, not a curve
     pts = pg.evaluate("document.querySelectorAll('#tsvg [data-pt]').length")
     check("every measurement is plotted", pts == len(D.MEASURED), str(pts))

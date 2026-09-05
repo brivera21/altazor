@@ -161,7 +161,28 @@ button:hover { border-color:var(--accent); }
 button.on { background:var(--accent); border-color:var(--accent); color:#0b0b0b; }
 button.unit { padding:6px 12px; font-variant-numeric:tabular-nums; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
-#chart { flex:1 1 640px; min-width:0; }
+.chartcol { flex:1 1 640px; min-width:0; }
+#chart { min-width:0; }
+#degwrap { margin-top:26px; overflow-x:auto; }
+#degrees { border-collapse:collapse; width:100%; font-size:12.5px;
+  font-variant-numeric:tabular-nums; }
+#degrees th { text-align:left; color:var(--muted); font-weight:400;
+  font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+  border-bottom:1px solid var(--line); padding:0 10px 6px 0; }
+#degrees td { padding:5px 10px 5px 0; border-bottom:1px solid #1e1e1e;
+  vertical-align:top; color:#b9bec6; }
+#degrees tr.key td { color:var(--text); }
+#degrees td.c { font-weight:600; color:var(--text); white-space:nowrap; }
+#degrees td.f, #degrees td.n { white-space:nowrap; }
+#degrees td.z { white-space:nowrap; }
+#degrees td.z i { width:8px; height:8px; border-radius:50%; display:inline-block;
+  margin-right:6px; }
+#degrees td.w { line-height:1.45; }
+#degrees td.n.m { color:var(--text); }
+#degrees td.n.b, #degrees td.n.n { color:#6b7280; }
+#degrees tr:hover td { background:#191919; }
+.tkey { color:var(--muted); font-size:11.5px; line-height:1.5; margin:10px 0 0;
+  max-width:900px; }
 #chart svg { width:100%; height:auto; display:block; user-select:none; }
 .side { flex:0 0 320px; position:sticky; top:16px; }
 .card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
@@ -205,7 +226,10 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   <button id="uK" class="unit">K</button>
 </div>
 <div class="stage">
+  <div class="chartcol">
   <div id="chart"></div>
+  <div id="degwrap">__TABLE__</div>
+  </div>
   <div class="side"><div class="card">
     <div id="kindTxt"></div>
     <div id="nameTxt"></div>
@@ -991,6 +1015,7 @@ function render(){
 }
 function setView(v){
   view=v; hot=null;
+  document.getElementById('degwrap').hidden = (v!=='range');
   for(const [id,k] of VBTN) document.getElementById(id).classList.toggle('on',v===k);
   render();
 }
@@ -1183,6 +1208,68 @@ window.__temp=()=>({view, unit:U,
 """
 
 
+def _metab(t):
+    """Metabolic rate at a whole degree: measured, bracketed, or neither."""
+    for ct, pc, key, _aw in D.MEASURED:
+        if abs(ct - t) < 0.65:
+            return f"{pc}%", D.MSRC[key][0], "m"
+    if t < 18:
+        return "not measured", "no person has been measured this cold", "n"
+    if t > 41.8:
+        return "not measured", "nothing above 41.8 has been measured", "n"
+    # the shivering peak is a different state, not a point on the same line,
+    # so it never brackets anything
+    pool = [m for m in D.MEASURED if m[2] != "eyolfson"]
+    lo = max([m for m in pool if m[0] < t], key=lambda m: m[0], default=None)
+    hi = min([m for m in pool if m[0] > t], key=lambda m: m[0], default=None)
+    if lo and hi:
+        a, b = sorted((lo[1], hi[1]))
+        return f"{a} to {b}%", "between two measurements, not itself one", "b"
+    return "not measured", "", "n"
+
+
+def _pulse(t):
+    P = D.PULSE
+    if P["cold_lo"] <= t <= P["cold_hi"]:
+        return f"{round(P['base'] - (37 - t) * P['cold_slope'])}", "m"
+    if P["warm_lo"] <= t <= P["warm_hi"]:
+        return f"{round(P['base'] + (t - 37) * P['warm_slope'])}", "m"
+    if P["cold_hi"] < t < P["warm_lo"]:
+        return f"{round(65 + (t - 35) * 2.5)}", "b"
+    return "not measured", "n"
+
+
+def degree_table():
+    rows = []
+    for t in range(int(D.ZONES[0][0]), int(D.ZONES[-1][1]) + 1):
+        z = next((z for z in D.ZONES if z[0] <= t < z[1]), D.ZONES[-1])
+        what = D.PER_DEGREE.get(t, z[4])
+        mv, mnote, mk = _metab(t)
+        pv, pk = _pulse(t)
+        f = t * 9 / 5 + 32
+        cls = " class=\"key\"" if t in D.PER_DEGREE else ""
+        rows.append(
+            f"<tr{cls}><td class=\"c\">{t}</td><td class=\"f\">{f:.1f}</td>"
+            f"<td class=\"z\"><i style=\"background:{ZC[z[2]]}\"></i>{z[3]}</td>"
+            f"<td class=\"w\">{what}</td>"
+            f"<td class=\"n {mk}\" title=\"{mnote}\">{mv}</td>"
+            f"<td class=\"n {pk}\">{pv}</td></tr>")
+    return (
+        "<table id=\"degrees\"><thead><tr>"
+        "<th>&deg;C</th><th>&deg;F</th><th>Where it falls</th>"
+        "<th>What is there</th><th>Metabolic rate</th><th>Pulse</th>"
+        "</tr></thead><tbody>" + "".join(rows) + "</tbody></table>"
+        "<p class=\"tkey\">Metabolic rate is a percentage of the resting "
+        "rate at 37. A figure in white is a measurement; a range in grey is "
+        "the gap between the two measurements either side of it and is not "
+        "itself measured. Pulse is 2.54 beats a minute per degree below 35, "
+        "from 216 people brought in with hypothermia, and about 8 a degree "
+        "above 37; between 35 and 37 no series covers it, and the figure "
+        "there is a join. Peak shivering, near 35, reaches 490 per cent and "
+        "is left out of the ranges around it because it is a different "
+        "state, not a point on the same line.</p>")
+
+
 def main():
     A = apa.article
     refs = [
@@ -1359,6 +1446,7 @@ def main():
             .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2)
             .replace("__METHOD__", METHOD)
             .replace("__MEASURED__", MEASURED_NOTE)
+            .replace("__TABLE__", degree_table())
             .replace("__REFS__", apa.render(refs)))
     out = ROOT / "temperature.html"
     out.write_text(html, encoding="utf-8")

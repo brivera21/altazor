@@ -441,3 +441,113 @@ HR_COLD = dict(slope=2.54, lo=19.3, hi=34.9, n=216,
                     "the normal pulse at 28 degrees comes from the same "
                     "1950s lineage as the metabolic table and sits well "
                     "below what was actually counted.")
+
+
+# =========================================================================
+# The whole span, one degree at a time
+# =========================================================================
+# What is worth saying at each whole degree. Degrees not listed here take
+# the line from the band they fall in. Every claim traces to something
+# already cited above; nothing new is asserted here.
+PER_DEGREE = {
+    10: "The bottom of the drawing, and well past anything measured. Nothing "
+        "in a living person has been recorded this cold.",
+    11: "A 27-month-old boy was found at minus seven in Poland with no signs "
+        "of life and fixed pupils, read 11.8 on rewarming, and went home "
+        "after 64 days neurologically well.",
+    13: "Anna Bagenholm was pulled from under ice in Norway at 13.7 after "
+        "about 80 minutes and recovered. Deliberate surgical cooling has "
+        "gone lower still.",
+    18: "The coldest whole-body measurement of a living person: 38 per cent "
+        "of the resting metabolic rate, in adults cooled for lung surgery. "
+        "Below this line nothing has been measured.",
+    19: "The bottom of the range in which anyone's pulse has been counted "
+        "and pooled. Below it the falling line is extrapolation.",
+    24: "The top of profound hypothermia. Below here a person can have no "
+        "pulse, no breathing and fixed pupils and still be brought back, "
+        "which is why resuscitation is attempted from temperatures that "
+        "would otherwise look hopeless.",
+    25: "Oxygen use is a little over half of normal, measured in twelve men "
+        "cooled on bypass.",
+    27: "Half the resting rate, from 293 children on bypass. The rate of "
+        "change steepens below about here rather than staying constant.",
+    28: "Ventricular fibrillation becomes the danger. The heart muscle is "
+        "irritable and rough handling alone can set it off, so a patient "
+        "this cold is moved gently.",
+    32: "Shivering stops, which is the clinical marker of this stage. "
+        "Consciousness fades, atrial fibrillation is common, and some "
+        "people undress.",
+    33: "The coldest a sedated volunteer has been taken with the metabolism "
+        "measured: 79 per cent of resting. When a participant began to "
+        "shiver their temperature stopped falling, which is why the "
+        "experiment could go no further.",
+    34: "Judgement and coordination are already going, before the person "
+        "feels in any danger.",
+    35: "Peak shivering sits near here: almost five times the resting rate, "
+        "about 500 watts. Whether it is reached depends more on how cold "
+        "the skin is than on the core.",
+    36: "Shivering begins around 36.8 in someone whose skin is not cold. "
+        "The modern mean sits at 36.6, and the daily low near 36.5.",
+    37: "The number Wunderlich set in 1868, from about a million readings "
+        "taken in the armpit. Converting his round 37 gives the "
+        "spuriously precise 98.6.",
+    38: "The usual fever cut-off, written for a rectal reading; critical "
+        "care often uses 38.3. Cooling a heat stroke patient stops at 38.6, "
+        "because a body cooled to normal keeps falling.",
+    39: "Measured 18 per cent above resting in anaesthetised patients heated "
+        "deliberately. Still a raised set point rather than a failure of "
+        "control.",
+    40: "Above here, with the nervous system failing, is heat stroke. The "
+        "definition needs both halves. Well trained athletes reach 41.5 in "
+        "a race without harm, so time above the line matters more than the "
+        "peak.",
+    41: "28 per cent above resting. The climb decelerates: about 9 per cent "
+        "a degree over the first two, then 5, then 4.",
+    42: "The critical thermal maximum, from one small 1978 study of sedated "
+        "volunteers. The finding was 41.6 to 42 held for anywhere from 45 "
+        "minutes to 8 hours, and the eight hours usually gets dropped.",
+    43: "Past every metabolic measurement there is. Nothing has been "
+        "measured in a person above 41.8.",
+    46: "A 52-year-old man survived 46.5 with heat stroke in Atlanta in July "
+        "1980 and was discharged after 24 days. The case is a record "
+        "listing rather than a published case report.",
+    48: "The top of the drawing. No one has been recorded here.",
+    12: "Colder than any adult has been rewarmed from. Only the child at "
+        "11.8 sits below this line.",
+    14: "Just above the 13.7 an adult survived under ice. Rewarming from "
+        "this depth needs a bypass or ECMO circuit, not blankets.",
+    15: "The figures quoted for this depth come from dogs cooled in 1950, "
+        "not from people.",
+    16: "Deep enough that the heart is unlikely to be beating, and cold "
+        "enough that the brain may not mind for a while.",
+    17: "Inside the gap. The nearest real measurement is at 18, one degree "
+        "warmer, and there is nothing below it.",
+    20: "Deliberate surgical cooling has gone below here. Accidental "
+        "survival this deep is rare and always involves rewarming on a "
+        "circuit.",
+    21: "Just above where the pulse series stops. Below 19.3 the falling "
+        "line is extrapolation.",
+    22: "A patient has been recorded conscious and shivering at 22.9, which "
+        "the staging says should not happen. The stages are population "
+        "conventions, not individual guarantees.",
+    23: "Approaching the top of profound hypothermia, where vital signs can "
+        "be absent and recovery still possible.",
+    26: "Between the two bypass measurements at 25.4 and 27. Nothing was "
+        "measured at this degree itself.",
+    29: "Consciousness is gone or going, the pulse is around fifty, and the "
+        "rhythm is unreliable.",
+    30: "The middle of moderate hypothermia. Every metabolic figure here "
+        "comes from patients on a bypass machine.",
+    31: "Just below where shivering fails. Above this the body is still "
+        "fighting the cold; below it, it has stopped.",
+    44: "Above the hottest anyone has been measured metabolically, and above "
+        "the critical thermal maximum. Damage here is a question of how "
+        "long, not whether.",
+    45: "The only documented survival above this line is the 46.5 record.",
+    47: "Above that record. No one is known to have come back from here.",
+}
+
+# Where the pulse figures hold. Below 19.3 and above 42 there is nothing.
+PULSE = dict(cold_lo=19.3, cold_hi=34.9, cold_slope=2.54,
+             warm_lo=37.0, warm_hi=42.0, warm_slope=8.0, base=70.0,
+             gap_note="between 35 and 37 no series covers it")
