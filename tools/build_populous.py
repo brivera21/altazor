@@ -18,7 +18,7 @@ import apa
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from world_data import ROWS as SRC, WORLD, FLAG   # noqa: E402
+from world_data import ROWS as SRC, WORLD, FLAG, NOT_SOVEREIGN  # noqa: E402
 
 OUT = Path(__file__).parent.parent / "populous-countries.html"
 
@@ -72,6 +72,21 @@ max_share = max(r["share"] for r in rows)
 max_flow = max(max(r["b"], r["d"]) for r in rows)
 shrinking = [r for r in rows if r["net"] < 0]
 top10 = sum(r["pop"] for r in rows[:10]) / WORLD["pop"] * 100
+
+# A day's births, deaths and net growth are each larger than whole countries.
+# The comparison counts sovereign states, which is what a reader hears in
+# "countries", rather than all 237 rows of the table, most of the smallest of
+# which are dependencies and overseas departments.
+SOV = sorted(r["pop"] for r in rows if r["code"] not in NOT_SOVEREIGN)
+assert len(SOV) == 194, len(SOV)   # the 193 UN members and the Vatican
+
+
+def smaller_than(n):
+    return sum(1 for p in SOV if p < n)
+
+
+n_b, n_d, n_g = (smaller_than(w_b), smaller_than(w_d),
+                 smaller_than(w_b - w_d))
 
 # ---- the paired bars that live inside each row ----
 VW, PLOT = 250, 150      # viewBox width, bar plot width
@@ -170,6 +185,7 @@ h2 {{ font-size:16px; margin:34px 0 10px; letter-spacing:.02em; }}
 .tile .lab {{ color:var(--muted); font-size:12.5px; }}
 .tile .val {{ font-size:26px; font-weight:600; margin-top:2px; line-height:1.2; }}
 .tile .sub {{ color:var(--ink-3); font-size:12px; margin-top:2px; }}
+.method {{ color:var(--muted); font-size:12.5px; max-width:760px; }}
 
 .legend {{ display:flex; gap:18px; font-size:12.5px; color:var(--ink-2);
   margin:26px 0 0; }}
@@ -226,13 +242,13 @@ tr.total td {{ border-bottom:none; color:var(--muted); font-size:13px; padding-t
     <div class="sub">{commas(WORLD['pop'])} in 2026</div></div>
   <div class="tile"><div class="lab">Births per day</div>
     <div class="val">{commas(w_b)}</div>
-    <div class="sub">worldwide</div></div>
+    <div class="sub">worldwide, more than {n_b} countries hold</div></div>
   <div class="tile"><div class="lab">Deaths per day</div>
     <div class="val">{commas(w_d)}</div>
-    <div class="sub">worldwide</div></div>
+    <div class="sub">worldwide, more than {n_d} countries hold</div></div>
   <div class="tile"><div class="lab">Net growth per day</div>
     <div class="val">+{commas(w_b - w_d)}</div>
-    <div class="sub">births minus deaths</div></div>
+    <div class="sub">births minus deaths, more than {n_g} countries hold</div></div>
 </div>
 
 <div class="legend">
@@ -259,6 +275,16 @@ percent of the UN's own world figure. The remainder is a gap in the source
 rather than a missing country: the UN's world record is larger than the sum of
 the places it lists. Flags are served by
 <a href="https://flagcdn.com" style="color:var(--accent)">FlagCDN</a>.</p>
+
+<p class="method">A day's births, deaths and net growth each outrun whole
+countries, and the counts beside those three figures say how many. They compare
+against the 194 sovereign states among these {len(rows)} rows, the 193 members
+of the United Nations and the Vatican, rather than against the whole table:
+most of the smallest rows here are dependencies and overseas departments, and
+a reader who hears "countries" is not thinking of Tokelau or Gibraltar. The
+thresholds fall between real places. Four sovereign states, Samoa, Sao Tome and
+Principe, Barbados and Vanuatu, sit between the day's net growth and the day's
+births, which is why those two counts differ by four.</p>
 
 <h2>References</h2>
 <div class="refs">

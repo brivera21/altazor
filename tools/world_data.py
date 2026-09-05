@@ -18,6 +18,21 @@ page states the sum, not the difference.
 
 WORLD = dict(pop=8_300_678_396, births=132_503_470, deaths=63_637_310)
 
+# The rows that are not sovereign states: dependencies, overseas departments,
+# crown dependencies, special administrative regions, and the territories and
+# places whose status is disputed or unrecognised. Taking these out of the 237
+# leaves 194, the 193 members of the United Nations plus the Vatican. Palestine
+# is the other UN observer state and sits here rather than there, since the
+# page's counts read as "countries" to an ordinary reader and Palestine's
+# statehood is what is being argued about.
+NOT_SOVEREIGN = {
+    "ASM", "AIA", "ABW", "BMU", "BES", "VGB", "CYM", "COK", "CUW", "FLK",
+    "FRO", "GUF", "PYF", "GIB", "GRL", "GLP", "GUM", "GGY", "HKG", "IMN",
+    "JEY", "XKX", "MAC", "MTQ", "MYT", "MSR", "NCL", "NIU", "MNP", "PSE",
+    "PRI", "REU", "BLM", "SHN", "MAF", "SPM", "SXM", "TWN", "TKL", "TCA",
+    "VIR", "WLF", "ESH",
+}
+
 ROWS = [
     ("IND", "India", 1476625571, 22988460, 9888274),
     ("CHN", "China", 1412914090, 8625232, 11482042),
