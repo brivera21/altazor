@@ -50,6 +50,7 @@ title: Library
 <div>
 <h2>Homo Sapiens</h2>
 <p><a href="migration.html">Homo Sapiens Migration</a></p>
+<p><a href="temperature.html">Temperature</a></p>
 <p><a href="populous-countries.html">Population</a></p>
 <p><a href="languages.html">Languages</a></p>
 </div>
