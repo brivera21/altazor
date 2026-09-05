@@ -347,3 +347,97 @@ TELL_NOTE = (
     "someone with an infection wastes effort and makes them shiver. Not "
     "cooling someone with heat stroke for half an hour can kill them. And "
     "the first things done are the same either way.")
+
+
+# =========================================================================
+# What has actually been measured
+# =========================================================================
+# Whole-body metabolic rate against core temperature, as a percentage of the
+# resting rate at 37 degrees. These are points, not a curve, and the page
+# draws them as points on purpose. No published figure spans this range,
+# because the two halves come from incompatible states: the shivering peak
+# needs an awake person defending their temperature, and every measurement
+# below about 33 degrees comes from someone anaesthetised, paralysed or on
+# bypass, which is the only reason those temperatures were reachable at all.
+#
+# (core temperature, per cent of resting, source key, awake?)
+MEASURED = [
+    (41.8, 131, "zhu", False),
+    (41.0, 128, "zhu", False),
+    (40.0, 123, "zhu", False),
+    (39.0, 118, "zhu", False),
+    (37.0, 100, "base", True),
+    (35.2, 490, "eyolfson", True),
+    (33.0, 79, "flick", True),
+    (32.0, 83, "shara", False),
+    (27.0, 51, "shara", False),
+    (25.4, 55, "hickey", False),
+    (18.0, 38, "diop", False),
+]
+
+MSRC = {
+    "base": ("Resting", "The rate every other figure on this panel is a "
+             "percentage of."),
+    "zhu": ("Zhu, 2003", "Twenty anaesthetised and paralysed patients heated "
+            "to 41.8 degrees, with a catheter in the pulmonary artery. The "
+            "climb decelerates: about 9 per cent a degree over the first two, "
+            "then 5, then 4. Anaesthesia removes shivering and the work of "
+            "breathing, so this is close to the pure effect of heat on "
+            "tissue and probably understates an intact person."),
+    "eyolfson": ("Eyolfson, 2001", "Peak shivering in fifteen people put in "
+                 "eight degree water and then rewarmed to twenty, which "
+                 "maximises the cold signal from the skin. Peak output was "
+                 "4.9 times the resting rate, about 500 watts, at a core of "
+                 "35.2 degrees. Shivering is driven mostly by skin rather "
+                 "than core, so a person at 35 degrees can sit anywhere "
+                 "between resting and five times it depending on how cold "
+                 "their skin is. Plotting this against core alone is a "
+                 "simplification."),
+    "flick": ("Flickinger, 2023", "Nine sedated volunteers cooled from 37 to "
+              "33 with indirect calorimetry, the best controlled human data "
+              "near normal. The fall is not linear: the largest single step "
+              "was the first degree. When a participant began to shiver, "
+              "their temperature stopped falling, which is why the "
+              "experiment could go no further."),
+    "shara": ("Sharabiani, 2025", "Two hundred and ninety-three children on "
+              "cardiopulmonary bypass, twenty thousand minutes of "
+              "measurement. The ratio of change per ten degrees is not "
+              "constant: it is shallow near normal and steepens sharply "
+              "below about 28."),
+    "hickey": ("Hickey, 1983", "Twelve men cooled to 25.4 degrees on bypass. "
+               "Oxygen use fell by 45 per cent."),
+    "diop": ("Diop, 2024", "Twenty-four adults cooled to 18 degrees for "
+             "pulmonary thromboendarterectomy. This is the coldest whole-body "
+             "measurement in a human that exists."),
+}
+
+# The regions of the scale, by what kind of person the numbers came from.
+REGIMES = [
+    (33.0, 43.0, "An awake person, or a sedated one", "#31d67a",
+     "Above about 33 degrees the measurements come from people who are "
+     "awake, or sedated but still their own thermostat. This is also the "
+     "only part of the range where a person defends their temperature, which "
+     "is why the shivering peak sits here and nowhere below."),
+    (18.0, 33.0, "Anaesthetised, paralysed, or on bypass", "#58a6ff",
+     "Every whole-body measurement below about 33 degrees was taken from a "
+     "patient whose thermoregulation had been switched off by drugs or by a "
+     "bypass machine. That is not a detail: it is the only reason anyone has "
+     "ever been measured this cold. The two halves of this panel are two "
+     "different physiological states, not two ends of one curve."),
+    (10.0, 18.0, "Never measured in a person", "#6b7280",
+     "No whole-body measurement of a human exists below 18 degrees. The "
+     "figures that circulate for 15 and 10 degrees trace back to dogs cooled "
+     "in 1950 and to a review from 1983 that cited papers it could not "
+     "reach. They are extrapolations, and because the rate of change "
+     "steepens as it gets colder, they are probably too high."),
+]
+
+# Heart rate the other way, from pooled measurements rather than convention.
+HR_COLD = dict(slope=2.54, lo=19.3, hi=34.9, n=216,
+               note="Two hundred and sixteen people brought in with "
+                    "accidental hypothermia, cores from 19.3 to 34.9 "
+                    "degrees. The pulse falls 2.54 beats a minute per "
+                    "degree, a straight line. The textbook figure of half "
+                    "the normal pulse at 28 degrees comes from the same "
+                    "1950s lineage as the metabolic table and sits well "
+                    "below what was actually counted.")

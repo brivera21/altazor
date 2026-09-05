@@ -54,6 +54,10 @@ js = dict(
     actions=[dict(n=n, c=c, b=b) for n, c, b in D.ACTIONS],
     tell=[dict(k=k, f=f, h=h) for k, f, h in D.TELL],
     tellnote=D.TELL_NOTE,
+    measured=[dict(t=t, p=pc, s=k, a=aw) for t, pc, k, aw in D.MEASURED],
+    msrc={k: dict(n=n, b=b) for k, (n, b) in D.MSRC.items()},
+    regimes=[dict(lo=a, hi=b, n=n, c=c, b=t) for a, b, n, c, t in D.REGIMES],
+    hrcold=D.HR_COLD,
 )
 DATA = json.dumps(js, separators=(",", ":"), ensure_ascii=False)
 
@@ -102,6 +106,32 @@ METHOD = ("What the collapse view rests on, and where it is soft. There is no "
           "an unresponsive person during immersion, so the line about the "
           "bathtub is a reading of the warnings rather than a quotation of "
           "one.")
+
+MEASURED_NOTE = (
+    "The points on the metabolic panel, and why they are points. No "
+    "published figure covers this range, and drawing one would mean joining "
+    "measurements that come from incompatible states: the shivering peak "
+    "needs a person awake and defending their temperature, while everything "
+    "below about 33 degrees was measured in someone anaesthetised, paralysed "
+    "or on bypass, which is the only reason anyone has been that cold and "
+    "measured. So the page plots the measurements and leaves the gaps "
+    "empty. The studies, in order down the scale: Zhu (2003), twenty "
+    "anaesthetised patients heated to 41.8; Eyolfson and colleagues (2001, "
+    "European Journal of Applied Physiology 84, 100 to 106) on peak "
+    "shivering; Flickinger and colleagues (2023, Therapeutic Hypothermia and "
+    "Temperature Management), nine sedated volunteers cooled to 33; "
+    "Sharabiani and colleagues (2025, Perfusion), 293 children on bypass; "
+    "Hickey and colleagues (1983, Journal of Thoracic and Cardiovascular "
+    "Surgery), twelve men at 25.4; and Diop and colleagues (2024, Journal of "
+    "Cardiothoracic and Vascular Anesthesia), twenty-four adults at 18, the "
+    "coldest whole-body measurement of a human there is. Below that there "
+    "is nothing. The figures that circulate for 15 and 10 degrees descend "
+    "from dogs cooled by Bigelow in 1950 by way of a 1983 review, and "
+    "because the rate of change steepens as it gets colder they are "
+    "probably too high. One more caution: the percentage-per-degree figures "
+    "in this literature differ by a fifth depending on whether the "
+    "denominator is the febrile value or the normal one, and this page uses "
+    "the febrile one.")
 
 HTML = r"""<!DOCTYPE html>
 <html lang="en">
@@ -185,6 +215,8 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 </div>
 <p class="note">__NOTE1__</p>
 <p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
+<div class="method"><details><summary>The points on the metabolic panel, and why they are points</summary>
+<p>__MEASURED__</p></details></div>
 <div class="method"><details><summary>What the collapse view rests on, and where it is soft</summary>
 <p>__METHOD__</p></details></div>
 <h2 class="refh">References</h2>
@@ -219,7 +251,7 @@ function card(kind,name,when,body){
 }
 function tint(c){ document.getElementById('kindTxt').style.color=c; }
 
-const W=1000, R=34;
+const W=1000, R=34, CELL=0.25;
 function svg(h,inner){
   return '<svg viewBox="0 0 '+W+' '+h+'" xmlns="http://www.w3.org/2000/svg" id="tsvg">'
     +'<rect width="'+W+'" height="'+h+'" fill="#121212"/>'+inner+'</svg>';
@@ -310,6 +342,11 @@ function leader(x0,y0,x1,y1,c){
 
 function drawRange(){
   const W0=RG.x0-14, W1=RG.x1+14;
+  // the marks, and the lines from the fine scale that are not already marks
+  const ITEMS=D.marks.map((m,i)=>({t:m.t,n:m.n,k:'m',a:'data-m',i:i}))
+    .concat(D.lines.map((L,i)=>({t:L.t,n:L.n,k:'L',a:'data-key',i:i,c:L.c}))
+      .filter(L=>!D.marks.some(m=>Math.abs(m.t-L.t)<0.01)))
+    .sort((a,b)=>b.t-a.t);
   let s=bodyDefs();
   // the bands, painted across the figure and cut to its shape
   s+='<g clip-path="url(#bodyClip)">';
@@ -320,19 +357,23 @@ function drawRange(){
       +(hot&&hot.t==='z'&&hot.i===i?1:0.82)+'"/>';
   }
   // a rule across the body at every marked temperature
-  D.marks.forEach((m,i)=>{
-    const y=yOf(m.t), on=hot&&hot.t==='m'&&hot.i===i;
-    s+='<path d="M'+W0+','+y.toFixed(1)+' H'+W1+'" stroke="#121212"'
-      +' stroke-width="'+(on?2.4:1.4)+'" stroke-opacity="'+(on?0.95:0.5)+'"/>';
+  ITEMS.forEach(it=>{
+    const y=yOf(it.t), on=hot&&hot.t===it.k&&hot.i===it.i;
+    s+='<path d="M'+W0+','+y.toFixed(1)+' H'+W1+'" stroke="'
+      +(it.k==='L'?'#ffffff':'#121212')+'" stroke-width="'+(on?2.4:1.3)
+      +'" stroke-opacity="'+(on?0.95:(it.k==='L'?0.4:0.5))+'"'
+      +(it.k==='L'?' stroke-dasharray="3 2"':'')+'/>';
   });
   s+='</g>'+bodyOutline('#e6e6e6',1.4);
-  // the same bands again, invisible, to catch the pointer
+  // a quarter of a degree at a time, over the whole figure
   s+='<g clip-path="url(#bodyClip)">';
-  for(let i=0;i<D.zones.length;i++){
-    const z=D.zones[i], y=yOf(z.hi), h=yOf(z.lo)-yOf(z.hi);
-    s+='<g data-z="'+i+'" style="cursor:pointer"><rect x="'+W0+'" y="'
-      +y.toFixed(1)+'" width="'+(W1-W0)+'" height="'+h.toFixed(1)
-      +'" fill="transparent"/></g>';
+  const NC=Math.round((RG.hi-RG.lo)/CELL);
+  for(let k=0;k<NC;k++){
+    const c=RG.lo+k*CELL, on=hot&&hot.t==='q'&&hot.i===k;
+    s+='<g data-q="'+k+'" style="cursor:pointer"><rect x="'+W0+'" y="'
+      +yOf(c+CELL).toFixed(1)+'" width="'+(W1-W0)+'" height="'
+      +(yOf(c)-yOf(c+CELL)).toFixed(1)+'" fill="#ffffff" fill-opacity="'
+      +(on?0.28:0)+'"/></g>';
   }
   s+='</g>';
   // the ladder of degrees, in whatever unit is showing
@@ -341,37 +382,109 @@ function drawRange(){
     s+='<path d="M'+(RG.x0-7)+','+y.toFixed(1)+' h7" stroke="#3d444d" stroke-width="1"/>'
       +txt(RG.x0-11,y+3.6,fmt(c,U==='K'?2:0),{anchor:'end'});
   }
-  // the marks, to the left, pushed apart where they crowd
-  const mt=D.marks.map(m=>yOf(m.t));
-  const ml=declash(mt.slice(),32,RG.top+8,RG.bot);
-  D.marks.forEach((m,i)=>{
-    const on=hot&&hot.t==='m'&&hot.i===i, LX=RG.x0-72;
-    s+='<g data-m="'+i+'" style="cursor:pointer">'
-      +leader(RG.x0,mt[i],LX+6,ml[i],on?'#e6e6e6':'#4a5058')
-      +'<circle cx="'+RG.x0+'" cy="'+mt[i].toFixed(1)+'" r="'+(on?4.5:3)+'" fill="#e6e6e6"/>'
-      +txt(LX,ml[i]-3,esc(m.n),{anchor:'end',fs:11.5,
-           fill:on?'#e6e6e6':'#8b93a0',stroke:1})
-      +txt(LX,ml[i]+11,pair(m.t),{anchor:'end',fs:11,
+  // the marks and lines, to the left, pushed apart where they crowd
+  const mt=ITEMS.map(it=>yOf(it.t));
+  const ml=declash(mt.slice(),30,RG.top+8,RG.bot);
+  ITEMS.forEach((it,j)=>{
+    const on=hot&&hot.t===it.k&&hot.i===it.i, LX=RG.x0-72;
+    s+='<g '+it.a+'="'+it.i+'" style="cursor:pointer">'
+      +leader(RG.x0,mt[j],LX+6,ml[j],on?'#e6e6e6':'#4a5058')
+      +'<circle cx="'+RG.x0+'" cy="'+mt[j].toFixed(1)+'" r="'+(on?4.5:3)
+      +'" fill="'+(it.c||'#e6e6e6')+'"/>'
+      +txt(LX,ml[j]-3,esc(it.n),{anchor:'end',fs:11.5,
+           fill:on?'#e6e6e6':(it.c||'#8b93a0'),stroke:1})
+      +txt(LX,ml[j]+11,pair(it.t),{anchor:'end',fs:11,
            fill:on?'#c8ccd2':'#5d6672',stroke:1})
-      +'<rect x="'+(LX-250)+'" y="'+(ml[i]-16)+'" width="256" height="30" fill="transparent"/>'
+      +'<rect x="'+(LX-250)+'" y="'+(ml[j]-15)+'" width="256" height="28" fill="transparent"/>'
       +'</g>';
   });
-  // what each band is, to the right, pushed apart the same way
+  // what each band is, to the right
   const zt=D.zones.map(z=>(yOf(z.hi)+yOf(z.lo))/2);
-  const zl=declash(zt.slice(),32,RG.top+8,RG.bot);
+  const zl=declash(zt.slice(),30,RG.top+8,RG.bot);
   D.zones.forEach((z,i)=>{
-    const on=hot&&hot.t==='z'&&hot.i===i, RX=RG.x1+64;
+    const on=hot&&hot.t==='z'&&hot.i===i, RX=RG.x1+34;
     s+='<g data-z="'+i+'" style="cursor:pointer">'
       +leader(RG.x1,zt[i],RX-6,zl[i],on?'#e6e6e6':'#3a4048')
       +txt(RX,zl[i]-3,esc(z.n),{fs:11.5,fill:on?'#e6e6e6':'#8b93a0',stroke:1})
       +txt(RX,zl[i]+11,fmt(z.lo,U==='K'?2:1)+' to '+fmt(z.hi,U==='K'?2:1),
            {fs:10.5,fill:on?'#c8ccd2':'#5d6672',stroke:1})
-      +'<rect x="'+(RX-6)+'" y="'+(zl[i]-16)+'" width="270" height="26" fill="transparent"/>'
+      +'<rect x="'+(RX-6)+'" y="'+(zl[i]-15)+'" width="150" height="26" fill="transparent"/>'
       +'</g>';
   });
+  s+=measuredPanel();
   s+=txt(80,RG.top-18,'the whole span a person has been brought back from, '
         +'and the sliver the body holds',{fs:11.5,fill:'#8b93a0'});
-  el.innerHTML=svg(560,s);
+  el.innerHTML=svg(600,s);
+}
+
+/* -------------------------------------- what has actually been measured */
+const MP={x0:716,x1:962,max:150};   // the shivering point runs off it
+function mx(p){ return MP.x0+Math.min(p,MP.max)/MP.max*(MP.x1-MP.x0); }
+function measuredPanel(){
+  let s=txt(MP.x0,RG.top-32,'Metabolic rate, against the resting rate',
+      {fs:11.5,fill:'#c8ccd2'})
+    +txt(MP.x0,RG.top-18,'every point is a measurement, and the gaps are gaps',
+         {fs:11,fill:'#6b7280'});
+  // who the numbers came from, banded down the side of the scale
+  D.regimes.forEach((r,i)=>{
+    const y=yOf(r.hi), h=yOf(r.lo)-yOf(r.hi);
+    const on=hot&&hot.t==='g'&&hot.i===i;
+    s+='<g data-g="'+i+'" style="cursor:pointer">'
+      +'<rect x="'+MP.x0+'" y="'+y.toFixed(1)+'" width="'+(MP.x1-MP.x0)
+      +'" height="'+h.toFixed(1)+'" fill="'+r.c+'" fill-opacity="'
+      +(on?0.14:(i===2?0.05:0.055))+'"'
+      +(i===2?' stroke="'+r.c+'" stroke-opacity="0.35" stroke-dasharray="3 3"':'')
+      +'/>'
+      +'</g>';
+  });
+  // the resting line, and a ladder of percentages
+  for(const p of [50,100,150]){
+    s+='<path d="M'+mx(p).toFixed(1)+','+RG.top+' V'+RG.bot+'" stroke="'
+      +(p===100?'#4a5058':'#242424')+'" stroke-width="1"'
+      +(p===100?'':' ')+'/>'
+      +txt(mx(p),RG.bot+18,p+'%',{anchor:'middle',fs:10,fill:'#6b7280'});
+  }
+  // one faint join within a study, never between studies
+  const by={};
+  D.measured.forEach((m,i)=>{ (by[m.s]=by[m.s]||[]).push(m); });
+  for(const k in by){
+    if(by[k].length<2) continue;
+    let d='';
+    by[k].slice().sort((a,b)=>a.t-b.t).forEach(m=>{
+      d+=(d?'L':'M')+mx(m.p).toFixed(1)+','+yOf(m.t).toFixed(1); });
+    s+='<path d="'+d+'" fill="none" stroke="#8b93a0" stroke-width="1"'
+      +' stroke-opacity="0.45" stroke-dasharray="4 3"/>';
+  }
+  D.measured.forEach((m,i)=>{
+    const on=hot&&hot.t==='M'&&hot.i===i, off=m.p>MP.max;
+    const x=mx(m.p), y=yOf(m.t);
+    s+='<g data-pt="'+i+'" style="cursor:pointer">';
+    if(off)   // an arrow at the edge, rather than a squashed axis
+      s+='<path d="M'+(x-9).toFixed(1)+','+y.toFixed(1)+' h7 m0,-5 l6,5 l-6,5Z"'
+        +' fill="#31d67a" stroke="#31d67a" stroke-width="1.4"/>';
+    else
+      s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(on?6:4)
+        +'" fill="'+(m.a?'#31d67a':'#58a6ff')+'" stroke="#121212" stroke-width="1.2"/>';
+    s+='<rect x="'+(x-14)+'" y="'+(y-9)+'" width="22" height="18" fill="transparent"/>'
+      +'</g>';
+  });
+  // the clusters, named once each
+  s+=txt(MP.x1-6,yOf(35.2)-9,'shivering, 4.9 times resting, off this scale',
+         {anchor:'end',fs:10.5,fill:'#31d67a',stroke:1})
+    +txt(mx(38)+8,yOf(18)-8,'the coldest a person has been measured',
+         {fs:10.5,fill:'#58a6ff',stroke:1});
+  // who the numbers came from, said once, under the panel
+  D.regimes.forEach((r,i)=>{
+    const on=hot&&hot.t==='g'&&hot.i===i, y=RG.bot+30+i*15;
+    s+='<g data-g="'+i+'" style="cursor:pointer">'
+      +'<rect x="'+MP.x0+'" y="'+(y-8)+'" width="9" height="9" fill="'+r.c
+      +'" fill-opacity="'+(i===2?0.25:0.9)+'"'
+      +(i===2?' stroke="'+r.c+'" stroke-dasharray="2 2"':'')+'/>'
+      +txt(MP.x0+14,y,esc(r.n),{fs:9.5,fill:on?'#e6e6e6':'#8b93a0'})
+      +'<rect x="'+MP.x0+'" y="'+(y-11)+'" width="230" height="15" fill="transparent"/>'
+      +'</g>';
+  });
+  return s;
 }
 
 /* ------------------------------------------------------------------ a day */
@@ -648,7 +761,6 @@ function nx(c){ return FN.x0+(c-FN.lo)/(FN.hi-FN.lo)*(FN.x1-FN.x0); }
 function nc(x){ return FN.lo+(x-FN.x0)/(FN.x1-FN.x0)*(FN.hi-FN.lo); }
 function metPct(c,k){ return 100+(c-D.cost.base)*(k||D.cost.met); }
 function bpm(c,k){ return D.cost.hr_base+(c-D.cost.base)*(k||D.cost.hr); }
-const CELL=0.25;
 
 // the ladder, in both units at once
 function ladder(yTop,yBot){
@@ -675,7 +787,7 @@ function keyLines(yTop,yBot){
   D.lines.forEach((L,i)=>{
     const x=nx(L.t), up=yTop-(i%2?88:56);
     const on=hot&&hot.t==='L'&&hot.i===i;
-    s+='<g data-L="'+i+'" style="cursor:pointer">'
+    s+='<g data-key="'+i+'" style="cursor:pointer">'
       +'<path d="M'+x.toFixed(1)+','+up+' V'+yBot+'" stroke="'+L.c
       +'" stroke-width="1.2" stroke-dasharray="4 3" stroke-opacity="'+(on?1:0.75)+'"/>'
       +txt(x+5,up+9,esc(L.n),{fs:11,fill:on?'#e6e6e6':L.c,stroke:1})
@@ -898,8 +1010,9 @@ for(const [id,k] of [['uC','C'],['uF','F'],['uK','K']])
 
 el.addEventListener('pointerover',ev=>{
   const g=ev.target.closest('[data-z],[data-m],[data-h],[data-s],[data-p],'
-    +'[data-f],[data-i],[data-r],[data-w],[data-x],[data-c],[data-L],'
-    +'[data-b],[data-u],[data-k],[data-a],[data-t],[data-n]');
+    +'[data-f],[data-i],[data-r],[data-w],[data-x],[data-c],[data-key],'
+    +'[data-b],[data-u],[data-k],[data-a],[data-t],[data-n],[data-q],'
+    +'[data-pt],[data-g]');
   if(!g) return;
   const P=D.power;
   const pick=(a,t)=>{ hot={t:t,i:+g.getAttribute(a)}; };
@@ -958,6 +1071,40 @@ el.addEventListener('pointerover',ev=>{
         +'the body water and bought it nothing, which is why humid heat is '
         +'more dangerous than dry heat at the same temperature.']][hot.i];
     card('Watts',B[0],B[1].toLocaleString('en-US')+' W',B[2]);
+  } else if(g.hasAttribute('data-q')){
+    pick('data-q','q');
+    const t=RG.lo+hot.i*CELL, mid=t+CELL/2;
+    const z=D.zones.find(x=>mid>=x.lo&&mid<x.hi)||D.zones[D.zones.length-1];
+    const rg=D.regimes.find(r=>mid>=r.lo&&mid<r.hi);
+    let cost;
+    if(mid>=37){
+      cost='Holding this costs about '+Math.round(metPct(mid)-100)
+        +' per cent more oxygen than resting, and the pulse runs near '
+        +Math.round(bpm(mid))+'. The climb flattens as it goes: about 9 per '
+        +'cent a degree over the first two, and 4 by the time it reaches 41.8.';
+    } else if(mid>=33){
+      cost='Shivering starts around 36.8 and can reach almost five times the '
+        +'resting rate, about 500 watts, near a core of 35. How hard it works '
+        +'depends more on how cold the skin is than on the core.';
+    } else if(mid>=18){
+      cost='Below about 33 the only measurements come from people "'
+        +'anaesthetised or on bypass. At 27 the rate is near half of resting, '
+        +'and at 18, the coldest a person has been measured, it is 38 per '
+        +'cent. The pulse falls 2.54 beats a minute per degree.';
+    } else {
+      cost='No whole-body measurement of a person exists this cold. The '
+        +'figures that circulate for 15 and 10 degrees come from dogs cooled '
+        +'in 1950, and they are probably too high.';
+    }
+    card(z.n,pair(mid),rg?rg.n:'',cost+' '+z.b); tint(z.c);
+  } else if(g.hasAttribute('data-pt')){
+    pick('data-pt','M'); const m=D.measured[hot.i], src=D.msrc[m.s];
+    card('A measurement',src.n,pair(m.t)+' · '+m.p+' per cent of resting',
+      src.b); tint(m.a?'#31d67a':'#58a6ff');
+  } else if(g.hasAttribute('data-g')){
+    pick('data-g','g'); const r=D.regimes[hot.i];
+    card('Who the numbers came from',r.n,pair(r.lo)+' to '+pair(r.hi),r.b);
+    tint(r.c);
   } else if(g.hasAttribute('data-c')){
     pick('data-c','c');
     const t=FN.lo+hot.i*CELL, mid=t+CELL/2;
@@ -973,8 +1120,8 @@ el.addEventListener('pointerover',ev=>{
           +'about '+Math.round(metPct(mid)-100)+' per cent more oxygen to hold.'
         : 'Below a normal 37, and cheaper to run.'));
     tint(b.c);
-  } else if(g.hasAttribute('data-L')){
-    pick('data-L','L'); const L=D.lines[hot.i];
+  } else if(g.hasAttribute('data-key')){
+    pick('data-key','L'); const L=D.lines[hot.i];
     card('A line on the scale',L.n,pair(L.t),L.b); tint(L.c);
   } else if(g.hasAttribute('data-b')){
     pick('data-b','b'); const b=D.fine[hot.i];
@@ -1024,7 +1171,7 @@ window.__temp=()=>({view, unit:U,
   span:[D.zones[0].lo,D.zones[D.zones.length-1].hi],
   nodes:document.querySelectorAll('#tsvg [data-z],#tsvg [data-m],#tsvg [data-h],'
     +'#tsvg [data-s],#tsvg [data-f],#tsvg [data-r],#tsvg [data-w],'
-    +'#tsvg [data-x],#tsvg [data-c],#tsvg [data-L],#tsvg [data-b],'
+    +'#tsvg [data-x],#tsvg [data-c],#tsvg [data-key],#tsvg [data-b],'
     +'#tsvg [data-u],#tsvg [data-k],#tsvg [data-a],#tsvg [data-t]').length,
   at37:fmt(37), rise1:gap(1),
   dayLow:dayT(D.day.nadir), dayHigh:dayT(18),
@@ -1173,6 +1320,34 @@ def main():
                  "https://www.nice.org.uk/guidance/ng143"),
          "That tepid sponging is not recommended for fever, and that "
          "antipyretics treat distress rather than the number."),
+        (A("Eyolfson, D. A., Tikuisis, P., Xu, X., Weseen, G., &amp; "
+           "Giesbrecht, G. G.", 2001,
+           "Measurement and prediction of peak shivering intensity in humans",
+           "European Journal of Applied Physiology", 84, 1-2, "100-106",
+           "https://doi.org/10.1007/s004210000329"),
+         "The shivering peak on the measurement panel: 4.9 times the resting "
+         "rate, and the fact that skin drives it more than core does."),
+        (A("Pasquier, M., Cools, E., Zafren, K., Carron, P.-N., "
+           "Frochaux, V., &amp; Rousson, V.", 2021,
+           "Vital signs in accidental hypothermia",
+           "High Altitude Medicine &amp; Biology", 22, 2, "142-147",
+           "https://doi.org/10.1089/ham.2020.0179"),
+         "The pulse in hypothermia, 2.54 beats a minute per degree, from 216 "
+         "people rather than from convention."),
+        (A("Rosomoff, H. L., &amp; Holaday, D. A.", 1954,
+           "Cerebral blood flow and cerebral oxygen consumption during "
+           "hypothermia", "American Journal of Physiology", 179, 1, "85-88",
+           "https://doi.org/10.1152/ajplegacy.1954.179.1.85"),
+         "The origin of the figure of six or seven per cent a degree. It was "
+         "measured in dogs, in the brain, between 37 and 25 degrees, and it "
+         "is routinely quoted as a whole-body number, which it is not."),
+        (A("Bigelow, W. G., Lindsay, W. K., Harrison, R. C., "
+           "Gordon, R. A., &amp; Greenwood, W. F.", 1950,
+           "Oxygen transport and utilization in dogs at low body "
+           "temperatures", "American Journal of Physiology", 160, 1,
+           "125-137", None),
+         "The dogs behind the table of percentages that still circulates for "
+         "human hypothermia."),
         (apa.web("Guinness World Records", None,
                  "Highest body temperature", "Guinness World Records",
                  "https://www.guinnessworldrecords.com/world-records/67749-highest-body-temperature"),
@@ -1183,6 +1358,7 @@ def main():
             .replace("__DATA__", DATA)
             .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2)
             .replace("__METHOD__", METHOD)
+            .replace("__MEASURED__", MEASURED_NOTE)
             .replace("__REFS__", apa.render(refs)))
     out = ROOT / "temperature.html"
     out.write_text(html, encoding="utf-8")

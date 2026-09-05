@@ -64,12 +64,12 @@ with sync_playwright() as pw:
     check("no two mark labels land on the same line",
           all(d == 0 or d >= 13 for d in pairs), str(sorted(set(pairs))[:5]))
     # and each still points at the temperature it means
-    lead = pg.evaluate(
-        "(()=>{const g=[...document.querySelectorAll('#tsvg [data-m]')];"
-        "return g.map(x=>+x.querySelector('circle').getAttribute('cy'));})()")
-    want = pg.evaluate("D.marks.map(m=>yOf(m.t))")
-    check("every mark still sits at its own height",
-          all(abs(a - b) < 0.6 for a, b in zip(lead, want)))
+    ok = pg.evaluate(
+        "[...document.querySelectorAll('#tsvg [data-m]')].every(g=>{"
+        "const c=g.querySelector('circle'); if(!c) return false;"
+        "const m=D.marks[+g.getAttribute('data-m')];"
+        "return Math.abs(+c.getAttribute('cy')-yOf(m.t))<0.6;})")
+    check("every mark still sits at its own height", ok)
 
     # --- the column is a person, not a bar
     check("the span is drawn in the shape of a body",
@@ -99,6 +99,63 @@ with sync_playwright() as pw:
                      "return {head:0.045*H, sh:0.092*H, hand:0.120*H};})()")
     check("the head is narrower than the shoulders",
           hw["head"] < hw["sh"] < hw["hand"], str(hw))
+
+    # --- the degree-by-degree detail, now on the first view
+    cells = pg.evaluate("document.querySelectorAll('#tsvg [data-q]').length")
+    check("the body is hoverable a quarter degree at a time",
+          cells == round((48 - 10) / 0.25), str(cells))
+    pg.evaluate("document.querySelector('[data-q=\"120\"]')"
+                ".dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
+    pg.wait_for_timeout(150)
+    name = pg.evaluate("document.getElementById('nameTxt').textContent")
+    body = pg.evaluate("document.getElementById('bodyTxt').textContent")
+    check("and a cell in the fever range names its cost",
+          "°C" in name and "°F" in name and "per cent more oxygen" in body,
+          name + " / " + body[:70])
+    pg.evaluate("document.querySelector('[data-q=\"20\"]')"
+                ".dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
+    pg.wait_for_timeout(150)
+    body = pg.evaluate("document.getElementById('bodyTxt').textContent")
+    check("while a cell below 18 says no one has been measured there",
+          "No whole-body measurement" in body, body[:80])
+    # the lines from the fine scale are on the body too
+    lines = pg.evaluate("document.querySelectorAll('#tsvg [data-key]').length")
+    check("the lines that matter are drawn on the figure",
+          lines == len([1 for t, *_ in D.LINES
+                        if not any(abs(m[0] - t) < 0.01 for m in D.MARKS)]),
+          str(lines))
+
+    # --- the measurement panel: points, not a curve
+    pts = pg.evaluate("document.querySelectorAll('#tsvg [data-pt]').length")
+    check("every measurement is plotted", pts == len(D.MEASURED), str(pts))
+    check("and they share the body's own scale",
+          pg.evaluate("(()=>{const g=document.querySelector('[data-pt=\"4\"]');"
+                      "const c=g.querySelector('circle');"
+                      "return Math.abs(+c.getAttribute('cy')-yOf(37))<0.6;})()"))
+    check("no line is drawn between two different studies",
+          pg.evaluate(
+              "(()=>{const by={};for(const m of D.measured)"
+              "(by[m.s]=by[m.s]||[]).push(m);"
+              "const multi=Object.values(by).filter(v=>v.length>1).length;"
+              "return document.querySelectorAll("
+              "'#tsvg path[stroke-dasharray=\"4 3\"]').length===multi;})()"))
+    check("the shivering peak runs off the panel rather than squashing it",
+          pg.evaluate("D.measured.some(m=>m.p>MP.max)")
+          and pg.evaluate("MP.max<200"))
+    check("the three regimes are named, as a band and as a legend chip",
+          pg.evaluate("document.querySelectorAll('#tsvg [data-g]').length")
+          == 2 * len(D.REGIMES))
+    pg.evaluate("document.querySelector('[data-g=\"2\"]')"
+                ".dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
+    pg.wait_for_timeout(150)
+    body = pg.evaluate("document.getElementById('bodyTxt').textContent")
+    check("and the coldest one owns up to being unmeasured",
+          "No whole-body measurement" in body, body[:80])
+    check("the coldest real measurement is the 18 degree one",
+          pg.evaluate("Math.min(...D.measured.map(m=>m.t))") == 18.0)
+    check("the panel says the gaps are gaps",
+          "the gaps are gaps" in pg.evaluate(
+              "document.getElementById('tsvg').textContent"))
 
     # --- a day
     pg.click("#vDay")
@@ -187,7 +244,7 @@ with sync_playwright() as pw:
     check("the pulse climbs faster in a child than in an adult",
           pg.evaluate("bpm(41,D.cost.hr_child)>bpm(41)"))
     check("every line that matters is drawn",
-          pg.evaluate("document.querySelectorAll('#tsvg [data-L]').length")
+          pg.evaluate("document.querySelectorAll('#tsvg [data-key]').length")
           == len(D.LINES))
     check("including the heat stroke line at 40",
           pg.evaluate("D.lines.some(l=>Math.abs(l.t-40)<1e-9)"))

@@ -65,7 +65,8 @@ def article(authors, year, title, journal, volume, issue, pages, url):
     iss = f"({issue})" if issue else ""
     vol = f"<i>{journal}, {volume}</i>{iss}" if volume else f"<i>{journal}</i>"
     pg = f", {pages}" if pages else ""
-    return f"{_auth(authors)}. ({year}). {title}. {vol}{pg}. {url}"
+    tail = f" {url}" if url else ""
+    return f"{_auth(authors)}. ({year}). {title}. {vol}{pg}.{tail}"
 
 
 def book(authors, year, title, publisher, url=None):
