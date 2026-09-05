@@ -28,14 +28,39 @@ button.unit { padding:6px 12px; font-variant-numeric:tabular-nums; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
 .chartcol { flex:1 1 640px; min-width:0; }
 #chart { min-width:0; }
-#degwrap { margin-top:26px; overflow-x:auto; }
-#degrees { border-collapse:collapse; width:100%; font-size:12.5px;
+/* the figure and the table, one axis, one row height */
+#spanpair { display:flex; gap:0; align-items:flex-start; overflow-x:auto; }
+#spanpair #chart { flex:0 0 var(--figw); }
+#spanpair #chart svg { height:auto; }
+/* the pair scrolls as one, so a narrow window never slides the table
+   out of step with the figure */
+#spanpair #degwrap { flex:1 1 auto; min-width:620px; overflow:visible; }
+/* on the paired view the card rides above the pair and follows the
+   reader down it, since the table is longer than a screen */
+.stage.span { display:flex; flex-direction:column; }
+.stage.span .side { order:-1; position:sticky; top:0; z-index:3; width:auto;
+  flex:none; margin-bottom:12px; background:var(--bg); padding-bottom:6px; }
+.stage.span .card { display:flex; gap:16px; align-items:baseline;
+  flex-wrap:wrap; }
+.stage.span #kindTxt { flex:0 0 auto; }
+.stage.span #nameTxt { margin:0; }
+.stage.span #bodyTxt { margin:0; flex:1 1 360px; min-width:0; }
+.stage.span #realTxt, .stage.span #srcTxt { display:none; }
+#degwrap { overflow-x:auto; }
+#degrees { border-collapse:collapse; width:100%; font-size:11.5px;
   font-variant-numeric:tabular-nums; }
 #degrees th { text-align:left; color:var(--muted); font-weight:400;
   font-size:11px; letter-spacing:.06em; text-transform:uppercase;
-  border-bottom:1px solid var(--line); padding:0 10px 6px 0; }
-#degrees td { padding:5px 10px 5px 0; border-bottom:1px solid #1e1e1e;
-  vertical-align:top; color:#b9bec6; }
+  height:34px; padding:0 10px 8px 0; vertical-align:bottom; }
+#degrees tbody tr { height:var(--row,32px); }
+#degrees thead tr { height:34px; }
+#degrees td { padding:1px 10px 1px 0; border-top:1px solid #1e1e1e;
+  vertical-align:middle; color:#b9bec6; line-height:1.25; font-size:11.5px; }
+#degrees td.w { font-size:11.5px; line-height:1.25; }
+#degrees td.w .cw { display:block; }
+#degrees td.c { width:78px; }
+#degrees td.z { width:124px; font-size:11.5px; }
+#degrees td.n { width:86px; text-align:right; }
 #degrees tr.key td { color:var(--text); }
 #degrees td.c { font-weight:600; color:var(--text); white-space:nowrap; }
 #degrees td.f, #degrees td.n { white-space:nowrap; }
@@ -93,8 +118,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 </div>
 <div class="stage">
   <div class="chartcol">
-  <div id="chart"></div>
-  <div id="degwrap"></div>
+  <div id="spanpair"><div id="chart"></div><div id="degwrap"></div></div>
   </div>
   <div class="side"><div class="card">
     <div id="kindTxt"></div>
@@ -138,7 +162,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <p>Guinness World Records. (n.d.). <i>Highest body temperature</i>. Guinness World Records. <a href="https://www.guinnessworldrecords.com/world-records/67749-highest-body-temperature">https://www.guinnessworldrecords.com/world-records/67749-highest-body-temperature</a><span class="ann">The hottest survival on record. It is a record listing rather than a published case report, and the page says so.</span></p></div>
 </div>
 <script>
-const D={"zones":[{"lo":10.0,"hi":24.0,"k":"cold4","n":"Profound hypothermia","b":"Below {24} degrees the heart may stop and the body can look dead: no pulse, no breathing, fixed pupils. It is also where the cold itself protects the brain, which is why resuscitation is attempted from temperatures that would otherwise be hopeless.","c":"#2b4a8f"},{"lo":24.0,"hi":28.0,"k":"cold3","n":"Severe hypothermia","b":"The heart muscle turns irritable and ventricular fibrillation becomes likely. Rough handling alone can set it off, so a patient this cold is moved gently.","c":"#3566bd"},{"lo":28.0,"hi":32.0,"k":"cold2","n":"Moderate hypothermia","b":"Shivering stops, which is the clinical marker of this stage, and consciousness fades. Atrial fibrillation is common. Some people undress, a confused response called paradoxical undressing.","c":"#4a87d6"},{"lo":32.0,"hi":35.0,"k":"cold1","n":"Mild hypothermia","b":"Shivering is at its hardest and the metabolic rate climbs. Judgement and coordination go first, before the person feels in any danger.","c":"#7fb4e8"},{"lo":35.0,"hi":36.16,"k":"low","n":"Below the normal band","b":"Colder than the pooled normal range for a healthy adult, though a reading here from the armpit is unremarkable: the axilla averages 35.97 degrees.","c":"#9fb6c4"},{"lo":36.16,"hi":37.02,"k":"norm","n":"The normal band","b":"The pooled range across sites in a meta-analysis of 7,636 healthy adults. The band is wide because it holds every site, every hour of the day and every person in those studies.","c":"#31d67a"},{"lo":37.02,"hi":38.0,"k":"warm1","n":"Warm, and not yet a fever","b":"Above the pooled band but under the usual cut-off. An oral reading of {37.5} at four in the afternoon is ordinary; the same reading at six in the morning is not.","c":"#ffd24d"},{"lo":38.0,"hi":39.0,"k":"warm2","n":"Fever","b":"The common clinical cut-off is {38.0} degrees, and critical care often uses {38.3}. The number means nothing without the site it was taken from.","c":"#f0a04b"},{"lo":39.0,"hi":41.0,"k":"warm3","n":"High fever","b":"Still a raised set point rather than a failure of control. The body is defending this temperature, not losing to it.","c":"#e0673f"},{"lo":41.0,"hi":48.0,"k":"warm4","n":"Hyperpyrexia","b":"Above {41} degrees, and into the range where heat damages cells directly. Sustained above about {41.6} for long enough, proteins denature and organs fail.","c":"#c02f2f"}],"marks":[{"t":11.8,"n":"The coldest survival on record","s":"l","b":"A 27-month-old boy left home in winter near Krakow wearing pyjama tops, barefoot, in air at minus 7. He was found two hours later with no signs of life and fixed pupils. His core read {11.8} degrees ten minutes into rewarming on ECMO. He went home after 64 days and was neurologically well five years on."},{"t":13.7,"n":"Anna Bagenholm","s":"l","b":"The best known adult case: a skier trapped under ice in Norway for about 80 minutes in 1999, rewarmed from {13.7} degrees and recovered. Deliberate surgical cooling has gone lower still, below {10} degrees, but that is a different thing from an accident."},{"t":36.6,"n":"The modern mean","s":"l","b":"{36.6} degrees, from 243,506 measurements of 35,488 outpatients. A later series of 618,306 oral readings agrees: {36.6}, with a normal range of {36.3} to {36.8}."},{"t":37.0,"n":"Wunderlich's 37","s":"l","b":"Carl Wunderlich set the figure in 1868 from about a million readings, taken in the armpit. Converting his round 37 gives 98.6 in Fahrenheit, which looks like a measurement to three figures and is nothing of the kind. The precision is an artefact of the arithmetic."},{"t":40.0,"n":"Heat stroke","s":"r","b":"Core above {40} degrees with the nervous system failing: confusion, seizures, coma. Well trained athletes reach {41.5} in a race without harm, so the time spent above the line matters more than the peak."},{"t":46.5,"n":"The hottest survival on record","s":"r","b":"A 52-year-old man admitted to Grady Memorial Hospital in Atlanta on 10 July 1980 with heat stroke, at {46.5} degrees. He was discharged after 24 days. The case is a Guinness record rather than a published case report."}],"day":{"mean":36.8,"amp":0.25,"nadir":6.0,"zenith":17.0,"cut_am":37.2,"cut_pm":37.7},"sites":[{"n":"Rectal","m":37.04,"lo":36.68,"hi":37.4,"k":13,"b":"Closest of the everyday sites to core, and the one the classic thresholds were written for. Accurate at rest, but it lags while the temperature is moving."},{"n":"Tympanic","m":36.64,"lo":36.2,"hi":37.08,"k":9,"b":"Quick and popular, and an unreliable reflection of core: the ear canal is open to the air and poorly perfused when circulation is failing."},{"n":"Oral","m":36.57,"lo":36.15,"hi":36.99,"k":33,"b":"The most studied site, and the source of most quoted figures. Biased by breathing, smoking, and hot or cold drinks."},{"n":"Axillary","m":35.97,"lo":35.49,"hi":36.45,"k":5,"b":"About 0.6 degrees below oral, and the least reliable. Wunderlich's 37 came from here, which cuts against the story of a modern decline rather than for it."}],"per":{"lo":-1.44,"hi":1.46,"sens":64,"spec":96,"ta_sens_adult":48,"nc_sens":70},"fever":{"hours":30,"base":36.8,"peak":39.4,"rise":2.0,"plateau_end":14.0,"fall_end":19.0,"phases":[[0.0,2.0,"The set point jumps","Pyrogens reach the brain and the preoptic hypothalamus resets itself upward. Nothing has warmed yet: core is still {36.8}, and the brain now reads that as too cold."],[2.0,6.0,"Chills, and the climb","The body does exactly what it would do out in the cold. Skin vessels clamp shut, the hands go cold and pale, hairs stand up, and shivering starts. The chill is the climb, not the fever. Every degree costs a tenth again of the metabolic rate."],[6.0,14.0,"The plateau","Core has caught the set point. The shivering stops and the person stops feeling cold, while sitting at {39} degrees."],[14.0,19.0,"The set point drops","The pyrogens clear, or an antipyretic cuts the prostaglandin that raised the set point. Now core is above the target, and the body sheds heat the way it sheds any excess: flushing and sweating."]]},"ill":{"base":36.8,"peak":41.5,"note":"In hyperthermia the set point never moves. Control is intact and losing: heat is arriving, or being made, faster than it can leave. That is why aspirin does nothing for heat stroke and cooling does everything."},"routes":[{"n":"Radiation","p":60,"c":"#e05f5f","b":"Infrared leaving the skin. The largest route at rest, and it reverses when the surroundings are hotter than the skin."},{"n":"Convection","p":15,"c":"#e0985f","b":"Air warmed at the skin and carried away. Wind and a fan work here."},{"n":"Conduction","p":3,"c":"#c9c05f","b":"Heat straight into whatever the body touches. Small, unless that something is water, which pulls heat about 25 times faster than air."},{"n":"Evaporation","p":22,"c":"#58a6ff","b":"Water leaving the skin and the lungs. At rest most of this is insensible, about 600 to 700 millilitres a day, before any sweating."}],"power":{"rest":100,"hard":1400,"peak":2500,"sweat_typ":1.0,"sweat_max":3.0,"sweat_rec":3.71,"latent":2426,"evap_w_per_lh":674,"skin":35.0},"scales":{"C":{"n":"Celsius","s":"&deg;C","b":"Zero at the freezing point of water, a hundred at its boiling point, though the scale is now defined off the kelvin: a temperature in kelvin is the Celsius figure plus 273.15."},"F":{"n":"Fahrenheit","s":"&deg;F","b":"Water freezes at 32 and boils at 212, so 180 Fahrenheit degrees cover what 100 Celsius degrees cover and one Fahrenheit degree is five ninths of a Celsius one. 37 converts to exactly 98.6, which is where the false precision in the folk figure comes from."},"K":{"n":"Kelvin","s":"K","b":"Zero at absolute zero, and since 2019 defined by fixing the Boltzmann constant at 1.380649 times ten to the minus 23 joules per kelvin. Temperature is the energy of molecular motion: at 310.15 kelvin the average molecule carries about 0.040 electronvolts of it, and that number sets which chemistry can happen in a body."}},"cost":{"met":10,"met_lo":7,"met_hi":13,"hr":8,"hr_lo":7,"hr_hi":8.4,"hr_child":12,"hr_child_lo":9,"hr_child_hi":14,"hr_base":70,"base":37.0,"shiver":6,"met_note":"Cooling a febrile patient by one degree Celsius lowers oxygen use by about 7 to 13 per cent, so the page draws the band rather than a line. Every figure comes from small studies of sedated patients, and the variance is wide.","hr_note":"Liebermeister's rule, from the nineteenth century, put the rise at 8 beats a minute per degree Celsius. Modern series find 7 to 8.4 in adults and 9 to 14 in children, so the old convention holds up better than most of its age."},"lines":[{"t":38.0,"n":"The usual fever cut-off","c":"#ffd24d","b":"The common clinical threshold, written for a rectal reading. Critical care often uses {38.3} instead. The number moves with the site: an armpit reading of {38.0} is a rectal reading nearer {38.6}."},{"t":38.6,"n":"Where cooling stops","c":"#31d67a","b":"The experimental stopping point for cooling a heat stroke patient, from a study that immersed volunteers and watched what happened after they came out. Stopping at {37.5} overshot to {35.7} in the oesophagus; stopping at {38.6} did not overshoot at all. Authorities put the line anywhere from {38.0} to {39.4}, so the spread is wider than it looks."},{"t":40.0,"n":"The heat stroke line","c":"#e0673f","b":"Above {40} with the nervous system failing is the definition of heat stroke. The definition needs both halves, and the brain half is the one a bystander can actually judge."},{"t":41.6,"n":"The critical thermal maximum","c":"#c02f2f","b":"The temperature at which human tissue starts to fail, from a single small 1978 study that heated sedated volunteers. The original finding was {41.6} to {42} degrees held for anywhere from 45 minutes to 8 hours, and the eight hours usually gets dropped in the retelling. People die below this line and survive above it."}],"fine":[{"lo":36.0,"hi":37.5,"n":"Ordinary","c":"#31d67a","b":"Inside the daily swing, or just above it. Nothing here needs doing."},{"lo":37.5,"hi":38.3,"n":"Low-grade","c":"#ffd24d","b":"A fever by most definitions, and by itself not an emergency in someone alert. What matters is how the person is, not the reading."},{"lo":38.3,"hi":39.5,"n":"A solid fever","c":"#f0a04b","b":"Uncomfortable, metabolically expensive, and still not in itself dangerous in a healthy adult who is alert and drinking."},{"lo":39.5,"hi":40.0,"n":"High","c":"#e0673f","b":"The territory where fever and heat illness start to look alike from the outside. The context and the mental state separate them."},{"lo":40.0,"hi":43.0,"n":"Over the line","c":"#c02f2f","b":"Above the heat stroke threshold. In someone alert this still calls for medical help; in someone confused or unresponsive it is heat stroke until proved otherwise."}],"unresp":"An emergency at every temperature on this scale, and at temperatures below it. Unresponsiveness has many causes and none of them wait. What the thermometer changes is not the urgency but the guess: a high reading in a hot place points at heat stroke, a low one points somewhere else. Nothing on the scale downgrades the call.","cooling":[{"n":"Cold or ice water immersion","r":0.2,"c":"#58a6ff","e":"strong","b":"The fastest method there is, and about double any realistic alternative. Real patients at the Falmouth road race cooled at 0.22 degrees Celsius a minute in water near {10}. Guidelines put the useful water range anywhere from {1} to {26} degrees, which is an envelope around the evidence rather than a target."},{"n":"A tarp, ice and water","r":0.15,"c":"#4a87d6","e":"moderate","b":"The person lies on a tarp with the sides held up, in ice and water. It cools nearly as fast as a tub, needs far less water, and is much safer for someone unresponsive: they are lying on their back in shallow water with the airway clear and reachable."},{"n":"Cold water poured on, and hard fanning","r":0.11,"c":"#7fb4e8","e":"contested","b":"The sports medicine literature puts this at about half the rate of immersion. A formal review of the same evidence could not tell it apart from doing nothing. Both figures are in current guidelines, and the page shows the more generous one."},{"n":"Ice packs to the neck, armpits and groin","r":0.05,"c":"#9fb6c4","e":"weak","b":"Popular, and close to useless on its own: the surface area is too small. It is worth doing alongside something else, not instead of it."},{"n":"Shade and rest, and nothing else","r":0.047,"c":"#6b7280","e":"strong","b":"What the body manages by itself once the heat load stops. It is the line everything else has to beat."}],"coolfrom":41.5,"coolto":38.6,"cooltarget":30,"actions":[{"n":"Call","c":"#58a6ff","b":"Emergency services first, and the two words that matter to the call handler are heat and unresponsive. Cooling starts at the same time if anyone else is there to start it. Waiting for the ambulance before cooling is the mistake the guidelines were written to stop."},{"n":"Breathing","c":"#31d67a","b":"Not breathing normally means CPR, and the cooling carries on alongside it: one person compresses, another pours water. Breathing normally means the recovery position, on the side, in the shade, because vomiting is common and the airway comes first."},{"n":"Cool","c":"#e0673f","b":"Clothes off, and cold water on the whole body, continuously, with hard fanning. Immersion is faster if there are enough people to hold the head and airway clear of the water, and a tarp with ice and water is nearly as fast and much safer. One person alone does not put an unresponsive body into a bathtub."},{"n":"Stop","c":"#ffd24d","b":"Cooling stops near {38.6} degrees, or in the field when the person comes round or starts shivering hard, and then they are dried and covered. The stopping point exists because a body cooled to normal keeps falling: volunteers taken to {37.5} dropped to {35.7} afterwards."},{"n":"Never","c":"#c02f2f","b":"Nothing by mouth to anyone who is not fully alert. No aspirin and no paracetamol: they lower a set point, and in heat stroke the set point is already normal, while both drugs land on the liver and the clotting the illness is attacking. No alcohol rubs, which poison through the skin. And nobody is left alone."}],"tell":[{"k":"The story","f":"Days of illness, a cough or a rash","h":"Hours in heat, a hot car, a hot job, or hard exertion"},{"k":"The mind","f":"Rousable and making sense","h":"Confused, fighting, unsteady, seizing or not answering"},{"k":"The skin","f":"Often shivering, with cold hands","h":"Very hot, sweaty after exertion, sometimes dry in the elderly"},{"k":"The pace","f":"Rising and falling over days","h":"Getting worse over minutes"}],"tellnote":"Dry skin is the classic teaching and it is not reliable: most exertional heat stroke patients are soaked. When the two cannot be told apart the safe reading is heat stroke, because the harm is lopsided. Cooling someone with an infection wastes effort and makes them shiver. Not cooling someone with heat stroke for half an hour can kill them. And the first things done are the same either way.","measured":[{"t":41.8,"p":131,"s":"zhu","a":false},{"t":41.0,"p":128,"s":"zhu","a":false},{"t":40.0,"p":123,"s":"zhu","a":false},{"t":39.0,"p":118,"s":"zhu","a":false},{"t":37.0,"p":100,"s":"base","a":true},{"t":35.2,"p":490,"s":"eyolfson","a":true},{"t":33.0,"p":79,"s":"flick","a":true},{"t":32.0,"p":83,"s":"shara","a":false},{"t":27.0,"p":51,"s":"shara","a":false},{"t":25.4,"p":55,"s":"hickey","a":false},{"t":18.0,"p":38,"s":"diop","a":false}],"msrc":{"base":{"n":"Resting","b":"The rate every other figure on this panel is a percentage of."},"zhu":{"n":"Zhu, 2003","b":"Twenty anaesthetised and paralysed patients heated to {41.8} degrees, with a catheter in the pulmonary artery. The climb decelerates: about 9 per cent a degree Celsius over the first two, then 5, then 4. Anaesthesia removes shivering and the work of breathing, so this is close to the pure effect of heat on tissue and probably understates an intact person."},"eyolfson":{"n":"Eyolfson, 2001","b":"Peak shivering in fifteen people put in eight degree water and then rewarmed to twenty, which maximises the cold signal from the skin. Peak output was 4.9 times the resting rate, about 500 watts, at a core of {35.2} degrees. Shivering is driven mostly by skin rather than core, so a person at {35} degrees can sit anywhere between resting and five times it depending on how cold their skin is. Plotting this against core alone is a simplification."},"flick":{"n":"Flickinger, 2023","b":"Nine sedated volunteers cooled from {37} to 33 with indirect calorimetry, the best controlled human data near normal. The fall is not linear: the largest single step was the first degree. When a participant began to shiver, their temperature stopped falling, which is why the experiment could go no further."},"shara":{"n":"Sharabiani, 2025","b":"Two hundred and ninety-three children on cardiopulmonary bypass, twenty thousand minutes of measurement. The ratio of change per ten degrees is not constant: it is shallow near normal and steepens sharply below about {28}."},"hickey":{"n":"Hickey, 1983","b":"Twelve men cooled to {25.4} degrees on bypass. Oxygen use fell by 45 per cent."},"diop":{"n":"Diop, 2024","b":"Twenty-four adults cooled to {18} degrees for pulmonary thromboendarterectomy. This is the coldest whole-body measurement in a human that exists."}},"regimes":[{"lo":33.0,"hi":43.0,"n":"An awake person, or a sedated one","c":"#31d67a","b":"Above about {33} degrees the measurements come from people who are awake, or sedated but still their own thermostat. This is also the only part of the range where a person defends their temperature, which is why the shivering peak sits here and nowhere below."},{"lo":18.0,"hi":33.0,"n":"Anaesthetised, paralysed, or on bypass","c":"#58a6ff","b":"Every whole-body measurement below about {33} degrees was taken from a patient whose thermoregulation had been switched off by drugs or by a bypass machine. That is not a detail: it is the only reason anyone has ever been measured this cold. The two halves of this panel are two different physiological states, not two ends of one curve."},{"lo":10.0,"hi":18.0,"n":"Never measured in a person","c":"#6b7280","b":"No whole-body measurement of a human exists below {18} degrees. The figures that circulate for {15} and {10} degrees trace back to dogs cooled in 1950 and to a review from 1983 that cited papers it could not reach. They are extrapolations, and because the rate of change steepens as it gets colder, they are probably too high."}],"hrcold":{"slope":2.54,"lo":19.3,"hi":34.9,"n":216,"note":"Two hundred and sixteen people brought in with accidental hypothermia, cores from {19.3} to {34.9} degrees. The pulse falls 2.54 beats a minute per degree, a straight line. The textbook figure of half the normal pulse at {28} degrees comes from the same 1950s lineage as the metabolic table and sits well below what was actually counted."},"table":[{"t":10,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"The bottom of the drawing, and well past anything measured. Nothing in a living person has been recorded this cold.","mv":"not measured","mn":"no person has been measured this cold","mk":"n","pv":"not measured","pk":"n"},{"t":11,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"A 27-month-old boy was found at minus seven in Poland with no signs of life and fixed pupils, read {11.8} on rewarming, and went home after 64 days neurologically well.","mv":"not measured","mn":"no person has been measured this cold","mk":"n","pv":"not measured","pk":"n"},{"t":12,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"Colder than any adult has been rewarmed from. Only the child at {11.8} sits below this line.","mv":"not measured","mn":"no person has been measured this cold","mk":"n","pv":"not measured","pk":"n"},{"t":13,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"Anna Bagenholm was pulled from under ice in Norway at {13.7} after about 80 minutes and recovered. Deliberate surgical cooling has gone lower still.","mv":"not measured","mn":"no person has been measured this cold","mk":"n","pv":"not measured","pk":"n"},{"t":14,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"Just above the {13.7} an adult survived under ice. Rewarming from this depth needs a bypass or ECMO circuit, not blankets.","mv":"not measured","mn":"no person has been measured this cold","mk":"n","pv":"not measured","pk":"n"},{"t":15,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"The figures quoted for this depth come from dogs cooled in 1950, not from people.","mv":"not measured","mn":"no person has been measured this cold","mk":"n","pv":"not measured","pk":"n"},{"t":16,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"Deep enough that the heart is unlikely to be beating, and cold enough that the brain may not mind for a while.","mv":"not measured","mn":"no person has been measured this cold","mk":"n","pv":"not measured","pk":"n"},{"t":17,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"Inside the gap. The nearest real measurement is a degree warmer, at {18}, and there is nothing below it.","mv":"not measured","mn":"no person has been measured this cold","mk":"n","pv":"not measured","pk":"n"},{"t":18,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"The coldest whole-body measurement of a living person: 38 per cent of the resting metabolic rate, in adults cooled for lung surgery. Below this line nothing has been measured.","mv":"38%","mn":"Diop, 2024","mk":"m","pv":"not measured","pk":"n"},{"t":19,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"The bottom of the range in which anyone's pulse has been counted and pooled. Below it the falling line is extrapolation.","mv":"38 to 55%","mn":"between two measurements, not itself one","mk":"b","pv":"not measured","pk":"n"},{"t":20,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"Deliberate surgical cooling has gone below here. Accidental survival this deep is rare and always involves rewarming on a circuit.","mv":"38 to 55%","mn":"between two measurements, not itself one","mk":"b","pv":"27","pk":"m"},{"t":21,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"Just above where the pulse series stops. Below {19.3} the falling line is extrapolation.","mv":"38 to 55%","mn":"between two measurements, not itself one","mk":"b","pv":"29","pk":"m"},{"t":22,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"A patient has been recorded conscious and shivering at {22.9}, which the staging says should not happen. The stages are population conventions, not individual guarantees.","mv":"38 to 55%","mn":"between two measurements, not itself one","mk":"b","pv":"32","pk":"m"},{"t":23,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"Approaching the top of profound hypothermia, where vital signs can be absent and recovery still possible.","mv":"38 to 55%","mn":"between two measurements, not itself one","mk":"b","pv":"34","pk":"m"},{"t":24,"zn":"Severe hypothermia","zc":"#3566bd","w":"The top of profound hypothermia. Below here a person can have no pulse, no breathing and fixed pupils and still be brought back, which is why resuscitation is attempted from temperatures that would otherwise look hopeless.","mv":"38 to 55%","mn":"between two measurements, not itself one","mk":"b","pv":"37","pk":"m"},{"t":25,"zn":"Severe hypothermia","zc":"#3566bd","w":"Oxygen use is a little over half of normal, measured in twelve men cooled on bypass.","mv":"55%","mn":"Hickey, 1983","mk":"m","pv":"40","pk":"m"},{"t":26,"zn":"Severe hypothermia","zc":"#3566bd","w":"Between the two bypass measurements at {25.4} and {27}. Nothing was measured at this degree itself.","mv":"55%","mn":"Hickey, 1983","mk":"m","pv":"42","pk":"m"},{"t":27,"zn":"Severe hypothermia","zc":"#3566bd","w":"Half the resting rate, from 293 children on bypass. The rate of change steepens below about here rather than staying constant.","mv":"51%","mn":"Sharabiani, 2025","mk":"m","pv":"45","pk":"m"},{"t":28,"zn":"Moderate hypothermia","zc":"#4a87d6","w":"Ventricular fibrillation becomes the danger. The heart muscle is irritable and rough handling alone can set it off, so a patient this cold is moved gently.","mv":"51 to 83%","mn":"between two measurements, not itself one","mk":"b","pv":"47","pk":"m"},{"t":29,"zn":"Moderate hypothermia","zc":"#4a87d6","w":"Consciousness is gone or going, the pulse is around fifty, and the rhythm is unreliable.","mv":"51 to 83%","mn":"between two measurements, not itself one","mk":"b","pv":"50","pk":"m"},{"t":30,"zn":"Moderate hypothermia","zc":"#4a87d6","w":"The middle of moderate hypothermia. Every metabolic figure here comes from patients on a bypass machine.","mv":"51 to 83%","mn":"between two measurements, not itself one","mk":"b","pv":"52","pk":"m"},{"t":31,"zn":"Moderate hypothermia","zc":"#4a87d6","w":"Just below where shivering fails. Above this the body is still fighting the cold; below it, it has stopped.","mv":"51 to 83%","mn":"between two measurements, not itself one","mk":"b","pv":"55","pk":"m"},{"t":32,"zn":"Mild hypothermia","zc":"#7fb4e8","w":"Shivering stops, which is the clinical marker of this stage. Consciousness fades, atrial fibrillation is common, and some people undress.","mv":"83%","mn":"Sharabiani, 2025","mk":"m","pv":"57","pk":"m"},{"t":33,"zn":"Mild hypothermia","zc":"#7fb4e8","w":"The coldest a sedated volunteer has been taken with the metabolism measured: 79 per cent of resting. When a participant began to shiver their temperature stopped falling, which is why the experiment could go no further.","mv":"79%","mn":"Flickinger, 2023","mk":"m","pv":"60","pk":"m"},{"t":34,"zn":"Mild hypothermia","zc":"#7fb4e8","w":"Judgement and coordination are already going, before the person feels in any danger.","mv":"79 to 100%","mn":"between two measurements, not itself one","mk":"b","pv":"62","pk":"m"},{"t":35,"zn":"Below the normal band","zc":"#9fb6c4","w":"Peak shivering sits near here: almost five times the resting rate, about 500 watts. Whether it is reached depends more on how cold the skin is than on the core.","mv":"490%","mn":"Eyolfson, 2001","mk":"m","pv":"65","pk":"b"},{"t":36,"zn":"Below the normal band","zc":"#9fb6c4","w":"Shivering begins around {36.8} in someone whose skin is not cold. The modern mean sits at {36.6}, and the daily low near {36.5}.","mv":"79 to 100%","mn":"between two measurements, not itself one","mk":"b","pv":"68","pk":"b"},{"t":37,"zn":"The normal band","zc":"#31d67a","w":"The number Wunderlich set in 1868, from about a million readings taken in the armpit. Converting his round 37 gives the spuriously precise 98.6.","mv":"100%","mn":"Resting","mk":"m","pv":"70","pk":"m"},{"t":38,"zn":"Fever","zc":"#f0a04b","w":"The usual fever cut-off, written for a rectal reading; critical care often uses {38.3}. Cooling a heat stroke patient stops at {38.6}, because a body cooled to normal keeps falling.","mv":"100 to 118%","mn":"between two measurements, not itself one","mk":"b","pv":"78","pk":"m"},{"t":39,"zn":"High fever","zc":"#e0673f","w":"Measured 18 per cent above resting in anaesthetised patients heated deliberately. Still a raised set point rather than a failure of control.","mv":"118%","mn":"Zhu, 2003","mk":"m","pv":"86","pk":"m"},{"t":40,"zn":"High fever","zc":"#e0673f","w":"Above here, with the nervous system failing, is heat stroke. The definition needs both halves. Well trained athletes reach {41.5} in a race without harm, so time above the line matters more than the peak.","mv":"123%","mn":"Zhu, 2003","mk":"m","pv":"94","pk":"m"},{"t":41,"zn":"Hyperpyrexia","zc":"#c02f2f","w":"28 per cent above resting. The climb decelerates: about 9 per cent a degree Celsius over the first two, then 5, then 4.","mv":"128%","mn":"Zhu, 2003","mk":"m","pv":"102","pk":"m"},{"t":42,"zn":"Hyperpyrexia","zc":"#c02f2f","w":"The critical thermal maximum, from one small 1978 study of sedated volunteers. The finding was {41.6} to {42} held for anywhere from 45 minutes to 8 hours, and the eight hours usually gets dropped.","mv":"131%","mn":"Zhu, 2003","mk":"m","pv":"110","pk":"m"},{"t":43,"zn":"Hyperpyrexia","zc":"#c02f2f","w":"Past every metabolic measurement there is. Nothing has been measured in a person above {41.8}.","mv":"not measured","mn":"nothing above 41.8 has been measured","mk":"n","pv":"not measured","pk":"n"},{"t":44,"zn":"Hyperpyrexia","zc":"#c02f2f","w":"Above the hottest anyone has been measured metabolically, and above the critical thermal maximum. Damage here is a question of how long, not whether.","mv":"not measured","mn":"nothing above 41.8 has been measured","mk":"n","pv":"not measured","pk":"n"},{"t":45,"zn":"Hyperpyrexia","zc":"#c02f2f","w":"The only documented survival above this line is the {46.5} record.","mv":"not measured","mn":"nothing above 41.8 has been measured","mk":"n","pv":"not measured","pk":"n"},{"t":46,"zn":"Hyperpyrexia","zc":"#c02f2f","w":"A 52-year-old man survived {46.5} with heat stroke in Atlanta in July 1980 and was discharged after 24 days. The case is a record listing rather than a published case report.","mv":"not measured","mn":"nothing above 41.8 has been measured","mk":"n","pv":"not measured","pk":"n"},{"t":47,"zn":"Hyperpyrexia","zc":"#c02f2f","w":"Above that record. No one is known to have come back from here.","mv":"not measured","mn":"nothing above 41.8 has been measured","mk":"n","pv":"not measured","pk":"n"},{"t":48,"zn":"Hyperpyrexia","zc":"#c02f2f","w":"The top of the drawing. No one has been recorded here.","mv":"not measured","mn":"nothing above 41.8 has been measured","mk":"n","pv":"not measured","pk":"n"}],"tkey":"Metabolic rate is a percentage of the resting rate at {37}. A figure in white is a measurement; a range in grey is the gap between the two measurements either side of it and is not itself measured. Pulse is 2.54 beats a minute per degree Celsius below {35}, from 216 people brought in with hypothermia, and about 8 a degree Celsius above {37}; between {35} and {37} no series covers it, and the figure there is a join. Peak shivering, near {35}, reaches 490 per cent and is left out of the ranges around it because it is a different state, not a point on the same line."};
+const D={"zones":[{"lo":10.0,"hi":24.0,"k":"cold4","n":"Profound hypothermia","b":"Below {24} degrees the heart may stop and the body can look dead: no pulse, no breathing, fixed pupils. It is also where the cold itself protects the brain, which is why resuscitation is attempted from temperatures that would otherwise be hopeless.","c":"#2b4a8f"},{"lo":24.0,"hi":28.0,"k":"cold3","n":"Severe hypothermia","b":"The heart muscle turns irritable and ventricular fibrillation becomes likely. Rough handling alone can set it off, so a patient this cold is moved gently.","c":"#3566bd"},{"lo":28.0,"hi":32.0,"k":"cold2","n":"Moderate hypothermia","b":"Shivering stops, which is the clinical marker of this stage, and consciousness fades. Atrial fibrillation is common. Some people undress, a confused response called paradoxical undressing.","c":"#4a87d6"},{"lo":32.0,"hi":35.0,"k":"cold1","n":"Mild hypothermia","b":"Shivering is at its hardest and the metabolic rate climbs. Judgement and coordination go first, before the person feels in any danger.","c":"#7fb4e8"},{"lo":35.0,"hi":36.16,"k":"low","n":"Below the normal band","b":"Colder than the pooled normal range for a healthy adult, though a reading here from the armpit is unremarkable: the axilla averages 35.97 degrees.","c":"#9fb6c4"},{"lo":36.16,"hi":37.02,"k":"norm","n":"The normal band","b":"The pooled range across sites in a meta-analysis of 7,636 healthy adults. The band is wide because it holds every site, every hour of the day and every person in those studies.","c":"#31d67a"},{"lo":37.02,"hi":38.0,"k":"warm1","n":"Warm, and not yet a fever","b":"Above the pooled band but under the usual cut-off. An oral reading of {37.5} at four in the afternoon is ordinary; the same reading at six in the morning is not.","c":"#ffd24d"},{"lo":38.0,"hi":39.0,"k":"warm2","n":"Fever","b":"The common clinical cut-off is {38.0} degrees, and critical care often uses {38.3}. The number means nothing without the site it was taken from.","c":"#f0a04b"},{"lo":39.0,"hi":41.0,"k":"warm3","n":"High fever","b":"Still a raised set point rather than a failure of control. The body is defending this temperature, not losing to it.","c":"#e0673f"},{"lo":41.0,"hi":48.0,"k":"warm4","n":"Hyperpyrexia","b":"Above {41} degrees, and into the range where heat damages cells directly. Sustained above about {41.6} for long enough, proteins denature and organs fail.","c":"#c02f2f"}],"marks":[{"t":11.8,"n":"The coldest survival on record","s":"l","b":"A 27-month-old boy left home in winter near Krakow wearing pyjama tops, barefoot, in air at minus 7. He was found two hours later with no signs of life and fixed pupils. His core read {11.8} degrees ten minutes into rewarming on ECMO. He went home after 64 days and was neurologically well five years on."},{"t":13.7,"n":"Anna Bagenholm","s":"l","b":"The best known adult case: a skier trapped under ice in Norway for about 80 minutes in 1999, rewarmed from {13.7} degrees and recovered. Deliberate surgical cooling has gone lower still, below {10} degrees, but that is a different thing from an accident."},{"t":36.6,"n":"The modern mean","s":"l","b":"{36.6} degrees, from 243,506 measurements of 35,488 outpatients. A later series of 618,306 oral readings agrees: {36.6}, with a normal range of {36.3} to {36.8}."},{"t":37.0,"n":"Wunderlich's 37","s":"l","b":"Carl Wunderlich set the figure in 1868 from about a million readings, taken in the armpit. Converting his round 37 gives 98.6 in Fahrenheit, which looks like a measurement to three figures and is nothing of the kind. The precision is an artefact of the arithmetic."},{"t":40.0,"n":"Heat stroke","s":"r","b":"Core above {40} degrees with the nervous system failing: confusion, seizures, coma. Well trained athletes reach {41.5} in a race without harm, so the time spent above the line matters more than the peak."},{"t":46.5,"n":"The hottest survival on record","s":"r","b":"A 52-year-old man admitted to Grady Memorial Hospital in Atlanta on 10 July 1980 with heat stroke, at {46.5} degrees. He was discharged after 24 days. The case is a Guinness record rather than a published case report."}],"day":{"mean":36.8,"amp":0.25,"nadir":6.0,"zenith":17.0,"cut_am":37.2,"cut_pm":37.7},"sites":[{"n":"Rectal","m":37.04,"lo":36.68,"hi":37.4,"k":13,"b":"Closest of the everyday sites to core, and the one the classic thresholds were written for. Accurate at rest, but it lags while the temperature is moving."},{"n":"Tympanic","m":36.64,"lo":36.2,"hi":37.08,"k":9,"b":"Quick and popular, and an unreliable reflection of core: the ear canal is open to the air and poorly perfused when circulation is failing."},{"n":"Oral","m":36.57,"lo":36.15,"hi":36.99,"k":33,"b":"The most studied site, and the source of most quoted figures. Biased by breathing, smoking, and hot or cold drinks."},{"n":"Axillary","m":35.97,"lo":35.49,"hi":36.45,"k":5,"b":"About 0.6 degrees below oral, and the least reliable. Wunderlich's 37 came from here, which cuts against the story of a modern decline rather than for it."}],"per":{"lo":-1.44,"hi":1.46,"sens":64,"spec":96,"ta_sens_adult":48,"nc_sens":70},"fever":{"hours":30,"base":36.8,"peak":39.4,"rise":2.0,"plateau_end":14.0,"fall_end":19.0,"phases":[[0.0,2.0,"The set point jumps","Pyrogens reach the brain and the preoptic hypothalamus resets itself upward. Nothing has warmed yet: core is still {36.8}, and the brain now reads that as too cold."],[2.0,6.0,"Chills, and the climb","The body does exactly what it would do out in the cold. Skin vessels clamp shut, the hands go cold and pale, hairs stand up, and shivering starts. The chill is the climb, not the fever. Every degree costs a tenth again of the metabolic rate."],[6.0,14.0,"The plateau","Core has caught the set point. The shivering stops and the person stops feeling cold, while sitting at {39} degrees."],[14.0,19.0,"The set point drops","The pyrogens clear, or an antipyretic cuts the prostaglandin that raised the set point. Now core is above the target, and the body sheds heat the way it sheds any excess: flushing and sweating."]]},"ill":{"base":36.8,"peak":41.5,"note":"In hyperthermia the set point never moves. Control is intact and losing: heat is arriving, or being made, faster than it can leave. That is why aspirin does nothing for heat stroke and cooling does everything."},"routes":[{"n":"Radiation","p":60,"c":"#e05f5f","b":"Infrared leaving the skin. The largest route at rest, and it reverses when the surroundings are hotter than the skin."},{"n":"Convection","p":15,"c":"#e0985f","b":"Air warmed at the skin and carried away. Wind and a fan work here."},{"n":"Conduction","p":3,"c":"#c9c05f","b":"Heat straight into whatever the body touches. Small, unless that something is water, which pulls heat about 25 times faster than air."},{"n":"Evaporation","p":22,"c":"#58a6ff","b":"Water leaving the skin and the lungs. At rest most of this is insensible, about 600 to 700 millilitres a day, before any sweating."}],"power":{"rest":100,"hard":1400,"peak":2500,"sweat_typ":1.0,"sweat_max":3.0,"sweat_rec":3.71,"latent":2426,"evap_w_per_lh":674,"skin":35.0},"scales":{"C":{"n":"Celsius","s":"&deg;C","b":"Zero at the freezing point of water, a hundred at its boiling point, though the scale is now defined off the kelvin: a temperature in kelvin is the Celsius figure plus 273.15."},"F":{"n":"Fahrenheit","s":"&deg;F","b":"Water freezes at 32 and boils at 212, so 180 Fahrenheit degrees cover what 100 Celsius degrees cover and one Fahrenheit degree is five ninths of a Celsius one. 37 converts to exactly 98.6, which is where the false precision in the folk figure comes from."},"K":{"n":"Kelvin","s":"K","b":"Zero at absolute zero, and since 2019 defined by fixing the Boltzmann constant at 1.380649 times ten to the minus 23 joules per kelvin. Temperature is the energy of molecular motion: at 310.15 kelvin the average molecule carries about 0.040 electronvolts of it, and that number sets which chemistry can happen in a body."}},"cost":{"met":10,"met_lo":7,"met_hi":13,"hr":8,"hr_lo":7,"hr_hi":8.4,"hr_child":12,"hr_child_lo":9,"hr_child_hi":14,"hr_base":70,"base":37.0,"shiver":6,"met_note":"Cooling a febrile patient by one degree Celsius lowers oxygen use by about 7 to 13 per cent, so the page draws the band rather than a line. Every figure comes from small studies of sedated patients, and the variance is wide.","hr_note":"Liebermeister's rule, from the nineteenth century, put the rise at 8 beats a minute per degree Celsius. Modern series find 7 to 8.4 in adults and 9 to 14 in children, so the old convention holds up better than most of its age."},"lines":[{"t":38.0,"n":"The usual fever cut-off","c":"#ffd24d","b":"The common clinical threshold, written for a rectal reading. Critical care often uses {38.3} instead. The number moves with the site: an armpit reading of {38.0} is a rectal reading nearer {38.6}."},{"t":38.6,"n":"Where cooling stops","c":"#31d67a","b":"The experimental stopping point for cooling a heat stroke patient, from a study that immersed volunteers and watched what happened after they came out. Stopping at {37.5} overshot to {35.7} in the oesophagus; stopping at {38.6} did not overshoot at all. Authorities put the line anywhere from {38.0} to {39.4}, so the spread is wider than it looks."},{"t":40.0,"n":"The heat stroke line","c":"#e0673f","b":"Above {40} with the nervous system failing is the definition of heat stroke. The definition needs both halves, and the brain half is the one a bystander can actually judge."},{"t":41.6,"n":"The critical thermal maximum","c":"#c02f2f","b":"The temperature at which human tissue starts to fail, from a single small 1978 study that heated sedated volunteers. The original finding was {41.6} to {42} degrees held for anywhere from 45 minutes to 8 hours, and the eight hours usually gets dropped in the retelling. People die below this line and survive above it."}],"fine":[{"lo":36.0,"hi":37.5,"n":"Ordinary","c":"#31d67a","b":"Inside the daily swing, or just above it. Nothing here needs doing."},{"lo":37.5,"hi":38.3,"n":"Low-grade","c":"#ffd24d","b":"A fever by most definitions, and by itself not an emergency in someone alert. What matters is how the person is, not the reading."},{"lo":38.3,"hi":39.5,"n":"A solid fever","c":"#f0a04b","b":"Uncomfortable, metabolically expensive, and still not in itself dangerous in a healthy adult who is alert and drinking."},{"lo":39.5,"hi":40.0,"n":"High","c":"#e0673f","b":"The territory where fever and heat illness start to look alike from the outside. The context and the mental state separate them."},{"lo":40.0,"hi":43.0,"n":"Over the line","c":"#c02f2f","b":"Above the heat stroke threshold. In someone alert this still calls for medical help; in someone confused or unresponsive it is heat stroke until proved otherwise."}],"unresp":"An emergency at every temperature on this scale, and at temperatures below it. Unresponsiveness has many causes and none of them wait. What the thermometer changes is not the urgency but the guess: a high reading in a hot place points at heat stroke, a low one points somewhere else. Nothing on the scale downgrades the call.","cooling":[{"n":"Cold or ice water immersion","r":0.2,"c":"#58a6ff","e":"strong","b":"The fastest method there is, and about double any realistic alternative. Real patients at the Falmouth road race cooled at 0.22 degrees Celsius a minute in water near {10}. Guidelines put the useful water range anywhere from {1} to {26} degrees, which is an envelope around the evidence rather than a target."},{"n":"A tarp, ice and water","r":0.15,"c":"#4a87d6","e":"moderate","b":"The person lies on a tarp with the sides held up, in ice and water. It cools nearly as fast as a tub, needs far less water, and is much safer for someone unresponsive: they are lying on their back in shallow water with the airway clear and reachable."},{"n":"Cold water poured on, and hard fanning","r":0.11,"c":"#7fb4e8","e":"contested","b":"The sports medicine literature puts this at about half the rate of immersion. A formal review of the same evidence could not tell it apart from doing nothing. Both figures are in current guidelines, and the page shows the more generous one."},{"n":"Ice packs to the neck, armpits and groin","r":0.05,"c":"#9fb6c4","e":"weak","b":"Popular, and close to useless on its own: the surface area is too small. It is worth doing alongside something else, not instead of it."},{"n":"Shade and rest, and nothing else","r":0.047,"c":"#6b7280","e":"strong","b":"What the body manages by itself once the heat load stops. It is the line everything else has to beat."}],"coolfrom":41.5,"coolto":38.6,"cooltarget":30,"actions":[{"n":"Call","c":"#58a6ff","b":"Emergency services first, and the two words that matter to the call handler are heat and unresponsive. Cooling starts at the same time if anyone else is there to start it. Waiting for the ambulance before cooling is the mistake the guidelines were written to stop."},{"n":"Breathing","c":"#31d67a","b":"Not breathing normally means CPR, and the cooling carries on alongside it: one person compresses, another pours water. Breathing normally means the recovery position, on the side, in the shade, because vomiting is common and the airway comes first."},{"n":"Cool","c":"#e0673f","b":"Clothes off, and cold water on the whole body, continuously, with hard fanning. Immersion is faster if there are enough people to hold the head and airway clear of the water, and a tarp with ice and water is nearly as fast and much safer. One person alone does not put an unresponsive body into a bathtub."},{"n":"Stop","c":"#ffd24d","b":"Cooling stops near {38.6} degrees, or in the field when the person comes round or starts shivering hard, and then they are dried and covered. The stopping point exists because a body cooled to normal keeps falling: volunteers taken to {37.5} dropped to {35.7} afterwards."},{"n":"Never","c":"#c02f2f","b":"Nothing by mouth to anyone who is not fully alert. No aspirin and no paracetamol: they lower a set point, and in heat stroke the set point is already normal, while both drugs land on the liver and the clotting the illness is attacking. No alcohol rubs, which poison through the skin. And nobody is left alone."}],"tell":[{"k":"The story","f":"Days of illness, a cough or a rash","h":"Hours in heat, a hot car, a hot job, or hard exertion"},{"k":"The mind","f":"Rousable and making sense","h":"Confused, fighting, unsteady, seizing or not answering"},{"k":"The skin","f":"Often shivering, with cold hands","h":"Very hot, sweaty after exertion, sometimes dry in the elderly"},{"k":"The pace","f":"Rising and falling over days","h":"Getting worse over minutes"}],"tellnote":"Dry skin is the classic teaching and it is not reliable: most exertional heat stroke patients are soaked. When the two cannot be told apart the safe reading is heat stroke, because the harm is lopsided. Cooling someone with an infection wastes effort and makes them shiver. Not cooling someone with heat stroke for half an hour can kill them. And the first things done are the same either way.","measured":[{"t":41.8,"p":131,"s":"zhu","a":false},{"t":41.0,"p":128,"s":"zhu","a":false},{"t":40.0,"p":123,"s":"zhu","a":false},{"t":39.0,"p":118,"s":"zhu","a":false},{"t":37.0,"p":100,"s":"base","a":true},{"t":35.2,"p":490,"s":"eyolfson","a":true},{"t":33.0,"p":79,"s":"flick","a":true},{"t":32.0,"p":83,"s":"shara","a":false},{"t":27.0,"p":51,"s":"shara","a":false},{"t":25.4,"p":55,"s":"hickey","a":false},{"t":18.0,"p":38,"s":"diop","a":false}],"msrc":{"base":{"n":"Resting","b":"The rate every other figure on this panel is a percentage of."},"zhu":{"n":"Zhu, 2003","b":"Twenty anaesthetised and paralysed patients heated to {41.8} degrees, with a catheter in the pulmonary artery. The climb decelerates: about 9 per cent a degree Celsius over the first two, then 5, then 4. Anaesthesia removes shivering and the work of breathing, so this is close to the pure effect of heat on tissue and probably understates an intact person."},"eyolfson":{"n":"Eyolfson, 2001","b":"Peak shivering in fifteen people put in eight degree water and then rewarmed to twenty, which maximises the cold signal from the skin. Peak output was 4.9 times the resting rate, about 500 watts, at a core of {35.2} degrees. Shivering is driven mostly by skin rather than core, so a person at {35} degrees can sit anywhere between resting and five times it depending on how cold their skin is. Plotting this against core alone is a simplification."},"flick":{"n":"Flickinger, 2023","b":"Nine sedated volunteers cooled from {37} to 33 with indirect calorimetry, the best controlled human data near normal. The fall is not linear: the largest single step was the first degree. When a participant began to shiver, their temperature stopped falling, which is why the experiment could go no further."},"shara":{"n":"Sharabiani, 2025","b":"Two hundred and ninety-three children on cardiopulmonary bypass, twenty thousand minutes of measurement. The ratio of change per ten degrees is not constant: it is shallow near normal and steepens sharply below about {28}."},"hickey":{"n":"Hickey, 1983","b":"Twelve men cooled to {25.4} degrees on bypass. Oxygen use fell by 45 per cent."},"diop":{"n":"Diop, 2024","b":"Twenty-four adults cooled to {18} degrees for pulmonary thromboendarterectomy. This is the coldest whole-body measurement in a human that exists."}},"regimes":[{"lo":33.0,"hi":43.0,"n":"An awake person, or a sedated one","c":"#31d67a","b":"Above about {33} degrees the measurements come from people who are awake, or sedated but still their own thermostat. This is also the only part of the range where a person defends their temperature, which is why the shivering peak sits here and nowhere below."},{"lo":18.0,"hi":33.0,"n":"Anaesthetised, paralysed, or on bypass","c":"#58a6ff","b":"Every whole-body measurement below about {33} degrees was taken from a patient whose thermoregulation had been switched off by drugs or by a bypass machine. That is not a detail: it is the only reason anyone has ever been measured this cold. The two halves of this panel are two different physiological states, not two ends of one curve."},{"lo":10.0,"hi":18.0,"n":"Never measured in a person","c":"#6b7280","b":"No whole-body measurement of a human exists below {18} degrees. The figures that circulate for {15} and {10} degrees trace back to dogs cooled in 1950 and to a review from 1983 that cited papers it could not reach. They are extrapolations, and because the rate of change steepens as it gets colder, they are probably too high."}],"hrcold":{"slope":2.54,"lo":19.3,"hi":34.9,"n":216,"note":"Two hundred and sixteen people brought in with accidental hypothermia, cores from {19.3} to {34.9} degrees. The pulse falls 2.54 beats a minute per degree, a straight line. The textbook figure of half the normal pulse at {28} degrees comes from the same 1950s lineage as the metabolic table and sits well below what was actually counted."},"table":[{"t":48,"zn":"Hyperpyrexia","zc":"#c02f2f","w":"The top of the drawing. No one has been recorded here.","mv":"not measured","mn":"nothing above 41.8 has been measured","mk":"n","pv":"not measured","pk":"n"},{"t":47,"zn":"Hyperpyrexia","zc":"#c02f2f","w":"Above the record. No one is known to have come back from here.","mv":"not measured","mn":"nothing above 41.8 has been measured","mk":"n","pv":"not measured","pk":"n"},{"t":46,"zn":"Hyperpyrexia","zc":"#c02f2f","w":"A man of 52 survived {46.5} with heat stroke in Atlanta in 1980 and went home after 24 days.","mv":"not measured","mn":"nothing above 41.8 has been measured","mk":"n","pv":"not measured","pk":"n"},{"t":45,"zn":"Hyperpyrexia","zc":"#c02f2f","w":"The only documented survival above this line is that {46.5} record.","mv":"not measured","mn":"nothing above 41.8 has been measured","mk":"n","pv":"not measured","pk":"n"},{"t":44,"zn":"Hyperpyrexia","zc":"#c02f2f","w":"Above the critical thermal maximum. Damage here is a question of how long, not whether.","mv":"not measured","mn":"nothing above 41.8 has been measured","mk":"n","pv":"not measured","pk":"n"},{"t":43,"zn":"Hyperpyrexia","zc":"#c02f2f","w":"Past every metabolic measurement. Nothing has been measured in a person above {41.8}.","mv":"not measured","mn":"nothing above 41.8 has been measured","mk":"n","pv":"not measured","pk":"n"},{"t":42,"zn":"Hyperpyrexia","zc":"#c02f2f","w":"The critical thermal maximum, from one 1978 study: {41.6} to {42} held for 45 minutes to 8 hours.","mv":"131%","mn":"Zhu, 2003","mk":"m","pv":"110","pk":"m"},{"t":41,"zn":"Hyperpyrexia","zc":"#c02f2f","w":"28 per cent above resting. The climb decelerates: 9 per cent a degree Celsius at first, then 5, then 4.","mv":"128%","mn":"Zhu, 2003","mk":"m","pv":"102","pk":"m"},{"t":40,"zn":"High fever","zc":"#e0673f","w":"Above here with the nervous system failing is heat stroke. Athletes reach {41.5} in a race without harm.","mv":"123%","mn":"Zhu, 2003","mk":"m","pv":"94","pk":"m"},{"t":39,"zn":"High fever","zc":"#e0673f","w":"Measured 18 per cent above resting in anaesthetised patients heated deliberately. A raised set point.","mv":"118%","mn":"Zhu, 2003","mk":"m","pv":"86","pk":"m"},{"t":38,"zn":"Fever","zc":"#f0a04b","w":"The usual fever cut-off, written for a rectal reading. Cooling a heat stroke patient stops at {38.6}.","mv":"100 to 118%","mn":"between two measurements, not itself one","mk":"b","pv":"78","pk":"m"},{"t":37,"zn":"The normal band","zc":"#31d67a","w":"Wunderlich set this in 1868 from a million armpit readings. His round {37} converts to the false precision of 98.6.","mv":"100%","mn":"Resting","mk":"m","pv":"70","pk":"m"},{"t":36,"zn":"Below the normal band","zc":"#9fb6c4","w":"Shivering begins near {36.8} in someone whose skin is not cold. The modern mean is {36.6}.","mv":"79 to 100%","mn":"between two measurements, not itself one","mk":"b","pv":"68","pk":"b"},{"t":35,"zn":"Below the normal band","zc":"#9fb6c4","w":"Peak shivering sits near here, almost five times resting. Reaching it depends on how cold the skin is.","mv":"490%","mn":"Eyolfson, 2001","mk":"m","pv":"65","pk":"b"},{"t":34,"zn":"Mild hypothermia","zc":"#7fb4e8","w":"Judgement and coordination are already going, before the person feels in any danger.","mv":"79 to 100%","mn":"between two measurements, not itself one","mk":"b","pv":"62","pk":"m"},{"t":33,"zn":"Mild hypothermia","zc":"#7fb4e8","w":"The coldest a sedated volunteer has been taken with the metabolism measured: 79 per cent of resting.","mv":"79%","mn":"Flickinger, 2023","mk":"m","pv":"60","pk":"m"},{"t":32,"zn":"Mild hypothermia","zc":"#7fb4e8","w":"Shivering stops, the marker of this stage. Consciousness fades and atrial fibrillation is common.","mv":"83%","mn":"Sharabiani, 2025","mk":"m","pv":"57","pk":"m"},{"t":31,"zn":"Moderate hypothermia","zc":"#4a87d6","w":"Just below where shivering fails. Above this the body is still fighting the cold; below it, it has stopped.","mv":"51 to 83%","mn":"between two measurements, not itself one","mk":"b","pv":"55","pk":"m"},{"t":30,"zn":"Moderate hypothermia","zc":"#4a87d6","w":"The middle of moderate hypothermia. Every metabolic figure here comes from patients on a bypass machine.","mv":"51 to 83%","mn":"between two measurements, not itself one","mk":"b","pv":"52","pk":"m"},{"t":29,"zn":"Moderate hypothermia","zc":"#4a87d6","w":"Consciousness is gone or going, the pulse is near fifty, and the rhythm is unreliable.","mv":"51 to 83%","mn":"between two measurements, not itself one","mk":"b","pv":"50","pk":"m"},{"t":28,"zn":"Moderate hypothermia","zc":"#4a87d6","w":"Ventricular fibrillation becomes the danger. Rough handling alone can set it off, so this patient is moved gently.","mv":"51 to 83%","mn":"between two measurements, not itself one","mk":"b","pv":"47","pk":"m"},{"t":27,"zn":"Severe hypothermia","zc":"#3566bd","w":"Half the resting rate, from 293 children on bypass. The rate of change steepens below about here.","mv":"51%","mn":"Sharabiani, 2025","mk":"m","pv":"45","pk":"m"},{"t":26,"zn":"Severe hypothermia","zc":"#3566bd","w":"Between the two bypass measurements either side. Nothing was measured at this degree itself.","mv":"55%","mn":"Hickey, 1983","mk":"m","pv":"42","pk":"m"},{"t":25,"zn":"Severe hypothermia","zc":"#3566bd","w":"Oxygen use is a little over half of normal, measured in twelve men cooled on bypass.","mv":"55%","mn":"Hickey, 1983","mk":"m","pv":"40","pk":"m"},{"t":24,"zn":"Severe hypothermia","zc":"#3566bd","w":"Below here a person can have no pulse, no breathing and fixed pupils and still be brought back.","mv":"38 to 55%","mn":"between two measurements, not itself one","mk":"b","pv":"37","pk":"m"},{"t":23,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"Approaching the top of profound hypothermia, where vital signs can be absent and recovery still possible.","mv":"38 to 55%","mn":"between two measurements, not itself one","mk":"b","pv":"34","pk":"m"},{"t":22,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"Someone has been recorded conscious and shivering at {22.9}. The stages are conventions, not guarantees.","mv":"38 to 55%","mn":"between two measurements, not itself one","mk":"b","pv":"32","pk":"m"},{"t":21,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"Just above where the pulse series stops, and far below where anything else has been counted.","mv":"38 to 55%","mn":"between two measurements, not itself one","mk":"b","pv":"29","pk":"m"},{"t":20,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"Surgical cooling has gone below here on purpose. Accidental survival this deep always needs a rewarming circuit.","mv":"38 to 55%","mn":"between two measurements, not itself one","mk":"b","pv":"27","pk":"m"},{"t":19,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"The bottom of the range in which anyone's pulse has been counted. Below it the falling line is extrapolation.","mv":"38 to 55%","mn":"between two measurements, not itself one","mk":"b","pv":"not measured","pk":"n"},{"t":18,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"The coldest measurement of a living person: 38 per cent of resting, in adults cooled for lung surgery.","mv":"38%","mn":"Diop, 2024","mk":"m","pv":"not measured","pk":"n"},{"t":17,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"Inside the gap. The nearest real measurement is a degree warmer, and there is nothing below it.","mv":"not measured","mn":"no person has been measured this cold","mk":"n","pv":"not measured","pk":"n"},{"t":16,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"Deep enough that the heart is unlikely to be beating, and cold enough that the brain may not mind for a while.","mv":"not measured","mn":"no person has been measured this cold","mk":"n","pv":"not measured","pk":"n"},{"t":15,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"The figures quoted for this depth come from dogs cooled in 1950, not from people.","mv":"not measured","mn":"no person has been measured this cold","mk":"n","pv":"not measured","pk":"n"},{"t":14,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"Rewarming from this depth needs a bypass or an ECMO circuit, not blankets.","mv":"not measured","mn":"no person has been measured this cold","mk":"n","pv":"not measured","pk":"n"},{"t":13,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"Anna Bagenholm came back from {13.7} after 80 minutes under ice. Surgical cooling has gone lower still.","mv":"not measured","mn":"no person has been measured this cold","mk":"n","pv":"not measured","pk":"n"},{"t":12,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"Colder than any adult has been rewarmed from. Only that child sits below this line.","mv":"not measured","mn":"no person has been measured this cold","mk":"n","pv":"not measured","pk":"n"},{"t":11,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"A boy of 27 months, found at minus seven in Poland with no signs of life, read {11.8} and went home well.","mv":"not measured","mn":"no person has been measured this cold","mk":"n","pv":"not measured","pk":"n"},{"t":10,"zn":"Profound hypothermia","zc":"#2b4a8f","w":"The bottom of the drawing, and past anything measured. Nothing in a living person has been recorded this cold.","mv":"not measured","mn":"no person has been measured this cold","mk":"n","pv":"not measured","pk":"n"}],"tkey":"Metabolic rate is a percentage of the resting rate at {37}. A figure in white is a measurement; a range in grey is the gap between the two measurements either side of it and is not itself measured. Pulse is 2.54 beats a minute per degree Celsius below {35}, from 216 people brought in with hypothermia, and about 8 a degree Celsius above {37}; between {35} and {37} no series covers it, and the figure there is a join. Peak shivering, near {35}, reaches 490 per cent and is left out of the ranges around it because it is a different state, not a point on the same line."};
 const el=document.getElementById('chart');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 let view='range', U='C', hot=null;
@@ -188,19 +212,38 @@ function txt(x,y,s,o){
 }
 
 /* ---------------------------------------------------------- the whole span */
-// The column is a person: feet at ten degrees, head at forty-eight, so the
-// bands fill a body rather than a bar. The silhouette is drawn as one open
-// half profile and its mirror, which gives a closed outline with no seam
-// down the middle, and as two closed halves for the clip the bands and the
-// marks are painted inside.
-const RG={lo:10, hi:48, top:44, bot:524, cx:450, hw:60};
-RG.x0=RG.cx-RG.hw; RG.x1=RG.cx+RG.hw;
-function yOf(c){ return RG.bot-(c-RG.lo)/(RG.hi-RG.lo)*(RG.bot-RG.top); }
+// The figure and the table are one drawing on one vertical axis. A degree
+// is a row of the table and a slice of the body at the same height, so the
+// eye runs across from a sentence to the place on a person it is about.
+// Everything follows from ROW: the row height sets the axis, the axis sets
+// the figure's height, and the figure's own proportions set its width. The
+// table runs hot at the top, because the body does.
+// The figure's box holds the axis and nothing else. Whatever height the
+// table's header turns out to be is applied to the figure as a margin
+// afterwards, measured rather than guessed, so the two never drift.
+let ROW=32;                          // a floor; fitRows raises it
+const DLO=10, DHI=48, NDEG=DHI-DLO+1;
+const RG={lo:DLO-0.5, hi:DHI+0.5, top:0, bot:0, ladder:56};
+let SPANW=0;
+// the axis is whatever the rows turn out to be, and the figure is sized
+// from it: as tall as the table, and as wide as a person that tall
+function setAxis(){
+  RG.bot=NDEG*ROW;
+  RG.h=RG.bot-RG.top;
+  // a figure this tall would be this wide, but past a point it would eat
+  // the table's width, and a wider figure makes taller rows makes a taller
+  // figure. The cap breaks that loop; the figure just gets slimmer.
+  RG.hw=Math.min(RG.h/8.4,150);
+  RG.sq=RG.hw/(RG.h/8.4);     // how much the cap slims the figure
+  RG.cx=RG.ladder+RG.hw;
+  SPANW=Math.round(RG.cx+RG.hw+6);
+}
+setAxis();
+function yOf(c){ return RG.bot-(c-RG.lo)/(RG.hi-RG.lo)*RG.h; }
 
-// the right half of a standing figure, in offsets of the figure's height
 function halfProfile(){
-  const H=RG.bot-RG.top, cx=RG.cx;
-  const Y=f=>(RG.top+f*H).toFixed(1), X=d=>(cx+d*H).toFixed(1);
+  const H=RG.h, cx=RG.cx;
+  const Y=f=>(RG.top+f*H).toFixed(1), X=d=>(cx+d*H*RG.sq).toFixed(1);
   const C=(a,b,c,d,e,f)=>'C'+X(a)+','+Y(b)+' '+X(c)+','+Y(d)+' '+X(e)+','+Y(f);
   return 'M'+X(0)+','+Y(.006)
     + C(.024,.006, .045,.014, .045,.044)          // skull
@@ -209,7 +252,7 @@ function halfProfile(){
     + C(.050,.144, .084,.156, .092,.198)          // shoulder
     + C(.106,.256, .116,.368, .120,.470)          // outer arm
     + C(.122,.506, .108,.520, .098,.514)          // the hand
-    + C(.090,.462, .082,.352, .076,.258)          // inner arm, up to the armpit
+    + C(.090,.462, .082,.352, .076,.258)          // inner arm, to the armpit
     + C(.074,.300, .056,.360, .052,.406)          // chest to waist
     + C(.060,.436, .072,.446, .072,.468)          // hip
     + C(.072,.500, .070,.512, .070,.526)          // outer thigh
@@ -236,6 +279,68 @@ function bodyOutline(c,w){
     +'" stroke-linejoin="round" transform="'+mirror()+'"/>';
 }
 
+function drawRange(){
+  const W0=RG.cx-RG.hw-8, W1=RG.cx+RG.hw+8;
+  const ITEMS=D.marks.map((m,i)=>({t:m.t,k:'m',a:'data-m',i:i}))
+    .concat(D.lines.map((L,i)=>({t:L.t,k:'L',a:'data-key',i:i,c:L.c}))
+      .filter(L=>!D.marks.some(m=>Math.abs(m.t-L.t)<0.01)));
+  let s=bodyDefs();
+  s+='<g clip-path="url(#bodyClip)">';
+  for(let i=0;i<D.zones.length;i++){
+    const z=D.zones[i], y=yOf(z.hi), h=yOf(z.lo)-yOf(z.hi);
+    s+='<rect x="'+W0+'" y="'+y.toFixed(1)+'" width="'+(W1-W0)
+      +'" height="'+h.toFixed(1)+'" fill="'+z.c+'" fill-opacity="'
+      +(hot&&hot.t==='z'&&hot.i===i?1:0.82)+'"/>';
+  }
+  ITEMS.forEach(it=>{
+    const y=yOf(it.t), on=hot&&hot.t===it.k&&hot.i===it.i;
+    s+='<path d="M'+W0+','+y.toFixed(1)+' H'+W1+'" stroke="'
+      +(it.k==='L'?'#ffffff':'#121212')+'" stroke-width="'+(on?3:1.6)
+      +'" stroke-opacity="'+(on?0.95:(it.k==='L'?0.4:0.5))+'"'
+      +(it.k==='L'?' stroke-dasharray="4 3"':'')+'/>';
+  });
+  s+='</g>'+bodyOutline('#e6e6e6',1.6);
+  // one hoverable slice of the figure per row of the table, so both halves
+  // of the drawing answer to the same pointer
+  s+='<g clip-path="url(#bodyClip)">';
+  for(let d=DLO;d<=DHI;d++){
+    const on=hot&&hot.t==='q'&&hot.i===d;
+    s+='<g data-q="'+d+'" style="cursor:pointer"><rect x="'+W0+'" y="'
+      +yOf(d+0.5).toFixed(1)+'" width="'+(W1-W0)+'" height="'+ROW
+      +'" fill="#ffffff" fill-opacity="'+(on?0.3:0)+'"/></g>';
+  }
+  s+='</g>';
+  // a rule at every degree boundary, carried out to the table's edge, so
+  // the eye can see that a row and a slice are the same thing
+  for(let d=DLO-1;d<=DHI;d++){
+    const y=yOf(d+0.5);
+    s+='<path d="M'+RG.ladder+','+y.toFixed(1)+' H'+SPANW
+      +'" stroke="#1e1e1e" stroke-width="1"/>';
+  }
+  // the ladder, one rung per row, reading the degrees the table reads
+  for(let d=DLO;d<=DHI;d++){
+    const y=yOf(d), lab=(d%2===0)||d===37;
+    s+='<path d="M'+(RG.ladder-(lab?9:4))+','+y.toFixed(1)+' H'+RG.ladder
+      +'" stroke="#3d444d" stroke-width="1"/>';
+    if(lab) s+=txt(RG.ladder-13,y+4,fmt(d,U==='C'?0:U==='K'?2:1),
+                   {anchor:'end',fs:11});
+  }
+  // the marks, as a dot on the edge of the figure at their own height
+  ITEMS.forEach(it=>{
+    const on=hot&&hot.t===it.k&&hot.i===it.i;
+    s+='<g '+it.a+'="'+it.i+'" style="cursor:pointer">'
+      +'<circle cx="'+W0+'" cy="'+yOf(it.t).toFixed(1)+'" r="'+(on?5:3.4)
+      +'" fill="'+(it.c||'#e6e6e6')+'"/>'
+      +'<rect x="'+(W0-12)+'" y="'+(yOf(it.t)-11)+'" width="24" height="22"'
+      +' fill="transparent"/></g>';
+  });
+  el.innerHTML='<svg viewBox="0 0 '+SPANW+' '+RG.bot
+    +'" xmlns="http://www.w3.org/2000/svg" id="tsvg" '
+    +'preserveAspectRatio="xMinYMin meet">'
+    +'<rect width="'+SPANW+'" height="'+RG.bot+'" fill="#121212"/>'
+    +s+'</svg>';
+}
+
 // Labels that want the same height get pushed apart, keeping their order,
 // and a leader line goes back to where each one really points.
 function declash(ys,gap,lo,hi){
@@ -259,153 +364,6 @@ function leader(x0,y0,x1,y1,c){
   return '<path d="M'+x0.toFixed(1)+','+y0.toFixed(1)+' H'+xm.toFixed(1)
     +' V'+y1.toFixed(1)+' H'+x1.toFixed(1)+'" fill="none" stroke="'
     +(c||'#4a5058')+'" stroke-width="1"/>';
-}
-
-function drawRange(){
-  const W0=RG.x0-14, W1=RG.x1+14;
-  // the marks, and the lines from the fine scale that are not already marks
-  const ITEMS=D.marks.map((m,i)=>({t:m.t,n:m.n,k:'m',a:'data-m',i:i}))
-    .concat(D.lines.map((L,i)=>({t:L.t,n:L.n,k:'L',a:'data-key',i:i,c:L.c}))
-      .filter(L=>!D.marks.some(m=>Math.abs(m.t-L.t)<0.01)))
-    .sort((a,b)=>b.t-a.t);
-  let s=bodyDefs();
-  // the bands, painted across the figure and cut to its shape
-  s+='<g clip-path="url(#bodyClip)">';
-  for(let i=0;i<D.zones.length;i++){
-    const z=D.zones[i], y=yOf(z.hi), h=yOf(z.lo)-yOf(z.hi);
-    s+='<rect x="'+W0+'" y="'+y.toFixed(1)+'" width="'+(W1-W0)
-      +'" height="'+h.toFixed(1)+'" fill="'+z.c+'" fill-opacity="'
-      +(hot&&hot.t==='z'&&hot.i===i?1:0.82)+'"/>';
-  }
-  // a rule across the body at every marked temperature
-  ITEMS.forEach(it=>{
-    const y=yOf(it.t), on=hot&&hot.t===it.k&&hot.i===it.i;
-    s+='<path d="M'+W0+','+y.toFixed(1)+' H'+W1+'" stroke="'
-      +(it.k==='L'?'#ffffff':'#121212')+'" stroke-width="'+(on?2.4:1.3)
-      +'" stroke-opacity="'+(on?0.95:(it.k==='L'?0.4:0.5))+'"'
-      +(it.k==='L'?' stroke-dasharray="3 2"':'')+'/>';
-  });
-  s+='</g>'+bodyOutline('#e6e6e6',1.4);
-  // a quarter of a degree at a time, over the whole figure
-  s+='<g clip-path="url(#bodyClip)">';
-  const NC=Math.round((RG.hi-RG.lo)/CELL);
-  for(let k=0;k<NC;k++){
-    const c=RG.lo+k*CELL, on=hot&&hot.t==='q'&&hot.i===k;
-    s+='<g data-q="'+k+'" style="cursor:pointer"><rect x="'+W0+'" y="'
-      +yOf(c+CELL).toFixed(1)+'" width="'+(W1-W0)+'" height="'
-      +(yOf(c)-yOf(c+CELL)).toFixed(1)+'" fill="#ffffff" fill-opacity="'
-      +(on?0.28:0)+'"/></g>';
-  }
-  s+='</g>';
-  // the ladder of degrees, in whatever unit is showing
-  for(let c=10;c<=48;c+=2){
-    const y=yOf(c);
-    s+='<path d="M'+(RG.x0-7)+','+y.toFixed(1)+' h7" stroke="#3d444d" stroke-width="1"/>'
-      +txt(RG.x0-11,y+3.6,fmt(c,U==='K'?2:0),{anchor:'end'});
-  }
-  // the marks and lines, to the left, pushed apart where they crowd
-  const mt=ITEMS.map(it=>yOf(it.t));
-  const ml=declash(mt.slice(),30,RG.top+8,RG.bot);
-  ITEMS.forEach((it,j)=>{
-    const on=hot&&hot.t===it.k&&hot.i===it.i, LX=RG.x0-72;
-    s+='<g '+it.a+'="'+it.i+'" style="cursor:pointer">'
-      +leader(RG.x0,mt[j],LX+6,ml[j],on?'#e6e6e6':'#4a5058')
-      +'<circle cx="'+RG.x0+'" cy="'+mt[j].toFixed(1)+'" r="'+(on?4.5:3)
-      +'" fill="'+(it.c||'#e6e6e6')+'"/>'
-      +txt(LX,ml[j]-3,esc(it.n),{anchor:'end',fs:11.5,
-           fill:on?'#e6e6e6':(it.c||'#8b93a0'),stroke:1})
-      +txt(LX,ml[j]+11,fmt(it.t),{anchor:'end',fs:11,
-           fill:on?'#c8ccd2':'#5d6672',stroke:1})
-      +'<rect x="'+(LX-250)+'" y="'+(ml[j]-15)+'" width="256" height="28" fill="transparent"/>'
-      +'</g>';
-  });
-  // what each band is, to the right
-  const zt=D.zones.map(z=>(yOf(z.hi)+yOf(z.lo))/2);
-  const zl=declash(zt.slice(),30,RG.top+8,RG.bot);
-  D.zones.forEach((z,i)=>{
-    const on=hot&&hot.t==='z'&&hot.i===i, RX=RG.x1+34;
-    s+='<g data-z="'+i+'" style="cursor:pointer">'
-      +leader(RG.x1,zt[i],RX-6,zl[i],on?'#e6e6e6':'#3a4048')
-      +txt(RX,zl[i]-3,esc(z.n),{fs:11.5,fill:on?'#e6e6e6':'#8b93a0',stroke:1})
-      +txt(RX,zl[i]+11,fmt(z.lo,U==='K'?2:1)+' to '+fmt(z.hi,U==='K'?2:1),
-           {fs:10.5,fill:on?'#c8ccd2':'#5d6672',stroke:1})
-      +'<rect x="'+(RX-6)+'" y="'+(zl[i]-15)+'" width="150" height="26" fill="transparent"/>'
-      +'</g>';
-  });
-  s+=measuredPanel();
-  s+=txt(80,RG.top-18,'the whole span a person has been brought back from, '
-        +'and the sliver the body holds',{fs:11.5,fill:'#8b93a0'});
-  el.innerHTML=svg(600,s);
-}
-
-/* -------------------------------------- what has actually been measured */
-const MP={x0:716,x1:962,max:150};   // the shivering point runs off it
-function mx(p){ return MP.x0+Math.min(p,MP.max)/MP.max*(MP.x1-MP.x0); }
-function measuredPanel(){
-  let s=txt(MP.x0,RG.top-32,'Metabolic rate, against the resting rate',
-      {fs:11.5,fill:'#c8ccd2'})
-    +txt(MP.x0,RG.top-18,'every point is a measurement, and the gaps are gaps',
-         {fs:11,fill:'#6b7280'});
-  // who the numbers came from, banded down the side of the scale
-  D.regimes.forEach((r,i)=>{
-    const y=yOf(r.hi), h=yOf(r.lo)-yOf(r.hi);
-    const on=hot&&hot.t==='g'&&hot.i===i;
-    s+='<g data-g="'+i+'" style="cursor:pointer">'
-      +'<rect x="'+MP.x0+'" y="'+y.toFixed(1)+'" width="'+(MP.x1-MP.x0)
-      +'" height="'+h.toFixed(1)+'" fill="'+r.c+'" fill-opacity="'
-      +(on?0.14:(i===2?0.05:0.055))+'"'
-      +(i===2?' stroke="'+r.c+'" stroke-opacity="0.35" stroke-dasharray="3 3"':'')
-      +'/>'
-      +'</g>';
-  });
-  // the resting line, and a ladder of percentages
-  for(const p of [50,100,150]){
-    s+='<path d="M'+mx(p).toFixed(1)+','+RG.top+' V'+RG.bot+'" stroke="'
-      +(p===100?'#4a5058':'#242424')+'" stroke-width="1"'
-      +(p===100?'':' ')+'/>'
-      +txt(mx(p),RG.bot+18,p+'%',{anchor:'middle',fs:10,fill:'#6b7280'});
-  }
-  // one faint join within a study, never between studies
-  const by={};
-  D.measured.forEach((m,i)=>{ (by[m.s]=by[m.s]||[]).push(m); });
-  for(const k in by){
-    if(by[k].length<2) continue;
-    let d='';
-    by[k].slice().sort((a,b)=>a.t-b.t).forEach(m=>{
-      d+=(d?'L':'M')+mx(m.p).toFixed(1)+','+yOf(m.t).toFixed(1); });
-    s+='<path d="'+d+'" fill="none" stroke="#8b93a0" stroke-width="1"'
-      +' stroke-opacity="0.45" stroke-dasharray="4 3"/>';
-  }
-  D.measured.forEach((m,i)=>{
-    const on=hot&&hot.t==='M'&&hot.i===i, off=m.p>MP.max;
-    const x=mx(m.p), y=yOf(m.t);
-    s+='<g data-pt="'+i+'" style="cursor:pointer">';
-    if(off)   // an arrow at the edge, rather than a squashed axis
-      s+='<path d="M'+(x-9).toFixed(1)+','+y.toFixed(1)+' h7 m0,-5 l6,5 l-6,5Z"'
-        +' fill="#31d67a" stroke="#31d67a" stroke-width="1.4"/>';
-    else
-      s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(on?6:4)
-        +'" fill="'+(m.a?'#31d67a':'#58a6ff')+'" stroke="#121212" stroke-width="1.2"/>';
-    s+='<rect x="'+(x-14)+'" y="'+(y-9)+'" width="22" height="18" fill="transparent"/>'
-      +'</g>';
-  });
-  // the clusters, named once each
-  s+=txt(MP.x1-6,yOf(35.2)-9,'shivering, 4.9 times resting, off this scale',
-         {anchor:'end',fs:10.5,fill:'#31d67a',stroke:1})
-    +txt(mx(38)+8,yOf(18)-8,'the coldest a person has been measured',
-         {fs:10.5,fill:'#58a6ff',stroke:1});
-  // who the numbers came from, said once, under the panel
-  D.regimes.forEach((r,i)=>{
-    const on=hot&&hot.t==='g'&&hot.i===i, y=RG.bot+30+i*15;
-    s+='<g data-g="'+i+'" style="cursor:pointer">'
-      +'<rect x="'+MP.x0+'" y="'+(y-8)+'" width="9" height="9" fill="'+r.c
-      +'" fill-opacity="'+(i===2?0.25:0.9)+'"'
-      +(i===2?' stroke="'+r.c+'" stroke-dasharray="2 2"':'')+'/>'
-      +txt(MP.x0+14,y,esc(r.n),{fs:9.5,fill:on?'#e6e6e6':'#8b93a0'})
-      +'<rect x="'+MP.x0+'" y="'+(y-11)+'" width="230" height="15" fill="transparent"/>'
-      +'</g>';
-  });
-  return s;
 }
 
 /* ------------------------------------------------------------------ a day */
@@ -886,7 +844,7 @@ function renderTable(){
   for(const d of D.table){
     r+='<tr><td class="c">'+fmt(d.t,U==='C'?0:U==='K'?2:1)+'</td>'
       +'<td class="z"><i style="background:'+d.zc+'"></i>'+esc(d.zn)+'</td>'
-      +'<td class="w">'+esc(conv(d.w))+'</td>'
+      +'<td class="w"><span class="cw">'+esc(conv(d.w))+'</span></td>'
       +'<td class="n '+d.mk+'" title="'+esc(d.mn)+'">'+esc(d.mv)+'</td>'
       +'<td class="n '+d.pk+'">'+esc(d.pv)+'</td></tr>';
   }
@@ -895,9 +853,9 @@ function renderTable(){
 const DRAW={range:drawRange, day:drawDay, site:drawSites, fever:drawFever,
             heat:drawHeat, fine:drawFine, help:drawHelp};
 const INTRO={
-  range:['The whole span','From the coldest anyone has been rewarmed from to '
-    +'the hottest anyone has walked away from. The band the body actually '
-    +'holds is the green sliver in the middle.'],
+  range:['The whole span','The figure and the table are one drawing on one '
+    +'axis: a row is a degree, and a degree is a slice of a person at the '
+    +'same height. The band the body holds is the green sliver at the ribs.'],
   day:['A day','Core temperature is lowest a couple of hours before waking '
     +'and highest in the late afternoon. The whole swing is about half a '
     +'degree, which is why the hour matters when a reading is judged.'],
@@ -921,13 +879,52 @@ const INTRO={
 const VBTN=[['vRange','range'],['vDay','day'],['vSite','site'],
             ['vFever','fever'],['vHeat','heat'],['vFine','fine'],
             ['vHelp','help']];
+// the one place the two halves are joined: the figure starts where the
+// table's first row starts, to the pixel
+function alignAxis(){
+  const c=document.getElementById('chart');
+  if(view!=='range'){ c.style.marginTop=''; return; }
+  const h=document.querySelector('#degrees thead');
+  c.style.marginTop = h ? h.getBoundingClientRect().height+'px' : '';
+}
+// A row that needs a third line makes every row that tall, because a row
+// of the table is a degree of the figure and degrees are all the same
+// size. Measured, not guessed, so a narrower window or a longer unit
+// simply moves everything together.
+function fitRows(){
+  if(view!=='range') return;
+  const rows=[...document.querySelectorAll('#degrees tbody tr')];
+  if(!rows.length) return;
+  // a cell stretches to its row, so the row cannot be measured from one:
+  // the prose is wrapped in a span and that is what gets measured
+  const spans=[...document.querySelectorAll('#degrees td.w .cw')];
+  if(!spans.length) return;
+  const tall=Math.ceil(Math.max(...spans.map(
+    x=>x.getBoundingClientRect().height))+7);
+  const want=Math.max(32,tall);
+  if(want===ROW) return;
+  ROW=want; setAxis();
+  document.documentElement.style.setProperty('--row',ROW+'px');
+  document.documentElement.style.setProperty('--figw',SPANW+'px');
+  document.documentElement.style.setProperty('--row',ROW+'px');
+  drawRange();
+  alignAxis();
+}
 function render(){
   DRAW[view]();
   if(!hot){ const [n,b]=INTRO[view]; card('',n,'',b); }
+  alignAxis(); fitRows();
 }
 function setView(v){
   view=v; hot=null;
-  document.getElementById('degwrap').hidden = (v!=='range');
+  const span = v==='range';
+  document.getElementById('degwrap').hidden = !span;
+  document.querySelector('.stage').classList.toggle('span',span);
+  document.getElementById('spanpair').style.display = span?'flex':'block';
+  // the figure is drawn at one pixel per unit so its degrees land on the
+  // table's rows exactly, whatever the page is doing around it
+  document.documentElement.style.setProperty('--figw',SPANW+'px');
+  document.documentElement.style.setProperty('--row',ROW+'px');
   for(const [id,k] of VBTN) document.getElementById(id).classList.toggle('on',v===k);
   render();
 }
@@ -937,6 +934,7 @@ function setUnit(u){
     document.getElementById(id).classList.toggle('on',u===k);
   DRAW[view]();
   renderTable();
+  alignAxis(); fitRows();
   // the prose below the diagram carries temperatures too
   for(const e of document.querySelectorAll('.cv')){
     if(!e.dataset.tpl) e.dataset.tpl=e.innerHTML;
@@ -1016,7 +1014,7 @@ el.addEventListener('pointerover',ev=>{
     card('Watts',B[0],B[1].toLocaleString('en-US')+' W',B[2]);
   } else if(g.hasAttribute('data-q')){
     pick('data-q','q');
-    const t=RG.lo+hot.i*CELL, mid=t+CELL/2;
+    const mid=hot.i;                    // data-q carries the degree itself
     const z=D.zones.find(x=>mid>=x.lo&&mid<x.hi)||D.zones[D.zones.length-1];
     const rg=D.regimes.find(r=>mid>=r.lo&&mid<r.hi);
     let cost;
