@@ -1,0 +1,179 @@
+#!/usr/bin/env python3
+"""Verify temperature.html against what the page actually draws.
+
+Offline (network cut): five views, each drawing its own thing; the bands
+of the span meet with no gap and cover the whole documented range; the
+labels are pushed apart rather than piled up; the daily curve is low
+before dawn and high in the late afternoon and swings about half a
+degree; the sites disagree by more than that; fever chases a moving set
+point while hyperthermia climbs past a still one; the four routes out
+add to a hundred; and the unit buttons convert a point on the scale and
+a gap between two points differently, which is the arithmetic the page
+is teaching. No JS errors.
+
+Usage: python3 verify_temperature.py
+"""
+import sys
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+
+sys.path.insert(0, str(Path(__file__).parent))
+import temperature_data as D                          # noqa: E402
+
+PAGE = Path(__file__).parent.parent / "temperature.html"
+fails = []
+
+
+def check(name, ok, detail=""):
+    print(("ok   " if ok else "FAIL ") + name
+          + (f"  [{detail}]" if detail and not ok else ""))
+    if not ok:
+        fails.append(name)
+
+
+VIEWS = [("vRange", "range"), ("vDay", "day"), ("vSite", "site"),
+         ("vFever", "fever"), ("vHeat", "heat")]
+
+with sync_playwright() as pw:
+    br = pw.chromium.launch()
+    pg = br.new_page(viewport={"width": 1400, "height": 1200})
+    errs = []
+    pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.route("**/*", lambda r: r.abort()
+             if r.request.url.startswith("http") else r.continue_())
+    pg.goto(PAGE.as_uri())
+    pg.wait_for_timeout(600)
+
+    st = pg.evaluate("window.__temp()")
+    check("the page opens on the whole span", st["view"] == "range")
+    check("in Celsius", st["unit"] == "C")
+
+    # --- the span
+    check("the bands meet with no gap between them", st["zonesJoin"])
+    check("and cover everything from the coldest survival to the hottest",
+          st["span"][0] <= 11.8 and st["span"][1] >= 46.5, str(st["span"]))
+    check("every band is drawn", st["zones"] == len(D.ZONES),
+          str(st["zones"]))
+    check("and every mark", st["marks"] == len(D.MARKS), str(st["marks"]))
+    # the labels are pushed apart, not piled on each other
+    ys = pg.evaluate(
+        "[...document.querySelectorAll('#tsvg [data-m] text')]"
+        ".map(t=>+t.getAttribute('y')).sort((a,b)=>a-b)")
+    pairs = [b - a for a, b in zip(ys, ys[1:])]
+    check("no two mark labels land on the same line",
+          all(d == 0 or d >= 13 for d in pairs), str(sorted(set(pairs))[:5]))
+    # and each still points at the temperature it means
+    lead = pg.evaluate(
+        "(()=>{const g=[...document.querySelectorAll('#tsvg [data-m]')];"
+        "return g.map(x=>+x.querySelector('circle').getAttribute('cy'));})()")
+    want = pg.evaluate("D.marks.map(m=>yOf(m.t))")
+    check("every mark still sits at its own height",
+          all(abs(a - b) < 0.6 for a, b in zip(lead, want)))
+
+    # --- a day
+    pg.click("#vDay")
+    pg.wait_for_timeout(250)
+    st = pg.evaluate("window.__temp()")
+    check("the day view draws the day", st["view"] == "day")
+    check("lowest before dawn, highest in the late afternoon",
+          st["dayLow"] < st["dayHigh"],
+          f'{st["dayLow"]} vs {st["dayHigh"]}')
+    swing = st["dayHigh"] - st["dayLow"]
+    check("and the whole swing is about half a degree",
+          0.45 <= swing <= 0.55, f"{swing:.2f}")
+    lo = pg.evaluate("dayT(D.day.nadir)")
+    check("the low lands on the nadir the source gives",
+          all(lo <= pg.evaluate(f"dayT({h})") + 1e-9 for h in range(0, 24)),
+          str(lo))
+
+    # --- where it is taken
+    pg.click("#vSite")
+    pg.wait_for_timeout(250)
+    check("a row for each site",
+          pg.evaluate("document.querySelectorAll('#tsvg [data-s]').length")
+          == len(D.SITES))
+    spread = pg.evaluate("Math.max(...D.sites.map(s=>s.m))"
+                         "-Math.min(...D.sites.map(s=>s.m))")
+    check("the sites disagree by more than the daily swing",
+          spread > swing, f"{spread:.2f} vs {swing:.2f}")
+    check("the rectum reads higher than the armpit",
+          pg.evaluate("D.sites.find(s=>s.n==='Rectal').m"
+                      ">D.sites.find(s=>s.n==='Axillary').m"))
+    check("and the peripheral spread is on the page too",
+          pg.evaluate("!!document.querySelector('#tsvg [data-p]')"))
+
+    # --- fever against hyperthermia
+    pg.click("#vFever")
+    pg.wait_for_timeout(250)
+    st = pg.evaluate("window.__temp()")
+    check("early in a fever the body is still chasing the set point",
+          st["chase"])
+    check("in the middle it has caught it", st["caught"])
+    check("and at the end it is shedding heat above it", st["shed"])
+    check("the four phases are all drawn",
+          pg.evaluate("document.querySelectorAll('#tsvg [data-f]').length")
+          == len(D.FEVER["phases"]))
+    check("hyperthermia climbs past a set point that never moves",
+          pg.evaluate("illT(20)>D.ill.base+3 && illT(0)===D.ill.base"))
+
+    # --- heat in and heat out
+    pg.click("#vHeat")
+    pg.wait_for_timeout(250)
+    check("the routes out add to a hundred", st["routeSum"] == 100,
+          str(st["routeSum"]))
+    check("a bar for each route",
+          pg.evaluate("document.querySelectorAll('#tsvg [data-r]').length")
+          == len(D.ROUTES))
+    check("radiation is the largest at rest",
+          pg.evaluate("D.routes[0].n==='Radiation' && "
+                      "D.routes.every(r=>r.p<=D.routes[0].p)"))
+    check("the sweat ceiling follows from the latent heat",
+          abs(pg.evaluate("2*D.power.evap_w_per_lh")
+              - 2 * D.POWER["latent"] * 1000 / 3600) < 5)
+    check("hard effort makes an order of magnitude more heat than rest",
+          pg.evaluate("D.power.hard/D.power.rest>=10"))
+    check("and the dry routes reverse above skin temperature",
+          pg.evaluate("document.querySelectorAll('#tsvg [data-x]').length")
+          == 2)
+
+    # --- the units, which are the other half of the lesson
+    pg.click("#vRange")
+    pg.wait_for_timeout(200)
+    for btn, unit, at37, rise in [("#uC", "C", "37.0°C", "1.0°C"),
+                                  ("#uF", "F", "98.6°F", "1.8°F"),
+                                  ("#uK", "K", "310.15 K", "1.0 K")]:
+        pg.click(btn)
+        pg.wait_for_timeout(200)
+        st = pg.evaluate("window.__temp()")
+        d = 2 if unit == "K" else 1
+        got = pg.evaluate(f"fmt(37,{d})")
+        check(f"a body reads {at37}", got == at37, got)
+        check(f"and a rise of one Celsius degree reads {rise}",
+              st["rise1"] == rise, st["rise1"])
+    pg.click("#uC")
+    pg.wait_for_timeout(200)
+
+    # every view still draws something the reader can point at
+    for btn, name in VIEWS:
+        pg.click("#" + btn)
+        pg.wait_for_timeout(220)
+        st = pg.evaluate("window.__temp()")
+        check(f"the {name} view has something to hover",
+              st["nodes"] >= 2, str(st["nodes"]))
+
+    html = PAGE.read_text(encoding="utf-8")
+    check("no em dashes", "—" not in html)
+    check("the page links back to the library", 'href="library.html"' in html)
+    for doi in ["10.1093/ofid/ofz032", "10.1136/bmj.j5468",
+                "10.1056/NEJMra1114208", "10.1093/ejcts/ezaa159",
+                "10.1056/NEJMra011089", "10.1177/1073858418760481"]:
+        check(f"cites {doi}", doi in html)
+    check("and says the hottest survival is a record, not a case report",
+          "Guinness" in html)
+
+    check("no JS errors", not errs, "; ".join(errs)[:140])
+    br.close()
+
+if fails:
+    raise SystemExit(f"{len(fails)} check(s) failed")
+print("all checks passed")
