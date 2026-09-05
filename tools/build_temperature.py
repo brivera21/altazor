@@ -63,77 +63,73 @@ js = dict(
 
 NOTE1 = ("Seven views on one column of degrees. The span is everything a "
          "person has been brought back from, at either end. The day is the "
-         "half degree the body actually moves through, and the sites "
-         "disagree by more than that. Fever sets a target the body chases, "
-         "which is why the chill comes first; hyperthermia moves no target "
-         "and is control losing to heat. The last two views run degree by "
-         "degree, and then ask what the number does not decide.")
+         "half degree the body moves through, and the sites disagree by more "
+         "than that. Fever sets a target the body chases, so the chill comes "
+         "first. In hyperthermia no target moves and control loses to heat. "
+         "The last two views run degree by degree, and then ask what the "
+         "number does not settle.")
 
-NOTE2 = ("The buttons set the scale and everything moves with it: the "
-         "ladder, the marks, the table, and the temperatures written into "
-         "the sentences. A point on the scale and a gap between two points "
-         "still convert differently, which is why a body at 37 degrees "
-         "Celsius is 98.6 Fahrenheit while a rise of one Celsius degree is "
-         "1.8 Fahrenheit degrees and exactly one kelvin. The collapse view "
-         "follows published guidance and does not replace the emergency "
-         "number, which is the first call.")
+NOTE2 = ("The buttons set the scale, and the ladder, the marks, the table and "
+         "the temperatures inside the sentences all move with it. A point on "
+         "the scale and a gap between two points still convert differently, "
+         "so a body at 37 degrees Celsius is 98.6 Fahrenheit while a rise of "
+         "one Celsius degree is 1.8 Fahrenheit degrees and exactly one "
+         "kelvin. The collapse view follows published guidance and does not "
+         "replace the emergency number, which is the first call.")
 
 METHOD = ("What the collapse view rests on, and where it is soft. There is no "
           "randomised trial of any cooling method in human heat stroke with "
-          "survival as the endpoint, and there will not be. Every figure "
-          "here comes either from laboratory heating of healthy volunteers, "
-          "which is not heat stroke, or from uncontrolled case series in "
-          "which the treatment was never withheld. The reviewers who grade "
-          "this literature call their own strongest cooling recommendation "
-          "certain in direction and very low in certainty of evidence, and "
-          "the page follows them. Three specifics are worth naming. The "
-          "cooling rates for pouring and fanning come from the sports "
-          "medicine literature at about half the rate of immersion; a formal "
-          "review of the same studies could not tell that method apart from "
-          "doing nothing, and both numbers sit in current guidelines. The "
-          "stopping point of {38.6} has direct experimental support "
-          "from ten volunteers, while authorities place the line anywhere "
-          "from {38.0} to {39.4}. And the thirty minute target is an operational "
-          "goal grounded in observational series and physiology, not a "
-          "measured cliff: no validated model turns a person's temperature "
+          "survival as the endpoint, and there will not be. Every figure here "
+          "comes either from laboratory heating of healthy volunteers, which "
+          "is not heat stroke, or from uncontrolled case series in which the "
+          "treatment was never withheld. The reviewers who grade this "
+          "literature call their own strongest cooling recommendation certain "
+          "in direction and very low in certainty of evidence, and the page "
+          "follows them. Three points in particular. The cooling rates for "
+          "pouring and fanning come from the sports medicine literature at "
+          "about half the rate of immersion; a formal review of the same "
+          "studies could not tell that method apart from doing nothing, and "
+          "both numbers sit in current guidelines. The stopping point of "
+          "{38.6} has direct experimental support from ten volunteers, while "
+          "authorities place the line anywhere from {38.0} to {39.4}. The "
+          "thirty minute target is grounded in observational series and "
+          "physiology, and no validated model turns a person's temperature "
           "and the time they spent there into a probability. The series "
           "reporting no deaths after fast cooling are drawn from finish line "
           "medical tents and military bases, where the patients were young "
           "and the collapse was witnessed, so they do not transfer to an "
           "elderly person found at home. Whether immersion suits that person "
-          "at all is genuinely unresolved: one guideline treats both kinds of "
-          "heat stroke the same, one review found immersion poorly tolerated "
-          "in the classic form, and a third makes no recommendation. No "
+          "at all is unresolved. One guideline treats both kinds of heat "
+          "stroke the same, one review found immersion poorly tolerated in "
+          "the classic form, and a third makes no recommendation. No "
           "guideline body tells a lay rescuer what to do about the airway of "
           "an unresponsive person during immersion, so the line about the "
-          "bathtub is a reading of the warnings rather than a quotation of "
-          "one.")
+          "bathtub follows from the warnings without quoting any of them.")
 
 MEASURED_NOTE = (
-    "The points on the metabolic panel, and why they are points. No "
-    "published figure covers this range, and drawing one would mean joining "
-    "measurements that come from incompatible states: the shivering peak "
-    "needs a person awake and defending their temperature, while everything "
-    "below about 33 degrees was measured in someone anaesthetised, paralysed "
-    "or on bypass, which is the only reason anyone has been that cold and "
-    "measured. So the page plots the measurements and leaves the gaps "
-    "empty. The studies, in order down the scale: Zhu (2003), twenty "
-    "anaesthetised patients heated to {41.8}; Eyolfson and colleagues (2001, "
-    "European Journal of Applied Physiology 84, 100 to 106) on peak "
-    "shivering; Flickinger and colleagues (2023, Therapeutic Hypothermia and "
-    "Temperature Management), nine sedated volunteers cooled to {33}; "
-    "Sharabiani and colleagues (2025, Perfusion), 293 children on bypass; "
-    "Hickey and colleagues (1983, Journal of Thoracic and Cardiovascular "
-    "Surgery), twelve men at {25.4}; and Diop and colleagues (2024, Journal of "
+    "Where the metabolic column comes from. No published figure covers this "
+    "range, and drawing a curve would mean joining measurements taken in "
+    "incompatible states. The shivering peak needs a person awake and "
+    "defending their temperature. Everything below about {33} was measured "
+    "in someone anaesthetised, paralysed or on bypass, which is the only "
+    "reason anyone has been that cold and measured. So the table gives a "
+    "figure where one was measured and marks the rest as gaps. "
+    "The studies, in order down the scale: Zhu (2003), twenty anaesthetised "
+    "patients heated to {41.8}; Eyolfson and colleagues (2001, European "
+    "Journal of Applied Physiology 84, 100 to 106) on peak shivering; "
+    "Flickinger and colleagues (2023, Therapeutic Hypothermia and Temperature "
+    "Management), nine sedated volunteers cooled to {33}; Sharabiani and "
+    "colleagues (2025, Perfusion), 293 children on bypass; Hickey and "
+    "colleagues (1983, Journal of Thoracic and Cardiovascular Surgery), "
+    "twelve men at {25.4}; and Diop and colleagues (2024, Journal of "
     "Cardiothoracic and Vascular Anesthesia), twenty-four adults at {18}, the "
-    "coldest whole-body measurement of a human there is. Below that there "
-    "is nothing. The figures that circulate for 15 and 10 degrees descend "
-    "from dogs cooled by Bigelow in 1950 by way of a 1983 review, and "
-    "because the rate of change steepens as it gets colder they are "
-    "probably too high. One more caution: the percentage-per-degree figures "
-    "in this literature differ by a fifth depending on whether the "
-    "denominator is the febrile value or the normal one, and this page uses "
-    "the febrile one.")
+    "coldest whole-body measurement of a human. Below that there is nothing. "
+    "The figures that circulate for {15} and {10} descend from dogs "
+    "cooled by Bigelow in 1950 by way of a 1983 review, and because the rate "
+    "of change steepens as it gets colder they are probably too high. One "
+    "more caution. The percentage-per-degree figures in this literature "
+    "differ by a fifth depending on whether the denominator is the febrile "
+    "value or the normal one. This page uses the febrile one.")
 
 HTML = r"""<!DOCTYPE html>
 <html lang="en">
@@ -265,9 +261,9 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 </div>
 <p class="note cv">__NOTE1__</p>
 <p class="note cv" style="border-top:none; padding-top:0;">__NOTE2__</p>
-<div class="method"><details><summary>The points on the metabolic panel, and why they are points</summary>
+<div class="method"><details><summary>Where the metabolic column comes from</summary>
 <p class="cv">__MEASURED__</p></details></div>
-<div class="method"><details><summary>What the collapse view rests on, and where it is soft</summary>
+<div class="method"><details><summary>How good the cooling evidence is</summary>
 <p class="cv">__METHOD__</p></details></div>
 <h2 class="refh">References</h2>
 <div class="refs">__REFS__</div>
@@ -965,27 +961,28 @@ const DRAW={range:drawRange, day:drawDay, site:drawSites, fever:drawFever,
             heat:drawHeat, fine:drawFine, help:drawHelp};
 const INTRO={
   range:['The whole span','The figure and the table are one drawing on one '
-    +'axis: a row is a degree, and a degree is a slice of a person at the '
+    +'axis. A row is a degree, and a degree is a slice of a person at the '
     +'same height. The band the body holds is the green sliver at the ribs.'],
   day:['A day','Core temperature is lowest a couple of hours before waking '
     +'and highest in the late afternoon. The whole swing is about half a '
-    +'degree, which is why the hour matters when a reading is judged.'],
+    +'degree, so the hour matters when a reading is judged.'],
   site:['Where it is taken','Four everyday sites, from a meta-analysis of '
     +'7,636 healthy adults. They disagree by more than a degree Celsius '
     +'between the '
-    +'rectum and the armpit, which is more than the daily swing.'],
-  fever:['Fever','Above, a fever: the set point moves and the body chases it. '
-    +'Below, hyperthermia: the set point stays put and heat wins anyway. The '
-    +'two look alike on a thermometer and are opposite underneath.'],
+    +'rectum and the armpit, more than the whole daily swing.'],
+  fever:['Fever','Above, a fever, where the set point moves and the body '
+    +'chases it. Below, hyperthermia, where the set point stays put and heat '
+    +'wins anyway. The two look alike on a thermometer and are opposite '
+    +'underneath.'],
   heat:['Heat in, heat out','About a hundred watts at rest, and fourteen '
     +'times that climbing a mountain on a bicycle. Sweat is the only route '
     +'that still works once the room is hotter than the skin.'],
   fine:['Degree by degree','From an ordinary morning to the top of what a '
     +'body survives, a quarter degree at a time, with what each step costs '
-    +'the metabolism and the heart. Both scales are on the ruler.'],
+    +'the metabolism and the heart.'],
   help:['If someone collapses','The temperature does not decide this. '
     +'Whether the person is answering does. The lower row is red the whole '
-    +'way across, and that is the point of the picture.'],
+    +'way across.'],
 };
 const VBTN=[['vRange','range'],['vDay','day'],['vSite','site'],
             ['vFever','fever'],['vHeat','heat'],['vFine','fine'],
@@ -1073,7 +1070,7 @@ el.addEventListener('pointerover',ev=>{
     card('A band of the span',z.n,fmt(z.lo)+' to '+fmt(z.hi),z.b); tint(z.c);
   } else if(g.hasAttribute('data-m')){
     pick('data-m','m'); const m=D.marks[hot.i];
-    card('A mark on the column',m.n,fmt(m.t),m.b);
+    card('A mark on the figure',m.n,fmt(m.t),m.b);
   } else if(g.hasAttribute('data-h')){
     pick('data-h','h'); const h=hot.i, t=dayT(h);
     card('One hour of the day',(h<10?'0':'')+h+':00',fmt(t),
@@ -1099,7 +1096,7 @@ el.addEventListener('pointerover',ev=>{
     card('A phase of the fever',p[2],'hour '+p[0]+' to '+p[1],p[3]);
   } else if(g.hasAttribute('data-i')){
     hot={t:'i',i:0};
-    card('The other way up','Hyperthermia',
+    card('The opposite case','Hyperthermia',
       fmt(D.ill.base)+' to '+fmt(D.ill.peak)+', with the set point unmoved',
       D.ill.note);
   } else if(g.hasAttribute('data-r')){
@@ -1114,14 +1111,14 @@ el.addEventListener('pointerover',ev=>{
         +'climb makes about this much heat, because only a fifth to a quarter '
         +'of the energy burned becomes movement and the rest is waste heat.'],
       ['At the highest effort ever measured',P.peak,'Twenty-five times the '
-        +'resting output. Nothing sheds heat that fast for long, which is why '
-        +'efforts like this are short.'],
+        +'resting output. Nothing sheds heat that fast for long, so efforts '
+        +'like this are short.'],
       ['What sweat can carry off',Math.round(2*P.evap_w_per_lh),
         'Evaporating a litre of sweat takes about '+P.latent+' kilojoules, so '
         +'two litres an hour carries off around '+Math.round(2*P.evap_w_per_lh)
         +' watts. Only evaporated sweat counts. Sweat that drips off has cost '
-        +'the body water and bought it nothing, which is why humid heat is '
-        +'more dangerous than dry heat at the same temperature.']][hot.i];
+        +'the body water and bought it nothing. Humid heat is more dangerous '
+        +'than dry heat at the same temperature.']][hot.i];
     card('Watts',B[0],B[1].toLocaleString('en-US')+' W',B[2]);
   } else if(g.hasAttribute('data-q')){
     pick('data-q','q');
@@ -1132,8 +1129,8 @@ el.addEventListener('pointerover',ev=>{
     if(mid>=37){
       cost='Holding this costs about '+Math.round(metPct(mid)-100)
         +' per cent more oxygen than resting, and the pulse runs near '
-        +Math.round(bpm(mid))+'. The climb flattens as it goes: about 9 per '
-        +'cent a degree Celsius over the first two, and 4 by the time it '
+        +Math.round(bpm(mid))+'. The climb flattens as it goes, from about 9 per '
+        +'cent a degree Celsius over the first two to 4 by the time it '
         +'reaches {41.8}.';
     } else if(mid>=33){
       cost='Shivering starts around 36.8 and can reach almost five times the '
@@ -1208,8 +1205,8 @@ el.addEventListener('pointerover',ev=>{
     card('Which way the heat runs',hot.i?'Hotter than the skin':'Cooler than the skin',
       hot.i?'above about '+fmt(P.skin):'below about '+fmt(P.skin),
       hot.i?'Radiation and convection reverse. The room is now heating the '
-        +'body, and evaporation is the only route left, which is why still, '
-        +'humid air is the dangerous combination.'
+        +'body, and evaporation is the only route left. Still, humid air is '
+        +'the dangerous combination.'
         :'Radiation and convection carry heat away from the skin, and do most '
         +'of the work at rest.');
   }
@@ -1282,14 +1279,14 @@ def degree_rows():
 
 
 TKEY = ("Metabolic rate is a percentage of the resting rate at {37}. A figure "
-        "in white is a measurement; a range in grey is the gap between the "
-        "two measurements either side of it and is not itself measured. Pulse "
+        "in white is a measurement; a range in grey is the gap between the two "
+        "measurements either side of it, and was never measured. Pulse "
         "is 2.54 beats a minute per degree Celsius below {35}, from 216 people "
         "brought in with hypothermia, and about 8 a degree Celsius above {37}; "
         "between {35} and {37} no series covers it, and the figure there is a "
         "join. Peak shivering, near {35}, reaches 490 per cent and is left "
-        "out of the ranges around it because it is a different state, not a "
-        "point on the same line.")
+        "out of the ranges around it because it comes from a different "
+        "state.")
 
 
 def main():
