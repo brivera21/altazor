@@ -45,23 +45,63 @@ js = dict(
     routes=[dict(n=n, p=p, c=c, b=b) for n, p, c, b in D.ROUTES],
     power=D.POWER,
     scales={k: dict(n=n, s=s, b=b) for k, (n, s, b) in D.SCALES.items()},
+    cost=D.COST,
+    lines=[dict(t=t, n=n, c=c, b=b) for t, n, c, b in D.LINES],
+    fine=[dict(lo=a, hi=b, n=n, c=c, b=t) for a, b, n, c, t in D.FINE],
+    unresp=D.UNRESPONSIVE,
+    cooling=[dict(n=n, r=r, c=c, e=e, b=b) for n, r, c, e, b in D.COOLING],
+    coolfrom=D.COOL_FROM, coolto=D.COOL_TO, cooltarget=D.COOL_TARGET,
+    actions=[dict(n=n, c=c, b=b) for n, c, b in D.ACTIONS],
+    tell=[dict(k=k, f=f, h=h) for k, f, h in D.TELL],
+    tellnote=D.TELL_NOTE,
 )
 DATA = json.dumps(js, separators=(",", ":"), ensure_ascii=False)
 
-NOTE1 = ("Five views on one column of degrees. The span is everything a "
+NOTE1 = ("Seven views on one column of degrees. The span is everything a "
          "person has been brought back from, at either end. The day is the "
          "half degree the body actually moves through, and the sites "
-         "disagree by more than that, so a reading without its site means "
-         "little. Fever sets a target the body then chases, which is why "
-         "the chill comes first. Hyperthermia moves no target and is "
-         "control losing to heat.")
+         "disagree by more than that. Fever sets a target the body chases, "
+         "which is why the chill comes first; hyperthermia moves no target "
+         "and is control losing to heat. The last two views run degree by "
+         "degree, and then ask what the number does not decide.")
 
-NOTE2 = ("The unit buttons change every figure. A point on the scale and a "
-         "gap between two points convert differently: a body at 37 degrees "
+NOTE2 = ("Every figure carries both scales at once. A point on the scale and "
+         "a gap between two points convert differently: a body at 37 degrees "
          "Celsius is at 98.6 Fahrenheit, while a rise of one Celsius degree "
-         "is a rise of 1.8 Fahrenheit degrees and of exactly one kelvin. "
-         "Kelvin is the one tied to what temperature is, the energy of "
-         "molecular motion, through a constant fixed by definition.")
+         "is a rise of 1.8 Fahrenheit degrees and of exactly one kelvin. The "
+         "collapse view follows published guidance and does not replace the "
+         "emergency number, which is the first call.")
+
+METHOD = ("What the collapse view rests on, and where it is soft. There is no "
+          "randomised trial of any cooling method in human heat stroke with "
+          "survival as the endpoint, and there will not be. Every figure "
+          "here comes either from laboratory heating of healthy volunteers, "
+          "which is not heat stroke, or from uncontrolled case series in "
+          "which the treatment was never withheld. The reviewers who grade "
+          "this literature call their own strongest cooling recommendation "
+          "certain in direction and very low in certainty of evidence, and "
+          "the page follows them. Three specifics are worth naming. The "
+          "cooling rates for pouring and fanning come from the sports "
+          "medicine literature at about half the rate of immersion; a formal "
+          "review of the same studies could not tell that method apart from "
+          "doing nothing, and both numbers sit in current guidelines. The "
+          "stopping point of 38.6 degrees has direct experimental support "
+          "from ten volunteers, while authorities place the line anywhere "
+          "from 38.0 to 39.4. And the thirty minute target is an operational "
+          "goal grounded in observational series and physiology, not a "
+          "measured cliff: no validated model turns a person's temperature "
+          "and the time they spent there into a probability. The series "
+          "reporting no deaths after fast cooling are drawn from finish line "
+          "medical tents and military bases, where the patients were young "
+          "and the collapse was witnessed, so they do not transfer to an "
+          "elderly person found at home. Whether immersion suits that person "
+          "at all is genuinely unresolved: one guideline treats both kinds of "
+          "heat stroke the same, one review found immersion poorly tolerated "
+          "in the classic form, and a third makes no recommendation. No "
+          "guideline body tells a lay rescuer what to do about the airway of "
+          "an unresponsive person during immersion, so the line about the "
+          "bathtub is a reading of the warnings rather than a quotation of "
+          "one.")
 
 HTML = r"""<!DOCTYPE html>
 <html lang="en">
@@ -103,6 +143,9 @@ button.unit { padding:6px 12px; font-variant-numeric:tabular-nums; }
 #bodyTxt { font-size:13.5px; line-height:1.55; margin-top:9px; }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
+.method { color:var(--muted); font-size:12.5px; margin-top:16px; max-width:760px; }
+.method summary { cursor:pointer; color:var(--accent); }
+.method p { margin:9px 0 0; }
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
 .refs p { margin:0 0 8px; overflow-wrap:anywhere; }
 .refs a { color:var(--accent); }
@@ -124,6 +167,8 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   <button id="vSite">Where it is taken</button>
   <button id="vFever">Fever</button>
   <button id="vHeat">Heat in, heat out</button>
+  <button id="vFine">Degree by degree</button>
+  <button id="vHelp">If someone collapses</button>
   <span class="sp"></span>
   <button id="uC" class="unit on">&deg;C</button>
   <button id="uF" class="unit">&deg;F</button>
@@ -140,6 +185,8 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 </div>
 <p class="note">__NOTE1__</p>
 <p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
+<div class="method"><details><summary>What the collapse view rests on, and where it is soft</summary>
+<p>__METHOD__</p></details></div>
 <h2 class="refh">References</h2>
 <div class="refs">__REFS__</div>
 </div>
@@ -155,6 +202,13 @@ const SYM={C:'°C', F:'°F', K:' K'};
 function fmt(c,d){ return toU(c).toFixed(d===undefined?1:d)+SYM[U]; }
 function gap(c,d){ return (U==='F'?c*9/5:c).toFixed(d===undefined?1:d)
   +(U==='K'?' K':SYM[U]); }
+// the same temperature in the unit showing and in the other one, because a
+// reader who thinks in Fahrenheit should not have to press a button
+function pair(c,d){
+  d=d===undefined?1:d;
+  const o = U==='F' ? c.toFixed(d)+'°C' : (c*9/5+32).toFixed(d)+'°F';
+  return fmt(c,U==='K'?2:d)+' · '+o;
+}
 
 function card(kind,name,when,body){
   const k=document.getElementById('kindTxt');
@@ -524,9 +578,212 @@ function drawHeat(){
   el.innerHTML=svg(hy+140,s);
 }
 
+
+/* ------------------------------------------------------- degree by degree */
+const FN={lo:36,hi:43,x0:150,x1:930};
+function nx(c){ return FN.x0+(c-FN.lo)/(FN.hi-FN.lo)*(FN.x1-FN.x0); }
+function nc(x){ return FN.lo+(x-FN.x0)/(FN.x1-FN.x0)*(FN.hi-FN.lo); }
+function metPct(c,k){ return 100+(c-D.cost.base)*(k||D.cost.met); }
+function bpm(c,k){ return D.cost.hr_base+(c-D.cost.base)*(k||D.cost.hr); }
+const CELL=0.25;
+
+// the ladder, in both units at once
+function ladder(yTop,yBot){
+  let s='';
+  for(let c=36;c<=43;c+=0.5){
+    const x=nx(c), big=Math.abs(c-Math.round(c))<0.01;
+    s+='<path d="M'+x.toFixed(1)+','+(yTop-(big?8:4))+' V'+yTop
+      +'" stroke="#3d444d" stroke-width="1"/>';
+    if(big) s+=txt(x,yTop-13,c.toFixed(0)+'°C',{anchor:'middle',fs:10.5,
+                   fill:'#8b93a0'});
+  }
+  for(let f=97;f<=109;f++){
+    const c=(f-32)*5/9;
+    if(c<FN.lo||c>FN.hi) continue;
+    const x=nx(c);
+    s+='<path d="M'+x.toFixed(1)+','+yBot+' v'+(f%2?4:8)+'" stroke="#3d444d" stroke-width="1"/>';
+    if(f%2===1) s+=txt(x,yBot+22,f+'°F',{anchor:'middle',fs:10.5,fill:'#8b93a0'});
+  }
+  return s;
+}
+// the four lines that matter, staggered so their labels do not touch
+function keyLines(yTop,yBot){
+  let s='';
+  D.lines.forEach((L,i)=>{
+    const x=nx(L.t), up=yTop-(i%2?88:56);
+    const on=hot&&hot.t==='L'&&hot.i===i;
+    s+='<g data-L="'+i+'" style="cursor:pointer">'
+      +'<path d="M'+x.toFixed(1)+','+up+' V'+yBot+'" stroke="'+L.c
+      +'" stroke-width="1.2" stroke-dasharray="4 3" stroke-opacity="'+(on?1:0.75)+'"/>'
+      +txt(x+5,up+9,esc(L.n),{fs:11,fill:on?'#e6e6e6':L.c,stroke:1})
+      +txt(x+5,up+21,pair(L.t),{fs:10,fill:on?'#c8ccd2':'#6b7280',stroke:1})
+      +'<rect x="'+(x-6)+'" y="'+(up-4)+'" width="200" height="28" fill="transparent"/>'
+      +'</g>';
+  });
+  return s;
+}
+
+function drawFine(){
+  const yb=226, hb=40;
+  let s=txt(80,34,'a quarter degree at a time, from an ordinary morning to '
+      +'the top of what a body survives',{fs:11.5,fill:'#8b93a0'});
+  s+=keyLines(yb,yb+hb+352);
+  // the bands, and a hoverable cell every quarter degree
+  D.fine.forEach((b,i)=>{
+    s+='<rect x="'+nx(b.lo).toFixed(1)+'" y="'+yb+'" width="'
+      +(nx(b.hi)-nx(b.lo)).toFixed(1)+'" height="'+hb+'" fill="'+b.c
+      +'" fill-opacity="0.8"/>';
+    const mid=(nx(Math.max(b.lo,FN.lo))+nx(Math.min(b.hi,FN.hi)))/2;
+    if(nx(Math.min(b.hi,FN.hi))-nx(Math.max(b.lo,FN.lo))>60)
+      s+=txt(mid,yb+25,esc(b.n),{anchor:'middle',fs:12,fill:'#101010',w:600});
+  });
+  const n=Math.round((FN.hi-FN.lo)/CELL);
+  for(let k=0;k<n;k++){
+    const c=FN.lo+k*CELL, on=hot&&hot.t==='c'&&hot.i===k;
+    s+='<g data-c="'+k+'" style="cursor:pointer">'
+      +'<rect x="'+nx(c).toFixed(1)+'" y="'+yb+'" width="'
+      +(nx(c+CELL)-nx(c)).toFixed(1)+'" height="'+hb+'" fill="#ffffff" fill-opacity="'
+      +(on?0.3:0)+'"/></g>';
+  }
+  s+=ladder(yb,yb+hb);
+  // what each degree costs, drawn as a band because the studies disagree
+  const P1={top:yb+hb+64,h:106}, P2={top:yb+hb+206,h:106};
+  function costPanel(P,lo,hi,f,lab,unit,col,kids){
+    const y=v=>P.top+P.h-(v-lo)/(hi-lo)*P.h;
+    let o=txt(80,P.top-14,lab,{fs:11.5,fill:'#c8ccd2'});
+    for(let v=lo;v<=hi;v+=(hi-lo)/4){
+      o+='<path d="M'+FN.x0+','+y(v).toFixed(1)+' H'+FN.x1
+        +'" stroke="#242424" stroke-width="1"/>'
+        +txt(FN.x0-10,y(v)+3.6,Math.round(v)+unit,{anchor:'end',fs:10.5});
+    }
+    let up='',dn='',mid='';
+    for(let c=FN.lo;c<=FN.hi;c+=0.1){
+      up+=(up?'L':'M')+nx(c).toFixed(1)+','+y(f(c,'hi')).toFixed(1);
+      mid+=(mid?'L':'M')+nx(c).toFixed(1)+','+y(f(c)).toFixed(1);
+    }
+    for(let c=FN.hi;c>=FN.lo;c-=0.1)
+      dn+='L'+nx(c).toFixed(1)+','+y(f(c,'lo')).toFixed(1);
+    o+='<path d="'+up+dn+'Z" fill="'+col+'" fill-opacity="0.16"/>'
+      +'<path d="'+mid+'" fill="none" stroke="'+col+'" stroke-width="2.2"/>';
+    if(kids){
+      let k='';
+      for(let c=FN.lo;c<=FN.hi;c+=0.1)
+        k+=(k?'L':'M')+nx(c).toFixed(1)+','+y(kids(c)).toFixed(1);
+      o+='<path d="'+k+'" fill="none" stroke="#ffd24d" stroke-width="1.6" stroke-dasharray="5 3"/>'
+        +txt(FN.x1-6,y(kids(FN.hi))-8,'a child',{anchor:'end',fs:10.5,
+             fill:'#ffd24d',stroke:1});
+    }
+    return o;
+  }
+  s+=costPanel(P1,100,180,
+    (c,k)=>metPct(c,k==='lo'?D.cost.met_lo:k==='hi'?D.cost.met_hi:D.cost.met),
+    'What it costs to run: per cent of the resting metabolic rate','%','#e0673f');
+  s+=costPanel(P2,60,140,
+    (c,k)=>bpm(c,k==='lo'?D.cost.hr_lo:k==='hi'?D.cost.hr_hi:D.cost.hr),
+    'What the heart does: beats a minute, from a resting seventy',' ','#58a6ff',
+    c=>bpm(c,D.cost.hr_child));
+  el.innerHTML=svg(P2.top+P2.h+46,s);
+}
+
+/* ------------------------------------------------- if someone collapses */
+function drawHelp(){
+  const x0=150, x1=930;
+  let s='';
+  // the thing that actually decides, drawn as two rows of the same scale
+  const yA=112, yB=182, hb=44;
+  s+=txt(80,64,'the same scale read two ways, by whether the person is '
+        +'answering',{fs:11.5,fill:'#8b93a0'});
+  D.fine.forEach((b,i)=>{
+    const on=hot&&hot.t==='b'&&hot.i===i;
+    s+='<g data-b="'+i+'" style="cursor:pointer">'
+      +'<rect x="'+nx(b.lo).toFixed(1)+'" y="'+yA+'" width="'
+      +(nx(b.hi)-nx(b.lo)).toFixed(1)+'" height="'+hb+'" fill="'+b.c
+      +'" fill-opacity="'+(on?1:0.8)+'"/>';
+    if(nx(b.hi)-nx(b.lo)>44)
+      s+=txt((nx(b.lo)+nx(b.hi))/2,yA+27,esc(b.n),
+             {anchor:'middle',fs:12,fill:'#101010',w:600});
+    s+='</g>';
+  });
+  const onU=hot&&hot.t==='u';
+  s+='<g data-u="1" style="cursor:pointer">'
+    +'<rect x="'+x0+'" y="'+yB+'" width="'+(x1-x0)+'" height="'+hb+'" fill="#c02f2f"'
+    +' fill-opacity="'+(onU?1:0.86)+'"/>'
+    +txt((x0+x1)/2,yB+27,'Emergency at every temperature on this scale',
+         {anchor:'middle',fs:13,fill:'#ffffff',w:600})+'</g>';
+  s+=txt(x0-14,yA+27,'Alert and answering',{anchor:'end',fs:12.5,fill:'#c8ccd2'})
+    +txt(x0-14,yB+27,'Not answering',{anchor:'end',fs:12.5,fill:'#e6e6e6'});
+  s+=ladder(yA,yB+hb);
+
+  // how long each way of cooling takes to cross the 30 minutes
+  const cy=yB+hb+92, maxMin=70, sc=(x1-x0-70)/maxMin;
+  const drop=D.coolfrom-D.coolto;
+  s+=txt(80,cy-30,'How long each way of cooling takes to bring '+pair(D.coolfrom)
+        +' down to '+pair(D.coolto),{fs:11.5,fill:'#c8ccd2'});
+  const tx=x0+D.cooltarget*sc;
+  s+='<path d="M'+tx.toFixed(1)+','+(cy-14)+' V'+(cy+D.cooling.length*46-14)
+    +'" stroke="#ffd24d" stroke-width="1.6" stroke-dasharray="5 3"/>'
+    +txt(tx+6,cy-20,'the '+D.cooltarget+' minutes the target allows',
+         {fs:11,fill:'#ffd24d',stroke:1});
+  D.cooling.forEach((m,i)=>{
+    const mins=drop/m.r, y=cy+i*46, on=hot&&hot.t==='k'&&hot.i===i;
+    s+='<g data-k="'+i+'" style="cursor:pointer">'
+      +'<rect x="0" y="'+(y-16)+'" width="'+W+'" height="42" fill="#ffffff" fill-opacity="'
+      +(on?0.045:0)+'"/>'
+      +txt(x0,y-4,esc(m.n),{fs:11,fill:on?'#e6e6e6':'#8b93a0'})
+      +'<rect x="'+x0+'" y="'+y+'" width="'+Math.min(mins,maxMin)*sc
+      +'" height="16" fill="'+m.c+'" fill-opacity="0.85"/>'
+      +txt(x0+Math.min(mins,maxMin)*sc+9,y+13,Math.round(mins)+' min',
+           {fs:12,fill:'#c8ccd2',stroke:1})+'</g>';
+  });
+
+  // the order it is done in
+  const ay=cy+D.cooling.length*46+52, aw=(x1-x0-4*12)/5;
+  s+=txt(80,ay-14,'What a bystander does, in order',{fs:11.5,fill:'#c8ccd2'});
+  D.actions.forEach((a,i)=>{
+    const x=x0+i*(aw+12), on=hot&&hot.t==='a'&&hot.i===i;
+    s+='<g data-a="'+i+'" style="cursor:pointer">'
+      +'<rect x="'+x.toFixed(1)+'" y="'+ay+'" width="'+aw.toFixed(1)
+      +'" height="56" rx="8" fill="'+a.c+'" fill-opacity="'+(on?0.30:0.14)
+      +'" stroke="'+a.c+'" stroke-opacity="'+(on?0.9:0.45)+'"/>'
+      +txt(x+aw/2,ay+27,(i+1)+'.',{anchor:'middle',fs:10.5,fill:a.c})
+      +txt(x+aw/2,ay+44,esc(a.n),{anchor:'middle',fs:13,
+           fill:on?'#e6e6e6':'#c8ccd2',w:600})
+      +'</g>';
+  });
+
+  s+=txt(x0,ay+80,'One person alone does not put an unresponsive body into a '
+        +'bathtub. Vomiting is common and the airway comes first.',
+        {fs:11.5,fill:'#e0673f'})
+    +txt(x0,ay+96,'Immersion needs a second pair of hands whose only job is '
+        +'holding the head clear of the water.',{fs:11.5,fill:'#e0673f'});
+
+  // and how to tell which of the two it is
+  const ty=ay+146;
+  s+=txt(80,ty-14,'Which of the two it is',{fs:11.5,fill:'#c8ccd2'})
+    +txt(x0+230,ty+2,'A fever from an infection',{fs:11.5,fill:'#31d67a'})
+    +txt(x0+540,ty+2,'Heat stroke',{fs:11.5,fill:'#e0673f'});
+  D.tell.forEach((r,i)=>{
+    const y=ty+26+i*26;
+    s+='<g data-t="'+i+'" style="cursor:pointer">'
+      +'<rect x="0" y="'+(y-15)+'" width="'+W+'" height="26" fill="#ffffff" fill-opacity="'
+      +(hot&&hot.t==='T'&&hot.i===i?0.05:(i%2?0:0.02))+'"/>'
+      +txt(x0+218,y,esc(r.k),{anchor:'end',fs:11.5,fill:'#8b93a0'})
+      +txt(x0+230,y,esc(r.f),{fs:11.5,fill:'#c8ccd2'})
+      +txt(x0+540,y,esc(r.h),{fs:11.5,fill:'#c8ccd2'})+'</g>';
+  });
+  const ny=ty+26+D.tell.length*26+18;
+  s+='<g data-n="1" style="cursor:pointer">'
+    +'<rect x="'+x0+'" y="'+(ny-16)+'" width="'+(x1-x0)+'" height="34" rx="8"'
+    +' fill="#c02f2f" fill-opacity="'+(hot&&hot.t==='N'?0.28:0.14)
+    +'" stroke="#c02f2f" stroke-opacity="0.5"/>'
+    +txt((x0+x1)/2,ny+6,'When it cannot be told apart, the safe reading is '
+         +'heat stroke',{anchor:'middle',fs:12.5,fill:'#e6e6e6'})+'</g>';
+  el.innerHTML=svg(ny+46,s);
+}
+
 /* --------------------------------------------------------------- plumbing */
 const DRAW={range:drawRange, day:drawDay, site:drawSites, fever:drawFever,
-            heat:drawHeat};
+            heat:drawHeat, fine:drawFine, help:drawHelp};
 const INTRO={
   range:['The whole span','From the coldest anyone has been rewarmed from to '
     +'the hottest anyone has walked away from. The band the body actually '
@@ -543,16 +800,23 @@ const INTRO={
   heat:['Heat in, heat out','About a hundred watts at rest, and fourteen '
     +'times that climbing a mountain on a bicycle. Sweat is the only route '
     +'that still works once the room is hotter than the skin.'],
+  fine:['Degree by degree','From an ordinary morning to the top of what a '
+    +'body survives, a quarter degree at a time, with what each step costs '
+    +'the metabolism and the heart. Both scales are on the ruler.'],
+  help:['If someone collapses','The temperature does not decide this. '
+    +'Whether the person is answering does. The lower row is red the whole '
+    +'way across, and that is the point of the picture.'],
 };
+const VBTN=[['vRange','range'],['vDay','day'],['vSite','site'],
+            ['vFever','fever'],['vHeat','heat'],['vFine','fine'],
+            ['vHelp','help']];
 function render(){
   DRAW[view]();
   if(!hot){ const [n,b]=INTRO[view]; card('',n,'',b); }
 }
 function setView(v){
   view=v; hot=null;
-  for(const [id,k] of [['vRange','range'],['vDay','day'],['vSite','site'],
-                       ['vFever','fever'],['vHeat','heat']])
-    document.getElementById(id).classList.toggle('on',v===k);
+  for(const [id,k] of VBTN) document.getElementById(id).classList.toggle('on',v===k);
   render();
 }
 function setUnit(u){
@@ -565,27 +829,26 @@ function setUnit(u){
   card('The scale',sc.n,'body: '+fmt(37,u==='K'?2:1)
     +' · a rise of one degree Celsius: '+gap(1),sc.b);
 }
-for(const [id,k] of [['vRange','range'],['vDay','day'],['vSite','site'],
-                     ['vFever','fever'],['vHeat','heat']])
-  document.getElementById(id).onclick=()=>setView(k);
+for(const [id,k] of VBTN) document.getElementById(id).onclick=()=>setView(k);
 for(const [id,k] of [['uC','C'],['uF','F'],['uK','K']])
   document.getElementById(id).onclick=()=>setUnit(k);
 
 el.addEventListener('pointerover',ev=>{
   const g=ev.target.closest('[data-z],[data-m],[data-h],[data-s],[data-p],'
-    +'[data-f],[data-i],[data-r],[data-w],[data-x]');
+    +'[data-f],[data-i],[data-r],[data-w],[data-x],[data-c],[data-L],'
+    +'[data-b],[data-u],[data-k],[data-a],[data-t],[data-n]');
   if(!g) return;
   const P=D.power;
   const pick=(a,t)=>{ hot={t:t,i:+g.getAttribute(a)}; };
   if(g.hasAttribute('data-z')){
     pick('data-z','z'); const z=D.zones[hot.i];
-    card('A band of the span',z.n,fmt(z.lo)+' to '+fmt(z.hi),z.b); tint(z.c);
+    card('A band of the span',z.n,pair(z.lo)+' to '+pair(z.hi),z.b); tint(z.c);
   } else if(g.hasAttribute('data-m')){
     pick('data-m','m'); const m=D.marks[hot.i];
-    card('A mark on the column',m.n,fmt(m.t),m.b);
+    card('A mark on the column',m.n,pair(m.t),m.b);
   } else if(g.hasAttribute('data-h')){
     pick('data-h','h'); const h=hot.i, t=dayT(h);
-    card('One hour of the day',(h<10?'0':'')+h+':00',fmt(t),
+    card('One hour of the day',(h<10?'0':'')+h+':00',pair(t),
       'The curve is a half-degree swing around a mean of '+fmt(D.day.mean)
       +'. Judged against the morning cut-off of '+fmt(D.day.cut_am)
       +' this hour reads '+(t>D.day.cut_am?'high':'normal')
@@ -593,7 +856,7 @@ el.addEventListener('pointerover',ev=>{
   } else if(g.hasAttribute('data-s')){
     pick('data-s','s'); const v=D.sites[hot.i];
     card('A place to put the thermometer',v.n,
-      fmt(v.m)+' · '+fmt(v.lo)+' to '+fmt(v.hi),v.b);
+      pair(v.m,2)+' · from '+fmt(v.lo,2)+' to '+fmt(v.hi,2),v.b);
   } else if(g.hasAttribute('data-p')){
     hot={t:'p',i:0};
     card('Forehead, ear and the rest','A peripheral reading',
@@ -609,7 +872,7 @@ el.addEventListener('pointerover',ev=>{
   } else if(g.hasAttribute('data-i')){
     hot={t:'i',i:0};
     card('The other way up','Hyperthermia',
-      fmt(D.ill.base)+' to '+fmt(D.ill.peak)+', with the set point unmoved',
+      pair(D.ill.base)+' to '+pair(D.ill.peak)+', with the set point unmoved',
       D.ill.note);
   } else if(g.hasAttribute('data-r')){
     pick('data-r','r'); const r=D.routes[hot.i];
@@ -632,10 +895,55 @@ el.addEventListener('pointerover',ev=>{
         +'the body water and bought it nothing, which is why humid heat is '
         +'more dangerous than dry heat at the same temperature.']][hot.i];
     card('Watts',B[0],B[1].toLocaleString('en-US')+' W',B[2]);
+  } else if(g.hasAttribute('data-c')){
+    pick('data-c','c');
+    const t=FN.lo+hot.i*CELL, mid=t+CELL/2;
+    const b=D.fine.find(z=>mid>=z.lo&&mid<z.hi)||D.fine[D.fine.length-1];
+    card(b.n,pair(mid),
+      Math.round(metPct(mid))+'% of the resting metabolic rate, somewhere '
+      +'between '+Math.round(metPct(mid,D.cost.met_lo))+' and '
+      +Math.round(metPct(mid,D.cost.met_hi))+'% · a pulse near '
+      +Math.round(bpm(mid))+', or '+Math.round(bpm(mid,D.cost.hr_child))
+      +' in a child',
+      b.b+' '+(mid>D.cost.base
+        ? 'That is '+gap(mid-D.cost.base)+' above a normal 37, and it costs '
+          +'about '+Math.round(metPct(mid)-100)+' per cent more oxygen to hold.'
+        : 'Below a normal 37, and cheaper to run.'));
+    tint(b.c);
+  } else if(g.hasAttribute('data-L')){
+    pick('data-L','L'); const L=D.lines[hot.i];
+    card('A line on the scale',L.n,pair(L.t),L.b); tint(L.c);
+  } else if(g.hasAttribute('data-b')){
+    pick('data-b','b'); const b=D.fine[hot.i];
+    card('Alert and answering',b.n,pair(b.lo)+' to '+pair(b.hi),b.b); tint(b.c);
+  } else if(g.hasAttribute('data-u')){
+    hot={t:'u',i:0};
+    card('Not answering','An emergency, whatever the number','',D.unresp);
+    tint('#c02f2f');
+  } else if(g.hasAttribute('data-k')){
+    pick('data-k','k'); const m=D.cooling[hot.i];
+    const mins=(D.coolfrom-D.coolto)/m.r;
+    card('A way of cooling',m.n,
+      m.r.toFixed(3)+' °C a minute · '+Math.round(mins)+' minutes from '
+      +pair(D.coolfrom)+' to '+pair(D.coolto)
+      +(mins<=D.cooltarget?' · inside the target':' · past the target'),
+      m.b+(m.e==='contested'?'' : ''));
+    tint(m.c);
+  } else if(g.hasAttribute('data-a')){
+    pick('data-a','a'); const a=D.actions[hot.i];
+    card('Step '+(hot.i+1)+' of '+D.actions.length,a.n,'',a.b); tint(a.c);
+  } else if(g.hasAttribute('data-t')){
+    pick('data-t','T'); const r=D.tell[hot.i];
+    card('Telling them apart',r.k,'',
+      'A fever from an infection: '+r.f+'. Heat stroke: '+r.h+'.');
+  } else if(g.hasAttribute('data-n')){
+    hot={t:'N',i:0};
+    card('When it cannot be told','The safe reading is heat stroke','',
+      D.tellnote); tint('#c02f2f');
   } else if(g.hasAttribute('data-x')){
     pick('data-x','x');
     card('Which way the heat runs',hot.i?'Hotter than the skin':'Cooler than the skin',
-      hot.i?'above about '+fmt(P.skin):'below about '+fmt(P.skin),
+      hot.i?'above about '+pair(P.skin):'below about '+pair(P.skin),
       hot.i?'Radiation and convection reverse. The room is now heating the '
         +'body, and evaporation is the only route left, which is why still, '
         +'humid air is the dangerous combination.'
@@ -653,7 +961,8 @@ window.__temp=()=>({view, unit:U,
   span:[D.zones[0].lo,D.zones[D.zones.length-1].hi],
   nodes:document.querySelectorAll('#tsvg [data-z],#tsvg [data-m],#tsvg [data-h],'
     +'#tsvg [data-s],#tsvg [data-f],#tsvg [data-r],#tsvg [data-w],'
-    +'#tsvg [data-x]').length,
+    +'#tsvg [data-x],#tsvg [data-c],#tsvg [data-L],#tsvg [data-b],'
+    +'#tsvg [data-u],#tsvg [data-k],#tsvg [data-a],#tsvg [data-t]').length,
   at37:fmt(37), rise1:gap(1),
   dayLow:dayT(D.day.nadir), dayHigh:dayT(18),
   chase:coreT(4)<setPoint(4), caught:Math.abs(coreT(10)-setPoint(10))<0.01,
@@ -740,6 +1049,67 @@ def main():
         (apa.wiki("https://en.wikipedia.org/wiki/Anna_B%C3%A5genholm"),
          "The Bagenholm case, the best known adult survival from deep "
          "hypothermia."),
+        (A("Casa, D. J., DeMartini, J. K., Bergeron, M. F., Csillan, D., "
+           "Eichner, E. R., Lopez, R. M., Ferrara, M. S., Miller, K. C., "
+           "O'Connor, F., Sawka, M. N., &amp; Yeargin, S. W.", 2015,
+           "National Athletic Trainers' Association position statement: "
+           "Exertional heat illnesses", "Journal of Athletic Training",
+           50, 9, "986-1000",
+           "https://doi.org/10.4085/1062-6050-50.9.07"),
+         "Cool first and transport second, the water temperature for "
+         "immersion, and the technique for holding a patient's head clear."),
+        (A("Lipman, G. S., Gaudio, F. G., Eifling, K. P., Ellis, M. A., "
+           "Otten, E. M., &amp; Grissom, C. K.", 2019,
+           "Wilderness Medical Society clinical practice guidelines for the "
+           "prevention and treatment of heat illness: 2019 update",
+           "Wilderness &amp; Environmental Medicine", 30, 4, "S33-S46",
+           "https://doi.org/10.1016/j.wem.2018.10.004"),
+         "That cooling is not delayed for a thermometer reading, and the "
+         "warning that an unresponsive patient can drown."),
+        (A("Douma, M. J., Aves, T., Allan, K. S., Bendall, J. C., "
+           "Berry, D. C., Chang, W.-T., Epstein, J., Hood, N., "
+           "Singletary, E. M., Zideman, D., &amp; Lin, S.", 2020,
+           "First aid cooling techniques for heat stroke and exertional "
+           "hyperthermia: A systematic review and meta-analysis",
+           "Resuscitation", 148, None, "173-190",
+           "https://doi.org/10.1016/j.resuscitation.2020.01.007"),
+         "The graded cooling rates, and the finding that evaporative cooling "
+         "could not be told apart from doing nothing."),
+        (A("Filep, E. M., Murata, Y., Endres, B. D., Kim, G., "
+           "Stearns, R. L., &amp; Casa, D. J.", 2020,
+           "Exertional heat stroke, modality cooling rate, and survival "
+           "outcomes: A systematic review", "Medicina", 56, 11, "589",
+           "https://doi.org/10.3390/medicina56110589"),
+         "The threshold of 0.15 degrees a minute separating adequate cooling "
+         "from insufficient, and the outcomes on either side of it."),
+        (A("Gagnon, D., Lemire, B. B., Casa, D. J., &amp; Kenny, G. P.", 2010,
+           "Cold-water immersion and the treatment of hyperthermia: Using "
+           "38.6 degrees C as a safe rectal temperature cooling limit",
+           "Journal of Athletic Training", 45, 5, "439-444",
+           "https://doi.org/10.4085/1062-6050-45.5.439"),
+         "The experiment behind the stopping point, and the overshoot that "
+         "follows cooling too far."),
+        (A("Bouchama, A., Dehbi, M., &amp; Chaves-Carballo, E.", 2007,
+           "Cooling and hemodynamic management in heatstroke: Practical "
+           "recommendations", "Critical Care", 11, 3, "R54",
+           "https://doi.org/10.1186/cc5910"),
+         "That antipyretics have no place here, and the finding that "
+         "immersion was poorly tolerated in classic heat stroke."),
+        (A("Manthous, C. A., Hall, J. B., Olson, D., Singh, M., "
+           "Chatila, W., Pohlman, A., Kushner, R., Schmidt, G. A., "
+           "&amp; Wood, L. D.", 1995,
+           "Effect of cooling on oxygen consumption in febrile critically "
+           "ill patients", "American Journal of Respiratory and Critical "
+           "Care Medicine", 151, 1, "10-14",
+           "https://doi.org/10.1164/ajrccm.151.1.7812538"),
+         "What a degree of fever costs in oxygen, at the low end of the "
+         "band the page draws."),
+        (apa.web("National Institute for Health and Care Excellence", 2021,
+                 "Fever in under 5s: Assessment and initial management "
+                 "(NICE guideline NG143)", "NICE",
+                 "https://www.nice.org.uk/guidance/ng143"),
+         "That tepid sponging is not recommended for fever, and that "
+         "antipyretics treat distress rather than the number."),
         (apa.web("Guinness World Records", None,
                  "Highest body temperature", "Guinness World Records",
                  "https://www.guinnessworldrecords.com/world-records/67749-highest-body-temperature"),
@@ -749,6 +1119,7 @@ def main():
     html = (HTML.replace("__APACSS__", apa.CSS)
             .replace("__DATA__", DATA)
             .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2)
+            .replace("__METHOD__", METHOD)
             .replace("__REFS__", apa.render(refs)))
     out = ROOT / "temperature.html"
     out.write_text(html, encoding="utf-8")

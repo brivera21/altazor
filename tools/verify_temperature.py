@@ -32,7 +32,8 @@ def check(name, ok, detail=""):
 
 
 VIEWS = [("vRange", "range"), ("vDay", "day"), ("vSite", "site"),
-         ("vFever", "fever"), ("vHeat", "heat")]
+         ("vFever", "fever"), ("vHeat", "heat"), ("vFine", "fine"),
+         ("vHelp", "help")]
 
 with sync_playwright() as pw:
     br = pw.chromium.launch()
@@ -136,6 +137,99 @@ with sync_playwright() as pw:
           pg.evaluate("document.querySelectorAll('#tsvg [data-x]').length")
           == 2)
 
+    # --- degree by degree, and what a degree costs
+    pg.click("#vFine")
+    pg.wait_for_timeout(280)
+    cells = pg.evaluate("document.querySelectorAll('#tsvg [data-c]').length")
+    check("the fine scale is hoverable a quarter degree at a time",
+          cells == round((43 - 36) / 0.25), str(cells))
+    check("and it runs from an ordinary morning to past survival",
+          pg.evaluate("FN.lo<=36 && FN.hi>=43"))
+    check("both scales are on the ruler at once",
+          pg.evaluate("[...document.querySelectorAll('#tsvg text')]"
+                      ".some(t=>t.textContent==='97°F')")
+          and pg.evaluate("[...document.querySelectorAll('#tsvg text')]"
+                          ".some(t=>t.textContent==='37°C')"))
+    check("a degree costs about a tenth again of the resting metabolism",
+          abs(pg.evaluate("metPct(38)-metPct(37)") - D.COST["met"]) < 0.01)
+    check("and the band around it holds the range the studies give",
+          pg.evaluate("metPct(40,D.cost.met_lo)<metPct(40)"
+                      "&&metPct(40)<metPct(40,D.cost.met_hi)"))
+    check("the pulse climbs faster in a child than in an adult",
+          pg.evaluate("bpm(41,D.cost.hr_child)>bpm(41)"))
+    check("every line that matters is drawn",
+          pg.evaluate("document.querySelectorAll('#tsvg [data-L]').length")
+          == len(D.LINES))
+    check("including the heat stroke line at 40",
+          pg.evaluate("D.lines.some(l=>Math.abs(l.t-40)<1e-9)"))
+
+    # --- if someone collapses: the number is not what decides
+    pg.click("#vHelp")
+    pg.wait_for_timeout(280)
+    check("the alert row is split into bands",
+          pg.evaluate("document.querySelectorAll('#tsvg [data-b]').length")
+          == len(D.FINE))
+    check("and the unresponsive row is one block, red the whole way",
+          pg.evaluate("document.querySelectorAll('#tsvg [data-u]').length")
+          == 1)
+    wide = pg.evaluate(
+        "(()=>{const r=document.querySelector('#tsvg [data-u] rect');"
+        "return +r.getAttribute('width');})()")
+    check("it spans the whole scale, not part of it", wide >= 770, str(wide))
+    # the cooling clock, and the arithmetic behind every bar
+    check("a bar for each way of cooling",
+          pg.evaluate("document.querySelectorAll('#tsvg [data-k]').length")
+          == len(D.COOLING))
+    drop = D.COOL_FROM - D.COOL_TO
+    for n, r, _c, _e, _b in D.COOLING:
+        mins = drop / r
+        inside = mins <= D.COOL_TARGET
+        check(f"{n[:34]} takes {round(mins)} minutes, "
+              f"{'inside' if inside else 'past'} the target",
+              abs(pg.evaluate(f"(D.coolfrom-D.coolto)/{r}") - mins) < 0.01)
+    fast = [n for n, r, *_ in D.COOLING if drop / r <= D.COOL_TARGET]
+    slow = [n for n, r, *_ in D.COOLING if drop / r > 1.8 * D.COOL_TARGET]
+    check("the three active methods clear thirty minutes", len(fast) == 3,
+          str(fast))
+    check("and ice packs alone take nearly twice as long as the target",
+          "Ice packs to the neck, armpits and groin" in slow, str(slow))
+    check("immersion clears it in half the time doing nothing would need "
+          "just to start",
+          drop / D.COOLING[0][1] * 2 < drop / D.COOLING[-1][1])
+    check("immersion is the fastest there is",
+          pg.evaluate("D.cooling[0].r===Math.max(...D.cooling.map(m=>m.r))"))
+    check("and doing nothing is the line the others have to beat",
+          pg.evaluate("D.cooling[D.cooling.length-1].r"
+                      "===Math.min(...D.cooling.map(m=>m.r))"))
+    # the sequence, and the things that must not happen
+    check("the bystander steps are all on the page",
+          pg.evaluate("document.querySelectorAll('#tsvg [data-a]').length")
+          == len(D.ACTIONS))
+    steps = pg.evaluate("D.actions.map(a=>a.n)")
+    check("and they start with the call and end with what never happens",
+          steps[0] == "Call" and steps[-1] == "Never", str(steps))
+    txt = pg.evaluate("document.getElementById('tsvg').textContent")
+    check("the bathtub warning is on the picture, not just in a card",
+          "bathtub" in txt, txt[:80])
+    check("telling a fever from heat stroke is on the page too",
+          pg.evaluate("document.querySelectorAll('#tsvg [data-t]').length")
+          == len(D.TELL))
+    check("with the fallback when it cannot be told",
+          "the safe reading is heat stroke" in txt)
+    # the cards behind the two rows
+    pg.evaluate("document.querySelector('[data-u]')"
+                ".dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
+    pg.wait_for_timeout(150)
+    card = pg.evaluate("document.querySelector('.card').textContent")
+    check("the unresponsive card says the number does not downgrade the call",
+          "downgrade" in card, card[:120])
+    pg.evaluate("document.querySelector('[data-a=\"4\"]')"
+                ".dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
+    pg.wait_for_timeout(150)
+    card = pg.evaluate("document.querySelector('.card').textContent")
+    check("and the last step rules out antipyretics and anything by mouth",
+          "paracetamol" in card and "mouth" in card, card[:120])
+
     # --- the units, which are the other half of the lesson
     pg.click("#vRange")
     pg.wait_for_timeout(200)
@@ -161,15 +255,42 @@ with sync_playwright() as pw:
         check(f"the {name} view has something to hover",
               st["nodes"] >= 2, str(st["nodes"]))
 
+    # --- both scales on every figure, without pressing anything
+    pg.click("#vRange")
+    pg.click("#uC")
+    pg.wait_for_timeout(220)
+    check("a temperature in Celsius carries its Fahrenheit too",
+          pg.evaluate("pair(37)") == "37.0°C · 98.6°F", pg.evaluate("pair(37)"))
+    pg.click("#uF")
+    pg.wait_for_timeout(200)
+    check("and the other way round",
+          pg.evaluate("pair(37)") == "98.6°F · 37.0°C", pg.evaluate("pair(37)"))
+    pg.click("#uC")
+    pg.wait_for_timeout(200)
+    pg.evaluate("document.querySelector('[data-m=\"5\"]')"
+                ".dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
+    pg.wait_for_timeout(150)
+    when = pg.evaluate("document.getElementById('whenTxt').textContent")
+    check("the cards carry both scales", "°C" in when and "°F" in when, when)
+
     html = PAGE.read_text(encoding="utf-8")
     check("no em dashes", "—" not in html)
     check("the page links back to the library", 'href="library.html"' in html)
     for doi in ["10.1093/ofid/ofz032", "10.1136/bmj.j5468",
                 "10.1056/NEJMra1114208", "10.1093/ejcts/ezaa159",
-                "10.1056/NEJMra011089", "10.1177/1073858418760481"]:
+                "10.1056/NEJMra011089", "10.1177/1073858418760481",
+                "10.4085/1062-6050-50.9.07", "10.1016/j.wem.2018.10.004",
+                "10.1016/j.resuscitation.2020.01.007",
+                "10.3390/medicina56110589", "10.4085/1062-6050-45.5.439",
+                "10.1186/cc5910"]:
         check(f"cites {doi}", doi in html)
     check("and says the hottest survival is a record, not a case report",
           "Guinness" in html)
+    check("the page says the collapse view does not replace the emergency call",
+          "does not replace the emergency number" in html)
+    check("and owns up to how soft the cooling evidence is",
+          "no randomised trial" in html.lower()
+          or "There is no" in html and "randomised trial" in html)
 
     check("no JS errors", not errs, "; ".join(errs)[:140])
     br.close()

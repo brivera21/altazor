@@ -195,3 +195,155 @@ SCALES = {
           "0.040 electronvolts of it, and that number sets which "
           "chemistry can happen in a body."),
 }
+
+
+# =========================================================================
+# Degree by degree, and what to do when someone collapses
+# =========================================================================
+
+# What a degree costs. Both figures are central estimates from small studies
+# with wide variance, so the page draws the band as well as the line.
+COST = dict(
+    met=10, met_lo=7, met_hi=13,     # per cent of resting metabolic rate, per C
+    hr=8, hr_lo=7, hr_hi=8.4,        # beats a minute per C, adults
+    hr_child=12, hr_child_lo=9, hr_child_hi=14,
+    hr_base=70, base=37.0,
+    shiver=6,                        # shivering multiplies resting output
+    met_note="Cooling a febrile patient by one degree lowers oxygen use by "
+             "about 7 to 13 per cent, so the page draws the band rather than "
+             "a line. Every figure comes from small studies of sedated "
+             "patients, and the variance is wide.",
+    hr_note="Liebermeister's rule, from the nineteenth century, put the rise "
+            "at 8 beats a minute per degree. Modern series find 7 to 8.4 in "
+            "adults and 9 to 14 in children, so the old convention holds up "
+            "better than most of its age.")
+
+# The lines that matter on the fine scale, and why each one is there.
+LINES = [
+    (38.0, "The usual fever cut-off", "#ffd24d",
+     "The common clinical threshold, written for a rectal reading. Critical "
+     "care often uses 38.3 instead. The number moves with the site: an "
+     "armpit reading of 38.0 is a rectal reading nearer 38.6."),
+    (38.6, "Where cooling stops", "#31d67a",
+     "The experimental stopping point for cooling a heat stroke patient, "
+     "from a study that immersed volunteers and watched what happened after "
+     "they came out. Stopping at 37.5 overshot to 35.7 in the oesophagus; "
+     "stopping at 38.6 did not overshoot at all. Authorities put the line "
+     "anywhere from 38.0 to 39.4, so the spread is wider than it looks."),
+    (40.0, "The heat stroke line", "#e0673f",
+     "Above 40 with the nervous system failing is the definition of heat "
+     "stroke. The definition needs both halves, and the brain half is the "
+     "one a bystander can actually judge."),
+    (41.6, "The critical thermal maximum", "#c02f2f",
+     "The temperature at which human tissue starts to fail, from a single "
+     "small 1978 study that heated sedated volunteers. The original finding "
+     "was 41.6 to 42 degrees held for anywhere from 45 minutes to 8 hours, "
+     "and the eight hours usually gets dropped in the retelling. People die "
+     "below this line and survive above it."),
+]
+
+# The bands of the fine scale, with what each means for someone who is awake
+# and answering. For someone who is not, see UNRESPONSIVE.
+FINE = [
+    (36.0, 37.5, "Ordinary", "#31d67a",
+     "Inside the daily swing, or just above it. Nothing here needs doing."),
+    (37.5, 38.3, "Low-grade", "#ffd24d",
+     "A fever by most definitions, and by itself not an emergency in someone "
+     "alert. What matters is how the person is, not the reading."),
+    (38.3, 39.5, "A solid fever", "#f0a04b",
+     "Uncomfortable, metabolically expensive, and still not in itself "
+     "dangerous in a healthy adult who is alert and drinking."),
+    (39.5, 40.0, "High", "#e0673f",
+     "The territory where fever and heat illness start to look alike from "
+     "the outside. The context and the mental state separate them."),
+    (40.0, 43.0, "Over the line", "#c02f2f",
+     "Above the heat stroke threshold. In someone alert this still calls for "
+     "medical help; in someone confused or unresponsive it is heat stroke "
+     "until proved otherwise."),
+]
+
+UNRESPONSIVE = (
+    "An emergency at every temperature on this scale, and at temperatures "
+    "below it. Unresponsiveness has many causes and none of them wait. What "
+    "the thermometer changes is not the urgency but the guess: a high "
+    "reading in a hot place points at heat stroke, a low one points "
+    "somewhere else. Nothing on the scale downgrades the call.")
+
+# Cooling rates, in degrees per minute, and how long each takes to bring a
+# core of 41.5 down to the 38.6 stopping point.
+COOLING = [
+    ("Cold or ice water immersion", 0.20, "#58a6ff", "strong",
+     "The fastest method there is, and about double any realistic "
+     "alternative. Real patients at the Falmouth road race cooled at 0.22 "
+     "degrees a minute in water near 10 degrees. Guidelines put the useful "
+     "water range anywhere from 1 to 26 degrees, which is an envelope around "
+     "the evidence rather than a target."),
+    ("A tarp, ice and water", 0.15, "#4a87d6", "moderate",
+     "The person lies on a tarp with the sides held up, in ice and water. It "
+     "cools nearly as fast as a tub, needs far less water, and is much safer "
+     "for someone unresponsive: they are lying on their back in shallow "
+     "water with the airway clear and reachable."),
+    ("Cold water poured on, and hard fanning", 0.11, "#7fb4e8", "contested",
+     "The sports medicine literature puts this at about half the rate of "
+     "immersion. A formal review of the same evidence could not tell it "
+     "apart from doing nothing. Both figures are in current guidelines, and "
+     "the page shows the more generous one."),
+    ("Ice packs to the neck, armpits and groin", 0.05, "#9fb6c4", "weak",
+     "Popular, and close to useless on its own: the surface area is too "
+     "small. It is worth doing alongside something else, not instead of it."),
+    ("Shade and rest, and nothing else", 0.047, "#6b7280", "strong",
+     "What the body manages by itself once the heat load stops. It is the "
+     "line everything else has to beat."),
+]
+
+COOL_FROM, COOL_TO, COOL_TARGET = 41.5, 38.6, 30   # degrees, degrees, minutes
+
+# What a bystander does, in the order it is done.
+ACTIONS = [
+    ("Call", "#58a6ff",
+     "Emergency services first, and the two words that matter to the call "
+     "handler are heat and unresponsive. Cooling starts at the same time if "
+     "anyone else is there to start it. Waiting for the ambulance before "
+     "cooling is the mistake the guidelines were written to stop."),
+    ("Breathing", "#31d67a",
+     "Not breathing normally means CPR, and the cooling carries on "
+     "alongside it: one person compresses, another pours water. Breathing "
+     "normally means the recovery position, on the side, in the shade, "
+     "because vomiting is common and the airway comes first."),
+    ("Cool", "#e0673f",
+     "Clothes off, and cold water on the whole body, continuously, with "
+     "hard fanning. Immersion is faster if there are enough people to hold "
+     "the head and airway clear of the water, and a tarp with ice and water "
+     "is nearly as fast and much safer. One person alone does not put an "
+     "unresponsive body into a bathtub."),
+    ("Stop", "#ffd24d",
+     "Cooling stops near 38.6 degrees, or in the field when the person comes "
+     "round or starts shivering hard, and then they are dried and covered. "
+     "The stopping point exists because a body cooled to normal keeps "
+     "falling: volunteers taken to 37.5 dropped to 35.7 afterwards."),
+    ("Never", "#c02f2f",
+     "Nothing by mouth to anyone who is not fully alert. No aspirin and no "
+     "paracetamol: they lower a set point, and in heat stroke the set point "
+     "is already normal, while both drugs land on the liver and the clotting "
+     "the illness is attacking. No alcohol rubs, which poison through the "
+     "skin. And nobody is left alone."),
+]
+
+# Telling a fever from heat stroke, and what to do when it cannot be told.
+TELL = [
+    ("The story", "Days of illness, a cough or a rash",
+     "Hours in heat, a hot car, a hot job, or hard exertion"),
+    ("The mind", "Rousable and making sense",
+     "Confused, fighting, unsteady, seizing or not answering"),
+    ("The skin", "Often shivering, with cold hands",
+     "Very hot, sweaty after exertion, sometimes dry in the elderly"),
+    ("The pace", "Rising and falling over days",
+     "Getting worse over minutes"),
+]
+TELL_NOTE = (
+    "Dry skin is the classic teaching and it is not reliable: most exertional "
+    "heat stroke patients are soaked. When the two cannot be told apart the "
+    "safe reading is heat stroke, because the harm is lopsided. Cooling "
+    "someone with an infection wastes effort and makes them shiver. Not "
+    "cooling someone with heat stroke for half an hour can kill them. And "
+    "the first things done are the same either way.")
