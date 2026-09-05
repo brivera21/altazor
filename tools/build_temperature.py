@@ -59,7 +59,7 @@ js = dict(
     regimes=[dict(lo=a, hi=b, n=n, c=c, b=t) for a, b, n, c, t in D.REGIMES],
     hrcold=D.HR_COLD,
 )
-DATA = json.dumps(js, separators=(",", ":"), ensure_ascii=False)
+
 
 NOTE1 = ("Seven views on one column of degrees. The span is everything a "
          "person has been brought back from, at either end. The day is the "
@@ -69,12 +69,14 @@ NOTE1 = ("Seven views on one column of degrees. The span is everything a "
          "and is control losing to heat. The last two views run degree by "
          "degree, and then ask what the number does not decide.")
 
-NOTE2 = ("Every figure carries both scales at once. A point on the scale and "
-         "a gap between two points convert differently: a body at 37 degrees "
-         "Celsius is at 98.6 Fahrenheit, while a rise of one Celsius degree "
-         "is a rise of 1.8 Fahrenheit degrees and of exactly one kelvin. The "
-         "collapse view follows published guidance and does not replace the "
-         "emergency number, which is the first call.")
+NOTE2 = ("The buttons set the scale and everything moves with it: the "
+         "ladder, the marks, the table, and the temperatures written into "
+         "the sentences. A point on the scale and a gap between two points "
+         "still convert differently, which is why a body at 37 degrees "
+         "Celsius is 98.6 Fahrenheit while a rise of one Celsius degree is "
+         "1.8 Fahrenheit degrees and exactly one kelvin. The collapse view "
+         "follows published guidance and does not replace the emergency "
+         "number, which is the first call.")
 
 METHOD = ("What the collapse view rests on, and where it is soft. There is no "
           "randomised trial of any cooling method in human heat stroke with "
@@ -89,9 +91,9 @@ METHOD = ("What the collapse view rests on, and where it is soft. There is no "
           "medicine literature at about half the rate of immersion; a formal "
           "review of the same studies could not tell that method apart from "
           "doing nothing, and both numbers sit in current guidelines. The "
-          "stopping point of 38.6 degrees has direct experimental support "
+          "stopping point of {38.6} has direct experimental support "
           "from ten volunteers, while authorities place the line anywhere "
-          "from 38.0 to 39.4. And the thirty minute target is an operational "
+          "from {38.0} to {39.4}. And the thirty minute target is an operational "
           "goal grounded in observational series and physiology, not a "
           "measured cliff: no validated model turns a person's temperature "
           "and the time they spent there into a probability. The series "
@@ -116,14 +118,14 @@ MEASURED_NOTE = (
     "or on bypass, which is the only reason anyone has been that cold and "
     "measured. So the page plots the measurements and leaves the gaps "
     "empty. The studies, in order down the scale: Zhu (2003), twenty "
-    "anaesthetised patients heated to 41.8; Eyolfson and colleagues (2001, "
+    "anaesthetised patients heated to {41.8}; Eyolfson and colleagues (2001, "
     "European Journal of Applied Physiology 84, 100 to 106) on peak "
     "shivering; Flickinger and colleagues (2023, Therapeutic Hypothermia and "
-    "Temperature Management), nine sedated volunteers cooled to 33; "
+    "Temperature Management), nine sedated volunteers cooled to {33}; "
     "Sharabiani and colleagues (2025, Perfusion), 293 children on bypass; "
     "Hickey and colleagues (1983, Journal of Thoracic and Cardiovascular "
-    "Surgery), twelve men at 25.4; and Diop and colleagues (2024, Journal of "
-    "Cardiothoracic and Vascular Anesthesia), twenty-four adults at 18, the "
+    "Surgery), twelve men at {25.4}; and Diop and colleagues (2024, Journal of "
+    "Cardiothoracic and Vascular Anesthesia), twenty-four adults at {18}, the "
     "coldest whole-body measurement of a human there is. Below that there "
     "is nothing. The figures that circulate for 15 and 10 degrees descend "
     "from dogs cooled by Bigelow in 1950 by way of a 1983 review, and "
@@ -228,7 +230,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <div class="stage">
   <div class="chartcol">
   <div id="chart"></div>
-  <div id="degwrap">__TABLE__</div>
+  <div id="degwrap"></div>
   </div>
   <div class="side"><div class="card">
     <div id="kindTxt"></div>
@@ -237,12 +239,12 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
     <div id="bodyTxt"></div>
   </div></div>
 </div>
-<p class="note">__NOTE1__</p>
-<p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
+<p class="note cv">__NOTE1__</p>
+<p class="note cv" style="border-top:none; padding-top:0;">__NOTE2__</p>
 <div class="method"><details><summary>The points on the metabolic panel, and why they are points</summary>
-<p>__MEASURED__</p></details></div>
+<p class="cv">__MEASURED__</p></details></div>
 <div class="method"><details><summary>What the collapse view rests on, and where it is soft</summary>
-<p>__METHOD__</p></details></div>
+<p class="cv">__METHOD__</p></details></div>
 <h2 class="refh">References</h2>
 <div class="refs">__REFS__</div>
 </div>
@@ -255,23 +257,29 @@ let view='range', U='C', hot=null;
 // a point on the scale, and a gap between two points, convert differently
 function toU(c){ return U==='F'?c*9/5+32 : U==='K'?c+273.15 : c; }
 const SYM={C:'°C', F:'°F', K:' K'};
-function fmt(c,d){ return toU(c).toFixed(d===undefined?1:d)+SYM[U]; }
+// kelvin needs the two places to say anything the others do not
+function fmt(c,d){
+  return toU(c).toFixed(d===undefined?(U==='K'?2:1):d)+SYM[U];
+}
 function gap(c,d){ return (U==='F'?c*9/5:c).toFixed(d===undefined?1:d)
   +(U==='K'?' K':SYM[U]); }
-// the same temperature in the unit showing and in the other one, because a
-// reader who thinks in Fahrenheit should not have to press a button
-function pair(c,d){
-  d=d===undefined?1:d;
-  const o = U==='F' ? c.toFixed(d)+'°C' : (c*9/5+32).toFixed(d)+'°F';
-  return fmt(c,U==='K'?2:d)+' · '+o;
+// Every temperature on the page, including the ones written into the
+// sentences, is in the one scale the buttons choose. A number authored as
+// {38.6} is a temperature; it converts, and keeps the precision it was
+// written with, give or take what the unit needs.
+function conv(s){
+  return String(s).replace(/\{(\d+(?:\.\d+)?)\}/g,(_,n)=>{
+    const d = U==='K' ? 2 : (n.indexOf('.')<0 ? (U==='F'?1:0) : 1);
+    return fmt(parseFloat(n),d);
+  });
 }
 
 function card(kind,name,when,body){
   const k=document.getElementById('kindTxt');
-  k.textContent=kind; k.style.color='var(--muted)';
-  document.getElementById('nameTxt').textContent=name;
-  document.getElementById('whenTxt').innerHTML=when||'';
-  document.getElementById('bodyTxt').textContent=body||'';
+  k.textContent=conv(kind); k.style.color='var(--muted)';
+  document.getElementById('nameTxt').textContent=conv(name);
+  document.getElementById('whenTxt').innerHTML=conv(when||'');
+  document.getElementById('bodyTxt').textContent=conv(body||'');
 }
 function tint(c){ document.getElementById('kindTxt').style.color=c; }
 
@@ -281,7 +289,7 @@ function svg(h,inner){
     +'<rect width="'+W+'" height="'+h+'" fill="#121212"/>'+inner+'</svg>';
 }
 function txt(x,y,s,o){
-  o=o||{};
+  o=o||{}; s=conv(s);
   return '<text x="'+x+'" y="'+y+'" font-size="'+(o.fs||11)+'"'
     +' fill="'+(o.fill||'#6b7280')+'"'
     +(o.anchor?' text-anchor="'+o.anchor+'"':'')
@@ -417,7 +425,7 @@ function drawRange(){
       +'" fill="'+(it.c||'#e6e6e6')+'"/>'
       +txt(LX,ml[j]-3,esc(it.n),{anchor:'end',fs:11.5,
            fill:on?'#e6e6e6':(it.c||'#8b93a0'),stroke:1})
-      +txt(LX,ml[j]+11,pair(it.t),{anchor:'end',fs:11,
+      +txt(LX,ml[j]+11,fmt(it.t),{anchor:'end',fs:11,
            fill:on?'#c8ccd2':'#5d6672',stroke:1})
       +'<rect x="'+(LX-250)+'" y="'+(ml[j]-15)+'" width="256" height="28" fill="transparent"/>'
       +'</g>';
@@ -815,7 +823,7 @@ function keyLines(yTop,yBot){
       +'<path d="M'+x.toFixed(1)+','+up+' V'+yBot+'" stroke="'+L.c
       +'" stroke-width="1.2" stroke-dasharray="4 3" stroke-opacity="'+(on?1:0.75)+'"/>'
       +txt(x+5,up+9,esc(L.n),{fs:11,fill:on?'#e6e6e6':L.c,stroke:1})
-      +txt(x+5,up+21,pair(L.t),{fs:10,fill:on?'#c8ccd2':'#6b7280',stroke:1})
+      +txt(x+5,up+21,fmt(L.t),{fs:10,fill:on?'#c8ccd2':'#6b7280',stroke:1})
       +'<rect x="'+(x-6)+'" y="'+(up-4)+'" width="200" height="28" fill="transparent"/>'
       +'</g>';
   });
@@ -916,8 +924,8 @@ function drawHelp(){
   // how long each way of cooling takes to cross the 30 minutes
   const cy=yB+hb+92, maxMin=70, sc=(x1-x0-70)/maxMin;
   const drop=D.coolfrom-D.coolto;
-  s+=txt(80,cy-30,'How long each way of cooling takes to bring '+pair(D.coolfrom)
-        +' down to '+pair(D.coolto),{fs:11.5,fill:'#c8ccd2'});
+  s+=txt(80,cy-30,'How long each way of cooling takes to bring '+fmt(D.coolfrom)
+        +' down to '+fmt(D.coolto),{fs:11.5,fill:'#c8ccd2'});
   const tx=x0+D.cooltarget*sc;
   s+='<path d="M'+tx.toFixed(1)+','+(cy-14)+' V'+(cy+D.cooling.length*46-14)
     +'" stroke="#ffd24d" stroke-width="1.6" stroke-dasharray="5 3"/>'
@@ -981,6 +989,20 @@ function drawHelp(){
 }
 
 /* --------------------------------------------------------------- plumbing */
+function renderTable(){
+  const w=document.getElementById('degwrap');
+  let r='<table id="degrees"><thead><tr><th>'+(U==='K'?'Kelvin':SYM[U].trim())
+    +'</th><th>Where it falls</th><th>What is there</th>'
+    +'<th>Metabolic rate</th><th>Pulse</th></tr></thead><tbody>';
+  for(const d of D.table){
+    r+='<tr><td class="c">'+fmt(d.t,U==='C'?0:U==='K'?2:1)+'</td>'
+      +'<td class="z"><i style="background:'+d.zc+'"></i>'+esc(d.zn)+'</td>'
+      +'<td class="w">'+esc(conv(d.w))+'</td>'
+      +'<td class="n '+d.mk+'" title="'+esc(d.mn)+'">'+esc(d.mv)+'</td>'
+      +'<td class="n '+d.pk+'">'+esc(d.pv)+'</td></tr>';
+  }
+  w.innerHTML=r+'</tbody></table><p class="tkey">'+esc(conv(D.tkey))+'</p>';
+}
 const DRAW={range:drawRange, day:drawDay, site:drawSites, fever:drawFever,
             heat:drawHeat, fine:drawFine, help:drawHelp};
 const INTRO={
@@ -991,7 +1013,8 @@ const INTRO={
     +'and highest in the late afternoon. The whole swing is about half a '
     +'degree, which is why the hour matters when a reading is judged.'],
   site:['Where it is taken','Four everyday sites, from a meta-analysis of '
-    +'7,636 healthy adults. They disagree by more than a degree between the '
+    +'7,636 healthy adults. They disagree by more than a degree Celsius '
+    +'between the '
     +'rectum and the armpit, which is more than the daily swing.'],
   fever:['Fever','Above, a fever: the set point moves and the body chases it. '
     +'Below, hyperthermia: the set point stays put and heat wins anyway. The '
@@ -1024,6 +1047,12 @@ function setUnit(u){
   for(const [id,k] of [['uC','C'],['uF','F'],['uK','K']])
     document.getElementById(id).classList.toggle('on',u===k);
   DRAW[view]();
+  renderTable();
+  // the prose below the diagram carries temperatures too
+  for(const e of document.querySelectorAll('.cv')){
+    if(!e.dataset.tpl) e.dataset.tpl=e.innerHTML;
+    e.innerHTML=conv(e.dataset.tpl);
+  }
   const sc=D.scales[u];
   // 37 converts to a terminating figure in each of the three
   card('The scale',sc.n,'body: '+fmt(37,u==='K'?2:1)
@@ -1043,13 +1072,13 @@ el.addEventListener('pointerover',ev=>{
   const pick=(a,t)=>{ hot={t:t,i:+g.getAttribute(a)}; };
   if(g.hasAttribute('data-z')){
     pick('data-z','z'); const z=D.zones[hot.i];
-    card('A band of the span',z.n,pair(z.lo)+' to '+pair(z.hi),z.b); tint(z.c);
+    card('A band of the span',z.n,fmt(z.lo)+' to '+fmt(z.hi),z.b); tint(z.c);
   } else if(g.hasAttribute('data-m')){
     pick('data-m','m'); const m=D.marks[hot.i];
-    card('A mark on the column',m.n,pair(m.t),m.b);
+    card('A mark on the column',m.n,fmt(m.t),m.b);
   } else if(g.hasAttribute('data-h')){
     pick('data-h','h'); const h=hot.i, t=dayT(h);
-    card('One hour of the day',(h<10?'0':'')+h+':00',pair(t),
+    card('One hour of the day',(h<10?'0':'')+h+':00',fmt(t),
       'The curve is a half-degree swing around a mean of '+fmt(D.day.mean)
       +'. Judged against the morning cut-off of '+fmt(D.day.cut_am)
       +' this hour reads '+(t>D.day.cut_am?'high':'normal')
@@ -1057,7 +1086,7 @@ el.addEventListener('pointerover',ev=>{
   } else if(g.hasAttribute('data-s')){
     pick('data-s','s'); const v=D.sites[hot.i];
     card('A place to put the thermometer',v.n,
-      pair(v.m,2)+' · from '+fmt(v.lo,2)+' to '+fmt(v.hi,2),v.b);
+      fmt(v.m,2)+' · from '+fmt(v.lo,2)+' to '+fmt(v.hi,2),v.b);
   } else if(g.hasAttribute('data-p')){
     hot={t:'p',i:0};
     card('Forehead, ear and the rest','A peripheral reading',
@@ -1073,7 +1102,7 @@ el.addEventListener('pointerover',ev=>{
   } else if(g.hasAttribute('data-i')){
     hot={t:'i',i:0};
     card('The other way up','Hyperthermia',
-      pair(D.ill.base)+' to '+pair(D.ill.peak)+', with the set point unmoved',
+      fmt(D.ill.base)+' to '+fmt(D.ill.peak)+', with the set point unmoved',
       D.ill.note);
   } else if(g.hasAttribute('data-r')){
     pick('data-r','r'); const r=D.routes[hot.i];
@@ -1106,7 +1135,8 @@ el.addEventListener('pointerover',ev=>{
       cost='Holding this costs about '+Math.round(metPct(mid)-100)
         +' per cent more oxygen than resting, and the pulse runs near '
         +Math.round(bpm(mid))+'. The climb flattens as it goes: about 9 per '
-        +'cent a degree over the first two, and 4 by the time it reaches 41.8.';
+        +'cent a degree Celsius over the first two, and 4 by the time it '
+        +'reaches {41.8}.';
     } else if(mid>=33){
       cost='Shivering starts around 36.8 and can reach almost five times the '
         +'resting rate, about 500 watts, near a core of 35. How hard it works '
@@ -1115,26 +1145,26 @@ el.addEventListener('pointerover',ev=>{
       cost='Below about 33 the only measurements come from people "'
         +'anaesthetised or on bypass. At 27 the rate is near half of resting, '
         +'and at 18, the coldest a person has been measured, it is 38 per '
-        +'cent. The pulse falls 2.54 beats a minute per degree.';
+        +'cent. The pulse falls 2.54 beats a minute per degree Celsius.';
     } else {
       cost='No whole-body measurement of a person exists this cold. The '
         +'figures that circulate for 15 and 10 degrees come from dogs cooled '
         +'in 1950, and they are probably too high.';
     }
-    card(z.n,pair(mid),rg?rg.n:'',cost+' '+z.b); tint(z.c);
+    card(z.n,fmt(mid),rg?rg.n:'',cost+' '+z.b); tint(z.c);
   } else if(g.hasAttribute('data-pt')){
     pick('data-pt','M'); const m=D.measured[hot.i], src=D.msrc[m.s];
-    card('A measurement',src.n,pair(m.t)+' · '+m.p+' per cent of resting',
+    card('A measurement',src.n,fmt(m.t)+' · '+m.p+' per cent of resting',
       src.b); tint(m.a?'#31d67a':'#58a6ff');
   } else if(g.hasAttribute('data-g')){
     pick('data-g','g'); const r=D.regimes[hot.i];
-    card('Who the numbers came from',r.n,pair(r.lo)+' to '+pair(r.hi),r.b);
+    card('Who the numbers came from',r.n,fmt(r.lo)+' to '+fmt(r.hi),r.b);
     tint(r.c);
   } else if(g.hasAttribute('data-c')){
     pick('data-c','c');
     const t=FN.lo+hot.i*CELL, mid=t+CELL/2;
     const b=D.fine.find(z=>mid>=z.lo&&mid<z.hi)||D.fine[D.fine.length-1];
-    card(b.n,pair(mid),
+    card(b.n,fmt(mid),
       Math.round(metPct(mid))+'% of the resting metabolic rate, somewhere '
       +'between '+Math.round(metPct(mid,D.cost.met_lo))+' and '
       +Math.round(metPct(mid,D.cost.met_hi))+'% · a pulse near '
@@ -1147,10 +1177,10 @@ el.addEventListener('pointerover',ev=>{
     tint(b.c);
   } else if(g.hasAttribute('data-key')){
     pick('data-key','L'); const L=D.lines[hot.i];
-    card('A line on the scale',L.n,pair(L.t),L.b); tint(L.c);
+    card('A line on the scale',L.n,fmt(L.t),L.b); tint(L.c);
   } else if(g.hasAttribute('data-b')){
     pick('data-b','b'); const b=D.fine[hot.i];
-    card('Alert and answering',b.n,pair(b.lo)+' to '+pair(b.hi),b.b); tint(b.c);
+    card('Alert and answering',b.n,fmt(b.lo)+' to '+fmt(b.hi),b.b); tint(b.c);
   } else if(g.hasAttribute('data-u')){
     hot={t:'u',i:0};
     card('Not answering','An emergency, whatever the number','',D.unresp);
@@ -1160,7 +1190,7 @@ el.addEventListener('pointerover',ev=>{
     const mins=(D.coolfrom-D.coolto)/m.r;
     card('A way of cooling',m.n,
       m.r.toFixed(3)+' °C a minute · '+Math.round(mins)+' minutes from '
-      +pair(D.coolfrom)+' to '+pair(D.coolto)
+      +fmt(D.coolfrom)+' to '+fmt(D.coolto)
       +(mins<=D.cooltarget?' · inside the target':' · past the target'),
       m.b+(m.e==='contested'?'' : ''));
     tint(m.c);
@@ -1178,7 +1208,7 @@ el.addEventListener('pointerover',ev=>{
   } else if(g.hasAttribute('data-x')){
     pick('data-x','x');
     card('Which way the heat runs',hot.i?'Hotter than the skin':'Cooler than the skin',
-      hot.i?'above about '+pair(P.skin):'below about '+pair(P.skin),
+      hot.i?'above about '+fmt(P.skin):'below about '+fmt(P.skin),
       hot.i?'Radiation and convection reverse. The room is now heating the '
         +'body, and evaporation is the only route left, which is why still, '
         +'humid air is the dangerous combination.'
@@ -1239,35 +1269,29 @@ def _pulse(t):
     return "not measured", "n"
 
 
-def degree_table():
+def degree_rows():
+    """One row per whole degree, for the page to render in whatever scale
+    the reader has chosen."""
     rows = []
     for t in range(int(D.ZONES[0][0]), int(D.ZONES[-1][1]) + 1):
         z = next((z for z in D.ZONES if z[0] <= t < z[1]), D.ZONES[-1])
-        what = D.PER_DEGREE.get(t, z[4])
         mv, mnote, mk = _metab(t)
         pv, pk = _pulse(t)
-        f = t * 9 / 5 + 32
-        cls = " class=\"key\"" if t in D.PER_DEGREE else ""
-        rows.append(
-            f"<tr{cls}><td class=\"c\">{t}</td><td class=\"f\">{f:.1f}</td>"
-            f"<td class=\"z\"><i style=\"background:{ZC[z[2]]}\"></i>{z[3]}</td>"
-            f"<td class=\"w\">{what}</td>"
-            f"<td class=\"n {mk}\" title=\"{mnote}\">{mv}</td>"
-            f"<td class=\"n {pk}\">{pv}</td></tr>")
-    return (
-        "<table id=\"degrees\"><thead><tr>"
-        "<th>&deg;C</th><th>&deg;F</th><th>Where it falls</th>"
-        "<th>What is there</th><th>Metabolic rate</th><th>Pulse</th>"
-        "</tr></thead><tbody>" + "".join(rows) + "</tbody></table>"
-        "<p class=\"tkey\">Metabolic rate is a percentage of the resting "
-        "rate at 37. A figure in white is a measurement; a range in grey is "
-        "the gap between the two measurements either side of it and is not "
-        "itself measured. Pulse is 2.54 beats a minute per degree below 35, "
-        "from 216 people brought in with hypothermia, and about 8 a degree "
-        "above 37; between 35 and 37 no series covers it, and the figure "
-        "there is a join. Peak shivering, near 35, reaches 490 per cent and "
-        "is left out of the ranges around it because it is a different "
-        "state, not a point on the same line.</p>")
+        rows.append(dict(t=t, zn=z[3], zc=ZC[z[2]],
+                         w=D.PER_DEGREE.get(t, z[4]),
+                         mv=mv, mn=mnote, mk=mk, pv=pv, pk=pk))
+    return rows
+
+
+TKEY = ("Metabolic rate is a percentage of the resting rate at {37}. A figure "
+        "in white is a measurement; a range in grey is the gap between the "
+        "two measurements either side of it and is not itself measured. Pulse "
+        "is 2.54 beats a minute per degree Celsius below {35}, from 216 people "
+        "brought in with hypothermia, and about 8 a degree Celsius above {37}; "
+        "between {35} and {37} no series covers it, and the figure there is a "
+        "join. Peak shivering, near {35}, reaches 490 per cent and is left "
+        "out of the ranges around it because it is a different state, not a "
+        "point on the same line.")
 
 
 def main():
@@ -1377,7 +1401,8 @@ def main():
            "Exertional heat stroke, modality cooling rate, and survival "
            "outcomes: A systematic review", "Medicina", 56, 11, "589",
            "https://doi.org/10.3390/medicina56110589"),
-         "The threshold of 0.15 degrees a minute separating adequate cooling "
+         "The threshold of 0.15 degrees Celsius a minute separating adequate "
+         "cooling "
          "from insufficient, and the outcomes on either side of it."),
         (A("Gagnon, D., Lemire, B. B., Casa, D. J., &amp; Kenny, G. P.", 2010,
            "Cold-water immersion and the treatment of hyperthermia: Using "
@@ -1399,7 +1424,7 @@ def main():
            "ill patients", "American Journal of Respiratory and Critical "
            "Care Medicine", 151, 1, "10-14",
            "https://doi.org/10.1164/ajrccm.151.1.7812538"),
-         "What a degree of fever costs in oxygen, at the low end of the "
+         "What a degree Celsius of fever costs in oxygen, at the low end of the "
          "band the page draws."),
         (apa.web("National Institute for Health and Care Excellence", 2021,
                  "Fever in under 5s: Assessment and initial management "
@@ -1419,13 +1444,15 @@ def main():
            "Vital signs in accidental hypothermia",
            "High Altitude Medicine &amp; Biology", 22, 2, "142-147",
            "https://doi.org/10.1089/ham.2020.0179"),
-         "The pulse in hypothermia, 2.54 beats a minute per degree, from 216 "
+         "The pulse in hypothermia, 2.54 beats a minute per degree Celsius, "
+         "from 216 "
          "people rather than from convention."),
         (A("Rosomoff, H. L., &amp; Holaday, D. A.", 1954,
            "Cerebral blood flow and cerebral oxygen consumption during "
            "hypothermia", "American Journal of Physiology", 179, 1, "85-88",
            "https://doi.org/10.1152/ajplegacy.1954.179.1.85"),
-         "The origin of the figure of six or seven per cent a degree. It was "
+         "The origin of the figure of six or seven per cent a degree Celsius. "
+         "It was "
          "measured in dogs, in the brain, between 37 and 25 degrees, and it "
          "is routinely quoted as a whole-body number, which it is not."),
         (A("Bigelow, W. G., Lindsay, W. K., Harrison, R. C., "
@@ -1441,12 +1468,15 @@ def main():
          "The hottest survival on record. It is a record listing rather than "
          "a published case report, and the page says so."),
     ]
+    js["table"] = degree_rows()
+    js["tkey"] = TKEY
+    data = json.dumps(js, separators=(",", ":"), ensure_ascii=False)
     html = (HTML.replace("__APACSS__", apa.CSS)
-            .replace("__DATA__", DATA)
+            .replace("__DATA__", data)
             .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2)
             .replace("__METHOD__", METHOD)
             .replace("__MEASURED__", MEASURED_NOTE)
-            .replace("__TABLE__", degree_table())
+
             .replace("__REFS__", apa.render(refs)))
     out = ROOT / "temperature.html"
     out.write_text(html, encoding="utf-8")

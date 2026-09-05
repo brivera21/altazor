@@ -6,16 +6,16 @@ Every temperature is in degrees Celsius. The page converts.
 Two things this file is careful about. Body temperature has no single
 number: it depends on the site, the hour and the person, so the normal
 band comes from a meta-analysis that reports each site separately rather
-than from the folk figure of 37. And the classic heat-loss percentages
+than from the folk figure of {37}. And the classic heat-loss percentages
 are a textbook idealisation for one condition, a nude adult resting in
-still air near 21 degrees, so they are labelled as that.
+still air near {21} degrees, so they are labelled as that.
 """
 
 # --- the survivable span, drawn as bands on the column -------------------
 # (low, high, key, name, what happens there)
 ZONES = [
     (10.0, 24.0, "cold4", "Profound hypothermia",
-     "Below 24 degrees the heart may stop and the body can look dead: no "
+     "Below {24} degrees the heart may stop and the body can look dead: no "
      "pulse, no breathing, fixed pupils. It is also where the cold itself "
      "protects the brain, which is why resuscitation is attempted from "
      "temperatures that would otherwise be hopeless."),
@@ -41,18 +41,18 @@ ZONES = [
      "the day and every person in those studies."),
     (37.02, 38.0, "warm1", "Warm, and not yet a fever",
      "Above the pooled band but under the usual cut-off. An oral reading "
-     "of 37.5 at four in the afternoon is ordinary; the same reading at "
+     "of {37.5} at four in the afternoon is ordinary; the same reading at "
      "six in the morning is not."),
     (38.0, 39.0, "warm2", "Fever",
-     "The common clinical cut-off is 38.0 degrees, and critical care "
-     "often uses 38.3. The number means nothing without the site it was "
+     "The common clinical cut-off is {38.0} degrees, and critical care "
+     "often uses {38.3}. The number means nothing without the site it was "
      "taken from."),
     (39.0, 41.0, "warm3", "High fever",
      "Still a raised set point rather than a failure of control. The body "
      "is defending this temperature, not losing to it."),
     (41.0, 48.0, "warm4", "Hyperpyrexia",
-     "Above 41 degrees, and into the range where heat damages cells "
-     "directly. Sustained above about 41.6 for long enough, proteins "
+     "Above {41} degrees, and into the range where heat damages cells "
+     "directly. Sustained above about {41.6} for long enough, proteins "
      "denature and organs fail."),
 ]
 
@@ -62,18 +62,18 @@ MARKS = [
     (11.8, "The coldest survival on record", "l",
      "A 27-month-old boy left home in winter near Krakow wearing pyjama "
      "tops, barefoot, in air at minus 7. He was found two hours later "
-     "with no signs of life and fixed pupils. His core read 11.8 degrees "
+     "with no signs of life and fixed pupils. His core read {11.8} degrees "
      "ten minutes into rewarming on ECMO. He went home after 64 days and "
      "was neurologically well five years on."),
     (13.7, "Anna Bagenholm", "l",
      "The best known adult case: a skier trapped under ice in Norway for "
-     "about 80 minutes in 1999, rewarmed from 13.7 degrees and recovered. "
-     "Deliberate surgical cooling has gone lower still, below 10 degrees, "
+     "about 80 minutes in 1999, rewarmed from {13.7} degrees and recovered. "
+     "Deliberate surgical cooling has gone lower still, below {10} degrees, "
      "but that is a different thing from an accident."),
     (36.6, "The modern mean", "l",
-     "36.6 degrees, from 243,506 measurements of 35,488 outpatients. A "
-     "later series of 618,306 oral readings agrees: 36.6, with a normal "
-     "range of 36.3 to 36.8."),
+     "{36.6} degrees, from 243,506 measurements of 35,488 outpatients. A "
+     "later series of 618,306 oral readings agrees: {36.6}, with a normal "
+     "range of {36.3} to {36.8}."),
     (37.0, "Wunderlich's 37", "l",
      "Carl Wunderlich set the figure in 1868 from about a million "
      "readings, taken in the armpit. Converting his round 37 gives 98.6 "
@@ -81,12 +81,12 @@ MARKS = [
      "is nothing of the kind. The precision is an artefact of the "
      "arithmetic."),
     (40.0, "Heat stroke", "r",
-     "Core above 40 degrees with the nervous system failing: confusion, "
-     "seizures, coma. Well trained athletes reach 41.5 in a race without "
+     "Core above {40} degrees with the nervous system failing: confusion, "
+     "seizures, coma. Well trained athletes reach {41.5} in a race without "
      "harm, so the time spent above the line matters more than the peak."),
     (46.5, "The hottest survival on record", "r",
      "A 52-year-old man admitted to Grady Memorial Hospital in Atlanta on "
-     "10 July 1980 with heat stroke, at 46.5 degrees. He was discharged "
+     "10 July 1980 with heat stroke, at {46.5} degrees. He was discharged "
      "after 24 days. The case is a Guinness record rather than a "
      "published case report."),
 ]
@@ -126,7 +126,7 @@ FEVER = dict(
     phases=[
         (0.0, 2.0, "The set point jumps",
          "Pyrogens reach the brain and the preoptic hypothalamus resets "
-         "itself upward. Nothing has warmed yet: core is still 36.8, and "
+         "itself upward. Nothing has warmed yet: core is still {36.8}, and "
          "the brain now reads that as too cold."),
         (2.0, 6.0, "Chills, and the climb",
          "The body does exactly what it would do out in the cold. Skin "
@@ -135,7 +135,7 @@ FEVER = dict(
          "Every degree costs a tenth again of the metabolic rate."),
         (6.0, 14.0, "The plateau",
          "Core has caught the set point. The shivering stops and the "
-         "person stops feeling cold, while sitting at 39 degrees."),
+         "person stops feeling cold, while sitting at {39} degrees."),
         (14.0, 19.0, "The set point drops",
          "The pyrogens clear, or an antipyretic cuts the prostaglandin "
          "that raised the set point. Now core is above the target, and "
@@ -209,12 +209,12 @@ COST = dict(
     hr_child=12, hr_child_lo=9, hr_child_hi=14,
     hr_base=70, base=37.0,
     shiver=6,                        # shivering multiplies resting output
-    met_note="Cooling a febrile patient by one degree lowers oxygen use by "
+    met_note="Cooling a febrile patient by one degree Celsius lowers oxygen use by "
              "about 7 to 13 per cent, so the page draws the band rather than "
              "a line. Every figure comes from small studies of sedated "
              "patients, and the variance is wide.",
     hr_note="Liebermeister's rule, from the nineteenth century, put the rise "
-            "at 8 beats a minute per degree. Modern series find 7 to 8.4 in "
+            "at 8 beats a minute per degree Celsius. Modern series find 7 to 8.4 in "
             "adults and 9 to 14 in children, so the old convention holds up "
             "better than most of its age.")
 
@@ -222,22 +222,22 @@ COST = dict(
 LINES = [
     (38.0, "The usual fever cut-off", "#ffd24d",
      "The common clinical threshold, written for a rectal reading. Critical "
-     "care often uses 38.3 instead. The number moves with the site: an "
-     "armpit reading of 38.0 is a rectal reading nearer 38.6."),
+     "care often uses {38.3} instead. The number moves with the site: an "
+     "armpit reading of {38.0} is a rectal reading nearer {38.6}."),
     (38.6, "Where cooling stops", "#31d67a",
      "The experimental stopping point for cooling a heat stroke patient, "
      "from a study that immersed volunteers and watched what happened after "
-     "they came out. Stopping at 37.5 overshot to 35.7 in the oesophagus; "
-     "stopping at 38.6 did not overshoot at all. Authorities put the line "
-     "anywhere from 38.0 to 39.4, so the spread is wider than it looks."),
+     "they came out. Stopping at {37.5} overshot to {35.7} in the oesophagus; "
+     "stopping at {38.6} did not overshoot at all. Authorities put the line "
+     "anywhere from {38.0} to {39.4}, so the spread is wider than it looks."),
     (40.0, "The heat stroke line", "#e0673f",
-     "Above 40 with the nervous system failing is the definition of heat "
+     "Above {40} with the nervous system failing is the definition of heat "
      "stroke. The definition needs both halves, and the brain half is the "
      "one a bystander can actually judge."),
     (41.6, "The critical thermal maximum", "#c02f2f",
      "The temperature at which human tissue starts to fail, from a single "
      "small 1978 study that heated sedated volunteers. The original finding "
-     "was 41.6 to 42 degrees held for anywhere from 45 minutes to 8 hours, "
+     "was {41.6} to {42} degrees held for anywhere from 45 minutes to 8 hours, "
      "and the eight hours usually gets dropped in the retelling. People die "
      "below this line and survive above it."),
 ]
@@ -275,8 +275,8 @@ COOLING = [
     ("Cold or ice water immersion", 0.20, "#58a6ff", "strong",
      "The fastest method there is, and about double any realistic "
      "alternative. Real patients at the Falmouth road race cooled at 0.22 "
-     "degrees a minute in water near 10 degrees. Guidelines put the useful "
-     "water range anywhere from 1 to 26 degrees, which is an envelope around "
+     "degrees Celsius a minute in water near {10}. Guidelines put the useful "
+     "water range anywhere from {1} to {26} degrees, which is an envelope around "
      "the evidence rather than a target."),
     ("A tarp, ice and water", 0.15, "#4a87d6", "moderate",
      "The person lies on a tarp with the sides held up, in ice and water. It "
@@ -317,10 +317,10 @@ ACTIONS = [
      "is nearly as fast and much safer. One person alone does not put an "
      "unresponsive body into a bathtub."),
     ("Stop", "#ffd24d",
-     "Cooling stops near 38.6 degrees, or in the field when the person comes "
+     "Cooling stops near {38.6} degrees, or in the field when the person comes "
      "round or starts shivering hard, and then they are dried and covered. "
      "The stopping point exists because a body cooled to normal keeps "
-     "falling: volunteers taken to 37.5 dropped to 35.7 afterwards."),
+     "falling: volunteers taken to {37.5} dropped to {35.7} afterwards."),
     ("Never", "#c02f2f",
      "Nothing by mouth to anyone who is not fully alert. No aspirin and no "
      "paracetamol: they lower a set point, and in heat stroke the set point "
@@ -379,8 +379,9 @@ MSRC = {
     "base": ("Resting", "The rate every other figure on this panel is a "
              "percentage of."),
     "zhu": ("Zhu, 2003", "Twenty anaesthetised and paralysed patients heated "
-            "to 41.8 degrees, with a catheter in the pulmonary artery. The "
-            "climb decelerates: about 9 per cent a degree over the first two, "
+            "to {41.8} degrees, with a catheter in the pulmonary artery. The "
+            "climb decelerates: about 9 per cent a degree Celsius over the first "
+            "two, "
             "then 5, then 4. Anaesthesia removes shivering and the work of "
             "breathing, so this is close to the pure effect of heat on "
             "tissue and probably understates an intact person."),
@@ -388,12 +389,12 @@ MSRC = {
                  "eight degree water and then rewarmed to twenty, which "
                  "maximises the cold signal from the skin. Peak output was "
                  "4.9 times the resting rate, about 500 watts, at a core of "
-                 "35.2 degrees. Shivering is driven mostly by skin rather "
-                 "than core, so a person at 35 degrees can sit anywhere "
+                 "{35.2} degrees. Shivering is driven mostly by skin rather "
+                 "than core, so a person at {35} degrees can sit anywhere "
                  "between resting and five times it depending on how cold "
                  "their skin is. Plotting this against core alone is a "
                  "simplification."),
-    "flick": ("Flickinger, 2023", "Nine sedated volunteers cooled from 37 to "
+    "flick": ("Flickinger, 2023", "Nine sedated volunteers cooled from {37} to "
               "33 with indirect calorimetry, the best controlled human data "
               "near normal. The fall is not linear: the largest single step "
               "was the first degree. When a participant began to shiver, "
@@ -403,10 +404,10 @@ MSRC = {
               "cardiopulmonary bypass, twenty thousand minutes of "
               "measurement. The ratio of change per ten degrees is not "
               "constant: it is shallow near normal and steepens sharply "
-              "below about 28."),
-    "hickey": ("Hickey, 1983", "Twelve men cooled to 25.4 degrees on bypass. "
+              "below about {28}."),
+    "hickey": ("Hickey, 1983", "Twelve men cooled to {25.4} degrees on bypass. "
                "Oxygen use fell by 45 per cent."),
-    "diop": ("Diop, 2024", "Twenty-four adults cooled to 18 degrees for "
+    "diop": ("Diop, 2024", "Twenty-four adults cooled to {18} degrees for "
              "pulmonary thromboendarterectomy. This is the coldest whole-body "
              "measurement in a human that exists."),
 }
@@ -414,19 +415,19 @@ MSRC = {
 # The regions of the scale, by what kind of person the numbers came from.
 REGIMES = [
     (33.0, 43.0, "An awake person, or a sedated one", "#31d67a",
-     "Above about 33 degrees the measurements come from people who are "
+     "Above about {33} degrees the measurements come from people who are "
      "awake, or sedated but still their own thermostat. This is also the "
      "only part of the range where a person defends their temperature, which "
      "is why the shivering peak sits here and nowhere below."),
     (18.0, 33.0, "Anaesthetised, paralysed, or on bypass", "#58a6ff",
-     "Every whole-body measurement below about 33 degrees was taken from a "
+     "Every whole-body measurement below about {33} degrees was taken from a "
      "patient whose thermoregulation had been switched off by drugs or by a "
      "bypass machine. That is not a detail: it is the only reason anyone has "
      "ever been measured this cold. The two halves of this panel are two "
      "different physiological states, not two ends of one curve."),
     (10.0, 18.0, "Never measured in a person", "#6b7280",
-     "No whole-body measurement of a human exists below 18 degrees. The "
-     "figures that circulate for 15 and 10 degrees trace back to dogs cooled "
+     "No whole-body measurement of a human exists below {18} degrees. The "
+     "figures that circulate for {15} and {10} degrees trace back to dogs cooled "
      "in 1950 and to a review from 1983 that cited papers it could not "
      "reach. They are extrapolations, and because the rate of change "
      "steepens as it gets colder, they are probably too high."),
@@ -435,10 +436,10 @@ REGIMES = [
 # Heart rate the other way, from pooled measurements rather than convention.
 HR_COLD = dict(slope=2.54, lo=19.3, hi=34.9, n=216,
                note="Two hundred and sixteen people brought in with "
-                    "accidental hypothermia, cores from 19.3 to 34.9 "
+                    "accidental hypothermia, cores from {19.3} to {34.9} "
                     "degrees. The pulse falls 2.54 beats a minute per "
                     "degree, a straight line. The textbook figure of half "
-                    "the normal pulse at 28 degrees comes from the same "
+                    "the normal pulse at {28} degrees comes from the same "
                     "1950s lineage as the metabolic table and sits well "
                     "below what was actually counted.")
 
@@ -453,9 +454,9 @@ PER_DEGREE = {
     10: "The bottom of the drawing, and well past anything measured. Nothing "
         "in a living person has been recorded this cold.",
     11: "A 27-month-old boy was found at minus seven in Poland with no signs "
-        "of life and fixed pupils, read 11.8 on rewarming, and went home "
+        "of life and fixed pupils, read {11.8} on rewarming, and went home "
         "after 64 days neurologically well.",
-    13: "Anna Bagenholm was pulled from under ice in Norway at 13.7 after "
+    13: "Anna Bagenholm was pulled from under ice in Norway at {13.7} after "
         "about 80 minutes and recovered. Deliberate surgical cooling has "
         "gone lower still.",
     18: "The coldest whole-body measurement of a living person: 38 per cent "
@@ -486,53 +487,53 @@ PER_DEGREE = {
     35: "Peak shivering sits near here: almost five times the resting rate, "
         "about 500 watts. Whether it is reached depends more on how cold "
         "the skin is than on the core.",
-    36: "Shivering begins around 36.8 in someone whose skin is not cold. "
-        "The modern mean sits at 36.6, and the daily low near 36.5.",
+    36: "Shivering begins around {36.8} in someone whose skin is not cold. "
+        "The modern mean sits at {36.6}, and the daily low near {36.5}.",
     37: "The number Wunderlich set in 1868, from about a million readings "
         "taken in the armpit. Converting his round 37 gives the "
         "spuriously precise 98.6.",
     38: "The usual fever cut-off, written for a rectal reading; critical "
-        "care often uses 38.3. Cooling a heat stroke patient stops at 38.6, "
+        "care often uses {38.3}. Cooling a heat stroke patient stops at {38.6}, "
         "because a body cooled to normal keeps falling.",
     39: "Measured 18 per cent above resting in anaesthetised patients heated "
         "deliberately. Still a raised set point rather than a failure of "
         "control.",
     40: "Above here, with the nervous system failing, is heat stroke. The "
-        "definition needs both halves. Well trained athletes reach 41.5 in "
+        "definition needs both halves. Well trained athletes reach {41.5} in "
         "a race without harm, so time above the line matters more than the "
         "peak.",
     41: "28 per cent above resting. The climb decelerates: about 9 per cent "
-        "a degree over the first two, then 5, then 4.",
+        "a degree Celsius over the first two, then 5, then 4.",
     42: "The critical thermal maximum, from one small 1978 study of sedated "
-        "volunteers. The finding was 41.6 to 42 held for anywhere from 45 "
+        "volunteers. The finding was {41.6} to {42} held for anywhere from 45 "
         "minutes to 8 hours, and the eight hours usually gets dropped.",
     43: "Past every metabolic measurement there is. Nothing has been "
-        "measured in a person above 41.8.",
-    46: "A 52-year-old man survived 46.5 with heat stroke in Atlanta in July "
+        "measured in a person above {41.8}.",
+    46: "A 52-year-old man survived {46.5} with heat stroke in Atlanta in July "
         "1980 and was discharged after 24 days. The case is a record "
         "listing rather than a published case report.",
     48: "The top of the drawing. No one has been recorded here.",
     12: "Colder than any adult has been rewarmed from. Only the child at "
-        "11.8 sits below this line.",
-    14: "Just above the 13.7 an adult survived under ice. Rewarming from "
+        "{11.8} sits below this line.",
+    14: "Just above the {13.7} an adult survived under ice. Rewarming from "
         "this depth needs a bypass or ECMO circuit, not blankets.",
     15: "The figures quoted for this depth come from dogs cooled in 1950, "
         "not from people.",
     16: "Deep enough that the heart is unlikely to be beating, and cold "
         "enough that the brain may not mind for a while.",
-    17: "Inside the gap. The nearest real measurement is at 18, one degree "
-        "warmer, and there is nothing below it.",
+    17: "Inside the gap. The nearest real measurement is a degree warmer, at "
+        "{18}, and there is nothing below it.",
     20: "Deliberate surgical cooling has gone below here. Accidental "
         "survival this deep is rare and always involves rewarming on a "
         "circuit.",
-    21: "Just above where the pulse series stops. Below 19.3 the falling "
+    21: "Just above where the pulse series stops. Below {19.3} the falling "
         "line is extrapolation.",
-    22: "A patient has been recorded conscious and shivering at 22.9, which "
+    22: "A patient has been recorded conscious and shivering at {22.9}, which "
         "the staging says should not happen. The stages are population "
         "conventions, not individual guarantees.",
     23: "Approaching the top of profound hypothermia, where vital signs can "
         "be absent and recovery still possible.",
-    26: "Between the two bypass measurements at 25.4 and 27. Nothing was "
+    26: "Between the two bypass measurements at {25.4} and {27}. Nothing was "
         "measured at this degree itself.",
     29: "Consciousness is gone or going, the pulse is around fifty, and the "
         "rhythm is unreliable.",
@@ -543,11 +544,11 @@ PER_DEGREE = {
     44: "Above the hottest anyone has been measured metabolically, and above "
         "the critical thermal maximum. Damage here is a question of how "
         "long, not whether.",
-    45: "The only documented survival above this line is the 46.5 record.",
+    45: "The only documented survival above this line is the {46.5} record.",
     47: "Above that record. No one is known to have come back from here.",
 }
 
 # Where the pulse figures hold. Below 19.3 and above 42 there is nothing.
 PULSE = dict(cold_lo=19.3, cold_hi=34.9, cold_slope=2.54,
              warm_lo=37.0, warm_hi=42.0, warm_slope=8.0, base=70.0,
-             gap_note="between 35 and 37 no series covers it")
+             gap_note="between {35} and {37} no series covers it")

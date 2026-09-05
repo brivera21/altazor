@@ -110,7 +110,7 @@ with sync_playwright() as pw:
     name = pg.evaluate("document.getElementById('nameTxt').textContent")
     body = pg.evaluate("document.getElementById('bodyTxt').textContent")
     check("and a cell in the fever range names its cost",
-          "°C" in name and "°F" in name and "per cent more oxygen" in body,
+          "°C" in name and "per cent more oxygen" in body,
           name + " / " + body[:70])
     pg.evaluate("document.querySelector('[data-q=\"20\"]')"
                 ".dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
@@ -132,40 +132,39 @@ with sync_playwright() as pw:
     check("and every one of them says something of its own",
           len(set(D.PER_DEGREE.values())) == len(D.PER_DEGREE)
           and all(d in D.PER_DEGREE for d in range(10, 49)))
-    check("both scales are columns, not a toggle",
+    check("one temperature column, in the scale the buttons chose",
           pg.evaluate("(()=>{const r=document.querySelectorAll("
                       "'#degrees tbody tr')[27];"
-                      "return r.children[0].textContent==='37'"
-                      "&&r.children[1].textContent==='98.6';})()"))
+                      "return r.children[0].textContent==='37\u00b0C';})()"))
     # a measured figure and a bracketed one are told apart
     check("a measured metabolic figure is marked as measured",
           pg.evaluate("(()=>{const r=[...document.querySelectorAll("
                       "'#degrees tbody tr')].find(x=>x.children[0]"
-                      ".textContent==='37');"
-                      "return r.children[4].classList.contains('m')"
-                      "&&r.children[4].textContent==='100%';})()"))
+                      ".textContent.startsWith('37'));"
+                      "return r.children[3].classList.contains('m')"
+                      "&&r.children[3].textContent==='100%';})()"))
     check("and a gap between two of them is marked as a gap",
           pg.evaluate("(()=>{const r=[...document.querySelectorAll("
                       "'#degrees tbody tr')].find(x=>x.children[0]"
-                      ".textContent==='30');"
-                      "return r.children[4].classList.contains('b')"
-                      "&&r.children[4].textContent.includes('to');})()"))
+                      ".textContent.startsWith('30'));"
+                      "return r.children[3].classList.contains('b')"
+                      "&&r.children[3].textContent.includes('to');})()"))
     check("nothing is claimed below the coldest measurement",
           pg.evaluate("(()=>{const r=[...document.querySelectorAll("
                       "'#degrees tbody tr')].filter(x=>+x.children[0]"
-                      ".textContent<18);"
-                      "return r.every(x=>x.children[4].textContent"
+                      ".textContent.replace(/[^\\d.-]/g,'')<18);"
+                      "return r.every(x=>x.children[3].textContent"
                       "==='not measured');})()"))
     check("or above the hottest one",
           pg.evaluate("(()=>{const r=[...document.querySelectorAll("
                       "'#degrees tbody tr')].filter(x=>+x.children[0]"
-                      ".textContent>42);"
-                      "return r.every(x=>x.children[4].textContent"
+                      ".textContent.replace(/[^\\d.-]/g,'')>42);"
+                      "return r.every(x=>x.children[3].textContent"
                       "==='not measured');})()"))
     check("the pulse stops where its series stops",
           pg.evaluate("(()=>{const g=t=>[...document.querySelectorAll("
                       "'#degrees tbody tr')].find(x=>+x.children[0]"
-                      ".textContent===t).children[5].textContent;"
+                      ".textContent.replace(/[^\\d.-]/g,'')==t).children[4].textContent;"
                       "return g(19)==='not measured'&&g(20)!=='not measured'"
                       "&&g(43)==='not measured';})()"))
     check("the table is only on the view it belongs to",
@@ -173,6 +172,37 @@ with sync_playwright() as pw:
                       "const h=document.getElementById('degwrap').hidden;"
                       "document.getElementById('vRange').click();"
                       "return h&&!document.getElementById('degwrap').hidden;})()"))
+
+    # --- one scale, and it reaches the sentences as well as the numbers
+    for btn, unit, at37, tcol in [("#uC", "C", "37.0°C", "37°C"),
+                                  ("#uF", "F", "98.6°F", "98.6°F"),
+                                  ("#uK", "K", "310.15 K", "310.15 K")]:
+        pg.click(btn)
+        pg.wait_for_timeout(250)
+        got = pg.evaluate(
+            "document.querySelectorAll('#degrees tbody tr')[27]"
+            ".children[0].textContent")
+        check(f"the table's degree column reads {tcol}", got == tcol, got)
+        prose = pg.evaluate(
+            "document.querySelectorAll('#degrees tbody tr')[28]"
+            ".children[2].textContent")
+        check(f"and the sentences in it are in {unit} too",
+              at37[-2:].strip() in prose or unit == "K" and " K" in prose,
+              prose[:90])
+        left = pg.evaluate("(document.body.innerText.match(/\\{\\d/g)||[]).length")
+        check(f"no unconverted marker survives in {unit}", left == 0, str(left))
+    pg.click("#uF")
+    pg.wait_for_timeout(250)
+    meth = pg.evaluate(
+        "[...document.querySelectorAll('.method p')].map(p=>p.textContent)"
+        ".join(' ')")
+    check("the method notes follow the scale as well",
+          "101.5°F" in meth or "100.4°F" in meth, meth[:0] or "no F in method")
+    note = pg.evaluate("[...document.querySelectorAll('.note')][1].textContent")
+    check("and the page no longer claims to show both at once",
+          "both scales" not in note, note[:70])
+    pg.click("#uC")
+    pg.wait_for_timeout(250)
 
     # --- the measurement panel: points, not a curve
     pts = pg.evaluate("document.querySelectorAll('#tsvg [data-pt]').length")
@@ -390,23 +420,28 @@ with sync_playwright() as pw:
         check(f"the {name} view has something to hover",
               st["nodes"] >= 2, str(st["nodes"]))
 
-    # --- both scales on every figure, without pressing anything
+    # --- one scale at a time, and the whole page in it
     pg.click("#vRange")
+    for btn, unit, want in [("#uC", "C", "46.5°C"), ("#uF", "F", "115.7°F"),
+                            ("#uK", "K", "319.65 K")]:
+        pg.click(btn)
+        pg.wait_for_timeout(250)
+        pg.evaluate("document.querySelector('[data-m=\"5\"]')"
+                    ".dispatchEvent(new PointerEvent("
+                    "'pointerover',{bubbles:true}))")
+        pg.wait_for_timeout(140)
+        when = pg.evaluate("document.getElementById('whenTxt').textContent")
+        check(f"a card in {unit} gives one figure, not two", when == want, when)
+        others = [s for s in ("°C", "°F", " K") if s not in want]
+        check(f"and none of the other scales with it",
+              not any(o in when for o in others), when)
+        lab = pg.evaluate(
+            "[...document.querySelectorAll('#tsvg [data-m] text')]"
+            ".map(t=>t.textContent).join('|')")
+        check(f"the marks on the figure are in {unit} alone",
+              want in lab and not any(o in lab for o in others), lab[:80])
     pg.click("#uC")
-    pg.wait_for_timeout(220)
-    check("a temperature in Celsius carries its Fahrenheit too",
-          pg.evaluate("pair(37)") == "37.0°C · 98.6°F", pg.evaluate("pair(37)"))
-    pg.click("#uF")
     pg.wait_for_timeout(200)
-    check("and the other way round",
-          pg.evaluate("pair(37)") == "98.6°F · 37.0°C", pg.evaluate("pair(37)"))
-    pg.click("#uC")
-    pg.wait_for_timeout(200)
-    pg.evaluate("document.querySelector('[data-m=\"5\"]')"
-                ".dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
-    pg.wait_for_timeout(150)
-    when = pg.evaluate("document.getElementById('whenTxt').textContent")
-    check("the cards carry both scales", "°C" in when and "°F" in when, when)
 
     html = PAGE.read_text(encoding="utf-8")
     check("no em dashes", "—" not in html)
