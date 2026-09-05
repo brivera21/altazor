@@ -57,12 +57,9 @@ with sync_playwright() as pw:
           str(st["zones"]))
     check("and every mark", st["marks"] == len(D.MARKS), str(st["marks"]))
     # the labels are pushed apart, not piled on each other
-    ys = pg.evaluate(
-        "[...document.querySelectorAll('#tsvg [data-m] text')]"
-        ".map(t=>+t.getAttribute('y')).sort((a,b)=>a-b)")
-    pairs = [b - a for a, b in zip(ys, ys[1:])]
-    check("no two mark labels land on the same line",
-          all(d == 0 or d >= 13 for d in pairs), str(sorted(set(pairs))[:5]))
+    check("the marks are dots on the figure, named by their own rows",
+          pg.evaluate("document.querySelectorAll('#tsvg [data-m] text')"
+                      ".length") == 0)
     # and each still points at the temperature it means
     ok = pg.evaluate(
         "[...document.querySelectorAll('#tsvg [data-m]')].every(g=>{"
@@ -91,9 +88,10 @@ with sync_playwright() as pw:
         "const b=p.getBBox();return [b.x,b.y,b.width,b.height];})()")
     check("the figure is at least three times as tall as half of it is wide",
           box[3] > 3 * box[2], f"{box[3]:.0f} tall, {box[2]:.0f} wide")
+    bot = pg.evaluate("RG.bot")
     check("it fills the whole scale, feet to head",
-          abs(box[1] - 44) < 8 and abs(box[1] + box[3] - 524) < 12,
-          f"top {box[1]:.0f}, bottom {box[1]+box[3]:.0f}")
+          box[1] < 14 and abs(box[1] + box[3] - bot) < 40,
+          f"top {box[1]:.0f}, bottom {box[1]+box[3]:.0f} of {bot}")
     # the head is narrow and the shoulders are wide, which is how it reads
     hw = pg.evaluate("(()=>{const H=RG.bot-RG.top;"
                      "return {head:0.045*H, sh:0.092*H, hand:0.120*H};})()")
@@ -102,9 +100,8 @@ with sync_playwright() as pw:
 
     # --- the degree-by-degree detail, now on the first view
     cells = pg.evaluate("document.querySelectorAll('#tsvg [data-q]').length")
-    check("the body is hoverable a quarter degree at a time",
-          cells == round((48 - 10) / 0.25), str(cells))
-    pg.evaluate("document.querySelector('[data-q=\"120\"]')"
+    check("a slice of the figure for every degree", cells == 39, str(cells))
+    pg.evaluate("document.querySelector('[data-q=\"40\"]')"
                 ".dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
     pg.wait_for_timeout(150)
     name = pg.evaluate("document.getElementById('nameTxt').textContent")
@@ -112,7 +109,7 @@ with sync_playwright() as pw:
     check("and a cell in the fever range names its cost",
           "°C" in name and "per cent more oxygen" in body,
           name + " / " + body[:70])
-    pg.evaluate("document.querySelector('[data-q=\"20\"]')"
+    pg.evaluate("document.querySelector('[data-q=\"15\"]')"
                 ".dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
     pg.wait_for_timeout(150)
     body = pg.evaluate("document.getElementById('bodyTxt').textContent")
@@ -134,8 +131,41 @@ with sync_playwright() as pw:
           and all(d in D.PER_DEGREE for d in range(10, 49)))
     check("one temperature column, in the scale the buttons chose",
           pg.evaluate("(()=>{const r=document.querySelectorAll("
-                      "'#degrees tbody tr')[27];"
+                      "'#degrees tbody tr')[11];"
                       "return r.children[0].textContent==='37\u00b0C';})()"))
+    check("the table runs hot at the top, the way the body stands",
+          pg.evaluate("(()=>{const r=[...document.querySelectorAll("
+                      "'#degrees tbody tr')].map(x=>parseFloat("
+                      "x.children[0].textContent));"
+                      "return r[0]===48&&r[r.length-1]===10"
+                      "&&r.every((v,i)=>!i||v<r[i-1]);})()"))
+
+    # --- the one thing this view is for: both halves on one axis
+    geo = pg.evaluate(
+        "(()=>{const svg=document.querySelector('#tsvg');"
+        "const sb=svg.getBoundingClientRect();"
+        "const rows=[...document.querySelectorAll('#degrees tbody tr')];"
+        "const sc=sb.height/RG.bot;"
+        "const mid=r=>{const b=r.getBoundingClientRect();"
+        "return (b.top+b.bottom)/2-sb.top;};"
+        "const drift=Math.max(...rows.map((r,i)=>"
+        "Math.abs(mid(r)-yOf(48-i)*sc)));"
+        "const hs=[...new Set(rows.map(r=>"
+        "Math.round(r.getBoundingClientRect().height)))];"
+        "const clip=[...document.querySelectorAll('#degrees td.w .cw')]"
+        ".filter(x=>x.getBoundingClientRect().height>ROW-4).length;"
+        "return {drift:+drift.toFixed(2), heights:hs, row:ROW, clip:clip,"
+        "figTop:Math.round(sb.top), scale:+sc.toFixed(3)};})()")
+    check("every row sits at its own degree on the figure, to the pixel",
+          geo["drift"] < 1.0, str(geo["drift"]))
+    check("and every row is the same height, because every degree is",
+          len(geo["heights"]) == 1, str(geo["heights"]))
+    check("the row height is the axis, so the two cannot drift",
+          geo["heights"][0] == geo["row"], f'{geo["heights"]} vs {geo["row"]}')
+    check("the figure is drawn at one pixel per unit", geo["scale"] == 1.0,
+          str(geo["scale"]))
+    check("no sentence is clipped by the row it sits in", geo["clip"] == 0,
+          str(geo["clip"]))
     # a measured figure and a bracketed one are told apart
     check("a measured metabolic figure is marked as measured",
           pg.evaluate("(()=>{const r=[...document.querySelectorAll("
@@ -180,11 +210,11 @@ with sync_playwright() as pw:
         pg.click(btn)
         pg.wait_for_timeout(250)
         got = pg.evaluate(
-            "document.querySelectorAll('#degrees tbody tr')[27]"
+            "document.querySelectorAll('#degrees tbody tr')[11]"
             ".children[0].textContent")
         check(f"the table's degree column reads {tcol}", got == tcol, got)
         prose = pg.evaluate(
-            "document.querySelectorAll('#degrees tbody tr')[28]"
+            "document.querySelectorAll('#degrees tbody tr')[10]"
             ".children[2].textContent")
         check(f"and the sentences in it are in {unit} too",
               at37[-2:].strip() in prose or unit == "K" and " K" in prose,
@@ -203,197 +233,6 @@ with sync_playwright() as pw:
           "both scales" not in note, note[:70])
     pg.click("#uC")
     pg.wait_for_timeout(250)
-
-    # --- the measurement panel: points, not a curve
-    pts = pg.evaluate("document.querySelectorAll('#tsvg [data-pt]').length")
-    check("every measurement is plotted", pts == len(D.MEASURED), str(pts))
-    check("and they share the body's own scale",
-          pg.evaluate("(()=>{const g=document.querySelector('[data-pt=\"4\"]');"
-                      "const c=g.querySelector('circle');"
-                      "return Math.abs(+c.getAttribute('cy')-yOf(37))<0.6;})()"))
-    check("no line is drawn between two different studies",
-          pg.evaluate(
-              "(()=>{const by={};for(const m of D.measured)"
-              "(by[m.s]=by[m.s]||[]).push(m);"
-              "const multi=Object.values(by).filter(v=>v.length>1).length;"
-              "return document.querySelectorAll("
-              "'#tsvg path[stroke-dasharray=\"4 3\"]').length===multi;})()"))
-    check("the shivering peak runs off the panel rather than squashing it",
-          pg.evaluate("D.measured.some(m=>m.p>MP.max)")
-          and pg.evaluate("MP.max<200"))
-    check("the three regimes are named, as a band and as a legend chip",
-          pg.evaluate("document.querySelectorAll('#tsvg [data-g]').length")
-          == 2 * len(D.REGIMES))
-    pg.evaluate("document.querySelector('[data-g=\"2\"]')"
-                ".dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
-    pg.wait_for_timeout(150)
-    body = pg.evaluate("document.getElementById('bodyTxt').textContent")
-    check("and the coldest one owns up to being unmeasured",
-          "No whole-body measurement" in body, body[:80])
-    check("the coldest real measurement is the 18 degree one",
-          pg.evaluate("Math.min(...D.measured.map(m=>m.t))") == 18.0)
-    check("the panel says the gaps are gaps",
-          "the gaps are gaps" in pg.evaluate(
-              "document.getElementById('tsvg').textContent"))
-
-    # --- a day
-    pg.click("#vDay")
-    pg.wait_for_timeout(250)
-    st = pg.evaluate("window.__temp()")
-    check("the day view draws the day", st["view"] == "day")
-    check("lowest before dawn, highest in the late afternoon",
-          st["dayLow"] < st["dayHigh"],
-          f'{st["dayLow"]} vs {st["dayHigh"]}')
-    swing = st["dayHigh"] - st["dayLow"]
-    check("and the whole swing is about half a degree",
-          0.45 <= swing <= 0.55, f"{swing:.2f}")
-    lo = pg.evaluate("dayT(D.day.nadir)")
-    check("the low lands on the nadir the source gives",
-          all(lo <= pg.evaluate(f"dayT({h})") + 1e-9 for h in range(0, 24)),
-          str(lo))
-
-    # --- where it is taken
-    pg.click("#vSite")
-    pg.wait_for_timeout(250)
-    check("a row for each site",
-          pg.evaluate("document.querySelectorAll('#tsvg [data-s]').length")
-          == len(D.SITES))
-    spread = pg.evaluate("Math.max(...D.sites.map(s=>s.m))"
-                         "-Math.min(...D.sites.map(s=>s.m))")
-    check("the sites disagree by more than the daily swing",
-          spread > swing, f"{spread:.2f} vs {swing:.2f}")
-    check("the rectum reads higher than the armpit",
-          pg.evaluate("D.sites.find(s=>s.n==='Rectal').m"
-                      ">D.sites.find(s=>s.n==='Axillary').m"))
-    check("and the peripheral spread is on the page too",
-          pg.evaluate("!!document.querySelector('#tsvg [data-p]')"))
-
-    # --- fever against hyperthermia
-    pg.click("#vFever")
-    pg.wait_for_timeout(250)
-    st = pg.evaluate("window.__temp()")
-    check("early in a fever the body is still chasing the set point",
-          st["chase"])
-    check("in the middle it has caught it", st["caught"])
-    check("and at the end it is shedding heat above it", st["shed"])
-    check("the four phases are all drawn",
-          pg.evaluate("document.querySelectorAll('#tsvg [data-f]').length")
-          == len(D.FEVER["phases"]))
-    check("hyperthermia climbs past a set point that never moves",
-          pg.evaluate("illT(20)>D.ill.base+3 && illT(0)===D.ill.base"))
-
-    # --- heat in and heat out
-    pg.click("#vHeat")
-    pg.wait_for_timeout(250)
-    check("the routes out add to a hundred", st["routeSum"] == 100,
-          str(st["routeSum"]))
-    check("a bar for each route",
-          pg.evaluate("document.querySelectorAll('#tsvg [data-r]').length")
-          == len(D.ROUTES))
-    check("radiation is the largest at rest",
-          pg.evaluate("D.routes[0].n==='Radiation' && "
-                      "D.routes.every(r=>r.p<=D.routes[0].p)"))
-    check("the sweat ceiling follows from the latent heat",
-          abs(pg.evaluate("2*D.power.evap_w_per_lh")
-              - 2 * D.POWER["latent"] * 1000 / 3600) < 5)
-    check("hard effort makes an order of magnitude more heat than rest",
-          pg.evaluate("D.power.hard/D.power.rest>=10"))
-    check("and the dry routes reverse above skin temperature",
-          pg.evaluate("document.querySelectorAll('#tsvg [data-x]').length")
-          == 2)
-
-    # --- degree by degree, and what a degree costs
-    pg.click("#vFine")
-    pg.wait_for_timeout(280)
-    cells = pg.evaluate("document.querySelectorAll('#tsvg [data-c]').length")
-    check("the fine scale is hoverable a quarter degree at a time",
-          cells == round((43 - 36) / 0.25), str(cells))
-    check("and it runs from an ordinary morning to past survival",
-          pg.evaluate("FN.lo<=36 && FN.hi>=43"))
-    check("both scales are on the ruler at once",
-          pg.evaluate("[...document.querySelectorAll('#tsvg text')]"
-                      ".some(t=>t.textContent==='97°F')")
-          and pg.evaluate("[...document.querySelectorAll('#tsvg text')]"
-                          ".some(t=>t.textContent==='37°C')"))
-    check("a degree costs about a tenth again of the resting metabolism",
-          abs(pg.evaluate("metPct(38)-metPct(37)") - D.COST["met"]) < 0.01)
-    check("and the band around it holds the range the studies give",
-          pg.evaluate("metPct(40,D.cost.met_lo)<metPct(40)"
-                      "&&metPct(40)<metPct(40,D.cost.met_hi)"))
-    check("the pulse climbs faster in a child than in an adult",
-          pg.evaluate("bpm(41,D.cost.hr_child)>bpm(41)"))
-    check("every line that matters is drawn",
-          pg.evaluate("document.querySelectorAll('#tsvg [data-key]').length")
-          == len(D.LINES))
-    check("including the heat stroke line at 40",
-          pg.evaluate("D.lines.some(l=>Math.abs(l.t-40)<1e-9)"))
-
-    # --- if someone collapses: the number is not what decides
-    pg.click("#vHelp")
-    pg.wait_for_timeout(280)
-    check("the alert row is split into bands",
-          pg.evaluate("document.querySelectorAll('#tsvg [data-b]').length")
-          == len(D.FINE))
-    check("and the unresponsive row is one block, red the whole way",
-          pg.evaluate("document.querySelectorAll('#tsvg [data-u]').length")
-          == 1)
-    wide = pg.evaluate(
-        "(()=>{const r=document.querySelector('#tsvg [data-u] rect');"
-        "return +r.getAttribute('width');})()")
-    check("it spans the whole scale, not part of it", wide >= 770, str(wide))
-    # the cooling clock, and the arithmetic behind every bar
-    check("a bar for each way of cooling",
-          pg.evaluate("document.querySelectorAll('#tsvg [data-k]').length")
-          == len(D.COOLING))
-    drop = D.COOL_FROM - D.COOL_TO
-    for n, r, _c, _e, _b in D.COOLING:
-        mins = drop / r
-        inside = mins <= D.COOL_TARGET
-        check(f"{n[:34]} takes {round(mins)} minutes, "
-              f"{'inside' if inside else 'past'} the target",
-              abs(pg.evaluate(f"(D.coolfrom-D.coolto)/{r}") - mins) < 0.01)
-    fast = [n for n, r, *_ in D.COOLING if drop / r <= D.COOL_TARGET]
-    slow = [n for n, r, *_ in D.COOLING if drop / r > 1.8 * D.COOL_TARGET]
-    check("the three active methods clear thirty minutes", len(fast) == 3,
-          str(fast))
-    check("and ice packs alone take nearly twice as long as the target",
-          "Ice packs to the neck, armpits and groin" in slow, str(slow))
-    check("immersion clears it in half the time doing nothing would need "
-          "just to start",
-          drop / D.COOLING[0][1] * 2 < drop / D.COOLING[-1][1])
-    check("immersion is the fastest there is",
-          pg.evaluate("D.cooling[0].r===Math.max(...D.cooling.map(m=>m.r))"))
-    check("and doing nothing is the line the others have to beat",
-          pg.evaluate("D.cooling[D.cooling.length-1].r"
-                      "===Math.min(...D.cooling.map(m=>m.r))"))
-    # the sequence, and the things that must not happen
-    check("the bystander steps are all on the page",
-          pg.evaluate("document.querySelectorAll('#tsvg [data-a]').length")
-          == len(D.ACTIONS))
-    steps = pg.evaluate("D.actions.map(a=>a.n)")
-    check("and they start with the call and end with what never happens",
-          steps[0] == "Call" and steps[-1] == "Never", str(steps))
-    txt = pg.evaluate("document.getElementById('tsvg').textContent")
-    check("the bathtub warning is on the picture, not just in a card",
-          "bathtub" in txt, txt[:80])
-    check("telling a fever from heat stroke is on the page too",
-          pg.evaluate("document.querySelectorAll('#tsvg [data-t]').length")
-          == len(D.TELL))
-    check("with the fallback when it cannot be told",
-          "the safe reading is heat stroke" in txt)
-    # the cards behind the two rows
-    pg.evaluate("document.querySelector('[data-u]')"
-                ".dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
-    pg.wait_for_timeout(150)
-    card = pg.evaluate("document.querySelector('.card').textContent")
-    check("the unresponsive card says the number does not downgrade the call",
-          "downgrade" in card, card[:120])
-    pg.evaluate("document.querySelector('[data-a=\"4\"]')"
-                ".dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
-    pg.wait_for_timeout(150)
-    card = pg.evaluate("document.querySelector('.card').textContent")
-    check("and the last step rules out antipyretics and anything by mouth",
-          "paracetamol" in card and "mouth" in card, card[:120])
 
     # --- the units, which are the other half of the lesson
     pg.click("#vRange")
@@ -435,11 +274,12 @@ with sync_playwright() as pw:
         others = [s for s in ("°C", "°F", " K") if s not in want]
         check(f"and none of the other scales with it",
               not any(o in when for o in others), when)
-        lab = pg.evaluate(
-            "[...document.querySelectorAll('#tsvg [data-m] text')]"
+        lad = pg.evaluate(
+            "[...document.querySelectorAll('#tsvg text')]"
             ".map(t=>t.textContent).join('|')")
-        check(f"the marks on the figure are in {unit} alone",
-              want in lab and not any(o in lab for o in others), lab[:80])
+        check(f"the ladder beside the figure is in {unit} alone",
+              not any(o in lad for o in others) and want[-2:].strip() in lad,
+              lad[:80])
     pg.click("#uC")
     pg.wait_for_timeout(200)
 

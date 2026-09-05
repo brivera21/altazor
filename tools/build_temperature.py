@@ -165,14 +165,39 @@ button.unit { padding:6px 12px; font-variant-numeric:tabular-nums; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
 .chartcol { flex:1 1 640px; min-width:0; }
 #chart { min-width:0; }
-#degwrap { margin-top:26px; overflow-x:auto; }
-#degrees { border-collapse:collapse; width:100%; font-size:12.5px;
+/* the figure and the table, one axis, one row height */
+#spanpair { display:flex; gap:0; align-items:flex-start; overflow-x:auto; }
+#spanpair #chart { flex:0 0 var(--figw); }
+#spanpair #chart svg { height:auto; }
+/* the pair scrolls as one, so a narrow window never slides the table
+   out of step with the figure */
+#spanpair #degwrap { flex:1 1 auto; min-width:620px; overflow:visible; }
+/* on the paired view the card rides above the pair and follows the
+   reader down it, since the table is longer than a screen */
+.stage.span { display:flex; flex-direction:column; }
+.stage.span .side { order:-1; position:sticky; top:0; z-index:3; width:auto;
+  flex:none; margin-bottom:12px; background:var(--bg); padding-bottom:6px; }
+.stage.span .card { display:flex; gap:16px; align-items:baseline;
+  flex-wrap:wrap; }
+.stage.span #kindTxt { flex:0 0 auto; }
+.stage.span #nameTxt { margin:0; }
+.stage.span #bodyTxt { margin:0; flex:1 1 360px; min-width:0; }
+.stage.span #realTxt, .stage.span #srcTxt { display:none; }
+#degwrap { overflow-x:auto; }
+#degrees { border-collapse:collapse; width:100%; font-size:11.5px;
   font-variant-numeric:tabular-nums; }
 #degrees th { text-align:left; color:var(--muted); font-weight:400;
   font-size:11px; letter-spacing:.06em; text-transform:uppercase;
-  border-bottom:1px solid var(--line); padding:0 10px 6px 0; }
-#degrees td { padding:5px 10px 5px 0; border-bottom:1px solid #1e1e1e;
-  vertical-align:top; color:#b9bec6; }
+  height:34px; padding:0 10px 8px 0; vertical-align:bottom; }
+#degrees tbody tr { height:var(--row,32px); }
+#degrees thead tr { height:34px; }
+#degrees td { padding:1px 10px 1px 0; border-top:1px solid #1e1e1e;
+  vertical-align:middle; color:#b9bec6; line-height:1.25; font-size:11.5px; }
+#degrees td.w { font-size:11.5px; line-height:1.25; }
+#degrees td.w .cw { display:block; }
+#degrees td.c { width:78px; }
+#degrees td.z { width:124px; font-size:11.5px; }
+#degrees td.n { width:86px; text-align:right; }
 #degrees tr.key td { color:var(--text); }
 #degrees td.c { font-weight:600; color:var(--text); white-space:nowrap; }
 #degrees td.f, #degrees td.n { white-space:nowrap; }
@@ -229,8 +254,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 </div>
 <div class="stage">
   <div class="chartcol">
-  <div id="chart"></div>
-  <div id="degwrap"></div>
+  <div id="spanpair"><div id="chart"></div><div id="degwrap"></div></div>
   </div>
   <div class="side"><div class="card">
     <div id="kindTxt"></div>
@@ -299,19 +323,38 @@ function txt(x,y,s,o){
 }
 
 /* ---------------------------------------------------------- the whole span */
-// The column is a person: feet at ten degrees, head at forty-eight, so the
-// bands fill a body rather than a bar. The silhouette is drawn as one open
-// half profile and its mirror, which gives a closed outline with no seam
-// down the middle, and as two closed halves for the clip the bands and the
-// marks are painted inside.
-const RG={lo:10, hi:48, top:44, bot:524, cx:450, hw:60};
-RG.x0=RG.cx-RG.hw; RG.x1=RG.cx+RG.hw;
-function yOf(c){ return RG.bot-(c-RG.lo)/(RG.hi-RG.lo)*(RG.bot-RG.top); }
+// The figure and the table are one drawing on one vertical axis. A degree
+// is a row of the table and a slice of the body at the same height, so the
+// eye runs across from a sentence to the place on a person it is about.
+// Everything follows from ROW: the row height sets the axis, the axis sets
+// the figure's height, and the figure's own proportions set its width. The
+// table runs hot at the top, because the body does.
+// The figure's box holds the axis and nothing else. Whatever height the
+// table's header turns out to be is applied to the figure as a margin
+// afterwards, measured rather than guessed, so the two never drift.
+let ROW=32;                          // a floor; fitRows raises it
+const DLO=10, DHI=48, NDEG=DHI-DLO+1;
+const RG={lo:DLO-0.5, hi:DHI+0.5, top:0, bot:0, ladder:56};
+let SPANW=0;
+// the axis is whatever the rows turn out to be, and the figure is sized
+// from it: as tall as the table, and as wide as a person that tall
+function setAxis(){
+  RG.bot=NDEG*ROW;
+  RG.h=RG.bot-RG.top;
+  // a figure this tall would be this wide, but past a point it would eat
+  // the table's width, and a wider figure makes taller rows makes a taller
+  // figure. The cap breaks that loop; the figure just gets slimmer.
+  RG.hw=Math.min(RG.h/8.4,150);
+  RG.sq=RG.hw/(RG.h/8.4);     // how much the cap slims the figure
+  RG.cx=RG.ladder+RG.hw;
+  SPANW=Math.round(RG.cx+RG.hw+6);
+}
+setAxis();
+function yOf(c){ return RG.bot-(c-RG.lo)/(RG.hi-RG.lo)*RG.h; }
 
-// the right half of a standing figure, in offsets of the figure's height
 function halfProfile(){
-  const H=RG.bot-RG.top, cx=RG.cx;
-  const Y=f=>(RG.top+f*H).toFixed(1), X=d=>(cx+d*H).toFixed(1);
+  const H=RG.h, cx=RG.cx;
+  const Y=f=>(RG.top+f*H).toFixed(1), X=d=>(cx+d*H*RG.sq).toFixed(1);
   const C=(a,b,c,d,e,f)=>'C'+X(a)+','+Y(b)+' '+X(c)+','+Y(d)+' '+X(e)+','+Y(f);
   return 'M'+X(0)+','+Y(.006)
     + C(.024,.006, .045,.014, .045,.044)          // skull
@@ -320,7 +363,7 @@ function halfProfile(){
     + C(.050,.144, .084,.156, .092,.198)          // shoulder
     + C(.106,.256, .116,.368, .120,.470)          // outer arm
     + C(.122,.506, .108,.520, .098,.514)          // the hand
-    + C(.090,.462, .082,.352, .076,.258)          // inner arm, up to the armpit
+    + C(.090,.462, .082,.352, .076,.258)          // inner arm, to the armpit
     + C(.074,.300, .056,.360, .052,.406)          // chest to waist
     + C(.060,.436, .072,.446, .072,.468)          // hip
     + C(.072,.500, .070,.512, .070,.526)          // outer thigh
@@ -347,6 +390,68 @@ function bodyOutline(c,w){
     +'" stroke-linejoin="round" transform="'+mirror()+'"/>';
 }
 
+function drawRange(){
+  const W0=RG.cx-RG.hw-8, W1=RG.cx+RG.hw+8;
+  const ITEMS=D.marks.map((m,i)=>({t:m.t,k:'m',a:'data-m',i:i}))
+    .concat(D.lines.map((L,i)=>({t:L.t,k:'L',a:'data-key',i:i,c:L.c}))
+      .filter(L=>!D.marks.some(m=>Math.abs(m.t-L.t)<0.01)));
+  let s=bodyDefs();
+  s+='<g clip-path="url(#bodyClip)">';
+  for(let i=0;i<D.zones.length;i++){
+    const z=D.zones[i], y=yOf(z.hi), h=yOf(z.lo)-yOf(z.hi);
+    s+='<rect x="'+W0+'" y="'+y.toFixed(1)+'" width="'+(W1-W0)
+      +'" height="'+h.toFixed(1)+'" fill="'+z.c+'" fill-opacity="'
+      +(hot&&hot.t==='z'&&hot.i===i?1:0.82)+'"/>';
+  }
+  ITEMS.forEach(it=>{
+    const y=yOf(it.t), on=hot&&hot.t===it.k&&hot.i===it.i;
+    s+='<path d="M'+W0+','+y.toFixed(1)+' H'+W1+'" stroke="'
+      +(it.k==='L'?'#ffffff':'#121212')+'" stroke-width="'+(on?3:1.6)
+      +'" stroke-opacity="'+(on?0.95:(it.k==='L'?0.4:0.5))+'"'
+      +(it.k==='L'?' stroke-dasharray="4 3"':'')+'/>';
+  });
+  s+='</g>'+bodyOutline('#e6e6e6',1.6);
+  // one hoverable slice of the figure per row of the table, so both halves
+  // of the drawing answer to the same pointer
+  s+='<g clip-path="url(#bodyClip)">';
+  for(let d=DLO;d<=DHI;d++){
+    const on=hot&&hot.t==='q'&&hot.i===d;
+    s+='<g data-q="'+d+'" style="cursor:pointer"><rect x="'+W0+'" y="'
+      +yOf(d+0.5).toFixed(1)+'" width="'+(W1-W0)+'" height="'+ROW
+      +'" fill="#ffffff" fill-opacity="'+(on?0.3:0)+'"/></g>';
+  }
+  s+='</g>';
+  // a rule at every degree boundary, carried out to the table's edge, so
+  // the eye can see that a row and a slice are the same thing
+  for(let d=DLO-1;d<=DHI;d++){
+    const y=yOf(d+0.5);
+    s+='<path d="M'+RG.ladder+','+y.toFixed(1)+' H'+SPANW
+      +'" stroke="#1e1e1e" stroke-width="1"/>';
+  }
+  // the ladder, one rung per row, reading the degrees the table reads
+  for(let d=DLO;d<=DHI;d++){
+    const y=yOf(d), lab=(d%2===0)||d===37;
+    s+='<path d="M'+(RG.ladder-(lab?9:4))+','+y.toFixed(1)+' H'+RG.ladder
+      +'" stroke="#3d444d" stroke-width="1"/>';
+    if(lab) s+=txt(RG.ladder-13,y+4,fmt(d,U==='C'?0:U==='K'?2:1),
+                   {anchor:'end',fs:11});
+  }
+  // the marks, as a dot on the edge of the figure at their own height
+  ITEMS.forEach(it=>{
+    const on=hot&&hot.t===it.k&&hot.i===it.i;
+    s+='<g '+it.a+'="'+it.i+'" style="cursor:pointer">'
+      +'<circle cx="'+W0+'" cy="'+yOf(it.t).toFixed(1)+'" r="'+(on?5:3.4)
+      +'" fill="'+(it.c||'#e6e6e6')+'"/>'
+      +'<rect x="'+(W0-12)+'" y="'+(yOf(it.t)-11)+'" width="24" height="22"'
+      +' fill="transparent"/></g>';
+  });
+  el.innerHTML='<svg viewBox="0 0 '+SPANW+' '+RG.bot
+    +'" xmlns="http://www.w3.org/2000/svg" id="tsvg" '
+    +'preserveAspectRatio="xMinYMin meet">'
+    +'<rect width="'+SPANW+'" height="'+RG.bot+'" fill="#121212"/>'
+    +s+'</svg>';
+}
+
 // Labels that want the same height get pushed apart, keeping their order,
 // and a leader line goes back to where each one really points.
 function declash(ys,gap,lo,hi){
@@ -370,153 +475,6 @@ function leader(x0,y0,x1,y1,c){
   return '<path d="M'+x0.toFixed(1)+','+y0.toFixed(1)+' H'+xm.toFixed(1)
     +' V'+y1.toFixed(1)+' H'+x1.toFixed(1)+'" fill="none" stroke="'
     +(c||'#4a5058')+'" stroke-width="1"/>';
-}
-
-function drawRange(){
-  const W0=RG.x0-14, W1=RG.x1+14;
-  // the marks, and the lines from the fine scale that are not already marks
-  const ITEMS=D.marks.map((m,i)=>({t:m.t,n:m.n,k:'m',a:'data-m',i:i}))
-    .concat(D.lines.map((L,i)=>({t:L.t,n:L.n,k:'L',a:'data-key',i:i,c:L.c}))
-      .filter(L=>!D.marks.some(m=>Math.abs(m.t-L.t)<0.01)))
-    .sort((a,b)=>b.t-a.t);
-  let s=bodyDefs();
-  // the bands, painted across the figure and cut to its shape
-  s+='<g clip-path="url(#bodyClip)">';
-  for(let i=0;i<D.zones.length;i++){
-    const z=D.zones[i], y=yOf(z.hi), h=yOf(z.lo)-yOf(z.hi);
-    s+='<rect x="'+W0+'" y="'+y.toFixed(1)+'" width="'+(W1-W0)
-      +'" height="'+h.toFixed(1)+'" fill="'+z.c+'" fill-opacity="'
-      +(hot&&hot.t==='z'&&hot.i===i?1:0.82)+'"/>';
-  }
-  // a rule across the body at every marked temperature
-  ITEMS.forEach(it=>{
-    const y=yOf(it.t), on=hot&&hot.t===it.k&&hot.i===it.i;
-    s+='<path d="M'+W0+','+y.toFixed(1)+' H'+W1+'" stroke="'
-      +(it.k==='L'?'#ffffff':'#121212')+'" stroke-width="'+(on?2.4:1.3)
-      +'" stroke-opacity="'+(on?0.95:(it.k==='L'?0.4:0.5))+'"'
-      +(it.k==='L'?' stroke-dasharray="3 2"':'')+'/>';
-  });
-  s+='</g>'+bodyOutline('#e6e6e6',1.4);
-  // a quarter of a degree at a time, over the whole figure
-  s+='<g clip-path="url(#bodyClip)">';
-  const NC=Math.round((RG.hi-RG.lo)/CELL);
-  for(let k=0;k<NC;k++){
-    const c=RG.lo+k*CELL, on=hot&&hot.t==='q'&&hot.i===k;
-    s+='<g data-q="'+k+'" style="cursor:pointer"><rect x="'+W0+'" y="'
-      +yOf(c+CELL).toFixed(1)+'" width="'+(W1-W0)+'" height="'
-      +(yOf(c)-yOf(c+CELL)).toFixed(1)+'" fill="#ffffff" fill-opacity="'
-      +(on?0.28:0)+'"/></g>';
-  }
-  s+='</g>';
-  // the ladder of degrees, in whatever unit is showing
-  for(let c=10;c<=48;c+=2){
-    const y=yOf(c);
-    s+='<path d="M'+(RG.x0-7)+','+y.toFixed(1)+' h7" stroke="#3d444d" stroke-width="1"/>'
-      +txt(RG.x0-11,y+3.6,fmt(c,U==='K'?2:0),{anchor:'end'});
-  }
-  // the marks and lines, to the left, pushed apart where they crowd
-  const mt=ITEMS.map(it=>yOf(it.t));
-  const ml=declash(mt.slice(),30,RG.top+8,RG.bot);
-  ITEMS.forEach((it,j)=>{
-    const on=hot&&hot.t===it.k&&hot.i===it.i, LX=RG.x0-72;
-    s+='<g '+it.a+'="'+it.i+'" style="cursor:pointer">'
-      +leader(RG.x0,mt[j],LX+6,ml[j],on?'#e6e6e6':'#4a5058')
-      +'<circle cx="'+RG.x0+'" cy="'+mt[j].toFixed(1)+'" r="'+(on?4.5:3)
-      +'" fill="'+(it.c||'#e6e6e6')+'"/>'
-      +txt(LX,ml[j]-3,esc(it.n),{anchor:'end',fs:11.5,
-           fill:on?'#e6e6e6':(it.c||'#8b93a0'),stroke:1})
-      +txt(LX,ml[j]+11,fmt(it.t),{anchor:'end',fs:11,
-           fill:on?'#c8ccd2':'#5d6672',stroke:1})
-      +'<rect x="'+(LX-250)+'" y="'+(ml[j]-15)+'" width="256" height="28" fill="transparent"/>'
-      +'</g>';
-  });
-  // what each band is, to the right
-  const zt=D.zones.map(z=>(yOf(z.hi)+yOf(z.lo))/2);
-  const zl=declash(zt.slice(),30,RG.top+8,RG.bot);
-  D.zones.forEach((z,i)=>{
-    const on=hot&&hot.t==='z'&&hot.i===i, RX=RG.x1+34;
-    s+='<g data-z="'+i+'" style="cursor:pointer">'
-      +leader(RG.x1,zt[i],RX-6,zl[i],on?'#e6e6e6':'#3a4048')
-      +txt(RX,zl[i]-3,esc(z.n),{fs:11.5,fill:on?'#e6e6e6':'#8b93a0',stroke:1})
-      +txt(RX,zl[i]+11,fmt(z.lo,U==='K'?2:1)+' to '+fmt(z.hi,U==='K'?2:1),
-           {fs:10.5,fill:on?'#c8ccd2':'#5d6672',stroke:1})
-      +'<rect x="'+(RX-6)+'" y="'+(zl[i]-15)+'" width="150" height="26" fill="transparent"/>'
-      +'</g>';
-  });
-  s+=measuredPanel();
-  s+=txt(80,RG.top-18,'the whole span a person has been brought back from, '
-        +'and the sliver the body holds',{fs:11.5,fill:'#8b93a0'});
-  el.innerHTML=svg(600,s);
-}
-
-/* -------------------------------------- what has actually been measured */
-const MP={x0:716,x1:962,max:150};   // the shivering point runs off it
-function mx(p){ return MP.x0+Math.min(p,MP.max)/MP.max*(MP.x1-MP.x0); }
-function measuredPanel(){
-  let s=txt(MP.x0,RG.top-32,'Metabolic rate, against the resting rate',
-      {fs:11.5,fill:'#c8ccd2'})
-    +txt(MP.x0,RG.top-18,'every point is a measurement, and the gaps are gaps',
-         {fs:11,fill:'#6b7280'});
-  // who the numbers came from, banded down the side of the scale
-  D.regimes.forEach((r,i)=>{
-    const y=yOf(r.hi), h=yOf(r.lo)-yOf(r.hi);
-    const on=hot&&hot.t==='g'&&hot.i===i;
-    s+='<g data-g="'+i+'" style="cursor:pointer">'
-      +'<rect x="'+MP.x0+'" y="'+y.toFixed(1)+'" width="'+(MP.x1-MP.x0)
-      +'" height="'+h.toFixed(1)+'" fill="'+r.c+'" fill-opacity="'
-      +(on?0.14:(i===2?0.05:0.055))+'"'
-      +(i===2?' stroke="'+r.c+'" stroke-opacity="0.35" stroke-dasharray="3 3"':'')
-      +'/>'
-      +'</g>';
-  });
-  // the resting line, and a ladder of percentages
-  for(const p of [50,100,150]){
-    s+='<path d="M'+mx(p).toFixed(1)+','+RG.top+' V'+RG.bot+'" stroke="'
-      +(p===100?'#4a5058':'#242424')+'" stroke-width="1"'
-      +(p===100?'':' ')+'/>'
-      +txt(mx(p),RG.bot+18,p+'%',{anchor:'middle',fs:10,fill:'#6b7280'});
-  }
-  // one faint join within a study, never between studies
-  const by={};
-  D.measured.forEach((m,i)=>{ (by[m.s]=by[m.s]||[]).push(m); });
-  for(const k in by){
-    if(by[k].length<2) continue;
-    let d='';
-    by[k].slice().sort((a,b)=>a.t-b.t).forEach(m=>{
-      d+=(d?'L':'M')+mx(m.p).toFixed(1)+','+yOf(m.t).toFixed(1); });
-    s+='<path d="'+d+'" fill="none" stroke="#8b93a0" stroke-width="1"'
-      +' stroke-opacity="0.45" stroke-dasharray="4 3"/>';
-  }
-  D.measured.forEach((m,i)=>{
-    const on=hot&&hot.t==='M'&&hot.i===i, off=m.p>MP.max;
-    const x=mx(m.p), y=yOf(m.t);
-    s+='<g data-pt="'+i+'" style="cursor:pointer">';
-    if(off)   // an arrow at the edge, rather than a squashed axis
-      s+='<path d="M'+(x-9).toFixed(1)+','+y.toFixed(1)+' h7 m0,-5 l6,5 l-6,5Z"'
-        +' fill="#31d67a" stroke="#31d67a" stroke-width="1.4"/>';
-    else
-      s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(on?6:4)
-        +'" fill="'+(m.a?'#31d67a':'#58a6ff')+'" stroke="#121212" stroke-width="1.2"/>';
-    s+='<rect x="'+(x-14)+'" y="'+(y-9)+'" width="22" height="18" fill="transparent"/>'
-      +'</g>';
-  });
-  // the clusters, named once each
-  s+=txt(MP.x1-6,yOf(35.2)-9,'shivering, 4.9 times resting, off this scale',
-         {anchor:'end',fs:10.5,fill:'#31d67a',stroke:1})
-    +txt(mx(38)+8,yOf(18)-8,'the coldest a person has been measured',
-         {fs:10.5,fill:'#58a6ff',stroke:1});
-  // who the numbers came from, said once, under the panel
-  D.regimes.forEach((r,i)=>{
-    const on=hot&&hot.t==='g'&&hot.i===i, y=RG.bot+30+i*15;
-    s+='<g data-g="'+i+'" style="cursor:pointer">'
-      +'<rect x="'+MP.x0+'" y="'+(y-8)+'" width="9" height="9" fill="'+r.c
-      +'" fill-opacity="'+(i===2?0.25:0.9)+'"'
-      +(i===2?' stroke="'+r.c+'" stroke-dasharray="2 2"':'')+'/>'
-      +txt(MP.x0+14,y,esc(r.n),{fs:9.5,fill:on?'#e6e6e6':'#8b93a0'})
-      +'<rect x="'+MP.x0+'" y="'+(y-11)+'" width="230" height="15" fill="transparent"/>'
-      +'</g>';
-  });
-  return s;
 }
 
 /* ------------------------------------------------------------------ a day */
@@ -997,7 +955,7 @@ function renderTable(){
   for(const d of D.table){
     r+='<tr><td class="c">'+fmt(d.t,U==='C'?0:U==='K'?2:1)+'</td>'
       +'<td class="z"><i style="background:'+d.zc+'"></i>'+esc(d.zn)+'</td>'
-      +'<td class="w">'+esc(conv(d.w))+'</td>'
+      +'<td class="w"><span class="cw">'+esc(conv(d.w))+'</span></td>'
       +'<td class="n '+d.mk+'" title="'+esc(d.mn)+'">'+esc(d.mv)+'</td>'
       +'<td class="n '+d.pk+'">'+esc(d.pv)+'</td></tr>';
   }
@@ -1006,9 +964,9 @@ function renderTable(){
 const DRAW={range:drawRange, day:drawDay, site:drawSites, fever:drawFever,
             heat:drawHeat, fine:drawFine, help:drawHelp};
 const INTRO={
-  range:['The whole span','From the coldest anyone has been rewarmed from to '
-    +'the hottest anyone has walked away from. The band the body actually '
-    +'holds is the green sliver in the middle.'],
+  range:['The whole span','The figure and the table are one drawing on one '
+    +'axis: a row is a degree, and a degree is a slice of a person at the '
+    +'same height. The band the body holds is the green sliver at the ribs.'],
   day:['A day','Core temperature is lowest a couple of hours before waking '
     +'and highest in the late afternoon. The whole swing is about half a '
     +'degree, which is why the hour matters when a reading is judged.'],
@@ -1032,13 +990,52 @@ const INTRO={
 const VBTN=[['vRange','range'],['vDay','day'],['vSite','site'],
             ['vFever','fever'],['vHeat','heat'],['vFine','fine'],
             ['vHelp','help']];
+// the one place the two halves are joined: the figure starts where the
+// table's first row starts, to the pixel
+function alignAxis(){
+  const c=document.getElementById('chart');
+  if(view!=='range'){ c.style.marginTop=''; return; }
+  const h=document.querySelector('#degrees thead');
+  c.style.marginTop = h ? h.getBoundingClientRect().height+'px' : '';
+}
+// A row that needs a third line makes every row that tall, because a row
+// of the table is a degree of the figure and degrees are all the same
+// size. Measured, not guessed, so a narrower window or a longer unit
+// simply moves everything together.
+function fitRows(){
+  if(view!=='range') return;
+  const rows=[...document.querySelectorAll('#degrees tbody tr')];
+  if(!rows.length) return;
+  // a cell stretches to its row, so the row cannot be measured from one:
+  // the prose is wrapped in a span and that is what gets measured
+  const spans=[...document.querySelectorAll('#degrees td.w .cw')];
+  if(!spans.length) return;
+  const tall=Math.ceil(Math.max(...spans.map(
+    x=>x.getBoundingClientRect().height))+7);
+  const want=Math.max(32,tall);
+  if(want===ROW) return;
+  ROW=want; setAxis();
+  document.documentElement.style.setProperty('--row',ROW+'px');
+  document.documentElement.style.setProperty('--figw',SPANW+'px');
+  document.documentElement.style.setProperty('--row',ROW+'px');
+  drawRange();
+  alignAxis();
+}
 function render(){
   DRAW[view]();
   if(!hot){ const [n,b]=INTRO[view]; card('',n,'',b); }
+  alignAxis(); fitRows();
 }
 function setView(v){
   view=v; hot=null;
-  document.getElementById('degwrap').hidden = (v!=='range');
+  const span = v==='range';
+  document.getElementById('degwrap').hidden = !span;
+  document.querySelector('.stage').classList.toggle('span',span);
+  document.getElementById('spanpair').style.display = span?'flex':'block';
+  // the figure is drawn at one pixel per unit so its degrees land on the
+  // table's rows exactly, whatever the page is doing around it
+  document.documentElement.style.setProperty('--figw',SPANW+'px');
+  document.documentElement.style.setProperty('--row',ROW+'px');
   for(const [id,k] of VBTN) document.getElementById(id).classList.toggle('on',v===k);
   render();
 }
@@ -1048,6 +1045,7 @@ function setUnit(u){
     document.getElementById(id).classList.toggle('on',u===k);
   DRAW[view]();
   renderTable();
+  alignAxis(); fitRows();
   // the prose below the diagram carries temperatures too
   for(const e of document.querySelectorAll('.cv')){
     if(!e.dataset.tpl) e.dataset.tpl=e.innerHTML;
@@ -1127,7 +1125,7 @@ el.addEventListener('pointerover',ev=>{
     card('Watts',B[0],B[1].toLocaleString('en-US')+' W',B[2]);
   } else if(g.hasAttribute('data-q')){
     pick('data-q','q');
-    const t=RG.lo+hot.i*CELL, mid=t+CELL/2;
+    const mid=hot.i;                    // data-q carries the degree itself
     const z=D.zones.find(x=>mid>=x.lo&&mid<x.hi)||D.zones[D.zones.length-1];
     const rg=D.regimes.find(r=>mid>=r.lo&&mid<r.hi);
     let cost;
@@ -1273,7 +1271,7 @@ def degree_rows():
     """One row per whole degree, for the page to render in whatever scale
     the reader has chosen."""
     rows = []
-    for t in range(int(D.ZONES[0][0]), int(D.ZONES[-1][1]) + 1):
+    for t in range(int(D.ZONES[-1][1]), int(D.ZONES[0][0]) - 1, -1):
         z = next((z for z in D.ZONES if z[0] <= t < z[1]), D.ZONES[-1])
         mv, mnote, mk = _metab(t)
         pv, pk = _pulse(t)
