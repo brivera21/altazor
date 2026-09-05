@@ -235,8 +235,53 @@ function txt(x,y,s,o){
 }
 
 /* ---------------------------------------------------------- the whole span */
-const RG={lo:10, hi:48, top:44, bot:524, x0:440, x1:520};
+// The column is a person: feet at ten degrees, head at forty-eight, so the
+// bands fill a body rather than a bar. The silhouette is drawn as one open
+// half profile and its mirror, which gives a closed outline with no seam
+// down the middle, and as two closed halves for the clip the bands and the
+// marks are painted inside.
+const RG={lo:10, hi:48, top:44, bot:524, cx:450, hw:60};
+RG.x0=RG.cx-RG.hw; RG.x1=RG.cx+RG.hw;
 function yOf(c){ return RG.bot-(c-RG.lo)/(RG.hi-RG.lo)*(RG.bot-RG.top); }
+
+// the right half of a standing figure, in offsets of the figure's height
+function halfProfile(){
+  const H=RG.bot-RG.top, cx=RG.cx;
+  const Y=f=>(RG.top+f*H).toFixed(1), X=d=>(cx+d*H).toFixed(1);
+  const C=(a,b,c,d,e,f)=>'C'+X(a)+','+Y(b)+' '+X(c)+','+Y(d)+' '+X(e)+','+Y(f);
+  return 'M'+X(0)+','+Y(.006)
+    + C(.024,.006, .045,.014, .045,.044)          // skull
+    + C(.045,.074, .034,.098, .026,.112)          // temple to jaw
+    + C(.024,.120, .023,.126, .023,.138)          // neck
+    + C(.050,.144, .084,.156, .092,.198)          // shoulder
+    + C(.106,.256, .116,.368, .120,.470)          // outer arm
+    + C(.122,.506, .108,.520, .098,.514)          // the hand
+    + C(.090,.462, .082,.352, .076,.258)          // inner arm, up to the armpit
+    + C(.074,.300, .056,.360, .052,.406)          // chest to waist
+    + C(.060,.436, .072,.446, .072,.468)          // hip
+    + C(.072,.500, .070,.512, .070,.526)          // outer thigh
+    + C(.066,.620, .054,.672, .052,.706)          // knee
+    + C(.050,.762, .038,.878, .032,.944)          // calf to ankle
+    + C(.031,.966, .040,.976, .040,.980)          // the foot
+    + 'L'+X(.010)+','+Y(.984)
+    + C(.010,.966, .014,.960, .014,.944)          // back up the inside
+    + C(.020,.860, .026,.760, .026,.706)
+    + C(.026,.640, .018,.580, .000,.530);         // to the crotch
+}
+function mirror(){ return 'translate('+(2*RG.cx)+',0) scale(-1,1)'; }
+function bodyDefs(){
+  const h=halfProfile();
+  return '<defs><clipPath id="bodyClip" clipPathUnits="userSpaceOnUse">'
+    +'<path d="'+h+'Z"/><path d="'+h+'Z" transform="'+mirror()+'"/>'
+    +'</clipPath></defs>';
+}
+function bodyOutline(c,w){
+  const h=halfProfile();
+  return '<path d="'+h+'" fill="none" stroke="'+c+'" stroke-width="'+w
+    +'" stroke-linejoin="round"/>'
+    +'<path d="'+h+'" fill="none" stroke="'+c+'" stroke-width="'+w
+    +'" stroke-linejoin="round" transform="'+mirror()+'"/>';
+}
 
 // Labels that want the same height get pushed apart, keeping their order,
 // and a leader line goes back to where each one really points.
@@ -264,14 +309,32 @@ function leader(x0,y0,x1,y1,c){
 }
 
 function drawRange(){
-  let s='';
+  const W0=RG.x0-14, W1=RG.x1+14;
+  let s=bodyDefs();
+  // the bands, painted across the figure and cut to its shape
+  s+='<g clip-path="url(#bodyClip)">';
   for(let i=0;i<D.zones.length;i++){
     const z=D.zones[i], y=yOf(z.hi), h=yOf(z.lo)-yOf(z.hi);
-    s+='<g data-z="'+i+'" style="cursor:pointer">'
-      +'<rect x="'+RG.x0+'" y="'+y.toFixed(1)+'" width="'+(RG.x1-RG.x0)
+    s+='<rect x="'+W0+'" y="'+y.toFixed(1)+'" width="'+(W1-W0)
       +'" height="'+h.toFixed(1)+'" fill="'+z.c+'" fill-opacity="'
-      +(hot&&hot.t==='z'&&hot.i===i?1:0.8)+'"/></g>';
+      +(hot&&hot.t==='z'&&hot.i===i?1:0.82)+'"/>';
   }
+  // a rule across the body at every marked temperature
+  D.marks.forEach((m,i)=>{
+    const y=yOf(m.t), on=hot&&hot.t==='m'&&hot.i===i;
+    s+='<path d="M'+W0+','+y.toFixed(1)+' H'+W1+'" stroke="#121212"'
+      +' stroke-width="'+(on?2.4:1.4)+'" stroke-opacity="'+(on?0.95:0.5)+'"/>';
+  });
+  s+='</g>'+bodyOutline('#e6e6e6',1.4);
+  // the same bands again, invisible, to catch the pointer
+  s+='<g clip-path="url(#bodyClip)">';
+  for(let i=0;i<D.zones.length;i++){
+    const z=D.zones[i], y=yOf(z.hi), h=yOf(z.lo)-yOf(z.hi);
+    s+='<g data-z="'+i+'" style="cursor:pointer"><rect x="'+W0+'" y="'
+      +y.toFixed(1)+'" width="'+(W1-W0)+'" height="'+h.toFixed(1)
+      +'" fill="transparent"/></g>';
+  }
+  s+='</g>';
   // the ladder of degrees, in whatever unit is showing
   for(let c=10;c<=48;c+=2){
     const y=yOf(c);
@@ -288,7 +351,7 @@ function drawRange(){
       +'<circle cx="'+RG.x0+'" cy="'+mt[i].toFixed(1)+'" r="'+(on?4.5:3)+'" fill="#e6e6e6"/>'
       +txt(LX,ml[i]-3,esc(m.n),{anchor:'end',fs:11.5,
            fill:on?'#e6e6e6':'#8b93a0',stroke:1})
-      +txt(LX,ml[i]+11,fmt(m.t),{anchor:'end',fs:11,
+      +txt(LX,ml[i]+11,pair(m.t),{anchor:'end',fs:11,
            fill:on?'#c8ccd2':'#5d6672',stroke:1})
       +'<rect x="'+(LX-250)+'" y="'+(ml[i]-16)+'" width="256" height="30" fill="transparent"/>'
       +'</g>';

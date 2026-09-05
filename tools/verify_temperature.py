@@ -71,6 +71,35 @@ with sync_playwright() as pw:
     check("every mark still sits at its own height",
           all(abs(a - b) < 0.6 for a, b in zip(lead, want)))
 
+    # --- the column is a person, not a bar
+    check("the span is drawn in the shape of a body",
+          pg.evaluate("!!document.querySelector('#tsvg clipPath#bodyClip')"))
+    halves = pg.evaluate(
+        "document.querySelectorAll('#tsvg clipPath#bodyClip path').length")
+    check("built from a half profile and its mirror", halves == 2, str(halves))
+    check("the bands are cut to that shape rather than left square",
+          pg.evaluate("[...document.querySelectorAll('#tsvg g[clip-path]')]"
+                      ".some(g=>g.querySelectorAll('rect').length"
+                      ">=D.zones.length)"))
+    check("and the outline is stroked with no seam down the middle",
+          pg.evaluate("[...document.querySelectorAll('#tsvg path')]"
+                      ".filter(p=>p.getAttribute('fill')==='none'"
+                      "&&p.getAttribute('stroke')==='#e6e6e6').length") == 2)
+    # a person is taller than they are wide, and the head is at the hot end
+    box = pg.evaluate(
+        "(()=>{const p=document.querySelector('#tsvg clipPath#bodyClip path');"
+        "const b=p.getBBox();return [b.x,b.y,b.width,b.height];})()")
+    check("the figure is at least three times as tall as half of it is wide",
+          box[3] > 3 * box[2], f"{box[3]:.0f} tall, {box[2]:.0f} wide")
+    check("it fills the whole scale, feet to head",
+          abs(box[1] - 44) < 8 and abs(box[1] + box[3] - 524) < 12,
+          f"top {box[1]:.0f}, bottom {box[1]+box[3]:.0f}")
+    # the head is narrow and the shoulders are wide, which is how it reads
+    hw = pg.evaluate("(()=>{const H=RG.bot-RG.top;"
+                     "return {head:0.045*H, sh:0.092*H, hand:0.120*H};})()")
+    check("the head is narrower than the shoulders",
+          hw["head"] < hw["sh"] < hw["hand"], str(hw))
+
     # --- a day
     pg.click("#vDay")
     pg.wait_for_timeout(250)
