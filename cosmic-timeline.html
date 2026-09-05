@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Universe in Time · Altazor</title>
+<title>The Universe in Time &middot; Altazor</title>
 <style>
 :root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
         --line:#2b2b2b; --accent:#58a6ff; }
@@ -18,18 +18,16 @@ header.site { border-top:4px solid var(--accent); padding-top:22px; margin-botto
 nav.site a { color:var(--muted); text-decoration:none; font-size:14px; margin-right:14px; }
 nav.site a:hover { color:var(--accent); }
 h1 { margin:0 0 10px; font-size:26px; }
-.bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px; }
+.bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
 button { font:inherit; font-size:13.5px; padding:6px 14px; border-radius:999px;
   border:1px solid var(--line); background:#1a1a1a; color:var(--text); cursor:pointer; }
 button:hover { border-color:var(--accent); }
 button.on { background:var(--accent); border-color:var(--accent); color:#0b0b0b; }
-#clock { color:var(--muted); font-size:12.5px; }
-.slider { display:flex; align-items:center; gap:10px; margin:8px 0 12px; }
-.slider input { flex:1; accent-color:var(--accent); }
-#legend { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:10px;
-  color:var(--muted); font-size:12px; align-items:center; }
-#legend span { display:flex; gap:5px; align-items:center; }
-#legend i { width:9px; height:9px; border-radius:50%; display:inline-block; }
+#legend { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:12px; }
+#legend button { font-size:11.5px; padding:3px 10px; color:var(--muted);
+  display:inline-flex; gap:5px; align-items:center; }
+#legend button i { width:8px; height:8px; border-radius:50%; display:inline-block; }
+#legend button.off { opacity:.38; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
 #chart { flex:1 1 640px; min-width:0; }
 #chart svg { width:100%; height:auto; display:block; user-select:none; }
@@ -47,6 +45,11 @@ button.on { background:var(--accent); border-color:var(--accent); color:#0b0b0b;
 #srcTxt a { color:var(--accent); }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
+.method { color:var(--muted); font-size:12.5px; margin-top:16px; max-width:760px; }
+.method summary { cursor:pointer; color:var(--accent); }
+.method table { border-collapse:collapse; margin-top:9px; font-size:12px; }
+.method td { padding:3px 12px 3px 0; vertical-align:top; border-top:1px solid var(--line); }
+.method td:first-child { color:var(--text); white-space:nowrap; }
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
 .refs p { margin:0 0 8px; overflow-wrap:anywhere; }
 .refs a { color:var(--accent); }
@@ -66,12 +69,8 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <div class="bar">
   <button id="bBack" class="on">Back from now</button>
   <button id="bFwd">Forward from the Big Bang</button>
+  <button id="bSun">Sun at the center</button>
   <button id="bLin">Even scale</button>
-  <button id="bPlay">Run the clock</button>
-  <span id="clock"></span>
-</div>
-<div class="slider">
-  <input id="t" type="range" min="0" max="1000" value="1000">
 </div>
 <div id="legend"></div>
 <div class="stage">
@@ -85,8 +84,11 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
     <div id="srcTxt"></div>
   </div></div>
 </div>
-<p class="note">Time runs left to right from the Big Bang, on three scales. Back from now counts years before the present, so each step right is a tenth of the time left and the recent marks spread out. Forward from the Big Bang counts years since it, which opens up the first stars and closes everything after the Sun into the edge. The even scale is the same events at one rate, and shows what both logarithms hide.</p>
-<p class="note" style="border-top:none; padding-top:0;">Each mark carries the dating and its source, and where a claim is disputed the card says so and gives the firmer, later date beside it. Bars are the published uncertainty where one is quoted. Three of these are ranges rather than moments: life, many cells and the first nervous systems each name the earliest evidence, not the event.</p>
+<p class="note">Time runs left to right from the Big Bang, on four scales. Back from now counts years before the present, so each step right is a tenth of the time left. Forward from the Big Bang counts years since it. Sun at the center is the same count stretched so the Sun sits on the middle, giving the nine billion years before it half the line. The even scale is one rate throughout, and shows what the logarithms hide.</p>
+<p class="note" style="border-top:none; padding-top:0;">The named milestones above the line carry their dating and its source, and where a claim is disputed the card says so and gives the firmer date beside it. Bars are the published uncertainty. The strands below the line hold the detail, from a Big History notebook; every date in them was checked against the current literature, and the ones that had drifted are corrected and listed under the references.</p>
+<div class="method"><details><summary>What the notebook said, and what the line says now</summary>
+<table><tr><td>The cosmic dark ages</td><td>The notebook: began 13.796 Ga, before the Big Bang itself. The line now: the dark ages run from recombination to reionization, and end 13.4 Ga.</td></tr><tr><td>The giant planets</td><td>The notebook: 4.59 Ga, before the Sun. The line now: Jupiter's core grew within a few million years of the first solids, 4.564 Ga.</td></tr><tr><td>The Moon</td><td>The notebook: 4.53 Ga. The line now: the giant impact is now dated near 4.51 Ga.</td></tr><tr><td>The earliest known galaxies</td><td>The notebook: 13.407 Ga. The line now: MoM z14, announced in 2025, sits at 13.52 Ga.</td></tr><tr><td>The Permian extinction</td><td>The notebook: an interval of 250 to 200 Ma. The line now: it is a short event at 251.9 Ma.</td></tr><tr><td>The Chicxulub impact</td><td>The notebook: 65 Ma. The line now: 66.0 Ma.</td></tr><tr><td>The first human</td><td>The notebook: Homo sapiens at 2.8 Ma. The line now: 2.8 Ma is the earliest jaw assigned to the genus Homo.</td></tr><tr><td>Acheulean handaxes</td><td>The notebook: 2.8 Ma. The line now: 1.76 Ma at Kokiselei.</td></tr><tr><td>Homo sapiens</td><td>The notebook: 200 ka. The line now: 315 ka at Jebel Irhoud.</td></tr><tr><td>Twisted plant fibre</td><td>The notebook: 90 ka. The line now: the Neanderthal cord from Abri du Maras is 50 ka.</td></tr><tr><td>Australia</td><td>The notebook: settled 55 ka. The line now: 65 ka at Madjedbebe.</td></tr><tr><td>The domestic dog</td><td>The notebook: 30 ka. The line now: the oldest undisputed dog burial is 14.2 ka, and the date is contested.</td></tr><tr><td>Pigs in New Guinea</td><td>The notebook: 7000 BCE. The line now: they arrive within the last few thousand years, so the mark was dropped.</td></tr><tr><td>The dromedary</td><td>The notebook: 3000 BCE. The line now: about 1000 BCE.</td></tr><tr><td>Adwa</td><td>The notebook: an Ethiopian victory in 1340. The line now: Adwa was fought in 1896, and the mark was dropped.</td></tr><tr><td>The Inca empire</td><td>The notebook: 1200. The line now: the kingdom of Cusco is that old, the empire expands from 1438.</td></tr><tr><td>Angkor</td><td>The notebook: abandoned about 1400. The line now: 1431.</td></tr><tr><td>A world population of one billion</td><td>The notebook: 1750. The line now: about 1800.</td></tr><tr><td>A world population of two billion</td><td>The notebook: 1900. The line now: 1927.</td></tr></table>
+</details></div>
 <h2 class="refh">References</h2>
 <div class="refs"><p>Planck Collaboration. (2020). Planck 2018 results. VI. Cosmological parameters. <i>Astronomy &amp; Astrophysics, 641</i>, A6. <a href="https://doi.org/10.1051/0004-6361/201833910">https://doi.org/10.1051/0004-6361/201833910</a><span class="ann">The date and the wording for The Big Bang.</span></p>
 <p>Chronology of the universe. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Chronology_of_the_universe">https://en.wikipedia.org/wiki/Chronology_of_the_universe</a><span class="ann">The date and the wording for The first light.</span></p>
@@ -100,18 +102,25 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <p>Evolution of mammals. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Evolution_of_mammals">https://en.wikipedia.org/wiki/Evolution_of_mammals</a><span class="ann">The date and the wording for Mammals.</span></p>
 <p>Primate. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Primate">https://en.wikipedia.org/wiki/Primate</a><span class="ann">The date and the wording for Primates.</span></p>
 <p>Jebel Irhoud. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Jebel_Irhoud">https://en.wikipedia.org/wiki/Jebel_Irhoud</a><span class="ann">The date and the wording for Homo sapiens.</span></p>
-<p>Early Christianity. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Early_Christianity">https://en.wikipedia.org/wiki/Early_Christianity</a><span class="ann">The date and the wording for Christianity.</span></p></div>
+<p>Early Christianity. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Early_Christianity">https://en.wikipedia.org/wiki/Early_Christianity</a><span class="ann">The date and the wording for Christianity.</span></p>
+<p>Timeline of natural history. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Timeline_of_natural_history">https://en.wikipedia.org/wiki/Timeline_of_natural_history</a><span class="ann">Checking the dates in the cosmos, Earth, life, animals, mammals and primates strands.</span></p>
+<p>Timeline of human prehistory. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Timeline_of_human_prehistory">https://en.wikipedia.org/wiki/Timeline_of_human_prehistory</a><span class="ann">Checking the dates in the us strand, from the first tools to the end of the last glacial period.</span></p>
+<p>Timeline of historic inventions. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Timeline_of_historic_inventions">https://en.wikipedia.org/wiki/Timeline_of_historic_inventions</a><span class="ann">Checking the dates in the farming, science and maths strands.</span></p>
+<p>Timeline of world history. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Timeline_of_world_history">https://en.wikipedia.org/wiki/Timeline_of_world_history</a><span class="ann">Checking the dates in the states and empires strand.</span></p>
+<p>Sehasseh, E. M., Fernandez, P., Kuhn, S., Stiner, M., Mentzer, S., Colarossi, D., Clark, A., Lanoe, F., Pailes, M., Hoffmann, D., Benson, A., Rhodes, E., Benmansour, M., Laissaoui, A., Ziani, I., Vidal-Matutano, P., Morales, J., Djellal, Y., Longet, B., ... Bouzouggar, A. (2021). Early Middle Stone Age personal ornaments from Bizmoune Cave, Essaouira, Morocco. <i>Science Advances, 7</i>(39), eabi8620. <a href="https://doi.org/10.1126/sciadv.abi8620">https://doi.org/10.1126/sciadv.abi8620</a><span class="ann">The 142,000 year date for the shell beads in the us strand.</span></p>
+<p>Hu, W., Hao, Z., Du, P., Di Vincenzo, F., Manzi, G., Cui, J., Fu, Y.-X., Pan, Y.-H., &amp; Li, H. (2023). Genomic inference of a severe human bottleneck during the Early to Middle Pleistocene transition. <i>Science, 381</i>(6661), 979-984. <a href="https://doi.org/10.1126/science.abq7487">https://doi.org/10.1126/science.abq7487</a><span class="ann">The population bottleneck of about 1,280, and the dispute over it.</span></p>
+<p>Roser, M., Ritchie, H., &amp; Ortiz-Ospina, E. (2013). <i>World population growth</i>. Our World in Data. <a href="https://ourworldindata.org/world-population-growth">https://ourworldindata.org/world-population-growth</a><span class="ann">The world population strand.</span></p></div>
 </div>
 <script>
-const EV=[{"n":"The Big Bang","t":13800000000.0,"u":null,"k":"cosmos","b":"The expansion begins. Every later date on this line is measured back from it.","r":"Planck's 2018 release puts the age at 13.8 billion years; its 2015 release printed 13.813 plus or minus 0.038 billion, which is the scale of the uncertainty.","s":"Planck 2018 results VI, cosmological parameters","u2":"https://en.wikipedia.org/wiki/Age_of_the_universe","age":0.0},{"n":"The first light","t":13799630000.0,"u":80000.0,"k":"cosmos","b":"Atoms form, the fog clears, and the light released then is still arriving as the microwave background.","r":"Recombination runs from about 290,000 to 370,000 years after the Big Bang, at redshift 1090 to 1270.","s":"Chronology of the universe","u2":"https://en.wikipedia.org/wiki/Chronology_of_the_universe","age":370000.0},{"n":"The first stars","t":13600000000.0,"u":100000000.0,"k":"star","b":"The first generation of stars lights up a few hundred million years in, and no one has seen one yet.","r":"The earliest galaxy confirmed so far, MoM z14, sits at redshift 14.44, some 280 million years after the Big Bang, announced in 2025. Population III stars themselves remain undetected.","s":"The earliest known galaxy, announced May 2025","u2":"https://www.space.com/astronomy/cosmic-miracle-james-webb-space-telescope-discovers-the-earliest-galaxy-ever-seen","age":200000000.0},{"n":"The Milky Way","t":13500000000.0,"u":300000000.0,"k":"galaxy","b":"Our own galaxy starts as an overdensity and grows by swallowing smaller ones, a habit it has not given up.","r":"Its oldest stars are nearly as old as the universe itself, and the galaxy began forming shortly after the Big Bang. The disk came later, and this date overlaps the first stars rather than following them.","s":"The Milky Way","u2":"https://en.wikipedia.org/wiki/Milky_Way","age":300000000.0},{"n":"The Sun","t":4568200000.0,"u":null,"k":"star","b":"A cloud collapses and the Sun lights. The planets take shape in the disk left spinning around it.","r":"The oldest inclusions in meteorites, rich in calcium and aluminium, are 4,568.2 million years old, and that is one definition of the age of the solar system.","s":"Formation and evolution of the Solar System","u2":"https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System","age":9231800000.0},{"n":"The Earth","t":4540000000.0,"u":50000000.0,"k":"world","b":"The planet finishes accreting, and something the size of Mars hits it hard enough to make the Moon.","r":"4.54 plus or minus 0.05 billion years, from lead isotopes in meteorites, the work Clair Patterson did in 1956.","s":"Age of the Earth","u2":"https://en.wikipedia.org/wiki/Age_of_the_Earth","age":9260000000.0},{"n":"Life","t":3480000000.0,"u":null,"k":"life","b":"Something starts copying itself, and has not stopped.","r":"The firmest early evidence is the 3.48 billion year old stromatolites of the Dresser Formation in Western Australia. Older claims exist, at 3.7 billion in Greenland and 4.28 billion in Quebec, and both are disputed as possibly abiotic.","s":"Earliest known life forms","u2":"https://en.wikipedia.org/wiki/Earliest_known_life_forms","age":10320000000.0},{"n":"Many cells","t":2100000000.0,"u":null,"k":"life","b":"Cells stop living alone. Being large becomes possible, and then being an organism.","r":"Large colonial fossils from the Francevillian rocks of Gabon are 2.1 billion years old. The oldest multicellular organism placed in a living group is Bangiomorpha, a red alga of 1,047 million years, which also carries the oldest evidence of sex.","s":"Multicellular organisms, and Bangiomorpha","u2":"https://en.wikipedia.org/wiki/Bangiomorpha","age":11700000000.0},{"n":"The first nervous systems","t":575000000.0,"u":25000000.0,"k":"mind","b":"Nets of nerve cells appear in the early animals, and an animal can act on what it senses.","r":"Nervous tissue emerges roughly 550 to 600 million years ago; the diffuse nerve nets of comb jellies and cnidarians are its simplest living form, and the bilaterian plan dates from the Ediacaran, over 550 million years ago.","s":"Nervous system","u2":"https://en.wikipedia.org/wiki/Nervous_system","age":13225000000.0},{"n":"Mammals","t":205000000.0,"u":null,"k":"life","b":"Small, warm and nocturnal, they spend their first hundred and forty million years out of the way of the dinosaurs.","r":"The Morganucodontidae appear in the late Triassic about 205 million years ago; Hadrocodium, from the early Jurassic, shows the first fully mammalian jaw joint and middle ear.","s":"Evolution of mammals","u2":"https://en.wikipedia.org/wiki/Evolution_of_mammals","age":13595000000.0},{"n":"Primates","t":66000000.0,"u":null,"k":"life","b":"Hands that grip, eyes that face forward, and a long childhood.","r":"Purgatorius, the earliest possible primate, dates to the early Paleocene about 66 million years ago, right after the asteroid. The oldest firm primate fossils are about 57 to 55 million years old, and molecular clocks push the branch back toward 85 million.","s":"Primate","u2":"https://en.wikipedia.org/wiki/Primate","age":13734000000.0},{"n":"Homo sapiens","t":315000.0,"u":34000.0,"k":"us","b":"Us, across Africa, long before anyone wrote anything down.","r":"The Jebel Irhoud fossils in Morocco are dated to 315 plus or minus 34 thousand years by thermoluminescence on burnt flint, which moved the origin of the species from one region to a continent.","s":"Jebel Irhoud","u2":"https://en.wikipedia.org/wiki/Jebel_Irhoud","age":13799685000.0},{"n":"Christianity","t":1993,"u":null,"k":"us","b":"A movement starts in Jerusalem and is a state religion within three centuries.","r":"Scholarship dates the crucifixion to about AD 33, the letters of Paul to the 50s, and takes early Christianity up to the Council of Nicaea in 325.","s":"Early Christianity","u2":"https://en.wikipedia.org/wiki/Early_Christianity","age":13799998007.0}], KINDS=[{"k":"cosmos","n":"Cosmos","c":"#b48cf2"},{"k":"star","n":"Stars","c":"#ffd24d"},{"k":"galaxy","n":"Galaxies","c":"#58a6ff"},{"k":"world","n":"Worlds","c":"#e08b5a"},{"k":"life","n":"Life","c":"#31d67a"},{"k":"mind","n":"Minds","c":"#2fc6a6"},{"k":"us","n":"Us","c":"#ef5350"}], NOW=13.8e9;
+const EV=[{"n":"The Big Bang","t":13800000000.0,"u":null,"k":"cos","b":"The expansion begins. Every later date on this line is measured back from it.","r":"Planck's 2018 release puts the age at 13.8 billion years; its 2015 release printed 13.813 plus or minus 0.038 billion, which is the scale of the uncertainty.","s":"Planck 2018 results VI, cosmological parameters","u2":"https://en.wikipedia.org/wiki/Age_of_the_universe","age":0.0,"m":1},{"n":"The first light","t":13799630000.0,"u":80000.0,"k":"cos","b":"Atoms form, the fog clears, and the light released then is still arriving as the microwave background.","r":"Recombination runs from about 290,000 to 370,000 years after the Big Bang, at redshift 1090 to 1270.","s":"Chronology of the universe","u2":"https://en.wikipedia.org/wiki/Chronology_of_the_universe","age":370000.0,"m":1},{"n":"The first stars","t":13600000000.0,"u":100000000.0,"k":"cos","b":"The first generation of stars lights up a few hundred million years in, and no one has seen one yet.","r":"The earliest galaxy confirmed so far, MoM z14, sits at redshift 14.44, some 280 million years after the Big Bang, announced in 2025. Population III stars themselves remain undetected.","s":"The earliest known galaxy, announced May 2025","u2":"https://www.space.com/astronomy/cosmic-miracle-james-webb-space-telescope-discovers-the-earliest-galaxy-ever-seen","age":200000000.0,"m":1},{"n":"The Milky Way","t":13500000000.0,"u":300000000.0,"k":"cos","b":"Our own galaxy starts as an overdensity and grows by swallowing smaller ones, a habit it has not given up.","r":"Its oldest stars are nearly as old as the universe itself, and the galaxy began forming shortly after the Big Bang. The disk came later, and this date overlaps the first stars rather than following them.","s":"The Milky Way","u2":"https://en.wikipedia.org/wiki/Milky_Way","age":300000000.0,"m":1},{"n":"The Sun","t":4568200000.0,"u":null,"k":"sol","b":"A cloud collapses and the Sun lights. The planets take shape in the disk left spinning around it.","r":"The oldest inclusions in meteorites, rich in calcium and aluminium, are 4,568.2 million years old, and that is one definition of the age of the solar system.","s":"Formation and evolution of the Solar System","u2":"https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System","age":9231800000.0,"m":1},{"n":"The Earth","t":4540000000.0,"u":50000000.0,"k":"ear","b":"The planet finishes accreting, and something the size of Mars hits it hard enough to make the Moon.","r":"4.54 plus or minus 0.05 billion years, from lead isotopes in meteorites, the work Clair Patterson did in 1956.","s":"Age of the Earth","u2":"https://en.wikipedia.org/wiki/Age_of_the_Earth","age":9260000000.0,"m":1},{"n":"Life","t":3480000000.0,"u":null,"k":"lif","b":"Something starts copying itself, and has not stopped.","r":"The firmest early evidence is the 3.48 billion year old stromatolites of the Dresser Formation in Western Australia. Older claims exist, at 3.7 billion in Greenland and 4.28 billion in Quebec, and both are disputed as possibly abiotic.","s":"Earliest known life forms","u2":"https://en.wikipedia.org/wiki/Earliest_known_life_forms","age":10320000000.0,"m":1},{"n":"Many cells","t":2100000000.0,"u":null,"k":"lif","b":"Cells stop living alone. Being large becomes possible, and then being an organism.","r":"Large colonial fossils from the Francevillian rocks of Gabon are 2.1 billion years old. The oldest multicellular organism placed in a living group is Bangiomorpha, a red alga of 1,047 million years, which also carries the oldest evidence of sex.","s":"Multicellular organisms, and Bangiomorpha","u2":"https://en.wikipedia.org/wiki/Bangiomorpha","age":11700000000.0,"m":1},{"n":"The first nervous systems","t":575000000.0,"u":25000000.0,"k":"ani","b":"Nets of nerve cells appear in the early animals, and an animal can act on what it senses.","r":"Nervous tissue emerges roughly 550 to 600 million years ago; the diffuse nerve nets of comb jellies and cnidarians are its simplest living form, and the bilaterian plan dates from the Ediacaran, over 550 million years ago.","s":"Nervous system","u2":"https://en.wikipedia.org/wiki/Nervous_system","age":13225000000.0,"m":1},{"n":"Mammals","t":205000000.0,"u":null,"k":"mam","b":"Small, warm and nocturnal, they spend their first hundred and forty million years out of the way of the dinosaurs.","r":"The Morganucodontidae appear in the late Triassic about 205 million years ago; Hadrocodium, from the early Jurassic, shows the first fully mammalian jaw joint and middle ear.","s":"Evolution of mammals","u2":"https://en.wikipedia.org/wiki/Evolution_of_mammals","age":13595000000.0,"m":1},{"n":"Primates","t":66000000.0,"u":null,"k":"pri","b":"Hands that grip, eyes that face forward, and a long childhood.","r":"Purgatorius, the earliest possible primate, dates to the early Paleocene about 66 million years ago, right after the asteroid. The oldest firm primate fossils are about 57 to 55 million years old, and molecular clocks push the branch back toward 85 million.","s":"Primate","u2":"https://en.wikipedia.org/wiki/Primate","age":13734000000.0,"m":1},{"n":"Homo sapiens","t":315000.0,"u":34000.0,"k":"sap","b":"Us, across Africa, long before anyone wrote anything down.","r":"The Jebel Irhoud fossils in Morocco are dated to 315 plus or minus 34 thousand years by thermoluminescence on burnt flint, which moved the origin of the species from one region to a continent.","s":"Jebel Irhoud","u2":"https://en.wikipedia.org/wiki/Jebel_Irhoud","age":13799685000.0,"m":1},{"n":"Christianity","t":1993,"u":null,"k":"art","b":"A movement starts in Jerusalem and is a state religion within three centuries.","r":"Scholarship dates the crucifixion to about AD 33, the letters of Paul to the 50s, and takes early Christianity up to the Council of Nicaea in 325.","s":"Early Christianity","u2":"https://en.wikipedia.org/wiki/Early_Christianity","age":13799998007.0,"m":1}], DET=[{"t":13787000000.0,"n":"The Big Bang","k":"cos"},{"t":13786622000.0,"n":"Recombination, and the first light","k":"cos"},{"t":13600000000.0,"n":"The first stars, still unobserved","k":"cos"},{"t":13520000000.0,"n":"MoM z14, the earliest galaxy seen so far","k":"cos"},{"t":13500000000.0,"n":"The first stars die as supernovae","k":"cos"},{"t":13500000000.0,"n":"The Milky Way begins to assemble","k":"cos"},{"t":13450000000.0,"n":"Reionization begins","k":"cos"},{"t":13407000000.0,"n":"Star clusters draw together into dwarf galaxies","k":"cos"},{"t":13400000000.0,"n":"The cosmic dark ages end","k":"cos"},{"t":9000000000.0,"n":"The universe is a web of galaxy clusters","k":"cos"},{"t":6000000000.0,"n":"The expansion of the universe starts to accelerate","k":"cos"},{"t":4568200000.0,"n":"The cloud collapses and the Sun begins","k":"sol"},{"t":4567000000.0,"n":"A nearby supernova seeds the cloud with heavy elements","k":"sol"},{"t":4567000000.0,"n":"The Hadean eon opens","k":"ear"},{"t":4564000000.0,"n":"Jupiter, Saturn, Uranus and Neptune take shape","k":"sol"},{"t":4550000000.0,"n":"The Sun ignites, fusing hydrogen into helium","k":"sol"},{"t":4540000000.0,"n":"Earth begins to accrete","k":"sol"},{"t":4530000000.0,"n":"The Sun drifts free of its sibling stars","k":"sol"},{"t":4530000000.0,"n":"The core separates from the mantle","k":"ear"},{"t":4510000000.0,"n":"A Mars-sized body strikes Earth and the Moon forms","k":"sol"},{"t":4500000000.0,"n":"Mercury, Venus, Earth and Mars are formed","k":"sol"},{"t":4400000000.0,"n":"The first oceans","k":"ear"},{"t":4200000000.0,"n":"The last universal common ancestor","k":"lif"},{"t":4100000000.0,"n":"The giant planets' orbits shift","k":"sol"},{"t":4000000000.0,"n":"The Archean eon opens","k":"ear"},{"t":3900000000.0,"n":"The late heavy bombardment, now disputed","k":"sol"},{"t":3700000000.0,"n":"Mars loses most of its atmosphere and its water","k":"sol"},{"t":3480000000.0,"n":"Stromatolites, the firmest early evidence of life","k":"lif"},{"t":3200000000.0,"n":"The first continents stand above the sea","k":"ear"},{"t":3200000000.0,"n":"Bacteria on land","k":"lif"},{"t":2700000000.0,"n":"Photosynthesis starts making oxygen","k":"lif"},{"t":2500000000.0,"n":"The Proterozoic eon opens","k":"ear"},{"t":2430000000.0,"n":"The great oxidation event","k":"ear"},{"t":2100000000.0,"n":"Large colonial fossils in the Francevillian rocks","k":"lif"},{"t":1850000000.0,"n":"Cells acquire mitochondria","k":"lif"},{"t":1650000000.0,"n":"The firmest early eukaryote fossils","k":"lif"},{"t":1047000000.0,"n":"Bangiomorpha, and the oldest evidence of sex","k":"lif"},{"t":750000000.0,"n":"Rodinia breaks up","k":"ear"},{"t":750000000.0,"n":"Sponges, by the molecular clock","k":"lif"},{"t":717000000.0,"n":"Snowball Earth","k":"ear"},{"t":635000000.0,"n":"The earliest known animal embryos","k":"lif"},{"t":575000000.0,"n":"The Ediacaran biota","k":"lif"},{"t":575000000.0,"n":"Nerve nets, and animals that act on what they sense","k":"ani"},{"t":538800000.0,"n":"The Phanerozoic eon opens","k":"ear"},{"t":538800000.0,"n":"The Cambrian explosion","k":"lif"},{"t":520000000.0,"n":"Conodonts leave the first toothlike fossils","k":"ani"},{"t":518000000.0,"n":"Haikouichthys, among the first fish","k":"ani"},{"t":510000000.0,"n":"Bonelike tissue","k":"ani"},{"t":480000000.0,"n":"The great Ordovician biodiversification","k":"ani"},{"t":479000000.0,"n":"Insects, by the molecular clock","k":"ani"},{"t":470000000.0,"n":"Spores of the first land plants","k":"ani"},{"t":465000000.0,"n":"Jawless armoured fish","k":"ani"},{"t":450000000.0,"n":"Sharks and rays","k":"ani"},{"t":436000000.0,"n":"Jaws","k":"ani"},{"t":425000000.0,"n":"Pneumodesmus, breathing air on land","k":"ani"},{"t":420000000.0,"n":"A fully bony internal skeleton","k":"ani"},{"t":416000000.0,"n":"Teeth, in a placoderm","k":"ani"},{"t":415000000.0,"n":"The first lungfish","k":"ani"},{"t":395000000.0,"n":"Vertebrate tracks on a Polish shore","k":"ani"},{"t":385000000.0,"n":"The first forests","k":"ani"},{"t":380000000.0,"n":"Materpiscis, the earliest known live birth","k":"ani"},{"t":375000000.0,"n":"Elginerpeton, an early tetrapod","k":"ani"},{"t":365000000.0,"n":"The first seeds","k":"ani"},{"t":330000000.0,"n":"Giant amphibians","k":"ani"},{"t":324000000.0,"n":"The first flying insects","k":"ani"},{"t":318000000.0,"n":"Amniotes, and the shelled egg","k":"ani"},{"t":312000000.0,"n":"Archaeothyris, an early synapsid","k":"ani"},{"t":310000000.0,"n":"The first conifers","k":"ani"},{"t":260000000.0,"n":"Cynodonts, the mammal line","k":"mam"},{"t":251900000.0,"n":"The Permian extinction, the largest of them all","k":"ear"},{"t":250000000.0,"n":"Frogs and salamanders","k":"ani"},{"t":231000000.0,"n":"The earliest dinosaur fossils","k":"ani"},{"t":225000000.0,"n":"Mammaliaforms split from their cynodont ancestors","k":"mam"},{"t":220000000.0,"n":"Odontochelys, an early turtle","k":"ani"},{"t":210000000.0,"n":"Milk and deciduous teeth","k":"mam"},{"t":205000000.0,"n":"Morganucodon","k":"mam"},{"t":165000000.0,"n":"Castorocauda, and a fossil trace of fur","k":"mam"},{"t":160000000.0,"n":"Juramaia, the earliest placental","k":"mam"},{"t":150000000.0,"n":"Archaeopteryx, and flight in birds","k":"ani"},{"t":130000000.0,"n":"Flowering plants","k":"ani"},{"t":125000000.0,"n":"Confuciusornis, the first toothless beak","k":"ani"},{"t":125000000.0,"n":"Sinodelphys, on the marsupial side","k":"mam"},{"t":123000000.0,"n":"Teinolophos, an early monotreme","k":"mam"},{"t":80000000.0,"n":"Alphadon, a late Cretaceous marsupial","k":"mam"},{"t":66000000.0,"n":"The Chicxulub impact","k":"ear"},{"t":66000000.0,"n":"Purgatorius, the earliest possible primate","k":"pri"},{"t":62000000.0,"n":"Ravenictis, an early carnivoran","k":"mam"},{"t":60000000.0,"n":"Eritherium, the earliest known elephant","k":"mam"},{"t":60000000.0,"n":"The first rodents","k":"mam"},{"t":56000000.0,"n":"Teilhardina, and firm primates in the record","k":"pri"},{"t":55000000.0,"n":"Diacodexis, an even-toed hoofed mammal","k":"mam"},{"t":52000000.0,"n":"The oldest known bats","k":"mam"},{"t":47000000.0,"n":"Darwinius, preserved in the Messel pit","k":"pri"},{"t":37000000.0,"n":"Hesperocyon, and the dog family","k":"mam"},{"t":25000000.0,"n":"Apes","k":"pri"},{"t":15800000.0,"n":"The last common ancestor with orangutans","k":"pri"},{"t":8900000.0,"n":"The last common ancestor with gorillas","k":"pri"},{"t":7000000.0,"n":"Sahelanthropus, the earliest claimed hominin","k":"pri"},{"t":6600000.0,"n":"The last common ancestor with chimpanzees","k":"pri"},{"t":3400000.0,"n":"Cut marks on bone in Ethiopia, disputed","k":"pri"},{"t":3300000.0,"n":"Lomekwi, the earliest flaked stone","k":"pri"},{"t":3000000.0,"n":"Australopithecus africanus","k":"pri"},{"t":2800000.0,"n":"The genus Homo","k":"pri"},{"t":2600000.0,"n":"Oldowan tools","k":"pri"},{"t":1760000.0,"n":"Acheulean handaxes at Kokiselei","k":"pri"},{"t":900000.0,"n":"A population bottleneck of about 1,280, disputed","k":"sap"},{"t":790000.0,"n":"Controlled fire at Gesher Benot Ya'aqov","k":"sap"},{"t":700000.0,"n":"The first extended sea crossing","k":"sap"},{"t":540000.0,"n":"A shell engraved by Homo erectus at Trinil","k":"sap"},{"t":500000.0,"n":"The first blades, in Kenya and Israel","k":"sap"},{"t":500000.0,"n":"Prepared-core technique","k":"sap"},{"t":460000.0,"n":"Flaked bone tools in Italy","k":"sap"},{"t":400000.0,"n":"Homo neanderthalensis","k":"sap"},{"t":315000.0,"n":"Homo sapiens at Jebel Irhoud","k":"sap"},{"t":300000.0,"n":"Hafted wooden spears at Schoningen","k":"sap"},{"t":250000.0,"n":"Levallois points","k":"sap"},{"t":200000.0,"n":"Birch tar, the first synthetic material","k":"sap"},{"t":170000.0,"n":"Clothing, dated by the genetics of lice","k":"sap"},{"t":164000.0,"n":"Ochre worked at Pinnacle Point","k":"sap"},{"t":142000.0,"n":"Shell beads at Bizmoune Cave","k":"sap"},{"t":115000.0,"n":"The last glacial period begins","k":"ear"},{"t":92000.0,"n":"The earliest known burial, at Qafzeh","k":"sap"},{"t":90000.0,"n":"Bone harpoons at Katanda","k":"sap"},{"t":84000.0,"n":"Bone tools at Blombos","k":"sap"},{"t":82000.0,"n":"Bead necklaces at Grotte des Pigeons","k":"sap"},{"t":65000.0,"n":"Australia is settled","k":"sap"},{"t":60000.0,"n":"Ostrich eggshell engraved at Diepkloof","k":"sap"},{"t":50000.0,"n":"Twisted plant fibre made by Neanderthals","k":"sap"},{"t":43000.0,"n":"Flutes of bird bone and mammoth ivory","k":"sap"},{"t":42000.0,"n":"Offshore fishing from canoes at Jerimalai","k":"sap"},{"t":40000.0,"n":"Figurative sculpture in Europe","k":"sap"},{"t":40000.0,"n":"The earliest known sewing needle","k":"sap"},{"t":36000.0,"n":"Chauvet Cave is painted","k":"sap"},{"t":35000.0,"n":"Ground stone technology in Australia","k":"sap"},{"t":32000.0,"n":"Oats ground and heated at Grotta Paglicci","k":"sap"},{"t":28000.0,"n":"Woven textiles at Dolni Vestonice","k":"sap"},{"t":25000.0,"n":"Houses built of mammoth bone","k":"sap"},{"t":23000.0,"n":"Wild cereals gathered at Ohalo","k":"sap"},{"t":23000.0,"n":"Fish hooks for open water","k":"sap"},{"t":20000.0,"n":"The first clay pots, at Xianrendong","k":"sap"},{"t":17000.0,"n":"Lascaux is painted","k":"sap"},{"t":17000.0,"n":"Carved atlatls","k":"sap"},{"t":14200.0,"n":"The oldest undisputed dog burial","k":"sap"},{"t":13000.0,"n":"Clovis points in New Mexico","k":"sap"},{"t":12025.0,"n":"About 4 million people","k":"pop"},{"t":11700.0,"n":"The last glacial period ends","k":"ear"},{"t":11025.0,"n":"Farming on the Fertile Crescent","k":"far"},{"t":10525.0,"n":"Sheep and goats are domesticated","k":"far"},{"t":10000.0,"n":"The earliest fish traps","k":"sap"},{"t":9025.0,"n":"Millet and rice farmed in China","k":"far"},{"t":8725.0,"n":"Maize domesticated in Mesoamerica","k":"far"},{"t":8525.0,"n":"Farming in the Indus valley","k":"far"},{"t":7025.0,"n":"Irrigation in Mesopotamia","k":"far"},{"t":7025.0,"n":"Wheat and barley in the Fayum","k":"far"},{"t":7025.0,"n":"About 5 million","k":"pop"},{"t":6525.0,"n":"Rice domesticated in India","k":"far"},{"t":6025.0,"n":"Sorghum farmed in Sudan","k":"far"},{"t":6025.0,"n":"Donkeys domesticated in Africa","k":"far"},{"t":6025.0,"n":"Taro drained and grown at Kuk Swamp","k":"far"},{"t":6025.0,"n":"About 7 million","k":"pop"},{"t":5425.0,"n":"Sumerian cuneiform","k":"far"},{"t":5425.0,"n":"The potter's wheel","k":"far"},{"t":5025.0,"n":"Yam and oil palm in West Africa","k":"far"},{"t":5025.0,"n":"About 14 million","k":"pop"},{"t":4625.0,"n":"Planned streets at Mohenjo-daro","k":"far"},{"t":4585.0,"n":"The Great Pyramid of Giza","k":"far"},{"t":4525.0,"n":"Stonehenge","k":"far"},{"t":4125.0,"n":"The Epic of Gilgamesh","k":"far"},{"t":4025.0,"n":"Corn and beans in North America","k":"far"},{"t":4025.0,"n":"About 27 million","k":"pop"},{"t":3779.0,"n":"The Code of Hammurabi","k":"far"},{"t":3625.0,"n":"The Hittite empire","k":"sta"},{"t":3525.0,"n":"Terracing in the Andes","k":"far"},{"t":3225.0,"n":"Oracle bones in Shang China","k":"far"},{"t":3225.0,"n":"The Olmec at San Lorenzo","k":"sta"},{"t":3075.0,"n":"The Phoenician alphabet","k":"far"},{"t":3071.0,"n":"The Zhou claim the mandate of heaven","k":"far"},{"t":3025.0,"n":"The dromedary is domesticated in Arabia","k":"far"},{"t":3025.0,"n":"About 50 million","k":"pop"},{"t":2825.0,"n":"The Etruscans in Italy","k":"sta"},{"t":2778.0,"n":"The founding of Rome","k":"sta"},{"t":2575.0,"n":"The Persian empire","k":"sta"},{"t":2525.0,"n":"Iron farming tools in West Africa","k":"far"},{"t":2525.0,"n":"Astronomy in India","k":"sci"},{"t":2525.0,"n":"Confucius teaches","k":"art"},{"t":2525.0,"n":"Buddhism","k":"art"},{"t":2525.0,"n":"About 100 million","k":"pop"},{"t":2355.0,"n":"Alexander of Macedon","k":"sta"},{"t":2325.0,"n":"A symbol for zero in Babylonian arithmetic","k":"sci"},{"t":2325.0,"n":"Euclid's Elements","k":"sci"},{"t":2231.0,"n":"The Han dynasty","k":"sta"},{"t":2225.0,"n":"The Nazca lines","k":"far"},{"t":2125.0,"n":"The Maya long count","k":"far"},{"t":2025.0,"n":"About 190 million","k":"pop"},{"t":1993.0,"n":"Christianity begins in Jerusalem","k":"art"},{"t":1965.0,"n":"The microwave background is measured","k":"cos"},{"t":1701.0,"n":"The Council of Nicaea","k":"art"},{"t":1404.0,"n":"The hijra, and the start of the Islamic calendar","k":"art"},{"t":1206.0,"n":"Al-Khwarizmi's algebra","k":"sci"},{"t":1026.0,"n":"Song dynasty innovations","k":"sta"},{"t":1026.0,"n":"Polynesians settle the last Pacific islands","k":"sta"},{"t":1026.0,"n":"Beowulf is written down","k":"art"},{"t":1026.0,"n":"Romanesque architecture","k":"art"},{"t":1026.0,"n":"About 295 million","k":"pop"},{"t":972.0,"n":"The schism between Rome and Constantinople","k":"art"},{"t":960.0,"n":"The Norman conquest of England","k":"sta"},{"t":938.0,"n":"The university of Bologna","k":"sci"},{"t":931.0,"n":"The First Crusade","k":"art"},{"t":926.0,"n":"Cahokia at its peak","k":"sta"},{"t":926.0,"n":"The compass is used at sea in China","k":"sci"},{"t":926.0,"n":"The Song of Roland","k":"art"},{"t":886.0,"n":"Gothic architecture","k":"art"},{"t":876.0,"n":"The Zagwe dynasty in Ethiopia","k":"sta"},{"t":846.0,"n":"The Arthurian romances","k":"art"},{"t":824.0,"n":"Fibonacci carries Hindu-Arabic numerals into Europe","k":"sci"},{"t":822.0,"n":"The Fourth Crusade sacks Constantinople","k":"art"},{"t":820.0,"n":"The Mongol empire","k":"sta"},{"t":817.0,"n":"The Franciscan order","k":"art"},{"t":811.0,"n":"Magna Carta","k":"sta"},{"t":810.0,"n":"The Dominican order","k":"art"},{"t":791.0,"n":"The Mali empire","k":"sta"},{"t":776.0,"n":"Gunpowder reaches Europe","k":"sci"},{"t":756.0,"n":"Aquinas writes the Summa Theologica","k":"art"},{"t":751.0,"n":"Marco Polo reaches China","k":"sta"},{"t":727.0,"n":"The Ottoman empire","k":"sta"},{"t":726.0,"n":"Great Zimbabwe at its peak","k":"sta"},{"t":726.0,"n":"Maori settlement of New Zealand","k":"sta"},{"t":726.0,"n":"The mechanical clock","k":"sci"},{"t":726.0,"n":"Giotto remakes painting","k":"art"},{"t":717.0,"n":"The Avignon papacy","k":"art"},{"t":706.0,"n":"Dante's Divine Comedy","k":"art"},{"t":701.0,"n":"Tenochtitlan is founded","k":"sta"},{"t":679.0,"n":"The Black Death","k":"sta"},{"t":676.0,"n":"Oresme's coordinate geometry","k":"sci"},{"t":658.0,"n":"The Ming dynasty","k":"sta"},{"t":648.0,"n":"The Western Schism","k":"art"},{"t":636.0,"n":"Chaucer's Canterbury Tales","k":"art"},{"t":626.0,"n":"The Oyo empire","k":"sta"},{"t":626.0,"n":"The kingdom of Kongo","k":"sta"},{"t":626.0,"n":"The Renaissance begins in Italy","k":"art"},{"t":595.0,"n":"Angkor is abandoned","k":"sta"},{"t":595.0,"n":"Joan of Arc is burned","k":"art"},{"t":588.0,"n":"The Inca empire expands","k":"sta"},{"t":586.0,"n":"Gutenberg's press","k":"sci"},{"t":586.0,"n":"Donatello's David","k":"art"},{"t":585.0,"n":"The Portuguese reach West Africa","k":"sta"},{"t":573.0,"n":"Constantinople falls","k":"sta"},{"t":571.0,"n":"The Gutenberg Bible","k":"art"},{"t":548.0,"n":"The Spanish Inquisition","k":"sta"},{"t":541.0,"n":"Botticelli's Birth of Venus","k":"art"},{"t":534.0,"n":"The Columbian exchange begins","k":"sta"},{"t":531.0,"n":"Leonardo's Last Supper","k":"art"},{"t":528.0,"n":"Vasco da Gama reaches India","k":"sta"},{"t":526.0,"n":"The Songhai empire at its peak","k":"sta"},{"t":526.0,"n":"About 460 million","k":"pop"},{"t":522.0,"n":"Michelangelo's David","k":"art"},{"t":515.0,"n":"Raphael's School of Athens","k":"art"},{"t":515.0,"n":"Erasmus, In Praise of Folly","k":"art"},{"t":514.0,"n":"The Sistine Chapel ceiling","k":"art"},{"t":509.0,"n":"Luther's ninety-five theses","k":"art"},{"t":505.0,"n":"Cortes takes Tenochtitlan","k":"sta"},{"t":505.0,"n":"The Diet of Worms","k":"art"},{"t":500.0,"n":"The Mughal empire","k":"sta"},{"t":494.0,"n":"Machiavelli's The Prince","k":"art"},{"t":493.0,"n":"Pizarro takes Cusco","k":"sta"},{"t":491.0,"n":"Rabelais, Gargantua and Pantagruel","k":"art"},{"t":490.0,"n":"Calvin's Institutes","k":"art"},{"t":483.0,"n":"Copernicus puts the Sun at the center","k":"sci"},{"t":483.0,"n":"Vesalius on the fabric of the human body","k":"sci"},{"t":481.0,"n":"Cardano's Ars Magna and the cubic","k":"sci"},{"t":481.0,"n":"The Council of Trent","k":"art"},{"t":446.0,"n":"Montaigne's Essays","k":"art"},{"t":435.0,"n":"Viete's symbolic algebra","k":"sci"},{"t":426.0,"n":"Sekigahara","k":"sta"},{"t":426.0,"n":"Shakespeare at the Globe","k":"art"},{"t":426.0,"n":"Caravaggio's chiaroscuro","k":"art"},{"t":423.0,"n":"The Tokugawa shogunate","k":"sta"},{"t":422.0,"n":"The Guru Granth Sahib is compiled","k":"art"},{"t":421.0,"n":"Cervantes, Don Quixote","k":"art"},{"t":420.0,"n":"Europeans first sight Australia","k":"sta"},{"t":419.0,"n":"Jamestown","k":"sta"},{"t":418.0,"n":"The telescope","k":"sci"},{"t":417.0,"n":"Kepler's laws","k":"sci"},{"t":416.0,"n":"Galileo sees the moons of Jupiter","k":"sci"},{"t":415.0,"n":"The King James Bible","k":"art"},{"t":412.0,"n":"Napier's logarithms","k":"sci"},{"t":408.0,"n":"The Thirty Years War","k":"sta"},{"t":406.0,"n":"Plymouth Colony","k":"sta"},{"t":406.0,"n":"Bacon's Novum Organum","k":"art"},{"t":398.0,"n":"Harvey on the circulation of the blood","k":"sci"},{"t":389.0,"n":"Descartes' coordinate geometry","k":"sci"},{"t":389.0,"n":"Fermat states his last theorem","k":"sci"},{"t":389.0,"n":"Descartes' Discourse on Method","k":"art"},{"t":384.0,"n":"The English Civil War","k":"sta"},{"t":384.0,"n":"Rembrandt's Night Watch","k":"art"},{"t":383.0,"n":"Torricelli's barometer","k":"sci"},{"t":382.0,"n":"The Qing dynasty","k":"sta"},{"t":375.0,"n":"Hobbes' Leviathan","k":"art"},{"t":372.0,"n":"Pascal and Fermat lay out probability","k":"sci"},{"t":359.0,"n":"Milton's Paradise Lost","k":"art"},{"t":356.0,"n":"Newton and Leibniz build the calculus","k":"sci"},{"t":350.0,"n":"Van Leeuwenhoek sees bacteria","k":"sci"},{"t":349.0,"n":"Spinoza's Ethics","k":"art"},{"t":344.0,"n":"Versailles","k":"art"},{"t":339.0,"n":"Newton's Principia","k":"sci"},{"t":338.0,"n":"The Glorious Revolution","k":"sta"},{"t":336.0,"n":"Locke's Essay Concerning Human Understanding","k":"art"},{"t":326.0,"n":"About 600 million","k":"pop"},{"t":314.0,"n":"Newcomen's steam engine","k":"sci"},{"t":313.0,"n":"Bernoulli's law of large numbers","k":"sci"},{"t":305.0,"n":"Bach's Brandenburg Concertos","k":"art"},{"t":300.0,"n":"Swift's Gulliver's Travels","k":"art"},{"t":291.0,"n":"Linnaeus orders the living world","k":"sci"},{"t":287.0,"n":"Hume's Treatise of Human Nature","k":"art"},{"t":284.0,"n":"Handel's Messiah","k":"art"},{"t":276.0,"n":"The industrial revolution","k":"sta"},{"t":275.0,"n":"Diderot's Encyclopedie","k":"art"},{"t":274.0,"n":"Franklin's kite","k":"sci"},{"t":272.0,"n":"Black isolates carbon dioxide","k":"sci"},{"t":271.0,"n":"Johnson's Dictionary","k":"art"},{"t":270.0,"n":"The Seven Years War","k":"sta"},{"t":269.0,"n":"East India Company rule in Bengal","k":"sta"},{"t":267.0,"n":"Voltaire's Candide","k":"art"},{"t":264.0,"n":"Rousseau's Social Contract","k":"art"},{"t":263.0,"n":"Bayes' theorem","k":"sci"},{"t":258.0,"n":"Cook's Pacific voyages","k":"sta"},{"t":257.0,"n":"Watt's separate condenser","k":"sci"},{"t":251.0,"n":"The American Revolution","k":"sta"},{"t":251.0,"n":"Lavoisier's chemical revolution","k":"sci"},{"t":250.0,"n":"Smith's Wealth of Nations","k":"art"},{"t":246.0,"n":"The Atlantic slave trade at its peak","k":"sta"},{"t":245.0,"n":"Herschel finds Uranus","k":"sci"},{"t":245.0,"n":"Kant's Critique of Pure Reason","k":"art"},{"t":241.0,"n":"Coulomb's law","k":"sci"},{"t":239.0,"n":"Mozart's Don Giovanni","k":"art"},{"t":238.0,"n":"The United States constitution","k":"sta"},{"t":238.0,"n":"The British colonisation of Australia","k":"sta"},{"t":238.0,"n":"Lagrange's analytical mechanics","k":"sci"},{"t":237.0,"n":"The French Revolution","k":"sta"},{"t":237.0,"n":"Blake's Songs of Innocence","k":"art"},{"t":235.0,"n":"The Haitian Revolution","k":"sta"},{"t":234.0,"n":"Wollstonecraft's Vindication","k":"art"},{"t":230.0,"n":"Jenner's smallpox vaccination","k":"sci"},{"t":228.0,"n":"Wordsworth and Coleridge's Lyrical Ballads","k":"art"},{"t":226.0,"n":"Volta's battery","k":"sci"},{"t":226.0,"n":"About 990 million","k":"pop"},{"t":225.0,"n":"Gauss's Disquisitiones Arithmeticae","k":"sci"},{"t":223.0,"n":"The Louisiana Purchase","k":"sta"},{"t":223.0,"n":"Dalton's atomic theory","k":"sci"},{"t":222.0,"n":"Napoleon is crowned emperor","k":"sta"},{"t":219.0,"n":"Fourier analysis","k":"sci"},{"t":218.0,"n":"Gay-Lussac's gas laws","k":"sci"},{"t":218.0,"n":"Goethe's Faust","k":"art"},{"t":215.0,"n":"Avogadro's hypothesis","k":"sci"},{"t":213.0,"n":"Austen's Pride and Prejudice","k":"art"},{"t":211.0,"n":"Waterloo","k":"sta"},{"t":208.0,"n":"The Zulu kingdom","k":"sta"},{"t":207.0,"n":"Byron begins Don Juan","k":"art"},{"t":205.0,"n":"Mexican independence","k":"sta"},{"t":205.0,"n":"The Greek war of independence","k":"sta"},{"t":205.0,"n":"Cauchy makes analysis rigorous","k":"sci"},{"t":205.0,"n":"Hegel's Philosophy of Right","k":"art"},{"t":204.0,"n":"Brazilian independence","k":"sta"},{"t":202.0,"n":"The Black War in Tasmania","k":"sta"},{"t":202.0,"n":"Beethoven's ninth symphony","k":"art"},{"t":197.0,"n":"Lobachevsky's non-Euclidean geometry","k":"sci"},{"t":195.0,"n":"Faraday's induction","k":"sci"},{"t":195.0,"n":"Hugo's Notre-Dame de Paris","k":"art"},{"t":194.0,"n":"Galois theory","k":"sci"},{"t":191.0,"n":"Balzac begins the Human Comedy","k":"art"},{"t":188.0,"n":"Dickens' Oliver Twist","k":"art"},{"t":187.0,"n":"The Opium Wars","k":"sta"},{"t":186.0,"n":"The Treaty of Waitangi","k":"sta"},{"t":183.0,"n":"Hamilton's quaternions","k":"sci"},{"t":178.0,"n":"The revolutions of 1848","k":"sta"},{"t":178.0,"n":"Marx and Engels' Communist Manifesto","k":"art"},{"t":177.0,"n":"The California gold rush","k":"sta"},{"t":176.0,"n":"The Taiping rebellion","k":"sta"},{"t":175.0,"n":"The Australian gold rushes","k":"sta"},{"t":173.0,"n":"The Crimean War","k":"sta"},{"t":172.0,"n":"Boole's laws of thought","k":"sci"},{"t":172.0,"n":"Riemann's geometry","k":"sci"},{"t":172.0,"n":"Thoreau's Walden","k":"art"},{"t":169.0,"n":"Flaubert's Madame Bovary","k":"art"},{"t":169.0,"n":"Baudelaire's Les Fleurs du mal","k":"art"},{"t":167.0,"n":"Darwin's Origin of Species","k":"sci"},{"t":166.0,"n":"Impressionism","k":"art"},{"t":165.0,"n":"The American Civil War","k":"sta"},{"t":164.0,"n":"Pasteur and the germ theory","k":"sci"},{"t":161.0,"n":"Mendel's laws of inheritance","k":"sci"},{"t":161.0,"n":"Maxwell's equations","k":"sci"},{"t":161.0,"n":"Carroll's Alice in Wonderland","k":"art"},{"t":160.0,"n":"Dostoevsky's Crime and Punishment","k":"art"},{"t":158.0,"n":"The Meiji restoration","k":"sta"},{"t":157.0,"n":"The Suez Canal","k":"sta"},{"t":157.0,"n":"The transcontinental railroad","k":"sta"},{"t":157.0,"n":"Mendeleev's periodic table","k":"sci"},{"t":157.0,"n":"Tolstoy's War and Peace","k":"art"},{"t":155.0,"n":"German unification","k":"sta"},{"t":154.0,"n":"Klein's Erlangen program","k":"sci"},{"t":152.0,"n":"Cantor's set theory","k":"sci"},{"t":150.0,"n":"Bell patents the telephone","k":"sci"},{"t":150.0,"n":"Wagner completes the Ring","k":"art"},{"t":147.0,"n":"Edison's light bulb","k":"sci"},{"t":147.0,"n":"Ibsen's A Doll's House","k":"art"},{"t":144.0,"n":"Koch finds the tuberculosis bacillus","k":"sci"},{"t":143.0,"n":"Nietzsche's Thus Spoke Zarathustra","k":"art"},{"t":142.0,"n":"The Berlin Conference and the scramble for Africa","k":"sta"},{"t":141.0,"n":"The first automobile","k":"sci"},{"t":141.0,"n":"Post-Impressionism","k":"art"},{"t":139.0,"n":"Hertz makes radio waves","k":"sci"},{"t":136.0,"n":"Wilde's The Picture of Dorian Gray","k":"art"},{"t":135.0,"n":"Hardy's Tess of the d'Urbervilles","k":"art"},{"t":131.0,"n":"Rontgen's X-rays","k":"sci"},{"t":130.0,"n":"Becquerel finds radioactivity","k":"sci"},{"t":128.0,"n":"The Spanish-American War","k":"sta"},{"t":128.0,"n":"Curie isolates radium","k":"sci"},{"t":126.0,"n":"The Boxer rebellion","k":"sta"},{"t":126.0,"n":"Planck's quantum","k":"sci"},{"t":126.0,"n":"Freud's Interpretation of Dreams","k":"art"},{"t":126.0,"n":"1.65 billion","k":"pop"},{"t":125.0,"n":"The federation of Australia","k":"sta"},{"t":123.0,"n":"The Wright brothers fly","k":"sci"},{"t":122.0,"n":"The Russo-Japanese War","k":"sta"},{"t":122.0,"n":"Chekhov's The Cherry Orchard","k":"art"},{"t":121.0,"n":"Einstein's special relativity","k":"sci"},{"t":115.0,"n":"Rutherford's nuclear atom","k":"sci"},{"t":114.0,"n":"The Qing dynasty falls","k":"sta"},{"t":114.0,"n":"Wegener proposes continental drift","k":"sci"},{"t":112.0,"n":"The First World War","k":"sta"},{"t":99.0,"n":"2 billion","k":"pop"},{"t":98.0,"n":"Fleming finds penicillin","k":"sci"},{"t":97.0,"n":"Hubble measures the expansion","k":"sci"},{"t":87.0,"n":"The Second World War","k":"sta"},{"t":81.0,"n":"The United Nations","k":"sta"},{"t":73.0,"n":"The structure of DNA","k":"sci"},{"t":66.0,"n":"Seventeen African states become independent","k":"sta"},{"t":65.0,"n":"The first human in orbit","k":"sci"},{"t":57.0,"n":"The first landing on the Moon","k":"sci"},{"t":52.0,"n":"4 billion","k":"pop"},{"t":37.0,"n":"Voyager 1 passes the last of the planets","k":"sol"},{"t":35.0,"n":"The Soviet Union dissolves","k":"sta"},{"t":26.0,"n":"6.1 billion","k":"pop"},{"t":23.0,"n":"The human genome is sequenced","k":"sci"},{"t":14.0,"n":"The Higgs boson","k":"sci"},{"t":11.0,"n":"Gravitational waves are detected","k":"sci"},{"t":5.0,"n":"The James Webb Space Telescope launches","k":"sci"},{"t":2.0,"n":"8.2 billion","k":"pop"}], ST=[{"k":"cos","n":"Cosmos","c":"#b48cf2"},{"k":"sol","n":"Solar system","c":"#ffd24d"},{"k":"ear","n":"Earth","c":"#e08b5a"},{"k":"lif","n":"Life","c":"#31d67a"},{"k":"ani","n":"Animals","c":"#4fbf8b"},{"k":"mam","n":"Mammals","c":"#7fd4ff"},{"k":"pri","n":"Primates","c":"#2fc6a6"},{"k":"sap","n":"Us","c":"#ef5350"},{"k":"far","n":"Farming and cities","c":"#d4a373"},{"k":"sta","n":"States and empires","c":"#f2837f"},{"k":"sci","n":"Science and maths","c":"#58a6ff"},{"k":"art","n":"Arts and belief","c":"#c78ee0"},{"k":"pop","n":"World population","c":"#9aa4b2"}];
+const NOW=13.8e9, TSUN=4.5682e9, Y0=2026;
 const el=document.getElementById('chart');
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
-const COL={}; for(const k of KINDS) COL[k.k]=k.c;
-let mode='back', cur=0, playing=null, cut=NOW;  // cut: years after the Big Bang
-const TMIN=1e3;   // the line stops a thousand years back, where the marks do
-
-document.getElementById('legend').innerHTML=KINDS.map(k=>
-  '<span><i style="background:'+k.c+'"></i>'+k.n+'</span>').join('');
+const COL={}, SNAME={};
+for(const s of ST){ COL[s.k]=s.c; SNAME[s.k]=s.n; }
+const off=new Set();          // strands the reader has switched off
+let mode='back', cur=0, curDet=-1;
+const TMIN=2;   // the line stops two years back, where the last marks are
 
 // how a span of years reads out loud
 function span(y){
@@ -122,79 +131,136 @@ function span(y){
 }
 function ago(t){ return t<1e4 ? Math.round(t).toLocaleString('en-US')+' years ago'
   : span(t)+' ago'; }
+// a calendar year, where the mark is recent enough for one to mean
+// anything. Y0-t is the astronomical year, which has a zero; the era
+// notation does not, so a year at or below zero counts back from 1 BCE.
+function cal(t){
+  const y=Math.round(Y0-t);
+  return y>0 ? y+' CE' : (1-y)+' BCE';
+}
+function whenTxt(t){ return t<13000 ? cal(t)+' \u00b7 '+ago(t) : ago(t); }
+// the age of the universe at the mark, worth saying only while the two
+// numbers still differ: after the first hundred million years it rounds
+// to the full 13.8 billion for everything
+function sinceTxt(t){
+  return t>=1e8 ? ' \u00b7 '+span(NOW-t)+' after the Big Bang' : '';
+}
 
-const W=1000, H=470, L=52, R=34, TOP=40, BOT=76;
-const AXIS=H-BOT;
-const LMIN=Math.log10(TMIN), LMAX=Math.log10(NOW);
+const W=1000, L=112, R=34, TOP=34, LANEH=28, ROWH=22, GAP=48;
+const LMIN=Math.log10(TMIN), LMAX=Math.log10(NOW), LSUN=Math.log10(TSUN);
+let AXIS=200, H=600;
+
 function X(t){
-  const span=W-L-R;
-  if(mode==='even') return L+(1-t/NOW)*span;
-  if(mode==='fwd'){          // log years since the Big Bang
-    const a=Math.max(1,NOW-t);
-    return L+Math.log10(a)/Math.log10(NOW)*span;
+  const w=W-L-R;
+  if(mode==='even') return L+(1-t/NOW)*w;
+  if(mode==='fwd'){                       // log years since the Big Bang
+    return L+Math.log10(Math.max(1,NOW-t))/Math.log10(NOW)*w;
+  }
+  if(mode==='sun'){
+    // still log years before now, but broken at the Sun and stretched so
+    // the Sun lands on the middle: half the line for the nine billion
+    // years before it, half for the four and a half billion since
+    const C=L+w*0.5, v=Math.log10(Math.max(TMIN,t));
+    if(v>=LSUN) return L+(LMAX-v)/(LMAX-LSUN)*(C-L);
+    return C+(LSUN-v)/(LSUN-LMIN)*(W-R-C);
   }
   const v=Math.log10(Math.max(TMIN,t));   // log years before now
-  return L+(LMAX-v)/(LMAX-LMIN)*span;
+  return L+(LMAX-v)/(LMAX-LMIN)*w;
 }
 const TICKS={
-  back:[1e10,1e9,1e8,1e7,1e6,1e5,1e4,1e3],
+  back:[1e10,1e9,1e8,1e7,1e6,1e5,1e4,1e3,1e2,1e1],
   fwd:[1,1e3,1e6,1e9,1e10],
+  // billions on the stretched arm, every other decade on the other
+  sun:[12e9,10e9,8e9,6e9,TSUN,1e8,1e6,1e4,1e2],
   even:[12e9,10e9,8e9,6e9,4e9,2e9,0]};
-function tickLabel(t){
-  if(mode==='fwd'){
-    const a=t;
-    return a>=1e9?(a/1e9)+' Gyr':a>=1e6?(a/1e6)+' Myr':a>=1e3?(a/1e3)+' kyr':a+' yr';
-  }
-  if(t===0) return 'now';
-  return t>=1e9?(t/1e9)+' Gyr':t>=1e6?(t/1e6)+' Myr':t>=1e3?(t/1e3)+' kyr':t+' yr';
+function unit(a){
+  return a>=1e9?(a/1e9)+' Gyr':a>=1e6?(a/1e6)+' Myr':a>=1e3?(a/1e3)+' kyr':a+' yr';
 }
+function tickLabel(t){
+  if(mode==='fwd') return unit(t);
+  if(mode==='sun'&&Math.abs(t-TSUN)<1e4) return 'the Sun';
+  if(t===0) return 'now';
+  return unit(t);
+}
+const CAP={back:'years before now, each step a tenth of the rest',
+  fwd:'years since the Big Bang, each step ten times the last',
+  sun:'years before now, stretched to put the Sun on the middle',
+  even:'years before now, on an even scale'};
 
-function render(){
-  let s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" id="tsvg">';
-  s+='<rect width="'+W+'" height="'+H+'" fill="#121212"/>';
-  // the axis and its ticks
-  s+='<path d="M'+L+','+AXIS+' H'+(W-R)+'" stroke="#3d444d" stroke-width="1.4"/>';
-  for(const t of TICKS[mode]){
-    if(t>NOW) continue;
-    const x=mode==='fwd'?L+Math.log10(Math.max(1,t))/Math.log10(NOW)*(W-L-R):X(t);
-    s+='<path d="M'+x.toFixed(1)+','+(AXIS-5)+' v10" stroke="#3d444d" stroke-width="1.2"/>'
-      +'<text x="'+x.toFixed(1)+'" y="'+(AXIS+21)+'" text-anchor="middle" font-size="10.5" fill="#6b7280">'
-      +tickLabel(t)+'</text>';
-  }
-  const CAP={back:'years before now, each step a tenth of the rest',
-    fwd:'years since the Big Bang, each step ten times the last',
-    even:'years before now, on an even scale'};
-  s+='<text x="'+(W-R)+'" y="'+(AXIS+38)+'" text-anchor="end" font-size="10.5" fill="#6b7280">'
-    +CAP[mode]+'</text>';
-  s+='<text x="'+L+'" y="24" font-size="11" fill="#6b7280">the Big Bang</text>'
-    +'<text x="'+(W-R)+'" y="24" text-anchor="end" font-size="11" fill="#6b7280">now</text>';
-
-  // the clock: everything after the cut is dimmed
-  const xc=X(Math.max(1,NOW-cut));
-  s+='<rect x="'+xc.toFixed(1)+'" y="'+TOP+'" width="'+Math.max(0,W-R-xc).toFixed(1)
-    +'" height="'+(AXIS-TOP)+'" fill="#121212" fill-opacity="0.72"/>'
-    +'<path d="M'+xc.toFixed(1)+','+TOP+' V'+AXIS+'" stroke="var(--accent)" stroke-width="1.2" stroke-opacity="0.8"/>';
-
-  // the events, stacked so their labels do not collide
-  const lanes=[];
+// pack the milestone labels into lanes so they do not collide
+function packLanes(){
+  const lanes=[], laneOf={};
   const order=EV.map((e,i)=>({e,i,x:X(e.t)})).sort((a,b)=>a.x-b.x);
-  const laneOf={};
   for(const o of order){
     const wide=o.e.n.length*7+26;
-    const flip=o.x+wide>W-R;
-    const left=flip?o.x-wide:o.x;
+    const left=(o.x+wide>W-R)?o.x-wide:o.x;
     let lane=0;
     while(lanes[lane]!==undefined && left<lanes[lane]) lane++;
     lanes[lane]=left+wide;
     laneOf[o.i]=lane;
   }
+  return {laneOf, n:lanes.length};
+}
+// the tallest the milestone block gets on any scale, so it does not jump
+let MAXLANE=1;
+(function(){ const keep=mode;
+  for(const m of ['back','fwd','sun','even']){ mode=m;
+    MAXLANE=Math.max(MAXLANE, packLanes().n); }
+  mode=keep; })();
+
+function render(){
+  const pack=packLanes();
+  AXIS=TOP+MAXLANE*LANEH+10;
+  const shown=ST.filter(s=>!off.has(s.k));
+  const ROW0=AXIS+GAP;
+  H=ROW0+shown.length*ROWH+10;
+  let s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" id="tsvg">';
+  s+='<rect width="'+W+'" height="'+H+'" fill="#121212"/>';
+
+  // the strand rows, and their detail marks
+  shown.forEach((st,r)=>{
+    const y=ROW0+r*ROWH, mid=y+ROWH/2;
+    if(r%2===0) s+='<rect x="'+L+'" y="'+y+'" width="'+(W-L-R)+'" height="'+ROWH
+      +'" fill="#ffffff" fill-opacity="0.022"/>';
+    s+='<text x="'+(L-9)+'" y="'+(mid+3.6)+'" text-anchor="end" font-size="10.5" '
+      +'fill="'+st.c+'" fill-opacity="0.85" data-row="'+st.k
+      +'" style="cursor:pointer">'+esc(st.n)+'</text>';
+    DET.forEach((d,i)=>{
+      if(d.k!==st.k) return;
+      const x=X(d.t);
+      if(x<L-1||x>W-R+1) return;
+      const hot=i===curDet;
+      s+='<g data-d="'+i+'" style="cursor:pointer">'
+        +'<circle cx="'+x.toFixed(1)+'" cy="'+mid.toFixed(1)+'" r="'+(hot?5:2.9)
+        +'" fill="'+st.c+'" fill-opacity="'+(hot?1:0.72)+'"'
+        +(hot?' stroke="#e6e6e6" stroke-width="1.2"':'')+'/>'
+        +'<rect x="'+(x-5).toFixed(1)+'" y="'+y+'" width="10" height="'+ROWH
+        +'" fill="transparent"/></g>';
+    });
+  });
+
+  // the axis and its ticks
+  s+='<path d="M'+L+','+AXIS+' H'+(W-R)+'" stroke="#3d444d" stroke-width="1.4"/>';
+  for(const t of TICKS[mode]){
+    if(t>NOW||t<0) continue;
+    const x=mode==='fwd'
+      ? L+Math.log10(Math.max(1,t))/Math.log10(NOW)*(W-L-R) : X(t);
+    s+='<path d="M'+x.toFixed(1)+','+(AXIS-5)+' v10" stroke="#3d444d" stroke-width="1.2"/>'
+      +'<text x="'+x.toFixed(1)+'" y="'+(AXIS+21)+'" text-anchor="middle" font-size="10.5" fill="#6b7280">'
+      +tickLabel(t)+'</text>';
+  }
+  s+='<text x="'+(W-R)+'" y="'+(AXIS+38)+'" text-anchor="end" font-size="10.5" fill="#6b7280">'
+    +CAP[mode]+'</text>';
+  s+='<text x="'+L+'" y="20" font-size="11" fill="#6b7280">the Big Bang</text>'
+    +'<text x="'+(W-R)+'" y="20" text-anchor="end" font-size="11" fill="#6b7280">now</text>';
+
+  // the milestones, above the line
   EV.forEach((e,i)=>{
-    const x=X(e.t), on=e.t>=NOW-cut;
+    const x=X(e.t);
     const flip=x+e.n.length*7+18>W-R;
-    const lane=laneOf[i];
-    const y=AXIS-26-lane*30;
-    const c=COL[e.k];
-    s+='<g data-i="'+i+'" style="cursor:pointer" opacity="'+(on?1:0.18)+'">';
+    const y=AXIS-16-(MAXLANE-1-pack.laneOf[i])*LANEH;
+    const c=COL[e.k]||'#e6e6e6';
+    s+='<g data-i="'+i+'" style="cursor:pointer">';
     if(e.u){
       const cl=v=>Math.max(L,Math.min(W-R,v));
       const x0=cl(X(e.t+e.u)), x1=cl(X(Math.max(1,e.t-e.u)));
@@ -202,79 +268,90 @@ function render(){
         +'" stroke="'+c+'" stroke-width="2.4" stroke-opacity="0.3" stroke-linecap="round"/>';
     }
     s+='<path d="M'+x.toFixed(1)+','+y+' V'+AXIS+'" stroke="'+c+'" stroke-width="1" stroke-opacity="0.45"/>'
-      +'<circle cx="'+x.toFixed(1)+'" cy="'+y+'" r="'+(i===cur?6:4.5)+'" fill="'+c+'" stroke="#121212" stroke-width="1.4"/>'
+      +'<circle cx="'+x.toFixed(1)+'" cy="'+y+'" r="'+(i===cur&&curDet<0?6:4.5)+'" fill="'+c+'" stroke="#121212" stroke-width="1.4"/>'
       // a label that would run off the right edge is set to the left instead
       +'<text x="'+(flip?(x-9):(x+9)).toFixed(1)+'" y="'+(y+4)+'" text-anchor="'+(flip?'end':'start')
-      +'" font-size="12" font-weight="'+(i===cur?700:400)
+      +'" font-size="12" font-weight="'+(i===cur&&curDet<0?700:400)
       +'" fill="#e6e6e6" stroke="#121212" stroke-width="2.6" paint-order="stroke">'+esc(e.n)+'</text>'
       +'<rect x="'+(flip?(x-9-e.n.length*7):(x-9)).toFixed(1)+'" y="'+(y-11)+'" width="'+(e.n.length*7+22)+'" height="22" fill="transparent"/>'
       +'</g>';
   });
   s+='</svg>';
   el.innerHTML=s;
-  document.getElementById('clock').textContent=
-    cut>=NOW ? 'the whole 13.8 billion years'
-             : span(cut)+' after the Big Bang';
 }
 
 function show(i){
   const e=EV[i]; if(!e) return;
-  cur=i;
-  const kind=KINDS.find(k=>k.k===e.k);
+  cur=i; curDet=-1;
   const kt=document.getElementById('kindTxt');
-  kt.textContent=kind?kind.n:''; kt.style.color=COL[e.k];
+  kt.textContent=SNAME[e.k]||''; kt.style.color=COL[e.k];
   document.getElementById('nameTxt').textContent=e.n;
-  document.getElementById('whenTxt').textContent=
-    ago(e.t)+' \u00b7 '+span(e.age)+' after the Big Bang';
+  document.getElementById('whenTxt').textContent=whenTxt(e.t)+sinceTxt(e.t);
   document.getElementById('bodyTxt').textContent=e.b;
   document.getElementById('realTxt').textContent=e.r;
   document.getElementById('srcTxt').innerHTML=
     '<a href="'+e.u2+'">'+esc(e.s)+'</a>';
   render();
 }
+function showDet(i){
+  const d=DET[i]; if(!d) return;
+  curDet=i;
+  const kt=document.getElementById('kindTxt');
+  kt.textContent=SNAME[d.k]||''; kt.style.color=COL[d.k];
+  document.getElementById('nameTxt').textContent=d.n;
+  document.getElementById('whenTxt').textContent=whenTxt(d.t)+sinceTxt(d.t);
+  document.getElementById('bodyTxt').textContent='';
+  document.getElementById('realTxt').textContent='';
+  document.getElementById('srcTxt').innerHTML='';
+  render();
+}
 
 el.addEventListener('pointerover',ev=>{
+  const d=ev.target.closest('[data-d]');
+  if(d){ showDet(+d.getAttribute('data-d')); return; }
   const g=ev.target.closest('[data-i]');
   if(g) show(+g.getAttribute('data-i'));
 });
-const slider=document.getElementById('t');
-slider.addEventListener('input',()=>{
-  // the slider is logarithmic in time since the Big Bang, so the first
-  // stars and the last two thousand years both get travel
-  const u=+slider.value/1000;
-  cut = u>=1 ? NOW : Math.pow(10, u*Math.log10(NOW));
-  render();
+el.addEventListener('click',ev=>{
+  const r=ev.target.closest('[data-row]');
+  if(r) toggle(r.getAttribute('data-row'));
 });
+
+const legend=document.getElementById('legend');
+legend.innerHTML=ST.map(s=>'<button data-k="'+s.k+'"><i style="background:'
+  +s.c+'"></i>'+s.n+'</button>').join('');
+function toggle(k){
+  if(off.has(k)) off.delete(k); else off.add(k);
+  legend.querySelector('[data-k="'+k+'"]').classList.toggle('off',off.has(k));
+  render();
+}
+legend.addEventListener('click',ev=>{
+  const b=ev.target.closest('[data-k]');
+  if(b) toggle(b.getAttribute('data-k'));
+});
+
 function setMode(m){
-  mode=m;
-  document.getElementById('bBack').classList.toggle('on',m==='back');
-  document.getElementById('bFwd').classList.toggle('on',m==='fwd');
-  document.getElementById('bLin').classList.toggle('on',m==='even');
+  mode=m; curDet=-1;
+  for(const [id,v] of [['bBack','back'],['bFwd','fwd'],['bSun','sun'],
+                       ['bLin','even']])
+    document.getElementById(id).classList.toggle('on',m===v);
   render();
 }
 document.getElementById('bBack').onclick=()=>setMode('back');
 document.getElementById('bFwd').onclick=()=>setMode('fwd');
+document.getElementById('bSun').onclick=()=>setMode('sun');
 document.getElementById('bLin').onclick=()=>setMode('even');
-document.getElementById('bPlay').onclick=e=>{
-  if(playing){ clearInterval(playing); playing=null; e.target.classList.remove('on');
-    e.target.textContent='Run the clock'; return; }
-  e.target.classList.add('on'); e.target.textContent='Stop';
-  slider.value=0; slider.dispatchEvent(new Event('input'));
-  playing=setInterval(()=>{
-    const v=+slider.value+6;
-    slider.value=Math.min(1000,v);
-    slider.dispatchEvent(new Event('input'));
-    if(v>=1000){ clearInterval(playing); playing=null;
-      e.target.classList.remove('on'); e.target.textContent='Run the clock'; }
-  },40);
-};
 
 render();
 show(0);
-window.__cosmic=()=>({events:EV.length, mode, cur, cut,
-  visible:EV.filter(e=>e.t>=NOW-cut).length,
+window.__cosmic=()=>({events:EV.length, detail:DET.length,
+  strands:ST.length, mode, cur, off:off.size,
+  sunX:Math.round(X(TSUN)), midX:Math.round(L+(W-L-R)/2),
   ordered:EV.every((e,i)=>!i||e.t<=EV[i-1].t),
+  detOrdered:DET.every((d,i)=>!i||d.t<=DET[i-1].t),
   sourced:EV.every(e=>e.s&&e.u2&&e.b&&e.r),
+  rows:document.querySelectorAll('[data-row]').length,
+  dots:document.querySelectorAll('[data-d]').length,
   spanLog:Math.round(X(EV[EV.length-1].t)-X(EV[0].t))});
 </script>
 </body>
