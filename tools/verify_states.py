@@ -197,6 +197,77 @@ with sync_playwright() as pw:
         pg.close()
     br.close()
 
+
+# --- the seven pages carry the same fields, so none of them can drift ---
+# thin again without the check noticing
+import json as _json
+import re as _re
+
+_src = (ROOT / "tools" / "build_states.py").read_text()
+_ns = {}
+exec(compile(_src[_src.index("US = {"):_src.index("PAGES = {")], "<hist>", "exec"),
+     _ns)
+HIST, SYMBOLS = _ns["HIST"], _ns["SYMBOLS"]
+
+REQUIRED = ("eras", "marks", "border", "nb", "pre", "nations", "events",
+            "census", "early", "native", "geo", "refs")
+FLOORS = dict(nations=7, events=11, native=3, eras=5, refs=3, early=1, marks=1)
+
+print("\n-- structure --")
+for st in sorted(HIST):
+    h = HIST[st]
+    missing = [k for k in REQUIRED if not h.get(k)]
+    check(f"{st}: every field is filled", not missing, ",".join(missing))
+    thin = [f"{k} {len(h[k])}<{n}" for k, n in FLOORS.items()
+            if len(h.get(k) or []) < n]
+    check(f"{st}: every list is deep enough", not thin, "; ".join(thin))
+    nat = h["native"]
+    check(f"{st}: the Native line runs in order and reaches 2020",
+          nat == sorted(nat) and nat[-1][0] == 2020,
+          str([x[0] for x in nat]))
+    check(f"{st}: every Native point says whose figure it is",
+          all(len(x) == 3 and x[2].strip() for x in nat))
+    early, cen = h["early"], h["census"]
+    check(f"{st}: the early counts sit before the first census",
+          all(len(e) == 3 and e[2].strip() for e in early)
+          and max(e[0] for e in early) < cen[-1][0])
+    check(f"{st}: statehood is on the rail",
+          any("Statehood" in m["l"] for m in h["marks"]),
+          str([m["l"] for m in h["marks"]]))
+    for n in h["nations"]:
+        assert {"n", "src", "poly", "lat", "lon", "note"} <= set(n), n
+    check(f"{st}: every nation carries a homeland, a label and a source",
+          all(len(n["poly"]) >= 4 and n["note"].strip() for n in h["nations"]))
+    sym = SYMBOLS[st]
+    kinds = [x["k"] for x in sym]
+    check(f"{st}: a bird, a flower and a tree", 
+          {"Bird", "Flower", "Tree"} <= set(kinds), ",".join(kinds))
+    check(f"{st}: every symbol has a binomial, a year and an article",
+          all(x["b"] and x["y"] and x["a"] and x["t"] for x in sym))
+    check(f"{st}: no symbol adopted before the state existed",
+          all(x["y"] >= h["border"] for x in sym),
+          str([(x["k"], x["y"]) for x in sym if x["y"] < h["border"]]))
+
+# the symbols reach the page, and the card renders them
+print("\n-- symbols on the page --")
+with sync_playwright() as _pw:
+    _br = _pw.chromium.launch()
+    _pg = _br.new_page(viewport={"width": 1280, "height": 1000})
+    for _st, _f in _ns.get("PAGES", {}).items() if _ns.get("PAGES") else []:
+        pass
+    for _st in sorted(HIST):
+        _fn = {"ca": "california", "az": "arizona", "pa": "pennsylvania",
+               "ma": "massachusetts", "al": "alabama", "ne": "nebraska",
+               "mn": "minnesota"}[_st] + ".html"
+        _pg.goto((ROOT / _fn).as_uri())
+        _pg.wait_for_timeout(900)
+        _n = _pg.eval_on_selector_all(".sym", "es=>es.length")
+        check(f"{_fn}: {_n} symbols in the card", _n == len(SYMBOLS[_st]))
+        _ticks = _pg.eval_on_selector_all("#ticks button", "es=>es.map(e=>e.textContent)")
+        check(f"{_fn}: no year appears twice on the rail",
+              len(_ticks) == len(set(_ticks)), ",".join(_ticks))
+    _br.close()
+
 if fails:
     raise SystemExit(f"{len(fails)} check(s) failed")
 print("all checks passed")

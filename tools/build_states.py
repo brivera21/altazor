@@ -83,13 +83,18 @@ HIST["ca"] = {
         {"y": 1856, "t": "rem", "n": "Round Valley", "lat": 39.80, "lon": -123.25, "note": "Reservation era begins amid massacres; Madley counts 9,500 to 16,000 Native people killed statewide, 1846 to 1873.", "src": "en.wikipedia.org/wiki/California_genocide"},
         {"y": 1872, "t": "set", "n": "Fresno", "pp": [[1900, 12470], [1950, 91669], [1980, 217129], [2020, 542107]], "lat": 36.74, "lon": -119.79, "note": "Central Pacific railroad town.", "src": "en.wikipedia.org/wiki/Fresno,_California"},
     ],
+    "early": [[1790, 1000, "Gente de raz\u00f3n"],
+              [1821, 3270, "Gente de raz\u00f3n"],
+              [1845, 7300, "Non-Native count, Mexican era"]],
     "census": [[1850, 92597], [1860, 379994], [1870, 560247], [1880, 864694],
                [1890, 1213398], [1900, 1485053], [1910, 2377549], [1920, 3426861],
                [1930, 5677251], [1940, 6907387], [1950, 10586223], [1960, 15717204],
                [1970, 19953134], [1980, 23667902], [1990, 29760021], [2000, 33871648],
                [2010, 37253956], [2020, 39538223]],
     "native": [[1769, 310000, "Cook's estimate"], [1848, 150000, "Madley"],
-               [1870, 30000, "Madley"], [1900, 16000, "Madley; other sources ~25,000"]],
+               [1870, 30000, "Madley"],
+               [1900, 16000, "Madley; other sources ~25,000"],
+               [2020, 631016, "2020 census, self-identified"]],
     "geo": {"hp": {"n": "Mount Whitney", "el": "4,421 m", "lat": 36.58, "lon": -118.29}},
     "refs": [
         ["Population of Native California; the estimates of Cook, Kroeber and others.", "https://en.wikipedia.org/wiki/Population_of_Native_California"],
@@ -109,7 +114,8 @@ HIST["az"] = {
         {"y0": 1912, "y1": 1917, "l": "Statehood, February 14, 1912", "f": US},
         {"y0": 1917, "y1": 2026, "l": "State flag adopted 1917", "f": {"a": "Flag of Arizona"}},
     ],
-    "marks": [{"y": 1853, "l": "Gadsden Purchase"}],
+    "marks": [{"y": 1853, "l": "Gadsden Purchase"},
+              {"y": 1912, "l": "Statehood, February 14, 1912, 48th state"}],
     "border": 1866,
     "nb": [
         {"n": "California", "lat": 34.3, "lon": -114.95},
@@ -147,6 +153,7 @@ HIST["az"] = {
         {"y": 1879, "t": "set", "n": "Tombstone", "lat": 31.71, "lon": -110.07, "note": "Silver boom town of 1879.", "src": "en.wikipedia.org/wiki/Tombstone,_Arizona"},
         {"y": 1886, "t": "rem", "n": "Geronimo's surrender", "lat": 31.58, "lon": -109.06, "note": "September 1886, Skeleton Canyon: the Chiricahua, army scouts included, are deported to Florida.", "src": "en.wikipedia.org/wiki/Geronimo"},
     ],
+    "early": [[1860, 6482, "Federal count, Arizona County"]],
     "census": [[1870, 9658], [1880, 40440], [1890, 88243], [1900, 122931],
                [1910, 204354], [1920, 334162], [1930, 435573], [1940, 499261],
                [1950, 749587], [1960, 1302161], [1970, 1770900], [1980, 2718215],
@@ -217,10 +224,13 @@ HIST["pa"] = {
                [1910, 7665111], [1920, 8720017], [1930, 9631350], [1940, 9900180],
                [1950, 10498012], [1960, 11319366], [1970, 11793909], [1980, 11863895],
                [1990, 11881643], [2000, 12281054], [2010, 12702379], [2020, 13002700]],
-    "colonial": [[1700, 17950], [1750, 119666], [1780, 327305]],
+    "early": [[1700, 17950, "Colonial estimate"],
+              [1750, 119666, "Colonial estimate"],
+              [1780, 327305, "Colonial estimate"]],
     "native": [[1600, 13000, "Lenape and Susquehannock combined, low bound"],
                [1670, 8000, "after the 1650s wars"],
-               [1763, 20, "Conestoga, the last Susquehannock community"]],
+               [1763, 20, "Conestoga, the last Susquehannock community"],
+               [2020, 31052, "2020 census, self-identified"]],
     "geo": {"hp": {"n": "Mount Davis", "el": "979 m", "lat": 39.79, "lon": -79.18}},
     "refs": [
         ["Native peoples to 1680, Encyclopedia of Greater Philadelphia.", "https://philadelphiaencyclopedia.org/essays/native-peoples-to-1680/"],
@@ -279,9 +289,12 @@ HIST["ma"] = {
                [1910, 3366416], [1920, 3852356], [1930, 4249614], [1940, 4316721],
                [1950, 4690514], [1960, 5148578], [1970, 5689170], [1980, 5737037],
                [1990, 6016425], [2000, 6349097], [2010, 6547629], [2020, 7029917]],
-    "colonial": [[1700, 55941], [1750, 188000], [1780, 268627]],
+    "early": [[1700, 55941, "Colonial estimate"],
+              [1750, 188000, "Colonial estimate"],
+              [1780, 268627, "Colonial estimate"]],
     "native": [[1600, 100000, "New England-wide"], [1620, 30000, "after the Great Dying, order of magnitude"],
-               [1680, 10000, "after King Philip's War, order of magnitude"]],
+               [1680, 10000, "after King Philip's War, order of magnitude"],
+               [2020, 24018, "2020 census, self-identified"]],
     "geo": {"hp": {"n": "Mount Greylock", "el": "1,064 m", "lat": 42.64, "lon": -73.17}},
     "refs": [
         ["Bragdon, K. (1996). Native People of Southern New England, 1500-1650. University of Oklahoma Press.", "https://www.oupress.com/9780806131269/native-people-of-southern-new-england-15001650/"],
@@ -301,6 +314,8 @@ HIST["al"] = {
         {"y0": 1819, "y1": 1895, "l": "State of Alabama, 1819", "f": US},
         {"y0": 1895, "y1": 2026, "l": "State flag adopted 1895", "f": {"a": "Flag of Alabama"}},
     ],
+    "marks": [{"y": 1819,
+               "l": "Statehood, December 14, 1819, 22nd state"}],
     "border": 1819,
     "nb": [
         {"n": "Tennessee", "lat": 35.25, "lon": -86.7},
@@ -320,6 +335,9 @@ HIST["al"] = {
         {"n": "Chickasaw", "src": "encyclopediaofalabama.org/article/chickasaws-in-alabama/", "poly": [[-88.2, 33.9], [-87.0, 34.0], [-87.2, 35.0], [-88.2, 34.95]], "lat": 34.7, "lon": -88.0, "note": "Northwest Alabama.", "after": {"y": 1837, "t": "removed 1837"}},
         {"n": "Alabama-Coushatta", "src": "encyclopediaofalabama.org/article/alabama-coushattas-in-alabama/", "poly": [[-87.0, 32.0], [-86.2, 32.1], [-86.3, 32.9], [-87.0, 32.8]], "lat": 32.5, "lon": -86.4, "note": "Upper Alabama River."},
         {"n": "Moundville", "src": "en.wikipedia.org/wiki/Moundville_Archaeological_Site", "poly": [[-87.8, 32.85], [-87.4, 32.85], [-87.45, 33.15], [-87.8, 33.1]], "lat": 33.0, "lon": -87.63, "note": "Mississippian mound center, about 1000 to 1450 CE."},
+        {"n": "Yuchi (Euchee)", "src": "en.wikipedia.org/wiki/Yuchi", "poly": [[-85.4, 32.7], [-84.92, 32.62], [-84.95, 31.95], [-85.35, 31.98], [-85.45, 32.35]], "lat": 32.35, "lon": -85.15, "note": "Yuchi Town on the Chattahoochee was the principal settlement from the mid 1700s until removal, with other Yuchis living among the Upper Creek towns."},
+        {"n": "Shawnee", "src": "en.wikipedia.org/wiki/Shawnee", "poly": [[-86.5, 33.6], [-85.9, 33.3], [-85.5, 32.5], [-86.0, 32.2], [-86.5, 32.8]], "lat": 32.9, "lon": -86.1, "note": "Peter Chartier led more than 400 Shawnee to the Coosa valley in 1748 and founded Chalakagay; others lived at Sawanogi on the Tallapoosa."},
+        {"n": "Apalachee", "src": "en.wikipedia.org/wiki/Apalachee", "poly": [[-88.15, 31.2], [-87.8, 31.15], [-87.75, 30.65], [-88.05, 30.6], [-88.2, 30.9]], "lat": 30.95, "lon": -87.95, "note": "Survivors of the 1704 massacre in Florida settled near French Mobile. A refugee community from 1704 to 1763 rather than a long homeland; the nation is seated in Louisiana today."},
     ],
     "events": [
         {"y": 1540, "t": "rem", "n": "Mabila", "lat": 32.2, "lon": -87.5, "note": "De Soto's entrada fights Tuskaloosa's people; the site is still unknown.", "src": "en.wikipedia.org/wiki/Mabila"},
@@ -337,14 +355,20 @@ HIST["al"] = {
         {"y": 1846, "t": "cap", "n": "Montgomery", "pp": [[1860, 8843], [1900, 30346], [1970, 133386], [2020, 200603]], "lat": 32.38, "lon": -86.31, "note": "Capital from 1846.", "src": "en.wikipedia.org/wiki/Montgomery,_Alabama"},
         {"y": 1871, "t": "set", "n": "Birmingham", "pp": [[1880, 3086], [1900, 38415], [1930, 259678], [2020, 200733]], "lat": 33.52, "lon": -86.81, "note": "Planned rail and iron city.", "src": "en.wikipedia.org/wiki/Birmingham,_Alabama"},
     ],
+    "early": [[1818, 68000, "Alabama Territory census"]],
     "census": [[1800, 1250], [1810, 9046], [1820, 127901], [1830, 309527],
                [1840, 590756], [1850, 771623], [1860, 964201], [1870, 996992],
                [1880, 1262505], [1890, 1513401], [1900, 1828697], [1910, 2138093],
                [1920, 2348174], [1930, 2646248], [1940, 2832961], [1950, 3061743],
                [1960, 3266740], [1970, 3444165], [1980, 3893888], [1990, 4040587],
                [2000, 4447100], [2010, 4779736], [2020, 5024279]],
-    "native": [[1830, 60000, "the four nations across their homelands, at removal"],
-               [1840, 5000, "remaining after the removals, order of magnitude"]],
+    "native": [[1685, 9000, "Muscogee (Creek) alone, Braund; no state-wide "
+                            "figure exists for this date"],
+               [1830, 60000,
+                "the four nations across their homelands, at removal"],
+               [1840, 5000,
+                "remaining after the removals, order of magnitude"],
+               [2020, 33625, "2020 census, self-identified"]],
     "geo": {"hp": {"n": "Cheaha Mountain", "el": "735 m", "lat": 33.49, "lon": -85.81}},
     "refs": [
         ["Trail of Tears: removal counts and mortality ranges by nation.", "https://en.wikipedia.org/wiki/Trail_of_Tears"],
@@ -364,6 +388,7 @@ HIST["ne"] = {
         {"y0": 1867, "y1": 1925, "l": "State of Nebraska, 1867", "f": US},
         {"y0": 1925, "y1": 2026, "l": "State banner 1925, official flag 1963", "f": {"a": "Flag of Nebraska"}},
     ],
+    "marks": [{"y": 1867, "l": "Statehood, March 1, 1867, 37th state"}],
     "border": 1867,
     "nb": [
         {"n": "South Dakota", "lat": 43.18, "lon": -100.0},
@@ -383,6 +408,9 @@ HIST["ne"] = {
         {"n": "Otoe-Missouria", "src": "en.wikipedia.org/wiki/Otoe-Missouria_Tribe_of_Indians", "poly": [[-97.0, 40.0], [-95.4, 40.1], [-95.7, 41.2], [-97.0, 41.0]], "lat": 40.4, "lon": -96.2, "note": "Lower Platte.", "after": {"y": 1881, "t": "moved to Indian Territory, 1881"}},
         {"n": "Lakota", "src": "en.wikipedia.org/wiki/Nebraska", "poly": [[-104.05, 42.2], [-101.5, 42.4], [-101.8, 43.0], [-104.05, 43.0]], "lat": 42.8, "lon": -103.0, "note": "Panhandle and northern plains."},
         {"n": "Cheyenne and Arapaho", "src": "en.wikipedia.org/wiki/Treaty_of_Fort_Laramie_(1868)", "poly": [[-104.05, 40.99], [-101.7, 41.1], [-102.0, 42.2], [-104.05, 42.1]], "lat": 41.3, "lon": -102.8, "note": "Western plains, per the 1851 Fort Laramie lines."},
+        {"n": "Ho-Chunk (Winnebago Tribe of Nebraska)", "src": "en.wikipedia.org/wiki/Winnebago_Tribe_of_Nebraska", "poly": [[-96.6, 42.4], [-96.1, 42.4], [-96.06, 42.05], [-96.55, 42.05]], "lat": 42.23, "lon": -96.35, "note": "Removed from Wisconsin and then from Minnesota, and settled in Thurston County in 1865. A homeland made by removal, and a continuous one since."},
+        {"n": "Isanyathi (Santee Dakota)", "src": "en.wikipedia.org/wiki/Santee_Sioux_Reservation", "poly": [[-98.0, 42.87], [-97.4, 42.85], [-97.38, 42.62], [-97.95, 42.63]], "lat": 42.75, "lon": -97.68, "note": "Expelled from Minnesota after the 1862 war and settled on the south bank of the Missouri in Knox County, where the Santee Sioux Nation is seated today."},
+        {"n": "Ioway (Iowa Tribe of Kansas and Nebraska)", "src": "en.wikipedia.org/wiki/Iowa_Tribe_of_Kansas_and_Nebraska", "poly": [[-96.1, 40.0], [-95.31, 40.0], [-95.35, 40.45], [-95.95, 40.55], [-96.2, 40.3]], "lat": 40.2, "lon": -95.75, "note": "The lower Missouri valley, including the southeastern corner, and a reservation straddling the Kansas line in Richardson County."},
     ],
     "events": [
         {"y": 1822, "t": "set", "n": "Bellevue", "pp": [[1950, 3858], [2020, 64176]], "lat": 41.15, "lon": -95.92, "note": "Fur post from about 1822; the oldest continuous town.", "src": "history.nebraska.gov/bellevue-the-first-twenty-years/"},
@@ -398,13 +426,18 @@ HIST["ne"] = {
         {"y": 1877, "t": "rem", "n": "Ponca removal", "lat": 42.7, "lon": -98.2, "note": "Forced march to Indian Territory; about a third died by spring 1878.", "src": "en.wikipedia.org/wiki/Standing_Bear"},
         {"y": 1879, "t": "rem", "n": "Standing Bear v. Crook", "lat": 41.26, "lon": -95.94, "note": "A federal judge in Omaha rules that an Indian is a person under the law.", "src": "en.wikipedia.org/wiki/Standing_Bear"},
     ],
+    "early": [[1854, 2732, "Nebraska Territory census"]],
     "census": [[1860, 28841], [1870, 122993], [1880, 452402], [1890, 1062656],
                [1900, 1066300], [1910, 1192214], [1920, 1296372], [1930, 1377963],
                [1940, 1315834], [1950, 1325510], [1960, 1411330], [1970, 1483493],
                [1980, 1569825], [1990, 1578385], [2000, 1711263], [2010, 1826341],
                [2020, 1961504]],
     "native": [[1800, 17000, "Pawnee, Omaha, Ponca, Otoe-Missouria combined, rough"],
-               [1900, 1700, "after removals and epidemics, order of magnitude"]],
+               [1859, 3400, "Pawnee alone, on the Nance County "
+                            "reservation after smallpox and cholera"],
+               [1900, 1700,
+                "after removals and epidemics, order of magnitude"],
+               [2020, 23102, "2020 census, self-identified"]],
     "geo": {"hp": {"n": "Panorama Point", "el": "1,653 m", "lat": 41.00, "lon": -104.03}},
     "refs": [
         ["Pawnee people: population and removal.", "https://en.wikipedia.org/wiki/Pawnee_people"],
@@ -424,6 +457,7 @@ HIST["mn"] = {
         {"y0": 1957, "y1": 2024, "l": "State flag of 1957, revised 1983", "f": {"c": "Flag of Minnesota (1957-1983).svg"}},
         {"y0": 2024, "y1": 2026, "l": "New state flag adopted May 11, 2024", "f": {"a": "Flag of Minnesota"}},
     ],
+    "marks": [{"y": 1858, "l": "Statehood, May 11, 1858, 32nd state"}],
     "border": 1858,
     "nb": [
         {"n": "Canada", "lat": 49.55, "lon": -95.3},
@@ -443,6 +477,9 @@ HIST["mn"] = {
         {"n": "Ioway", "src": "mnhs.org/usdakotawar/glossary/iowa", "poly": [[-94.3, 43.5], [-92.3, 43.5], [-92.6, 44.3], [-94.3, 44.1]], "lat": 43.9, "lon": -93.8, "note": "Southern Minnesota, earlier era."},
         {"n": "Cheyenne", "src": "accessgenealogy.com/minnesota/minnesota-indian-tribes.htm", "poly": [[-96.8, 44.8], [-95.6, 44.9], [-95.9, 46.0], [-96.8, 45.9]], "lat": 45.3, "lon": -96.0, "note": "Western Minnesota before moving to the plains."},
         {"n": "Ho-Chunk", "src": "en.wikipedia.org/wiki/Blue_Earth_Reservation", "poly": [[-94.7, 43.7], [-93.7, 43.8], [-93.9, 44.4], [-94.7, 44.3]], "lat": 43.9, "lon": -94.2, "note": "Relocated into southern Minnesota in the 1840s.", "after": {"y": 1863, "t": "expelled 1863 despite taking no part in the war"}},
+        {"n": "Assiniboine (Nakoda)", "src": "en.wikipedia.org/wiki/Assiniboine", "poly": [[-96.9, 48.7], [-95.3, 49.2], [-94.2, 48.8], [-94.6, 47.9], [-96.2, 47.9], [-96.95, 48.2]], "lat": 48.45, "lon": -95.6, "note": "Separated from their Dakota relatives near the headwaters of the Mississippi and held the Lake of the Woods country before drifting northwest. Seventeenth century; their later territory is in Montana and the prairies."},
+        {"n": "Cree (N\u0113hiyawak)", "src": "en.wikipedia.org/wiki/Cree", "poly": [[-94.6, 49.0], [-92.4, 48.7], [-90.4, 48.25], [-90.7, 47.85], [-92.6, 48.2], [-94.5, 48.5]], "lat": 48.5, "lon": -92.6, "note": "Rainy Lake and the border lakes during the fur trade, allied with the Assiniboine, before Ojibwe expansion and their own move northwest."},
+        {"n": "Ih\u00e1\u014bkt\u021fu\u014bwa\u014b (Yankton) and Yanktonai", "src": "en.wikipedia.org/wiki/Yankton_Sioux_Tribe", "poly": [[-96.6, 45.7], [-95.2, 45.2], [-94.5, 44.1], [-95.3, 43.5], [-96.45, 43.5], [-96.75, 44.8]], "lat": 44.4, "lon": -95.9, "note": "Divisions of the O\u010dh\u00e9thi \u0160ak\u00f3wi\u014b distinct from the Santee Dakota. They held the southwestern prairie, and the 1858 treaty reserved the pipestone quarries to them."},
     ],
     "events": [
         {"y": 1778, "t": "set", "n": "Grand Portage", "lat": 47.96, "lon": -89.68, "note": "North West Company depot on the Ojibwe carrying place.", "src": "en.wikipedia.org/wiki/Grand_Portage_National_Monument"},
@@ -459,13 +496,20 @@ HIST["mn"] = {
         {"y": 1862, "t": "rem", "n": "Mankato executions", "lat": 44.16, "lon": -94.00, "note": "December 26, 1862: 38 Dakota hanged, the largest one-day mass execution in US history.", "src": "en.wikipedia.org/wiki/Dakota_War_of_1862"},
         {"y": 1863, "t": "rem", "n": "Exile and bounties", "lat": 44.89, "lon": -93.18, "note": "Congress abolishes the Dakota and Ho-Chunk reservations; exile follows internment at Fort Snelling, where 102 to 300 died.", "src": "en.wikipedia.org/wiki/Dakota_War_of_1862"},
     ],
+    "early": [[1849, 5000, "Minnesota Territory census"],
+              [1857, 150037, "Minnesota Territory census"]],
     "census": [[1850, 6077], [1860, 172023], [1870, 439706], [1880, 780773],
                [1890, 1310283], [1900, 1751394], [1910, 2075708], [1920, 2387125],
                [1930, 2563953], [1940, 2792300], [1950, 2982483], [1960, 3413864],
                [1970, 3804971], [1980, 4075970], [1990, 4375099], [2000, 4919479],
                [2010, 5303925], [2020, 5706494]],
-    "native": [[1862, 7000, "eastern Dakota, Wingerd's estimate; Ojibwe uncounted"],
-               [1863, 300, "Dakota remaining lawfully in Minnesota after the exile, order of magnitude"]],
+    "native": [[1850, 31700, "Dakota and Ojibwe together, "
+                         "Minnesota Historical Society"],
+               [1860, 19600,
+                "the same series, across the treaty decade"],
+               [1862, 7000, "eastern Dakota, Wingerd's estimate; Ojibwe uncounted"],
+               [1863, 300, "Dakota remaining lawfully in Minnesota after the exile, order of magnitude"],
+               [2020, 68641, "2020 census, self-identified"]],
     "geo": {"hp": {"n": "Eagle Mountain", "el": "701 m", "lat": 47.90, "lon": -90.56}},
     "refs": [
         ["US-Dakota War of 1862: the war, the executions, the exile.", "https://en.wikipedia.org/wiki/Dakota_War_of_1862"],
@@ -473,6 +517,154 @@ HIST["mn"] = {
     
         ["Nation homelands: the Minnesota Historical Society on the Ojibwe and Dakota, and the treaty records.",
          "https://www.mnhs.org/fortsnelling/learn/native-americans"],],
+}
+
+# --- the official living symbols ----------------------------------------
+# k: what the statute calls it. n: the everyday name. b: the accepted
+# binomial. s: the name the statute uses, when the taxonomy has moved
+# since. y: year adopted. a: the English Wikipedia article, which is where
+# the photograph comes from at view time.
+SYMBOLS = {
+"ca": [
+ {"k": "Bird", "n": "California quail", "b": "Callipepla californica",
+  "s": "Lophortyx californica, the California valley quail", "y": 1931,
+  "a": "California quail",
+  "t": "The plume over the bill looks like one curved feather and is six "
+       "overlapping black ones."},
+ {"k": "Flower", "n": "California poppy", "b": "Eschscholzia californica",
+  "y": 1903, "a": "Eschscholzia californica",
+  "t": "A separate section of the penal code makes picking one on state "
+       "or private land an offence."},
+ {"k": "Tree", "n": "California redwood", "b": "Sequoia sempervirens and "
+  "Sequoiadendron giganteum", "s": "Sequoia sempervirens, Sequoia gigantea",
+  "y": 1937, "a": "Sequoia sempervirens",
+  "t": "One symbol covering two species. The 1937 act named the redwood "
+       "without saying which, and a 1953 amendment settled it by adding "
+       "the giant sequoia rather than choosing."},
+ {"k": "Grass", "n": "Purple needlegrass", "b": "Stipa pulchra",
+  "s": "Nassella pulchra", "y": 2004, "a": "Stipa pulchra",
+  "t": "A bunchgrass whose roots reach several metres down, which is how "
+       "it survives the dry season."},
+],
+"az": [
+ {"k": "Bird", "n": "Cactus wren", "b": "Campylorhynchus brunneicapillus",
+  "s": "Heleodytes brunneicapillus couesi", "y": 1931, "a": "Cactus wren",
+  "t": "The largest wren in the country. It builds several nests in cholla "
+       "and spare ones are used for roosting."},
+ {"k": "Flower", "n": "Saguaro blossom", "b": "Carnegiea gigantea",
+  "s": "the white waxy flower of Cereus giganteus", "y": 1931, "a": "Saguaro",
+  "t": "The symbol is the blossom rather than the cactus. It opens after "
+       "sunset, closes by mid afternoon, and cannot pollinate itself."},
+ {"k": "Tree", "n": "Palo verde", "b": "Parkinsonia florida and "
+  "Parkinsonia microphylla", "s": "the genus Cercidium", "y": 1954,
+  "a": "Parkinsonia florida",
+  "t": "The statute names a genus and not a species. Palo verde is green "
+       "stick: the bark photosynthesises, so the tree keeps feeding itself "
+       "after it drops its leaves."},
+],
+"pa": [
+ {"k": "Bird", "n": "Ruffed grouse", "b": "Bonasa umbellus", "y": 1931,
+  "a": "Ruffed grouse",
+  "t": "The male's drumming is not a call. He beats his wings against the "
+       "air, and the thump carries a quarter of a mile."},
+ {"k": "Flower", "n": "Mountain laurel", "b": "Kalmia latifolia", "y": 1933,
+  "a": "Kalmia latifolia",
+  "t": "The genus is named for Pehr Kalm, a student of Linnaeus who "
+       "collected the plant in North America in the 1740s."},
+ {"k": "Tree", "n": "Eastern hemlock", "b": "Tsuga canadensis", "y": 1931,
+  "a": "Tsuga canadensis",
+  "t": "Hemlock bark was the tannin of the state's leather industry. Whole "
+       "stands were stripped for bark and the wood left where it fell."},
+ {"k": "Conservation plant", "n": "Penngift crownvetch",
+  "b": "Securigera varia", "s": "Coronilla varia, the Penngift variety",
+  "y": 1982, "a": "Securigera varia",
+  "t": "Bred at Penn State to hold highway embankments, adopted as a "
+       "symbol, and now widely treated as invasive."},
+],
+"ma": [
+ {"k": "Bird", "n": "Black-capped chickadee", "b": "Poecile atricapillus",
+  "s": "Penthestes atricapillus", "y": 1941, "a": "Black-capped chickadee",
+  "t": "It hides food in thousands of separate places and grows new "
+       "hippocampal neurons each autumn to keep track of them."},
+ {"k": "Flower", "n": "Mayflower, or trailing arbutus", "b": "Epigaea repens",
+  "y": 1918, "a": "Epigaea repens",
+  "t": "The same statute makes digging one up an offence, at fifty dollars, "
+       "doubled for doing it at night or in disguise."},
+ {"k": "Tree", "n": "American elm", "b": "Ulmus americana", "y": 1941,
+  "a": "Ulmus americana",
+  "t": "Chosen for the Cambridge elm under which Washington was said to "
+       "have taken command of the Continental Army in 1775."},
+ {"k": "Berry", "n": "Cranberry", "b": "Vaccinium macrocarpon", "y": 1994,
+  "a": "Vaccinium macrocarpon",
+  "t": "One of a very few fruits farmed commercially that is native to "
+       "North America."},
+],
+"al": [
+ {"k": "Bird", "n": "Yellowhammer, the northern flicker",
+  "b": "Colaptes auratus", "s": "the bird commonly called the yellow-hammer",
+  "y": 1927, "a": "Northern flicker",
+  "t": "Yellowhammer in Britain is a different bird entirely. The Alabama "
+       "usage is said to come from Civil War troops whose butternut "
+       "uniforms had yellow trim."},
+ {"k": "Flower", "n": "Camellia", "b": "Camellia japonica", "y": 1959,
+  "a": "Camellia japonica",
+  "t": "Not native. It replaced goldenrod in 1959, and the statute did not "
+       "say which camellia until 1999, which is why the state later added "
+       "a native wildflower as well."},
+ {"k": "Wildflower", "n": "Oak-leaf hydrangea", "b": "Hydrangea quercifolia",
+  "y": 1999, "a": "Hydrangea quercifolia",
+  "t": "Native, described by William Bartram, and the only hydrangea whose "
+       "lobed leaves turn red in autumn."},
+ {"k": "Tree", "n": "Southern longleaf pine", "b": "Pinus palustris",
+  "y": 1997, "a": "Longleaf pine",
+  "t": "The 1949 act said only southern pine. Seedlings spend years in a "
+       "grass stage, looking like a tuft while they push a taproot down, "
+       "before they shoot up."},
+ {"k": "Native grass", "n": "Little bluestem", "b": "Schizachyrium scoparium",
+  "y": 2024, "a": "Schizachyrium scoparium",
+  "t": "The grass of the longleaf pine understory, and the newest of the "
+       "state's living symbols."},
+],
+"ne": [
+ {"k": "Bird", "n": "Western meadowlark", "b": "Sturnella neglecta", "y": 1929,
+  "a": "Western meadowlark",
+  "t": "Audubon named it neglecta because earlier naturalists, the Lewis "
+       "and Clark expedition among them, had passed it over as an eastern "
+       "meadowlark."},
+ {"k": "Flower", "n": "Goldenrod", "b": "Solidago gigantea", "y": 1895,
+  "a": "Solidago gigantea",
+  "t": "The 1895 act names no species, and it was never written into the "
+       "codified statutes, so the binomial here is convention rather than "
+       "law. The senate floor fight was against the violet, and goldenrod "
+       "won partly on being native."},
+ {"k": "Tree", "n": "Eastern cottonwood", "b": "Populus deltoides", "y": 1972,
+  "a": "Populus deltoides",
+  "t": "It replaced the American elm, which had been the state tree since "
+       "1937 and which Dutch elm disease had killed."},
+ {"k": "Grass", "n": "Little bluestem", "b": "Schizachyrium scoparium",
+  "s": "Andropogon scoparius", "y": 1969, "a": "Schizachyrium scoparium",
+  "t": "One of the four grasses of the tallgrass prairie, and the one that "
+       "turns copper in autumn."},
+],
+"mn": [
+ {"k": "Bird", "n": "Common loon", "b": "Gavia immer", "y": 1961,
+  "a": "Common loon",
+  "t": "The state holds about six thousand nesting pairs, more than any "
+       "other except Alaska."},
+ {"k": "Flower", "n": "Showy lady's slipper", "b": "Cypripedium reginae",
+  "y": 1902, "a": "Cypripedium reginae",
+  "t": "The 1893 legislature named a species that does not grow in the "
+       "state, and the 1902 one corrected it. A plant can take sixteen "
+       "years to flower and live about fifty."},
+ {"k": "Tree", "n": "Red pine, called Norway pine", "b": "Pinus resinosa",
+  "y": 1953, "a": "Pinus resinosa",
+  "t": "Norway pine is a misnomer. The species is North American and grows "
+       "nowhere near Norway."},
+ {"k": "Grain", "n": "Wild rice", "b": "Zizania palustris", "y": 1977,
+  "a": "Zizania palustris",
+  "t": "Manoomin, a grass of shallow lakes rather than a rice, and central "
+       "to Ojibwe treaty rights in the state."},
+],
 }
 
 PAGES = {
@@ -528,6 +720,24 @@ h1 { margin:0 0 10px; font-size:26px; }
 .side { flex:0 0 320px; position:sticky; top:16px; display:flex;
   flex-direction:column; gap:14px; }
 .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+.symh { color:var(--muted); font-size:11px; letter-spacing:.09em;
+  text-transform:uppercase; margin-bottom:8px; }
+.sym { display:flex; gap:10px; align-items:flex-start; padding:7px 0;
+  border-top:1px solid var(--line); }
+.sym:first-child { border-top:none; padding-top:0; }
+.sym img { width:54px; height:54px; object-fit:cover; border-radius:7px;
+  background:#0d0d0d; flex:0 0 54px; }
+.sym .noimg { width:54px; height:54px; border-radius:7px; background:#0d0d0d;
+  flex:0 0 54px; }
+.sym .b { min-width:0; }
+.sym .k { color:var(--muted); font-size:10.5px; letter-spacing:.07em;
+  text-transform:uppercase; }
+.sym .n { font-size:13.5px; font-weight:600; line-height:1.3; }
+.sym .sci { font-size:12px; font-style:italic; color:#9fb6c4;
+  overflow-wrap:anywhere; }
+.sym .y { font-size:11.5px; color:var(--muted); }
+.sym .t { font-size:12px; color:#b0b0b0; line-height:1.45; margin-top:3px; }
+.sym .st { font-size:11.5px; color:var(--muted); margin-top:3px; }
 #flagImg { width:100%; max-height:130px; object-fit:contain; background:#0d0d0d;
   border:1px solid var(--line); border-radius:8px; display:none; }
 #flagNone { color:var(--muted); font-size:13px; padding:20px 0; text-align:center;
@@ -564,6 +774,10 @@ h1 { margin:0 0 10px; font-size:26px; }
 .eraband span { position:absolute; top:-2px; width:2px; bottom:-2px; }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
+.method { color:var(--muted); font-size:12.5px; margin-top:14px;
+  max-width:820px; }
+.method summary { cursor:pointer; color:var(--accent); }
+.method p { margin:9px 0 0; }
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
 .refs p { margin:0 0 8px; overflow-wrap:anywhere; }
 .refs a { color:var(--accent); }
@@ -616,6 +830,10 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
       <div id="bodyTxt"></div>
       <div id="srcTxt"></div>
     </div>
+    <div class="card">
+      <div class="symh">The living symbols</div>
+      <div id="symList"></div>
+    </div>
   </div>
 </div>
 <div class="tl">
@@ -629,11 +847,15 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 </div>
 <p class="note">__NOTE1__</p>
 <p class="note">__NOTE2__</p>
+<div class="method"><details><summary>What the population line is made
+of</summary><p>__METHOD__</p></details></div>
+<div class="method"><details><summary>About the living symbols</summary>
+<p>__SYMNOTE__</p></details></div>
 <h2 class="refh">References</h2>
 <div class="refs">__REFS__</div>
 </div>
 <script>
-const ST=__ST__, HIST=__HIST__, ROADS=__ROADS__;
+const ST=__ST__, HIST=__HIST__, ROADS=__ROADS__, SYM=__SYM__;
 const W=ST.W, H=ST.H;
 const [MX0,MY0,MX1,MY1]=ST.m;
 const R=6378137, RAD=Math.PI/180;
@@ -888,7 +1110,15 @@ function star(x,y,r){
 }
 
 // ---- population and era readouts ----
-const CEN=(HIST.colonial||[]).concat(HIST.census);
+const CEN=(HIST.early||[]).map(r=>[r[0],r[1],r[2]])
+  .concat(HIST.census.map(r=>[r[0],r[1],'Census']))
+  .sort((a,b)=>a[0]-b[0]);
+// which kind of count the year sits in, so the readout can say so
+function kindAt(y){
+  let k=CEN.length?CEN[0][2]:'';
+  for(const p of CEN){ if(p[0]<=y) k=p[2]; else break; }
+  return k;
+}
 function interp(pts,y){
   if(!pts.length||y<pts[0][0]) return null;
   if(y>=pts[pts.length-1][0]) return pts[pts.length-1][1];
@@ -913,6 +1143,29 @@ async function flagUrl(f){
   }
   flagCache[key]=u; return u;
 }
+async function symbols(){
+  const box=document.getElementById('symList');
+  box.innerHTML=SYM.map((x,i)=>
+    '<div class="sym"><div class="noimg" id="symImg'+i+'"></div>'
+    +'<div class="b"><div class="k">'+esc(x.k)+'</div>'
+    +'<div class="n">'+esc(x.n)+'</div>'
+    +'<div class="sci">'+esc(x.b)+'</div>'
+    +'<div class="y">Adopted '+x.y+'</div>'
+    +'<div class="t">'+esc(x.t)+'</div>'
+    +(x.s?'<div class="st">The statute says '+esc(x.s)+'.</div>':'')
+    +'</div></div>').join('');
+  for(let i=0;i<SYM.length;i++){
+    const u=await flagUrl({a:SYM[i].a});
+    const slot=document.getElementById('symImg'+i);
+    if(!slot) continue;
+    if(u){
+      const img=new Image();
+      img.alt=SYM[i].n; img.src=u;
+      slot.replaceWith(img);
+    }
+  }
+}
+
 async function setYear(y){
   year=y;
   document.getElementById('yr').value=y;
@@ -930,7 +1183,8 @@ async function setYear(y){
   const natLast=HIST.native.length?HIST.native[HIST.native.length-1][0]:0;
   const nat=y<=natLast?interp(HIST.native,y):null;
   let t=[];
-  if(cen!=null) t.push('<span class="totG">'+esc((y>=(HIST.census[0][0])?'Census (interpolated): ':'Colonial estimate: ')+fmt(cen))+'</span>');
+  if(cen!=null) t.push('<span class="totG">'
+    +esc(kindAt(y)+' (interpolated): '+fmt(cen))+'</span>');
   else t.push(esc('Before the counts: '+HIST.pre));
   if(nat!=null) t.push(esc('Native population (estimate): '+fmt(nat)));
   document.getElementById('popTxt').innerHTML=t.join('<br>');
@@ -1029,9 +1283,17 @@ document.getElementById('bPlay').onclick=()=>{
 // clickable year above the slider
 (function ticks(){
   const tk=document.getElementById('ticks'), span=2025-1492;
-  const pts=HIST.eras.map(e=>({y:e.y0,l:e.l}))
-    .concat(HIST.marks||[])
-    .filter(p=>p.y>1492).sort((a,b)=>a.y-b.y);
+  // an era can begin in the year a mark falls on, and the two would
+  // otherwise stack the same year twice on the rail
+  const by=new Map();
+  for(const p of HIST.eras.map(e=>({y:e.y0,l:e.l})).concat(HIST.marks||[])){
+    if(p.y<=1492) continue;
+    if(by.has(p.y)){
+      const had=by.get(p.y);
+      if(had.l.indexOf(p.l)<0) had.l+=' \u00b7 '+p.l;
+    } else by.set(p.y,{y:p.y,l:p.l});
+  }
+  const pts=[...by.values()].sort((a,b)=>a.y-b.y);
   let lastX={1:-99,2:-99};
   pts.forEach(p=>{
     const x=(p.y-1492)/span*100;
@@ -1185,6 +1447,7 @@ async function woods(){
 }
 
 setYear(1492);
+symbols();
 terrain(); woods();
 window.__state=()=>({year, layers:{...layers}, counties:ST.counties.length,
   rivers:ST.rivers.length, lakes:ST.lakes.length, nations:HIST.nations.length,
@@ -1213,6 +1476,43 @@ NOTE2 = ("The slider runs from 1492: first the nations, as colored patches "
          "waves, joining regions rather than exact places. These nations "
          "still exist today; Native Land Digital maps their territories "
          "fully, with community input, and is the place to see them.")
+
+
+METHOD = ("What the population line is made of, and where it is soft. Every "
+          "state carries three series. The counts before the first federal "
+          "census of that state are colonial or territorial enumerations, "
+          "and each of them left Native people out by design: the "
+          "California figures count gente de raz\u00f3n only, the Arizona "
+          "figure covers the Gadsden strip and no further, and the "
+          "territorial acts said Indians excepted in so many words. Two of "
+          "them are known to be bad counts. The Nebraska census of 1854 was "
+          "called a floating one at the time, since a number of those "
+          "enumerated lived in Kansas. The Minnesota census of 1857 was "
+          "taken to reach the population statehood needed, and seven "
+          "counties in it were later found to have been filled with invented "
+          "names. Both are on the line as published rather than corrected, "
+          "because the correction is not known. Between two points the line "
+          "is drawn straight, which is wrong wherever the change was sudden: "
+          "California between 1845 and 1850 is the clearest case, since the "
+          "gold rush happened inside that gap. The Native line is a "
+          "different kind of number again. The early points are scholarly "
+          "estimates with wide ranges, carried with whose estimate they are; "
+          "the 2020 point is census self-identification, which counts a "
+          "different thing, and the count of people reporting American "
+          "Indian and Alaska Native alone or in combination with another "
+          "race is substantially larger than the figure shown.")
+
+SYMNOTE = ("About the living symbols. Each is the current designation, with "
+           "the accepted binomial and, where the taxonomy has moved since "
+           "adoption, the name the statute itself uses. Three are odder than "
+           "they look. The California redwood is one symbol covering two "
+           "species, because the 1937 act did not say which redwood and the "
+           "1953 amendment settled it by adding the other. The Arizona palo "
+           "verde is a genus rather than a species. The Nebraska goldenrod "
+           "was adopted by an act of 1895 that names no species and was "
+           "never written into the codified statutes, so its binomial is "
+           "convention rather than law. The photographs come from Wikipedia "
+           "when the page is opened.")
 
 
 def refs_html(hist):
@@ -1246,6 +1546,15 @@ def refs_html(hist):
         ("https://native-land.ca/",
          "The community map of Indigenous territories. The patches drawn here "
          "are rough approximations of documented homelands, not their data."),
+        ("https://en.wikipedia.org/wiki/Native_Americans_in_the_United_States",
+         "American Indian and Alaska Native population by state, 1880 to the "
+         "2020 census. The 2020 point on the Native line comes from here."),
+        ("https://en.wikipedia.org/wiki/Lists_of_United_States_state_symbols",
+         "The living symbols, each traced to its own state's code: the "
+         "California Government Code, Arizona Revised Statutes title 41, "
+         "the Pennsylvania session laws, Massachusetts General Laws chapter "
+         "2, the Code of Alabama title 1 chapter 2, Nebraska Revised "
+         "Statutes chapter 90, and Minnesota Statutes chapter 1."),
     ]
     out = [apa.auto(u, ann) for u, ann in rows]
     out += [apa.entry(t, u) for t, u in hist.get("refs", [])]
@@ -1742,10 +2051,12 @@ for st, fname in PAGES.items():
             .replace("__TITLE__", data["name"])
             .replace("__SIBS__", sibs)
             .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2)
+            .replace("__METHOD__", METHOD).replace("__SYMNOTE__", SYMNOTE)
             .replace("__REFS__", refs_html(hist))
             .replace("__ST__", json.dumps(data, separators=(",", ":")))
             .replace("__HIST__", json.dumps(hist, separators=(",", ":")))
-            .replace("__ROADS__", json.dumps(roads, separators=(",", ":"))))
+            .replace("__ROADS__", json.dumps(roads, separators=(",", ":")))
+            .replace("__SYM__", json.dumps(SYMBOLS[st], separators=(",", ":"))))
     (ROOT / fname).write_text(html, encoding="utf-8")
     print(f"wrote {ROOT / fname} ({len(html):,} B): "
           f"{len(hist['nations'])} nations, {len(hist['events'])} events, "
