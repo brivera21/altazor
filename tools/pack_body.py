@@ -1,12 +1,20 @@
 #!/usr/bin/env python3
 """Pack the traced BodyParts3D outlines into tools/data/body_paths.json.
 
-Run once, from /tmp/bp3d/traced, after trace_all.py. The result is checked
-in so the page builds without the network and without the 1.3 GB of meshes.
+Run once, after trace_spin.py, from the traced directory. The result is
+checked in so the page builds without the network and without the 1.3 GB
+of meshes.
 
-Each ring is a polyline-encoded string: signed deltas on a quarter
-millimetre grid, five bits to a character, the same scheme Google uses for
-map polylines. It costs about a fifth of what a list of numbers would.
+Each part carries one silhouette per traced angle about the vertical
+axis. Only half a turn is traced. An orthographic silhouette is the set
+of points the surface projects onto, and looking from the far side gives
+the same set mirrored left to right, so the view at an angle plus 180
+degrees is that view mirrored, with the stacking order reversed. The page
+does that, and the file stays half the size.
+
+Each ring is polyline-encoded: signed deltas on a quarter millimetre
+grid, five bits to a character, the scheme Google uses for map polylines.
+It costs about a fifth of what a list of numbers would.
 
 Usage: python3 pack_body.py [traced_dir]
 """
@@ -16,7 +24,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
-SRC = sys.argv[1] if len(sys.argv) > 1 else "/tmp/bp3d/traced"
+SRC = sys.argv[1] if len(sys.argv) > 1 else "/tmp/bp3d/spun"
 SCALE = 4          # quarter of a millimetre
 
 
@@ -39,18 +47,6 @@ def encode(ring):
     return "".join(out)
 
 
-parts = []
-for f in sorted(glob.glob(f"{SRC}/*.json")):
-    d = json.load(open(f))
-    rings = [r for r in d["p"] if len(r) >= 4]
-    if not rings:
-        continue
-    parts.append([d["fma"][3:], d["name"], d["sys"], round(d["d"], 1),
-                  round(d["f"], 1), round(d["a"], 1),
-                  [encode(r) for r in rings]])
-
-xs = [p for _ in () for p in ()]
-# bounds, read back from the encoded rings so they match what the page draws
 def decode(s):
     out, i, px, py = [], 0, 0, 0
     while i < len(s):
@@ -71,11 +67,27 @@ def decode(s):
     return out
 
 
-X = [x for p in parts for r in p[6] for x, y in decode(r)]
-Y = [y for p in parts for r in p[6] for x, y in decode(r)]
+ANGLES = [0, 45, 90, 135]
+parts = []
+for f in sorted(glob.glob(f"{SRC}/*.json")):
+    d = json.load(open(f))
+    views = d["views"]
+    if len(views) != len(ANGLES) or not any(v["p"] for v in views):
+        continue
+    parts.append([
+        d["fma"][3:], d["name"], d["sys"],
+        [v["f"] for v in views],
+        [v["a"] for v in views],
+        [[encode(r) for r in v["p"] if len(r) >= 4] for v in views],
+    ])
+
+# one box that holds every angle, so the figure does not jump as it turns
+X = [x for p in parts for rings in p[5] for r in rings for x, y in decode(r)]
+Y = [y for p in parts for rings in p[5] for r in rings for x, y in decode(r)]
 box = [round(min(X), 1), round(min(Y), 1), round(max(X), 1), round(max(Y), 1)]
 
 out = ROOT / "tools" / "data" / "body_paths.json"
-out.write_text(json.dumps(dict(scale=SCALE, box=box, parts=parts),
-                          separators=(",", ":")))
-print(f"{len(parts)} parts, box {box}, {out.stat().st_size/1024:.0f} KB")
+out.write_text(json.dumps(dict(scale=SCALE, box=box, angles=ANGLES,
+                               parts=parts), separators=(",", ":")))
+print(f"{len(parts)} parts x {len(ANGLES)} angles, box {box}, "
+      f"{out.stat().st_size/1024:.0f} KB")

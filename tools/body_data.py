@@ -25,11 +25,12 @@ SYSTEMS = [
      "heaviest tissue in the body and the one that moves the frame. In the "
      "front view the superficial sheets cover almost everything, which is "
      "what the depth control is for."),
-    ("nervous", "Brain",
-     "The brain, the brainstem, the fluid spaces inside them and the two "
-     "optic nerves. The cerebellum sits behind and below the cerebrum and "
-     "holds most of the neurons in the body while taking about a tenth of "
-     "the mass."),
+    ("nervous", "Nervous system",
+     "The brain and the fluid spaces inside it are traced from the model. "
+     "Everything else here is drawn: the cord, the thirty-one pairs of "
+     "spinal nerves, the twelve cranial pairs and the two autonomic "
+     "outflows, laid over the traced skeleton at the measured position of "
+     "each vertebra. The buttons above take the system apart."),
     ("cardiovascular", "Heart and vessels",
      "The heart wall and valves, the great vessels, and the named arteries "
      "and veins the model carries. The vessels here stop where the "
@@ -269,7 +270,9 @@ NOTES = {
 # What the model does not hold. Stated on the page rather than drawn.
 GAPS = [
     "no lymph vessels and no lymph nodes",
-    "no spinal cord, and no peripheral nerves except the two optic nerves",
+    "no spinal cord, and no nerves outside the brain but the optic pair, "
+    "which is why the nervous system on this page is drawn rather than "
+    "traced",
     "no blood vessels smaller than the named branches",
     "no thyroid or parathyroid glands",
     "no female reproductive organs, since the model is one adult male",
@@ -354,11 +357,16 @@ REFS = [
         "https://doi.org/10.1371/journal.pbio.1002533"),
      "The cell counts, and the end of the ten to one ratio."),
     (apa.book(
+        "Moore, K. L., Dalley, A. F., &amp; Agur, A. M. R.", 2018,
+        "Clinically oriented anatomy (8th ed.)", "Wolters Kluwer"),
+     "The courses of the spinal, cranial and autonomic nerves, with "
+     "Standring, which the drawn nervous system follows."),
+    (apa.book(
         "Standring, S. (Ed.)", 2020,
         "Gray's anatomy: The anatomical basis of clinical practice "
         "(42nd ed.)", "Elsevier"),
-     "The anatomy the part names follow, and a work that gives no total "
-     "for the muscles."),
+     "The anatomy the part names follow, the nerve courses, and a work "
+     "that gives no total for the muscles."),
     (apa.article(
         "Yammine, K.", 2013,
         "Clinical prevalence of palmaris longus agenesis: A systematic "

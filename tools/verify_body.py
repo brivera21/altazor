@@ -47,23 +47,42 @@ def decode(s, scale):
 
 
 SC, BOX = DATA["scale"], DATA["box"]
-parts = {p[0]: dict(fma=p[0], name=p[1], sys=p[2], d=p[3], f=p[4], a=p[5],
-                    rings=[decode(r, SC) for r in p[6]]) for p in DATA["parts"]}
+ANGLES = DATA["angles"]
+parts = {p[0]: dict(fma=p[0], name=p[1], sys=p[2], fs=p[3], a=p[4],
+                    views=[[decode(r, SC) for r in rings] for rings in p[5]])
+         for p in DATA["parts"]}
+for p in parts.values():
+    p["rings"] = p["views"][0]          # the front view, for the anatomy
+    p["f"] = p["fs"][0]
 
-print(f"  {len(parts)} parts, box {BOX}")
+print(f"  {len(parts)} parts at {len(ANGLES)} traced angles {ANGLES}, "
+      f"box {BOX}")
 
 # --- the data ------------------------------------------------------------
 ck(len(parts) == len(DATA["parts"]), "every FMA id is unique")
 bad = [p["name"] for p in parts.values()
-       if any(len(r) < 4 for r in p["rings"])]
+       if any(len(r) < 4 for v in p["views"] for r in v)]
 ck(not bad, f"every ring has at least four points ({len(bad)} short)")
-out = [p["name"] for p in parts.values() for r in p["rings"]
+out = [p["name"] for p in parts.values() for v in p["views"] for r in v
        for x, y in r
        if not (BOX[0] - .3 <= x <= BOX[2] + .3
                and BOX[1] - .3 <= y <= BOX[3] + .3)]
 ck(not out, f"every point lies inside the stated box ({len(out)} outside)")
-ck(all(p["f"] <= p["d"] + 0.05 for p in parts.values()),
-   "the frontmost point of a part is never behind its median")
+ck(all(len(p["views"]) == len(ANGLES) for p in parts.values()),
+   "every part carries a silhouette at every traced angle")
+ck(all(any(r for r in v) for p in parts.values() for v in p["views"]),
+   "no angle of any part came out empty")
+# a part is about as tall from every side, since the turn is about the
+# vertical axis and height cannot change
+bad_h = []
+for p in parts.values():
+    hs = [max(y for r in v for x, y in r) - min(y for r in v for x, y in r)
+          for v in p["views"] if v]
+    # tracing at up to eight pixels to the millimetre leaves a little
+    # rounding, which shows most on the smallest parts
+    if hs and max(hs) - min(hs) > max(3.0, 0.03 * max(hs)):
+        bad_h.append(p["name"])
+ck(not bad_h, f"height is the same from every angle ({len(bad_h)} off)")
 
 # --- the anatomy ---------------------------------------------------------
 def one(name):
@@ -152,7 +171,7 @@ with sync_playwright() as pw:
         # stacked back to front, so the frontmost part is painted last
         fs = pg.evaluate("()=>[...document.querySelectorAll("
                          "'#fig svg path[data-fma]')].map(e=>"
-                         "PARTS.find(p=>p.fma===e.dataset.fma).f)")
+                         "partF(PARTS.find(p=>p.fma===e.dataset.fma)))")
         ck(all(a >= b - .001 for a, b in zip(fs, fs[1:])),
            f"{k}: drawn back to front")
         said = pg.inner_text("#depthTxt")
@@ -180,8 +199,8 @@ with sync_playwright() as pw:
                        "const ps=PARTS.filter(p=>p.sys==='muscular');"
                        "const off=ps.filter(p=>!on.has(p.fma));"
                        "const inn=ps.filter(p=>on.has(p.fma));"
-                       "return [Math.max(...off.map(p=>p.f)),"
-                       "Math.min(...inn.map(p=>p.f))];}")
+                       "return [Math.max(...off.map(partF)),"
+                       "Math.min(...inn.map(partF))];}")
     ck(gone[0] <= gone[1] + .001,
        "what the cut removes is in front of what it leaves")
 
@@ -215,6 +234,111 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(200)
     ck(pg.get_attribute("#fig svg", "viewBox") == before,
        "the whole body button restores the view")
+
+    # ---- the turn --------------------------------------------------
+    pg.click("#bar button[data-k='skeletal']")
+    pg.wait_for_timeout(300)
+    nview = pg.evaluate("()=>NVIEW")
+    ck(nview == len(ANGLES) * 2,
+       f"{nview} views from {len(ANGLES)} traced angles")
+    seen, widths = set(), []
+    for v in range(nview):
+        pg.eval_on_selector(
+            "#spin", "e=>{e.value=%d;e.dispatchEvent(new Event('input'))}" % v)
+        pg.wait_for_timeout(220)
+        d = pg.evaluate("()=>[...document.querySelectorAll("
+                        "'#fig svg path[data-fma]')].map(e=>e.getAttribute('d'))"
+                        ".join('|')")
+        seen.add(d)
+        said = pg.inner_text("#spinTxt")
+        ck(bool(said), f"view {v} is named: {said}")
+        bb = pg.evaluate("()=>{const b=document.querySelector('#fig svg')"
+                         ".getBBox(); return [b.width,b.height];}")
+        widths.append(bb)
+    ck(len(seen) == nview, f"all {nview} views differ ({len(seen)} distinct)")
+    hs = [h for w, h in widths]
+    ck(max(hs) - min(hs) < 2.0,
+       f"the figure keeps its height through the turn ({min(hs):.0f} to "
+       f"{max(hs):.0f})")
+    # A turn of half a circle is the same outline mirrored, which a
+    # left-right symmetric body cannot show. The liver can: it sits on the
+    # subject's right and has to cross the midline when the body turns.
+    pg.click("#bar button[data-k='digestive']")
+    pg.wait_for_timeout(300)
+    def livx():
+        return pg.evaluate(
+            "()=>{const e=[...document.querySelectorAll('#fig svg path[data-fma]')]"
+            ".find(e=>PARTS.find(p=>p.fma===e.dataset.fma).name==='liver');"
+            "const b=e.getBBox(); return [b.x, b.width];}")
+    pg.eval_on_selector("#spin", "e=>{e.value=0;e.dispatchEvent(new Event('input'))}")
+    pg.wait_for_timeout(250)
+    a = livx()
+    pg.eval_on_selector("#spin",
+                        "e=>{e.value=%d;e.dispatchEvent(new Event('input'))}"
+                        % len(ANGLES))
+    pg.wait_for_timeout(280)
+    b = livx()
+    ck(abs(a[1] - b[1]) < 1.0 and abs((a[0] + a[1]) + b[0]) < 1.0,
+       f"seen from behind the liver is the front view mirrored, and swaps "
+       f"sides ({a[0]:.1f} to {b[0]:.1f})")
+    ck(a[0] < 0 < b[0] + b[1],
+       "the liver is on the reader's left from the front and the right "
+       "from behind")
+    pg.click("#bar button[data-k='skeletal']")
+    pg.wait_for_timeout(250)
+    pg.eval_on_selector("#spin", "e=>{e.value=0;e.dispatchEvent(new Event('input'))}")
+    pg.wait_for_timeout(200)
+
+    # ---- the nervous system ----------------------------------------
+    pg.click("#bar button[data-k='nervous']")
+    pg.wait_for_timeout(400)
+    subs = pg.eval_on_selector_all("#subbar button", "es=>es.map(e=>e.dataset.g)")
+    ck(subs == ["all", "cns", "periph", "cranial", "symp", "para"],
+       f"the nervous system takes apart into {subs}")
+    for g in subs:
+        pg.click(f"#subbar button[data-g='{g}']")
+        pg.wait_for_timeout(320)
+        n = pg.eval_on_selector_all("#fig svg [data-nv]", "es=>es.length")
+        ck(n > 0, f"{g}: {n} nerve marks drawn")
+        ck(bool(pg.inner_text("#bodyTxt").strip()), f"{g}: the card explains it")
+    # the counts each view claims
+    want = {"cns": 21, "periph": 120, "cranial": 28, "symp": 90, "para": 16}
+    got = pg.evaluate("()=>{const o={};for(const n of NERVES)"
+                      "o[n.g]=(o[n.g]||0)+1;return o;}")
+    ck(got == want, f"the nerve paths divide as {got}")
+    ck(pg.evaluate("()=>NERVES.filter(n=>n.n.indexOf('spinal nerve')>0).length")
+       == 62, "thirty-one pairs of spinal nerves")
+    ck(pg.evaluate("()=>NERVES.filter(n=>n.g==='cranial'"
+                   "&&/^(Left|Right) [IVX]+ /.test(n.n)).length") == 22,
+       "eleven cranial pairs are drawn, the tenth being the vagus, which "
+       "sits with the parasympathetic")
+    ck(pg.evaluate("()=>NERVES.some(n=>n.n==='Left vagus nerve')"),
+       "the vagus is drawn")
+    # the cord stops where the anatomy says
+    cord = pg.evaluate("()=>NERVES.find(n=>n.n==='Spinal cord').p")
+    ck(abs(cord[-1][2] - 1043) < 12,
+       f"the cord ends at the first lumbar vertebra (z={cord[-1][2]})")
+    ck(cord[0][2] > 1450, f"the cord starts at the skull (z={cord[0][2]})")
+    ck(all(cord[i][2] > cord[i + 1][2] for i in range(len(cord) - 1)),
+       "the cord runs downward the whole way")
+    # the sympathetic outflow is thoracolumbar and nothing else
+    rami = pg.evaluate("()=>NERVES.filter(n=>n.n.indexOf('white ramus')>0)"
+                       ".map(n=>n.n.split(' ')[1])")
+    lv = sorted(set(rami))
+    ck(all(x[0] in "TL" for x in lv) and "L3" not in lv and "C7" not in lv,
+       f"the sympathetic outflow is thoracolumbar only ({len(lv)} levels)")
+    ck(pg.evaluate("()=>NERVES.filter(n=>n.g==='para'"
+                   "&&n.n.indexOf('splanchnic')>0).length") == 2,
+       "the parasympathetic outflow below the head is sacral")
+    # the nerves turn with the body, since they are real three-dimensional lines
+    pg.click("#subbar button[data-g='cns']")
+    pg.wait_for_timeout(250)
+    d0 = pg.eval_on_selector("#fig svg [data-nv]", "e=>e.getAttribute('d')")
+    pg.eval_on_selector("#spin", "e=>{e.value=2;e.dispatchEvent(new Event('input'))}")
+    pg.wait_for_timeout(300)
+    d2 = pg.eval_on_selector("#fig svg [data-nv]", "e=>e.getAttribute('d')")
+    ck(d0 != d2, "the drawn nerves turn with the body")
+    pg.eval_on_selector("#spin", "e=>{e.value=0;e.dispatchEvent(new Event('input'))}")
 
     ck(not errs, f"no script errors ({errs[:1]})")
     br.close()
