@@ -322,6 +322,38 @@ with sync_playwright() as pw:
         pg.click("#" + bid)
         pg.wait_for_timeout(220)
 
+    # --- the readout at the sub-solar point, where the sine of the altitude
+    # lands a rounding error past one and the arc sine of that is NaN
+    pg.click("#bDay")
+    bad, heights = 0, set()
+    for _ in range(50):
+        pg.wait_for_timeout(60)
+        t = pg.evaluate("()=>document.getElementById('pAlt').textContent")
+        heights.add(round(pg.evaluate("()=>document.getElementById('pAlt').getBoundingClientRect().height")))
+        if "NaN" in t or not t.startswith("90.0"):
+            bad += 1
+    pg.click("#bDay")
+    ok = bad == 0 and len(heights) == 1
+    print(f"  {'ok  ' if ok else 'FAIL'} the Sun's height at the sub-solar point reads "
+          f"90.0 through a running day, never NaN, and the row holds one height "
+          f"({bad} bad readings, heights {sorted(heights)})")
+    if not ok:
+        fails.append(f"sub-solar altitude readout: {bad} bad readings, heights {sorted(heights)}")
+
+    # --- the order of the page: map, then the numbers and controls, then the facts
+    pos = pg.evaluate("""()=>{const r=s=>document.querySelector(s).getBoundingClientRect();
+      return {mapW:r('#map').width, mapB:r('#map').bottom, card:r('.card').top,
+              ctrl:r('.controls').top, tiles:r('.tiles').top, cardB:r('.card').bottom};}""")
+    ok = pos["mapB"] <= pos["card"] and pos["mapB"] <= pos["ctrl"] and pos["cardB"] <= pos["tiles"]
+    print(f"  {'ok  ' if ok else 'FAIL'} the map comes first, {pos['mapW']:.0f}px wide, with the "
+          f"numbers and controls under it and the facts under those")
+    if not ok:
+        fails.append(f"page order: {pos}")
+    ok = pos["mapW"] >= 1000
+    print(f"  {'ok  ' if ok else 'FAIL'} at 1440px the map is over a thousand pixels wide")
+    if not ok:
+        fails.append(f"map only {pos['mapW']:.0f}px wide")
+
     if errs:
         fails.append(f"javascript errors: {errs}")
     br.close()

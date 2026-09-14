@@ -107,14 +107,33 @@ def as_png(a):
     return base64.b64encode(buf.getvalue()).decode()
 
 
-def main():
-    cid = np.load(DATA / "cid.npy")
-    clim = np.load(DATA / "clim.npy")
-    H, W = cid.shape
+def layers():
+    """The ground and the lights: from the raster data when it is on this
+    machine, otherwise read back out of the page as last built, which carries
+    both as PNGs. The second path changes nothing in the drawing; it lets the
+    page be rebuilt for its markup and script on a machine without the data."""
+    if (DATA / "cid.npy").exists():
+        cid = np.load(DATA / "cid.npy")
+        clim = np.load(DATA / "clim.npy")
+        # one byte a pixel: 0 is sea, 1 to 5 are the five Koppen groups
+        ground = np.where(cid > 0, clim, 0).astype(np.uint8)
+        lit, ncity = lights()
+        return ground, lit, ncity
+    import re
+    old = OUT.read_text(encoding="utf-8")
+    m = re.search(r"^const D = (\{.*?\});$", old, re.M)
+    d = json.loads(m.group(1))
+    dec = lambda b64: np.array(Image.open(io.BytesIO(base64.b64decode(b64))))
+    m2 = re.search(r"([\d,]+) cities in a", old)
+    ncity = int(m2.group(1).replace(",", "")) if m2 else 0
+    print("raster data not on this machine; ground and lights read back out of "
+          "the page as last built")
+    return dec(d["png"]), dec(d["lights"]), ncity
 
-    # one byte a pixel: 0 is sea, 1 to 5 are the five Koppen groups
-    ground = np.where(cid > 0, clim, 0).astype(np.uint8)
-    lit, ncity = lights()
+
+def main():
+    ground, lit, ncity = layers()
+    H, W = ground.shape
 
     js = {"png": as_png(ground), "w": W, "h": H,
           "lights": as_png(lit), "lw": LIGHT_W, "lh": LIGHT_H,
@@ -140,7 +159,7 @@ def main():
 *{{box-sizing:border-box}}
 body{{margin:0;background:var(--bg);color:var(--ink);
 font:400 16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}}
-main{{max-width:1180px;margin:0 auto;padding:2rem 1.25rem 4rem}}
+main{{max-width:1320px;margin:0 auto;padding:2rem 1.25rem 4rem}}
 header.site{{border-top:4px solid var(--accent);padding-top:22px;margin-bottom:26px;
 display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}}
 .brand{{font-weight:700;font-size:20px;letter-spacing:.1em;text-decoration:none;color:var(--ink)}}
@@ -162,7 +181,10 @@ padding:13px 15px}}
 .card h2{{font-size:1.02rem;font-weight:600;margin:0 0 2px}}
 .card .sub{{font-size:.8rem;color:var(--ink3);margin-bottom:9px}}
 .row{{display:flex;justify-content:space-between;gap:12px;font-size:.87rem;padding:2.5px 0}}
-.row span:last-child{{font-variant-numeric:tabular-nums;color:var(--ink2)}}
+.row span:last-child{{font-variant-numeric:tabular-nums;color:var(--ink2);white-space:nowrap;text-align:right}}
+.under{{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-top:14px}}
+.under .side{{flex:0 0 320px;min-width:260px}}
+.under .controls{{flex:1 1 420px;margin:0}}
 
 .controls{{margin:14px 0 0;display:flex;flex-direction:column;gap:9px}}
 .sl{{display:grid;grid-template-columns:118px 1fr 150px;align-items:center;
@@ -177,7 +199,7 @@ button:hover{{background:#20242a}}
 button[aria-pressed="true"]{{border-color:var(--accent);color:var(--accent)}}
 
 .tiles{{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));
-gap:10px;margin:0 0 16px}}
+gap:10px;margin:16px 0 0}}
 .tile{{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 14px}}
 .tile .k{{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em}}
 .tile .v{{font-size:1.16rem;font-weight:650;margin-top:3px;font-variant-numeric:tabular-nums}}
@@ -201,11 +223,12 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}}
 
 <h1>The Day: Earth's Night and Day Cycle</h1>
 
-<div class="tiles">{facts}</div>
-
 <div class="stage">
   <div class="mapwrap"><canvas id="map"></canvas></div>
   <div class="curvewrap"><canvas id="curve"></canvas></div>
+</div>
+
+<div class="under">
   <div class="side"><div class="card">
     <h2 id="pName">The sub-solar point</h2>
     <div class="sub" id="pSub">where the Sun is straight overhead</div>
@@ -217,9 +240,8 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}}
     <div class="row"><span>Sunrise, UTC</span><span id="pRise"></span></div>
     <div class="row"><span>Sunset, UTC</span><span id="pSet"></span></div>
   </div></div>
-</div>
 
-<div class="controls">
+  <div class="controls">
   <div class="sl"><label for="hour">Hour, UTC</label>
     <input type="range" id="hour" min="0" max="1439" step="1" value="0">
     <output id="hourOut"></output></div>
@@ -234,7 +256,10 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}}
     <button id="bBands" aria-pressed="false">Twilight bands</button>
     <button id="bLights" aria-pressed="true">City lights</button>
   </div>
+  </div>
 </div>
+
+<div class="tiles">{facts}</div>
 
 <div class="notes">
 <h2>About the map</h2>
@@ -324,8 +349,11 @@ function solar(jdv) {{
 // how high the Sun stands, in degrees
 function altitude(lat, lon, s) {{
   const h = (lon - s.slon)*D2R;
-  return Math.asin(Math.sin(lat*D2R)*Math.sin(s.dec*D2R)
-                 + Math.cos(lat*D2R)*Math.cos(s.dec*D2R)*Math.cos(h))*R2D;
+  // at the sub-solar point the sum lands a rounding error past 1, and the
+  // arc sine of that is NaN; so it is clamped
+  const v = Math.sin(lat*D2R)*Math.sin(s.dec*D2R)
+          + Math.cos(lat*D2R)*Math.cos(s.dec*D2R)*Math.cos(h);
+  return Math.asin(Math.max(-1, Math.min(1, v)))*R2D;
 }}
 
 // hours between sunrise and sunset at a latitude, 0 or 24 inside the circles
@@ -635,8 +663,8 @@ function panel(s) {{
     + (p.lat >= 0 ? ' N' : ' S');
   el('pLon').textContent = Math.abs(p.lon).toFixed(2) + DEG
     + (p.lon >= 0 ? ' E' : ' W');
-  el('pAlt').textContent = alt.toFixed(1) + DEG
-    + (alt > 0 ? ' above the horizon' : ' below it');
+  el('pAlt').textContent = Math.abs(alt).toFixed(1) + DEG
+    + (alt >= 0 ? ' above the horizon' : ' below the horizon');
   el('pSolar').textContent = hm(s.ut + s.eqt/60 + p.lon/15);
   el('pDay').textContent = dur(len);
   el('pRise').textContent = (len <= 0 || len >= 24) ? '--' : hm(noon - len/2);
