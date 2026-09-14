@@ -11,6 +11,7 @@ their rows; the corrections are on the page; no JS errors.
 
 Usage: python3 verify_cosmic.py
 """
+import re
 import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -212,6 +213,75 @@ with sync_playwright() as pw:
           all(a in html for a, _b, _c in FIXED))
     check("and are outside the description budget",
           '<div class="method">' in html)
+
+    # --- the search, over the milestones and all the detail
+    pg.evaluate("()=>{setWin(null);runFind('')}")
+    for q, want, first in [("dinosaur", 1, "The earliest dinosaur fossils"),
+                           ("empire", 9, None), ("zzzz", 0, None)]:
+        pg.fill("#find", q)
+        pg.wait_for_timeout(80)
+        n = pg.evaluate("()=>hits.length")
+        check(f"'{q}' turns up {n} match(es) across the milestones and the detail",
+              n == want, pg.evaluate("()=>document.getElementById('findTxt').textContent"))
+        if first:
+            got = pg.evaluate("()=>hits.map(h=>h[0]==='ev'?EV[h[1]].n:DET[h[1]].n)")
+            check("and names it", got[0] == first, str(got))
+    # a word start, not any substring: war finds warfare, not toward
+    pg.fill("#find", "war")
+    pg.wait_for_timeout(80)
+    names = pg.evaluate("()=>hits.map(h=>h[0]==='ev'?EV[h[1]].n:DET[h[1]].n)")
+    check("the search matches word starts, so nothing here is a 'toward'",
+          names and all(any(w.lower().startswith("war")
+                            for w in re.split(r"[^A-Za-z0-9]+", n))
+                        for n in names), str(names[:3]))
+    # matched marks are ringed and the rest fade
+    rings = pg.evaluate("""()=>[...document.querySelectorAll('#tsvg circle')]
+      .filter(c=>c.getAttribute('stroke')==='#f4efe2').length""")
+    check(f"every match is ringed on the line ({rings} of {len(names)})",
+          rings == len(names))
+    # walking the matches with the return key
+    pg.evaluate("()=>{hitAt=-1;step()}")
+    a = pg.evaluate("()=>document.getElementById('nameTxt').textContent")
+    pg.evaluate("()=>step()")
+    b = pg.evaluate("()=>document.getElementById('nameTxt').textContent")
+    check("the return key walks from one match to the next",
+          a != b and a in names and b in names, f"{a} then {b}")
+
+    # --- the window: a span pulled out of the line rescales it
+    pg.fill("#find", "")
+    pg.evaluate("()=>setWin(null)")
+    # x runs right to left with age on the three backward scales, so
+    # compare the width the decade takes, not its sign
+    wide = abs(pg.evaluate("()=>X(1e6)-X(1e5)"))
+    pg.evaluate("()=>setWin([2e6,5e4])")
+    got = pg.evaluate("()=>win")
+    check("a span sets the window", got and abs(got[0] - 2e6) < 1, str(got))
+    tight = abs(pg.evaluate("()=>X(1e6)-X(1e5)"))
+    check(f"and the decade it holds stretches from {wide:.0f}px to {tight:.0f}px",
+          tight > wide * 3)
+    labs = pg.evaluate("()=>ticksNow().map(t=>t.lab)")
+    check(f"the ticks are rebuilt for the span: {labs}",
+          len(labs) >= 3 and all(lb.endswith("kyr") or lb.endswith("Myr")
+                                 for lb in labs))
+    ends = pg.evaluate("""()=>[...document.querySelectorAll('#tsvg text')]
+      .slice(0,0).concat([document.getElementById('winTxt').textContent])""")
+    check("and the ends of the line say where they are",
+          "2.0 million years ago" in ends[0], str(ends))
+    off_screen = pg.evaluate(
+        "()=>EV.filter(e=>e.t>win[0]||e.t<win[1]).length")
+    drawn = pg.evaluate("()=>document.querySelectorAll('#tsvg g[data-i]').length")
+    check(f"the {off_screen} milestones outside the window are not drawn",
+          drawn == len(EVENTS) - off_screen, f"{drawn} drawn")
+    # every scale keeps its own shape inside a window
+    for m in ("back", "fwd", "sun", "even"):
+        pg.evaluate("(m)=>{setMode(m);setWin([1e9,1e6])}", m)
+        n = len(pg.evaluate("()=>ticksNow()"))
+        mono = pg.evaluate("""()=>{const t=ticksNow().map(k=>X(k.t));
+          return t.every((v,i)=>!i||v>t[i-1]) || t.every((v,i)=>!i||v<t[i-1]);}""")
+        check(f"the {m} scale keeps its order inside a window ({n} ticks)",
+              n >= 3 and mono)
+    pg.evaluate("()=>{setMode('back');setWin(null)}")
+    check("and the whole line comes back", pg.evaluate("()=>win") is None)
 
     check("no JS errors", not errs, "; ".join(errs)[:140])
     br.close()

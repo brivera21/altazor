@@ -119,6 +119,9 @@ with sync_playwright() as pw:
     pg = br.new_page(viewport={"width": 1400, "height": 900})
     errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
+    # the page loads nothing from the network; block it so this runs offline
+    pg.route("http://**", lambda r: r.abort())
+    pg.route("https://**", lambda r: r.abort())
     pg.goto(PAGE.resolve().as_uri())
     pg.wait_for_timeout(900)
 
