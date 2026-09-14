@@ -71,7 +71,7 @@
   #info .close:hover { color: var(--text); }
 
   #moons {
-    position: absolute; top: 14px; right: 16px; width: 295px; z-index: 3;
+    position: absolute; top: 14px; left: 16px; width: 295px; z-index: 3;
     overflow: hidden;
     background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
     padding: 13px 16px 14px; color: var(--text); backdrop-filter: blur(8px);
@@ -103,6 +103,7 @@
   @media (max-width: 720px) {
     #hud p { display: none; }
     #info { width: min(295px, calc(100% - 32px)); }
+    #moons { width: min(295px, calc(100% - 32px)); }
   }
 </style>
 </head>
@@ -151,7 +152,7 @@
     and when a probe first reached it. <b>Make to scale</b> sets the true distances and sizes; almost everything
     left is space. There, a pulse of light leaves the Sun and crosses the diagram in true proportion,
     carrying its elapsed time, and under each planet sits how long sunlight takes to reach it.
-    Zoomed in on a planet that has moons, a second panel opens on the right with its named moons drawn
+    Zoomed in on a planet that has moons, a second panel opens on the left with its named moons drawn
     to scale against the planet and against each other, and a log scale of how far out each one orbits.
     The view pans and zooms freely. Figures follow NASA's
     <a href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/" style="color:var(--accent)">planetary
@@ -495,16 +496,24 @@
     const bar = document.getElementById("controls");
     if (!bar) return;
     const top = bar.getBoundingClientRect().top;
-    const ceiling = top > 0 ? top : window.innerHeight;
-    const room = ceiling - 14 - 14;
-    const mp = document.getElementById("moons");
-    const sharing = mp && mp.classList.contains("show");
-    info.style.maxHeight = Math.max(150, sharing ? room * 0.46 : room) + "px";
-    if (sharing) {
-      const b = info.getBoundingClientRect().bottom;
-      mp.style.top = (b + 10) + "px";
-      mp.style.maxHeight = Math.max(130, ceiling - b - 24) + "px";
+    let ceiling = top > 0 ? top : window.innerHeight;
+    // at true scale the scale bar sits in the bottom left corner, under the
+    // moons panel's own column, so it is the floor there too
+    const sb = document.getElementById("scalebar");
+    if (sb && sb.style.display !== "none") {
+      const t = sb.getBoundingClientRect().top;
+      if (t > 0) ceiling = Math.min(ceiling, t);
     }
+    info.style.maxHeight = Math.max(150, ceiling - 28) + "px";
+    const mp = document.getElementById("moons");
+    if (!mp || !mp.classList.contains("show")) return;
+    // the moons take the left column, under the title. On a window too narrow
+    // for two columns they drop below the panel on the right instead.
+    const roomy = window.innerWidth >= 660;
+    const above = roomy ? document.getElementById("hud").getBoundingClientRect().bottom
+                        : info.getBoundingClientRect().bottom;
+    mp.style.top = (above + 10) + "px";
+    mp.style.maxHeight = Math.max(130, ceiling - above - 24) + "px";
   }
   window.addEventListener("resize", fitPanel);
   const DEFAULT_LABELS = { dist: "Distance from the Sun", diam: "Diameter",
