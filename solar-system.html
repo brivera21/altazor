@@ -116,9 +116,10 @@
     and when a probe first reached it. <b>Make to scale</b> sets the true distances and sizes; almost everything
     left is space. There, a pulse of light leaves the Sun and crosses the diagram in true proportion,
     carrying its elapsed time, and under each planet sits how long sunlight takes to reach it.
-    Up close, a planet's named moons sit beside it on the line, each drawn to scale in size and set at its
-    true distance, with its name and that distance beneath; the farther ones come into view as the zoom pulls
-    back, and the ones still off the edge are listed there. The pointer over a moon tells who found it.
+    Up close, a planet's named moons sit beside it in a row, enlarged and set close so each can be seen, in
+    order outward, with its name and its true distance beneath; <b>Make to scale</b> sends them out to their
+    real distances at their real sizes, and the ones then past the edge are listed there. The pointer over a
+    moon tells who found it.
     The view pans and zooms freely. Figures follow NASA's
     <a href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/" style="color:var(--accent)">planetary
     fact sheets</a>.</div>
@@ -375,7 +376,26 @@
       const wantW = Math.min(W * 0.42, beltHalfHeight() * 2 * 0.8);
       camT.c = (a + b) / 2; camT.z = wantW / Math.max(b - a, 1e-9);
     }
-    else { camT.c = px(obj); camT.z = Math.min(H, W) * 0.20 / pr(obj); }
+    else {
+      let Rd = Math.min(H, W) * 0.20, cx = W / 2;
+      if (MOONS[obj.name] && mTarget < 0.5) {
+        // the row has to fit on the lenient layout, which is where it is a row
+        const panel = info.classList.contains("show") ? info.getBoundingClientRect().right : 0;
+        const left = panel + 24, right = W - 16;
+        const rf = 1 + ringPad(obj, 1);                // rings widen the planet
+        let need = 2 * Rd * rf + moonRow(obj, Rd).width - Rd;
+        if (cx - Rd * rf < left || cx + need - Rd * rf > right) {
+          // slide it left first, then bring the zoom down
+          if (need > right - left) {
+            Rd = Math.max(36, (right - left - moonRow(obj, Rd).width + Rd) / (2 * rf));
+            need = 2 * Rd * rf + moonRow(obj, Rd).width - Rd;
+          }
+          cx = Math.max(left + Rd * rf, Math.min(W / 2, right - need + Rd * rf));
+        }
+      }
+      camT.z = Rd / pr(obj);
+      camT.c = px(obj) - (cx - W / 2) / camT.z;
+    }
   }
 
 
@@ -539,33 +559,81 @@
     if (line) lines.push(line);
     return lines;
   }
+  // the tint each moon actually shows: Io's sulphur, Titan's haze, Amalthea's red
+  const MOON_COLOR = { "The Moon": ["#c9c9c9", "#4a4a4a"], Phobos: ["#8a8378", "#2e2b26"],
+    Deimos: ["#8f887c", "#2f2c27"], Amalthea: ["#b05a3c", "#3d1f14"], Io: ["#e6d27a", "#6b5a1c"],
+    Europa: ["#e8dcc8", "#6b6255"], Ganymede: ["#b8ab9a", "#4a4238"], Callisto: ["#8c8072", "#332d27"],
+    Mimas: ["#d6d6d6", "#4c4c4c"], Enceladus: ["#f4f7ff", "#6f7a90"], Tethys: ["#e2e4e8", "#585c66"],
+    Dione: ["#d9dbe0", "#53565e"], Rhea: ["#d3d5d9", "#4f5258"], Titan: ["#e2a84a", "#6b4a18"],
+    Hyperion: ["#b9a68a", "#463c2e"], Iapetus: ["#c9c2b2", "#2a2622"], Phoebe: ["#6f6a63", "#242220"],
+    Miranda: ["#cfd1d6", "#4b4d54"], Ariel: ["#dcdee3", "#54565c"], Umbriel: ["#8f9198", "#2e2f33"],
+    Titania: ["#bfbcc0", "#45434a"], Oberon: ["#b3aeb0", "#403c3f"], Larissa: ["#a9acb5", "#3c3e45"],
+    Proteus: ["#9a9ca4", "#35373d"], Triton: ["#e5cfc9", "#6a5450"], Nereid: ["#b4b6bd", "#41434a"] };
+  // the lenient row for a planet drawn at radius Rd: each moon's radius and
+  // its offset from the planet's centre, and the width the whole row takes
+  function ringPad(p, Rd) { return p.name === "Saturn" ? Rd * 1.15 : p.name === "Uranus" ? Rd * 0.3 : 0; }
+  function moonRow(p, Rd) {
+    const ms = MOONS[p.name], s = Rd / p.rKm;
+    const maxR = Math.max(...ms.map(mo => mo.r));
+    const big = Math.min(40, Math.max(14, maxR * s));
+    let cursor = Rd + ringPad(p, Rd) + 30;
+    const slots = ms.map(mo => {
+      const r = Math.max(3, big * mo.r / maxR);
+      const dx = cursor + r;
+      cursor += Math.max(2 * r + 22, 74);
+      return { r, dx };
+    });
+    return { slots, width: cursor - 4 };
+  }
   function drawMoons() {
     moonState = null;
     const p = moonsShowing();
     if (!p) { moonHover = -1; return; }
-    const Rd = pr(p) * cam.z, x0 = sx(px(p));
+    const Rd = pr(p) * cam.z, x0 = sx(px(p)), me = ease(m);
     const s = Rd / p.rKm;                 // pixels per kilometre, the planet's own scale
     const ms = MOONS[p.name], out = [], beyond = [];
-    // which moon the pointer rests on, if any
+    // the lenient row: enlarged and set close so each one can be seen, in
+    // order outward; the true layout: each at its real distance and size on
+    // the planet's scale. The scale button carries them from one to the other.
+    const row = moonRow(p, Rd);
+    const lay = ms.map((mo, i) => {
+      const rLen = row.slots[i].r, xLen = x0 + row.slots[i].dx;
+      const rTrue = Math.max(mo.r * s, 1.2), xTrue = x0 + mo.a * s;
+      return { x: mix(xLen, xTrue, me), r: mix(rLen, rTrue, me) };
+    });
     moonHover = -1;
-    ms.forEach((mo, i) => {
-      const x = x0 + mo.a * s, r = Math.max(mo.r * s, 1.2);
-      if (ptrX >= 0 && Math.abs(ptrX - x) <= Math.max(r, 7) && Math.abs(ptrY - y0) <= Math.max(r, 9)) moonHover = i;
+    lay.forEach((o, i) => {
+      if (ptrX >= 0 && Math.abs(ptrX - o.x) <= Math.max(o.r, 7) && Math.abs(ptrY - y0) <= Math.max(o.r, 9)) moonHover = i;
     });
     ms.forEach((mo, i) => {
-      const x = x0 + mo.a * s, r = Math.max(mo.r * s, 1.2), hot = i === moonHover;
+      const { x, r } = lay[i], hot = i === moonHover;
       out.push({ n: mo.n, x, r, a: mo.a, rKm: mo.r });
       if (x - r > W + 4) { beyond.push(mo); return; }
       if (x + r < -20) return;
-      if (mo.r * s >= 3) shade(x, y0, r, hot ? "#f2f6ff" : "#d9e1f0", "#4d5668");
+      const col = MOON_COLOR[mo.n] || ["#d9e1f0", "#4d5668"];
+      if (r >= 2.5) shade(x, y0, r, hot ? "#f2f6ff" : col[0], col[1]);
       else {
         // a moon this small is a dot, so a faint halo marks it out from the stars
         ctx.strokeStyle = hot ? "rgba(88,166,255,0.9)" : "rgba(190,205,235,0.35)"; ctx.lineWidth = 1;
         circle(x, y0, r + 3.5); ctx.stroke();
         ctx.fillStyle = hot ? "#ffffff" : "rgba(214,222,240,0.95)"; circle(x, y0, r); ctx.fill();
       }
+      if (hot) { ctx.strokeStyle = "rgba(88,166,255,0.9)"; ctx.lineWidth = 1.2; circle(x, y0, r + 3); ctx.stroke(); }
       label(mo.n, x, y0 + r + 16, hot, fmtKm(mo.a), true);
     });
+    // on the lenient row the caption says what the row is
+    if (me < 0.999 && lay.length) {
+      const first = lay[0], last = lay[lay.length - 1];
+      ctx.globalAlpha = 1 - me;
+      ctx.font = "10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillStyle = "rgba(133,147,173,0.9)";
+      const cy = y0 + Math.max(...lay.map(o => o.r)) + 52;
+      ctx.fillText(ms.length === 1 ? "enlarged and set close; the distance beneath is the true one"
+                                   : "enlarged and set close, in order outward; the distances beneath are the true ones",
+                   Math.max(first.x - first.r, x0 + Rd + 8), cy);
+      ctx.globalAlpha = 1;
+    }
     // the ones past the right edge, listed there with their distances
     if (beyond.length) {
       ctx.font = "10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
@@ -598,9 +666,10 @@
         ctx.fillText(l, bx + 10, by + 18 + k * 15);
       });
     }
-    moonState = { of: p.name, scale: s, x0, y0, Rd, hover: moonHover, moons: out,
+    moonState = { of: p.name, scale: s, x0, y0, Rd, me, hover: moonHover, moons: out,
                   beyond: beyond.map(mo => mo.n), ghosting: m < 0.5 };
   }
+
 
   // ---------- Chips & scale button ----------
   const chips = document.getElementById("chips");
@@ -828,10 +897,10 @@
   }
 
   function drawBelt(g) {
-    const GA = ghostOthers ? 0.14 : 1;
-    ctx.globalAlpha = GA;
     const a = sx(g.edgeIn()), b = sx(g.edgeOut());
     if (b < -60 || a > W + 60) return;
+    const GA = ghostOthers ? 0.14 : 1;   // set only once it is known to draw
+    ctx.globalAlpha = GA;
     const w = Math.max(b - a, 1);
     const hot = selected === g;
     const hh = beltHalfHeight();
