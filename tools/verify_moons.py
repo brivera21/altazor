@@ -3,11 +3,14 @@
   the data     every named moon has a radius, an orbital distance, a
                discovery and a note; each planet's list runs outward; the
                figures match the NASA planetary satellite fact sheet
-  the drawing  the moons appear beside a planet seen up close and only then,
-               each at the planet's own drawn scale in both size and
-               distance; the ones past the edge are listed there; the
-               pointer over a moon names its finder; the panel of numbers
-               sits on the left, under the title and above the control bar
+  the drawing  the moons appear beside a planet seen up close and only then.
+               On the lenient layout they are a row, enlarged and set close,
+               in order outward, and the whole row fits on the screen; at
+               true scale each sits at the planet's own drawn scale in both
+               size and distance. The ones past the edge are listed there;
+               the pointer over a moon names its finder; the neighbours step
+               back on the lenient layout while the planet itself stays at
+               full strength; the panel of numbers sits on the left
 """
 import re
 import sys
@@ -96,7 +99,7 @@ with sync_playwright() as pw:
     check(names == [mo["n"] for mo in ns["Jupiter"]], f"all five, outward: {names}")
 
     def geometry_holds(st, planet):
-        # size and distance both on the planet's own drawn scale
+        # true layout: size and distance both on the planet's own drawn scale
         s = st["Rd"] / PLANET_R[planet]
         worst = 0.0
         for mo, ref in zip(st["moons"], ns[planet]):
@@ -106,20 +109,35 @@ with sync_playwright() as pw:
                         abs(mo["r"] - want_r) / want_r)
         return abs(st["scale"] - s) / s < 1e-9 and worst < 1e-6, worst
 
-    ok, worst = geometry_holds(st, "Jupiter")
-    check(ok, f"each moon sits at its true distance and true size on that scale "
-              f"(worst {worst:.1e} out)")
-    io, cal = st["moons"][1], st["moons"][4]
-    ratio = (cal["x"] - st["x0"]) / (io["x"] - st["x0"])
-    check(abs(ratio - 1882700 / 421800) < 1e-6,
-          f"Callisto sits {ratio:.3f} times as far out as Io, as the figures say")
-    check(st["moons"][3]["r"] > st["moons"][1]["r"] > st["moons"][0]["r"],
-          "Ganymede is drawn larger than Io, and Io larger than Amalthea")
-    on_screen = [mo["n"] for mo in st["moons"] if mo["x"] - mo["r"] <= 1400 + 4]
-    check(st["beyond"] == [n for n in names if n not in on_screen],
-          f"the moons past the right edge are listed there: {st['beyond']}")
+    def row_holds(st, planet, width):
+        # lenient layout: a row past the planet, in order outward, every moon
+        # at least a visible sphere, the largest drawn largest, all on screen
+        xs = [mo["x"] for mo in st["moons"]]
+        rs = [mo["r"] for mo in st["moons"]]
+        refs = ns[planet]
+        biggest = max(range(len(refs)), key=lambda i: refs[i]["r"])
+        return (all(xs[i] > xs[i - 1] + 2 * rs[i - 1] for i in range(1, len(xs)))
+                and xs[0] - rs[0] > st["x0"] + st["Rd"]
+                and min(rs) >= 3 and rs[biggest] == max(rs)
+                and xs[-1] + rs[-1] <= width and not st["beyond"])
+
+    check(st["me"] == 0 and row_holds(st, "Jupiter", 1400),
+          "on the lenient layout they run in a row past the planet, in order "
+          "outward, each at least a small sphere, all on the screen")
     check(st["ghosting"] is True,
-          "on the lenient layout the neighbours step back while the moons show")
+          "the neighbours step back while the moons show")
+    # the planet itself must not: read its own pixels back off the canvas
+    px = pg.evaluate("""()=>{const d=window.__dbg, c=document.getElementById('space')
+      .getContext('2d'), k=devicePixelRatio;
+      return [...c.getImageData(Math.round(d.ex*k), Math.round((d.moons.y0-d.er*0.5)*k),1,1).data];}""")
+    check(px[3] == 255, f"and Jupiter itself is drawn at full strength (alpha {px[3]})")
+    for planet in ("Saturn", "Earth", "Neptune"):
+        st = open_on(planet)
+        check(st and st["of"] == planet and row_holds(st, planet, 1400),
+              f"{planet}'s row of {len(ns[planet])} fits on the screen in order",
+              str([(mo["n"], round(mo["x"])) for mo in st["moons"]]) if st else "none")
+    st = open_on("Jupiter")
+    names = [mo["n"] for mo in st["moons"]]
 
     # the pointer over a moon names its finder
     target = next(mo for mo in st["moons"] if 40 < mo["x"] < 1360)
@@ -143,8 +161,15 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(1800)
     st = open_on("Saturn")
     ok, worst = geometry_holds(st, "Saturn")
-    check(st and st["of"] == "Saturn" and ok,
-          f"at true scale Saturn's nine hold the same geometry (worst {worst:.1e})")
+    check(st and st["of"] == "Saturn" and st["me"] == 1 and ok,
+          f"at true scale Saturn's nine sit at their real distances and sizes "
+          f"on the planet's scale (worst {worst:.1e})")
+    io_cal = open_on("Jupiter")
+    io, cal = io_cal["moons"][1], io_cal["moons"][4]
+    ratio = (cal["x"] - io_cal["x0"]) / (io["x"] - io_cal["x0"])
+    check(abs(ratio - 1882700 / 421800) < 1e-6,
+          f"there Callisto sits {ratio:.3f} times as far out as Io, as the figures say")
+    st = open_on("Saturn")
     check(st["ghosting"] is False, "and nothing needs to step back there")
     check("Phoebe" in st["beyond"] and "Iapetus" in st["beyond"],
           f"Phoebe and Iapetus are off the edge and say so: {st['beyond']}")
