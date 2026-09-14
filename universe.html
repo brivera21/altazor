@@ -36,6 +36,23 @@ h1 { margin:0 0 6px; font-size:26px; }
 .refs p { margin:0 0 8px; }
 .refs a { color:var(--accent); }
 h2.refh { font-size:15px; margin:26px 0 8px; }
+.controls { display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  margin:0 0 14px; }
+.controls input[type=range] { flex:1 1 300px; min-width:220px; accent-color:var(--accent);
+  height:22px; }
+.rd { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--muted);
+  font-variant-numeric:tabular-nums; }
+.rd b { color:var(--text); font-weight:700; }
+.presets { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 14px; }
+.presets button { background:var(--panel); color:var(--muted); border:1px solid var(--line);
+  border-radius:999px; padding:5px 11px; font-size:12.5px; cursor:pointer;
+  font-family:inherit; }
+.presets button:hover { color:var(--text); border-color:#3d3d3d; }
+.presets button[aria-pressed=true] { color:#0b0b0b; background:var(--accent);
+  border-color:var(--accent); font-weight:700; }
+#atTxt { color:var(--muted); font-size:12.5px; margin-top:8px; }
+.method { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
 @media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
 .refs p { padding-left:2em; text-indent:-2em; }
 .refs .ann { color:#7d7d7d; display:block; padding-left:0; text-indent:0; margin-top:2px; }
@@ -48,25 +65,52 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   <nav class="site"><a href="library.html">&larr; Library</a></nav>
 </header>
 <h1>The Universe</h1>
+<div class="controls">
+  <input type="range" id="scale" min="-600" max="100" step="1" value="0"
+    aria-label="scale factor">
+  <div class="rd">
+    <span>size <b id="rdA"></b></span>
+    <span>redshift <b id="rdZ"></b></span>
+    <span>background <b id="rdT"></b></span>
+    <span>age <b id="rdAge"></b></span>
+  </div>
+</div>
+<div class="presets" id="presets"></div>
 <div class="stage">
   <div id="diagram"></div>
   <div class="side"><div class="card">
     <div id="pct"></div>
     <div id="segTxt">Hover a segment</div>
     <div id="bodyTxt"></div>
+    <div id="atTxt"></div>
     <div id="srcTxt"></div>
   </div></div>
 </div>
-<p class="note">The top bar is everything there is, by present-day energy
-content. Ordinary matter, the thin amber sliver, opens below into where its
-atoms actually sit, and the galaxies segment opens in turn into what one
-large galaxy is made of, with the Milky Way as the exemplar. A segment under
-the cursor fills the card.</p>
-<p class="note">Photons of the microwave background add about five
-thousandths of a percent and the known neutrino mass roughly a tenth of a
-percent; both are too thin to draw. The bottom bar counts only ordinary
-matter: the galaxy as a whole sits in a dark matter halo that outweighs
-everything drawn there by more than ten to one.</p>
+<p class="note">The curves hold the share of all the energy in the universe
+carried by radiation, by matter and by dark energy, against the size of the
+universe. Radiation thins fastest and lost the lead first; dark energy does
+not thin at all, so it takes the lead last. The two crossings are where the
+lines meet, and the bar under them is the budget at the moment the marker
+sits on.</p>
+<p class="note">Below it, the thin amber sliver of ordinary matter opens into
+where its atoms actually sit, and the galaxies segment opens in turn into
+what one large galaxy is made of, with the Milky Way as the exemplar. Those
+two are censuses of the universe as it is now, so they fade when the marker
+leaves the present.</p>
+<div class="method"><p>Densities follow the flat baseline of Planck 2018 VI:
+dark energy 0.685 of the critical density, dark matter 0.266, ordinary matter
+0.049, radiation about one part in eleven thousand, with radiation diluting
+as the fourth power of the scale factor, matter as the third, and dark energy
+constant. Neutrinos are counted with the radiation. They weigh as matter once
+the universe cools below their mass, near a redshift of a few hundred, and
+carry about a tenth of a percent of the total today, too little to show at
+this scale. The range stops at a redshift of a million, late enough that the
+radiation is the photons and neutrinos of today with no other species still
+in the bath. Age is the integral of d ln a over H, with a Hubble constant of
+67.4 kilometres per second per megaparsec, giving 13.79 billion years for the
+present. The bottom two bars count only ordinary matter: the galaxy sits in a
+dark matter halo that outweighs everything drawn there by more than ten to
+one.</p></div>
 <h2 class="refh">References</h2>
 <div class="refs">
 <p>Planck Collaboration. (2020). Planck 2018 results. VI. Cosmological
@@ -110,37 +154,117 @@ based on interferometric astrometry of multiple stellar orbits.
 </div>
 </div>
 <script>
-const TOP=[{"k":"de","l":"Dark energy","p":68.5,"c":"#b48cf2","h":false,"t":"Dark energy","b":"The component that accelerates the expansion of the universe. It enters the equations as a constant energy of space itself, and nothing beyond that constancy has been measured about it.","s":"Planck 2018 VI, baseline model"},{"k":"dm","l":"Dark matter","p":26.4,"c":"#58a6ff","h":false,"t":"Dark matter","b":"Matter that gravitates but neither emits nor absorbs light. It holds galaxies and clusters together and shapes the cosmic web; every attempt to detect a particle of it has so far come back empty.","s":"Planck 2018 VI, baseline model"},{"k":"ob","l":"Ordinary matter","p":4.9,"c":"#ffb02e","h":false,"t":"Ordinary matter","b":"Everything made of atoms: every star, planet, gas cloud and living thing. The bar below opens this sliver into where those atoms actually are.","s":"Planck 2018 VI, baseline model"}], BAR=[{"k":"lya","l":"Diffuse intergalactic gas","p":28,"c":"#ffb02e","h":false,"t":"The diffuse intergalactic medium","b":"Cool photoionized hydrogen strung along the cosmic web, seen as the Lyman-alpha forest in quasar spectra. About 28 percent of all ordinary matter, give or take 11.","s":"Shull, Smith and Danforth 2012"},{"k":"whim","l":"Warm-hot intergalactic gas","p":25,"c":"#ff8a3d","h":false,"t":"The warm-hot intergalactic medium","b":"Shock-heated gas at a hundred thousand to a million kelvin, traced by highly ionized oxygen and broad Lyman-alpha absorbers. About 25 percent, give or take 8.","s":"Shull, Smith and Danforth 2012"},{"k":"cgm","l":"Circumgalactic gas","p":5,"c":"#2fc6a6","h":false,"t":"The circumgalactic medium","b":"The gas halo around each galaxy, fuel for future star formation. About 5 percent, give or take 3.","s":"Shull, Smith and Danforth 2012"},{"k":"icm","l":"Cluster gas","p":4,"c":"#6ee7f2","h":false,"t":"The intracluster medium","b":"Hot X-ray gas filling groups and clusters of galaxies. About 4 percent, give or take 1.5.","s":"Shull, Smith and Danforth 2012"},{"k":"cold","l":"Cold gas","p":1.7,"c":"#9be564","h":false,"t":"Cold neutral gas","b":"Neutral hydrogen and helium in and around galaxies, the reservoir the Lyman-alpha forest does not reach. About 1.7 percent, give or take 0.4.","s":"Shull, Smith and Danforth 2012"},{"k":"miss","l":"Found in 2020","p":29,"c":"#8b93a7","h":true,"t":"The baryons that went missing","b":"In 2012 about 29 percent of the ordinary matter, give or take 13, had never been seen in any waveband; simulations placed most of it as even hotter intergalactic gas, invisible to the surveys. In 2020 the dispersion of fast radio bursts measured all the ionized gas along their paths and found the full amount.","s":"Shull 2012; Macquart and others 2020"},{"k":"gal","l":"Galaxies","p":7,"c":"#31d67a","h":false,"t":"Stars and gas in galaxies","b":"All the stars and the interstellar gas of all the galaxies: about 7 percent of the ordinary matter, give or take 2. The bar below opens this segment into what a large galaxy is made of.","s":"Shull, Smith and Danforth 2012"}], GAL=[{"k":"stars","l":"Living stars","p":65,"c":"#31d67a","h":false,"t":"Living stars","b":"Stars still burning, from red dwarfs to supergiants: about 65 percent of the Milky Way's ordinary matter, some 40 billion solar masses of the 50 billion in stars overall.","s":"Bland-Hawthorn and Gerhard 2016; Fukugita and Peebles 2004"},{"k":"rem","l":"Stellar remnants","p":14,"c":"#7fd6a8","h":false,"t":"Stellar remnants","b":"Dead stars: white dwarfs hold most of it, with neutron stars and stellar black holes the rest, about 18 percent of the stellar mass.","s":"Fukugita and Peebles 2004"},{"k":"atom","l":"Atomic gas","p":18,"c":"#a3e635","h":false,"t":"Atomic gas","b":"Neutral hydrogen spread through the disk, about 8 billion solar masses of hydrogen plus its share of helium, the raw reservoir for star formation.","s":"Kalberla and Kerp 2009"},{"k":"mol","l":"Molecular gas","p":2.7,"c":"#d3f261","h":false,"t":"Molecular gas","b":"Cold dense clouds of molecular hydrogen, about 1.2 billion solar masses plus helium: the part of the gas that actually collapses into new stars.","s":"Miville-Deschenes, Murray and Lee 2017"},{"k":"dust","l":"Dust","p":0.2,"c":"#e8c78f","h":false,"t":"Dust","b":"Grains of silicate and carbon mixed through the gas at about one part in a hundred: a rounding error by mass, and the reason the Milky Way has dark lanes.","s":"Galliano, Galametz and Jones 2018"},{"k":"smbh","l":"Central black hole","p":0.007,"c":"#8b93a7","h":false,"t":"Sagittarius A*","b":"The supermassive black hole at the center, 4.3 million solar masses: drawn here as a hairline, because for all its fame it is a hundred thousandth of the galaxy's ordinary matter.","s":"GRAVITY Collaboration 2022"}];
-const W=980,H=850;
-const T={x:20,y:60,w:940,h:110}, B={x:20,y:330,w:940,h:110},
-      G={x:20,y:640,w:940,h:110};
+const TOP=[{"k":"rad","l":"Radiation","n":4,"om":9.15e-05,"c":"#e0564f","h":false,"t":"Radiation","b":"The photons of the microwave background, with neutrinos counted alongside them. Expansion both spreads the photons out and stretches each one, so radiation thins by a fourth power and loses ground to everything else. It ruled the first fifty thousand years.","s":"Planck 2018 VI, baseline model"},{"k":"dm","l":"Dark matter","n":3,"om":0.2657,"c":"#58a6ff","h":false,"t":"Dark matter","b":"Matter that gravitates but neither emits nor absorbs light. It holds galaxies and clusters together and shapes the cosmic web; every attempt to detect a particle of it has so far come back empty.","s":"Planck 2018 VI, baseline model"},{"k":"ob","l":"Ordinary matter","n":3,"om":0.0493,"c":"#ffb02e","h":false,"t":"Ordinary matter","b":"Everything made of atoms: every star, planet, gas cloud and living thing. The bar below opens this sliver into where those atoms actually are.","s":"Planck 2018 VI, baseline model"},{"k":"de","l":"Dark energy","n":0,"om":0.6849084999999999,"c":"#b48cf2","h":false,"t":"Dark energy","b":"The component that accelerates the expansion of the universe. It enters the equations as a constant energy of space itself, so expansion does not dilute it, and every other component thins past it in turn.","s":"Planck 2018 VI, baseline model"}], BAR=[{"k":"lya","l":"Diffuse intergalactic gas","p":28,"c":"#ffb02e","h":false,"t":"The diffuse intergalactic medium","b":"Cool photoionized hydrogen strung along the cosmic web, seen as the Lyman-alpha forest in quasar spectra. About 28 percent of all ordinary matter, give or take 11.","s":"Shull, Smith and Danforth 2012"},{"k":"whim","l":"Warm-hot intergalactic gas","p":25,"c":"#ff8a3d","h":false,"t":"The warm-hot intergalactic medium","b":"Shock-heated gas at a hundred thousand to a million kelvin, traced by highly ionized oxygen and broad Lyman-alpha absorbers. About 25 percent, give or take 8.","s":"Shull, Smith and Danforth 2012"},{"k":"cgm","l":"Circumgalactic gas","p":5,"c":"#2fc6a6","h":false,"t":"The circumgalactic medium","b":"The gas halo around each galaxy, fuel for future star formation. About 5 percent, give or take 3.","s":"Shull, Smith and Danforth 2012"},{"k":"icm","l":"Cluster gas","p":4,"c":"#6ee7f2","h":false,"t":"The intracluster medium","b":"Hot X-ray gas filling groups and clusters of galaxies. About 4 percent, give or take 1.5.","s":"Shull, Smith and Danforth 2012"},{"k":"cold","l":"Cold gas","p":1.7,"c":"#9be564","h":false,"t":"Cold neutral gas","b":"Neutral hydrogen and helium in and around galaxies, the reservoir the Lyman-alpha forest does not reach. About 1.7 percent, give or take 0.4.","s":"Shull, Smith and Danforth 2012"},{"k":"miss","l":"Found in 2020","p":29,"c":"#8b93a7","h":true,"t":"The baryons that went missing","b":"In 2012 about 29 percent of the ordinary matter, give or take 13, had never been seen in any waveband; simulations placed most of it as even hotter intergalactic gas, invisible to the surveys. In 2020 the dispersion of fast radio bursts measured all the ionized gas along their paths and found the full amount.","s":"Shull 2012; Macquart and others 2020"},{"k":"gal","l":"Galaxies","p":7,"c":"#31d67a","h":false,"t":"Stars and gas in galaxies","b":"All the stars and the interstellar gas of all the galaxies: about 7 percent of the ordinary matter, give or take 2. The bar below opens this segment into what a large galaxy is made of.","s":"Shull, Smith and Danforth 2012"}], GAL=[{"k":"stars","l":"Living stars","p":65,"c":"#31d67a","h":false,"t":"Living stars","b":"Stars still burning, from red dwarfs to supergiants: about 65 percent of the Milky Way's ordinary matter, some 40 billion solar masses of the 50 billion in stars overall.","s":"Bland-Hawthorn and Gerhard 2016; Fukugita and Peebles 2004"},{"k":"rem","l":"Stellar remnants","p":14,"c":"#7fd6a8","h":false,"t":"Stellar remnants","b":"Dead stars: white dwarfs hold most of it, with neutron stars and stellar black holes the rest, about 18 percent of the stellar mass.","s":"Fukugita and Peebles 2004"},{"k":"atom","l":"Atomic gas","p":18,"c":"#a3e635","h":false,"t":"Atomic gas","b":"Neutral hydrogen spread through the disk, about 8 billion solar masses of hydrogen plus its share of helium, the raw reservoir for star formation.","s":"Kalberla and Kerp 2009"},{"k":"mol","l":"Molecular gas","p":2.7,"c":"#d3f261","h":false,"t":"Molecular gas","b":"Cold dense clouds of molecular hydrogen, about 1.2 billion solar masses plus helium: the part of the gas that actually collapses into new stars.","s":"Miville-Deschenes, Murray and Lee 2017"},{"k":"dust","l":"Dust","p":0.2,"c":"#e8c78f","h":false,"t":"Dust","b":"Grains of silicate and carbon mixed through the gas at about one part in a hundred: a rounding error by mass, and the reason the Milky Way has dark lanes.","s":"Galliano, Galametz and Jones 2018"},{"k":"smbh","l":"Central black hole","p":0.007,"c":"#8b93a7","h":false,"t":"Sagittarius A*","b":"The supermassive black hole at the center, 4.3 million solar masses: drawn here as a hairline, because for all its fame it is a hundred thousandth of the galaxy's ordinary matter.","s":"GRAVITY Collaboration 2022"}];
+const W=980,H=1180;
+const C={x:86,y:70,w:800,h:210},
+      T={x:20,y:392,w:940,h:110}, B={x:20,y:662,w:940,h:110},
+      G={x:20,y:972,w:940,h:110};
+const LOGMIN=-6, LOGMAX=1;          // decades of the scale factor on show
+const H0INV=14.5077;                // 1/H0 in billions of years, H0 = 67.4
+const TCMB=2.7255;                  // kelvin today
 
 const el=document.getElementById('diagram');
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
-let sel=null;
+const byKey=Object.fromEntries(TOP.map(d=>[d.k,d]));
+const OM_M=byKey.dm.om+byKey.ob.om, OM_R=byKey.rad.om, OM_L=byKey.de.om;
+let sel=null, la=0;                 // la is log10 of the scale factor
 
-function seg(row,d,x,w,i,list){
+/* ---- the model: a flat three component universe ---- */
+function dens(d,a){ return d.om*Math.pow(a,-d.n); }
+function shares(a){
+  let tot=0; const o={};
+  for(const d of TOP){ o[d.k]=dens(d,a); tot+=o[d.k]; }
+  for(const k in o) o[k]=o[k]/tot*100;
+  return o;
+}
+function Erel(a){                   // H(a)/H0
+  return Math.sqrt(OM_R*Math.pow(a,-4)+OM_M*Math.pow(a,-3)+OM_L);
+}
+function age(a){                    // billions of years, integral of dlna/H
+  const lo=Math.log(1e-14), hi=Math.log(a), n=1200, h=(hi-lo)/n;
+  let s=0;
+  for(let i=0;i<=n;i++){
+    const f=1/Erel(Math.exp(lo+i*h));
+    s+=f*(i===0||i===n?1:(i%2?4:2));
+  }
+  return s*h/3*H0INV;
+}
+const A_RM=OM_R/OM_M;                       // radiation equals matter
+const A_ML=Math.cbrt(OM_M/OM_L);            // matter equals dark energy
+
+/* ---- formatting ---- */
+const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³',
+           '4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+const sup=n=>String(n).split('').map(c=>SUP[c]||c).join('');
+function sci(v,dp){
+  let e=Math.floor(Math.log10(Math.abs(v))), m=v/Math.pow(10,e);
+  const lim=10-0.5*Math.pow(10,-(dp||2));
+  if(Math.abs(m)>=lim){ m/=10; e++; }
+  return m.toFixed(dp===undefined?2:dp)+'×10'+sup(e);
+}
+function pct(v){
+  if(v>=10) return v.toFixed(1)+'%';
+  if(v>=1) return v.toFixed(2)+'%';
+  if(v>=0.001) return v.toFixed(4).replace(/0+$/,'')+'%';
+  return sci(v,1)+'%';
+}
+function num(v){
+  if(v===0) return '0';
+  const a=Math.abs(v);
+  if(a>=1e4||a<0.01) return sci(v);
+  if(a>=100) return v.toFixed(0);
+  if(a>=1) return v.toFixed(2);
+  return v.toFixed(3);
+}
+function fmtT(k){
+  if(k>=1e6) return num(k)+' K';
+  if(k>=1000) return Math.round(k).toLocaleString('en-US')+' K';
+  return k.toFixed(k<10?2:0)+' K';
+}
+function fmtAge(g){
+  const yr=g*1e9;
+  if(yr<1){
+    const sec=yr*3.1557e7;
+    if(sec<90) return sec.toFixed(1)+' seconds';
+    if(sec<5400) return (sec/60).toFixed(1)+' minutes';
+    if(sec<172800) return (sec/3600).toFixed(1)+' hours';
+    return (sec/86400).toFixed(1)+' days';
+  }
+  if(yr<1e3) return yr.toFixed(0)+' years';
+  if(yr<1e6) return (yr/1e3).toFixed(1)+' thousand years';
+  if(yr<1e9) return (yr/1e6).toFixed(0)+' million years';
+  return g.toFixed(2)+' billion years';
+}
+function fmtZ(z){
+  if(z>=1e4) return num(z);
+  if(z>=10) return Math.round(z).toLocaleString('en-US');
+  if(z>-0.005&&z<0.005) return '0';
+  return z.toFixed(2).replace(/\.?0+$/,'');
+}
+
+/* ---- the bars ---- */
+function seg(row,d,x,w,p){
   const dash=d.h?' stroke-dasharray="5 4"':'';
   const op=(sel===null||sel===d.k)?1:0.35;
-  let s=`<g data-k="${d.k}" style="cursor:default" opacity="${op}">
-    <rect x="${x}" y="${row.y}" width="${Math.max(w,1.2)}" height="${row.h}" rx="4"
-      fill="${d.c}" fill-opacity="${d.h?0.35:0.85}" stroke="${d.c}" stroke-width="1.4"${dash}/>`;
-  if(w>90) s+=`<text x="${x+w/2}" y="${row.y+row.h/2-4}" text-anchor="middle"
-      font-size="14.5" font-weight="700" fill="#0b0b0b" pointer-events="none">${esc(d.l)}</text>
-    <text x="${x+w/2}" y="${row.y+row.h/2+16}" text-anchor="middle" font-size="13"
-      fill="#0b0b0b" pointer-events="none">${d.p}%</text>`;
-  else if(w>34) s+=`<text x="${x+w/2}" y="${row.y+row.h/2+5}" text-anchor="middle"
-      font-size="12.5" font-weight="700" fill="#0b0b0b" pointer-events="none">${d.p}%</text>`;
+  let s='<g data-k="'+d.k+'" style="cursor:default" opacity="'+op+'">'+
+    '<rect x="'+x+'" y="'+row.y+'" width="'+Math.max(w,1.2)+'" height="'+row.h+'" rx="4"'+
+    ' fill="'+d.c+'" fill-opacity="'+(d.h?0.35:0.85)+'" stroke="'+d.c+'" stroke-width="1.4"'+dash+'/>';
+  const lab=typeof p==='number'?pct(p):p+'%';
+  if(w>90) s+='<text x="'+(x+w/2)+'" y="'+(row.y+row.h/2-4)+'" text-anchor="middle"'+
+      ' font-size="14.5" font-weight="700" fill="#0b0b0b" pointer-events="none">'+esc(d.l)+'</text>'+
+    '<text x="'+(x+w/2)+'" y="'+(row.y+row.h/2+16)+'" text-anchor="middle" font-size="13"'+
+      ' fill="#0b0b0b" pointer-events="none">'+lab+'</text>';
+  else if(w>34) s+='<text x="'+(x+w/2)+'" y="'+(row.y+row.h/2+5)+'" text-anchor="middle"'+
+      ' font-size="12.5" font-weight="700" fill="#0b0b0b" pointer-events="none">'+lab+'</text>';
   s+='</g>';
   return s;
 }
-function lanes(row,list){
+function lanes(row,list,widths){
   // labels under a bar for its narrow segments, each dropped to the first
   // lane where it fits
   let s='', x=row.x; const ends=[];
-  const tot=list.reduce((a,d)=>a+d.p,0);
-  for(const d of list){
-    const w=d.p/tot*row.w;
+  for(let i=0;i<list.length;i++){
+    const d=list[i], w=widths[i];
     if(w<=90){
       const tw=d.l.length*6.4+10;
       const lx=Math.min(row.x+row.w-tw/2,Math.max(row.x+tw/2,x+w/2));
@@ -148,63 +272,229 @@ function lanes(row,list){
       while(lane<ends.length && ends[lane]>lx-tw/2) lane++;
       ends[lane]=lx+tw/2+10;
       const ly=row.y+row.h+22+lane*19;
-      s+=`<g data-k="${d.k}" style="cursor:default">
-        <line x1="${x+w/2}" y1="${row.y+row.h+2}" x2="${lx}" y2="${ly-11}" stroke="${d.c}" stroke-width="1" opacity="0.7"/>
-        <text x="${lx}" y="${ly}" text-anchor="middle" font-size="12" fill="${d.c}">${esc(d.l)}</text></g>`;
+      s+='<g data-k="'+d.k+'" style="cursor:default">'+
+        '<line x1="'+(x+w/2)+'" y1="'+(row.y+row.h+2)+'" x2="'+lx+'" y2="'+(ly-11)+
+        '" stroke="'+d.c+'" stroke-width="1" opacity="0.7"/>'+
+        '<text x="'+lx+'" y="'+ly+'" text-anchor="middle" font-size="12" fill="'+d.c+'">'+
+        esc(d.l)+'</text></g>';
     }
     x+=w;
   }
   return s;
 }
+
+/* ---- the history panel ---- */
+const CX=v=>C.x+(v-LOGMIN)/(LOGMAX-LOGMIN)*C.w;     // log10 a to pixels
+const CY=f=>C.y+C.h-f/100*C.h;                       // percent to pixels
+const XC=px=>LOGMIN+(px-C.x)/C.w*(LOGMAX-LOGMIN);
+const CURVES=[['rad','Radiation','#e0564f'],
+              ['mat','Matter','#58a6ff'],
+              ['de','Dark energy','#b48cf2']];
+function curveShare(k,a){
+  const r=OM_R*Math.pow(a,-4), m=OM_M*Math.pow(a,-3), l=OM_L, t=r+m+l;
+  return (k==='rad'?r:k==='mat'?m:l)/t*100;
+}
+function panel(){
+  let s='<g>';
+  s+='<rect x="'+C.x+'" y="'+C.y+'" width="'+C.w+'" height="'+C.h+
+     '" fill="#171717" stroke="#2b2b2b"/>';
+  // horizontal grid at 0, 25, 50, 75, 100 percent
+  for(const f of [0,25,50,75,100]){
+    s+='<line x1="'+C.x+'" y1="'+CY(f)+'" x2="'+(C.x+C.w)+'" y2="'+CY(f)+
+       '" stroke="#2b2b2b" stroke-width="1"/>'+
+       '<text x="'+(C.x-8)+'" y="'+(CY(f)+4)+'" text-anchor="end" font-size="11" fill="#6f6f6f">'+
+       f+'%</text>';
+  }
+  // decades of the scale factor, labelled underneath by redshift
+  for(let e=LOGMIN;e<=LOGMAX;e++){
+    const x=CX(e), a=Math.pow(10,e), z=1/a-1;
+    s+='<line x1="'+x+'" y1="'+C.y+'" x2="'+x+'" y2="'+(C.y+C.h)+
+       '" stroke="#232323" stroke-width="1"/>'+
+       '<text x="'+x+'" y="'+(C.y+C.h+16)+'" text-anchor="middle" font-size="11" fill="#6f6f6f">'+
+       (e===0?'1':'10'+sup(e))+'</text>'+
+       '<text x="'+x+'" y="'+(C.y+C.h+31)+'" text-anchor="middle" font-size="10.5" fill="#565656">'+
+       fmtZ(z)+'</text>';
+  }
+  s+='<text x="'+(C.x+C.w+20)+'" y="'+(C.y+C.h+16)+'" font-size="11" fill="#6f6f6f">size</text>'+
+     '<text x="'+(C.x+C.w+20)+'" y="'+(C.y+C.h+31)+'" font-size="10.5" fill="#565656">redshift</text>';
+  // the two crossings
+  for(const [av,txt] of [[A_RM,'radiation = matter'],[A_ML,'matter = dark energy']]){
+    const x=CX(Math.log10(av)), anchor=x>C.x+C.w-150?'end':'start';
+    s+='<line x1="'+x+'" y1="'+C.y+'" x2="'+x+'" y2="'+(C.y+C.h)+
+       '" stroke="#8a8a8a" stroke-width="1" stroke-dasharray="4 4"/>'+
+       '<text x="'+(x+(anchor==='end'?-6:6))+'" y="'+(C.y+14)+'" text-anchor="'+anchor+
+       '" font-size="11" fill="#a9a9a9">'+txt+'</text>';
+  }
+  // the three curves
+  const N=700;
+  for(const [k,lab,col] of CURVES){
+    let pts='';
+    for(let i=0;i<=N;i++){
+      const lv=LOGMIN+(LOGMAX-LOGMIN)*i/N;
+      pts+=CX(lv).toFixed(2)+','+CY(curveShare(k,Math.pow(10,lv))).toFixed(2)+' ';
+    }
+    const kk=(k==='mat')?'dm':k;
+    const op=(sel===null||sel===kk||(k==='mat'&&sel==='ob'))?1:0.3;
+    s+='<g data-k="'+kk+'" opacity="'+op+'"><polyline points="'+pts+
+       '" fill="none" stroke="'+col+'" stroke-width="2.4" stroke-linejoin="round"/>'+
+       '<polyline points="'+pts+'" fill="none" stroke="transparent" stroke-width="14"/></g>';
+  }
+  // the marker
+  const mx=CX(la);
+  s+='<line x1="'+mx+'" y1="'+(C.y-8)+'" x2="'+mx+'" y2="'+(C.y+C.h+4)+
+     '" stroke="#f4efe2" stroke-width="1.6"/>';
+  for(const [k,lab,col] of CURVES){
+    s+='<circle cx="'+mx+'" cy="'+CY(curveShare(k,Math.pow(10,la))).toFixed(2)+
+       '" r="4" fill="'+col+'" stroke="#121212" stroke-width="1.4"/>';
+  }
+  // a legend for the curves, on the title line where no curve can reach it
+  const items=CURVES.map(c=>[c[1],c[2],c[1].length*6.2+34]);
+  let lx=C.x+C.w-items.reduce((t,i)=>t+i[2],0)+18;
+  for(const [lab,col,wid] of items){
+    s+='<rect x="'+lx+'" y="'+(C.y-22)+'" width="11" height="3" fill="'+col+'"/>'+
+       '<text x="'+(lx+16)+'" y="'+(C.y-15)+'" font-size="11.5" fill="'+col+'">'+lab+'</text>';
+    lx+=wid;
+  }
+  s+='</g>';
+  return s;
+}
+
+/* ---- the whole drawing ---- */
 function render(){
-  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" id="uvsvg">`;
-  s+=`<rect width="${W}" height="${H}" fill="#121212"/>`;
-  s+=`<text x="${T.x}" y="${T.y-18}" font-size="14" fill="#9a9a9a">Everything, by energy content today</text>`;
-  s+=`<text x="${B.x}" y="${B.y-18}" font-size="14" fill="#9a9a9a">The ordinary matter alone, atom by atom</text>`;
-  s+=`<text x="${G.x}" y="${G.y-18}" font-size="14" fill="#9a9a9a">The ordinary matter of one large galaxy, the Milky Way</text>`;
+  const a=Math.pow(10,la), sh=shares(a), now=Math.abs(la)<1e-9;
+  const faded=now?1:0.32;
+  let s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" id="uvsvg">';
+  s+='<rect width="'+W+'" height="'+H+'" fill="#121212"/>';
+  s+='<text x="'+C.x+'" y="'+(C.y-18)+'" font-size="14" fill="#9a9a9a">'+
+     'The share of all the energy, across the life of the universe</text>';
+  s+='<text x="'+T.x+'" y="'+(T.y-18)+'" font-size="14" fill="#9a9a9a">'+
+     'Everything, by energy content '+(now?'today':'when the universe was '+
+     num(a)+' times its present size')+'</text>';
+  s+='<g opacity="'+faded+'">';
+  s+='<text x="'+B.x+'" y="'+(B.y-18)+'" font-size="14" fill="#9a9a9a">'+
+     'The ordinary matter alone, atom by atom, as counted today</text>';
+  s+='<text x="'+G.x+'" y="'+(G.y-18)+'" font-size="14" fill="#9a9a9a">'+
+     'The ordinary matter of one large galaxy, the Milky Way</text>';
+  // widths of the top bar at this moment, so the wedge can find the sliver
+  const tw=TOP.map(d=>sh[d.k]/100*T.w);
+  let obx=T.x; for(let i=0;i<TOP.length;i++){ if(TOP[i].k==='ob') break; obx+=tw[i]; }
+  const obw=tw[TOP.findIndex(d=>d.k==='ob')];
   // the wedge from the sliver to the second bar
-  const obw=TOP[2].p/100*T.w, obx=T.x+(TOP[0].p+TOP[1].p)/100*T.w;
-  s+=`<path d="M${obx},${T.y+T.h} L${obx+obw},${T.y+T.h} L${B.x+B.w},${B.y} L${B.x},${B.y} Z"
-    fill="#ffb02e" fill-opacity="0.07" stroke="#ffb02e" stroke-opacity="0.35" stroke-width="1"/>`;
+  s+='<path d="M'+obx+','+(T.y+T.h)+' L'+(obx+obw)+','+(T.y+T.h)+' L'+(B.x+B.w)+','+B.y+
+     ' L'+B.x+','+B.y+' Z" fill="#ffb02e" fill-opacity="0.07" stroke="#ffb02e"'+
+     ' stroke-opacity="0.35" stroke-width="1"/>';
   // the wedge from the galaxies segment, at the right end, to the third bar
-  const btot=BAR.reduce((a,d)=>a+d.p,0);
-  const gw=BAR[BAR.length-1].p/btot*B.w, gx=B.x+B.w-gw;
-  s+=`<path d="M${gx},${B.y+B.h} L${gx+gw},${B.y+B.h} L${G.x+G.w},${G.y} L${G.x},${G.y} Z"
-    fill="#31d67a" fill-opacity="0.07" stroke="#31d67a" stroke-opacity="0.35" stroke-width="1"/>`;
-  let x=T.x;
-  for(const d of TOP){ const w=d.p/100*T.w; s+=seg(T,d,x,w); x+=w; }
-  x=B.x;
-  for(const d of BAR){ const w=d.p/btot*B.w; s+=seg(B,d,x,w); x+=w; }
+  const btot=BAR.reduce((x,d)=>x+d.p,0);
+  const bw=BAR.map(d=>d.p/btot*B.w);
+  const gw=bw[bw.length-1], gx=B.x+B.w-gw;
+  s+='<path d="M'+gx+','+(B.y+B.h)+' L'+(gx+gw)+','+(B.y+B.h)+' L'+(G.x+G.w)+','+G.y+
+     ' L'+G.x+','+G.y+' Z" fill="#31d67a" fill-opacity="0.07" stroke="#31d67a"'+
+     ' stroke-opacity="0.35" stroke-width="1"/>';
+  let x=B.x;
+  for(let i=0;i<BAR.length;i++){ s+=seg(B,BAR[i],x,bw[i],BAR[i].p); x+=bw[i]; }
+  const gtot=GAL.reduce((x2,d)=>x2+d.p,0);
+  const gws=GAL.map(d=>d.p/gtot*G.w);
   x=G.x;
-  const gtot=GAL.reduce((a,d)=>a+d.p,0);
-  for(const d of GAL){ const w=d.p/gtot*G.w; s+=seg(G,d,x,w); x+=w; }
-  s+=lanes(B,BAR)+lanes(G,GAL);
+  for(let i=0;i<GAL.length;i++){ s+=seg(G,GAL[i],x,gws[i],GAL[i].p); x+=gws[i]; }
+  s+=lanes(B,BAR,bw)+lanes(G,GAL,gws);
+  s+='</g>';
+  x=T.x;
+  for(let i=0;i<TOP.length;i++){ s+=seg(T,TOP[i],x,tw[i],sh[TOP[i].k]); x+=tw[i]; }
+  s+=lanes(T,TOP,tw);
+  s+=panel();
   s+='</svg>';
   el.innerHTML=s;
 }
+
+/* ---- the card ---- */
 function show(k){
   const d=TOP.find(t=>t.k===k)||BAR.find(t=>t.k===k)||GAL.find(t=>t.k===k);
   if(!d) return;
-  document.getElementById('pct').textContent=d.p+'%';
-  document.getElementById('pct').style.color=d.c;
+  const inTop=TOP.indexOf(d)>=0;
+  const sh=shares(Math.pow(10,la));
+  const p=inTop?sh[d.k]:d.p;
+  const P=document.getElementById('pct');
+  P.textContent=inTop?pct(p):d.p+'%';
+  P.style.color=d.c;
   document.getElementById('segTxt').textContent=d.t;
   document.getElementById('bodyTxt').textContent=d.b;
+  const at=document.getElementById('atTxt');
+  if(inTop){
+    const nowsh=shares(1)[d.k];
+    at.textContent=Math.abs(la)<1e-9 ? 'share of everything today'
+      : 'share of everything when the universe was '+num(Math.pow(10,la))+
+        ' times its present size. Today it is '+pct(nowsh)+'.';
+  } else at.textContent='';
   document.getElementById('srcTxt').textContent=
-    d.s+(TOP.includes(d)?' \u00b7 share of everything'
-        :BAR.includes(d)?' \u00b7 share of the ordinary matter'
-        :' \u00b7 share of the galaxy\u2019s ordinary matter');
+    d.s+(inTop?'':BAR.includes(d)?' · share of the ordinary matter'
+        :' · share of the galaxy’s ordinary matter');
 }
+let card=null;
+function refresh(){ render(); if(card) show(card); readouts(); }
+function readouts(){
+  const a=Math.pow(10,la);
+  document.getElementById('rdA').textContent=num(a)+(Math.abs(la)<1e-9?' (today)':'');
+  document.getElementById('rdZ').textContent=fmtZ(1/a-1);
+  document.getElementById('rdT').textContent=fmtT(TCMB/a);
+  document.getElementById('rdAge').textContent=fmtAge(age(a));
+  const sl=document.getElementById('scale');
+  if(+sl.value!==Math.round(la*100)) sl.value=Math.round(la*100);
+  for(const b of document.querySelectorAll('#presets button'))
+    b.setAttribute('aria-pressed', Math.abs(+b.dataset.la-la)<5e-3 ? 'true':'false');
+}
+function setLa(v){
+  la=Math.min(LOGMAX,Math.max(LOGMIN,v));
+  refresh();
+}
+
+/* ---- moments worth a button ---- */
+const MOMENTS=[
+  [LOGMIN,'the earliest here'],
+  [Math.log10(A_RM),'radiation and matter equal'],
+  [Math.log10(1/1091),'the background is released'],
+  [Math.log10(1/21),'the first stars'],
+  [Math.log10(A_ML),'matter and dark energy equal'],
+  [0,'today'],
+  [LOGMAX,'ten times this size'],
+];
+document.getElementById('presets').innerHTML=MOMENTS.map(
+  m=>'<button type="button" data-la="'+m[0]+'">'+m[1]+'</button>').join('');
+document.getElementById('presets').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(b) setLa(+b.dataset.la);
+});
+document.getElementById('scale').addEventListener('input',e=>setLa(+e.target.value/100));
+
+/* ---- pointing at the drawing ---- */
 el.addEventListener('pointerover',e=>{
   const g=e.target.closest('[data-k]');
-  if(g){ show(g.getAttribute('data-k')); }
+  if(g){ card=g.getAttribute('data-k'); show(card); }
 });
 el.addEventListener('click',e=>{
+  if(swallow){ swallow=false; return; }
   const g=e.target.closest('[data-k]');
   sel = g ? (sel===g.getAttribute('data-k')?null:g.getAttribute('data-k')) : null;
-  render();
-  if(g) show(g.getAttribute('data-k'));
+  if(g) card=g.getAttribute('data-k');
+  refresh();
 });
-render();
+// dragging across the history panel moves the moment
+function fromEvent(e){
+  const svg=document.getElementById('uvsvg'), r=svg.getBoundingClientRect();
+  const px=(e.clientX-r.left)/r.width*W, py=(e.clientY-r.top)/r.height*H;
+  if(py<C.y-16||py>C.y+C.h+8) return null;
+  return XC(px);
+}
+let dragging=false, swallow=false;
+el.addEventListener('pointerdown',e=>{
+  const v=fromEvent(e);
+  if(v===null) return;
+  dragging=true; swallow=true; el.setPointerCapture&&el.setPointerCapture(e.pointerId);
+  setLa(v); e.preventDefault();
+});
+el.addEventListener('pointermove',e=>{ if(dragging){ const v=fromEvent(e); if(v!==null) setLa(v); } });
+window.addEventListener('pointerup',()=>{ dragging=false; });
+
+card='de';
+refresh();
 show('de');
 </script>
 </body>

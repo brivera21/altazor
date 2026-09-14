@@ -53,6 +53,15 @@ button.on { background:var(--accent); border-color:var(--accent); color:#0b0b0b;
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
 .refs p { margin:0 0 8px; overflow-wrap:anywhere; }
 .refs a { color:var(--accent); }
+.bar2 { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:0 0 10px; }
+.bar2 input { background:var(--panel); color:var(--text); border:1px solid var(--line);
+  border-radius:8px; padding:6px 10px; width:230px; font:inherit; font-size:13.5px; }
+.bar2 button { background:var(--panel); color:var(--muted); border:1px solid var(--line);
+  border-radius:999px; padding:5px 11px; font-size:12.5px; cursor:pointer; font-family:inherit; }
+.bar2 button:hover:not(:disabled) { color:var(--text); border-color:#3d3d3d; }
+.bar2 button:disabled { opacity:.4; cursor:default; }
+.bar2 .sep { flex:1 1 0; }
+#findTxt, #winTxt { color:var(--muted); font-size:12.5px; }
 .refs p { padding-left:2em; text-indent:-2em; }
 .refs .ann { color:#7d7d7d; display:block; padding-left:0; text-indent:0; margin-top:2px; }
 h2.refh { font-size:15px; margin:26px 0 8px; }
@@ -72,6 +81,14 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   <button id="bSun">Sun at the center</button>
   <button id="bLin">Even scale</button>
 </div>
+<div class="bar2">
+  <input type="search" id="find" placeholder="a moment, by name" aria-label="a moment, by name">
+  <span id="findTxt"></span>
+  <button id="fitFind" disabled>Fit the line to them</button>
+  <span class="sep"></span>
+  <span id="winTxt">the whole line</span>
+  <button id="whole" disabled>The whole line</button>
+</div>
 <div id="legend"></div>
 <div class="stage">
   <div id="chart"></div>
@@ -85,8 +102,12 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   </div></div>
 </div>
 <p class="note">Time runs left to right from the Big Bang, on four scales. Back from now counts years before the present, so each step right is a tenth of the time left. Forward from the Big Bang counts years since it. Sun at the center is the same count stretched so the Sun sits on the middle, giving the nine billion years before it half the line. The even scale is one rate throughout, and shows what the logarithms hide.</p>
-<p class="note" style="border-top:none; padding-top:0;">The named milestones above the line carry their dating and its source, and where a claim is disputed the card says so and gives the firmer date beside it. Bars are the published uncertainty. The strands below the line hold the detail, from a Big History notebook; every date in them was checked against the current literature, and the ones that had drifted are corrected and listed under the references.</p>
-<div class="method"><details><summary>What the notebook said, and what the line says now</summary>
+<p class="note" style="border-top:none; padding-top:0;">The named milestones above the line carry their dating and its source, and where a claim is disputed the card says so and gives the firmer date beside it. Bars are the published uncertainty. The strands below hold the detail, from a Big History notebook.</p>
+<p class="note" style="border-top:none; padding-top:0;">A name typed into the box rings every mark that carries it, across the milestones and all the detail, and the return key walks from one to the next. A band pulled out across the strands rescales the line to that span alone, on whichever scale is running.</p>
+<div class="method"><p>Every date in the strands was checked against the
+current literature. The ones that had drifted are corrected here and listed
+under the references.</p>
+<details><summary>What the notebook said, and what the line says now</summary>
 <table><tr><td>The cosmic dark ages</td><td>The notebook: began 13.796 Ga, before the Big Bang itself. The line now: the dark ages run from recombination to reionization, and end 13.4 Ga.</td></tr><tr><td>The giant planets</td><td>The notebook: 4.59 Ga, before the Sun. The line now: Jupiter's core grew within a few million years of the first solids, 4.564 Ga.</td></tr><tr><td>The Moon</td><td>The notebook: 4.53 Ga. The line now: the giant impact is now dated near 4.51 Ga.</td></tr><tr><td>The earliest known galaxies</td><td>The notebook: 13.407 Ga. The line now: MoM z14, announced in 2025, sits at 13.52 Ga.</td></tr><tr><td>The Permian extinction</td><td>The notebook: an interval of 250 to 200 Ma. The line now: it is a short event at 251.9 Ma.</td></tr><tr><td>The Chicxulub impact</td><td>The notebook: 65 Ma. The line now: 66.0 Ma.</td></tr><tr><td>The first human</td><td>The notebook: Homo sapiens at 2.8 Ma. The line now: 2.8 Ma is the earliest jaw assigned to the genus Homo.</td></tr><tr><td>Acheulean handaxes</td><td>The notebook: 2.8 Ma. The line now: 1.76 Ma at Kokiselei.</td></tr><tr><td>Homo sapiens</td><td>The notebook: 200 ka. The line now: 315 ka at Jebel Irhoud.</td></tr><tr><td>Twisted plant fibre</td><td>The notebook: 90 ka. The line now: the Neanderthal cord from Abri du Maras is 50 ka.</td></tr><tr><td>Australia</td><td>The notebook: settled 55 ka. The line now: 65 ka at Madjedbebe.</td></tr><tr><td>The domestic dog</td><td>The notebook: 30 ka. The line now: the oldest undisputed dog burial is 14.2 ka, and the date is contested.</td></tr><tr><td>Pigs in New Guinea</td><td>The notebook: 7000 BCE. The line now: they arrive within the last few thousand years, so the mark was dropped.</td></tr><tr><td>The dromedary</td><td>The notebook: 3000 BCE. The line now: about 1000 BCE.</td></tr><tr><td>Adwa</td><td>The notebook: an Ethiopian victory in 1340. The line now: Adwa was fought in 1896, and the mark was dropped.</td></tr><tr><td>The Inca empire</td><td>The notebook: 1200. The line now: the kingdom of Cusco is that old, the empire expands from 1438.</td></tr><tr><td>Angkor</td><td>The notebook: abandoned about 1400. The line now: 1431.</td></tr><tr><td>A world population of one billion</td><td>The notebook: 1750. The line now: about 1800.</td></tr><tr><td>A world population of two billion</td><td>The notebook: 1900. The line now: 1927.</td></tr></table>
 </details></div>
 <h2 class="refh">References</h2>
@@ -120,6 +141,8 @@ const COL={}, SNAME={};
 for(const s of ST){ COL[s.k]=s.c; SNAME[s.k]=s.n; }
 const off=new Set();          // strands the reader has switched off
 let mode='back', cur=0, curDet=-1;
+let dragX=null, dragX2=null;  // the band being pulled out over the line
+let finding=false, found={ev:new Set(),det:new Set()}, hits=[], hitAt=-1;
 const TMIN=2;   // the line stops two years back, where the last marks are
 
 // how a span of years reads out loud
@@ -150,23 +173,30 @@ const W=1000, L=112, R=34, TOP=34, LANEH=28, ROWH=22, GAP=48;
 const LMIN=Math.log10(TMIN), LMAX=Math.log10(NOW), LSUN=Math.log10(TSUN);
 let AXIS=200, H=600;
 
-function X(t){
-  const w=W-L-R;
-  if(mode==='even') return L+(1-t/NOW)*w;
-  if(mode==='fwd'){                       // log years since the Big Bang
-    return L+Math.log10(Math.max(1,NOW-t))/Math.log10(NOW)*w;
-  }
+// where a date sits along the whole line, 0 at the Big Bang and 1 at now
+function u(t){
+  if(mode==='even') return 1-t/NOW;
+  if(mode==='fwd') return Math.log10(Math.max(1,NOW-t))/Math.log10(NOW);
   if(mode==='sun'){
     // still log years before now, but broken at the Sun and stretched so
     // the Sun lands on the middle: half the line for the nine billion
     // years before it, half for the four and a half billion since
-    const C=L+w*0.5, v=Math.log10(Math.max(TMIN,t));
-    if(v>=LSUN) return L+(LMAX-v)/(LMAX-LSUN)*(C-L);
-    return C+(LSUN-v)/(LSUN-LMIN)*(W-R-C);
+    const v=Math.log10(Math.max(TMIN,t));
+    if(v>=LSUN) return (LMAX-v)/(LMAX-LSUN)*0.5;
+    return 0.5+(LSUN-v)/(LSUN-LMIN)*0.5;
   }
   const v=Math.log10(Math.max(TMIN,t));   // log years before now
-  return L+(LMAX-v)/(LMAX-LMIN)*w;
+  return (LMAX-v)/(LMAX-LMIN);
 }
+let win=null;         // [older, newer] in years before now, or the whole line
+function X(t){
+  const w=W-L-R, p=u(t);
+  if(!win) return L+p*w;
+  const a=u(win[0]), b=u(win[1]);
+  return L+(p-a)/(b-a)*w;
+}
+function inView(x){ return x>=L-2 && x<=W-R+2; }
+
 const TICKS={
   back:[1e10,1e9,1e8,1e7,1e6,1e5,1e4,1e3,1e2,1e1],
   fwd:[1,1e3,1e6,1e9,1e10],
@@ -182,6 +212,43 @@ function tickLabel(t){
   if(t===0) return 'now';
   return unit(t);
 }
+// nice round values inside a range: powers of ten and their halves and
+// fifths on a log reading, an even step on a linear one
+function niceVals(lo,hi,linear){
+  const out=[];
+  if(linear){
+    const raw=(hi-lo)/6, e=Math.pow(10,Math.floor(Math.log10(raw)));
+    const m=raw/e, step=(m<1.5?1:m<3.5?2:m<7.5?5:10)*e;
+    for(let v=Math.ceil(lo/step)*step; v<=hi+step*1e-9; v+=step) out.push(v);
+    return out;
+  }
+  // widen the set of round numbers until the span carries enough of them
+  for(const mants of [[1,2,5],[1,1.5,2,3,5,7],[1,1.2,1.5,2,2.5,3,4,5,6,7,8,9]]){
+    out.length=0;
+    for(const mant of mants)
+      for(let e=-1;e<=11;e++){
+        const v=mant*Math.pow(10,e);
+        if(v>=lo&&v<=hi) out.push(v);
+      }
+    if(out.length>=3) break;
+  }
+  out.sort((a,b)=>a-b);
+  return out.length>11 ? out.filter(v=>{
+    const l=Math.log10(v); return Math.abs(l-Math.round(l))<1e-9; }) : out;
+}
+// the ticks for the line as it stands, in years before now
+function ticksNow(){
+  if(!win) return TICKS[mode].filter(t=>t<=NOW&&t>=0)
+    .map(t=>({t:mode==='fwd'?NOW-t:t, lab:tickLabel(t)}));
+  const [o,n]=win;
+  if(mode==='fwd'){                       // read as years since the Big Bang
+    return niceVals(Math.max(1,NOW-o),NOW-n,false)
+      .map(a=>({t:NOW-a, lab:unit(a)}));
+  }
+  const lin=mode==='even';
+  return niceVals(lin?n:Math.max(TMIN,n), o, lin)
+    .map(t=>({t, lab:t===0?'now':unit(t)}));
+}
 const CAP={back:'years before now, each step a tenth of the rest',
   fwd:'years since the Big Bang, each step ten times the last',
   sun:'years before now, stretched to put the Sun on the middle',
@@ -190,7 +257,8 @@ const CAP={back:'years before now, each step a tenth of the rest',
 // pack the milestone labels into lanes so they do not collide
 function packLanes(){
   const lanes=[], laneOf={};
-  const order=EV.map((e,i)=>({e,i,x:X(e.t)})).sort((a,b)=>a.x-b.x);
+  const order=EV.map((e,i)=>({e,i,x:X(e.t)})).filter(o=>inView(o.x))
+    .sort((a,b)=>a.x-b.x);
   for(const o of order){
     const wide=o.e.n.length*7+26;
     const left=(o.x+wide>W-R)?o.x-wide:o.x;
@@ -229,10 +297,12 @@ function render(){
       if(d.k!==st.k) return;
       const x=X(d.t);
       if(x<L-1||x>W-R+1) return;
-      const hot=i===curDet;
+      const hot=i===curDet, hit=found.det.has(i), dull=finding&&!hit;
       s+='<g data-d="'+i+'" style="cursor:pointer">'
+        +(hit?'<circle cx="'+x.toFixed(1)+'" cy="'+mid.toFixed(1)
+            +'" r="7.5" fill="none" stroke="#f4efe2" stroke-width="1.4" stroke-opacity="0.85"/>':'')
         +'<circle cx="'+x.toFixed(1)+'" cy="'+mid.toFixed(1)+'" r="'+(hot?5:2.9)
-        +'" fill="'+st.c+'" fill-opacity="'+(hot?1:0.72)+'"'
+        +'" fill="'+st.c+'" fill-opacity="'+(hot?1:dull?0.16:0.72)+'"'
         +(hot?' stroke="#e6e6e6" stroke-width="1.2"':'')+'/>'
         +'<rect x="'+(x-5).toFixed(1)+'" y="'+y+'" width="10" height="'+ROWH
         +'" fill="transparent"/></g>';
@@ -241,22 +311,24 @@ function render(){
 
   // the axis and its ticks
   s+='<path d="M'+L+','+AXIS+' H'+(W-R)+'" stroke="#3d444d" stroke-width="1.4"/>';
-  for(const t of TICKS[mode]){
-    if(t>NOW||t<0) continue;
-    const x=mode==='fwd'
-      ? L+Math.log10(Math.max(1,t))/Math.log10(NOW)*(W-L-R) : X(t);
+  for(const tk of ticksNow()){
+    const x=X(tk.t);
+    if(!inView(x)) continue;
     s+='<path d="M'+x.toFixed(1)+','+(AXIS-5)+' v10" stroke="#3d444d" stroke-width="1.2"/>'
       +'<text x="'+x.toFixed(1)+'" y="'+(AXIS+21)+'" text-anchor="middle" font-size="10.5" fill="#6b7280">'
-      +tickLabel(t)+'</text>';
+      +tk.lab+'</text>';
   }
   s+='<text x="'+(W-R)+'" y="'+(AXIS+38)+'" text-anchor="end" font-size="10.5" fill="#6b7280">'
     +CAP[mode]+'</text>';
-  s+='<text x="'+L+'" y="20" font-size="11" fill="#6b7280">the Big Bang</text>'
-    +'<text x="'+(W-R)+'" y="20" text-anchor="end" font-size="11" fill="#6b7280">now</text>';
+  s+='<text x="'+L+'" y="20" font-size="11" fill="#6b7280">'
+    +(win?ago(win[0]):'the Big Bang')+'</text>'
+    +'<text x="'+(W-R)+'" y="20" text-anchor="end" font-size="11" fill="#6b7280">'
+    +(win?ago(win[1]):'now')+'</text>';
 
   // the milestones, above the line
   EV.forEach((e,i)=>{
     const x=X(e.t);
+    if(!inView(x)||pack.laneOf[i]===undefined) return;
     const flip=x+e.n.length*7+18>W-R;
     const y=AXIS-16-(MAXLANE-1-pack.laneOf[i])*LANEH;
     const c=COL[e.k]||'#e6e6e6';
@@ -267,8 +339,13 @@ function render(){
       s+='<path d="M'+Math.min(x0,x1).toFixed(1)+','+(y-9)+' H'+Math.max(x0,x1).toFixed(1)
         +'" stroke="'+c+'" stroke-width="2.4" stroke-opacity="0.3" stroke-linecap="round"/>';
     }
-    s+='<path d="M'+x.toFixed(1)+','+y+' V'+AXIS+'" stroke="'+c+'" stroke-width="1" stroke-opacity="0.45"/>'
-      +'<circle cx="'+x.toFixed(1)+'" cy="'+y+'" r="'+(i===cur&&curDet<0?6:4.5)+'" fill="'+c+'" stroke="#121212" stroke-width="1.4"/>'
+    const ehit=found.ev.has(i);
+    s+='<path d="M'+x.toFixed(1)+','+y+' V'+AXIS+'" stroke="'+c+'" stroke-width="1" stroke-opacity="'
+      +(finding&&!ehit?0.15:0.45)+'"/>'
+      +(ehit?'<circle cx="'+x.toFixed(1)+'" cy="'+y
+          +'" r="10" fill="none" stroke="#f4efe2" stroke-width="1.4" stroke-opacity="0.85"/>':'')
+      +'<circle cx="'+x.toFixed(1)+'" cy="'+y+'" r="'+(i===cur&&curDet<0?6:4.5)+'" fill="'+c
+      +'" fill-opacity="'+(finding&&!ehit?0.3:1)+'" stroke="#121212" stroke-width="1.4"/>'
       // a label that would run off the right edge is set to the left instead
       +'<text x="'+(flip?(x-9):(x+9)).toFixed(1)+'" y="'+(y+4)+'" text-anchor="'+(flip?'end':'start')
       +'" font-size="12" font-weight="'+(i===cur&&curDet<0?700:400)
@@ -276,6 +353,13 @@ function render(){
       +'<rect x="'+(flip?(x-9-e.n.length*7):(x-9)).toFixed(1)+'" y="'+(y-11)+'" width="'+(e.n.length*7+22)+'" height="22" fill="transparent"/>'
       +'</g>';
   });
+  // the band being dragged out, and the matches a search has turned up
+  if(dragX!==null){
+    const x0=Math.min(dragX,dragX2), x1=Math.max(dragX,dragX2);
+    s+='<rect x="'+x0.toFixed(1)+'" y="'+(AXIS-14)+'" width="'+(x1-x0).toFixed(1)
+      +'" height="'+(H-AXIS+6)+'" fill="#58a6ff" fill-opacity="0.13" '
+      +'stroke="#58a6ff" stroke-opacity="0.6" stroke-width="1"/>';
+  }
   s+='</svg>';
   el.innerHTML=s;
 }
@@ -323,7 +407,7 @@ legend.innerHTML=ST.map(s=>'<button data-k="'+s.k+'"><i style="background:'
 function toggle(k){
   if(off.has(k)) off.delete(k); else off.add(k);
   legend.querySelector('[data-k="'+k+'"]').classList.toggle('off',off.has(k));
-  render();
+  if(finding) runFind(findBox.value); else render();
 }
 legend.addEventListener('click',ev=>{
   const b=ev.target.closest('[data-k]');
@@ -331,7 +415,7 @@ legend.addEventListener('click',ev=>{
 });
 
 function setMode(m){
-  mode=m; curDet=-1;
+  mode=m; curDet=-1; win=null; winTxt();
   for(const [id,v] of [['bBack','back'],['bFwd','fwd'],['bSun','sun'],
                        ['bLin','even']])
     document.getElementById(id).classList.toggle('on',m===v);
@@ -342,8 +426,125 @@ document.getElementById('bFwd').onclick=()=>setMode('fwd');
 document.getElementById('bSun').onclick=()=>setMode('sun');
 document.getElementById('bLin').onclick=()=>setMode('even');
 
+/* ---- the window: a drag over the line rescales it to that span ---- */
+// the inverse of u(t), so a pixel can be read back as a date
+function tAt(px){
+  const w=W-L-R;
+  let p=(px-L)/w;
+  if(win){ const a=u(win[0]), b=u(win[1]); p=a+p*(b-a); }
+  p=Math.min(1,Math.max(0,p));
+  if(mode==='even') return NOW*(1-p);
+  if(mode==='fwd') return NOW-Math.pow(10,p*Math.log10(NOW));
+  if(mode==='sun') return p<=0.5 ? Math.pow(10,LMAX-p*2*(LMAX-LSUN))
+                                 : Math.pow(10,LSUN-(p-0.5)*2*(LSUN-LMIN));
+  return Math.pow(10,LMAX-p*(LMAX-LMIN));
+}
+function winTxt(){
+  document.getElementById('winTxt').textContent = win
+    ? ago(win[0])+' to '+(win[1]<2?'now':ago(win[1])) : 'the whole line';
+  document.getElementById('whole').disabled = !win;
+}
+function setWin(w){
+  if(w){
+    const o=Math.min(NOW,Math.max(w[0],w[1])), n=Math.max(0,Math.min(w[0],w[1]));
+    // a span narrower than a hair of the line is a click, not a window
+    if(Math.abs(u(o)-u(n))<0.004){ win=null; } else win=[o,n];
+  } else win=null;
+  winTxt(); render();
+}
+document.getElementById('whole').onclick=()=>setWin(null);
+
+function svgX(ev){
+  const svg=document.getElementById('tsvg'), r=svg.getBoundingClientRect();
+  return (ev.clientX-r.left)/r.width*W;
+}
+function svgY(ev){
+  const svg=document.getElementById('tsvg'), r=svg.getBoundingClientRect();
+  return (ev.clientY-r.top)/r.height*H;
+}
+el.addEventListener('pointerdown',ev=>{
+  if(svgY(ev)<AXIS-14) return;        // the milestones above the line stay clickable
+  dragX=dragX2=Math.min(W-R,Math.max(L,svgX(ev)));
+  el.setPointerCapture&&el.setPointerCapture(ev.pointerId);
+  ev.preventDefault();
+});
+el.addEventListener('pointermove',ev=>{
+  if(dragX===null) return;
+  dragX2=Math.min(W-R,Math.max(L,svgX(ev)));
+  render();
+});
+window.addEventListener('pointerup',ev=>{
+  if(dragX===null) return;
+  const a=dragX, b=dragX2;
+  dragX=dragX2=null;
+  if(Math.abs(a-b)<6){ render(); return; }   // a click on a row, not a drag
+  setWin([tAt(Math.min(a,b)),tAt(Math.max(a,b))]);
+});
+
+/* ---- the search, over the milestones and all the detail ---- */
+function runFind(q){
+  q=(q||'').trim();
+  finding=q.length>0;
+  found={ev:new Set(),det:new Set()}; hits=[]; hitAt=-1;
+  if(finding){
+    // a match is a word that starts with what was typed, so that "war"
+    // finds warfare but not toward
+    const ql=q.toLowerCase();
+    const hit=n=>{
+      const t=n.toLowerCase();
+      let at=t.indexOf(ql);
+      while(at>=0){
+        if(at===0 || !/[a-z0-9]/.test(t.charAt(at-1))) return true;
+        at=t.indexOf(ql,at+1);
+      }
+      return false;
+    };
+    EV.forEach((e,i)=>{ if(hit(e.n)){
+      found.ev.add(i); hits.push(['ev',i,e.t]); } });
+    DET.forEach((d,i)=>{ if(hit(d.n)&&!off.has(d.k)){
+      found.det.add(i); hits.push(['det',i,d.t]); } });
+    hits.sort((a,b)=>b[2]-a[2]);
+  }
+  document.getElementById('findTxt').textContent = !finding ? ''
+    : hits.length===0 ? 'nothing by that name'
+    : hits.length+(hits.length===1?' match':' matches');
+  document.getElementById('fitFind').disabled = hits.length<1;
+  render();
+}
+function step(){
+  if(!hits.length) return;
+  hitAt=(hitAt+1)%hits.length;
+  const [kind,i,t]=hits[hitAt];
+  // a match outside the window slides the window along to hold it
+  if(win && (t>win[0]||t<win[1])){
+    const half=Math.abs(u(win[0])-u(win[1]))/2, p=u(t);
+    win=[tOfU(Math.max(0,p-half)), tOfU(Math.min(1,p+half))];
+    winTxt();
+  }
+  if(kind==='ev') show(i); else showDet(i);
+  document.getElementById('findTxt').textContent=
+    (hitAt+1)+' of '+hits.length+(hits.length===1?' match':' matches');
+}
+// a position along the whole line, read back as a date
+function tOfU(p){
+  const keep=win; win=null;
+  const t=tAt(L+p*(W-L-R));
+  win=keep; return t;
+}
+document.getElementById('fitFind').onclick=()=>{
+  if(!hits.length) return;
+  const ts=hits.map(h=>h[2]);
+  let o=Math.max(...ts), n=Math.min(...ts);
+  const pad=(u(n)-u(o))*0.08||0.02;
+  setWin([tOfU(Math.max(0,u(o)-pad)), tOfU(Math.min(1,u(n)+pad))]);
+};
+const findBox=document.getElementById('find');
+findBox.addEventListener('input',e=>runFind(e.target.value));
+findBox.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); step(); } });
+
 render();
 show(0);
+winTxt();
 window.__cosmic=()=>({events:EV.length, detail:DET.length,
   strands:ST.length, mode, cur, off:off.size,
   sunX:Math.round(X(TSUN)), midX:Math.round(L+(W-L-R)/2),
@@ -352,7 +553,9 @@ window.__cosmic=()=>({events:EV.length, detail:DET.length,
   sourced:EV.every(e=>e.s&&e.u2&&e.b&&e.r),
   rows:document.querySelectorAll('[data-row]').length,
   dots:document.querySelectorAll('[data-d]').length,
-  spanLog:Math.round(X(EV[EV.length-1].t)-X(EV[0].t))});
+  spanLog:Math.round(X(EV[EV.length-1].t)-X(EV[0].t)),
+  win, hits:hits.length, finding,
+  ticks:[...document.querySelectorAll('#tsvg text')].length});
 </script>
 </body>
 </html>

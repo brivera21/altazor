@@ -70,6 +70,32 @@
     color: var(--dim); font-size: 18px; cursor: pointer; }
   #info .close:hover { color: var(--text); }
 
+  #moons {
+    position: absolute; top: 14px; right: 16px; width: 295px; z-index: 3;
+    overflow: hidden;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 13px 16px 14px; color: var(--text); backdrop-filter: blur(8px);
+    display: none;
+  }
+  #moons.show { display: flex; flex-direction: column; }
+  #moons .mh { font-size: 10.5px; color: var(--dim); text-transform: uppercase;
+    letter-spacing: 0.1em; }
+  #moons .mh b { color: var(--text); }
+  #mStrip { margin: 9px 0 2px; }
+  #mCap { font-size: 10.5px; color: var(--dim); line-height: 1.35; }
+  #mOrbit { margin-top: 8px; }
+  #mList { margin-top: 8px; border-top: 1px solid var(--line);
+    overflow-y: auto; overscroll-behavior: contain; min-height: 54px; }
+  .mrow { padding: 5px 0; border-bottom: 1px solid rgba(88,166,255,0.09); cursor: pointer; }
+  .mrow b { font-size: 13px; }
+  .mrow span { font-size: 11.5px; color: var(--dim); display: block; margin-top: 1px; }
+  .mrow p { font-size: 11.5px; line-height: 1.4; margin-top: 4px; color: var(--text); display: none; }
+  .mrow.on { background: rgba(88,166,255,0.09); border-radius: 7px; padding-left: 7px; padding-right: 7px; }
+  .mrow.on p { display: block; }
+  #mMore { font-size: 11.5px; color: var(--dim); margin-top: 0; padding-top: 8px;
+    line-height: 1.4; border-top: 1px solid var(--line); }
+  #mMore:empty { display: none; }
+
   #scalebar { position: absolute; left: 16px; bottom: 16px; color: var(--dim); font-size: 11.5px;
     pointer-events: none; }
   #scalebar .bar { height: 2px; background: var(--dim); margin-bottom: 4px; }
@@ -105,6 +131,15 @@
   </dl>
 </div>
 
+<div id="moons">
+  <div class="mh">The moons of <b id="mTitle"></b></div>
+  <div id="mStrip"></div>
+  <div id="mCap"></div>
+  <div id="mOrbit"></div>
+  <div id="mList"></div>
+  <div id="mMore"></div>
+</div>
+
 <div id="controls">
   <div id="chips"></div>
   <div id="row2">
@@ -116,6 +151,8 @@
     and when a probe first reached it. <b>Make to scale</b> sets the true distances and sizes; almost everything
     left is space. There, a pulse of light leaves the Sun and crosses the diagram in true proportion,
     carrying its elapsed time, and under each planet sits how long sunlight takes to reach it.
+    Zoomed in on a planet that has moons, a second panel opens on the right with its named moons drawn
+    to scale against the planet and against each other, and a log scale of how far out each one orbits.
     The view pans and zooms freely. Figures follow NASA's
     <a href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/" style="color:var(--accent)">planetary
     fact sheets</a>.</div>
@@ -375,6 +412,80 @@
     else { camT.c = px(obj); camT.z = Math.min(H, W) * 0.20 / pr(obj); }
   }
 
+
+  // ---------- Moons ----------
+  // The named moons of each planet, with mean radius and mean orbital
+  // distance in km from JPL's Solar System Dynamics tables and the NASA
+  // planetary satellite fact sheets. Only the moons with names are listed;
+  // the rest are numbered rocks a few kilometres across, and the count of
+  // all of them sits on the planet's own panel.
+  const MOONS = {
+    Earth: [
+      { n:"The Moon", r:1737.4, a:384400, d:"Known since antiquity",
+        t:"The only moon large enough to raise the tides that shape Earth's coasts, and the only one a human has stood on." },
+    ],
+    Mars: [
+      { n:"Phobos", r:11.27, a:9376, d:"Asaph Hall, 1877",
+        t:"Orbits closer to its planet than any other moon, fast enough to rise twice a day, and is spiralling in." },
+      { n:"Deimos", r:6.2, a:23463, d:"Asaph Hall, 1877",
+        t:"A dark, smooth-looking lump, its craters half buried in its own dust." },
+    ],
+    Jupiter: [
+      { n:"Amalthea", r:83.5, a:181400, d:"Edward Barnard, 1892",
+        t:"Reddened by sulphur drifting off Io, and less dense than water, so it is a pile of rubble." },
+      { n:"Io", r:1821.6, a:421800, d:"Galileo Galilei, 1610",
+        t:"The most volcanically active body known, kneaded by Jupiter's tides and resurfaced faster than it can be cratered." },
+      { n:"Europa", r:1560.8, a:671100, d:"Galileo Galilei, 1610",
+        t:"A shell of ice over a salt ocean that holds more water than every ocean on Earth together." },
+      { n:"Ganymede", r:2634.1, a:1070400, d:"Galileo Galilei, 1610",
+        t:"The largest moon in the solar system, wider than Mercury, and the only one with a magnetic field of its own." },
+      { n:"Callisto", r:2410.3, a:1882700, d:"Galileo Galilei, 1610",
+        t:"The most heavily cratered surface known, essentially unchanged for four billion years." },
+    ],
+    Saturn: [
+      { n:"Mimas", r:198.2, a:185540, d:"William Herschel, 1789",
+        t:"Carries Herschel, a crater a third as wide as the moon itself." },
+      { n:"Enceladus", r:252.1, a:238040, d:"William Herschel, 1789",
+        t:"Vents water from cracks at its south pole, and that spray is what keeps Saturn's E ring supplied." },
+      { n:"Tethys", r:531.1, a:294670, d:"Giovanni Cassini, 1684",
+        t:"Almost pure water ice, and split along a third of its circumference by the Ithaca Chasma." },
+      { n:"Dione", r:561.4, a:377420, d:"Giovanni Cassini, 1684",
+        t:"Bright ice cliffs run across its trailing side, mistaken for wisps of cloud until Cassini resolved them." },
+      { n:"Rhea", r:763.8, a:527070, d:"Giovanni Cassini, 1672",
+        t:"Saturn's second largest moon, and ice nearly all the way through." },
+      { n:"Titan", r:2574.7, a:1221870, d:"Christiaan Huygens, 1655",
+        t:"The only moon with a thick atmosphere, and the only world besides Earth with rivers, rain and lakes, all of methane." },
+      { n:"Hyperion", r:135, a:1500880, d:"Bond, Bond and Lassell, 1848",
+        t:"A sponge-like body so porous and so tugged by Titan that it tumbles chaotically instead of turning." },
+      { n:"Iapetus", r:734.5, a:3560840, d:"Giovanni Cassini, 1671",
+        t:"One hemisphere is dark as coal and the other bright as snow, which is why Cassini could only see it on one side of its orbit." },
+      { n:"Phoebe", r:106.5, a:12947780, d:"William Pickering, 1899",
+        t:"Orbits backwards and far out, and is most likely a body captured from beyond Neptune." },
+    ],
+    Uranus: [
+      { n:"Miranda", r:235.8, a:129900, d:"Gerard Kuiper, 1948",
+        t:"Cliffs up to twenty kilometres high, the tallest known anywhere, on a moon smaller than Britain is wide." },
+      { n:"Ariel", r:578.9, a:190900, d:"William Lassell, 1851",
+        t:"The brightest of the five, with the youngest surface and valleys flooded by icy flows." },
+      { n:"Umbriel", r:584.7, a:266000, d:"William Lassell, 1851",
+        t:"The darkest of the five, reflecting barely a sixth of the light that reaches it." },
+      { n:"Titania", r:788.4, a:436300, d:"William Herschel, 1787",
+        t:"Uranus's largest moon, cut by a canyon system more than a thousand kilometres long." },
+      { n:"Oberon", r:761.4, a:583500, d:"William Herschel, 1787",
+        t:"The outermost of the large five, heavily cratered, with dark floors to the biggest craters." },
+    ],
+    Neptune: [
+      { n:"Larissa", r:97, a:73548, d:"Voyager 2, 1989",
+        t:"Suspected from a star blinking out in 1981, and confirmed when Voyager 2 arrived." },
+      { n:"Proteus", r:210, a:117647, d:"Voyager 2, 1989",
+        t:"About as large as a body can be while still holding an irregular shape rather than pulling itself round." },
+      { n:"Triton", r:1353.4, a:354759, d:"William Lassell, 1846",
+        t:"Orbits backwards, so it was captured rather than formed here, and nitrogen geysers still erupt through its ice." },
+      { n:"Nereid", r:170, a:5513818, d:"Gerard Kuiper, 1949",
+        t:"The most lopsided orbit of any large moon: its distance from Neptune varies sevenfold." },
+    ],
+  };
+
   // ---------- Info panel ----------
   const info = document.getElementById("info");
   const el = id => document.getElementById(id);
@@ -384,8 +495,16 @@
     const bar = document.getElementById("controls");
     if (!bar) return;
     const top = bar.getBoundingClientRect().top;
-    const room = (top > 0 ? top : window.innerHeight) - 14 - 14;
-    info.style.maxHeight = Math.max(160, room) + "px";
+    const ceiling = top > 0 ? top : window.innerHeight;
+    const room = ceiling - 14 - 14;
+    const mp = document.getElementById("moons");
+    const sharing = mp && mp.classList.contains("show");
+    info.style.maxHeight = Math.max(150, sharing ? room * 0.46 : room) + "px";
+    if (sharing) {
+      const b = info.getBoundingClientRect().bottom;
+      mp.style.top = (b + 10) + "px";
+      mp.style.maxHeight = Math.max(130, ceiling - b - 24) + "px";
+    }
   }
   window.addEventListener("resize", fitPanel);
   const DEFAULT_LABELS = { dist: "Distance from the Sun", diam: "Diameter",
@@ -424,6 +543,109 @@
     else { info.classList.remove("show"); fitAll(); }
   }
   el("infoClose").addEventListener("click", () => select(null));
+
+
+  // ---------- The moons panel ----------
+  const moonsPanel = document.getElementById("moons");
+  let moonFor = null, moonHi = -1;
+  const km = v => Math.round(v).toLocaleString("en-US");
+
+  // the named moons and the planet drawn on one scale, with the planet's
+  // limb at the left so the ratio is the thing the reader sees first
+  function moonStrip(p, ms, hi) {
+    const AVAIL = 256, LIMB = 24, GAP = 5;
+    const maxR = Math.max(...ms.map(m => m.r));
+    const sumD = ms.reduce((a, m) => a + 2 * m.r, 0);
+    const s = Math.min(24 / maxR, (AVAIL - LIMB - GAP * (ms.length + 1)) / sumD);
+    const h = 2 * maxR * s + 20, cy = h / 2, Rp = p.rKm * s;
+    let g = '<svg viewBox="0 0 ' + AVAIL + ' ' + h.toFixed(1) +
+      '" width="100%" style="display:block" id="mStripSvg">';
+    g += '<circle cx="' + (LIMB - Rp).toFixed(1) + '" cy="' + cy.toFixed(1) +
+      '" r="' + Rp.toFixed(1) + '" fill="' + p.dotColor +
+      '" fill-opacity="0.45" stroke="' + p.dotColor + '" stroke-width="1.2"/>';
+    let x = LIMB + GAP;
+    ms.forEach((mo, i) => {
+      const r = Math.max(mo.r * s, 0.7), cx = x + r;
+      if (i === hi) g += '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) +
+        '" r="' + (r + 4).toFixed(1) + '" fill="none" stroke="#58a6ff" stroke-width="1.4"/>';
+      g += '<g data-moon="' + i + '" style="cursor:pointer">' +
+        '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) +
+        '" fill="#d3dcee" fill-opacity="' + (hi < 0 || i === hi ? 0.92 : 0.4) + '"/>' +
+        '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' +
+        Math.max(r, 6).toFixed(1) + '" fill="transparent"/></g>';
+      x += 2 * r + GAP;
+    });
+    return g + '</svg>';
+  }
+
+  // how far out each one orbits, on a log scale that starts at the planet's
+  // own surface, because the named moons of one planet span three decades
+  function moonOrbit(p, ms, hi) {
+    const W = 256, h = 40, x0 = 6, x1 = W - 6, y = 14;
+    const lo = Math.log10(p.rKm), hiV = Math.log10(Math.max(...ms.map(m => m.a)) * 1.3);
+    const X = v => x0 + (Math.log10(v) - lo) / (hiV - lo) * (x1 - x0);
+    let g = '<svg viewBox="0 0 ' + W + ' ' + h + '" width="100%" style="display:block">';
+    g += '<line x1="' + x0 + '" y1="' + y + '" x2="' + x1 + '" y2="' + y +
+      '" stroke="rgba(88,166,255,0.35)" stroke-width="1"/>';
+    g += '<rect x="' + (x0 - 4) + '" y="' + (y - 7) + '" width="4" height="14" fill="' +
+      p.dotColor + '" fill-opacity="0.7"/>';
+    ms.forEach((mo, i) => {
+      const cx = X(mo.a);
+      g += '<g data-moon="' + i + '" style="cursor:pointer">' +
+        '<circle cx="' + cx.toFixed(1) + '" cy="' + y + '" r="' + (i === hi ? 4.6 : 3) +
+        '" fill="' + (i === hi ? "#58a6ff" : "#d3dcee") + '" fill-opacity="' +
+        (hi < 0 || i === hi ? 0.95 : 0.45) + '"/>' +
+        '<rect x="' + (cx - 6).toFixed(1) + '" y="' + (y - 8) + '" width="12" height="16" fill="transparent"/></g>';
+    });
+    g += '<text x="' + x0 + '" y="' + (y + 18) + '" font-size="9.5" fill="#8593ad">surface</text>';
+    const far = Math.max(...ms.map(m => m.a));
+    g += '<text x="' + x1 + '" y="' + (y + 18) + '" text-anchor="end" font-size="9.5" fill="#8593ad">' +
+      (far >= 1e6 ? (far / 1e6).toFixed(far >= 1e7 ? 1 : 2) + ' million km'
+                  : km(far) + ' km') + ' out</text>';
+    return g + '</svg>';
+  }
+
+  function paintMoons(p) {
+    const ms = MOONS[p.name];
+    el("mTitle").textContent = p.name;
+    el("mStrip").innerHTML = moonStrip(p, ms, moonHi);
+    el("mCap").textContent = ms.length === 1
+      ? "The moon and the planet on one scale."
+      : "The " + ms.length + " named moons and the planet, all on one scale, in order of distance.";
+    el("mOrbit").innerHTML = moonOrbit(p, ms, moonHi);
+    el("mList").innerHTML = ms.map((mo, i) =>
+      '<div class="mrow' + (i === moonHi ? ' on' : '') + '" data-moon="' + i + '">' +
+      '<b>' + mo.n + '</b><span>' + km(2 * mo.r) + ' km across &middot; ' +
+      km(mo.a) + ' km out &middot; ' + mo.d + '</span><p>' + mo.t + '</p></div>').join("");
+    // the planet's own panel carries the full count; this says what is left over
+    const total = parseInt(String(p.moons).replace(/[^0-9]/, "") || "0", 10);
+    el("mMore").textContent = total > ms.length
+      ? "Another " + (total - ms.length) + " of the " + total +
+        " recognized are numbered rocks, most of them a few kilometres across and captured rather than formed here."
+      : "";
+  }
+  function hiMoon(i) {
+    moonHi = (moonHi === i ? -1 : i);
+    if (moonFor) paintMoons(PLANETS.find(q => q.name === moonFor));
+  }
+  moonsPanel.addEventListener("click", ev => {
+    const g = ev.target.closest("[data-moon]");
+    if (g) hiMoon(+g.getAttribute("data-moon"));
+  });
+
+  // the panel belongs to a planet seen up close, so it follows the zoom
+  const MOON_MIN_R = 34;   // drawn planet radius, in pixels
+  function updateMoons() {
+    const p = selected;
+    const want = p && !p.isBelt && p !== SUN && MOONS[p.name] &&
+      pr(p) * cam.z >= MOON_MIN_R ? p : null;
+    if (want && want.name !== moonFor) { moonFor = want.name; moonHi = -1; paintMoons(want); }
+    if (!want) moonFor = null;
+    if (!!want !== moonsPanel.classList.contains("show")) {
+      moonsPanel.classList.toggle("show", !!want);
+      fitPanel();
+    }
+  }
 
   // ---------- Chips & scale button ----------
   const chips = document.getElementById("chips");
@@ -914,6 +1136,7 @@
     drawGhostEarth();
     drawLightTimes();
     drawScalebar();
+    updateMoons();
     window.__dbg = { m, mTarget, camc: cam.c, camz: cam.z, tracking,
       sel: selected && selected.name,
       ex: selected && !selected.isBelt ? sx(px(selected)) : null,
@@ -933,6 +1156,7 @@
       kuiper: { plutino: KUIPER.plutino, twotino: KUIPER.twotino,
                 cliff: KUIPER.cliff },
       ghost: ghostState,
+      moons: { open: moonsPanel.classList.contains('show'), of: moonFor, hi: moonHi },
       light: lightState, speedup: LIGHT_SPEEDUP,
       lightEnd: KUIPER.auOut * AU / C_KM_S };
     requestAnimationFrame(frame);
