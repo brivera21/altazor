@@ -310,8 +310,8 @@
   BELT.rocks = makeSwarm(BELT, 620, 20260101);      // Ceres, January 1, 1801
   KUIPER.rocks = makeSwarm(KUIPER, 1150, 19920830); // Albion, August 30, 1992
   REGIONS.forEach(g => {
-    g.edgeIn = () => mix(g.xLenIn, g.xTrueIn, ease(m));
-    g.edgeOut = () => mix(g.xLenOut, g.xTrueOut, ease(m));
+    g.edgeIn = () => mix(g.xLenIn + shifted(g.xLenIn), g.xTrueIn, ease(m));
+    g.edgeOut = () => mix(g.xLenOut + shifted(g.xLenIn), g.xTrueOut, ease(m));
   });
   const ROCKS = BELT.rocks;                          // kept for the debug hook
   const SUN_R_TRUE = SUN.rKm * KM2U;
@@ -351,7 +351,11 @@
 
   const ease = t => t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2;
   function mix(a, b, t) { return a + (b - a) * t; }
-  function px(p) { const me = ease(m); return mix(p.xLen, p.xTrue, me); }          // world x
+  // on the lenient layout, while a moon row is showing, everything outward
+  // of that planet slides right by roomU world units so the row has the space
+  let roomU = 0, roomT = 0, roomFrom = Infinity;
+  const shifted = xLen => xLen > roomFrom ? roomU : 0;
+  function px(p) { const me = ease(m); return mix(p.xLen + shifted(p.xLen), p.xTrue, me); }   // world x
   function pr(p) { const me = ease(m); return mix(p.lenR, p.rTrue, me); }          // world r
   function sunR() { return mix(LEN_SUN_R, SUN_R_TRUE, ease(m)); }
   function sx(wx) { return (wx - cam.c) * cam.z + W / 2; }
@@ -585,6 +589,14 @@
     });
     return { slots, width: cursor - 4 };
   }
+  // the near edge, in lenient world units, of whatever sits next outward:
+  // a planet's disc or rings, or the inner edge of a belt
+  function nextEdgeU(p) {
+    let e = Infinity;
+    for (const q of PLANETS) if (q.xLen > p.xLen) e = Math.min(e, q.xLen - q.lenR * (1 + ringPad(q, 1)));
+    for (const g of REGIONS) if (g.xLenIn > p.xLen) e = Math.min(e, g.xLenIn);
+    return e;
+  }
   function drawMoons() {
     moonState = null;
     const p = moonsShowing();
@@ -666,8 +678,19 @@
         ctx.fillText(l, bx + 10, by + 18 + k * 15);
       });
     }
+    // where the next body's near edge lands on the screen, for the checker
+    let nextPx = Infinity, nextName = null;
+    for (const q of PLANETS) if (q.xLen > p.xLen) {
+      const e = sx(px(q)) - pr(q) * cam.z * (1 + ringPad(q, 1));
+      if (e < nextPx) { nextPx = e; nextName = q.name; }
+    }
+    for (const g of REGIONS) if (g.xLenIn > p.xLen) {
+      const e = sx(g.edgeIn());
+      if (e < nextPx) { nextPx = e; nextName = g.name; }
+    }
     moonState = { of: p.name, scale: s, x0, y0, Rd, me, hover: moonHover, moons: out,
-                  beyond: beyond.map(mo => mo.n), ghosting: m < 0.5 };
+                  beyond: beyond.map(mo => mo.n), room: roomU,
+                  next: { name: nextName, edge: nextPx } };
   }
 
 
@@ -742,7 +765,6 @@
   function circle(x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, 7); }
 
   function drawSun() {
-    if (ghostOthers) ctx.globalAlpha = 0.14;
     const r = Math.max(sunR() * cam.z, 3);
     const x = sx(0);
     if (x + r * 6 < 0) return;
@@ -753,8 +775,6 @@
     g = ctx.createRadialGradient(x - r*0.25, y0 - r*0.25, r*0.05, x, y0, r);
     g.addColorStop(0, "#fff7d6"); g.addColorStop(0.6, "#ffd257"); g.addColorStop(1, "#f59f1e");
     ctx.fillStyle = g; circle(x, y0, r); ctx.fill();
-    ctx.globalAlpha = 1;
-    if (ghostOthers) return;
     label("Sun", x, y0 - r - 10, SUN === selected);
   }
 
@@ -899,8 +919,6 @@
   function drawBelt(g) {
     const a = sx(g.edgeIn()), b = sx(g.edgeOut());
     if (b < -60 || a > W + 60) return;
-    const GA = ghostOthers ? 0.14 : 1;   // set only once it is known to draw
-    ctx.globalAlpha = GA;
     const w = Math.max(b - a, 1);
     const hot = selected === g;
     const hh = beltHalfHeight();
@@ -918,12 +936,11 @@
       if (x < -4 || x > W + 4) continue;
       const fade = 1 - Math.pow(Math.abs(k.v), 3);   // no hard edge top or bottom
       if (fade <= 0.02) continue;
-      ctx.globalAlpha = GA * (k.a * fade * (g.icy ? 0.8 : 1));
+      ctx.globalAlpha = k.a * fade * (g.icy ? 0.8 : 1);
       ctx.fillStyle = tone;
       circle(x, y0 + k.v * hh, k.r * (g.icy ? 0.85 : 1)); ctx.fill();
     }
     ctx.globalAlpha = 1;
-    if (ghostOthers) return;          // a ghost carries no name
 
     // the label rides at the top of the curtain, clear of the planet labels
     ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
@@ -935,15 +952,12 @@
                  lx, top - 8);
   }
 
-  let ghostOthers = false;
   function drawPlanet(p) {
     const wr = pr(p) * cam.z;
     const x = sx(px(p));
     const r = Math.max(wr, 0.9);
     if (x + r < -60 || x - r > W + 60) { return; }
     const detailed = r > 3.5;
-    const ghosted = ghostOthers && p !== selected;
-    if (ghosted) ctx.globalAlpha = 0.14;
 
     // Saturn's rings: back half behind the disc (i≈27° tilt stylized)
     if (p.name === "Saturn" && detailed) {
@@ -971,8 +985,6 @@
       ringArc(x, y0, r*0.5, r*1.7, -0.12, -Math.PI/2, Math.PI/2, r*0.07, "rgba(210,240,242,0.7)");
     }
 
-    ctx.globalAlpha = 1;
-    if (ghosted) return;               // a ghost carries no name
     const ly = y0 - Math.max(r, p.name === "Uranus" ? r*1.75 : r) - (p.name === "Saturn" ? r*0.7 : 0) - 10;
     label(p.name, x, ly, p === selected);
   }
@@ -1174,12 +1186,21 @@
     ctx.strokeStyle = "rgba(120,160,220,0.12)"; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(W, y0); ctx.stroke();
 
+    // the room the moon row needs on the lenient layout, eased in and out
     const showing = moonsShowing();
-    ghostOthers = !!showing && m < 0.5;   // only the lenient layout collides
+    if (showing) {
+      const Rd = pr(showing) * cam.z;
+      const need = moonRow(showing, Rd).width + 44;     // pixels past the planet's centre
+      const gapU = nextEdgeU(showing) - showing.xLen;   // to the next body's near edge
+      roomFrom = showing.xLen;
+      roomT = Math.max(0, need / cam.z - gapU);
+    } else roomT = 0;
+    roomU += (roomT - roomU) * Math.min(1, dt * 6);
+    if (Math.abs(roomT - roomU) * cam.z < 0.5) roomU = roomT;
+    if (roomU === 0 && !showing) roomFrom = Infinity;
     drawSun();
     for (const g of REGIONS) drawBelt(g);
     for (const p of PLANETS) drawPlanet(p);
-    ghostOthers = false;
     drawMoons();
     flushLabels();
     drawGhostEarth();
