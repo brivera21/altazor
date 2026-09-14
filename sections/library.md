@@ -28,7 +28,7 @@ title: Library
 <p><a href="matter.html">Matter</a></p>
 <p><a href="cosmic-timeline.html">The Universe in Time</a></p>
 <p><a href="universe.html">The Universe</a></p>
-<p class="soon">Galaxies <span class="tag">coming soon</span></p>
+<p><a href="galaxies.html">Galaxies</a></p>
 <p><a href="solar-system.html">The Solar System</a></p>
 </div>
 <div>
