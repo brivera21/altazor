@@ -168,17 +168,44 @@ with sync_playwright() as pw:
     st = pg.evaluate("()=>window.__dbg.moons")
     check(st["open"] is False, "and zooming back out closes it", str(st))
 
-    # the two right-hand panels never overlap
+    # the panel takes the left column: clear of the title above it, of the
+    # control bar below it, and of the panel on the other side
     open_on("Saturn")
-    box = pg.evaluate("""()=>{const a=document.getElementById('info').getBoundingClientRect(),
-      b=document.getElementById('moons').getBoundingClientRect(),
-      c=document.getElementById('controls').getBoundingClientRect();
-      return {ab:a.bottom, bt:b.top, bb:b.bottom, ct:c.top};}""")
-    check(box["bt"] >= box["ab"] - 0.5,
-          f"the moons panel clears the panel above it "
-          f"({box['bt']:.0f} against {box['ab']:.0f})")
-    check(box["bb"] <= box["ct"] + 0.5,
-          f"and stops above the control bar ({box['bb']:.0f} against {box['ct']:.0f})")
+    box = pg.evaluate("""()=>{const r=i=>document.getElementById(i).getBoundingClientRect();
+      const m=r('moons');return {mt:m.top,mb:m.bottom,ml:m.left,mr:m.right,
+        hb:r('hud').bottom, il:r('info').left, ct:r('controls').top, w:innerWidth};}""")
+    check(box["ml"] < box["w"] / 2,
+          f"the moons sit on the left ({box['ml']:.0f}px in, window {box['w']:.0f})")
+    check(box["mt"] >= box["hb"] - 0.5,
+          f"clear of the title above it ({box['mt']:.0f} against {box['hb']:.0f})")
+    check(box["mr"] <= box["il"] + 0.5,
+          f"clear of the panel on the right ({box['mr']:.0f} against {box['il']:.0f})")
+    check(box["mb"] <= box["ct"] + 0.5,
+          f"and stopping above the control bar ({box['mb']:.0f} against {box['ct']:.0f})")
+    # at true scale the scale bar shares that corner, so the panel stops above it
+    pg.click("#scaleBtn")
+    pg.wait_for_timeout(1800)
+    open_on("Saturn")
+    box = pg.evaluate("""()=>{const r=i=>document.getElementById(i).getBoundingClientRect();
+      const m=r('moons'), s=r('scalebar');
+      return {mb:m.bottom, st:s.top, shown:getComputedStyle(
+        document.getElementById('scalebar')).display};}""")
+    check(box["shown"] != "none" and box["mb"] <= box["st"] + 0.5,
+          f"at true scale it stops above the scale bar too "
+          f"({box['mb']:.0f} against {box['st']:.0f})")
+    pg.click("#scaleBtn")
+    pg.wait_for_timeout(1500)
+    # too narrow for two columns, it drops below the panel on the right
+    pg.set_viewport_size({"width": 600, "height": 900})
+    open_on("Saturn")
+    box = pg.evaluate("""()=>{const r=i=>document.getElementById(i).getBoundingClientRect();
+      const m=r('moons'), f=r('info');return {mt:m.top, ib:f.bottom};}""")
+    check(box["mt"] >= box["ib"] - 0.5,
+          f"on a narrow window it drops below that panel instead "
+          f"({box['mt']:.0f} against {box['ib']:.0f})")
+    pg.set_viewport_size({"width": 1400, "height": 950})
+    pg.wait_for_timeout(400)
+
     check(not errs, "no script errors", "; ".join(errs))
     br.close()
 
