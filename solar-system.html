@@ -53,7 +53,7 @@
     border-top: 1px solid var(--line); padding-top: 8px; }
 
   #info {
-    position: absolute; top: 14px; right: 16px; width: 295px;
+    position: absolute; top: 14px; left: 16px; width: 295px;
     max-height: calc(100vh - 150px); max-height: calc(100dvh - 150px);
     overflow-y: auto; overscroll-behavior: contain; z-index: 3;
     background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
@@ -70,32 +70,6 @@
     color: var(--dim); font-size: 18px; cursor: pointer; }
   #info .close:hover { color: var(--text); }
 
-  #moons {
-    position: absolute; top: 14px; left: 16px; width: 295px; z-index: 3;
-    overflow: hidden;
-    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
-    padding: 13px 16px 14px; color: var(--text); backdrop-filter: blur(8px);
-    display: none;
-  }
-  #moons.show { display: flex; flex-direction: column; }
-  #moons .mh { font-size: 10.5px; color: var(--dim); text-transform: uppercase;
-    letter-spacing: 0.1em; }
-  #moons .mh b { color: var(--text); }
-  #mStrip { margin: 9px 0 2px; }
-  #mCap { font-size: 10.5px; color: var(--dim); line-height: 1.35; }
-  #mOrbit { margin-top: 8px; }
-  #mList { margin-top: 8px; border-top: 1px solid var(--line);
-    overflow-y: auto; overscroll-behavior: contain; min-height: 54px; }
-  .mrow { padding: 5px 0; border-bottom: 1px solid rgba(88,166,255,0.09); cursor: pointer; }
-  .mrow b { font-size: 13px; }
-  .mrow span { font-size: 11.5px; color: var(--dim); display: block; margin-top: 1px; }
-  .mrow p { font-size: 11.5px; line-height: 1.4; margin-top: 4px; color: var(--text); display: none; }
-  .mrow.on { background: rgba(88,166,255,0.09); border-radius: 7px; padding-left: 7px; padding-right: 7px; }
-  .mrow.on p { display: block; }
-  #mMore { font-size: 11.5px; color: var(--dim); margin-top: 0; padding-top: 8px;
-    line-height: 1.4; border-top: 1px solid var(--line); }
-  #mMore:empty { display: none; }
-
   #scalebar { position: absolute; left: 16px; bottom: 16px; color: var(--dim); font-size: 11.5px;
     pointer-events: none; }
   #scalebar .bar { height: 2px; background: var(--dim); margin-bottom: 4px; }
@@ -103,7 +77,6 @@
   @media (max-width: 720px) {
     #hud p { display: none; }
     #info { width: min(295px, calc(100% - 32px)); }
-    #moons { width: min(295px, calc(100% - 32px)); }
   }
 </style>
 </head>
@@ -132,15 +105,6 @@
   </dl>
 </div>
 
-<div id="moons">
-  <div class="mh">The moons of <b id="mTitle"></b></div>
-  <div id="mStrip"></div>
-  <div id="mCap"></div>
-  <div id="mOrbit"></div>
-  <div id="mList"></div>
-  <div id="mMore"></div>
-</div>
-
 <div id="controls">
   <div id="chips"></div>
   <div id="row2">
@@ -152,8 +116,9 @@
     and when a probe first reached it. <b>Make to scale</b> sets the true distances and sizes; almost everything
     left is space. There, a pulse of light leaves the Sun and crosses the diagram in true proportion,
     carrying its elapsed time, and under each planet sits how long sunlight takes to reach it.
-    Zoomed in on a planet that has moons, a second panel opens on the left with its named moons drawn
-    to scale against the planet and against each other, and a log scale of how far out each one orbits.
+    Up close, a planet's named moons sit beside it on the line, each drawn to scale in size and set at its
+    true distance, with its name and that distance beneath; the farther ones come into view as the zoom pulls
+    back, and the ones still off the edge are listed there. The pointer over a moon tells who found it.
     The view pans and zooms freely. Figures follow NASA's
     <a href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/" style="color:var(--accent)">planetary
     fact sheets</a>.</div>
@@ -498,22 +463,15 @@
     const top = bar.getBoundingClientRect().top;
     let ceiling = top > 0 ? top : window.innerHeight;
     // at true scale the scale bar sits in the bottom left corner, under the
-    // moons panel's own column, so it is the floor there too
+    // panel's own column, so it is the floor there too
     const sb = document.getElementById("scalebar");
     if (sb && sb.style.display !== "none") {
       const t = sb.getBoundingClientRect().top;
       if (t > 0) ceiling = Math.min(ceiling, t);
     }
-    info.style.maxHeight = Math.max(150, ceiling - 28) + "px";
-    const mp = document.getElementById("moons");
-    if (!mp || !mp.classList.contains("show")) return;
-    // the moons take the left column, under the title. On a window too narrow
-    // for two columns they drop below the panel on the right instead.
-    const roomy = window.innerWidth >= 660;
-    const above = roomy ? document.getElementById("hud").getBoundingClientRect().bottom
-                        : info.getBoundingClientRect().bottom;
-    mp.style.top = (above + 10) + "px";
-    mp.style.maxHeight = Math.max(130, ceiling - above - 24) + "px";
+    const above = document.getElementById("hud").getBoundingClientRect().bottom;
+    info.style.top = (above + 10) + "px";
+    info.style.maxHeight = Math.max(150, ceiling - above - 24) + "px";
   }
   window.addEventListener("resize", fitPanel);
   const DEFAULT_LABELS = { dist: "Distance from the Sun", diam: "Diameter",
@@ -554,106 +512,94 @@
   el("infoClose").addEventListener("click", () => select(null));
 
 
-  // ---------- The moons panel ----------
-  const moonsPanel = document.getElementById("moons");
-  let moonFor = null, moonHi = -1;
-  const km = v => Math.round(v).toLocaleString("en-US");
 
-  // the named moons and the planet drawn on one scale, with the planet's
-  // limb at the left so the ratio is the thing the reader sees first
-  function moonStrip(p, ms, hi) {
-    const AVAIL = 256, LIMB = 24, GAP = 5;
-    const maxR = Math.max(...ms.map(m => m.r));
-    const sumD = ms.reduce((a, m) => a + 2 * m.r, 0);
-    const s = Math.min(24 / maxR, (AVAIL - LIMB - GAP * (ms.length + 1)) / sumD);
-    const h = 2 * maxR * s + 20, cy = h / 2, Rp = p.rKm * s;
-    let g = '<svg viewBox="0 0 ' + AVAIL + ' ' + h.toFixed(1) +
-      '" width="100%" style="display:block" id="mStripSvg">';
-    g += '<circle cx="' + (LIMB - Rp).toFixed(1) + '" cy="' + cy.toFixed(1) +
-      '" r="' + Rp.toFixed(1) + '" fill="' + p.dotColor +
-      '" fill-opacity="0.45" stroke="' + p.dotColor + '" stroke-width="1.2"/>';
-    let x = LIMB + GAP;
-    ms.forEach((mo, i) => {
-      const r = Math.max(mo.r * s, 0.7), cx = x + r;
-      if (i === hi) g += '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) +
-        '" r="' + (r + 4).toFixed(1) + '" fill="none" stroke="#58a6ff" stroke-width="1.4"/>';
-      g += '<g data-moon="' + i + '" style="cursor:pointer">' +
-        '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) +
-        '" fill="#d3dcee" fill-opacity="' + (hi < 0 || i === hi ? 0.92 : 0.4) + '"/>' +
-        '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' +
-        Math.max(r, 6).toFixed(1) + '" fill="transparent"/></g>';
-      x += 2 * r + GAP;
-    });
-    return g + '</svg>';
-  }
-
-  // how far out each one orbits, on a log scale that starts at the planet's
-  // own surface, because the named moons of one planet span three decades
-  function moonOrbit(p, ms, hi) {
-    const W = 256, h = 40, x0 = 6, x1 = W - 6, y = 14;
-    const lo = Math.log10(p.rKm), hiV = Math.log10(Math.max(...ms.map(m => m.a)) * 1.3);
-    const X = v => x0 + (Math.log10(v) - lo) / (hiV - lo) * (x1 - x0);
-    let g = '<svg viewBox="0 0 ' + W + ' ' + h + '" width="100%" style="display:block">';
-    g += '<line x1="' + x0 + '" y1="' + y + '" x2="' + x1 + '" y2="' + y +
-      '" stroke="rgba(88,166,255,0.35)" stroke-width="1"/>';
-    g += '<rect x="' + (x0 - 4) + '" y="' + (y - 7) + '" width="4" height="14" fill="' +
-      p.dotColor + '" fill-opacity="0.7"/>';
-    ms.forEach((mo, i) => {
-      const cx = X(mo.a);
-      g += '<g data-moon="' + i + '" style="cursor:pointer">' +
-        '<circle cx="' + cx.toFixed(1) + '" cy="' + y + '" r="' + (i === hi ? 4.6 : 3) +
-        '" fill="' + (i === hi ? "#58a6ff" : "#d3dcee") + '" fill-opacity="' +
-        (hi < 0 || i === hi ? 0.95 : 0.45) + '"/>' +
-        '<rect x="' + (cx - 6).toFixed(1) + '" y="' + (y - 8) + '" width="12" height="16" fill="transparent"/></g>';
-    });
-    g += '<text x="' + x0 + '" y="' + (y + 18) + '" font-size="9.5" fill="#8593ad">surface</text>';
-    const far = Math.max(...ms.map(m => m.a));
-    g += '<text x="' + x1 + '" y="' + (y + 18) + '" text-anchor="end" font-size="9.5" fill="#8593ad">' +
-      (far >= 1e6 ? (far / 1e6).toFixed(far >= 1e7 ? 1 : 2) + ' million km'
-                  : km(far) + ' km') + ' out</text>';
-    return g + '</svg>';
-  }
-
-  function paintMoons(p) {
-    const ms = MOONS[p.name];
-    el("mTitle").textContent = p.name;
-    el("mStrip").innerHTML = moonStrip(p, ms, moonHi);
-    el("mCap").textContent = ms.length === 1
-      ? "The moon and the planet on one scale."
-      : "The " + ms.length + " named moons and the planet, all on one scale, in order of distance.";
-    el("mOrbit").innerHTML = moonOrbit(p, ms, moonHi);
-    el("mList").innerHTML = ms.map((mo, i) =>
-      '<div class="mrow' + (i === moonHi ? ' on' : '') + '" data-moon="' + i + '">' +
-      '<b>' + mo.n + '</b><span>' + km(2 * mo.r) + ' km across &middot; ' +
-      km(mo.a) + ' km out &middot; ' + mo.d + '</span><p>' + mo.t + '</p></div>').join("");
-    // the planet's own panel carries the full count; this says what is left over
-    const total = parseInt(String(p.moons).replace(/[^0-9]/, "") || "0", 10);
-    el("mMore").textContent = total > ms.length
-      ? "Another " + (total - ms.length) + " of the " + total +
-        " recognized are numbered rocks, most of them a few kilometres across and captured rather than formed here."
-      : "";
-  }
-  function hiMoon(i) {
-    moonHi = (moonHi === i ? -1 : i);
-    if (moonFor) paintMoons(PLANETS.find(q => q.name === moonFor));
-  }
-  moonsPanel.addEventListener("click", ev => {
-    const g = ev.target.closest("[data-moon]");
-    if (g) hiMoon(+g.getAttribute("data-moon"));
-  });
-
-  // the panel belongs to a planet seen up close, so it follows the zoom
-  const MOON_MIN_R = 34;   // drawn planet radius, in pixels
-  function updateMoons() {
+  // ---------- Moons, on the line ----------
+  // Drawn beside the selected planet at the planet's own drawn scale, so
+  // both the size of each moon and its distance out are true relative to
+  // the planet, in either mode. They appear once the planet is up close.
+  const MOON_MIN_R = 30;                  // drawn planet radius, in pixels
+  let moonState = null, moonHover = -1, ptrX = -1, ptrY = -1;
+  canvas.addEventListener("pointermove", e => { ptrX = e.clientX; ptrY = e.clientY; });
+  canvas.addEventListener("pointerleave", () => { ptrX = ptrY = -1; });
+  function moonsShowing() {
     const p = selected;
-    const want = p && !p.isBelt && p !== SUN && MOONS[p.name] &&
-      pr(p) * cam.z >= MOON_MIN_R ? p : null;
-    if (want && want.name !== moonFor) { moonFor = want.name; moonHi = -1; paintMoons(want); }
-    if (!want) moonFor = null;
-    if (!!want !== moonsPanel.classList.contains("show")) {
-      moonsPanel.classList.toggle("show", !!want);
-      fitPanel();
+    return p && !p.isBelt && p !== SUN && MOONS[p.name] && pr(p) * cam.z >= MOON_MIN_R ? p : null;
+  }
+  function fmtKm(a) {
+    return a >= 1e6 ? (a / 1e6).toFixed(a >= 1e7 ? 1 : 2) + " million km"
+                    : Math.round(a).toLocaleString("en-US") + " km";
+  }
+  function wrapText(text, width) {
+    const words = text.split(" "), lines = []; let line = "";
+    for (const w of words) {
+      const t = line ? line + " " + w : w;
+      if (ctx.measureText(t).width > width && line) { lines.push(line); line = w; }
+      else line = t;
     }
+    if (line) lines.push(line);
+    return lines;
+  }
+  function drawMoons() {
+    moonState = null;
+    const p = moonsShowing();
+    if (!p) { moonHover = -1; return; }
+    const Rd = pr(p) * cam.z, x0 = sx(px(p));
+    const s = Rd / p.rKm;                 // pixels per kilometre, the planet's own scale
+    const ms = MOONS[p.name], out = [], beyond = [];
+    // which moon the pointer rests on, if any
+    moonHover = -1;
+    ms.forEach((mo, i) => {
+      const x = x0 + mo.a * s, r = Math.max(mo.r * s, 1.2);
+      if (ptrX >= 0 && Math.abs(ptrX - x) <= Math.max(r, 7) && Math.abs(ptrY - y0) <= Math.max(r, 9)) moonHover = i;
+    });
+    ms.forEach((mo, i) => {
+      const x = x0 + mo.a * s, r = Math.max(mo.r * s, 1.2), hot = i === moonHover;
+      out.push({ n: mo.n, x, r, a: mo.a, rKm: mo.r });
+      if (x - r > W + 4) { beyond.push(mo); return; }
+      if (x + r < -20) return;
+      if (mo.r * s >= 3) shade(x, y0, r, hot ? "#f2f6ff" : "#d9e1f0", "#4d5668");
+      else {
+        // a moon this small is a dot, so a faint halo marks it out from the stars
+        ctx.strokeStyle = hot ? "rgba(88,166,255,0.9)" : "rgba(190,205,235,0.35)"; ctx.lineWidth = 1;
+        circle(x, y0, r + 3.5); ctx.stroke();
+        ctx.fillStyle = hot ? "#ffffff" : "rgba(214,222,240,0.95)"; circle(x, y0, r); ctx.fill();
+      }
+      label(mo.n, x, y0 + r + 16, hot, fmtKm(mo.a), true);
+    });
+    // the ones past the right edge, listed there with their distances
+    if (beyond.length) {
+      ctx.font = "10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.textAlign = "right";
+      let y = y0 + 34;
+      ctx.fillStyle = "rgba(150,165,195,0.85)";
+      ctx.fillText("farther out, off the edge →", W - 14, y); y += 15;
+      for (const mo of beyond) {
+        ctx.fillStyle = "rgba(200,212,235,0.9)";
+        ctx.fillText(mo.n + "  " + fmtKm(mo.a), W - 14, y); y += 14;
+      }
+    }
+    // the moon under the pointer says who found it
+    if (moonHover >= 0) {
+      const mo = ms[moonHover], o = out[moonHover];
+      ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      const lines = [mo.n + ", " + Math.round(2 * mo.r).toLocaleString("en-US") + " km across · " + mo.d]
+        .concat(wrapText(mo.t, 250));
+      const bw = Math.min(270, Math.max(...lines.map(l => ctx.measureText(l).width)) + 20);
+      const bh = lines.length * 15 + 14;
+      let bx = o.x + 14, by = y0 - o.r - 12 - bh;
+      if (bx + bw > W - 10) bx = o.x - 14 - bw;
+      if (by < 8) by = y0 + o.r + 44;
+      ctx.fillStyle = "rgba(13,18,34,0.92)";
+      ctx.strokeStyle = "rgba(88,166,255,0.35)"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 8); ctx.fill(); ctx.stroke();
+      ctx.textAlign = "left";
+      lines.forEach((l, k) => {
+        ctx.fillStyle = k === 0 ? "#dbe4f5" : "rgba(190,205,235,0.85)";
+        ctx.fillText(l, bx + 10, by + 18 + k * 15);
+      });
+    }
+    moonState = { of: p.name, scale: s, x0, y0, Rd, hover: moonHover, moons: out,
+                  beyond: beyond.map(mo => mo.n), ghosting: m < 0.5 };
   }
 
   // ---------- Chips & scale button ----------
@@ -727,6 +673,7 @@
   function circle(x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, 7); }
 
   function drawSun() {
+    if (ghostOthers) ctx.globalAlpha = 0.14;
     const r = Math.max(sunR() * cam.z, 3);
     const x = sx(0);
     if (x + r * 6 < 0) return;
@@ -737,32 +684,44 @@
     g = ctx.createRadialGradient(x - r*0.25, y0 - r*0.25, r*0.05, x, y0, r);
     g.addColorStop(0, "#fff7d6"); g.addColorStop(0.6, "#ffd257"); g.addColorStop(1, "#f59f1e");
     ctx.fillStyle = g; circle(x, y0, r); ctx.fill();
+    ctx.globalAlpha = 1;
+    if (ghostOthers) return;
     label("Sun", x, y0 - r - 10, SUN === selected);
   }
 
   let labelQueue = [];
-  function label(text, x, y, hot) { labelQueue.push({ text, x, y, hot }); }
+  function label(text, x, y, hot, sub, below) { labelQueue.push({ text, x, y, hot, sub, below }); }
   function flushLabels() {
-    // stagger labels that crowd each other (inner planets at true scale)
+    // stagger labels that crowd each other (inner planets at true scale).
+    // Labels above the line and labels below it are staggered separately.
     labelQueue.sort((a, b) => a.x - b.x);
-    let prevX = -1e9, level = 0;
-    ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    const prevX = { above: -1e9, below: -1e9 }, off = { above: 0, below: 0 };
     ctx.textAlign = "center";
     for (const L of labelQueue) {
-      level = (L.x - prevX < 56) ? level + 1 : 0;
-      prevX = L.x;
-      const y = L.y - level * 13;
+      const side = L.below ? "below" : "above";
+      const h = L.sub ? 25 : 13;
+      off[side] = (L.x - prevX[side] < 56) ? off[side] + h : 0;
+      prevX[side] = L.x;
+      const y = L.y + (L.below ? 1 : -1) * off[side];
+      ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
       ctx.fillStyle = L.hot ? "#58a6ff" : "rgba(190,205,235,0.85)";
       ctx.fillText(L.text, L.x, y);
-      if (level > 0) { // tick down to the dot
+      if (L.sub) {
+        ctx.font = "10px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        ctx.fillStyle = "rgba(150,165,195,0.85)";
+        ctx.fillText(L.sub, L.x, y + 12);
+      }
+      if (off[side] > 0) { // tick from the label to the body
         ctx.strokeStyle = "rgba(190,205,235,0.25)"; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(L.x, y + 3); ctx.lineTo(L.x, L.y + 6); ctx.stroke();
+        ctx.beginPath();
+        if (L.below) { ctx.moveTo(L.x, y - 10); ctx.lineTo(L.x, L.y - 7); }
+        else { ctx.moveTo(L.x, y + 3); ctx.lineTo(L.x, L.y + 6); }
+        ctx.stroke();
       }
     }
     labelQueue = [];
   }
 
-  // Feature painters, all clipped to the planet disc; deterministic shapes.
   function shade(x, y, r, base, dark) {
     // sun is to the LEFT: light the left limb
     const g = ctx.createRadialGradient(x - r*0.45, y - r*0.2, r*0.1, x, y, r*1.25);
@@ -869,6 +828,8 @@
   }
 
   function drawBelt(g) {
+    const GA = ghostOthers ? 0.14 : 1;
+    ctx.globalAlpha = GA;
     const a = sx(g.edgeIn()), b = sx(g.edgeOut());
     if (b < -60 || a > W + 60) return;
     const w = Math.max(b - a, 1);
@@ -888,11 +849,12 @@
       if (x < -4 || x > W + 4) continue;
       const fade = 1 - Math.pow(Math.abs(k.v), 3);   // no hard edge top or bottom
       if (fade <= 0.02) continue;
-      ctx.globalAlpha = k.a * fade * (g.icy ? 0.8 : 1);
+      ctx.globalAlpha = GA * (k.a * fade * (g.icy ? 0.8 : 1));
       ctx.fillStyle = tone;
       circle(x, y0 + k.v * hh, k.r * (g.icy ? 0.85 : 1)); ctx.fill();
     }
     ctx.globalAlpha = 1;
+    if (ghostOthers) return;          // a ghost carries no name
 
     // the label rides at the top of the curtain, clear of the planet labels
     ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
@@ -904,12 +866,15 @@
                  lx, top - 8);
   }
 
+  let ghostOthers = false;
   function drawPlanet(p) {
     const wr = pr(p) * cam.z;
     const x = sx(px(p));
     const r = Math.max(wr, 0.9);
     if (x + r < -60 || x - r > W + 60) { return; }
     const detailed = r > 3.5;
+    const ghosted = ghostOthers && p !== selected;
+    if (ghosted) ctx.globalAlpha = 0.14;
 
     // Saturn's rings: back half behind the disc (i≈27° tilt stylized)
     if (p.name === "Saturn" && detailed) {
@@ -937,6 +902,8 @@
       ringArc(x, y0, r*0.5, r*1.7, -0.12, -Math.PI/2, Math.PI/2, r*0.07, "rgba(210,240,242,0.7)");
     }
 
+    ctx.globalAlpha = 1;
+    if (ghosted) return;               // a ghost carries no name
     const ly = y0 - Math.max(r, p.name === "Uranus" ? r*1.75 : r) - (p.name === "Saturn" ? r*0.7 : 0) - 10;
     label(p.name, x, ly, p === selected);
   }
@@ -1138,14 +1105,17 @@
     ctx.strokeStyle = "rgba(120,160,220,0.12)"; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(W, y0); ctx.stroke();
 
+    const showing = moonsShowing();
+    ghostOthers = !!showing && m < 0.5;   // only the lenient layout collides
     drawSun();
     for (const g of REGIONS) drawBelt(g);
     for (const p of PLANETS) drawPlanet(p);
+    ghostOthers = false;
+    drawMoons();
     flushLabels();
     drawGhostEarth();
     drawLightTimes();
     drawScalebar();
-    updateMoons();
     window.__dbg = { m, mTarget, camc: cam.c, camz: cam.z, tracking,
       sel: selected && selected.name,
       ex: selected && !selected.isBelt ? sx(px(selected)) : null,
@@ -1165,7 +1135,7 @@
       kuiper: { plutino: KUIPER.plutino, twotino: KUIPER.twotino,
                 cliff: KUIPER.cliff },
       ghost: ghostState,
-      moons: { open: moonsPanel.classList.contains('show'), of: moonFor, hi: moonHi },
+      moons: moonState,
       light: lightState, speedup: LIGHT_SPEEDUP,
       lightEnd: KUIPER.auOut * AU / C_KM_S };
     requestAnimationFrame(frame);
