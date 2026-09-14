@@ -8,9 +8,10 @@
                in order outward, and the whole row fits on the screen; at
                true scale each sits at the planet's own drawn scale in both
                size and distance. The ones past the edge are listed there;
-               the pointer over a moon names its finder; the neighbours step
-               back on the lenient layout while the planet itself stays at
-               full strength; the panel of numbers sits on the left
+               the pointer over a moon names its finder; on the lenient
+               layout everything outward slides right so the next body
+               clears the row, and slides back when the row goes; the panel
+               of numbers sits on the left
 """
 import re
 import sys
@@ -124,18 +125,32 @@ with sync_playwright() as pw:
     check(st["me"] == 0 and row_holds(st, "Jupiter", 1400),
           "on the lenient layout they run in a row past the planet, in order "
           "outward, each at least a small sphere, all on the screen")
-    check(st["ghosting"] is True,
-          "the neighbours step back while the moons show")
-    # the planet itself must not: read its own pixels back off the canvas
+    def clears(st):
+        last = st["moons"][-1]
+        return st["next"]["edge"] - (last["x"] + last["r"]), st["next"]["name"]
+
+    gap, nxt = clears(st)
+    check(gap >= 30 and st["room"] > 0,
+          f"{nxt} has slid right and clears the row by {gap:.0f}px "
+          f"(room {st['room']:.0f} units)")
+    # the planet itself is drawn at full strength: read its pixels back
     px = pg.evaluate("""()=>{const d=window.__dbg, c=document.getElementById('space')
       .getContext('2d'), k=devicePixelRatio;
       return [...c.getImageData(Math.round(d.ex*k), Math.round((d.moons.y0-d.er*0.5)*k),1,1).data];}""")
     check(px[3] == 255, f"and Jupiter itself is drawn at full strength (alpha {px[3]})")
-    for planet in ("Saturn", "Earth", "Neptune"):
+    for planet in ("Saturn", "Earth", "Mars", "Neptune"):
         st = open_on(planet)
-        check(st and st["of"] == planet and row_holds(st, planet, 1400),
-              f"{planet}'s row of {len(ns[planet])} fits on the screen in order",
+        gap, nxt = clears(st)
+        check(st and st["of"] == planet and row_holds(st, planet, 1400) and gap >= 30,
+              f"{planet}'s row of {len(ns[planet])} fits the screen in order, and "
+              f"{nxt} clears it by {gap:.0f}px",
               str([(mo["n"], round(mo["x"])) for mo in st["moons"]]) if st else "none")
+    # with nothing selected the room closes again
+    pg.evaluate("()=>document.querySelector('.chip').click()")
+    pg.wait_for_timeout(1900)
+    room = pg.evaluate("()=>{const d=window.__dbg;return d.moons?d.moons.room:0}")
+    check(room == 0 and pg.evaluate("()=>window.__dbg.sel") is None,
+          "on the overview the room closes and the layout is its old self")
     st = open_on("Jupiter")
     names = [mo["n"] for mo in st["moons"]]
 
@@ -170,7 +185,7 @@ with sync_playwright() as pw:
     check(abs(ratio - 1882700 / 421800) < 1e-6,
           f"there Callisto sits {ratio:.3f} times as far out as Io, as the figures say")
     st = open_on("Saturn")
-    check(st["ghosting"] is False, "and nothing needs to step back there")
+    check(st["room"] == 0, "and nothing needs to move there")
     check("Phoebe" in st["beyond"] and "Iapetus" in st["beyond"],
           f"Phoebe and Iapetus are off the edge and say so: {st['beyond']}")
     pg.click("#scaleBtn")
