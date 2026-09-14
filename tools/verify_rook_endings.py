@@ -29,23 +29,14 @@ def ck(ok, msg):
     (notes if ok else fails).append(msg)
 
 
-# the page holds its lines as a JS literal, so node reads them out
-EXTRACT = """
-const fs=require('fs');
-const html=fs.readFileSync(process.argv[2],'utf8');
-let body=html.slice(html.indexOf('var POSITIONS = [')+'var POSITIONS = '.length);
-let d=0,end=-1;
-for(let i=0;i<body.length;i++){
-  if(body[i]==='[') d++;
-  else if(body[i]===']'){ d--; if(!d){ end=i+1; break; } }
-}
-process.stdout.write(JSON.stringify(eval(body.slice(0,end))));
-"""
-tmp = Path("/tmp/_extract_rook.js")
-tmp.write_text(EXTRACT)
-POS = json.loads(subprocess.run([
-    "node", str(tmp), str(PAGE)], capture_output=True, text=True,
-    check=True).stdout)
+# the page carries its lines as one JSON blob, so they come straight out
+m = re.search(r"const POS=(\[.*?\]);\n", PAGE.read_text(encoding="utf-8"),
+              re.S)
+POS = json.loads(m.group(1))
+for p in POS:                       # the builder names the squares a and b
+    p["caption"] = p["cap"]
+    for mv in p["moves"]:
+        mv["from"], mv["to"] = mv["a"], mv["b"]
 
 FMAP = {"K": chess.KING, "Q": chess.QUEEN, "R": chess.ROOK,
         "B": chess.BISHOP, "N": chess.KNIGHT, "P": chess.PAWN}
@@ -109,9 +100,11 @@ ck(POS[2]["moves"][-1]["from"] == "f7" and POS[2]["moves"][-1]["to"] == "f6",
 html = PAGE.read_text(encoding="utf-8")
 ck("—" not in re.sub(r"<script[\s\S]*?</script>", "", html),
    "no em dash in the page copy")
-ck("fonts.googleapis.com" in html and html.count("fonts.googleapis.com/css2") == 1,
-   "one web font link")
-ck("Spectral" in html and "serif" in html, "Spectral with a serif fallback")
+# the page wears the site's chrome rather than a set of its own
+ck("fonts.googleapis.com" not in html, "no web font, like every other page")
+for token in ("--bg:#121212", "--accent:#58a6ff", "--sq-light:#a9b2be",
+              "border-top:4px solid var(--accent)", "ALTAZOR"):
+    ck(token in html, f"the site's chrome carries {token}")
 
 try:
     from playwright.sync_api import sync_playwright
@@ -126,31 +119,34 @@ with sync_playwright() as pw:
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.goto(PAGE.as_uri())
     pg.wait_for_timeout(600)
-    ck(pg.eval_on_selector_all("#board .sq", "es=>es.length") == 64,
+    ck(pg.eval_on_selector_all("#board rect.sq", "es=>es.length") == 64,
        "sixty-four squares")
+    darkfill = pg.evaluate("()=>getComputedStyle(document.documentElement)"
+                           ".getPropertyValue('--sq-dark').trim()")
     # a1 dark and h1 light, or the diagram reads as wrong to a player
     for sq, want in (("a1", "dark"), ("h1", "light"), ("a8", "light"),
                      ("h8", "dark"), ("e4", "light"), ("d4", "dark")):
-        cls = pg.eval_on_selector(f'[data-square="{sq}"]', "e=>e.className")
-        got = "dark" if "dark" in cls else "light"
+        got = ("dark" if pg.eval_on_selector(f"#sq-{sq}", "e=>e.getAttribute('fill')")
+               == darkfill else "light")
         ck(got == want, f"{sq} is {want}")
     # White's orientation: rank 1 at the bottom, the a file on the left
-    r1 = pg.eval_on_selector('[data-square="a1"]', "e=>e.getBoundingClientRect().top")
-    r8 = pg.eval_on_selector('[data-square="a8"]', "e=>e.getBoundingClientRect().top")
-    h1 = pg.eval_on_selector('[data-square="h1"]', "e=>e.getBoundingClientRect().left")
-    a1 = pg.eval_on_selector('[data-square="a1"]', "e=>e.getBoundingClientRect().left")
+    r1 = pg.eval_on_selector("#sq-a1", "e=>e.getBoundingClientRect().top")
+    r8 = pg.eval_on_selector("#sq-a8", "e=>e.getBoundingClientRect().top")
+    h1 = pg.eval_on_selector("#sq-h1", "e=>e.getBoundingClientRect().left")
+    a1 = pg.eval_on_selector("#sq-a1", "e=>e.getBoundingClientRect().left")
     ck(r1 > r8 and h1 > a1, "drawn from White's side")
-    ck(pg.eval_on_selector_all(".ranks span", "es=>es.length") == 8
-       and pg.eval_on_selector_all(".files span", "es=>es.length") == 8,
-       "coordinates down the left edge and along the bottom")
+    ck(pg.evaluate("()=>[...document.querySelectorAll('#board text')]"
+                   ".filter(t=>/^[a-h][1-8]$/.test(t.textContent)).length") == 64,
+       "a coordinate in the corner of every square")
 
-    tabs = pg.eval_on_selector_all(".positions button", "es=>es.map(e=>e.textContent)")
-    ck(tabs == [p["name"] for p in POS], f"a tab for each position: {tabs}")
+    tabs = pg.eval_on_selector_all("#menu button",
+                                   "es=>es.map(e=>e.firstChild.textContent)")
+    ck(tabs == [p["name"] for p in POS], f"one button per position: {tabs}")
 
     for i, p in enumerate(POS):
-        pg.click(f".positions button:nth-child({i+1})")
+        pg.click(f"#menu button:nth-of-type({i+1})")
         pg.wait_for_timeout(200)
-        ck(pg.inner_text("#counter").startswith("0 /"),
+        ck(pg.inner_text("#sInd").startswith("0 /"),
            f"{p['name']}: opens at the start")
         # forward to the end, by key and by button alternately
         for k in range(len(p["moves"])):
@@ -159,25 +155,23 @@ with sync_playwright() as pw:
             else:
                 pg.click("#next")
             pg.wait_for_timeout(40)
-        ck(pg.inner_text("#counter") == f"{len(p['moves'])} / {len(p['moves'])}",
-           f"{p['name']}: steps to the last ply, {pg.inner_text('#counter')}")
+        ck(pg.inner_text("#sInd") == f"{len(p['moves'])} / {len(p['moves'])}",
+           f"{p['name']}: steps to the last ply, {pg.inner_text('#sInd')}")
         # the pieces standing at the end are the engine's final position
         shown = pg.evaluate(
-            "()=>Object.fromEntries([...document.querySelectorAll('#board .sq')]"
-            ".filter(e=>e.textContent.trim()).map(e=>[e.dataset.square,"
-            "e.textContent.trim()]))")
+            "()=>Object.fromEntries([...document.querySelectorAll('#pieces g')]"
+            ".map(e=>[e.dataset.square, e.dataset.k]))")
         ck(len(shown) == len(p["start"]),
            f"{p['name']}: {len(shown)} pieces on the board at the end")
         # and back again to the start
         for k in range(len(p["moves"])):
             pg.keyboard.press("ArrowLeft")
             pg.wait_for_timeout(30)
-        ck(pg.inner_text("#counter").startswith("0 /"),
+        ck(pg.inner_text("#sInd").startswith("0 /"),
            f"{p['name']}: steps all the way back")
         back = pg.evaluate(
-            "()=>Object.fromEntries([...document.querySelectorAll('#board .sq')]"
-            ".filter(e=>e.textContent.trim()).map(e=>[e.dataset.square,"
-            "e.textContent.trim()]))")
+            "()=>Object.fromEntries([...document.querySelectorAll('#pieces g')]"
+            ".map(e=>[e.dataset.square, e.dataset.k]))")
         ck(set(back) == set(p["start"]),
            f"{p['name']}: stepping back restores the opening position")
         # a note only where there is something to say
@@ -188,7 +182,7 @@ with sync_playwright() as pw:
         for k in range(len(p["moves"])):
             pg.click("#next")
             pg.wait_for_timeout(40)
-            notes_at.append(bool(pg.inner_text("#note").strip()))
+            notes_at.append(bool(pg.inner_text("#pNote").strip()))
         want_notes = [bool(m.get("note")) for m in p["moves"]]
         ck(notes_at == want_notes,
            f"{p['name']}: a note appears on exactly the moves that carry one")
@@ -202,6 +196,13 @@ with sync_playwright() as pw:
     ck(bool(pg.eval_on_selector_all("header.site a[href='chess.html']",
                                     "es=>es.length")),
        "a way back to the Chess page")
+    # clicking a move in the list jumps to it
+    pg.click("#menu button:nth-of-type(1)")
+    pg.wait_for_timeout(200)
+    pg.click("#moves span[data-i='4']")
+    pg.wait_for_timeout(200)
+    ck(pg.inner_text("#sInd").startswith("4 /"),
+       f"clicking a move jumps to it ({pg.inner_text('#sInd')})")
     ck(not errs, f"no script errors ({errs[:1]})")
     br.close()
 
