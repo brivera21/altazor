@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scale &middot; Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; margin-right:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 12px; font-size:26px; }
+.controls { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 12px; }
+.controls label { font-size:13px; color:var(--muted); }
+.controls input[type=range] { width:160px; accent-color:var(--accent); }
+.controls output { font-size:13px; color:var(--text); font-variant-numeric:tabular-nums; }
+.presets { display:flex; gap:6px; flex-wrap:wrap; }
+.presets button { background:var(--panel); color:var(--muted); border:1px solid var(--line);
+  border-radius:999px; padding:5px 11px; font-size:12.5px; cursor:pointer; font-family:inherit; }
+.presets button:hover { color:var(--text); border-color:#3d3d3d; }
+.stage { display:flex; gap:22px; align-items:flex-start; }
+#diagram { flex:1 1 640px; min-width:0; }
+#diagram svg { width:100%; height:auto; display:block; user-select:none; }
+.side { flex:0 0 300px; position:sticky; top:16px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; }
+#kindTxt { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+#nameTxt { font-weight:700; font-size:17px; margin:2px 0 6px; }
+#numTxt { font-size:13.5px; line-height:1.55; font-variant-numeric:tabular-nums; }
+#numTxt b { color:var(--muted); font-weight:400; }
+#bodyTxt { color:var(--muted); font-size:13.5px; line-height:1.55; margin-top:9px; }
+#srcTxt { color:var(--muted); font-size:12px; margin-top:10px; border-top:1px solid var(--line); padding-top:8px; }
+#srcTxt a { color:var(--accent); }
+.note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.method { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+.refs p { margin:0 0 8px; overflow-wrap:anywhere; }
+.refs a { color:var(--accent); }
+.refs p { padding-left:2em; text-indent:-2em; }
+.refs .ann { color:#7d7d7d; display:block; padding-left:0; text-indent:0; margin-top:2px; }
+h2.refh { font-size:15px; margin:26px 0 8px; }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="library.html">&larr; Library &middot; Abstractions</a><a href="prime-spiral.html">The Prime Spiral</a><a href="universe.html">The Universe</a></nav>
+</header>
+<h1>Scale</h1>
+<div class="controls">
+  <label for="lensW">lens width</label>
+  <input type="range" id="lensW" min="10" max="60" step="1" value="30">
+  <output id="lensWOut">3.0 decades</output>
+  <span class="presets" id="jumps"></span>
+</div>
+<div class="stage">
+  <div id="diagram"></div>
+  <div class="side"><div class="card">
+    <div id="kindTxt"></div>
+    <div id="nameTxt">A mark under the cursor lands here</div>
+    <div id="numTxt"></div>
+    <div id="bodyTxt"></div>
+    <div id="srcTxt"></div>
+  </div></div>
+</div>
+<p class="note">One line, sixty-two steps, each step a factor of ten, from the Planck length at the left to the observable universe at the right. Every mark is a measured thing, coloured by realm. A person stands a little past the middle: thirty-five steps up from the smallest length that means anything, twenty-seven down from the whole universe.</p>
+<p class="note" style="border-top:none; padding-top:0;">On a log line nothing is drawn at its size, so a lens three decades wide slides along it, and whatever falls inside is drawn beneath as circles in true proportion, the largest filling the panel. Two marks picked in turn give their ratio in the card, as a power of ten and in plain multiples. Things the site draws elsewhere link to their pages.</p>
+<div class="method"><p>Each length is the diameter unless the card says otherwise: a distance for the gaps between bodies, a height for the mountain and the tower, a length for the island, the whale and the bacterium. Constants are CODATA 2018 and the IAU; the rest are the figures the Wikipedia article for each thing carries, cited one by one, since those are the numbers a reader meets next. Rounded things like a grain of sand or a hair are set at the middle of their published range. The lens draws circles by diameter, so a whale and a person appear as discs of those widths, not as their shapes.</p></div>
+<h2 class="refh">References</h2>
+<div class="refs"><p>Tiesinga, E., Mohr, P. J., Newell, D. B., &amp; Taylor, B. N. (2021). CODATA recommended values of the fundamental physical constants: 2018. <i>Reviews of Modern Physics, 93</i>(2), 025010. <a href="https://doi.org/10.1103/RevModPhys.93.025010">https://doi.org/10.1103/RevModPhys.93.025010</a><span class="ann">The Planck length, the proton charge radius and the Bohr radius.</span></p>
+<p>International Astronomical Union. (2012). <i>Resolution B2 on the re-definition of the astronomical unit of length</i>. IAU. <a href="https://www.iau.org/static/resolutions/IAU2012_English.pdf">https://www.iau.org/static/resolutions/IAU2012_English.pdf</a><span class="ann">The astronomical unit, exactly 149,597,870,700 m.</span></p>
+<p>Goodwin, S. P., Gribbin, J., &amp; Hendry, M. A. (1998). The relative size of the Milky Way. <i>The Observatory, 118</i>, 201-208. <a href="https://ui.adsabs.harvard.edu/abs/1998Obs...118..201G">https://ui.adsabs.harvard.edu/abs/1998Obs...118..201G</a><span class="ann">The Milky Way's stellar disc.</span></p>
+<p>McConnachie, A. W. (2012). The observed properties of dwarf galaxies in and around the Local Group. <i>The Astronomical Journal, 144</i>(1), 4. <a href="https://doi.org/10.1088/0004-6256/144/1/4">https://doi.org/10.1088/0004-6256/144/1/4</a><span class="ann">Andromeda's distance and the Local Group's extent.</span></p>
+<p>Morrison, P., Morrison, P., &amp; the Office of Charles and Ray Eames. (1982). <i>Powers of ten: A book about the relative size of things in the universe and the effect of adding another zero</i>. Scientific American Library.<span class="ann">The idea of the page: one line, a factor of ten a step.</span></p>
+<p>Properties of water. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Properties_of_water">https://en.wikipedia.org/wiki/Properties_of_water</a></p>
+<p>DNA. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/DNA">https://en.wikipedia.org/wiki/DNA</a></p>
+<p>Hemoglobin. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Hemoglobin">https://en.wikipedia.org/wiki/Hemoglobin</a></p>
+<p>Ribosome. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Ribosome">https://en.wikipedia.org/wiki/Ribosome</a></p>
+<p>SARS-CoV-2. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/SARS-CoV-2">https://en.wikipedia.org/wiki/SARS-CoV-2</a></p>
+<p>Visible spectrum. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Visible_spectrum">https://en.wikipedia.org/wiki/Visible_spectrum</a></p>
+<p>Escherichia coli. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Escherichia_coli">https://en.wikipedia.org/wiki/Escherichia_coli</a></p>
+<p>Red blood cell. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Red_blood_cell">https://en.wikipedia.org/wiki/Red_blood_cell</a></p>
+<p>Egg cell. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Egg_cell">https://en.wikipedia.org/wiki/Egg_cell</a></p>
+<p>Hair. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Hair">https://en.wikipedia.org/wiki/Hair</a></p>
+<p>Sand. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Sand">https://en.wikipedia.org/wiki/Sand</a></p>
+<p>Ant. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Ant">https://en.wikipedia.org/wiki/Ant</a></p>
+<p>Quarter (United States coin). (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Quarter_(United_States_coin)">https://en.wikipedia.org/wiki/Quarter_(United_States_coin)</a></p>
+<p>Human height. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Human_height">https://en.wikipedia.org/wiki/Human_height</a></p>
+<p>Blue whale. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Blue_whale">https://en.wikipedia.org/wiki/Blue_whale</a></p>
+<p>Hyperion (tree). (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Hyperion_(tree)">https://en.wikipedia.org/wiki/Hyperion_(tree)</a></p>
+<p>Burj Khalifa. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Burj_Khalifa">https://en.wikipedia.org/wiki/Burj_Khalifa</a></p>
+<p>Mount Everest. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Mount_Everest">https://en.wikipedia.org/wiki/Mount_Everest</a></p>
+<p>Manhattan. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Manhattan">https://en.wikipedia.org/wiki/Manhattan</a></p>
+<p>Marathon. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Marathon">https://en.wikipedia.org/wiki/Marathon</a></p>
+<p>Moon. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Moon">https://en.wikipedia.org/wiki/Moon</a></p>
+<p>Earth. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Earth">https://en.wikipedia.org/wiki/Earth</a></p>
+<p>Jupiter. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Jupiter">https://en.wikipedia.org/wiki/Jupiter</a></p>
+<p>Lunar distance. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Lunar_distance">https://en.wikipedia.org/wiki/Lunar_distance</a></p>
+<p>Sun. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Sun">https://en.wikipedia.org/wiki/Sun</a></p>
+<p>Betelgeuse. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Betelgeuse">https://en.wikipedia.org/wiki/Betelgeuse</a></p>
+<p>Neptune. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Neptune">https://en.wikipedia.org/wiki/Neptune</a></p>
+<p>Heliosphere. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Heliosphere">https://en.wikipedia.org/wiki/Heliosphere</a></p>
+<p>Proxima Centauri. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Proxima_Centauri">https://en.wikipedia.org/wiki/Proxima_Centauri</a></p>
+<p>Virgo Cluster. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Virgo_Cluster">https://en.wikipedia.org/wiki/Virgo_Cluster</a></p>
+<p>Laniakea Supercluster. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Laniakea_Supercluster">https://en.wikipedia.org/wiki/Laniakea_Supercluster</a></p>
+<p>Observable universe. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Observable_universe">https://en.wikipedia.org/wiki/Observable_universe</a></p></div>
+</div>
+<script>
+const OBJ=[{"k":"planck","n":"the Planck length","m":1.616255e-35,"r":"quantum","what":"the smallest length physics gives a meaning to","b":"Below this, quantum uncertainty and gravity make the notion of a distance stop working. Nothing measured comes within twenty decades of it.","s":"CODATA 2018","link":null},{"k":"proton","n":"a proton","m":1.68e-15,"r":"quantum","what":"diameter, twice the charge radius of 0.84 fm","b":"The nucleus of hydrogen. An atom is a hundred thousand times wider than this, and nearly all of it empty.","s":"CODATA 2018","link":"matter.html"},{"k":"hydrogen","n":"a hydrogen atom","m":1.06e-10,"r":"quantum","what":"diameter, twice the Bohr radius","b":"One proton and one electron, the electron's cloud setting the size. Every element in the table is within a factor of a few of this.","s":"CODATA 2018","link":"matter.html"},{"k":"water","n":"a water molecule","m":2.75e-10,"r":"molecule","what":"across the oxygen and its two hydrogens","b":"Three atoms, bent at 104.5 degrees, which is why water is polar and dissolves so much.","s":"Wikipedia, Properties of water","link":null},{"k":"dna","n":"the DNA double helix","m":2e-09,"r":"molecule","what":"the width of the helix","b":"Two nanometres wide and, uncoiled, two metres long in every human cell: a ratio of a billion.","s":"Wikipedia, DNA","link":null},{"k":"hemoglobin","n":"a haemoglobin molecule","m":5.5e-09,"r":"molecule","what":"diameter","b":"The protein that carries oxygen in blood, four chains folded together, with an iron atom at the heart of each.","s":"Wikipedia, Hemoglobin","link":null},{"k":"ribosome","n":"a ribosome","m":2.5e-08,"r":"molecule","what":"diameter","b":"The machine that reads RNA and builds proteins; a cell has millions. The largest molecular machine drawn here.","s":"Wikipedia, Ribosome","link":null},{"k":"virus","n":"a coronavirus","m":1e-07,"r":"cell","what":"diameter, SARS-CoV-2","b":"A hundred nanometres across, smaller than the wavelength of the light a microscope uses, which is why viruses waited for the electron microscope.","s":"Wikipedia, SARS-CoV-2","link":null},{"k":"green","n":"a wave of green light","m":5.5e-07,"r":"cell","what":"the wavelength","b":"Half a micron from crest to crest. Nothing smaller than roughly this can be seen with light, whatever the lens.","s":"Wikipedia, Visible spectrum","link":null},{"k":"ecoli","n":"an E. coli bacterium","m":2e-06,"r":"cell","what":"length","b":"Two microns long and half a micron wide, the best studied living thing. A thousand of them end to end make two millimetres.","s":"Wikipedia, Escherichia coli","link":null},{"k":"rbc","n":"a red blood cell","m":7.8e-06,"r":"cell","what":"diameter","b":"A disc with no nucleus, made to squeeze through capillaries barely wider than itself. A drop of blood holds five million.","s":"Wikipedia, Red blood cell","link":null},{"k":"hair","n":"a human hair","m":8e-05,"r":"everyday","what":"width","b":"Between seventeen and a hundred and eighty microns thick, depending on the head; the width most people reach for as the smallest thing they can see.","s":"Wikipedia, Hair","link":null},{"k":"egg","n":"a human egg cell","m":0.00012,"r":"cell","what":"diameter","b":"The largest human cell, and the only one the naked eye can just make out, about the width of a hair.","s":"Wikipedia, Egg cell","link":null},{"k":"sand","n":"a grain of sand","m":0.0005,"r":"everyday","what":"diameter, mid-range","b":"Sand is defined by size: between a sixteenth of a millimetre and two millimetres. Smaller is silt, larger is gravel.","s":"Wikipedia, Sand","link":null},{"k":"ant","n":"an ant","m":0.004,"r":"everyday","what":"length, a typical worker","b":"Ants run from under a millimetre to over five centimetres. The four millimetre worker is the common one.","s":"Wikipedia, Ant","link":null},{"k":"coin","n":"a coin","m":0.024,"r":"everyday","what":"diameter, a US quarter","b":"Twenty-four millimetres. The thing in a pocket that is nearest to a round number.","s":"Wikipedia, Quarter (United States coin)","link":null},{"k":"human","n":"a person","m":1.7,"r":"everyday","what":"height, an adult","b":"About one and seven tenths metres, the measure the metre was made to be a comfortable fraction of. The middle of this line in the sense that matters to us.","s":"Wikipedia, Human height","link":"body.html"},{"k":"whale","n":"a blue whale","m":25,"r":"everyday","what":"length","b":"The largest animal that has ever lived, as far as is known, at up to thirty metres.","s":"Wikipedia, Blue whale","link":"animals.html"},{"k":"redwood","n":"the tallest tree","m":115.9,"r":"everyday","what":"height, Hyperion, a coast redwood","b":"Measured at 115.92 metres in 2019. Trees stop near here because water cannot be lifted much higher against gravity and friction.","s":"Wikipedia, Hyperion (tree)","link":null},{"k":"burj","n":"the tallest building","m":828,"r":"everyday","what":"height, Burj Khalifa","b":"Eight hundred and twenty-eight metres, about seven redwoods.","s":"Wikipedia, Burj Khalifa","link":null},{"k":"everest","n":"Everest","m":8849,"r":"everyday","what":"height above sea level","b":"The 2020 survey figure. From the seabed, Mauna Kea is taller, at over ten kilometres.","s":"Wikipedia, Mount Everest","link":null},{"k":"manhattan","n":"Manhattan","m":21600.0,"r":"everyday","what":"length, tip to tip","b":"Twenty-one and a half kilometres, a long walk in a day.","s":"Wikipedia, Manhattan","link":"new-york.html"},{"k":"marathon","n":"a marathon","m":42195.0,"r":"everyday","what":"the distance run","b":"Forty-two kilometres and change, about the largest distance a body covers on foot in one go.","s":"Wikipedia, Marathon","link":null},{"k":"moon","n":"the Moon","m":3474800.0,"r":"world","what":"diameter","b":"A quarter the Earth's width, and the largest moon in the solar system relative to its planet.","s":"Wikipedia, Moon","link":"solar-system.html"},{"k":"earth","n":"the Earth","m":12742000.0,"r":"world","what":"mean diameter","b":"Twelve thousand seven hundred kilometres: three hundred marathons laid end to end.","s":"Wikipedia, Earth","link":"solar-system.html"},{"k":"jupiter","n":"Jupiter","m":139800000.0,"r":"world","what":"mean diameter","b":"Eleven Earths across, and more than twice the mass of all the other planets together.","s":"Wikipedia, Jupiter","link":"solar-system.html"},{"k":"moondist","n":"the Earth to the Moon","m":384400000.0,"r":"world","what":"mean distance","b":"Thirty Earths would fit in the gap. Light takes 1.3 seconds to cross it.","s":"Wikipedia, Lunar distance","link":"solar-system.html"},{"k":"sun","n":"the Sun","m":1392700000.0,"r":"star","what":"diameter","b":"A hundred and nine Earths across, and 99.86 percent of the mass of the solar system.","s":"Wikipedia, Sun","link":"solar-system.html"},{"k":"au","n":"the Earth to the Sun","m":149597870700.0,"r":"star","what":"the astronomical unit","b":"Defined exactly since 2012. Light takes eight minutes and twenty seconds.","s":"IAU 2012","link":"solar-system.html"},{"k":"betelgeuse","n":"Betelgeuse","m":1100000000000.0,"r":"star","what":"diameter, about 760 Suns","b":"A red supergiant so wide that, in the Sun's place, it would swallow the orbits of Mars and Jupiter.","s":"Wikipedia, Betelgeuse","link":null},{"k":"neptune","n":"Neptune's orbit","m":9000000000000.0,"r":"star","what":"diameter, 60 au","b":"The edge of the planets. Light takes four hours to reach Neptune from the Sun.","s":"Wikipedia, Neptune","link":"solar-system.html"},{"k":"heliosphere","n":"the heliosphere","m":36000000000000.0,"r":"star","what":"diameter, about 240 au","b":"Where the solar wind gives out against the gas between the stars. Voyager 1 crossed it in 2012.","s":"Wikipedia, Heliosphere","link":null},{"k":"ly","n":"a light year","m":9460700000000000.0,"r":"star","what":"the distance light covers in a year","b":"Nine and a half trillion kilometres, sixty-three thousand au.","s":"IAU","link":null},{"k":"proxima","n":"the Sun to Proxima Centauri","m":4.0175e+16,"r":"star","what":"distance, 4.25 light years","b":"The nearest other star. At Voyager's speed the trip would take seventy thousand years.","s":"Wikipedia, Proxima Centauri","link":null},{"k":"mw","n":"the Milky Way","m":8.27e+20,"r":"galaxy","what":"diameter of the stellar disc, 26.8 kpc","b":"Eighty-seven thousand light years across, with the Sun a little over half way out.","s":"Goodwin, Gribbin and Hendry 1998","link":"galaxies.html"},{"k":"m31","n":"the Milky Way to Andromeda","m":2.36e+22,"r":"galaxy","what":"distance, 765 kpc","b":"Two and a half million light years, about thirty Milky Ways laid end to end.","s":"McConnachie 2012","link":"galaxies.html"},{"k":"lg","n":"the Local Group","m":9.3e+22,"r":"galaxy","what":"diameter, about 3 Mpc","b":"The Milky Way, Andromeda and everything bound to them, some eighty galaxies in all.","s":"McConnachie 2012","link":"galaxies.html"},{"k":"virgo","n":"the Milky Way to the Virgo cluster","m":5.1e+23,"r":"galaxy","what":"distance, 16.5 Mpc","b":"The nearest large cluster, over a thousand galaxies, at the centre of our supercluster.","s":"Wikipedia, Virgo Cluster","link":null},{"k":"laniakea","n":"Laniakea","m":1.6e+24,"r":"cosmos","what":"diameter, 160 Mpc","b":"The supercluster the Local Group flows within, defined in 2014 by which way galaxies fall.","s":"Wikipedia, Laniakea Supercluster","link":null},{"k":"universe","n":"the observable universe","m":8.8e+26,"r":"cosmos","what":"diameter, 93 billion light years","b":"Everything whose light has had time to reach us. Wider than 13.8 billion light years because space has stretched while the light travelled.","s":"Wikipedia, Observable universe","link":"universe.html"}], REALM={"quantum":["#f28cb0","the quantum realm"],"molecule":["#e0a458","molecules"],"cell":["#9be564","cells and viruses"],"everyday":["#f4efe2","the human scale"],"world":["#58a6ff","worlds"],"star":["#ffb02e","stars and their systems"],"galaxy":["#b48cf2","galaxies"],"cosmos":["#6ee7f2","the cosmos"]}, JUMPS=[["hydrogen","an atom"],["rbc","a cell"],["human","a person"],["earth","the Earth"],["sun","the Sun"],["mw","the Galaxy"],["universe","everything"]];
+const W=980, H=720, L=40, R=940, Y=190;          // the line
+const LOG0=-35, LOG1=27;                          // decades on show
+const PANEL={x:30,y:270,w:920,h:420};             // the lens panel
+const el=document.getElementById('diagram');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const X=v=>L+(Math.log10(v)-LOG0)/(LOG1-LOG0)*(R-L);   // metres to pixels
+const XL=lg=>L+(lg-LOG0)/(LOG1-LOG0)*(R-L);            // log10 metres to pixels
+const LX=px=>LOG0+(px-L)/(R-L)*(LOG1-LOG0);            // pixels to log10 metres
+let lensC=Math.log10(1.7), lensW=3.0, picks=[], hot=null;
+
+/* ---- numbers ---- */
+const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+const sup=n=>String(n).split('').map(c=>SUP[c]||c).join('');
+function sci(v,dp){ let e=Math.floor(Math.log10(v)), m=v/Math.pow(10,e);
+  if(m>=9.995){m/=10;e++;} return m.toFixed(dp===undefined?2:dp)+'×10'+sup(e)+' m'; }
+// the unit a person would use for a length of this size
+const UNITS=[[1e-12,1e-15,'fm'],[1e-9,1e-12,'pm'],[1e-6,1e-9,'nm'],[1e-3,1e-6,'µm'],[1,1e-3,'mm'],
+  [1e3,1,'m'],[1e9,1e3,'km'],[1.495978707e11,1e9,'million km'],[9.4607e15,1.495978707e11,'au'],
+  [3.0857e19,9.4607e15,'light years'],[3.0857e22,3.0857e19,'kpc'],[3.0857e25,3.0857e22,'Mpc'],[Infinity,9.4607e24,'billion light years']];
+function human(v){
+  if(v<1e-16) return sci(v,2);
+  for(const [lim,u,name] of UNITS) if(v<lim){
+    const q=v/u; const txt=q>=100?Math.round(q).toLocaleString('en-US'):q>=10?q.toFixed(1):q.toFixed(2);
+    return txt+' '+name;
+  }
+}
+const nice=v=>v>=1e6?sci(v,1).replace(' m',''):v>=100?Math.round(v).toLocaleString('en-US'):v>=10?v.toFixed(1):v.toFixed(2);
+
+/* ---- the card ---- */
+function card(kind,name,rows,body,src){
+  document.getElementById('kindTxt').textContent=kind;
+  document.getElementById('nameTxt').textContent=name;
+  document.getElementById('numTxt').innerHTML=rows.map(([k,v])=>'<b>'+esc(k)+'</b> '+v).join('<br>');
+  document.getElementById('bodyTxt').textContent=body;
+  document.getElementById('srcTxt').innerHTML=src;
+}
+function showOne(o){
+  const rows=[['length', sci(o.m)+', '+human(o.m)], ['which is', esc(o.what)]];
+  if(o.k!=='human') rows.push(['against a person', ratioTxt(o.m/1.7)]);
+  card(REALM[o.r][1], o.n, rows, o.b,
+    esc(o.s)+(o.link?' · <a href="'+o.link+'">drawn on this site</a>':''));
+}
+function ratioTxt(q){
+  const lg=Math.log10(q), big=q>=1?q:1/q;
+  return (q>=1?'':'1/')+nice(big)+' as '+(q>=1?'large':'large, that is smaller')+', '+Math.abs(lg).toFixed(1)+' decades '+(q>=1?'up':'down');
+}
+function showPair(a,b){
+  const big=a.m>=b.m?a:b, small=a.m>=b.m?b:a, q=big.m/small.m;
+  card('Two marks compared', big.n+' and '+small.n,
+    [[big.n, sci(big.m)], [small.n, sci(small.m)],
+     ['ratio', nice(q)+' to one, 10^'+Math.log10(q).toFixed(2)],
+     ['in steps of ten', Math.round(Math.log10(q))+' decades']],
+    'The bigger of the two is '+nice(q)+' times the smaller across. Each decade is one step along the line; '+
+    'a thousandfold is three steps.', esc(big.s)+'; '+esc(small.s));
+}
+
+/* ---- the line ---- */
+function lanes(){
+  // labels above the line, each dropped to the first lane where it fits
+  const order=[...OBJ].map(o=>({o,x:X(o.m)})).sort((a,b)=>a.x-b.x);
+  const ends=[], out={};
+  for(const {o,x} of order){
+    const w=o.n.length*6.3+10, left=Math.max(L-30,Math.min(R-w+30,x-w/2));
+    let lane=0; while(ends[lane]!==undefined && ends[lane]>left) lane++;
+    ends[lane]=left+w+8; out[o.k]={lane,lx:left+w/2};
+  }
+  return out;
+}
+const LANE=lanes(), NLANE=Math.max(...Object.values(LANE).map(l=>l.lane))+1;
+function line(){
+  let s='';
+  // realm bands, faint, along the axis
+  s+='<line x1="'+L+'" y1="'+Y+'" x2="'+R+'" y2="'+Y+'" stroke="#3d444d" stroke-width="2"/>';
+  for(let e=LOG0;e<=LOG1;e++){
+    const x=XL(e), major=e%5===0;
+    s+='<line x1="'+x.toFixed(1)+'" y1="'+(Y-(major?7:4))+'" x2="'+x.toFixed(1)+'" y2="'+(Y+(major?7:4))+'" stroke="#3d444d" stroke-width="1"/>';
+    if(major) s+='<text x="'+x.toFixed(1)+'" y="'+(Y+22)+'" text-anchor="middle" font-size="10.5" fill="#6b7280">10'+sup(e)+'</text>';
+  }
+  // the units people use, under the ticks
+  for(const [v,lab] of [[1e-9,'nm'],[1e-6,'µm'],[1e-3,'mm'],[1,'m'],[1e3,'km'],[1.496e11,'au'],[9.46e15,'ly'],[3.086e19,'kpc'],[3.086e22,'Mpc']])
+    s+='<text x="'+X(v).toFixed(1)+'" y="'+(Y+36)+'" text-anchor="middle" font-size="10" fill="#565656">'+lab+'</text>';
+  // the lens
+  const x0=XL(lensC-lensW/2), x1=XL(lensC+lensW/2);
+  s+='<rect x="'+x0.toFixed(1)+'" y="'+(Y-16-NLANE*14)+'" width="'+(x1-x0).toFixed(1)+'" height="'+(NLANE*14+34)+
+     '" fill="#58a6ff" fill-opacity="0.08" stroke="#58a6ff" stroke-opacity="0.55" stroke-width="1" data-lens="1" style="cursor:ew-resize"/>';
+  // the marks and their labels
+  for(const o of OBJ){
+    const x=X(o.m), {lane,lx}=LANE[o.k], ly=Y-16-lane*14, c=REALM[o.r][0];
+    const picked=picks.includes(o.k), isHot=hot===o.k;
+    s+='<g data-k="'+o.k+'" style="cursor:pointer">';
+    s+='<line x1="'+x.toFixed(1)+'" y1="'+(ly+3)+'" x2="'+x.toFixed(1)+'" y2="'+(Y-5)+'" stroke="'+c+'" stroke-opacity="0.35" stroke-width="1"/>';
+    s+='<circle cx="'+x.toFixed(1)+'" cy="'+Y+'" r="'+(picked||isHot?5.5:3.8)+'" fill="'+c+'" stroke="#121212" stroke-width="1.2"/>';
+    if(picked) s+='<circle cx="'+x.toFixed(1)+'" cy="'+Y+'" r="9" fill="none" stroke="#f4efe2" stroke-width="1.2"/>';
+    s+='<text x="'+lx.toFixed(1)+'" y="'+ly+'" text-anchor="middle" font-size="10.5" fill="'+(picked||isHot?'#f4efe2':c)+'">'+esc(o.n)+'</text>';
+    s+='<rect x="'+(lx-o.n.length*3.2-4).toFixed(1)+'" y="'+(ly-10)+'" width="'+(o.n.length*6.4+8)+'" height="14" fill="transparent"/>';
+    s+='<circle cx="'+x.toFixed(1)+'" cy="'+Y+'" r="9" fill="transparent"/></g>';
+  }
+  // a bracket between two picks
+  if(picks.length===2){
+    const a=X(OBJ.find(o=>o.k===picks[0]).m), b=X(OBJ.find(o=>o.k===picks[1]).m);
+    s+='<path d="M'+Math.min(a,b).toFixed(1)+','+(Y+48)+' v6 H'+Math.max(a,b).toFixed(1)+' v-6" fill="none" stroke="#f4efe2" stroke-width="1.2"/>';
+    const q=Math.abs(Math.log10(OBJ.find(o=>o.k===picks[0]).m/OBJ.find(o=>o.k===picks[1]).m));
+    s+='<text x="'+((a+b)/2).toFixed(1)+'" y="'+(Y+68)+'" text-anchor="middle" font-size="11" fill="#f4efe2">'+q.toFixed(1)+' decades apart</text>';
+  }
+  return s;
+}
+
+/* ---- the lens panel: what is inside, at true proportion ---- */
+function panel(){
+  const lo=Math.pow(10,lensC-lensW/2), hi=Math.pow(10,lensC+lensW/2);
+  const inside=OBJ.filter(o=>o.m>=lo&&o.m<=hi).sort((a,b)=>b.m-a.m);
+  let s='<rect x="'+PANEL.x+'" y="'+PANEL.y+'" width="'+PANEL.w+'" height="'+PANEL.h+'" fill="#171717" stroke="#2b2b2b" rx="8"/>';
+  s+='<text x="'+(PANEL.x+14)+'" y="'+(PANEL.y+22)+'" font-size="12" fill="#9a9a9a">inside the lens, '+sci(lo,1)+' to '+sci(hi,1)+', drawn in true proportion</text>';
+  if(!inside.length){
+    s+='<text x="'+(PANEL.x+PANEL.w/2)+'" y="'+(PANEL.y+PANEL.h/2)+'" text-anchor="middle" font-size="13" fill="#6b7280">nothing measured on this line falls in the window</text>';
+    return s;
+  }
+  const maxD=Math.min(PANEL.h-110, 330), k=maxD/inside[0].m;    // px per metre
+  // lay them out left to right, biggest first, each in a slot of its width plus room for a name
+  let x=PANEL.x+24; const cy=PANEL.y+34+maxD/2; let tiny=0;
+  for(const o of inside){
+    const d=o.m*k, r=Math.max(d/2,0.6), slot=Math.max(d+28, o.n.length*6.4+24);
+    if(x+slot>PANEL.x+PANEL.w-10) break;
+    const cx=x+slot/2, c=REALM[o.r][0], isHot=hot===o.k;
+    s+='<g data-k="'+o.k+'" style="cursor:pointer">';
+    s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+r.toFixed(2)+'" fill="'+c+'" fill-opacity="'+(isHot?0.95:0.75)+'" stroke="'+(isHot?'#f4efe2':c)+'" stroke-width="1"/>';
+    if(d<3){ tiny++; s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="6" fill="none" stroke="'+c+'" stroke-opacity="0.5" stroke-dasharray="2 2"/>'; }
+    s+='<rect x="'+x.toFixed(1)+'" y="'+(PANEL.y+30)+'" width="'+slot.toFixed(1)+'" height="'+(PANEL.h-40)+'" fill="transparent"/>';
+    s+='<text x="'+cx.toFixed(1)+'" y="'+(PANEL.y+34+maxD+26)+'" text-anchor="middle" font-size="11" fill="'+(isHot?'#f4efe2':'#cfd6e6')+'">'+esc(o.n)+'</text>';
+    s+='<text x="'+cx.toFixed(1)+'" y="'+(PANEL.y+34+maxD+42)+'" text-anchor="middle" font-size="10" fill="#8a94a6">'+human(o.m)+'</text>';
+    if(o!==inside[0]) s+='<text x="'+cx.toFixed(1)+'" y="'+(PANEL.y+34+maxD+57)+'" text-anchor="middle" font-size="10" fill="#6b7280">1/'+nice(inside[0].m/o.m)+' of the largest</text>';
+    s+='</g>';
+    x+=slot;
+  }
+  if(tiny) s+='<text x="'+(PANEL.x+PANEL.w-14)+'" y="'+(PANEL.y+PANEL.h-12)+'" text-anchor="end" font-size="10.5" fill="#6b7280">a dashed ring marks a thing too small to draw at this proportion</text>';
+  return s;
+}
+
+/* ---- render and events ---- */
+function render(){
+  el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" id="ssvg">'+
+    '<rect width="'+W+'" height="'+H+'" fill="#121212"/>'+
+    '<text x="'+L+'" y="30" font-size="14" fill="#9a9a9a">Sixty-two decades, a factor of ten a step. The lens slides.</text>'+
+    line()+panel()+'</svg>';
+  document.getElementById('lensWOut').textContent=lensW.toFixed(1)+' decades';
+}
+function pick(k){
+  const o=OBJ.find(x=>x.k===k); if(!o) return;
+  if(picks.includes(k)) picks=picks.filter(p=>p!==k);
+  else { picks.push(k); if(picks.length>2) picks=picks.slice(-2); }
+  if(picks.length===2) showPair(OBJ.find(x=>x.k===picks[0]),OBJ.find(x=>x.k===picks[1]));
+  else showOne(o);
+  render();
+}
+let dragging=false, swallow=false;
+function svgX(e){ const r=document.getElementById('ssvg').getBoundingClientRect(); return (e.clientX-r.left)/r.width*W; }
+function svgY(e){ const r=document.getElementById('ssvg').getBoundingClientRect(); return (e.clientY-r.top)/r.height*H; }
+el.addEventListener('pointerover',e=>{ const g=e.target.closest('[data-k]'); if(g){ hot=g.getAttribute('data-k'); if(picks.length<2) showOne(OBJ.find(o=>o.k===hot)); render(); } });
+el.addEventListener('pointerdown',e=>{
+  const y=svgY(e);
+  if(e.target.closest('[data-lens]') || (y>Y-20 && y<Y+40 && !e.target.closest('[data-k]'))){
+    dragging=true; swallow=true; el.setPointerCapture&&el.setPointerCapture(e.pointerId);
+    setLens(LX(svgX(e))); e.preventDefault();
+  }
+});
+el.addEventListener('pointermove',e=>{ if(dragging) setLens(LX(svgX(e))); });
+window.addEventListener('pointerup',()=>{ dragging=false; });
+el.addEventListener('click',e=>{ if(swallow){ swallow=false; return; } const g=e.target.closest('[data-k]'); if(g) pick(g.getAttribute('data-k')); });
+function setLens(c){ lensC=Math.max(LOG0+lensW/2,Math.min(LOG1-lensW/2,c)); render(); }
+document.getElementById('lensW').addEventListener('input',e=>{ lensW=+e.target.value/10; setLens(lensC); });
+document.getElementById('jumps').innerHTML=JUMPS.map(([k,l])=>'<button type="button" data-j="'+k+'">'+l+'</button>').join('');
+document.getElementById('jumps').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return;
+  const o=OBJ.find(x=>x.k===b.dataset.j); setLens(Math.log10(o.m)); hot=o.k; if(picks.length<2) showOne(o); render(); });
+
+render();
+showOne(OBJ.find(o=>o.k==='human'));
+window.__scale=()=>({n:OBJ.length, lensC, lensW, picks, hot,
+  inside:OBJ.filter(o=>Math.log10(o.m)>=lensC-lensW/2&&Math.log10(o.m)<=lensC+lensW/2).map(o=>o.k),
+  marks:document.querySelectorAll('#ssvg g[data-k]').length});
+</script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stars &middot; Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; margin-right:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 12px; font-size:26px; }
+.controls { display:grid; grid-template-columns:auto 1fr auto; gap:8px 14px; align-items:center;
+  margin:0 0 12px; max-width:760px; font-size:13px; color:var(--muted); }
+.controls input[type=range] { width:100%; accent-color:var(--accent); }
+.controls output { color:var(--text); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.presets { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 12px; }
+.presets button { background:var(--panel); color:var(--muted); border:1px solid var(--line);
+  border-radius:999px; padding:5px 11px; font-size:12.5px; cursor:pointer; font-family:inherit; }
+.presets button:hover { color:var(--text); border-color:#3d3d3d; }
+.presets button[aria-pressed=true] { color:#0b0b0b; background:var(--accent); border-color:var(--accent); font-weight:700; }
+.stage { display:flex; gap:22px; align-items:flex-start; }
+#diagram { flex:1 1 640px; min-width:0; }
+#diagram svg { width:100%; height:auto; display:block; user-select:none; }
+.side { flex:0 0 300px; position:sticky; top:16px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; }
+#kindTxt { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+#nameTxt { font-weight:700; font-size:17px; margin:2px 0 6px; }
+#numTxt { font-size:13.5px; line-height:1.55; font-variant-numeric:tabular-nums; }
+#numTxt b { color:var(--muted); font-weight:400; }
+#bodyTxt { color:var(--muted); font-size:13.5px; line-height:1.55; margin-top:9px; }
+#srcTxt { color:var(--muted); font-size:12px; margin-top:10px; border-top:1px solid var(--line); padding-top:8px; }
+.note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.method { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+.refs p { margin:0 0 8px; overflow-wrap:anywhere; }
+.refs a { color:var(--accent); }
+.refs p { padding-left:2em; text-indent:-2em; }
+.refs .ann { color:#7d7d7d; display:block; padding-left:0; text-indent:0; margin-top:2px; }
+h2.refh { font-size:15px; margin:26px 0 8px; }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="library.html">&larr; Library &middot; The Universe</a><a href="galaxies.html">Galaxies</a><a href="solar-system.html">The Solar System</a><a href="matter.html">Matter</a></nav>
+</header>
+<h1>Stars</h1>
+<div class="controls">
+  <label for="mass">mass</label><input type="range" id="mass" min="-100" max="160" step="1" value="0"><output id="massOut"></output>
+  <label for="life">life</label><input type="range" id="life" min="0" max="1150" step="1" value="0"><output id="lifeOut"></output>
+</div>
+<div class="presets" id="presets"></div>
+<div class="stage">
+  <div id="diagram"></div>
+  <div class="side"><div class="card">
+    <div id="kindTxt"></div>
+    <div id="nameTxt">A star under the cursor lands here</div>
+    <div id="numTxt"></div>
+    <div id="bodyTxt"></div>
+    <div id="srcTxt"></div>
+  </div></div>
+</div>
+<p class="note">Every star is a point on this diagram: how much light it gives against how hot its surface is, with the hot end on the left, the way Russell drew it in 1914. Most stars fall on the diagonal band, the main sequence, where hydrogen burns in the core and mass alone sets the place: heavier is hotter and brighter. The dashed lines are equal radius, since the same temperature at more light means a bigger surface.</p>
+<p class="note" style="border-top:none; padding-top:0;">The sliders set a star's mass and carry it through its life. The main sequence lasts about ten billion years for the Sun and a million for the heaviest; then the core runs out of hydrogen, the star swells into the giants at the upper right, and ends as the white dwarfs at the lower left, or as a supernova and a neutron star or black hole, off the diagram, if it began with more than about eight suns.</p>
+<div class="method"><p>The named stars carry the temperature, luminosity, mass and distance their Wikipedia article gives, cited one by one; the radius on the card is worked from the first two, since luminosity goes as the radius squared and the temperature to the fourth. The main sequence is the dwarf table of Pecaut and Mamajek. The life track is a sketch in the right places: the main sequence lifetime is ten billion years times mass over luminosity; the giant and supergiant stages take the last tenth of the life, at the luminosities and temperatures stars of that mass reach; the white dwarf then cools for longer than the diagram can hold. The track is not a model run, and a real star wanders more than a line. The class bands follow the dwarf table, moved a few hundred kelvin where a named giant or supergiant would otherwise fall on the wrong side of its published letter.</p></div>
+<h2 class="refh">References</h2>
+<div class="refs"><p>Russell, H. N. (1914). Relations between the spectra and other characteristics of the stars. <i>Popular Astronomy, 22</i>, 275-294. <a href="https://ui.adsabs.harvard.edu/abs/1914PA.....22..275R">https://ui.adsabs.harvard.edu/abs/1914PA.....22..275R</a><span class="ann">The diagram, as Russell first drew it.</span></p>
+<p>Pecaut, M. J., &amp; Mamajek, E. E. (2013). Intrinsic colors, temperatures, and bolometric corrections of pre-main-sequence stars. <i>The Astrophysical Journal Supplement Series, 208</i>(1), 9. <a href="https://doi.org/10.1088/0067-0049/208/1/9">https://doi.org/10.1088/0067-0049/208/1/9</a><span class="ann">The dwarf sequence of temperatures and luminosities, and the class boundaries.</span></p>
+<p>Iben, I. (1967). Stellar evolution within and off the main sequence. <i>Annual Review of Astronomy and Astrophysics, 5</i>, 571-626. <a href="https://doi.org/10.1146/annurev.aa.05.090167.003103">https://doi.org/10.1146/annurev.aa.05.090167.003103</a><span class="ann">The shape of a star's track after the main sequence.</span></p>
+<p>Kippenhahn, R., Weigert, A., &amp; Weiss, A. (2012). <i>Stellar structure and evolution</i>. Springer. <a href="https://doi.org/10.1007/978-3-642-30304-3">https://doi.org/10.1007/978-3-642-30304-3</a><span class="ann">The lifetime scaling and the fates by mass.</span></p>
+<p>Heger, A., Fryer, C. L., Woosley, S. E., Langer, N., &amp; Hartmann, D. H. (2003). How massive single stars end their life. <i>The Astrophysical Journal, 591</i>(1), 288-300. <a href="https://doi.org/10.1086/375341">https://doi.org/10.1086/375341</a><span class="ann">Which masses leave a white dwarf, a neutron star or a black hole.</span></p>
+<p>Sun. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Sun">https://en.wikipedia.org/wiki/Sun</a></p>
+<p>Sirius. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Sirius">https://en.wikipedia.org/wiki/Sirius</a></p>
+<p>Proxima Centauri. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Proxima_Centauri">https://en.wikipedia.org/wiki/Proxima_Centauri</a></p>
+<p>Alpha Centauri. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Alpha_Centauri">https://en.wikipedia.org/wiki/Alpha_Centauri</a></p>
+<p>Barnard's Star. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Barnard%27s_Star">https://en.wikipedia.org/wiki/Barnard%27s_Star</a></p>
+<p>Wolf 359. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Wolf_359">https://en.wikipedia.org/wiki/Wolf_359</a></p>
+<p>TRAPPIST-1. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/TRAPPIST-1">https://en.wikipedia.org/wiki/TRAPPIST-1</a></p>
+<p>Vega. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Vega">https://en.wikipedia.org/wiki/Vega</a></p>
+<p>Altair. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Altair">https://en.wikipedia.org/wiki/Altair</a></p>
+<p>Fomalhaut. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Fomalhaut">https://en.wikipedia.org/wiki/Fomalhaut</a></p>
+<p>Procyon. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Procyon">https://en.wikipedia.org/wiki/Procyon</a></p>
+<p>Epsilon Eridani. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Epsilon_Eridani">https://en.wikipedia.org/wiki/Epsilon_Eridani</a></p>
+<p>Tau Ceti. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Tau_Ceti">https://en.wikipedia.org/wiki/Tau_Ceti</a></p>
+<p>61 Cygni. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/61_Cygni">https://en.wikipedia.org/wiki/61_Cygni</a></p>
+<p>Gliese 581. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Gliese_581">https://en.wikipedia.org/wiki/Gliese_581</a></p>
+<p>Arcturus. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Arcturus">https://en.wikipedia.org/wiki/Arcturus</a></p>
+<p>Aldebaran. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Aldebaran">https://en.wikipedia.org/wiki/Aldebaran</a></p>
+<p>Capella. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Capella">https://en.wikipedia.org/wiki/Capella</a></p>
+<p>Pollux. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Pollux">https://en.wikipedia.org/wiki/Pollux</a></p>
+<p>Mira. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Mira">https://en.wikipedia.org/wiki/Mira</a></p>
+<p>Regulus. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Regulus">https://en.wikipedia.org/wiki/Regulus</a></p>
+<p>Achernar. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Achernar">https://en.wikipedia.org/wiki/Achernar</a></p>
+<p>Bellatrix. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Bellatrix">https://en.wikipedia.org/wiki/Bellatrix</a></p>
+<p>Spica. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Spica">https://en.wikipedia.org/wiki/Spica</a></p>
+<p>Alnitak. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Alnitak">https://en.wikipedia.org/wiki/Alnitak</a></p>
+<p>Zeta Puppis. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Zeta_Puppis">https://en.wikipedia.org/wiki/Zeta_Puppis</a></p>
+<p>Rigel. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Rigel">https://en.wikipedia.org/wiki/Rigel</a></p>
+<p>Deneb. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Deneb">https://en.wikipedia.org/wiki/Deneb</a></p>
+<p>Polaris. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Polaris">https://en.wikipedia.org/wiki/Polaris</a></p>
+<p>Canopus. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Canopus">https://en.wikipedia.org/wiki/Canopus</a></p>
+<p>Betelgeuse. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Betelgeuse">https://en.wikipedia.org/wiki/Betelgeuse</a></p>
+<p>Antares. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Antares">https://en.wikipedia.org/wiki/Antares</a></p>
+<p>Van Maanen 2. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Van_Maanen_2">https://en.wikipedia.org/wiki/Van_Maanen_2</a></p></div>
+</div>
+<script>
+const STARS=[{"n":"the Sun","T":5772,"L":1.0,"c":"G2V","M":1.0,"d":1.58e-05,"r":"main","b":"The reference for everything on this diagram: one solar luminosity, one solar mass, one solar radius."},{"n":"Sirius A","T":9940,"L":25.4,"c":"A1V","M":2.06,"d":8.6,"r":"main","b":"The brightest star in the night sky, twice the Sun's mass and twenty-five times its light, eight light years off."},{"n":"Sirius B","T":25200,"L":0.056,"c":"DA2","M":1.02,"d":8.6,"r":"wd","b":"Sirius's companion, a white dwarf the size of the Earth carrying the mass of the Sun. Hotter than Sirius A, and ten thousand times fainter."},{"n":"Proxima Centauri","T":3042,"L":0.0017,"c":"M5.5V","M":0.12,"d":4.25,"r":"main","b":"The nearest star to the Sun, a red dwarf too faint to see without a telescope, which will burn for trillions of years."},{"n":"Alpha Centauri A","T":5790,"L":1.52,"c":"G2V","M":1.08,"d":4.37,"r":"main","b":"The Sun's near twin, a little heavier and brighter, in the nearest star system."},{"n":"Alpha Centauri B","T":5260,"L":0.5,"c":"K1V","M":0.91,"d":4.37,"r":"main","b":"Its orange companion, a little lighter and dimmer than the Sun."},{"n":"Barnard's Star","T":3134,"L":0.0035,"c":"M4V","M":0.16,"d":5.96,"r":"main","b":"The fastest moving star in the sky, an old red dwarf of the galactic halo passing through."},{"n":"Wolf 359","T":2749,"L":0.0011,"c":"M6V","M":0.11,"d":7.86,"r":"main","b":"Near the bottom of the main sequence: a tenth of the Sun's mass and a thousandth of its light."},{"n":"TRAPPIST-1","T":2566,"L":0.000553,"c":"M8V","M":0.0898,"d":40.7,"r":"main","b":"Barely a star at all, just over the line where hydrogen fuses, with seven Earth-sized planets."},{"n":"Vega","T":9602,"L":40.1,"c":"A0V","M":2.1,"d":25,"r":"main","b":"The zero point of the magnitude scale for a century, spinning so fast it is flattened at the poles."},{"n":"Altair","T":7550,"L":10.6,"c":"A7V","M":1.8,"d":16.7,"r":"main","b":"A fast spinner too, seen nearly pole-on, one of the first stars ever imaged as a disc."},{"n":"Fomalhaut","T":8590,"L":16.6,"c":"A3V","M":1.92,"d":25,"r":"main","b":"A young A star with a ring of debris around it, imaged directly."},{"n":"Procyon A","T":6530,"L":6.93,"c":"F5IV-V","M":1.5,"d":11.5,"r":"main","b":"Leaving the main sequence: its core hydrogen is nearly spent and it has begun to swell."},{"n":"Procyon B","T":7740,"L":0.00049,"c":"DQZ","M":0.6,"d":11.5,"r":"wd","b":"A faint white dwarf beside Procyon, the cooled core of a star that finished long ago."},{"n":"Epsilon Eridani","T":5084,"L":0.34,"c":"K2V","M":0.82,"d":10.5,"r":"main","b":"A young orange dwarf with a planet and a dust disc, a favourite of science fiction."},{"n":"Tau Ceti","T":5344,"L":0.52,"c":"G8V","M":0.78,"d":11.9,"r":"main","b":"The nearest single star like the Sun, a little cooler and older."},{"n":"61 Cygni A","T":4526,"L":0.153,"c":"K5V","M":0.7,"d":11.4,"r":"main","b":"The first star whose distance was measured by parallax, by Bessel in 1838."},{"n":"Gliese 581","T":3480,"L":0.013,"c":"M3V","M":0.31,"d":20.5,"r":"main","b":"A red dwarf with a planetary system, a third of the Sun's mass."},{"n":"Arcturus","T":4286,"L":170,"c":"K1.5III","M":1.08,"d":36.7,"r":"giant","b":"A red giant of about the Sun's mass, which is what the Sun will look like in five billion years: twenty-five times wider and 170 times brighter."},{"n":"Aldebaran","T":3900,"L":439,"c":"K5III","M":1.16,"d":65,"r":"giant","b":"The eye of the Bull, a red giant forty-four times the Sun's radius."},{"n":"Capella Aa","T":4970,"L":78.7,"c":"K0III","M":2.57,"d":42.9,"r":"giant","b":"A giant burning helium in its core, the red clump stage, paired with a near twin."},{"n":"Pollux","T":4586,"L":32.7,"c":"K0III","M":1.9,"d":33.8,"r":"giant","b":"The nearest giant star to the Sun, with a planet."},{"n":"Mira","T":3000,"L":8400,"c":"M7III","M":1.2,"d":300,"r":"giant","b":"The first variable star recognised, swelling and shrinking over 332 days on the asymptotic giant branch, near its end. Its luminosity varies."},{"n":"Regulus A","T":12460,"L":288,"c":"B8IVn","M":3.8,"d":79,"r":"main","b":"Spinning at 96 percent of the speed that would tear it apart, and egg-shaped for it."},{"n":"Achernar","T":15000,"L":3150,"c":"B6Vep","M":6.7,"d":139,"r":"main","b":"The flattest star known, its equator half again as wide as its poles, for the same reason."},{"n":"Bellatrix","T":22000,"L":9211,"c":"B2III","M":8.6,"d":250,"r":"main","b":"Orion's shoulder, a hot blue giant at the top of the main sequence."},{"n":"Spica A","T":25300,"L":20500,"c":"B1III-IV","M":11.4,"d":250,"r":"main","b":"A blue giant of eleven solar masses that will end as a supernova, part of a tight binary."},{"n":"Alnitak Aa","T":29500,"L":250000,"c":"O9.5Iab","M":33,"d":1260,"r":"super","b":"The easternmost star of Orion's belt, a blue supergiant a quarter of a million times the Sun's light."},{"n":"Zeta Puppis","T":40000,"L":800000,"c":"O4If","M":56,"d":1080,"r":"super","b":"One of the hottest stars visible to the eye, losing mass in a wind a million times the Sun's. Its luminosity is uncertain by a factor of two."},{"n":"Rigel","T":12100,"L":120000,"c":"B8Ia","M":21,"d":860,"r":"super","b":"A blue supergiant, Orion's foot, seventy-nine times the Sun's radius and a supernova to come."},{"n":"Deneb","T":8525,"L":196000,"c":"A2Ia","M":19,"d":2600,"r":"super","b":"A white supergiant among the most luminous stars known, visible to the eye from two and a half thousand light years."},{"n":"Polaris","T":6015,"L":1260,"c":"F7Ib","M":5.4,"d":448,"r":"super","b":"The pole star, a Cepheid variable pulsing every four days, the kind of star that calibrates cosmic distances."},{"n":"Canopus","T":7400,"L":10700,"c":"A9II","M":8,"d":310,"r":"super","b":"The second brightest star in the sky, a bright giant on its way to becoming a red supergiant."},{"n":"Betelgeuse","T":3600,"L":126000,"c":"M1-2Ia","M":17,"d":550,"r":"super","b":"A red supergiant so wide it would reach past the orbit of Mars in the Sun's place, and due to explode within the next hundred thousand years."},{"n":"Antares","T":3660,"L":75900,"c":"M1.5Iab","M":12,"d":550,"r":"super","b":"The heart of the Scorpion, another red supergiant near its end."},{"n":"Van Maanen 2","T":6130,"L":0.00017,"c":"DZ8","M":0.68,"d":14.1,"r":"wd","b":"The nearest single white dwarf, cooled over three billion years to about the Sun's temperature at a ten thousandth of its light."}], CLASSES=[["O",29000,200000,"#9bb0ff"],["B",10000,29000,"#aabfff"],["A",7300,10000,"#cad7ff"],["F",5900,7300,"#f8f7ff"],["G",5300,5900,"#fff4ea"],["K",3850,5300,"#ffd2a1"],["M",2300,3850,"#ffcc6f"]], MS=[[0.1,2900,0.0008],[0.2,3200,0.004],[0.3,3400,0.01],[0.5,3800,0.04],[0.7,4700,0.2],[0.8,5100,0.35],[1.0,5772,1.0],[1.3,6400,2.5],[1.6,7200,6.0],[2.0,8400,16.0],[2.9,9600,40.0],[3.5,11000,100.0],[5.0,15500,500.0],[10.0,24000,6000.0],[20.0,33000,60000.0],[40.0,42000,400000.0]];
+const W=980, H=720, P={x:88,y:36,w:850,h:610};       // the plot
+const LT0=Math.log10(120000), LT1=Math.log10(2300);  // hot on the left
+const LL0=-5, LL1=6.5;
+const el=document.getElementById('diagram');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const X=T=>P.x+(Math.log10(T)-LT0)/(LT1-LT0)*P.w;
+const Y=L=>P.y+P.h-(Math.log10(L)-LL0)/(LL1-LL0)*P.h;
+const TSUN=5772;
+let mass=1, life=0, hot=null;
+
+/* ---- numbers ---- */
+const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+const sup=n=>String(n).split('').map(c=>SUP[c]||c).join('');
+function num(v){
+  if(v>=1e5||v<0.001){ let e=Math.floor(Math.log10(v)), m=v/Math.pow(10,e); if(m>=9.995){m/=10;e++;} return m.toFixed(1)+'×10'+sup(e); }
+  if(v>=100) return Math.round(v).toLocaleString('en-US');
+  if(v>=10) return v.toFixed(1);
+  if(v>=1) return v.toFixed(2);
+  return v.toFixed(3).replace(/0+$/,'');
+}
+function years(g){            // billions of years
+  const y=g*1e9;
+  if(y>=1e9) return num(g)+' billion years';
+  if(y>=1e6) return num(y/1e6)+' million years';
+  if(y>=1e3) return num(y/1e3)+' thousand years';
+  return num(y)+' years';
+}
+const radius=(T,L)=>Math.sqrt(L)*Math.pow(TSUN/T,2);           // solar radii
+const cls=T=>(CLASSES.find(c=>T>=c[1]&&T<c[2])||CLASSES[T>=29000?0:6])[0];
+// colour of a star by temperature, a blackbody eyeballed onto the classes
+function colour(T){ const c=CLASSES.find(c=>T>=c[1]&&T<c[2]); return c?c[3]:(T>=29000?'#9bb0ff':'#ffbb66'); }
+
+/* ---- the main sequence, by mass, from the dwarf table ---- */
+function ms(M){
+  const lm=Math.log10(M);
+  let i=0; while(i<MS.length-2 && Math.log10(MS[i+1][0])<lm) i++;
+  const [m0,t0,l0]=MS[i], [m1,t1,l1]=MS[i+1];
+  const f=(lm-Math.log10(m0))/(Math.log10(m1)-Math.log10(m0));
+  return {T:Math.pow(10,Math.log10(t0)+f*(Math.log10(t1)-Math.log10(t0))),
+          L:Math.pow(10,Math.log10(l0)+f*(Math.log10(l1)-Math.log10(l0)))};
+}
+const lifetime=M=>10*M/ms(M).L;                                 // billions of years on the main sequence
+
+/* ---- a life, as knots of (fraction of the life, T, L, the phase) ---- */
+function track(M){
+  const z=ms(M), T0=z.T, L0=z.L, k=[];
+  k.push([0,T0,L0,'on the main sequence, fusing hydrogen in the core']);
+  if(M<0.5){
+    k.push([0.9,T0*0.97,L0*1.6,'near the end of the main sequence, still fusing hydrogen']);
+    k.push([1.0,15000,0.01,'a helium white dwarf: the core, laid bare, with no fusion left']);
+    k.push([1.15,5000,1e-4,'a white dwarf cooling toward the dark']);
+  } else if(M<8){
+    k.push([0.9,T0*0.93,L0*2.2,'the end of the main sequence; the core is out of hydrogen']);
+    k.push([0.93,Math.sqrt(T0*4800),L0*3,'a subgiant: hydrogen burns in a shell and the star swells']);
+    k.push([0.97,3100,2500*Math.pow(M,0.5),'the tip of the red giant branch']);
+    k.push([0.975,M<2?4800:4000,50*M,'burning helium in the core, the red clump']);
+    k.push([0.995,3000,5000*Math.pow(M,0.6),'the asymptotic giant branch, shedding its outer layers']);
+    k.push([1.0,80000,3000,'the hot core lit up as a planetary nebula fades around it']);
+    k.push([1.05,25000,0.01,'a white dwarf of about 0.6 suns, cooling']);
+    k.push([1.15,6000,1e-4,'a white dwarf cooling toward the dark']);
+  } else {
+    k.push([0.9,T0*0.85,L0*2.0,'the end of the main sequence; the core is out of hydrogen']);
+    if(M<30){
+      k.push([0.93,8000,L0*2.4,'crossing the gap fast, in a few thousand years']);
+      k.push([0.97,3600,L0*(M<12?4:2.5),'a red supergiant, fusing heavier and heavier elements']);
+      k.push([1.0,3600,L0*(M<12?4:2.5),'core collapse: a supernova, and a '+(M<25?'neutron star':'black hole')+' left behind']);
+    } else {
+      k.push([0.95,30000,L0*2.5,'a luminous blue variable, shedding mass in eruptions']);
+      k.push([0.98,60000,L0*2,'a Wolf-Rayet star, its hydrogen envelope gone']);
+      k.push([1.0,60000,L0*2,'core collapse: a supernova or a direct fall into a black hole']);
+    }
+  }
+  return k;
+}
+// the star at a fraction f of its life, interpolated in log between knots
+function at(M,f){
+  const k=track(M);
+  if(f>=k[k.length-1][0]) return {T:k[k.length-1][1],L:k[k.length-1][2],phase:k[k.length-1][3],ended:M>=8};
+  let i=0; while(k[i+1][0]<=f) i++;
+  const [f0,T0,L0,p0]=k[i], [f1,T1,L1]=k[i+1], u=(f-f0)/(f1-f0);
+  return {T:Math.pow(10,Math.log10(T0)+u*(Math.log10(T1)-Math.log10(T0))),
+          L:Math.pow(10,Math.log10(L0)+u*(Math.log10(L1)-Math.log10(L0))),phase:p0,ended:false};
+}
+
+/* ---- the card ---- */
+function card(kind,name,rows,body,src){
+  document.getElementById('kindTxt').textContent=kind;
+  document.getElementById('nameTxt').textContent=name;
+  document.getElementById('numTxt').innerHTML=rows.map(([k,v])=>'<b>'+esc(k)+'</b> '+esc(v)).join('<br>');
+  document.getElementById('bodyTxt').textContent=body;
+  document.getElementById('srcTxt').textContent=src;
+}
+const REGION={main:'On the main sequence',giant:'A giant',super:'A supergiant',wd:'A white dwarf'};
+function showStar(s){
+  card(REGION[s.r], s.n, [['class',s.c+', a '+cls(s.T)+' star'],['surface',Math.round(s.T).toLocaleString('en-US')+' K'],
+    ['luminosity',num(s.L)+' Suns'],['radius',num(radius(s.T,s.L))+' Suns, from the two above'],
+    ['mass',s.M?num(s.M)+' Suns':'not well known'],['distance',s.d<0.001?'8 light minutes':num(s.d)+' light years']],
+    s.b,'Wikipedia, '+s.n.replace(/ A$| B$| Aa$| A\b/,''));
+}
+function showLife(){
+  const a=at(mass,life), tl=lifetime(mass), age=life<=1?life*tl:tl*(1+(life-1)*0.3);
+  const fate=mass<8?(mass<0.5?'a helium white dwarf, in a time longer than the universe has existed':'a white dwarf')
+            :mass<25?'a supernova and a neutron star':'a supernova and a black hole';
+  card('A star of '+num(mass)+' solar masses', a.ended?'ended':a.phase,
+    [['age',years(age)],['main sequence',years(tl)],['surface',a.ended?'gone':Math.round(a.T).toLocaleString('en-US')+' K, class '+cls(a.T)],
+     ['luminosity',a.ended?'the supernova outshone the galaxy for weeks':num(a.L)+' Suns'],
+     ['radius',a.ended?'a dozen kilometres, or a horizon':num(radius(a.T,a.L))+' Suns'],['fate',fate]],
+    mass<0.5?'A red dwarf burns so slowly that none has yet left the main sequence; the universe is too young. Its whole life, mixed all the way through, ends as a helium white dwarf.'
+    :mass<8?'The Sun\u2019s kind of life: ten billion years of quiet, then a swelling into a red giant that reaches about to the Earth\u2019s orbit and may swallow it, a brief helium stage, and a slow cooling as a white dwarf the size of the Earth.'
+    :'A short and violent life. The heavier the star, the faster it burns: the main sequence is over in millions of years, the end is a core collapse, and the elements it made are thrown out for the next generation.',
+    'Pecaut and Mamajek 2013; Iben 1967; Heger and others 2003');
+}
+
+/* ---- the drawing ---- */
+function render(){
+  let s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" id="hsvg">';
+  s+='<rect width="'+W+'" height="'+H+'" fill="#121212"/>';
+  // class bands
+  for(const [c,lo,hi,col] of CLASSES){
+    const x0=X(Math.min(hi,120000)), x1=X(Math.max(lo,2300));
+    s+='<rect x="'+x0.toFixed(1)+'" y="'+P.y+'" width="'+(x1-x0).toFixed(1)+'" height="'+P.h+'" fill="'+col+'" fill-opacity="0.045"/>';
+    s+='<text x="'+((x0+x1)/2).toFixed(1)+'" y="'+(P.y+16)+'" text-anchor="middle" font-size="13" font-weight="700" fill="'+col+'" fill-opacity="0.7">'+c+'</text>';
+  }
+  s+='<rect x="'+P.x+'" y="'+P.y+'" width="'+P.w+'" height="'+P.h+'" fill="none" stroke="#2b2b2b"/>';
+  // radius lines: log L = 2 log R + 4 log(T/Tsun)
+  for(const R of [0.001,0.01,0.1,1,10,100,1000]){
+    const pts=[]; for(let lt=LT0; lt>=LT1; lt-=0.01){ const T=Math.pow(10,lt), L=R*R*Math.pow(T/TSUN,4);
+      const y=Y(L); if(y<P.y||y>P.y+P.h) continue; pts.push(X(T).toFixed(1)+','+y.toFixed(1)); }
+    if(pts.length<2) continue;
+    s+='<polyline points="'+pts.join(' ')+'" fill="none" stroke="#3d444d" stroke-dasharray="3 5" stroke-width="1"/>';
+    const [lx,ly]=pts[pts.length-1].split(',');
+    s+='<text x="'+(+lx-4)+'" y="'+(+ly-4)+'" text-anchor="end" font-size="10" fill="#6b7280">'+(R>=1?R:R)+' R☉</text>';
+  }
+  // axes
+  for(const T of [100000,40000,20000,10000,5000,3000]) s+='<text x="'+X(T).toFixed(1)+'" y="'+(P.y+P.h+18)+'" text-anchor="middle" font-size="11" fill="#9a9a9a">'+T.toLocaleString('en-US')+' K</text>';
+  for(let e=-4;e<=6;e+=2) s+='<text x="'+(P.x-8)+'" y="'+(Y(Math.pow(10,e))+4).toFixed(1)+'" text-anchor="end" font-size="11" fill="#9a9a9a">10'+sup(e)+'</text>';
+  s+='<text x="'+(P.x+P.w/2)+'" y="'+(P.y+P.h+40)+'" text-anchor="middle" font-size="12" fill="#9a9a9a">surface temperature, hotter to the left</text>';
+  s+='<text transform="translate(18,'+(P.y+P.h/2)+') rotate(-90)" text-anchor="middle" font-size="12" fill="#9a9a9a">luminosity, in Suns</text>';
+  // the main sequence at birth
+  s+='<polyline points="'+MS.map(([m,T,L])=>X(T).toFixed(1)+','+Y(L).toFixed(1)).join(' ')+'" fill="none" stroke="#f4efe2" stroke-opacity="0.25" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>';
+  // region names
+  for(const [x,y,t] of [[X(9000),Y(700),'main sequence'],[X(4200),Y(300)-14,'giants'],[X(6000),Y(1.2e5)-16,'supergiants'],[X(15000),Y(0.003)+22,'white dwarfs']])
+    s+='<text x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" text-anchor="middle" font-size="12" fill="#6b7280" font-style="italic">'+t+'</text>';
+  // the life track of the chosen mass
+  const k=track(mass), pts=[];
+  for(let f=0; f<=1.15; f+=0.0025){ const a=at(mass,f); if(a.ended) break; pts.push(X(a.T).toFixed(1)+','+Y(a.L).toFixed(1)); }
+  s+='<polyline points="'+pts.join(' ')+'" fill="none" stroke="#58a6ff" stroke-width="2" stroke-opacity="0.85" stroke-linejoin="round"/>';
+  for(const [f,T,L] of k) s+='<circle cx="'+X(T).toFixed(1)+'" cy="'+Y(L).toFixed(1)+'" r="2.2" fill="#58a6ff" fill-opacity="0.6"/>';
+  // the named stars, labels nudged down where two sit on top of each other
+  const placed=[];
+  for(let i=0;i<STARS.length;i++){
+    const st=STARS[i], x=X(st.T), y=Y(st.L), r=Math.max(3,Math.min(9,3+Math.log10(radius(st.T,st.L)+1)*2.2));
+    const isHot=hot===i;
+    let ly=y+3.5;
+    for(const q of placed) if(Math.abs(q.x-x)<70 && Math.abs(q.ly-ly)<11) ly=q.ly+11;
+    placed.push({x,ly});
+    s+='<g data-i="'+i+'" style="cursor:pointer">'+
+       '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+colour(st.T)+'" stroke="'+(isHot?'#ffffff':'#121212')+'" stroke-width="'+(isHot?1.8:1)+'"/>'+
+       (st.n==='the Sun'?'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r+4)+'" fill="none" stroke="#ffb02e" stroke-width="1.3"/>':'')+
+       '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r+5)+'" fill="transparent"/>'+
+       '<text x="'+(x+r+4).toFixed(1)+'" y="'+ly.toFixed(1)+'" font-size="10" fill="'+(isHot?'#ffffff':'#8a94a6')+'">'+esc(st.n)+'</text></g>';
+  }
+  // the chosen star now
+  const a=at(mass,life);
+  if(!a.ended){
+    const x=X(a.T), y=Y(a.L), r=Math.max(4,Math.min(16,4+Math.log10(radius(a.T,a.L)+1)*3));
+    s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r+5)+'" fill="none" stroke="#58a6ff" stroke-width="1.5"/>';
+    s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+colour(a.T)+'" stroke="#58a6ff" stroke-width="1.5" data-now="1"/>';
+  } else {
+    s+='<text x="'+(P.x+P.w-12)+'" y="'+(P.y+P.h-14)+'" text-anchor="end" font-size="12" fill="#58a6ff">the star has gone: a supernova, and a remnant off this diagram</text>';
+  }
+  s+='</svg>';
+  el.innerHTML=s;
+  document.getElementById('massOut').textContent=num(mass)+' Suns, main sequence '+years(lifetime(mass));
+  document.getElementById('lifeOut').textContent=(life<=1?(life*100).toFixed(0)+'% of the main sequence life':'after: '+((life-1)*100).toFixed(0)+'% more');
+}
+function setMass(m){ mass=m; document.getElementById('mass').value=Math.round(Math.log10(m)*100); render(); showLife();
+  for(const b of document.querySelectorAll('#presets button')) b.setAttribute('aria-pressed', Math.abs(+b.dataset.m-m)<1e-9?'true':'false'); }
+function setLife(f){ life=f; document.getElementById('life').value=Math.round(f*1000); render(); showLife(); }
+document.getElementById('mass').addEventListener('input',e=>setMass(Math.pow(10,+e.target.value/100)));
+document.getElementById('life').addEventListener('input',e=>setLife(+e.target.value/1000));
+const PRE=[[0.2,'a red dwarf'],[1,'the Sun'],[2,'Sirius A'],[5,'a B star'],[17,'Betelgeuse'],[40,'an O star']];
+document.getElementById('presets').innerHTML=PRE.map(([m,l])=>'<button type="button" data-m="'+m+'">'+l+'</button>').join('');
+document.getElementById('presets').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setMass(+b.dataset.m); });
+el.addEventListener('pointerover',e=>{ const g=e.target.closest('[data-i]'); if(g){ hot=+g.dataset.i; render(); showStar(STARS[hot]); } });
+el.addEventListener('pointerleave',()=>{ hot=null; render(); showLife(); });
+setMass(1);
+window.__stars=()=>({mass,life,n:STARS.length,at:at(mass,life),lifetime:lifetime(mass),ms:ms(mass),track:track(mass)});
+</script>
+</body>
+</html>
