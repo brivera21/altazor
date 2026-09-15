@@ -38,6 +38,9 @@ title: Library
 <h2>Earth</h2>
 <p><a href="earth-history.html">Geological History</a></p>
 <p><a href="earth-interior.html">The Interior</a></p>
+<p><a href="plates.html">Plate Tectonics</a></p>
+<p><a href="atmosphere.html">The Atmosphere</a></p>
+<p><a href="ocean.html">Ocean Currents</a></p>
 <p><a href="earth.html">Climate</a></p>
 <p><a href="orbit-sine.html">Rotation</a></p>
 <p><a href="moon.html">Lunar Cycle</a></p>
