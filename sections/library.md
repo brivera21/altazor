@@ -41,6 +41,7 @@ title: Library
 <p><a href="plates.html">Plate Tectonics</a></p>
 <p><a href="atmosphere.html">The Atmosphere</a></p>
 <p><a href="ocean.html">Ocean Currents</a></p>
+<p><a href="projections.html">Map Projections</a></p>
 <p><a href="earth.html">Climate</a></p>
 <p><a href="orbit-sine.html">Rotation</a></p>
 <p><a href="moon.html">Lunar Cycle</a></p>
@@ -115,3 +116,7 @@ title: Library
 [Writing](writing.html)
 
 [Calendars](calendars.html)
+
+[Music](music.html)
+
+[Colour](colour.html)
