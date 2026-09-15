@@ -71,7 +71,9 @@ def article(authors, year, title, journal, volume, issue, pages, url):
 
 def book(authors, year, title, publisher, url=None):
     tail = f" {url}" if url else ""
-    return f"{_auth(authors)}. ({year}). <i>{title}</i>. {publisher}.{tail}"
+    m = re.match(r"^(.*?)\s*(\([^()]*ed\.\))$", title)      # the edition sits outside the italics
+    t = f"<i>{m.group(1)}</i> {m.group(2)}" if m else f"<i>{title}</i>"
+    return f"{_auth(authors)}. ({year}). {t}. {publisher}.{tail}"
 
 
 def render(entries):

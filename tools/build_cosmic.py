@@ -620,7 +620,7 @@ def main():
                              "Astronomy &amp; Astrophysics", 641, None, "A6",
                              "https://doi.org/10.1051/0004-6361/201833910")
                  if e["n"] == "The Big Bang" else
-                 apa.web("Space.com", 2025,
+                 apa.web("Lea, R.", "2025, May 30",
                          "Cosmic miracle! James Webb Space Telescope discovers "
                          "the earliest galaxy ever seen", "Space.com", e["u2"])
                  if e["n"] == "The first stars" else

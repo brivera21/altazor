@@ -289,10 +289,10 @@ energy. In <i>The Feynman lectures on physics</i> (Vol. 1, Ch. 4). Caltech.
 <p>Bureau International des Poids et Mesures. (2019). <i>The International
 System of Units (SI)</i> (9th ed.), where the joule is defined.
 <a href="https://www.bipm.org/en/publications/si-brochure">https://www.bipm.org/en/publications/si-brochure</a></p>
-<p>Tiesinga, E., Mohr, P. J., Newell, D. B., &amp; Taylor, B. N. (2024). CODATA
+<p>Mohr, P. J., Newell, D. B., Taylor, B. N., &amp; Tiesinga, E. (2025). CODATA
 recommended values of the fundamental physical constants: 2022. <i>Reviews of
-Modern Physics, 96</i>(2), 025002.
-<a href="https://doi.org/10.1103/RevModPhys.96.025002">https://doi.org/10.1103/RevModPhys.96.025002</a></p>
+Modern Physics, 97</i>(2), 025002.
+<a href="https://doi.org/10.1103/RevModPhys.97.025002">https://doi.org/10.1103/RevModPhys.97.025002</a></p>
 <p>Food and Agriculture Organization of the United Nations. (2003). <i>Food
 energy: Methods of analysis and conversion factors</i> (FAO Food and Nutrition
 Paper 77), where the Atwater factors are set out.
