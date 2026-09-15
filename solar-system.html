@@ -209,7 +209,7 @@
     mass: "About 2.4 × 10<sup>21</sup> kg, some 3% of the Moon and 0.04% of Earth. Ceres alone holds roughly a third of it, and the four largest bodies about half",
     moons: "Ceres, 939 km across and a dwarf planet in its own right, then Vesta 525 km, Pallas 512 km and Hygiea 434 km",
     made: "Rock and metal near the inner edge, turning carbon-rich and increasingly icy outward. Ceres carries water ice and briny material under its crust",
-    extra: "Spacecraft cross it without steering around anything. The objects big enough to have been catalogued sit about a million kilometres apart",
+    extra: "Spacecraft cross it without steering around anything. The objects big enough to have been cataloged sit about a million kilometers apart",
     disc: "Giuseppe Piazzi found Ceres on January 1, 1801 and took it for a planet. Pallas, Juno and Vesta followed by 1807. After 1845 they kept coming, and the four small planets were understood as a belt",
     probe: "Pioneer 10 was the first to cross it, in 1972. Galileo made the first close pass of a belt asteroid, 951 Gaspra, on October 29, 1991; Dawn orbited Vesta in 2011 and Ceres in 2015"
   };
@@ -407,7 +407,7 @@
   // The named moons of each planet, with mean radius and mean orbital
   // distance in km from JPL's Solar System Dynamics tables and the NASA
   // planetary satellite fact sheets. Only the moons with names are listed;
-  // the rest are numbered rocks a few kilometres across, and the count of
+  // the rest are numbered rocks a few kilometers across, and the count of
   // all of them sits on the planet's own panel.
   const MOONS = {
     Earth: [
@@ -422,7 +422,7 @@
     ],
     Jupiter: [
       { n:"Amalthea", r:83.5, a:181400, d:"Edward Barnard, 1892",
-        t:"Reddened by sulphur drifting off Io, and less dense than water, so it is a pile of rubble." },
+        t:"Reddened by sulfur drifting off Io, and less dense than water, so it is a pile of rubble." },
       { n:"Io", r:1821.6, a:421800, d:"Galileo Galilei, 1610",
         t:"The most volcanically active body known, kneaded by Jupiter's tides and resurfaced faster than it can be cratered." },
       { n:"Europa", r:1560.8, a:671100, d:"Galileo Galilei, 1610",
@@ -454,13 +454,13 @@
     ],
     Uranus: [
       { n:"Miranda", r:235.8, a:129900, d:"Gerard Kuiper, 1948",
-        t:"Cliffs up to twenty kilometres high, the tallest known anywhere, on a moon smaller than Britain is wide." },
+        t:"Cliffs up to twenty kilometers high, the tallest known anywhere, on a moon smaller than Britain is wide." },
       { n:"Ariel", r:578.9, a:190900, d:"William Lassell, 1851",
         t:"The brightest of the five, with the youngest surface and valleys flooded by icy flows." },
       { n:"Umbriel", r:584.7, a:266000, d:"William Lassell, 1851",
         t:"The darkest of the five, reflecting barely a sixth of the light that reaches it." },
       { n:"Titania", r:788.4, a:436300, d:"William Herschel, 1787",
-        t:"Uranus's largest moon, cut by a canyon system more than a thousand kilometres long." },
+        t:"Uranus's largest moon, cut by a canyon system more than a thousand kilometers long." },
       { n:"Oberon", r:761.4, a:583500, d:"William Herschel, 1787",
         t:"The outermost of the large five, heavily cratered, with dark floors to the biggest craters." },
     ],
@@ -563,7 +563,7 @@
     if (line) lines.push(line);
     return lines;
   }
-  // the tint each moon actually shows: Io's sulphur, Titan's haze, Amalthea's red
+  // the tint each moon actually shows: Io's sulfur, Titan's haze, Amalthea's red
   const MOON_COLOR = { "The Moon": ["#c9c9c9", "#4a4a4a"], Phobos: ["#8a8378", "#2e2b26"],
     Deimos: ["#8f887c", "#2f2c27"], Amalthea: ["#b05a3c", "#3d1f14"], Io: ["#e6d27a", "#6b5a1c"],
     Europa: ["#e8dcc8", "#6b6255"], Ganymede: ["#b8ab9a", "#4a4238"], Callisto: ["#8c8072", "#332d27"],
@@ -574,7 +574,7 @@
     Titania: ["#bfbcc0", "#45434a"], Oberon: ["#b3aeb0", "#403c3f"], Larissa: ["#a9acb5", "#3c3e45"],
     Proteus: ["#9a9ca4", "#35373d"], Triton: ["#e5cfc9", "#6a5450"], Nereid: ["#b4b6bd", "#41434a"] };
   // the lenient row for a planet drawn at radius Rd: each moon's radius and
-  // its offset from the planet's centre, and the width the whole row takes
+  // its offset from the planet's center, and the width the whole row takes
   function ringPad(p, Rd) { return p.name === "Saturn" ? Rd * 1.15 : p.name === "Uranus" ? Rd * 0.3 : 0; }
   function moonRow(p, Rd) {
     const ms = MOONS[p.name], s = Rd / p.rKm;
@@ -602,7 +602,7 @@
     const p = moonsShowing();
     if (!p) { moonHover = -1; return; }
     const Rd = pr(p) * cam.z, x0 = sx(px(p)), me = ease(m);
-    const s = Rd / p.rKm;                 // pixels per kilometre, the planet's own scale
+    const s = Rd / p.rKm;                 // pixels per kilometer, the planet's own scale
     const ms = MOONS[p.name], out = [], beyond = [];
     // the lenient row: enlarged and set close so each one can be seen, in
     // order outward; the true layout: each at its real distance and size on
@@ -1190,7 +1190,7 @@
     const showing = moonsShowing();
     if (showing) {
       const Rd = pr(showing) * cam.z;
-      const need = moonRow(showing, Rd).width + 44;     // pixels past the planet's centre
+      const need = moonRow(showing, Rd).width + 44;     // pixels past the planet's center
       const gapU = nextEdgeU(showing) - showing.xLen;   // to the next body's near edge
       roomFrom = showing.xLen;
       roomT = Math.max(0, need / cam.z - gapU);

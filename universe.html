@@ -107,7 +107,7 @@ carry about a tenth of a percent of the total today, too little to show at
 this scale. The range stops at a redshift of a million, late enough that the
 radiation is the photons and neutrinos of today with no other species still
 in the bath. Age is the integral of d ln a over H, with a Hubble constant of
-67.4 kilometres per second per megaparsec, giving 13.79 billion years for the
+67.4 kilometers per second per megaparsec, giving 13.79 billion years for the
 present. The bottom two bars count only ordinary matter: the galaxy sits in a
 dark matter halo that outweighs everything drawn there by more than ten to
 one.</p></div>
@@ -305,7 +305,7 @@ function panel(){
        '<text x="'+(C.x-8)+'" y="'+(CY(f)+4)+'" text-anchor="end" font-size="11" fill="#6f6f6f">'+
        f+'%</text>';
   }
-  // decades of the scale factor, labelled underneath by redshift
+  // decades of the scale factor, labeled underneath by redshift
   for(let e=LOGMIN;e<=LOGMAX;e++){
     const x=CX(e), a=Math.pow(10,e), z=1/a-1;
     s+='<line x1="'+x+'" y1="'+C.y+'" x2="'+x+'" y2="'+(C.y+C.h)+
