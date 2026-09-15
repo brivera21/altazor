@@ -29,6 +29,7 @@ title: Library
 <p><a href="cosmic-timeline.html">The Universe in Time</a></p>
 <p><a href="universe.html">The Universe</a></p>
 <p><a href="galaxies.html">Galaxies</a></p>
+<p><a href="stars.html">Stars</a></p>
 <p><a href="solar-system.html">The Solar System</a></p>
 </div>
 <div>
@@ -41,6 +42,7 @@ title: Library
 </div>
 <div>
 <h2>Life</h2>
+<p><a href="cell.html">The Cell</a></p>
 <p><a href="tree-of-life.html">Tree of Life</a></p>
 <p><a href="animals.html">Animals</a></p>
 <p><a href="mammals.html">Mammals</a></p>
@@ -95,3 +97,7 @@ title: Library
 [The Prime Spiral](prime-spiral.html)
 
 [The Most Used Chinese](chinese.html)
+
+[Scale](scale.html)
+
+[Numbers](numbers.html)
