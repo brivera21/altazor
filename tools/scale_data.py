@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+"""The objects on scale.html, one measured length each, in metres.
+
+The length is a diameter unless the note says otherwise: a distance for the
+gaps between bodies, a height for the mountain and the tower, a length for
+the island, the trench and the bacterium. Constants are CODATA 2018 and the
+IAU; everything else is the figure the Wikipedia article for it carries, with
+the article cited, since these are the numbers a reader will meet next.
+"""
+
+import apa
+
+# realm: the colour and the word for the region of the line
+REALMS = {
+    "quantum": ("#f28cb0", "the quantum realm"),
+    "molecule": ("#e0a458", "molecules"),
+    "cell": ("#9be564", "cells and viruses"),
+    "everyday": ("#f4efe2", "the human scale"),
+    "world": ("#58a6ff", "worlds"),
+    "star": ("#ffb02e", "stars and their systems"),
+    "galaxy": ("#b48cf2", "galaxies"),
+    "cosmos": ("#6ee7f2", "the cosmos"),
+}
+
+# k, name, metres, realm, what the length is, a line, source, a page on this site
+OBJECTS = [
+    ("planck", "the Planck length", 1.616255e-35, "quantum", "the smallest length physics gives a meaning to",
+     "Below this, quantum uncertainty and gravity make the notion of a distance stop working. Nothing measured comes within twenty decades of it.", "CODATA 2018", None),
+    ("proton", "a proton", 1.68e-15, "quantum", "diameter, twice the charge radius of 0.84 fm",
+     "The nucleus of hydrogen. An atom is a hundred thousand times wider than this, and nearly all of it empty.", "CODATA 2018", "matter.html"),
+    ("hydrogen", "a hydrogen atom", 1.06e-10, "quantum", "diameter, twice the Bohr radius",
+     "One proton and one electron, the electron's cloud setting the size. Every element in the table is within a factor of a few of this.", "CODATA 2018", "matter.html"),
+    ("water", "a water molecule", 2.75e-10, "molecule", "across the oxygen and its two hydrogens",
+     "Three atoms, bent at 104.5 degrees, which is why water is polar and dissolves so much.", "Wikipedia, Properties of water", None),
+    ("dna", "the DNA double helix", 2.0e-9, "molecule", "the width of the helix",
+     "Two nanometres wide and, uncoiled, two metres long in every human cell: a ratio of a billion.", "Wikipedia, DNA", None),
+    ("hemoglobin", "a haemoglobin molecule", 5.5e-9, "molecule", "diameter",
+     "The protein that carries oxygen in blood, four chains folded together, with an iron atom at the heart of each.", "Wikipedia, Hemoglobin", None),
+    ("ribosome", "a ribosome", 2.5e-8, "molecule", "diameter",
+     "The machine that reads RNA and builds proteins; a cell has millions. The largest molecular machine drawn here.", "Wikipedia, Ribosome", None),
+    ("virus", "a coronavirus", 1.0e-7, "cell", "diameter, SARS-CoV-2",
+     "A hundred nanometres across, smaller than the wavelength of the light a microscope uses, which is why viruses waited for the electron microscope.", "Wikipedia, SARS-CoV-2", None),
+    ("green", "a wave of green light", 5.5e-7, "cell", "the wavelength",
+     "Half a micron from crest to crest. Nothing smaller than roughly this can be seen with light, whatever the lens.", "Wikipedia, Visible spectrum", None),
+    ("ecoli", "an E. coli bacterium", 2.0e-6, "cell", "length",
+     "Two microns long and half a micron wide, the best studied living thing. A thousand of them end to end make two millimetres.", "Wikipedia, Escherichia coli", None),
+    ("rbc", "a red blood cell", 7.8e-6, "cell", "diameter",
+     "A disc with no nucleus, made to squeeze through capillaries barely wider than itself. A drop of blood holds five million.", "Wikipedia, Red blood cell", None),
+    ("hair", "a human hair", 8e-5, "everyday", "width",
+     "Between seventeen and a hundred and eighty microns thick, depending on the head; the width most people reach for as the smallest thing they can see.", "Wikipedia, Hair", None),
+    ("egg", "a human egg cell", 1.2e-4, "cell", "diameter",
+     "The largest human cell, and the only one the naked eye can just make out, about the width of a hair.", "Wikipedia, Egg cell", None),
+    ("sand", "a grain of sand", 5e-4, "everyday", "diameter, mid-range",
+     "Sand is defined by size: between a sixteenth of a millimetre and two millimetres. Smaller is silt, larger is gravel.", "Wikipedia, Sand", None),
+    ("ant", "an ant", 4e-3, "everyday", "length, a typical worker",
+     "Ants run from under a millimetre to over five centimetres. The four millimetre worker is the common one.", "Wikipedia, Ant", None),
+    ("coin", "a coin", 2.4e-2, "everyday", "diameter, a US quarter",
+     "Twenty-four millimetres. The thing in a pocket that is nearest to a round number.", "Wikipedia, Quarter (United States coin)", None),
+    ("human", "a person", 1.7, "everyday", "height, an adult",
+     "About one and seven tenths metres, the measure the metre was made to be a comfortable fraction of. The middle of this line in the sense that matters to us.", "Wikipedia, Human height", "body.html"),
+    ("whale", "a blue whale", 25, "everyday", "length",
+     "The largest animal that has ever lived, as far as is known, at up to thirty metres.", "Wikipedia, Blue whale", "animals.html"),
+    ("redwood", "the tallest tree", 115.9, "everyday", "height, Hyperion, a coast redwood",
+     "Measured at 115.92 metres in 2019. Trees stop near here because water cannot be lifted much higher against gravity and friction.", "Wikipedia, Hyperion (tree)", None),
+    ("burj", "the tallest building", 828, "everyday", "height, Burj Khalifa",
+     "Eight hundred and twenty-eight metres, about seven redwoods.", "Wikipedia, Burj Khalifa", None),
+    ("everest", "Everest", 8849, "everyday", "height above sea level",
+     "The 2020 survey figure. From the seabed, Mauna Kea is taller, at over ten kilometres.", "Wikipedia, Mount Everest", None),
+    ("manhattan", "Manhattan", 2.16e4, "everyday", "length, tip to tip",
+     "Twenty-one and a half kilometres, a long walk in a day.", "Wikipedia, Manhattan", "new-york.html"),
+    ("marathon", "a marathon", 4.2195e4, "everyday", "the distance run",
+     "Forty-two kilometres and change, about the largest distance a body covers on foot in one go.", "Wikipedia, Marathon", None),
+    ("moon", "the Moon", 3.4748e6, "world", "diameter",
+     "A quarter the Earth's width, and the largest moon in the solar system relative to its planet.", "Wikipedia, Moon", "solar-system.html"),
+    ("earth", "the Earth", 1.2742e7, "world", "mean diameter",
+     "Twelve thousand seven hundred kilometres: three hundred marathons laid end to end.", "Wikipedia, Earth", "solar-system.html"),
+    ("jupiter", "Jupiter", 1.398e8, "world", "mean diameter",
+     "Eleven Earths across, and more than twice the mass of all the other planets together.", "Wikipedia, Jupiter", "solar-system.html"),
+    ("moondist", "the Earth to the Moon", 3.844e8, "world", "mean distance",
+     "Thirty Earths would fit in the gap. Light takes 1.3 seconds to cross it.", "Wikipedia, Lunar distance", "solar-system.html"),
+    ("sun", "the Sun", 1.3927e9, "star", "diameter",
+     "A hundred and nine Earths across, and 99.86 percent of the mass of the solar system.", "Wikipedia, Sun", "solar-system.html"),
+    ("au", "the Earth to the Sun", 1.495978707e11, "star", "the astronomical unit",
+     "Defined exactly since 2012. Light takes eight minutes and twenty seconds.", "IAU 2012", "solar-system.html"),
+    ("betelgeuse", "Betelgeuse", 1.1e12, "star", "diameter, about 760 Suns",
+     "A red supergiant so wide that, in the Sun's place, it would swallow the orbits of Mars and Jupiter.", "Wikipedia, Betelgeuse", None),
+    ("neptune", "Neptune's orbit", 9.0e12, "star", "diameter, 60 au",
+     "The edge of the planets. Light takes four hours to reach Neptune from the Sun.", "Wikipedia, Neptune", "solar-system.html"),
+    ("heliosphere", "the heliosphere", 3.6e13, "star", "diameter, about 240 au",
+     "Where the solar wind gives out against the gas between the stars. Voyager 1 crossed it in 2012.", "Wikipedia, Heliosphere", None),
+    ("ly", "a light year", 9.4607e15, "star", "the distance light covers in a year",
+     "Nine and a half trillion kilometres, sixty-three thousand au.", "IAU", None),
+    ("proxima", "the Sun to Proxima Centauri", 4.0175e16, "star", "distance, 4.25 light years",
+     "The nearest other star. At Voyager's speed the trip would take seventy thousand years.", "Wikipedia, Proxima Centauri", None),
+    ("mw", "the Milky Way", 8.27e20, "galaxy", "diameter of the stellar disc, 26.8 kpc",
+     "Eighty-seven thousand light years across, with the Sun a little over half way out.", "Goodwin, Gribbin and Hendry 1998", "galaxies.html"),
+    ("m31", "the Milky Way to Andromeda", 2.36e22, "galaxy", "distance, 765 kpc",
+     "Two and a half million light years, about thirty Milky Ways laid end to end.", "McConnachie 2012", "galaxies.html"),
+    ("lg", "the Local Group", 9.3e22, "galaxy", "diameter, about 3 Mpc",
+     "The Milky Way, Andromeda and everything bound to them, some eighty galaxies in all.", "McConnachie 2012", "galaxies.html"),
+    ("virgo", "the Milky Way to the Virgo cluster", 5.1e23, "galaxy", "distance, 16.5 Mpc",
+     "The nearest large cluster, over a thousand galaxies, at the centre of our supercluster.", "Wikipedia, Virgo Cluster", None),
+    ("laniakea", "Laniakea", 1.6e24, "cosmos", "diameter, 160 Mpc",
+     "The supercluster the Local Group flows within, defined in 2014 by which way galaxies fall.", "Wikipedia, Laniakea Supercluster", None),
+    ("universe", "the observable universe", 8.8e26, "cosmos", "diameter, 93 billion light years",
+     "Everything whose light has had time to reach us. Wider than 13.8 billion light years because space has stretched while the light travelled.", "Wikipedia, Observable universe", "universe.html"),
+]
+
+# places the lens can jump to, by the object it centres on
+JUMPS = [("hydrogen", "an atom"), ("rbc", "a cell"), ("human", "a person"),
+         ("earth", "the Earth"), ("sun", "the Sun"), ("mw", "the Galaxy"),
+         ("universe", "everything")]
+
+REFS = [
+    (apa.article("Tiesinga, E., Mohr, P. J., Newell, D. B., &amp; Taylor, B. N.", 2021,
+                 "CODATA recommended values of the fundamental physical constants: 2018",
+                 "Reviews of Modern Physics", 93, 2, "025010", "https://doi.org/10.1103/RevModPhys.93.025010"),
+     "The Planck length, the proton charge radius and the Bohr radius."),
+    (apa.web("International Astronomical Union", 2012,
+             "Resolution B2 on the re-definition of the astronomical unit of length",
+             "IAU", "https://www.iau.org/static/resolutions/IAU2012_English.pdf"),
+     "The astronomical unit, exactly 149,597,870,700 m."),
+    (apa.article("Goodwin, S. P., Gribbin, J., &amp; Hendry, M. A.", 1998, "The relative size of the Milky Way",
+                 "The Observatory", 118, None, "201-208", "https://ui.adsabs.harvard.edu/abs/1998Obs...118..201G"),
+     "The Milky Way's stellar disc."),
+    (apa.article("McConnachie, A. W.", 2012, "The observed properties of dwarf galaxies in and around the Local Group",
+                 "The Astronomical Journal", 144, 1, "4", "https://doi.org/10.1088/0004-6256/144/1/4"),
+     "Andromeda's distance and the Local Group's extent."),
+    (apa.book("Morrison, P., Morrison, P., &amp; the Office of Charles and Ray Eames", 1982,
+              "Powers of ten: A book about the relative size of things in the universe and the effect of adding another zero",
+              "Scientific American Library"),
+     "The idea of the page: one line, a factor of ten a step."),
+]
+for name in ["Properties of water", "DNA", "Hemoglobin", "Ribosome", "SARS-CoV-2", "Visible spectrum",
+             "Escherichia coli", "Red blood cell", "Egg cell", "Hair", "Sand", "Ant",
+             "Quarter (United States coin)", "Human height", "Blue whale", "Hyperion (tree)", "Burj Khalifa",
+             "Mount Everest", "Manhattan", "Marathon", "Moon", "Earth", "Jupiter", "Lunar distance", "Sun",
+             "Betelgeuse", "Neptune", "Heliosphere", "Proxima Centauri", "Virgo Cluster",
+             "Laniakea Supercluster", "Observable universe"]:
+    REFS.append(apa.wiki("https://en.wikipedia.org/wiki/" + name.replace(" ", "_")))
