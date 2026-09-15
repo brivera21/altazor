@@ -170,8 +170,8 @@ function years(g){            // billions of years
 }
 const radius=(T,L)=>Math.sqrt(L)*Math.pow(TSUN/T,2);           // solar radii
 const cls=T=>(CLASSES.find(c=>T>=c[1]&&T<c[2])||CLASSES[T>=29000?0:6])[0];
-// colour of a star by temperature, a blackbody eyeballed onto the classes
-function colour(T){ const c=CLASSES.find(c=>T>=c[1]&&T<c[2]); return c?c[3]:(T>=29000?'#9bb0ff':'#ffbb66'); }
+// color of a star by temperature, a blackbody eyeballed onto the classes
+function color(T){ const c=CLASSES.find(c=>T>=c[1]&&T<c[2]); return c?c[3]:(T>=29000?'#9bb0ff':'#ffbb66'); }
 
 /* ---- the main sequence, by mass, from the dwarf table ---- */
 function ms(M){
@@ -247,7 +247,7 @@ function showLife(){
   card('A star of '+num(mass)+' solar masses', a.ended?'ended':a.phase,
     [['age',years(age)],['main sequence',years(tl)],['surface',a.ended?'gone':Math.round(a.T).toLocaleString('en-US')+' K, class '+cls(a.T)],
      ['luminosity',a.ended?'the supernova outshone the galaxy for weeks':num(a.L)+' Suns'],
-     ['radius',a.ended?'a dozen kilometres, or a horizon':num(radius(a.T,a.L))+' Suns'],['fate',fate]],
+     ['radius',a.ended?'a dozen kilometers, or a horizon':num(radius(a.T,a.L))+' Suns'],['fate',fate]],
     mass<0.5?'A red dwarf burns so slowly that none has yet left the main sequence; the universe is too young. Its whole life, mixed all the way through, ends as a helium white dwarf.'
     :mass<8?'The Sun\\u2019s kind of life: ten billion years of quiet, then a swelling into a red giant that reaches about to the Earth\\u2019s orbit and may swallow it, a brief helium stage, and a slow cooling as a white dwarf the size of the Earth.'
     :'A short and violent life. The heavier the star, the faster it burns: the main sequence is over in millions of years, the end is a core collapse, and the elements it made are thrown out for the next generation.',
@@ -298,7 +298,7 @@ function render(){
     for(const q of placed) if(Math.abs(q.x-x)<70 && Math.abs(q.ly-ly)<11) ly=q.ly+11;
     placed.push({x,ly});
     s+='<g data-i="'+i+'" style="cursor:pointer">'+
-       '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+colour(st.T)+'" stroke="'+(isHot?'#ffffff':'#121212')+'" stroke-width="'+(isHot?1.8:1)+'"/>'+
+       '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+color(st.T)+'" stroke="'+(isHot?'#ffffff':'#121212')+'" stroke-width="'+(isHot?1.8:1)+'"/>'+
        (st.n==='the Sun'?'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r+4)+'" fill="none" stroke="#ffb02e" stroke-width="1.3"/>':'')+
        '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r+5)+'" fill="transparent"/>'+
        '<text x="'+(x+r+4).toFixed(1)+'" y="'+ly.toFixed(1)+'" font-size="10" fill="'+(isHot?'#ffffff':'#8a94a6')+'">'+esc(st.n)+'</text></g>';
@@ -308,7 +308,7 @@ function render(){
   if(!a.ended){
     const x=X(a.T), y=Y(a.L), r=Math.max(4,Math.min(16,4+Math.log10(radius(a.T,a.L)+1)*3));
     s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r+5)+'" fill="none" stroke="#58a6ff" stroke-width="1.5"/>';
-    s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+colour(a.T)+'" stroke="#58a6ff" stroke-width="1.5" data-now="1"/>';
+    s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+color(a.T)+'" stroke="#58a6ff" stroke-width="1.5" data-now="1"/>';
   } else {
     s+='<text x="'+(P.x+P.w-12)+'" y="'+(P.y+P.h-14)+'" text-anchor="end" font-size="12" fill="#58a6ff">the star has gone: a supernova, and a remnant off this diagram</text>';
   }

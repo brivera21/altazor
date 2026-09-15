@@ -176,7 +176,7 @@ def main():
         # the founding footprint, where one is documented
         if key in FOUNDED:
             flat, flon, fy, flabel, fnote = FOUNDED[key]
-            half = 804.672 / 2          # half a mile, in metres
+            half = 804.672 / 2          # half a mile, in meters
             dlat = half / 111320.0
             dlon = half / (111320.0 * math.cos(math.radians(flat)))
             ring = [[flon - dlon, flat - dlat], [flon + dlon, flat - dlat],

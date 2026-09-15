@@ -32,7 +32,7 @@ OUT = Path(__file__).parent.parent / "earth-history.html"
 
 RANKS = ["eon", "era", "period", "epoch", "age"]
 
-# The page's own colours, keyed to the eon and then to the era inside it. They
+# The page's own colors, keyed to the eon and then to the era inside it. They
 # are not the ICS chart's own, which this file does not carry.
 ERA_HUE = {
     "Hadean": "#6b3f6e", "Eoarchean": "#8a3f63", "Paleoarchean": "#9a4667",
@@ -46,7 +46,7 @@ EON_HUE = {"Hadean": "#6b3f6e", "Archean": "#9a4667",
 
 AGE_OF_EARTH = 4567.0
 
-# One colour a plate, so a continent can be followed through the reconstruction.
+# One color a plate, so a continent can be followed through the reconstruction.
 PLATE_COLOUR = {101: "#386bb6", 201: "#7e6bd0", 301: "#47a566", 501: "#d0699a",
                 701: "#b17600", 801: "#3fa8a0", 802: "#cfd8e3"}
 PLATE_SHORT = {101: "North America", 201: "South America", 301: "Eurasia",
@@ -108,7 +108,7 @@ def main():
     for pid, age, plat, plon, ang, rel in ROTATIONS:
         assert rel == 0, "the rotations have to be against the anchor plate"
         # kept at full precision: rounding the pole to four decimals moves a
-        # point near the pole by several metres, which is enough to fail the
+        # point near the pole by several meters, which is enough to fail the
         # comparison against an independent implementation
         rots.setdefault(str(pid), []).append([age, plat, plon, ang])
     for v in rots.values():
@@ -604,7 +604,7 @@ function toXYZ(lat, lon) {
   return [Math.cos(p) * Math.cos(l), Math.cos(p) * Math.sin(l), Math.sin(p)];
 }
 function toLL(v) {
-  // normalise first: near the poles asin is steep, and a vector that has
+  // normalize first: near the poles asin is steep, and a vector that has
   // drifted a part in 10^12 off the unit sphere moves the latitude enough to
   // show up against an independent implementation
   const n = Math.hypot(v[0], v[1], v[2]) || 1;
@@ -746,7 +746,7 @@ function globe() {
   if (age > D.eurasiaBreaks) {
     const c4 = make('text', {x: 22, y: GH - 16, class: 'warn'}, gc);
     c4.textContent = 'Eurasia is drawn dashed: Siberia, Baltica and the two '
-      + 'Chinas were still separate continents and are not modelled apart here';
+      + 'Chinas were still separate continents and are not modeled apart here';
   }
 }
 

@@ -30,7 +30,7 @@ NOTE1 = ("Together sets the three cells on one scale: an animal cell fifteen "
 
 NOTE2 = ("The other three views each fill the stage with one cell, its parts "
          "drawn at that scale where they can be and named where they cannot: "
-         "a membrane seven nanometres thick is a line, a ribosome a stipple. "
+         "a membrane seven nanometers thick is a line, a ribosome a stipple. "
          "A part under the cursor gives its size, how many the cell has, "
          "what share of the cell it takes, and what it does. Counts are the "
          "round numbers of Cell Biology by the Numbers.")

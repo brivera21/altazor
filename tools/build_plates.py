@@ -3,9 +3,9 @@
 three ways an edge can move.
 
 Two views. The map: the 52 plates of Bird's PB2002 model on an equirectangular
-map, land in grey, boundaries coloured by kind, a plate lit under the pointer
+map, land in gray, boundaries colored by kind, a plate lit under the pointer
 with its area, its share of the surface, the lengths of its edges by kind and
-its speed against its neighbours; a boundary under the pointer gives the two
+its speed against its neighbors; a boundary under the pointer gives the two
 plates, the kind and the relative velocity. The edges: three cross-sections
 of what happens at a ridge, a trench and a transform.
 
@@ -26,7 +26,7 @@ OUT = ROOT / "plates.html"
 GEO = json.loads((ROOT / "tools" / "data" / "plates.json").read_text())
 
 NOTE1 = ("The Earth's outer shell is broken into plates that slide over the "
-         "soft mantle beneath, a few centimetres a year, about as fast as "
+         "soft mantle beneath, a few centimeters a year, about as fast as "
          "fingernails grow. Fifty-two of them in Bird's model, seven of "
          "them holding most of the surface. Every mountain range, trench, "
          "volcano chain and earthquake belt lies along the edges, and the "
@@ -42,14 +42,14 @@ NOTE2 = ("Under the pointer a plate gives its area and its edges by kind; a "
          "made or lost.")
 
 METHOD = ("The plates and their boundaries are Bird's PB2002 model, a set "
-          "of 52 rigid plates whose edges are digitised in 5,824 steps, "
+          "of 52 rigid plates whose edges are digitized in 5,824 steps, "
           "each classed as a spreading ridge, continental rift, subduction "
           "zone, oceanic or continental transform, or continental or "
           "oceanic convergence, and each given the relative velocity of the "
           "two plates across it. Areas are measured from the model's "
           "polygons on a sixth-of-a-degree grid weighted by the cosine of "
           "latitude and match Bird's table. A plate's speed against its "
-          "neighbours is the mean of its boundary velocities weighted by "
+          "neighbors is the mean of its boundary velocities weighted by "
           "length. The map is equirectangular, so the poles are stretched "
           "and Antarctica looks far larger than it is; the areas in the "
           "cards are true. Steps are drawn simplified to a tenth of a degree.")
@@ -169,11 +169,11 @@ for(const L of G.lines){ const [pair,c,len,v]=L; const u=under(pair); for(const 
 const kindWord=c=>CLASSES[c].n.replace(/^an? /,'');
 const grp=c=>c<=1?'pulling apart':c===2?'diving under':c<=4?'sliding past':'colliding';
 function showPlate(i){ const k=code(i), [name,area]=G.areas[k], s=stats[k]||{by:[0,0,0,0,0,0,0],L:0,LV:0};
-  const kinds=[['pulling apart',s.by[0]+s.by[1]],['diving under a neighbour',s.under||0],['a neighbour diving under it',s.over||0],['sliding past',s.by[3]+s.by[4]],['colliding',s.by[5]+s.by[6]]].filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+  const kinds=[['pulling apart',s.by[0]+s.by[1]],['diving under a neighbor',s.under||0],['a neighbor diving under it',s.over||0],['sliding past',s.by[3]+s.by[4]],['colliding',s.by[5]+s.by[6]]].filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
   const note=NOTES[k]||GENERIC;
   card('A plate', esc(name), [['area',(area/1e6).toFixed(2)+' million km\\u00b2'],['share of the surface',(area/EARTH*100).toFixed(1)+'%'],['edge',Math.round(s.L).toLocaleString('en-US')+' km'],
     ...kinds.map(([n,l])=>['  '+n, Math.round(l).toLocaleString('en-US')+' km']),
-    ['against its neighbours', s.L?(s.LV/s.L/10).toFixed(1)+' cm a year, on average':''],
+    ['against its neighbors', s.L?(s.LV/s.L/10).toFixed(1)+' cm a year, on average':''],
     ['fastest edge', s.fast?(s.fast[1]/10).toFixed(1)+' cm a year, with '+G.areas[split(s.fast[0]).find(x=>x!==k)][0]:'']], note[0], note[1]); }
 function showLine(j){ const [pair,c,len,v,d,e]=G.lines[j]; const [a,b]=split(pair).map(x=>G.areas[x][0]); const u=under(pair);
   const rel=c===2&&u?G.areas[u][0]+' dives under '+G.areas[split(pair).find(x=>x!==u)][0]:Math.abs(d)<2?'sliding past':d>0?'pulling apart':'pushing together';
@@ -273,8 +273,8 @@ function edges(){
     s+='</g>'; }
   return '<svg viewBox="0 0 980 360" xmlns="http://www.w3.org/2000/svg" id="psvg"><rect width="980" height="360" fill="#121212"/>'+s+'</svg>';
 }
-const EDGE={ridge:['A spreading ridge','The plates part, the pressure on the mantle beneath drops, and it melts. The melt freezes into new crust at the crack, so the sea floor is youngest at the ridge and gets older, colder and deeper away from it: the Atlantic is two and a half centimetres wider every year, and none of its floor is older than 180 million years.', 'Wikipedia, Mid-ocean ridge'],
-  trench:['A subduction zone','Old ocean floor is dense enough to sink. It bends down at a trench, the deepest places on the planet, and slides into the mantle at a few centimetres a year, shaking as it goes: the earthquakes trace the slab down to 700 km. Water carried down with it lowers the melting point of the rock above, and a line of volcanoes stands a hundred kilometres or so behind the trench.', 'Wikipedia, Subduction'],
+const EDGE={ridge:['A spreading ridge','The plates part, the pressure on the mantle beneath drops, and it melts. The melt freezes into new crust at the crack, so the sea floor is youngest at the ridge and gets older, colder and deeper away from it: the Atlantic is two and a half centimeters wider every year, and none of its floor is older than 180 million years.', 'Wikipedia, Mid-ocean ridge'],
+  trench:['A subduction zone','Old ocean floor is dense enough to sink. It bends down at a trench, the deepest places on the planet, and slides into the mantle at a few centimeters a year, shaking as it goes: the earthquakes trace the slab down to 700 km. Water carried down with it lowers the melting point of the rock above, and a line of volcanoes stands a hundred kilometers or so behind the trench.', 'Wikipedia, Subduction'],
   transform:['A transform fault','Spreading ridges are broken into segments, and between the segments the plates slide past each other along a fault. Nothing is made or destroyed. On land the same motion is the San Andreas, where the two sides jerk past each other in earthquakes every century or so.', 'Wikipedia, Transform fault']};
 document.getElementById('edges').innerHTML=edges();
 document.getElementById('edges').addEventListener('pointerover',e=>{ const g=e.target.closest('[data-e]'); if(g){ const k=g.getAttribute('data-e'); card('The edges',EDGE[k][0],[],EDGE[k][1],EDGE[k][2]); } });

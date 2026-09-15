@@ -118,13 +118,13 @@ FACTS = {
     ],
     "cardiovascular": [
         ("5.6 L", "blood, reference adult male",
-         "4.1 litres in the reference adult female, near 70 millilitres per "
+         "4.1 liters in the reference adult female, near 70 milliliters per "
          "kilogram in both."),
         ("about 106,000", "heartbeats a day",
          "From a mean 24 hour heart rate of 74 in healthy adults. The round "
          "100,000 comes from multiplying a resting rate by the whole day."),
         ("no measured length", "of the vessels",
-         "The familiar 100,000 kilometres traces back to an extrapolation "
+         "The familiar 100,000 kilometers traces back to an extrapolation "
          "from capillary counts made in 1929. Working from measured "
          "capillary density gives something nearer 10,000 to 20,000, and no "
          "one has measured it."),
@@ -156,7 +156,7 @@ FACTS = {
          "though it were a constant."),
         ("about 180 L", "plasma filtered a day",
          "Arithmetic from the filtration rate rather than a separate "
-         "measurement. About 1.5 litres leaves as urine."),
+         "measurement. About 1.5 liters leaves as urine."),
     ],
     "endocrine": [
         ("3", "endocrine organs in this model",
@@ -176,8 +176,8 @@ FACTS = {
     "reproductive": [],
     "integumentary": [
         ("1.90 m2", "skin surface, reference adult male",
-         "1.66 square metres in the reference adult female. The two square "
-         "metres usually quoted is the male figure rounded up."),
+         "1.66 square meters in the reference adult female. The two square "
+         "meters usually quoted is the male figure rounded up."),
         ("3.3 kg", "skin, reference adult male",
          "About 4.5 per cent of body mass, and nearly twice the liver. It "
          "is the largest organ only if the skeleton at 10.5 kilograms and "
@@ -230,7 +230,7 @@ NOTES = {
                 "first, smell excepted.",
     "medulla oblongata": "Where the brain meets the cord. Breathing and "
                          "blood pressure are regulated from here.",
-    "corpus callosum": "About two hundred million fibres joining the two "
+    "corpus callosum": "About two hundred million fibers joining the two "
                        "hemispheres.",
     "optic nerve": "Not really a nerve but a tract of the brain, pushed out "
                    "to the eye during development.",
@@ -238,7 +238,7 @@ NOTES = {
                      "the coronary arteries, because the blood inside the "
                      "chambers is too far away to reach it.",
     "ascending aorta": "Everything the left ventricle pumps leaves through "
-                       "here, at about five litres a minute at rest.",
+                       "here, at about five liters a minute at rest.",
     "inferior vena cava": "The return line from everything below the "
                           "diaphragm.",
     "liver": "The largest visceral organ. It receives blood twice over, "
@@ -248,7 +248,7 @@ NOTES = {
               "red cells and holds a reserve of white ones.",
     "lobe of thymus": "Where T cells learn not to attack the body. It is "
                       "largest in childhood and mostly fat by middle age.",
-    "kidney": "It filters about 180 litres of plasma a day and gives back "
+    "kidney": "It filters about 180 liters of plasma a day and gives back "
               "more than 99 per cent of it.",
     "urinary bladder": "Smooth muscle that stretches. The urge is a stretch "
                        "signal, not a full one.",
@@ -257,7 +257,7 @@ NOTES = {
     "trachea": "Held open by cartilage rings that are open at the back, so "
                "the esophagus behind can bulge into the gap.",
     "skin": "The outline every other system is drawn inside.",
-    "eyeball": "About 24 millimetres across, and almost the same size in a "
+    "eyeball": "About 24 millimeters across, and almost the same size in a "
                "newborn as in an adult.",
     "prostate": "It sits around the urethra just below the bladder, which "
                 "is why it is felt when it grows.",

@@ -5,7 +5,7 @@ Diameters are D25 where published (RC3 and the NASA/IPAC Extragalactic
 Database, as carried on the Wikipedia article for each galaxy); the Milky
 Way's is the stellar disc of Goodwin, Gribbin and Hendry (1998). Milky Way
 structure: Bland-Hawthorn and Gerhard (2016). The Sun's distance to the
-centre: GRAVITY Collaboration (2019). Arms: Reid and others (2019). Local
+center: GRAVITY Collaboration (2019). Arms: Reid and others (2019). Local
 Group members: McConnachie (2012).
 """
 
@@ -45,7 +45,7 @@ KINDS = [
          s="Hubble 1926"),
     dict(k="Sb", g="Spiral", n="Sb, the middle of the sequence",
          **{"def": "a moderate bulge and arms at a pitch near fifteen degrees"},
-         ex="Andromeda, M31; Bode's galaxy, M81", mw="Andromeda, our nearest large neighbour, is an Sb",
+         ex="Andromeda, M31; Bode's galaxy, M81", mw="Andromeda, our nearest large neighbor, is an Sb",
          b="Andromeda is the archetype: a bright bulge, well defined arms, dust lanes, and a disc that keeps making stars, slowly.",
          s="Hubble 1926"),
     dict(k="Sc", g="Spiral", n="Sc, loosely wound",
@@ -54,9 +54,9 @@ KINDS = [
          b="An Sc is mostly disc, rich in gas, with arms lit by young blue stars and the pink of hydrogen around them. They are the spirals that look most like the pictures.",
          s="Hubble 1926"),
     dict(k="SBa", g="Barred spiral", n="SBa, barred and tight",
-         **{"def": "a straight bar of stars through the centre, with tightly wound arms leaving its ends"},
+         **{"def": "a straight bar of stars through the center, with tightly wound arms leaving its ends"},
          ex="NGC 4314; NGC 2787 sits on the border with SB0", mw="our bar is longer than our bulge is wide, as here",
-         b="The bar is a stellar wave, not a fixed set of stars. It funnels gas inward, feeds the centre, and most spirals have one when looked at in the infrared.",
+         b="The bar is a stellar wave, not a fixed set of stars. It funnels gas inward, feeds the center, and most spirals have one when looked at in the infrared.",
          s="Hubble 1936; Eskridge and others 2000"),
     dict(k="SBb", g="Barred spiral", n="SBb, barred, middle of the sequence",
          **{"def": "a bar with arms at a moderate pitch"},
@@ -100,7 +100,7 @@ SIZES = [
          b="The textbook barred spiral, and about the Milky Way's size and class. Seen face-on, it is the nearest thing to a photograph of our own galaxy from outside.",
          s="Wikipedia, NGC 1300"),
     dict(k="mw", n="the Milky Way", c="MW", d=26.8, dTxt="26.8 kpc, 87,400 light years, the stellar disc",
-         dist="the Sun is 8.2 kpc from its centre", t="Barred spiral, SBbc",
+         dist="the Sun is 8.2 kpc from its center", t="Barred spiral, SBbc",
          b="Our own, drawn face-on with the Sun where it is: a little more than halfway out, in a minor spur between two arms. The commonly quoted 100,000 light years counts fainter outskirts than the disc edge drawn here.",
          s="Goodwin, Gribbin and Hendry 1998; GRAVITY 2019"),
     dict(k="m51", n="Whirlpool, M51", c="Sc", d=23.6, dTxt="24 kpc, 77,000 light years",
@@ -142,17 +142,17 @@ PARTS = [
          b="A barred spiral of the class SBbc, one of two large spirals in the Local Group. Everything visible to the naked eye at night is inside it, and the band across the sky is its disc seen from within.",
          mw="A barred spiral, SBbc. The bar is seen nearly end-on from the Sun, which is why it took until the 1990s to be sure of it; from outside the galaxy would look much like NGC 1300.",
          s="Bland-Hawthorn and Gerhard 2016; McConnachie 2012"),
-    dict(k="bar", n="The bar", nums=[["half-length", "about 5 kpc"], ["angle", "28 degrees from the Sun's line to the centre"],
+    dict(k="bar", n="The bar", nums=[["half-length", "about 5 kpc"], ["angle", "28 degrees from the Sun's line to the center"],
             ["mass", "about 1.9 times 10^10 suns with the bulge"]],
-         b="A bar of stars through the centre, seen from the Sun nearly end-on, which hid it until infrared surveys traced its asymmetric glow. It turns as a pattern about once every 200 million years and steers gas inward.",
+         b="A bar of stars through the center, seen from the Sun nearly end-on, which hid it until infrared surveys traced its asymmetric glow. It turns as a pattern about once every 200 million years and steers gas inward.",
          s="Bland-Hawthorn and Gerhard 2016"),
     dict(k="bulge", n="The bulge", nums=[["radius", "about 1.5 kpc"], ["shape", "a boxy peanut, seen edge-on"], ["stars", "mostly old, over 10 billion years"]],
          b="The bulge is the bar's thick middle, puffed up by the bar itself, and from the side it has the peanut shape of a bar seen at an angle. Its stars are old and rich in heavy elements.",
          s="Bland-Hawthorn and Gerhard 2016"),
     dict(k="sgra", n="Sagittarius A*", nums=[["mass", "4.3 million suns"], ["distance", "8.178 kpc, measured to 0.3 percent"], ["size", "an event horizon about 0.08 au across"]],
-         b="The black hole at the centre. Stars orbit it fast enough to weigh it, and the orbit of one, S2, gave the distance to the centre of the galaxy that this whole drawing is scaled by.",
+         b="The black hole at the center. Stars orbit it fast enough to weigh it, and the orbit of one, S2, gave the distance to the center of the galaxy that this whole drawing is scaled by.",
          s="GRAVITY Collaboration 2019, 2022"),
-    dict(k="sun", n="The Sun", nums=[["from the centre", "8.2 kpc, 26,700 light years"], ["above the plane", "about 25 pc"], ["speed", "238 km/s, about one turn per 230 million years"]],
+    dict(k="sun", n="The Sun", nums=[["from the center", "8.2 kpc, 26,700 light years"], ["above the plane", "about 25 pc"], ["speed", "238 km/s, about one turn per 230 million years"]],
          b="A little more than halfway out to the disc's edge, in a minor spur between the Sagittarius and Perseus arms. The Sun has gone round about twenty times since it formed.",
          s="GRAVITY 2019; Bland-Hawthorn and Gerhard 2016"),
     dict(k="thin", n="The thin disc", nums=[["scale height", "about 300 pc"], ["scale length", "about 2.6 kpc"], ["mass", "about 3.5 times 10^10 suns in stars"]],
@@ -167,7 +167,7 @@ PARTS = [
          b="A sparse round cloud of the oldest stars, much of it the wreckage of swallowed dwarfs, wrapped in a dark matter halo that outweighs everything drawn here ten to one and reaches fourteen times farther.",
          s="Bland-Hawthorn and Gerhard 2016"),
     dict(k="gcs", n="Globular clusters", nums=[["count", "about 150 known"], ["ages", "11 to 13 billion years"], ["stars each", "a hundred thousand to a million"]],
-         b="Dense balls of old stars orbiting through the halo, some of them among the oldest objects known. Their distribution was how Shapley found, in 1918, that the Sun is not at the centre.",
+         b="Dense balls of old stars orbiting through the halo, some of them among the oldest objects known. Their distribution was how Shapley found, in 1918, that the Sun is not at the center.",
          s="Bland-Hawthorn and Gerhard 2016"),
     dict(k="perseus", n="The Perseus arm", arm=True, major=True, pitch=9.4, rSun=10.2, labelT=-1.9, c="#b48cf2",
          nums=[["from the Sun", "about 2 kpc outward"], ["pitch", "9.4 degrees"]],
@@ -192,12 +192,12 @@ PARTS = [
 ]
 
 # ---- the Local Group, McConnachie 2012 ----
-# k, name, type (for the colour), tTxt, galactic l and b in degrees, distance kpc, size kpc, group
+# k, name, type (for the color), tTxt, galactic l and b in degrees, distance kpc, size kpc, group
 def _g(k, n, type_, tTxt, l, b, d, size, sizeTxt, group, body, big=False):
     return dict(k=k, n=n, type=type_, tTxt=tTxt, l=l, lat=b, d=d, size=size,
                 sizeTxt=sizeTxt, group=group, b=body, big=big)
 
-NEIGHBOURS = [
+NEIGHBORS = [
     _g("lmc", "Large Magellanic Cloud", "irregular", "Magellanic spiral, SB(s)m", 280.5, -32.9, 50, 9.9,
        "9.9 kpc across", "the Milky Way's satellites",
        "Our brightest satellite, visible to the eye from the south as a detached piece of the Milky Way.", True),
@@ -297,7 +297,7 @@ REFS = [
     (apa.article("GRAVITY Collaboration", 2019,
                  "A geometric distance measurement to the Galactic center black hole with 0.3% uncertainty",
                  "Astronomy &amp; Astrophysics", 625, None, "L10", "https://doi.org/10.1051/0004-6361/201935656"),
-     "The Sun's distance to the centre, 8.178 kpc."),
+     "The Sun's distance to the center, 8.178 kpc."),
     (apa.article("GRAVITY Collaboration", 2022,
                  "Mass distribution in the Galactic Center based on interferometric astrometry of multiple stellar orbits",
                  "Astronomy &amp; Astrophysics", 657, None, "L12", "https://doi.org/10.1051/0004-6361/202142465"),
@@ -315,7 +315,7 @@ REFS = [
     (apa.article("McConnachie, A. W.", 2012,
                  "The observed properties of dwarf galaxies in and around the Local Group",
                  "The Astronomical Journal", 144, 1, "4", "https://doi.org/10.1088/0004-6256/144/1/4"),
-     "Every position and distance in the Neighbours view."),
+     "Every position and distance in the Neighbors view."),
     (apa.book("de Vaucouleurs, G., de Vaucouleurs, A., Corwin, H. G., Buta, R. J., Paturel, G., &amp; Fouqu&eacute;, P.",
               1991, "Third reference catalogue of bright galaxies", "Springer",
               "https://doi.org/10.1007/978-1-4757-4363-0"),

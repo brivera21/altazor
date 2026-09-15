@@ -56,7 +56,7 @@ NAME = {n: n for n in AREA}
 # Three need more room, and the reason is in the source rather than the method:
 # WDBII carries the Campeche and Quintana Roo boundary as it stood before the
 # two states settled it in 1997, and Mexico City is small enough that half a
-# kilometre of simplified coastline and border is worth several per cent.
+# kilometer of simplified coastline and border is worth several per cent.
 TOLERANCE = {"Campeche": 16.0, "Quintana Roo": 22.0, "Ciudad de Mexico": 12.0}
 DEFAULT_TOL = 8.0
 
@@ -80,7 +80,7 @@ FACTS = [
 ]
 
 # Rivers carry no name in the source. A course is named where it passes a town
-# on that river: within fifteen kilometres, with the next nearest course four
+# on that river: within fifteen kilometers, with the next nearest course four
 # times further off, so there is no question which line is meant.
 #     river, the place, its latitude and longitude
 NAMED_RIVERS = [
@@ -297,7 +297,7 @@ within eight per cent of what INEGI publishes.</p>
 <p>The three that miss are named in the panel. Campeche and Quintana Roo miss
 because the boundary in the data is the one that stood before the two states
 settled theirs in 1997, and Mexico City misses because it is small enough that
-half a kilometre either way is worth several per cent.</p>
+half a kilometer either way is worth several per cent.</p>
 <p>The sierras are measured from a relief image rather than an elevation grid,
 so they mark broken ground and not any named range, and a river is named only
 where one course passes a town on it and nothing else is near.</p>

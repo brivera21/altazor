@@ -48,7 +48,7 @@ DATA = Path("/home/claude/earth")
 LIGHT_W, LIGHT_H = 720, 360  # the grid the city lights and the shadow share
 CITY_FLOOR = 20_000          # smaller places than this add nothing visible
 
-# Land tones, the colours these climates actually wear from orbit rather than a
+# Land tones, the colors these climates actually wear from orbit rather than a
 # categorical palette: rainforest and boreal green, desert tan, ice white. The
 # classes come from Koppen-Geiger, so this is a likeness built from climate, not
 # a photograph. Index 0 is the sea.
@@ -274,7 +274,7 @@ terminator stops sliding and only its lean moves: the Sun draws a slender figure
 of eight on the map, its width the quarter hour a sundial runs ahead of or
 behind a clock, and the daylight curve stacks up between its two solstice
 limits.</p>
-<p>The ground wears the colours those climates show from orbit, and the lights
+<p>The ground wears the colors those climates show from orbit, and the lights
 that come up behind the terminator are cities, placed and sized by how many
 people live in them.</p>
 </div>

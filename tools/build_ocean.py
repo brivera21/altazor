@@ -28,7 +28,7 @@ GEO = json.loads((ROOT / "tools" / "data" / "plates.json").read_text())
 NOTE1 = ("The wind drags the sea's surface, the Earth's turning bends the "
          "drift to the right north of the equator and to the left south of "
          "it, and the continents get in the way. The result is five great "
-         "rings of current, clockwise in the north and anticlockwise in "
+         "rings of current, clockwise in the north and counterclockwise in "
          "the south, each with a fast, narrow, warm current on its western "
          "side and a slow, cool one on its eastern, and one current with "
          "no land to stop it circling the Antarctic.")
@@ -39,7 +39,7 @@ NOTE2 = ("Under the surface there is a slower circulation. Water that "
          "in the Indian and Pacific oceans and returning at the surface. "
          "The second view follows it round. A current under the pointer "
          "says how much water it moves, in sverdrups: a million cubic "
-         "metres a second, about five Amazons.")
+         "meters a second, about five Amazons.")
 
 METHOD = ("The currents are drawn by hand from the standard maps as a few "
           "points each and are schematic; the real ones meander, shed "

@@ -3,7 +3,7 @@
 and the profiles beneath it.
 
 Two views. A cut: a half-section to scale, seven layers from crust to inner
-core, a depth line down to the centre with a marker that drags, and a card
+core, a depth line down to the center with a marker that drags, and a card
 that reads density, wave speeds, gravity, pressure and temperature at that
 depth, all from PREM. Profiles: the same five quantities against depth, side
 by side, with the layer boundaries drawn across them and the marker shared.
@@ -34,14 +34,14 @@ NOTE2 = ("The profiles put the same five quantities side by side against "
          "at the core; the shear wave vanishes in the liquid outer core, "
          "which is how the core was known to be liquid before anything "
          "else about it; gravity stays near 10 all the way to the core and "
-         "then falls to nothing at the centre; pressure climbs to 3.6 "
+         "then falls to nothing at the center; pressure climbs to 3.6 "
          "million atmospheres.")
 
 METHOD = ("Density and the two wave speeds are the Preliminary Reference "
           "Earth Model of Dziewonski and Anderson, PREM, evaluated from its "
           "polynomials; mass, gravity and pressure are integrated from the "
-          "density on a half-kilometre grid, and the total mass comes out "
-          "at 5.973 times 10 to the 24 kg, the centre at 364 GPa, as in "
+          "density on a half-kilometer grid, and the total mass comes out "
+          "at 5.973 times 10 to the 24 kg, the center at 364 GPa, as in "
           "PREM. PREM is an average Earth with a 3 km ocean and a 24 km "
           "crust; it puts the transition zone's boundaries at 400 and 670 "
           "km where later work has 410 and 660. Temperature is not in "
@@ -156,7 +156,7 @@ let view='cut', depth=1000, hot=null;
 /* ---- PREM ---- */
 function prem(T,r){ const x=r/RE; for(const [a,b,c] of T){ if(r>=a&&r<=b) return c[0]+c[1]*x+c[2]*x*x+c[3]*x*x*x; } return 0; }
 const rho=r=>prem(RHO,r), vp=r=>prem(VP,r), vs=r=>prem(VS,r);
-// mass from the centre, then gravity, then pressure from the surface, on a half-kilometre grid
+// mass from the center, then gravity, then pressure from the surface, on a half-kilometer grid
 const DR=0.5, N=Math.round(RE/DR), M=new Float64Array(N+1), GR=new Float64Array(N+1), PR=new Float64Array(N+1);
 for(let i=0;i<N;i++){ const rm=(i+0.5)*DR; M[i+1]=M[i]+4*Math.PI*Math.pow(rm*1e3,2)*rho(rm)*1e3*DR*1e3; }
 for(let i=1;i<=N;i++) GR[i]=G*M[i]/Math.pow(i*DR*1e3,2);
@@ -185,7 +185,7 @@ function card(kind,name,rows,body,src){
 function showDepth(d){ const r=RE-d, L=layerOf(d), s=vs(r);
   const pl=PLACES.find(p=>Math.abs(p.d-d)<=Math.max(1,d*0.002));
   card('At a depth of', km(d)+(pl?', '+esc(pl.n):''),
-    [['layer',L.n],['radius from the centre',km(r)],['density',f2(rho(r))+' g/cm\\u00b3'],['P wave',f2(vp(r))+' km/s'],['S wave',s>0?f2(s)+' km/s':'none: it is liquid'],
+    [['layer',L.n],['radius from the center',km(r)],['density',f2(rho(r))+' g/cm\\u00b3'],['P wave',f2(vp(r))+' km/s'],['S wave',s>0?f2(s)+' km/s':'none: it is liquid'],
      ['gravity',f2(gAt(r))+' m/s\\u00b2'],['pressure',pressure(pAt(r))],['temperature','about '+Math.round(temp(d)).toLocaleString('en-US')+' K'],
      ['mass beneath',(massBelow(r)/MASS*100).toFixed(1)+'% of the Earth']],
     pl?pl.b:L.b, pl?pl.s:L.s); }
@@ -203,10 +203,10 @@ function cut(){
   // the crust as a stroke so it can be seen at all
   s+='<path d="M'+C.cx+','+(C.cy-C.R)+' A'+C.R+','+C.R+' 0 0 0 '+C.cx+','+(C.cy+C.R)+'" fill="none" stroke="'+LAYERS[0].c+'" stroke-width="2"/>';
   s+='<line x1="'+C.cx+'" y1="'+(C.cy-C.R)+'" x2="'+C.cx+'" y2="'+(C.cy+C.R)+'" stroke="#121212" stroke-width="2"/>';
-  // the depth line: from the surface at the top down to the centre
+  // the depth line: from the surface at the top down to the center
   s+='<line x1="'+C.cx+'" y1="'+(C.cy-C.R)+'" x2="'+C.cx+'" y2="'+C.cy+'" stroke="#e6e6e6" stroke-width="1" opacity="0.5"/>';
   for(const d of [0,1000,2000,3000,4000,5000,6000]){ const y=C.cy-C.R+C.R*d/RE; s+='<line x1="'+(C.cx-4)+'" y1="'+y.toFixed(1)+'" x2="'+(C.cx+4)+'" y2="'+y.toFixed(1)+'" stroke="#e6e6e6" opacity="0.6"/>'; }
-  s+='<text x="'+(C.cx-10)+'" y="'+(C.cy+4)+'" text-anchor="end" font-size="10.5" fill="#4a4540">the centre, 6,371 km</text>';
+  s+='<text x="'+(C.cx-10)+'" y="'+(C.cy+4)+'" text-anchor="end" font-size="10.5" fill="#4a4540">the center, 6,371 km</text>';
   // layer labels down the right, spaced apart
   let lastY=-1e9;
   for(const L of LAYERS){ const mid=(L.top+L.bot)/2, y0=C.cy-C.R+C.R*mid/RE; let y=Math.max(y0,lastY+17); lastY=y;

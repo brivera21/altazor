@@ -78,7 +78,7 @@ NOTE2 = ("The buttons set the scale, and the ladder, the marks, the table and "
          "replace the emergency number, which is the first call.")
 
 METHOD = ("What the collapse view rests on, and where it is soft. There is no "
-          "randomised trial of any cooling method in human heat stroke with "
+          "randomized trial of any cooling method in human heat stroke with "
           "survival as the endpoint, and there will not be. Every figure here "
           "comes either from laboratory heating of healthy volunteers, which "
           "is not heat stroke, or from uncontrolled case series in which the "
@@ -111,10 +111,10 @@ MEASURED_NOTE = (
     "range, and drawing a curve would mean joining measurements taken in "
     "incompatible states. The shivering peak needs a person awake and "
     "defending their temperature. Everything below about {33} was measured "
-    "in someone anaesthetised, paralysed or on bypass, which is the only "
+    "in someone anesthetized, paralyzed or on bypass, which is the only "
     "reason anyone has been that cold and measured. So the table gives a "
     "figure where one was measured and marks the rest as gaps. "
-    "The studies, in order down the scale: Zhu (2003), twenty anaesthetised "
+    "The studies, in order down the scale: Zhu (2003), twenty anesthetized "
     "patients heated to {41.8}; Eyolfson and colleagues (2001, European "
     "Journal of Applied Physiology 84, 100 to 106) on peak shivering; "
     "Flickinger and colleagues (2023, Therapeutic Hypothermia and Temperature "
@@ -696,7 +696,7 @@ function drawHeat(){
   [['rest','At rest',P.rest,'#31d67a'],
    ['hard','Up a mountain on a bike',P.hard,'#e0673f'],
    ['peak','At the highest effort ever measured',P.peak,'#c02f2f'],
-   ['evap','What two litres of sweat an hour can carry off',
+   ['evap','What two liters of sweat an hour can carry off',
     Math.round(2*P.evap_w_per_lh),'#58a6ff']]
    .forEach(([k,lab,w,c],i)=>{
     const yy=sy+i*54, on=hot&&hot.t==='w'&&hot.i===i;
@@ -1114,8 +1114,8 @@ el.addEventListener('pointerover',ev=>{
         +'resting output. Nothing sheds heat that fast for long, so efforts '
         +'like this are short.'],
       ['What sweat can carry off',Math.round(2*P.evap_w_per_lh),
-        'Evaporating a litre of sweat takes about '+P.latent+' kilojoules, so '
-        +'two litres an hour carries off around '+Math.round(2*P.evap_w_per_lh)
+        'Evaporating a liter of sweat takes about '+P.latent+' kilojoules, so '
+        +'two liters an hour carries off around '+Math.round(2*P.evap_w_per_lh)
         +' watts. Only evaporated sweat counts. Sweat that drips off has cost '
         +'the body water and bought it nothing. Humid heat is more dangerous '
         +'than dry heat at the same temperature.']][hot.i];
@@ -1138,7 +1138,7 @@ el.addEventListener('pointerover',ev=>{
         +'depends more on how cold the skin is than on the core.';
     } else if(mid>=18){
       cost='Below about 33 the only measurements come from people "'
-        +'anaesthetised or on bypass. At 27 the rate is near half of resting, '
+        +'anesthetized or on bypass. At 27 the rate is near half of resting, '
         +'and at 18, the coldest a person has been measured, it is 38 per '
         +'cent. The pulse falls 2.54 beats a minute per degree Celsius.';
     } else {
@@ -1279,7 +1279,7 @@ def degree_rows():
 
 
 TKEY = ("Metabolic rate is a percentage of the resting rate at {37}. A figure "
-        "in white is a measurement; a range in grey is the gap between the two "
+        "in white is a measurement; a range in gray is the gap between the two "
         "measurements either side of it, and was never measured. Pulse "
         "is 2.54 beats a minute per degree Celsius below {35}, from 216 people "
         "brought in with hypothermia, and about 8 a degree Celsius above {37}; "

@@ -54,9 +54,9 @@ INLAND_WATER_KM2 = 5_000_000        # lakes and rivers, Verpoorter et al. 2014
 # (all pairs, dark mode): lightness band, chroma floor, normal-vision floor and
 # contrast all pass; worst CVD pair is amber against green at 7.9, which is the
 # 6-8 band and legal only with secondary encoding. That encoding is the legend,
-# the hover readout naming the climate, and the labelled bars in the panel.
+# the hover readout naming the climate, and the labeled bars in the panel.
 # Polar is deliberately outside the categorical band: ice reads as white, and
-# lightness alone separates it from all four under every kind of colour vision.
+# lightness alone separates it from all four under every kind of color vision.
 GROUPS = [
     ("A", "Tropical", "#47a566", "Hot all year, and wet enough that "
      "something grows through it"),
@@ -230,7 +230,7 @@ table.mix td{{font-variant-numeric:tabular-nums}}
 <div class="notes">
 <h2>About the map</h2>
 <p>Every continent under the cursor fills the panel with its area and the
-climates that cover it. The colours are the five main Koppen groups, the
+climates that cover it. The colors are the five main Koppen groups, the
 classification that sorts land by what its temperature and rainfall do through
 the year rather than by where it sits.</p>
 <p>The projection is equirectangular, which keeps latitude and longitude square
@@ -241,7 +241,7 @@ larger here than they are, which is why the areas are given as numbers.</p>
 <div class="method">
 <h2>Method and sources</h2>
 <p>Coastlines are GSHHG at full resolution, the same shoreline data used for
-nautical work, rasterised to a sixth of a degree. Africa, Eurasia, the two
+nautical work, rasterized to a sixth of a degree. Africa, Eurasia, the two
 Americas and Australia are separate polygons in that data, so Suez and Panama
 need no cutting. Europe and Asia do: they are parted along the Urals, down the
 Ural river to the Caspian, across the Kuma-Manych depression to the Black Sea,
@@ -249,7 +249,7 @@ and through the Bosphorus. That line is a convention, not a coastline, and so is
 the placing of the islands, which follow the usual groupings rather than the
 nearest shore.</p>
 <p>Climates are the Koppen-Geiger present-day map of Beck and others, 2018, at
-one kilometre, reduced to its five main groups by first letter and downsampled
+one kilometer, reduced to its five main groups by first letter and downsampled
 by majority vote. The shares below are area weighted by the cosine of latitude,
 so a pixel near the pole counts for what it is worth.</p>
 <p>Areas are the published figures rather than measurements off this raster. At
@@ -323,7 +323,7 @@ function paint() {{
     if (ids[p] === 0) c = SEA;
     else if (showClim && g[p] > 0) c = CLR[g[p] - 1];
     else c = LANDFLAT;
-    // the focused continent keeps its exact palette colour, so it still
+    // the focused continent keeps its exact palette color, so it still
     // matches the legend; everything else is dimmed instead of it being lit
     let f = (hover && ids[p] !== 0 && ids[p] !== hover) ? 0.48 : 1;
     o[i] = Math.min(255, c[0] * f);

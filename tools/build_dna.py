@@ -23,7 +23,7 @@ from dna_data import HELIX, BASES, CODE, AMINO, GENE, GENE_NOTE, MUTATIONS, CHRO
 
 OUT = Path(__file__).parent.parent / "dna.html"
 
-NOTE1 = ("Two chains wound round each other, two nanometres across, ten and "
+NOTE1 = ("Two chains wound round each other, two nanometers across, ten and "
          "a half steps to a turn, and every step a pair of bases joined by "
          "hydrogen bonds: adenine with thymine, guanine with cytosine, "
          "always. That rule is the whole trick. Either chain carries the "

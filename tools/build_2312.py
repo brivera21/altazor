@@ -136,7 +136,7 @@ def _scale(r_km):
 
 
 def _bar(kmpx, y=BAR_Y, x=16):
-    """A scale bar of a round number of kilometres, about 100 px long."""
+    """A scale bar of a round number of kilometers, about 100 px long."""
     raw = 100 * kmpx
     step = 10 ** math.floor(math.log10(raw))
     km = min([m * step for m in (1, 2, 5, 10)], key=lambda v: abs(v - raw))
@@ -277,7 +277,7 @@ def earth():
     return _wrap(s, _cap([
         "Earth, radius 6,371 km, holds eleven billion people in the novel.",
         "Satellite altimetry has watched global mean sea level rise go",
-        "from about 2 to more than 4 millimetres a year since 1993.",
+        "from about 2 to more than 4 millimeters a year since 1993.",
     ]))
 
 
@@ -331,7 +331,7 @@ def vesta():
          f'spun</text>'
          f'<text x="0" y="47" font-size="9.5" fill="#ffb02e">and lit inside'
          f'</text>'
-         f'<text x="0" y="60" font-size="9.5" fill="#9a9a9a">kilometres long,'
+         f'<text x="0" y="60" font-size="9.5" fill="#9a9a9a">kilometers long,'
          f'</text>'
          f'<text x="0" y="71" font-size="9.5" fill="#9a9a9a">not to this scale'
          f'</text></g>' + _bar(kmpx))

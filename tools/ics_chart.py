@@ -83,7 +83,7 @@ CHART = [
     ("Phanerozoic",    "eon", None,  538.8,      0.0,   0.6,   False),
 
     # ---------------- ERAS / ERATHEMS ----------------
-    # The Hadean has no ICS-recognised eras.
+    # The Hadean has no ICS-recognized eras.
     ("Eoarchean",         "era", "Archean",     4031.0, 3600.0, 3.0,  False),
     ("Paleoarchean",      "era", "Archean",     3600.0, 3200.0, None, False),
     ("Mesoarchean",       "era", "Archean",     3200.0, 2800.0, None, False),
@@ -327,7 +327,7 @@ CHART = [
 EVENTS = [
     # ---- Hadean ----
     ("Formation of the Solar System (CAIs)", 4567.3, (4567.5, 4567.1),
-     "Calcium-aluminium-rich inclusions in chondrites, the oldest solids in the "
+     "Calcium-aluminum-rich inclusions in chondrites, the oldest solids in the "
      "Solar System, date to 4567.3 +/- 0.16 Ma; the ICS chart uses 4567 Ma as the base of the Hadean.",
      "Wikipedia 'Age of Earth' (citing Bouvier & Wadhwa 2010); ICS chart v2026/06"),
 
@@ -354,7 +354,7 @@ EVENTS = [
 
     ("Nuvvuagittuq greenstone belt (disputed older rock)", 4280.0, (4280.0, 3800.0),
      "DISPUTED - a 4.28 Ga Sm-Nd mantle-extraction model age from Quebec; the "
-     "true crystallisation age may be closer to 3.8 Ga, so it is not accepted as the oldest rock.",
+     "true crystallization age may be closer to 3.8 Ga, so it is not accepted as the oldest rock.",
      "Wikipedia 'Oldest dated rocks' (O'Neil et al. 2008 and rebuttals)"),
 
     # ---- Earliest life ----
@@ -376,10 +376,10 @@ EVENTS = [
     # ---- Oxygenation & Paleoproterozoic ----
     ("Great Oxidation Event (onset)", 2430.0, (2460.0, 2426.0),
      "Atmospheric free oxygen rose irreversibly, marked by the loss of "
-     "mass-independent sulphur fractionation; onset constrained to 2460-2426 Ma.",
+     "mass-independent sulfur fractionation; onset constrained to 2460-2426 Ma.",
      "Gumsley et al. 2017, PNAS 114:1811-1816 'Timing and tempo of the Great Oxidation Event'"),
 
-    ("Great Oxidation Event (end of the oxygen overshoot / stabilisation)", 2060.0, (2220.0, 2060.0),
+    ("Great Oxidation Event (end of the oxygen overshoot / stabilization)", 2060.0, (2220.0, 2060.0),
      "The GOE interval closes around 2.06 Ga; NOTE published onset estimates "
      "2016-2022 differ by ~500 Myr (2.7-2.3 Ga), so the event's timing is genuinely contested.",
      "Wikipedia 'Great Oxidation Event' (Poulton et al. 2021, Nature; Gumsley et al. 2017)"),

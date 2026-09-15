@@ -13,7 +13,7 @@ import apa
 # k, name, long axis in microns, short axis, what it is
 CELLS = [
     ("animal", "An animal cell", 15, 15,
-     "A typical human cell, a fibroblast or a liver cell, fifteen microns across: three thousand cubic microns holding some ten billion protein molecules and two metres of DNA."),
+     "A typical human cell, a fibroblast or a liver cell, fifteen microns across: three thousand cubic microns holding some ten billion protein molecules and two meters of DNA."),
     ("plant", "A plant cell", 40, 20,
      "A leaf mesophyll cell, forty microns by twenty, boxed in a wall and mostly a water-filled vacuole, with the chloroplasts pressed against the edge where the light is."),
     ("bacterium", "A bacterium", 2.0, 0.8,
@@ -26,7 +26,7 @@ PARTS = [
     ("a_membrane", "animal", "Plasma membrane", "about 7 nm thick, 4 nm of lipid", "one, 700 square microns", "a thousandth of the cell's width",
      "A double layer of lipids with proteins studded through it, the boundary of the cell. Drawn here as a line because at true thickness it would be a fifth of a pixel.", "Milo and Phillips 2015; Alberts 2022"),
     ("a_nucleus", "animal", "Nucleus", "about 6 microns across", "one", "about a tenth of the volume",
-     "The DNA, two metres of it in 46 chromosomes, wound onto proteins and wrapped in a double membrane with pores. Every gene the cell will ever read is in here.", "Milo and Phillips 2015"),
+     "The DNA, two meters of it in 46 chromosomes, wound onto proteins and wrapped in a double membrane with pores. Every gene the cell will ever read is in here.", "Milo and Phillips 2015"),
     ("a_nucleolus", "animal", "Nucleolus", "1 to 2 microns", "one to a few", "",
      "Where ribosomes are built, from RNA copied off hundreds of repeated genes. The densest thing in the nucleus.", "Alberts 2022"),
     ("a_mito", "animal", "Mitochondrion", "0.5 to 1 micron wide, 1 to 4 long", "1,000 to 2,000 in a liver cell", "about a fifth of the volume",
@@ -40,16 +40,16 @@ PARTS = [
     ("a_ribo", "animal", "Ribosomes", "25 nm", "about 10 million", "",
      "The machines that read RNA and build proteins, a hundred amino acids a minute each. Drawn as a stipple: each is a third of a pixel here.", "Milo and Phillips 2015"),
     ("a_cyto", "animal", "Cytoskeleton", "microtubules 25 nm, actin 7 nm", "thousands of filaments", "",
-     "The scaffolding: microtubules from the centre out, actin under the membrane. It holds the shape, moves the organelles and pulls the chromosomes apart at division.", "Alberts 2022"),
+     "The scaffolding: microtubules from the center out, actin under the membrane. It holds the shape, moves the organelles and pulls the chromosomes apart at division.", "Alberts 2022"),
     ("a_centro", "animal", "Centrosome", "two rods, 0.4 microns long", "one", "",
      "The point the microtubules grow from, two barrels at right angles beside the nucleus; it doubles before the cell divides.", "Alberts 2022"),
     ("a_vesicle", "animal", "Vesicles", "50 to 100 nm", "thousands", "",
      "Membrane bubbles carrying cargo between the ER, the Golgi, the membrane and the lysosomes.", "Alberts 2022"),
     ("a_cytosol", "animal", "Cytosol", "the space between", "", "about half the volume",
-     "Water with a protein in every few nanometres: a fifth of the mass is protein, crowded enough that diffusion is slow.", "Milo and Phillips 2015"),
+     "Water with a protein in every few nanometers: a fifth of the mass is protein, crowded enough that diffusion is slow.", "Milo and Phillips 2015"),
     # ---- plant ----
     ("p_wall", "plant", "Cell wall", "0.1 to 1 micron thick", "one", "",
-     "Cellulose fibres in a matrix, outside the membrane, which is why plants stand up without a skeleton and why cells cannot move.", "Alberts 2022"),
+     "Cellulose fibers in a matrix, outside the membrane, which is why plants stand up without a skeleton and why cells cannot move.", "Alberts 2022"),
     ("p_membrane", "plant", "Plasma membrane", "about 7 nm", "one", "",
      "Pressed against the wall from inside by the pressure of the vacuole.", "Alberts 2022"),
     ("p_vacuole", "plant", "Central vacuole", "most of the cell", "one", "30 to 90 percent of the volume",
@@ -63,17 +63,17 @@ PARTS = [
     ("p_er", "plant", "Endoplasmic reticulum and Golgi", "as in the animal cell", "", "",
      "The same protein and membrane factories, in the thin layer of cytoplasm between vacuole and wall.", "Alberts 2022"),
     ("p_plasmo", "plant", "Plasmodesmata", "channels 50 nm across", "thousands per cell", "",
-     "Pores through the wall joining neighbouring cells' cytoplasm, so a plant is in a sense one connected cell.", "Alberts 2022"),
+     "Pores through the wall joining neighboring cells' cytoplasm, so a plant is in a sense one connected cell.", "Alberts 2022"),
     # ---- bacterium ----
     ("b_envelope", "bacterium", "Envelope", "about 30 nm: two membranes and a wall between", "one", "",
      "An inner membrane, a thin wall of peptidoglycan, and an outer membrane. Gram-negative; the wall is what penicillin attacks.", "Milo and Phillips 2015"),
     ("b_nucleoid", "bacterium", "Nucleoid", "fills the middle", "one chromosome, 4.6 million bases", "",
-     "The DNA, a single loop 1.6 millimetres long folded a thousandfold into a cell two microns long, with no membrane around it.", "Milo and Phillips 2015"),
+     "The DNA, a single loop 1.6 millimeters long folded a thousandfold into a cell two microns long, with no membrane around it.", "Milo and Phillips 2015"),
     ("b_ribo", "bacterium", "Ribosomes", "20 nm", "20,000 to 70,000", "about a quarter of the dry mass",
      "The faster the bacterium grows, the more of it is ribosome. Each is drawn here, roughly to scale.", "Milo and Phillips 2015"),
     ("b_flagellum", "bacterium", "Flagellum", "20 nm thick, 5 to 10 microns long", "four to ten", "",
      "A rotating helix driven by a motor in the membrane, spinning a hundred times a second. Several times longer than the cell; drawn cut off.", "Milo and Phillips 2015"),
-    ("b_pili", "bacterium", "Pili", "a few nanometres thick, up to a micron long", "hundreds", "",
+    ("b_pili", "bacterium", "Pili", "a few nanometers thick, up to a micron long", "hundreds", "",
      "Hairs for gripping surfaces and other cells, and for passing DNA.", "Alberts 2022"),
     ("b_plasmid", "bacterium", "Plasmid", "a few thousand bases", "none to dozens", "",
      "Small extra loops of DNA, traded between bacteria; how antibiotic resistance travels.", "Alberts 2022"),
@@ -90,14 +90,14 @@ EXTRAS = [
     ("egg", "a human egg cell", 120, 120, "arc",
      "The largest human cell, a hundred and twenty microns: its edge alone fits on this stage."),
     ("virus", "a coronavirus", 0.1, 0.1, "dot",
-     "A hundred nanometres, which at this scale is one pixel."),
+     "A hundred nanometers, which at this scale is one pixel."),
 ]
 
 FACTS = [
     ("cells in a body", "about 30 trillion", "Sender, Fuchs and Milo 2016"),
     ("bacteria in and on it", "about as many again", "Sender, Fuchs and Milo 2016"),
     ("protein molecules in one animal cell", "about 10 billion", "Milo 2013"),
-    ("DNA in one animal cell, unwound", "about 2 metres", "Milo and Phillips 2015"),
+    ("DNA in one animal cell, unwound", "about 2 meters", "Milo and Phillips 2015"),
 ]
 
 REFS = [

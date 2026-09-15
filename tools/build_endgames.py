@@ -87,7 +87,7 @@ TOPICS = [
       c="The ending everything else reduces to. One pawn decides the game, "
         "and the kings decide the pawn. Three positions here, played out "
         "one move at a time and checked against a solved table of this "
-        "ending: the same centre pawn winning and drawing depending only "
+        "ending: the same center pawn winning and drawing depending only "
         "on whose turn it is, and a rook pawn that cannot be won at all.",
       strong=[], soft=[],
       legend=[("w", "the squares the pawn attacks"),
@@ -96,7 +96,7 @@ TOPICS = [
               ("chk", "check")],
       steps=[
        dict(pieces=[["bK", "bK", "e7"], ["wK", "wK", "e5"], ["PW", "wP", "e4"]],
-            sec="Centre pawn: Black to move, White wins",
+            sec="Center pawn: Black to move, White wins",
             jump=True,
             c="White to move would only draw, but it is Black's turn, and in "
               "this ending the side that has to move first is the side that "
@@ -133,7 +133,7 @@ TOPICS = [
             c="7. e8 makes a queen, with check. The mate that follows is the "
               "queen mate below."),
        dict(pieces=[["bK", "bK", "e7"], ["wK", "wK", "e5"], ["PW", "wP", "e4"]],
-            sec="Centre pawn: White to move, it is a draw",
+            sec="Center pawn: White to move, it is a draw",
             jump=True,
             c="The same position, but now it is White to move, and that "
               "reverses the result. White cannot make progress and the game "
@@ -229,7 +229,7 @@ TOPICS = [
  dict(id="queenmate", g="Checkmates", t="The queen mate",
       c="A queen and king against a bare king, the shortest of the basic "
         "mates. The queen fences off a rank and a file at once; the king "
-        "walks in behind the fence. Black plays the tablebase defence. "
+        "walks in behind the fence. Black plays the tablebase defense. "
         "Mate in 7.",
       strong=[], soft=[],
       legend=[("w", "the queen's squares"),
@@ -240,7 +240,7 @@ TOPICS = [
        dict(pieces=[["bK", "bK", "d5"], ["wK", "wK", "c1"],
                     ["QN", "wQ", "e1"]],
             c="The start: Kc1, Qe1, black king on d5. Black plays the "
-              "tablebase defence, the reply that delays mate the longest. "
+              "tablebase defense, the reply that delays mate the longest. "
               "Mate in 7."),
        dict(pieces=[["bK", "bK", "d5"], ["wK", "wK", "c1"],
                     ["QN", "wQ", "e7"]],
@@ -304,7 +304,7 @@ TOPICS = [
  dict(id="rookmate", g="Checkmates", t="The rook mate",
       c="A rook and king against a bare king. The rook fences a whole "
         "rank or file at a time; the kings fight for the squares in "
-        "between. Black plays the tablebase defence. Mate in 14.",
+        "between. Black plays the tablebase defense. Mate in 14.",
       strong=[], soft=[],
       legend=[("w", "the rook's squares"),
               ("wk", "squares the white king covers"),
@@ -314,7 +314,7 @@ TOPICS = [
        dict(pieces=[["bK", "bK", "d5"], ["wK", "wK", "c1"],
                     ["RK", "wR", "e1"]],
             c="The start: Kc1, Re1, black king on d5. Black plays the "
-              "tablebase defence, the reply that delays mate the "
+              "tablebase defense, the reply that delays mate the "
               "longest. Mate in 14."),
        dict(pieces=[["bK", "bK", "d5"], ["wK", "wK", "b2"],
                     ["RK", "wR", "e1"]],
@@ -322,7 +322,7 @@ TOPICS = [
               "first."),
        dict(pieces=[["bK", "bK", "d4"], ["wK", "wK", "b2"],
                     ["RK", "wR", "e1"]],
-            c="1... Kd4. Black holds the centre."),
+            c="1... Kd4. Black holds the center."),
        dict(pieces=[["bK", "bK", "d4"], ["wK", "wK", "c2"],
                     ["RK", "wR", "e1"]],
             c="2. Kc2."),
@@ -413,7 +413,7 @@ TOPICS = [
              "move at a time."]),
  dict(id="twobishops", g="Checkmates", t="The two-bishop mate",
       c="Two bishops form diagonal fences a king cannot cross. Black is "
-        "not scripted: it plays the tablebase defence, the reply that "
+        "not scripted: it plays the tablebase defense, the reply that "
         "delays mate the longest. Gold is every square White covers; "
         "green is every square still open to the black king.",
       strong=[], soft=[],
@@ -425,13 +425,13 @@ TOPICS = [
       steps=[
        dict(pieces=[["bK", "bK", "d5"], ["wK", "wK", "c1"],
                     ["BL", "wB", "d1"], ["BD", "wB", "e1"]],
-            c="The start: Kc1, Bd1, Be1, black king on d5. Black plays the tablebase defence: every reply is the one that delays mate the longest. White aims for a mate away from the corner, which costs one extra move: mate in 17."),
+            c="The start: Kc1, Bd1, Be1, black king on d5. Black plays the tablebase defense: every reply is the one that delays mate the longest. White aims for a mate away from the corner, which costs one extra move: mate in 17."),
        dict(pieces=[["bK", "bK", "d5"], ["wK", "wK", "d2"],
                     ["BL", "wB", "d1"], ["BD", "wB", "e1"]],
             c="1. Kd2. The king steps up first."),
        dict(pieces=[["bK", "bK", "d4"], ["wK", "wK", "d2"],
                     ["BL", "wB", "d1"], ["BD", "wB", "e1"]],
-            c="1... Kd4. All eight replies lose in the same number of moves; black takes the centre."),
+            c="1... Kd4. All eight replies lose in the same number of moves; black takes the center."),
        dict(pieces=[["bK", "bK", "d4"], ["wK", "wK", "d2"],
                     ["BL", "wB", "e2"], ["BD", "wB", "e1"]],
             c="2. Be2. The light bishop clears d1 and eyes the f1-a6 diagonal."),
@@ -485,7 +485,7 @@ TOPICS = [
             c="10. Ba5. Takes b6 away."),
        dict(pieces=[["bK", "bK", "c8"], ["wK", "wK", "d6"],
                     ["BL", "wB", "e2"], ["BD", "wB", "a5"]],
-            c="10... Kc8. The longest defence; heading for a7 falls sooner."),
+            c="10... Kc8. The longest defense; heading for a7 falls sooner."),
        dict(pieces=[["bK", "bK", "c8"], ["wK", "wK", "c6"],
                     ["BL", "wB", "e2"], ["BD", "wB", "a5"]],
             c="11. Kc6. Black is down to one reply."),
@@ -528,7 +528,7 @@ TOPICS = [
       ],
       notes=["Black's moves come from a computed tablebase of this "
              "ending, so this is the longest resistance possible, not a "
-             "scripted defence.",
+             "scripted defense.",
              "The arrows and the arrow keys play through the line one "
              "move at a time."]),
  dict(id="twobishops2", g="Checkmates", t="The two-bishop mate in the "
@@ -551,7 +551,7 @@ TOPICS = [
             c="1. Kd2."),
        dict(pieces=[["bK", "bK", "d4"], ["wK", "wK", "d2"],
                     ["BL", "wB", "d1"], ["BD", "wB", "e1"]],
-            c="1... Kd4. Every reply loses in 16; black takes the centre."),
+            c="1... Kd4. Every reply loses in 16; black takes the center."),
        dict(pieces=[["bK", "bK", "d4"], ["wK", "wK", "d2"],
                     ["BL", "wB", "d1"], ["BD", "wB", "g3"]],
             c="2. Bg3. The dark bishop takes the b8-h2 diagonal."),
@@ -581,7 +581,7 @@ TOPICS = [
             c="6. Kc3. The king joins."),
        dict(pieces=[["bK", "bK", "a6"], ["wK", "wK", "c3"],
                     ["BL", "wB", "f3"], ["BD", "wB", "f2"]],
-            c="6... Ka6. The best defence runs up the edge on its own; the lower retreats lose faster."),
+            c="6... Ka6. The best defense runs up the edge on its own; the lower retreats lose faster."),
        dict(pieces=[["bK", "bK", "a6"], ["wK", "wK", "c4"],
                     ["BL", "wB", "f3"], ["BD", "wB", "f2"]],
             c="7. Kc4."),
@@ -641,7 +641,7 @@ TOPICS = [
             c="16. Bd4, mate. The long dark diagonal ends the game; Be4 covers b1 and the king covers a2 and b2."),
       ],
       notes=["This is the fastest mate from the starting position against "
-             "the tablebase defence. With best play from both sides the "
+             "the tablebase defense. With best play from both sides the "
              "king ends up in the corner.",
              "The arrows and the arrow keys play through the line one "
              "move at a time."]),
@@ -1077,7 +1077,7 @@ function fillFor(f,r,topic){
 }
 
 function sqName(s){ return FILESTR[s&7]+((s>>3)+1); }
-/* a dot for a win, a dash for a draw: the verdict does not rest on colour.
+/* a dot for a win, a dash for a draw: the verdict does not rest on color.
    The square's coordinate label is re-inked here too, for the same reason. */
 function mapMarks(){
   let s='';

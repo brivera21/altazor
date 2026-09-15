@@ -48,14 +48,14 @@ YEAR = 365.256363        # sidereal year
 # disc. Each sea is listed by the patch of the Moon it actually covers, in
 # selenographic latitude and longitude, and projected below the way the Moon is
 # really seen: orthographic, north up, east to the right. Projecting the edges
-# rather than the centre is what matters near the limb, where a degree of
+# rather than the center is what matters near the limb, where a degree of
 # longitude is worth almost nothing: it is why Oceanus Procellarum is squeezed
 # into a tall band along the western edge and Crisium into a small oval on the
 # eastern one. The bounds are read off the standard near-side map to the
 # nearest degree or so, so this is a likeness rather than an atlas, but nothing
 # about the arrangement is invented.
 #
-#     name, latitude and longitude of the centre, half extent in each
+#     name, latitude and longitude of the center, half extent in each
 MARIA_LL = [
     ("Oceanus Procellarum", 20.0, -52.5, 25.0, 32.5),
     ("Mare Imbrium", 33.0, -16.0, 15.0, 16.0),
@@ -394,7 +394,7 @@ function moonFace(R) {
   w.drawImage(sea, 0, 0);
   w.filter = 'none';
   for (let i = 0; i < 7; i++) w.drawImage(coast, 0, 0);
-  w.globalCompositeOperation = 'source-in';   // keep the shape, take the colour
+  w.globalCompositeOperation = 'source-in';   // keep the shape, take the color
   w.fillStyle = '#6b7280';
   w.fillRect(0, 0, px, px);
 
@@ -497,7 +497,7 @@ function drawEarthView(p) {
   const mAng = p.lam*D2R;                          // the Moon, seen from Earth
   const mx = ex + Math.cos(mAng)*rMoon, my = ey - Math.sin(mAng)*rMoon;
 
-  // Earth's orbit, and the stretch of it just travelled
+  // Earth's orbit, and the stretch of it just traveled
   ctx.strokeStyle = 'rgba(90,176,255,0.16)'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.arc(cx, cy, Rorb, 0, 7); ctx.stroke();
   const trailDays = 40;
@@ -580,7 +580,7 @@ function drawEarthView(p) {
 
 function wave(p) {
   const x0 = 46, x1 = Math.max(x0 + 120, Math.min(W - 46, colR)), y = 150, h = 34;
-  colInk = Math.max(colInk, x1 + 22);   // 'new' is centred on the far end
+  colInk = Math.max(colInk, x1 + 22);   // 'new' is centered on the far end
   ctx.strokeStyle = 'rgba(120,150,200,0.25)'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(x0, y + h); ctx.lineTo(x1, y + h); ctx.stroke();
   ctx.beginPath();
@@ -613,15 +613,15 @@ function drawSunView(p) {
   const days = 110, span = 360*days/D.YEAR, half = span/2*D2R;
   const Rpx = Math.max(200, Math.min(W*0.82/(2*Math.sin(half)),
     (band.bot - 158 - 110)/(1 - Math.cos(half))));   // 110 for the Sun arrow
-  // the arc is usually limited by the width, so it is centred in the band
+  // the arc is usually limited by the width, so it is centered in the band
   // rather than hung from the top, which would leave the space all at the foot
   const drop = Rpx*(1 - Math.cos(half)) + 110;
   const apex = Math.max(158, band.top + (band.bot - band.top - drop)/2);
   const cx = W*0.5, cy = apex + Rpx;
-  const centre = -Math.PI/2;
+  const center = -Math.PI/2;
 
   const earthAt = t => {
-    const a = centre - half + 2*half*t;
+    const a = center - half + 2*half*t;
     return [cx + Math.cos(a)*Rpx, cy + Math.sin(a)*Rpx];
   };
   ctx.strokeStyle = 'rgba(90,176,255,0.45)'; ctx.lineWidth = 1.6;
@@ -636,7 +636,7 @@ function drawSunView(p) {
   const jdA = jd - days/2, jdB = jd + days/2;
   const moonAt = t => {
     const j = jdA + (jdB - jdA)*t;
-    const a = centre - half + 2*half*t;
+    const a = center - half + 2*half*t;
     const [ex, ey] = earthAt(t);
     const ph = (positions(j).lam - positions(j).slon)*D2R;
     return [ex + Math.cos(a + Math.PI + ph)*off, ey + Math.sin(a + Math.PI + ph)*off];

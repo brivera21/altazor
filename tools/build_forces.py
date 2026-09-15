@@ -6,7 +6,7 @@ forces between two protons, drawn against distance on log-log axes across
 nine decades of distance and sixty of force, with the reach of the pion and
 the W marked and a marker that reads all four off at any distance. How
 hard: one log line of forces in newtons, from gravity inside a hydrogen atom
-to the Planck force, each mark coloured by which of the four is doing the
+to the Planck force, each mark colored by which of the four is doing the
 pushing.
 
 Data: tools/forces_data.py.
@@ -23,7 +23,7 @@ from forces_data import FOUR, PLACES, FORCES, REFS
 OUT = Path(__file__).parent.parent / "forces.html"
 
 NOTE1 = ("Four forces account for everything that pushes or pulls. Between "
-         "two protons the strong force wins inside a femtometre and fades "
+         "two protons the strong force wins inside a femtometer and fades "
          "over the next few; the weak force, strong up close, reaches only "
          "a thousandth of that; electromagnetism and gravity go on forever, "
          "falling with the square of the distance, thirty-six decades "
@@ -34,7 +34,7 @@ NOTE2 = ("The second line asks how hard things push, in newtons, and it "
          "of a hydrogen atom to the Planck force. Everything a hand can feel "
          "is electromagnetism between electrons; gravity shows only at the "
          "two ends, where masses are atoms or worlds; the strong force "
-         "appears once, between two quarks, at sixteen tonnes.")
+         "appears once, between two quarks, at sixteen metric tons.")
 
 METHOD = ("Electromagnetism and gravity are Coulomb's and Newton's laws for "
           "two protons. The strong and weak forces are drawn as Yukawa "
@@ -43,11 +43,11 @@ METHOD = ("Electromagnetism and gravity are Coulomb's and Newton's laws for "
           "set by the carrier's mass: 1.414 fm for the pion, 0.002455 fm for "
           "the W. The couplings are the fine-structure constant 1/137, the "
           "weak coupling alpha over sin squared of the weak mixing angle, "
-          "about 1/32, a strong coupling of one at the femtometre scale, and "
+          "about 1/32, a strong coupling of one at the femtometer scale, and "
           "for gravity G times the proton mass squared over hbar c, "
           "5.9 times 10 to the minus 39. This is the textbook picture; the "
           "true force between nucleons turns repulsive inside half a "
-          "femtometre and is already small by three, where the one-pion "
+          "femtometer and is already small by three, where the one-pion "
           "tail drawn here still runs on, and the couplings change with "
           "distance. The weights on the second line use 9.81 m per second "
           "squared.")
@@ -171,8 +171,8 @@ function force(f,rr){ // newtons between two protons
   const base=f.a*hbarc/(rr*rr); if(f.lam==null) return base; const u=rr/f.lam; return base*(1+u)*Math.exp(-u); }
 function weightWords(N){ const kg=N/g0;
   if(kg<1e-6) return null; if(kg<1e-3) return 'the weight of '+sf(kg*1e6,3)+' milligrams'; if(kg<1) return 'the weight of '+sf(kg*1e3,3)+' grams';
-  if(kg<1e3) return 'the weight of '+sf(kg,3)+' kg'; if(kg<1e9) return 'the weight of '+sf(kg/1e3,3)+' tonnes';
-  if(kg<1e12) return 'the weight of '+sf(kg/1e9,3)+' million tonnes'; return 'the weight of '+sci(kg)+' kg, on Earth'; }
+  if(kg<1e3) return 'the weight of '+sf(kg,3)+' kg'; if(kg<1e9) return 'the weight of '+sf(kg/1e3,3)+' metric tons';
+  if(kg<1e12) return 'the weight of '+sf(kg/1e9,3)+' million metric tons'; return 'the weight of '+sci(kg)+' kg, on Earth'; }
 
 /* ---- the card ---- */
 function card(kind,name,rows,body,src){
@@ -229,7 +229,7 @@ function line(){
   for(let d=S.LOG0; d<=S.LOG1; d++){ const x=SX(Math.pow(10,d)); const big=(d%10===0);
     s+='<line x1="'+x.toFixed(1)+'" y1="'+(S.Y-(big?7:3))+'" x2="'+x.toFixed(1)+'" y2="'+(S.Y+(big?7:3))+'" stroke="#8a94a6"/>';
     if(big) s+='<text x="'+x.toFixed(1)+'" y="'+(S.Y+22)+'" text-anchor="middle" font-size="11" fill="#9a9a9a">10<tspan dy="-4" font-size="8">'+d+'</tspan><tspan dy="4"> N</tspan></text>'; }
-  s+='<text x="'+S.L+'" y="'+(S.Y-70)+'" font-size="11" fill="#9a9a9a">ninety-three decades of force; the colour says which of the four is pushing</text>';
+  s+='<text x="'+S.L+'" y="'+(S.Y-70)+'" font-size="11" fill="#9a9a9a">ninety-three decades of force; the color says which of the four is pushing</text>';
   let lx=S.L; for(const f of FOUR){ if(f.k==='weak') continue; s+='<rect x="'+lx+'" y="'+(S.Y-58)+'" width="10" height="10" fill="'+f.c+'" rx="2"/><text x="'+(lx+14)+'" y="'+(S.Y-49)+'" font-size="10.5" fill="#9a9a9a">'+esc(f.n)+'</text>'; lx+=f.n.length*6.2+30; }
   const items=lanes(FORCES.map(o=>({...o,x:SX(o.N),w:o.n.length*5.7+10})).sort((a,b)=>a.x-b.x),0);
   let maxLane=0;

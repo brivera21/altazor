@@ -55,7 +55,7 @@ CALENDARS = [
      "The one purely lunar calendar in wide use: twelve months of the moon and nothing to hold them to the seasons, so Ramadan falls eleven days earlier each year and comes round the whole year in a third of a century. The tabular version drawn here is the arithmetic one used for planning; religious dates wait for the moon to be seen.", True),
     ("chinese", "Chinese", "lunisolar", [(f"{i + 1}", 30 if i % 2 == 0 else 29) for i in range(12)],
      "a thirteenth month in 7 years of every 19, placed by the position of the sun; months are 29 or 30 days by the actual new moons", 365.2422, "months begin at the astronomical new moon, in Beijing time; a month without a solar term is doubled", "years counted in cycles of sixty, named by ten stems and twelve branches; the year begins at the second new moon after the December solstice, in January or February",
-     "The traditional calendar of China and its neighbours, now used for festivals: months begin at the new moon, computed rather than seen, and a leap month is added when a month contains no principal solar term, seven times in nineteen years. Each year takes an animal from a cycle of twelve and a stem from a cycle of ten.", True),
+     "The traditional calendar of China and its neighbors, now used for festivals: months begin at the new moon, computed rather than seen, and a leap month is added when a month contains no principal solar term, seven times in nineteen years. Each year takes an animal from a cycle of twelve and a stem from a cycle of ten.", True),
 ]
 
 # the Maya day names and months, for the converter

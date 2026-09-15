@@ -31,9 +31,9 @@ NOTE1 = ("A plant is a machine for standing in the light. Roots hold it "
 
 NOTE2 = ("The second view is the light itself. Chlorophyll takes the blue "
          "and the red and lets the green through, which is why leaves are "
-         "the colour they are, and what it takes goes into pulling carbon "
+         "the color they are, and what it takes goes into pulling carbon "
          "dioxide and water apart and rebuilding them as sugar, with oxygen "
-         "left over: a hundred billion tonnes of carbon a year, half on "
+         "left over: a hundred billion metric tons of carbon a year, half on "
          "land, half in the sea. The third view is who does it: four kinds "
          "of land plant, and when each arrived.")
 
@@ -41,8 +41,8 @@ METHOD = ("The plant is a diagram, not a species. The absorption curves are "
           "drawn as sums of Gaussians at the measured peaks of chlorophyll a "
           "and b in ether, 430 and 662 nm and 453 and 642, with the relative "
           "heights of the published spectra; in a leaf the peaks shift a "
-          "few nanometres and other pigments fill in some of the green. The "
-          "spectrum's colours come from the CIE matching functions, as on "
+          "few nanometers and other pigments fill in some of the green. The "
+          "spectrum's colors come from the CIE matching functions, as on "
           "the Light page. Production is Field and colleagues' 1998 "
           "estimate, still the standard one; species counts are Kew's, "
           "which change with every revision; the dates of first appearance "
@@ -142,7 +142,7 @@ const el=document.getElementById('diagram');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 let view='parts', hot=null, lam=550, t0=performance.now();
 
-/* ---- colour, as on the Light page ---- */
+/* ---- color, as on the Light page ---- */
 const g=(l,mu,s1,s2)=>{ const s=l<mu?s1:s2; const t=(l-mu)/s; return Math.exp(-0.5*t*t); };
 const xbar=l=>1.056*g(l,599.8,37.9,31.0)+0.362*g(l,442.0,16.0,26.7)-0.065*g(l,501.1,20.4,26.2);
 const ybar=l=>0.821*g(l,568.8,46.9,40.5)+0.286*g(l,530.9,16.3,31.1);
@@ -150,9 +150,9 @@ const zbar=l=>1.217*g(l,437.0,11.8,36.0)+0.681*g(l,459.0,26.0,13.8);
 function xyzToRgb(X,Y,Z){ let r=3.2406*X-1.5372*Y-0.4986*Z, gg=-0.9689*X+1.8758*Y+0.0415*Z, b=0.0557*X-0.2040*Y+1.0570*Z; const m=Math.min(r,gg,b); if(m<0){ r-=m; gg-=m; b-=m; } const mx=Math.max(r,gg,b)||1; return [r/mx,gg/mx,b/mx]; }
 const gam=v=>v<=0.0031308?12.92*v:1.055*Math.pow(v,1/2.4)-0.055;
 const hex=rgb=>'#'+rgb.map(v=>Math.round(255*Math.max(0,Math.min(1,gam(v)))).toString(16).padStart(2,'0')).join('');
-function waveColour(nm){ const rgb=xyzToRgb(xbar(nm),ybar(nm),zbar(nm)); const br=Math.min(1,Math.max(xbar(nm),ybar(nm),zbar(nm))/0.6); return hex(rgb.map(v=>v*br)); }
+function waveColor(nm){ const rgb=xyzToRgb(xbar(nm),ybar(nm),zbar(nm)); const br=Math.min(1,Math.max(xbar(nm),ybar(nm),zbar(nm))/0.6); return hex(rgb.map(v=>v*br)); }
 const absorb=(k,nm)=>CHL[k].peaks.reduce((a,[mu,s,h])=>a+h*Math.exp(-0.5*((nm-mu)/s)**2),0);
-const colourName=nm=>nm<450?'violet':nm<495?'blue':nm<570?'green':nm<590?'yellow':nm<620?'orange':'red';
+const colorName=nm=>nm<450?'violet':nm<495?'blue':nm<570?'green':nm<590?'yellow':nm<620?'orange':'red';
 
 /* ---- the card ---- */
 function card(kind,name,rows,body,src){
@@ -165,9 +165,9 @@ function card(kind,name,rows,body,src){
 function showPart(k){ const p=PARTS.find(x=>x.k===k); card('A part', esc(p.n), [['one number',esc(p.num)]], p.b, p.s); }
 function showPlant(){ card('A flowering plant','Roots to flower',[['parts',PARTS.length]],'Each part under the pointer says what it does. The blue dots are water rising through the xylem; the orange ones are sugar going down through the phloem.','Wikipedia, Plant'); }
 function showLam(nm){ const a=absorb('a',nm), b=absorb('b',nm);
-  card('Light at', nm+' nm, '+colourName(nm), [['chlorophyll a absorbs',(a*100).toFixed(0)+'% of its strongest, the blue peak'],['chlorophyll b absorbs',(b*100).toFixed(0)+'% of its strongest'],['a leaf',a+b>0.5?'absorbs most of this and uses it':a+b>0.15?'takes some of this':'lets most of this through or bounces it back, which is why it looks green']],
+  card('Light at', nm+' nm, '+colorName(nm), [['chlorophyll a absorbs',(a*100).toFixed(0)+'% of its strongest, the blue peak'],['chlorophyll b absorbs',(b*100).toFixed(0)+'% of its strongest'],['a leaf',a+b>0.5?'absorbs most of this and uses it':a+b>0.15?'takes some of this':'lets most of this through or bounces it back, which is why it looks green']],
     nm>=495&&nm<570?'Green is the light chlorophyll wants least, so it is the light that comes back out of a leaf and into an eye.':nm<495?'Blue light carries more energy than a photosynthesis step can use; the excess is shed as heat, and the sugar comes out the same as from red.':nm<620?'The gap between the two bands, where other pigments, the carotenoids, catch a little.':'Red light is the most efficient: nearly every red photon a leaf absorbs drives a step.', 'Wikipedia, Chlorophyll'); }
-function showPhoto(){ card('Photosynthesis', PHOTO.equation, [['costs',PHOTO.energy_kj.toLocaleString('en-US')+' kJ a mole of sugar, from about 48 photons'],['the biosphere makes',PHOTO.npp_pg+' billion tonnes of carbon a year'],['on land',PHOTO.npp_land+', in the sea '+PHOTO.npp_ocean],['efficiency',PHOTO.efficiency]], 'Six molecules of carbon dioxide from the air and six of water from the roots, taken apart by light and put together as one sugar, with six of oxygen left over. Every calorie anyone eats, and every breath, comes from this line.', 'Field et al. 1998; Zhu et al. 2008; Wikipedia, Photosynthesis'); }
+function showPhoto(){ card('Photosynthesis', PHOTO.equation, [['costs',PHOTO.energy_kj.toLocaleString('en-US')+' kJ a mole of sugar, from about 48 photons'],['the biosphere makes',PHOTO.npp_pg+' billion metric tons of carbon a year'],['on land',PHOTO.npp_land+', in the sea '+PHOTO.npp_ocean],['efficiency',PHOTO.efficiency]], 'Six molecules of carbon dioxide from the air and six of water from the roots, taken apart by light and put together as one sugar, with six of oxygen left over. Every calorie anyone eats, and every breath, comes from this line.', 'Field et al. 1998; Zhu et al. 2008; Wikipedia, Photosynthesis'); }
 function showKind(k){ const x=KINDS.find(y=>y.k===k); const tot=KINDS.reduce((a,y)=>a+y.sp,0);
   card('A kind of plant', esc(x.n), [['species','about '+x.sp.toLocaleString('en-US')+', '+(x.sp/tot*100).toFixed(x.sp/tot<0.01?1:0)+'% of land plants'],['first appeared','about '+x.ma+' million years ago']], x.b, x.s); }
 function showKinds(){ const tot=KINDS.reduce((a,y)=>a+y.sp,0); card('The kinds','Four groups of land plants',[['species in all','about '+tot.toLocaleString('en-US')],['flowering',(KINDS.find(k=>k.k==='flower').sp/tot*100).toFixed(0)+'% of them']],'Each bar is a group; its length is how many species, its place on the line is when it appeared.','Royal Botanic Gardens, Kew 2016; Wikipedia, Plant'); }
@@ -212,7 +212,7 @@ function partsView(now){
   s+='<circle cx="120" cy="70" r="26" fill="#ffb02e" opacity="0.9"/>';
   for(const [x2,y2] of [[cx-100,ground-280],[cx-90,ground-160]]) s+='<line x1="140" y1="86" x2="'+x2+'" y2="'+y2+'" stroke="#ffb02e" stroke-dasharray="4 4" opacity="0.7"/>';
   s+='<text x="90" y="118" font-size="11" fill="#9a9a9a">light</text>';
-  s+='<text x="'+(cx+150)+'" y="'+(ground-110)+'" font-size="11" fill="#9a9a9a">CO\\u2082 in \\u2192</text><text x="'+(cx+150)+'" y="'+(ground-94)+'" font-size="11" fill="#9a9a9a">\\u2190 O\\u2082 and water vapour out</text>';
+  s+='<text x="'+(cx+150)+'" y="'+(ground-110)+'" font-size="11" fill="#9a9a9a">CO\\u2082 in \\u2192</text><text x="'+(cx+150)+'" y="'+(ground-94)+'" font-size="11" fill="#9a9a9a">\\u2190 O\\u2082 and water vapor out</text>';
   return {svg:s, h:ground+190};
 }
 
@@ -221,21 +221,21 @@ const L={x:80,y:60,w:820,h:300,a:380,b:750};
 const LX=nm=>L.x+(nm-L.a)/(L.b-L.a)*L.w;
 function lightView(){
   let s='';
-  for(let nm=L.a; nm<L.b; nm+=2) s+='<rect x="'+LX(nm).toFixed(1)+'" y="'+(L.y+L.h)+'" width="'+((L.w/((L.b-L.a)/2))+0.6).toFixed(2)+'" height="26" fill="'+waveColour(nm+1)+'"/>';
+  for(let nm=L.a; nm<L.b; nm+=2) s+='<rect x="'+LX(nm).toFixed(1)+'" y="'+(L.y+L.h)+'" width="'+((L.w/((L.b-L.a)/2))+0.6).toFixed(2)+'" height="26" fill="'+waveColor(nm+1)+'"/>';
   s+='<rect x="'+L.x+'" y="'+L.y+'" width="'+L.w+'" height="'+L.h+'" fill="none" stroke="#2b2b2b"/>';
   for(const nm of [400,450,500,550,600,650,700,750]) s+='<text x="'+LX(nm).toFixed(1)+'" y="'+(L.y+L.h+42)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">'+nm+'</text>';
   s+='<text x="'+(L.x+L.w/2)+'" y="'+(L.y+L.h+60)+'" text-anchor="middle" font-size="11" fill="#9a9a9a">wavelength, nm</text>';
   s+='<text transform="translate(16,'+(L.y+L.h/2)+') rotate(-90)" text-anchor="middle" font-size="11" fill="#9a9a9a">absorption, relative</text>';
   // the green window shaded
   s+='<rect x="'+LX(495).toFixed(1)+'" y="'+L.y+'" width="'+(LX(570)-LX(495)).toFixed(1)+'" height="'+L.h+'" fill="#9be564" opacity="0.06"/><text x="'+LX(532).toFixed(1)+'" y="'+(L.y+18)+'" text-anchor="middle" font-size="10.5" fill="#9be564">the green that gets away</text>';
-  for(const k of ['a','b']){ let d=''; for(let nm=L.a; nm<=L.b; nm+=1){ const v=absorb(k,nm); d+=(d?'L':'M')+LX(nm).toFixed(1)+','+(L.y+L.h-v*(L.h-30)).toFixed(1); } s+='<path d="'+d+'" fill="none" stroke="'+CHL[k].colour+'" stroke-width="2.2"/>';
-    const pk=CHL[k].peaks[0]; s+='<text x="'+(LX(pk[0])+(k==='a'?-8:8)).toFixed(1)+'" y="'+(L.y+L.h-pk[2]*(L.h-30)-8).toFixed(1)+'" text-anchor="'+(k==='a'?'end':'start')+'" font-size="11" fill="'+CHL[k].colour+'">chlorophyll '+k+'</text>'; }
+  for(const k of ['a','b']){ let d=''; for(let nm=L.a; nm<=L.b; nm+=1){ const v=absorb(k,nm); d+=(d?'L':'M')+LX(nm).toFixed(1)+','+(L.y+L.h-v*(L.h-30)).toFixed(1); } s+='<path d="'+d+'" fill="none" stroke="'+CHL[k].color+'" stroke-width="2.2"/>';
+    const pk=CHL[k].peaks[0]; s+='<text x="'+(LX(pk[0])+(k==='a'?-8:8)).toFixed(1)+'" y="'+(L.y+L.h-pk[2]*(L.h-30)-8).toFixed(1)+'" text-anchor="'+(k==='a'?'end':'start')+'" font-size="11" fill="'+CHL[k].color+'">chlorophyll '+k+'</text>'; }
   const mx=LX(lam);
   s+='<g id="marker" style="cursor:ew-resize"><line x1="'+mx.toFixed(1)+'" y1="'+L.y+'" x2="'+mx.toFixed(1)+'" y2="'+(L.y+L.h+26)+'" stroke="#ffb02e" stroke-width="1.5"/><circle cx="'+mx.toFixed(1)+'" cy="'+(L.y+L.h-absorb('a',lam)*(L.h-30)).toFixed(1)+'" r="5" fill="#ffb02e" stroke="#121212" stroke-width="1.5"/><text x="'+mx.toFixed(1)+'" y="'+(L.y-8)+'" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffb02e">'+lam+' nm</text></g>';
   // the equation
   const ey=L.y+L.h+100;
   s+='<g data-photo="1" style="cursor:pointer"><rect x="'+L.x+'" y="'+(ey-30)+'" width="'+L.w+'" height="60" rx="8" fill="#161616" stroke="#2b2b2b"/><text x="'+(L.x+L.w/2)+'" y="'+(ey+6)+'" text-anchor="middle" font-size="18" fill="#e6e6e6">'+esc(PHOTO.equation)+'</text>';
-  s+='<text x="'+(L.x+L.w/2)+'" y="'+(ey+50)+'" text-anchor="middle" font-size="11" fill="#9a9a9a">'+PHOTO.energy_kj.toLocaleString('en-US')+' kJ a mole of sugar; '+PHOTO.npp_pg+' billion tonnes of carbon a year across the planet</text></g>';
+  s+='<text x="'+(L.x+L.w/2)+'" y="'+(ey+50)+'" text-anchor="middle" font-size="11" fill="#9a9a9a">'+PHOTO.energy_kj.toLocaleString('en-US')+' kJ a mole of sugar; '+PHOTO.npp_pg+' billion metric tons of carbon a year across the planet</text></g>';
   return {svg:s, h:ey+70};
 }
 
@@ -257,7 +257,7 @@ function kindsView(){
 }
 
 /* ---- render and wiring ---- */
-function render(now){ const q=view==='parts'?partsView(now||performance.now()):view==='light'?lightView():kindsView(); el.innerHTML='<svg viewBox="0 0 '+W+' '+q.h+'" xmlns="http://www.w3.org/2000/svg" id="psvg"><rect width="'+W+'" height="'+q.h+'" fill="#121212"/>'+q.svg+'</svg>'; document.getElementById('lightCtl').hidden=view!=='light'; document.getElementById('lamOut').textContent=lam+' nm, '+colourName(lam); }
+function render(now){ const q=view==='parts'?partsView(now||performance.now()):view==='light'?lightView():kindsView(); el.innerHTML='<svg viewBox="0 0 '+W+' '+q.h+'" xmlns="http://www.w3.org/2000/svg" id="psvg"><rect width="'+W+'" height="'+q.h+'" fill="#121212"/>'+q.svg+'</svg>'; document.getElementById('lightCtl').hidden=view!=='light'; document.getElementById('lamOut').textContent=lam+' nm, '+colorName(lam); }
 function setView(v){ view=v; hot=null; for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render(); if(v==='parts') showPlant(); else if(v==='light') showLam(lam); else showKinds(); }
 document.getElementById('views').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setView(b.dataset.v); });
 (function tick(now){ if(view==='parts') render(now); requestAnimationFrame(tick); })(performance.now());
@@ -275,7 +275,7 @@ el.addEventListener('pointerleave',()=>{ if(view==='parts'&&hot){ hot=null; show
 render(); showPlant();
 window.__plants=(q)=>{ const o={view,hot,lam,card:document.getElementById('numTxt').innerText,name:document.getElementById('nameTxt').innerText,parts:document.querySelectorAll('#psvg g[data-part]').length,kinds:document.querySelectorAll('#psvg g[data-kind]').length,
   marker:(()=>{ const c=document.querySelector('#marker line'); return c?+c.getAttribute('x1'):null; })()};
-  if(q&&q.nm!=null){ o.abs=[absorb('a',q.nm),absorb('b',q.nm)]; o.col=waveColour(q.nm); } return o; };
+  if(q&&q.nm!=null){ o.abs=[absorb('a',q.nm),absorb('b',q.nm)]; o.col=waveColor(q.nm); } return o; };
 </script>
 </body>
 </html>

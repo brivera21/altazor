@@ -9,14 +9,14 @@ everyday forces carry the article or paper each comes from.
 
 import apa
 
-# the four, as forces between two protons: k, name, colour, coupling alpha,
+# the four, as forces between two protons: k, name, color, coupling alpha,
 # range lambda (m, None for infinite), a line, source
 # gravity: alpha_G = G m_p^2 / (hbar c); the rest as dimensionless couplings
-# at the femtometre scale; the strong and weak forces are drawn as Yukawa
+# at the femtometer scale; the strong and weak forces are drawn as Yukawa
 # forces with the pion's and the W's reach.
 FOUR = [
     ("strong", "the strong force", "#f28cb0", 1.0, 1.4138e-15,
-     "Between two nucleons it is the leftover of the colour force that binds quarks, carried by pions, and it fades past the pion's reach of 1.4 fm. Inside that, it beats electromagnetism a hundred times over, which is why nuclei hold.",
+     "Between two nucleons it is the leftover of the color force that binds quarks, carried by pions, and it fades past the pion's reach of 1.4 fm. Inside that, it beats electromagnetism a hundred times over, which is why nuclei hold.",
      "PDG 2024; Yukawa 1935"),
     ("em", "electromagnetism", "#ffb02e", 7.2973525693e-3, None,
      "Infinite in reach, falling as the inverse square, with a coupling of 1/137. Every push, pull, bond and friction in daily life is this force between electrons.",
@@ -29,7 +29,7 @@ FOUR = [
      "CODATA 2018"),
 ]
 
-# places on the distance axis: k, name, metres, a line
+# places on the distance axis: k, name, meters, a line
 PLACES = [
     ("w", "the W's reach", 2.455e-18, "hbar over the W mass times c: the distance a weak interaction spans"),
     ("proton", "a proton's radius", 8.41e-16, "the charge radius, CODATA 2018"),
@@ -49,8 +49,8 @@ FORCES = [
     ("bond", "breaking a covalent bond", 2.0e-9, "em", "a silicon-carbon bond pulled apart",
      "Two nanonewtons, measured by pulling a single polymer chain until a bond gave. Electromagnetism between a handful of electrons.", "Grandbois et al. 1999"),
     ("hydrogen", "the electric pull inside a hydrogen atom", 8.24e-8, "em", "proton on electron at the Bohr radius",
-     "Coulomb's law at 53 picometres: a twelfth of a microneutron, on a particle so light it holds the electron at a speed of 2,200 km per second.", "CODATA 2018"),
-    ("twopeople", "two people a metre apart", 3.3e-7, "gravity", "70 kg each, centre to centre",
+     "Coulomb's law at 53 picometers: a twelfth of a microneutron, on a particle so light it holds the electron at a speed of 2,200 km per second.", "CODATA 2018"),
+    ("twopeople", "two people a meter apart", 3.3e-7, "gravity", "70 kg each, center to center",
      "A third of a microneutron. A hair weighs a million times more. Gravity between everyday things is real, measured by Cavendish in 1798, and never felt.", "CODATA 2018"),
     ("mosquito", "a mosquito's weight", 2.5e-5, "gravity", "2.5 milligrams",
      "Twenty-five micronewtons. The lightest thing on this line that a person can feel land.", "Wikipedia, Mosquito"),
@@ -62,8 +62,8 @@ FORCES = [
      "Fifteen kilonewtons, carried by four patches of rubber the size of a hand each.", "Wikipedia, Curb weight"),
     ("croc", "a crocodile's bite", 1.64e4, "em", "a saltwater crocodile",
      "Sixteen kilonewtons, the strongest bite measured in a living animal, muscle and lever arm doing the work.", "Erickson et al. 2012"),
-    ("quarks", "the pull between two quarks", 1.6e5, "strong", "the colour string's tension, about 1 GeV per femtometre",
-     "Sixteen tonnes of force, constant with distance: stretching the string between two quarks costs energy without limit, until a new pair pops out of the vacuum. That is why no quark is ever alone.", "Wikipedia, Color confinement"),
+    ("quarks", "the pull between two quarks", 1.6e5, "strong", "the color string's tension, about 1 GeV per femtometer",
+     "Sixteen metric tons of force, constant with distance: stretching the string between two quarks costs energy without limit, until a new pair pops out of the vacuum. That is why no quark is ever alone.", "Wikipedia, Color confinement"),
     ("saturn", "a Saturn V at lift-off", 3.5e7, "em", "five F-1 engines",
      "Thirty-five meganewtons, gas pushed out the back: momentum, which is to say atoms colliding, which is to say electromagnetism.", "Wikipedia, Saturn V"),
     ("moon", "the Earth holding the Moon", 1.98e20, "gravity", "the two masses at 384,400 km",
@@ -99,7 +99,7 @@ REFS = [
 REFS += [(apa.wiki(f"https://en.wikipedia.org/wiki/{p}"), a) for p, a in [
     ("Fundamental_interaction", "The four, their carriers and their reach."),
     ("Yukawa_potential", "The force law drawn for the strong and weak forces."),
-    ("Color_confinement", "The string tension, about a gigaelectronvolt per femtometre."),
+    ("Color_confinement", "The string tension, about a gigaelectronvolt per femtometer."),
     ("Optical_tweezers", None), ("Mosquito", None), ("Newton_(unit)", None), ("Human_body_weight", None),
     ("Curb_weight", None), ("Saturn_V", None), ("Cavendish_experiment", "Gravity between everyday masses, measured."),
 ]]

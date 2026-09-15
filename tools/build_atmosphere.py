@@ -8,7 +8,7 @@ the marks up the column from the tallest building to the Hubble telescope,
 and a marker that drags to any altitude while the card reads temperature,
 pressure, density, the air above and below, the speed of sound and the
 boiling point of water there. Made of: dry air by volume as a bar, the
-trace gases opened out on a log scale, and the water vapour beside them.
+trace gases opened out on a log scale, and the water vapor beside them.
 
 Data: tools/atmosphere_data.py.
 
@@ -26,7 +26,7 @@ OUT = Path(__file__).parent.parent / "atmosphere.html"
 
 NOTE1 = ("The air is a thin skin: half of it lies below the height of a "
          "mountain, ninety-nine percent below 30 km, and the whole column "
-         "weighs ten tonnes on every square metre. It comes in four layers "
+         "weighs ten metric tons on every square meter. It comes in four layers "
          "by temperature, cooling with height where the ground warms it, "
          "warming where ozone catches the ultraviolet, cooling again, and "
          "then heating to a thousand kelvin in gas too thin to feel. The "
@@ -37,7 +37,7 @@ NOTE2 = ("The second view is what the air is made of. Two gases are "
          "nearly all of it, one noble gas is most of the rest, and the "
          "carbon dioxide that sets the planet's temperature is four "
          "hundredths of a percent, so the trace gases get their own line "
-         "with a log scale. Water vapour is left out of dry air because it "
+         "with a log scale. Water vapor is left out of dry air because it "
          "varies a hundredfold from place to place; on average it is a "
          "quarter of a percent.")
 
@@ -52,7 +52,7 @@ METHOD = ("Temperature to 86 km is the US Standard Atmosphere of 1976: "
           "The share of the air above a height is its pressure over the "
           "sea-level pressure. The speed of sound is the square root of "
           "gamma R T; the boiling point is the temperature at which the "
-          "vapour pressure of water, from the Antoine equation, equals the "
+          "vapor pressure of water, from the Antoine equation, equals the "
           "air pressure. The column is drawn linear to 120 km and "
           "compressed fivefold above.")
 
@@ -189,7 +189,7 @@ function showZ(zk){ const s=std(zk), L=layerOf(zk); const m=MARKS.find(x=>Math.a
     ['density',dens(s.rho)],['speed of sound',zk<=86?Math.round(sound(s.T))+' m/s':''],['water boils at',tb>-40&&zk<=86?Math.round(tb)+' \\u00b0C':'']], m?m.b:L.t, m?m.s:'US Standard Atmosphere 1976'); }
 function showLayer(k){ const L=LAYERS.find(x=>x.k===k); const a=std(L.a), b=std(Math.min(L.b,ZTOP)-0.001);
   card('A layer', L.n, [['from',km(L.a)+' to '+km(L.b)],['temperature',Math.round(a.T-273.15)+' to '+Math.round(b.T-273.15)+' \\u00b0C'],['holds',((a.p-b.p)/P0*100).toFixed(a.p-b.p>P0*0.01?1:3)+'% of the air']], L.t, 'US Standard Atmosphere 1976'); }
-function showGas(g){ card('In dry air', esc(g.n)+', '+g.f, [['by volume', g.x>=0.001?(g.x*100).toFixed(g.x>0.1?1:2)+'%':(g.x*1e6).toLocaleString('en-US',{maximumFractionDigits:2})+' parts per million'],['in a breath of half a litre', g.x>=1e-3?(g.x*0.5*1000).toFixed(0)+' ml':(g.x*0.5*1e6).toFixed(g.x>1e-5?0:1)+' \\u00b5l']], g.b, 'Picard et al. 2008; NOAA GML'); }
+function showGas(g){ card('In dry air', esc(g.n)+', '+g.f, [['by volume', g.x>=0.001?(g.x*100).toFixed(g.x>0.1?1:2)+'%':(g.x*1e6).toLocaleString('en-US',{maximumFractionDigits:2})+' parts per million'],['in a breath of half a liter', g.x>=1e-3?(g.x*0.5*1000).toFixed(0)+' ml':(g.x*0.5*1e6).toFixed(g.x>1e-5?0:1)+' \\u00b5l']], g.b, 'Picard et al. 2008; NOAA GML'); }
 
 /* ---- up ---- */
 const P={x:70,y:30,w:250,h:600}, ZB=120;                   // the column: linear to 120 km, then compressed
@@ -243,10 +243,10 @@ function made(){
   let lane=0, lastX=-1e9;
   GASES.forEach((g,i)=>{ const xx=LX(g.x*1e6); if(xx-lastX<70) lane=(lane+1)%3; else lane=0; lastX=xx; const yy=y1-30-lane*22;
     s+='<g data-g="'+i+'" style="cursor:pointer"><line x1="'+xx.toFixed(1)+'" y1="'+y1+'" x2="'+xx.toFixed(1)+'" y2="'+(yy+4)+'" stroke="'+(hot==='g'+i?'#ffb02e':'#3d444d')+'"/><circle cx="'+xx.toFixed(1)+'" cy="'+y1+'" r="4" fill="'+(i<3?colors[i]:'#ffb02e')+'"/><text x="'+xx.toFixed(1)+'" y="'+yy+'" text-anchor="middle" font-size="10.5" fill="'+(hot==='g'+i?'#ffb02e':'#e6e6e6')+'">'+esc(g.n)+'</text></g>'; });
-  const wx=LX(WATER.x*1e6); s+='<g data-g="w" style="cursor:pointer"><line x1="'+wx.toFixed(1)+'" y1="'+y1+'" x2="'+wx.toFixed(1)+'" y2="'+(y1+40)+'" stroke="#6ee7f2" stroke-dasharray="3 3"/><circle cx="'+wx.toFixed(1)+'" cy="'+y1+'" r="4" fill="#6ee7f2"/><text x="'+wx.toFixed(1)+'" y="'+(y1+54)+'" text-anchor="middle" font-size="10.5" fill="#6ee7f2">water vapour, on average</text><text x="'+wx.toFixed(1)+'" y="'+(y1+66)+'" text-anchor="middle" font-size="9.5" fill="#6b7280">not part of dry air; from nothing to 4%</text></g>';
+  const wx=LX(WATER.x*1e6); s+='<g data-g="w" style="cursor:pointer"><line x1="'+wx.toFixed(1)+'" y1="'+y1+'" x2="'+wx.toFixed(1)+'" y2="'+(y1+40)+'" stroke="#6ee7f2" stroke-dasharray="3 3"/><circle cx="'+wx.toFixed(1)+'" cy="'+y1+'" r="4" fill="#6ee7f2"/><text x="'+wx.toFixed(1)+'" y="'+(y1+54)+'" text-anchor="middle" font-size="10.5" fill="#6ee7f2">water vapor, on average</text><text x="'+wx.toFixed(1)+'" y="'+(y1+66)+'" text-anchor="middle" font-size="9.5" fill="#6b7280">not part of dry air; from nothing to 4%</text></g>';
   // the column of air
   const y2=390; s+='<text x="'+x0+'" y="'+y2+'" font-size="12" fill="#9a9a9a">the whole column</text>';
-  const rows=[['mass of the air',(COLUMN.mass/1e18).toFixed(2)+' \\u00d7 10\\u00b9\\u2078 kg'],['over each square metre',(P0/G0/1000).toFixed(1)+' tonnes'],['water in it',(COLUMN.water/1e15).toFixed(0)+' \\u00d7 10\\u00b9\\u2075 kg, '+(COLUMN.water/COLUMN.mass*100).toFixed(2)+'%'],['half of it below',halfHeight().toFixed(1)+' km'],['ninety percent below',heightAt(0.1).toFixed(0)+' km'],['ninety-nine percent below',heightAt(0.01).toFixed(0)+' km']];
+  const rows=[['mass of the air',(COLUMN.mass/1e18).toFixed(2)+' \\u00d7 10\\u00b9\\u2078 kg'],['over each square meter',(P0/G0/1000).toFixed(1)+' metric tons'],['water in it',(COLUMN.water/1e15).toFixed(0)+' \\u00d7 10\\u00b9\\u2075 kg, '+(COLUMN.water/COLUMN.mass*100).toFixed(2)+'%'],['half of it below',halfHeight().toFixed(1)+' km'],['ninety percent below',heightAt(0.1).toFixed(0)+' km'],['ninety-nine percent below',heightAt(0.01).toFixed(0)+' km']];
   rows.forEach(([k,v],i)=>{ s+='<text x="'+x0+'" y="'+(y2+24+i*20)+'" font-size="12" fill="#9a9a9a">'+k+'</text><text x="'+(x0+240)+'" y="'+(y2+24+i*20)+'" font-size="12" fill="#e6e6e6">'+v+'</text>'; });
   return {svg:s, h:y2+24+rows.length*20+10};
 }

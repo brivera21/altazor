@@ -2,7 +2,7 @@
 """Generate scifi-hundred.html, the hundred most cited science fiction novels.
 
 A ranked bar chart: each novel's bar is the share of the source lists it
-was eligible for that named it, coloured by the language it was written
+was eligible for that named it, colored by the language it was written
 in. Hugo and Nebula wins come from the site's own award data, so the page
 carries a second, independent signal beside the citation count. Hovering
 a bar fills the card with the book's cover, from Open Library.
@@ -72,7 +72,7 @@ NOTE1 = ("Rank is the share of the source lists a novel was eligible for "
          "appear on a poll taken in 1988, so its denominator is smaller "
          "and the share, not the raw count, does the ranking.")
 
-NOTE2 = ("Colour is the language the novel was written in, and ninety-five "
+NOTE2 = ("Color is the language the novel was written in, and ninety-five "
          "of the hundred were written in English. The sources are "
          "Anglophone, so the list measures what that world has kept "
          "reading rather than what the world wrote. Amber and violet pips "

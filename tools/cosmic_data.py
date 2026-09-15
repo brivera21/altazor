@@ -7,7 +7,7 @@ says so and gives the firmer, later date beside it.
 
 # t: years before now
 # u: the uncertainty to draw, in years, or None
-# k: kind, for colour: cosmos, galaxy, star, world, life, mind, us
+# k: kind, for color: cosmos, galaxy, star, world, life, mind, us
 EVENTS = [
     dict(n="The Big Bang", t=13.8e9, u=None, k="cos",
          b="The expansion begins. Every later date on this line is measured "
@@ -45,7 +45,7 @@ EVENTS = [
          b="A cloud collapses and the Sun lights. The planets take shape in "
            "the disk left spinning around it.",
          r="The oldest inclusions in meteorites, rich in calcium and "
-           "aluminium, are 4,568.2 million years old, and that is one "
+           "aluminum, are 4,568.2 million years old, and that is one "
            "definition of the age of the solar system.",
          s="Formation and evolution of the Solar System",
          u2="https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System"),

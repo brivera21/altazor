@@ -6,7 +6,7 @@ Three views. The origins: the world map with the dozen places where
 plants and animals were domesticated, each answering under the pointer
 with its crops, its animals and its date, and a line of time beneath
 running from twelve thousand years ago to now. The harvest: the world's
-largest crops as bars, tonnes a year, with who grows them and what for.
+largest crops as bars, metric tons a year, with who grows them and what for.
 The land and the animals: what farming takes of the habitable land, what
 share of it feeds livestock and what the livestock give back, and the
 mass of the farm animals against the mass of every wild mammal and bird.
@@ -21,7 +21,7 @@ import json
 from pathlib import Path
 
 import apa
-from agriculture_data import CENTRES, CROPS, LAND, BIOMASS, REFS
+from agriculture_data import CENTERS, CROPS, LAND, BIOMASS, REFS
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "agriculture.html"
@@ -47,7 +47,7 @@ METHOD = ("The dates of domestication are round figures from the "
           "archaeological and genetic literature and move with every dig; "
           "each is the usual estimate for when a crop or animal was clearly "
           "domesticated, not when it was first gathered or tamed, which is "
-          "earlier. The Ethiopian centre has no agreed date. The harvests "
+          "earlier. The Ethiopian center has no agreed date. The harvests "
           "are FAO figures as reported per crop, each with its own year, "
           "so the bars are not all from the same season; palm oil is the "
           "oil, not the fruit. The land figures are Ritchie and Roser's "
@@ -61,7 +61,7 @@ def _js(o):
     return json.dumps(o, separators=(",", ":"), ensure_ascii=False)
 
 
-centres = [{"k": k, "n": n, "lon": lon, "lat": lat, "ya": ya, "plants": pl, "animals": an, "b": b} for k, n, lon, lat, ya, pl, an, b in CENTRES]
+centers = [{"k": k, "n": n, "lon": lon, "lat": lat, "ya": ya, "plants": pl, "animals": an, "b": b} for k, n, lon, lat, ya, pl, an, b in CENTERS]
 crops = [{"k": k, "n": n, "mt": mt, "year": y, "top": top, "use": use, "s": s} for k, n, mt, y, top, use, s in CROPS]
 biomass = [{"k": k, "n": n, "gtc": g, "b": b} for k, n, g, b in BIOMASS]
 
@@ -140,7 +140,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <div class="refs">__REFS__</div>
 </div>
 <script>
-const CENTRES=__CENTRES__, CROPS=__CROPS__, LAND=__LAND__, BIOMASS=__BIOMASS__, LANDPNG=__LANDPNG__, LW=__LW__, LH=__LH__;
+const CENTERS=__CENTRES__, CROPS=__CROPS__, LAND=__LAND__, BIOMASS=__BIOMASS__, LANDPNG=__LANDPNG__, LW=__LW__, LH=__LH__;
 const W=980;
 const el=document.getElementById('diagram');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
@@ -156,12 +156,12 @@ function card(kind,name,rows,body,src){
   document.getElementById('srcTxt').textContent=src;
 }
 const ago=ya=>ya==null?'no agreed date':'about '+fmt(ya)+' years ago';
-function showCentre(k){ const c=CENTRES.find(x=>x.k===k); card('A centre of domestication', esc(c.n), [['when',ago(c.ya)],['plants',c.plants==='none'?'':c.plants],['animals',c.animals==='none'?'':c.animals]], c.b, 'Larson et al. 2014; Wikipedia, Neolithic Revolution'); }
-function showOrigins(){ const dated=CENTRES.filter(c=>c.ya!=null); card('The origins','Farming, invented many times',[['places drawn',CENTRES.length],['the oldest',dated.sort((a,b)=>b.ya-a.ya)[0].n+', '+ago(Math.max(...dated.map(c=>c.ya)))],['the span','from the end of the ice age to about 4,000 years ago']],'Each dot is a place where people turned wild plants or animals into crops or livestock without learning it from anyone else; the colour runs from the oldest, in orange, to the latest, in blue. Each answers under the pointer, and so does its mark on the line of time.','Larson et al. 2014; Wikipedia, Neolithic Revolution'); }
-function showCrop(k){ const c=CROPS.find(x=>x.k===k); const tot=CROPS.reduce((a,x)=>a+x.mt,0); card('A crop, '+c.year, esc(c.n), [['the harvest',fmt(c.mt)+' million tonnes'],['the largest grower',c.top],['what for',c.use],['a share',fmt(c.mt/8.1,0)+' kg for every person on Earth']], 'One year\\u2019s world harvest of this crop, as the FAO counts it, fresh weight; the tonnage says nothing about calories, which is why sugarcane, mostly water, tops the list and wheat, dry grain, feeds more people.', c.s+'; FAOSTAT'); }
-function showHarvest(){ const tot=CROPS.reduce((a,x)=>a+x.mt,0); const grasses=CROPS.filter(c=>['sugarcane','maize','rice','wheat','barley'].includes(c.k)).reduce((a,x)=>a+x.mt,0); card('The harvest','Twelve crops, one year each',[['together','about '+fmt(tot/1000,1)+' billion tonnes'],['the grasses','sugarcane, maize, rice, wheat and barley: '+fmt(grasses/tot*100,0)+'% of it'],['the three staples','rice, wheat and maize, which between them supply most of the calories people eat']],'Each bar is one crop\\u2019s world harvest in the latest year reported for it; each answers under the pointer.','FAOSTAT; Wikipedia, per crop'); }
-function showLand(){ card('The land','Nearly half the habitable Earth',[['farmland',fmt(LAND.agri_km2/1e6)+' million km\\u00b2, '+LAND.agri_share_habitable+'% of the habitable land'],['for livestock',LAND.livestock_pct+'% of it, pasture and feed crops together'],['for crops people eat',LAND.crops_people_pct+'%'],['for fibre and fuel',LAND.crops_other_pct+'%'],['what the animals give back',LAND.animal_calories_pct+'% of the world\\u2019s calories and '+LAND.animal_protein_pct+'% of its protein']],'Habitable land is the land that is not ice, desert or bare rock, about a fifth of the planet\\u2019s surface; farming has nearly half of it, and most of that is for the animals, which return a sixth of the food.','Ritchie & Roser 2024; Poore & Nemecek 2018'); }
-function showBio(k){ const b=BIOMASS.find(x=>x.k===k); const ref=k==='wildbirds'||k==='poultry'?BIOMASS.find(x=>x.k==='wildbirds'):BIOMASS.find(x=>x.k==='wildmammals'); card('Biomass', esc(b.n), [['carbon',b.gtc+' gigatonnes'],['against the wild',k==='wildmammals'||k==='wildbirds'?'this is the wild':fmt(b.gtc/ref.gtc,1)+' times all '+ref.n]], b.b+'. Carbon is about a sixth of a living animal\\u2019s wet weight, so the livestock come to some 600 million tonnes of animal, and the wild mammals of the whole planet, whales included, to about 40.', 'Bar-On, Phillips & Milo 2018'); }
+function showCentre(k){ const c=CENTERS.find(x=>x.k===k); card('A center of domestication', esc(c.n), [['when',ago(c.ya)],['plants',c.plants==='none'?'':c.plants],['animals',c.animals==='none'?'':c.animals]], c.b, 'Larson et al. 2014; Wikipedia, Neolithic Revolution'); }
+function showOrigins(){ const dated=CENTERS.filter(c=>c.ya!=null); card('The origins','Farming, invented many times',[['places drawn',CENTERS.length],['the oldest',dated.sort((a,b)=>b.ya-a.ya)[0].n+', '+ago(Math.max(...dated.map(c=>c.ya)))],['the span','from the end of the ice age to about 4,000 years ago']],'Each dot is a place where people turned wild plants or animals into crops or livestock without learning it from anyone else; the color runs from the oldest, in orange, to the latest, in blue. Each answers under the pointer, and so does its mark on the line of time.','Larson et al. 2014; Wikipedia, Neolithic Revolution'); }
+function showCrop(k){ const c=CROPS.find(x=>x.k===k); const tot=CROPS.reduce((a,x)=>a+x.mt,0); card('A crop, '+c.year, esc(c.n), [['the harvest',fmt(c.mt)+' million metric tons'],['the largest grower',c.top],['what for',c.use],['a share',fmt(c.mt/8.1,0)+' kg for every person on Earth']], 'One year\\u2019s world harvest of this crop, as the FAO counts it, fresh weight; the tonnage says nothing about calories, which is why sugarcane, mostly water, tops the list and wheat, dry grain, feeds more people.', c.s+'; FAOSTAT'); }
+function showHarvest(){ const tot=CROPS.reduce((a,x)=>a+x.mt,0); const grasses=CROPS.filter(c=>['sugarcane','maize','rice','wheat','barley'].includes(c.k)).reduce((a,x)=>a+x.mt,0); card('The harvest','Twelve crops, one year each',[['together','about '+fmt(tot/1000,1)+' billion metric tons'],['the grasses','sugarcane, maize, rice, wheat and barley: '+fmt(grasses/tot*100,0)+'% of it'],['the three staples','rice, wheat and maize, which between them supply most of the calories people eat']],'Each bar is one crop\\u2019s world harvest in the latest year reported for it; each answers under the pointer.','FAOSTAT; Wikipedia, per crop'); }
+function showLand(){ card('The land','Nearly half the habitable Earth',[['farmland',fmt(LAND.agri_km2/1e6)+' million km\\u00b2, '+LAND.agri_share_habitable+'% of the habitable land'],['for livestock',LAND.livestock_pct+'% of it, pasture and feed crops together'],['for crops people eat',LAND.crops_people_pct+'%'],['for fiber and fuel',LAND.crops_other_pct+'%'],['what the animals give back',LAND.animal_calories_pct+'% of the world\\u2019s calories and '+LAND.animal_protein_pct+'% of its protein']],'Habitable land is the land that is not ice, desert or bare rock, about a fifth of the planet\\u2019s surface; farming has nearly half of it, and most of that is for the animals, which return a sixth of the food.','Ritchie & Roser 2024; Poore & Nemecek 2018'); }
+function showBio(k){ const b=BIOMASS.find(x=>x.k===k); const ref=k==='wildbirds'||k==='poultry'?BIOMASS.find(x=>x.k==='wildbirds'):BIOMASS.find(x=>x.k==='wildmammals'); card('Biomass', esc(b.n), [['carbon',b.gtc+' gigatonnes'],['against the wild',k==='wildmammals'||k==='wildbirds'?'this is the wild':fmt(b.gtc/ref.gtc,1)+' times all '+ref.n]], b.b+'. Carbon is about a sixth of a living animal\\u2019s wet weight, so the livestock come to some 600 million metric tons of animal, and the wild mammals of the whole planet, whales included, to about 40.', 'Bar-On, Phillips & Milo 2018'); }
 function showAnimals(){ card('The animals','The farm outweighs the wild',[['livestock','0.1 gigatonnes of carbon, '+fmt(0.1/0.007,0)+' times every wild mammal'],['humans','0.06, nine times the wild mammals by ourselves'],['poultry','0.005, two and a half times every wild bird']],'The mass of the mammals and birds on Earth, as carbon, on a log scale: the farm animals, the people, and the wild that is left. Each bar answers under the pointer.','Bar-On, Phillips & Milo 2018'); }
 
 /* ---- the origins ---- */
@@ -174,23 +174,23 @@ function originsView(){ const cv=document.createElement('canvas'); cv.width=W; c
   ctx.strokeStyle='rgba(230,230,230,0.15)'; ctx.lineWidth=1; for(let l=-150;l<=150;l+=30){ ctx.beginPath(); ctx.moveTo(MX(l),0); ctx.lineTo(MX(l),MAPH); ctx.stroke(); } for(let p=-60;p<=60;p+=30){ ctx.beginPath(); ctx.moveTo(0,MY(p)); ctx.lineTo(W,MY(p)); ctx.stroke(); }
   ctx.font='11px sans-serif'; const halo=(t,x,y)=>{ ctx.save(); ctx.lineJoin='round'; ctx.strokeStyle='#121212'; ctx.lineWidth=3.5; ctx.strokeText(t,x,y); ctx.restore(); ctx.fillText(t,x,y); };
   const OFF={crescent:[10,-10],yangtze:[10,14],yellow:[10,-8],newguinea:[-10,14],mesoamerica:[-10,-10],andes:[-10,4],amazonia:[10,14],sahel:[10,-8],ethiopia:[10,14],westafrica:[-10,16],eastern:[-10,-10],steppe:[10,-8]};
-  for(const c of CENTRES){ const x=MX(c.lon), y=MY(c.lat), on=hot===c.k; ctx.fillStyle=ageCol(c.ya); ctx.beginPath(); ctx.arc(x,y,on?9:7,0,7); ctx.fill(); ctx.strokeStyle=on?'#ffffff':'#121212'; ctx.lineWidth=1.5; ctx.stroke(); const [dx,dy]=OFF[c.k]||[10,-8]; ctx.textAlign=dx<0?'right':'left'; ctx.fillStyle=on?'#ffffff':'#e6e6e6'; halo(c.n.replace(/^the /,''),x+dx,y+dy); }
+  for(const c of CENTERS){ const x=MX(c.lon), y=MY(c.lat), on=hot===c.k; ctx.fillStyle=ageCol(c.ya); ctx.beginPath(); ctx.arc(x,y,on?9:7,0,7); ctx.fill(); ctx.strokeStyle=on?'#ffffff':'#121212'; ctx.lineWidth=1.5; ctx.stroke(); const [dx,dy]=OFF[c.k]||[10,-8]; ctx.textAlign=dx<0?'right':'left'; ctx.fillStyle=on?'#ffffff':'#e6e6e6'; halo(c.n.replace(/^the /,''),x+dx,y+dy); }
   // the line of time
   ctx.strokeStyle='#8a94a6'; ctx.beginPath(); ctx.moveTo(TL.x,TL.y); ctx.lineTo(TL.x+TL.w,TL.y); ctx.stroke(); ctx.fillStyle='#9a9a9a'; ctx.textAlign='center';
   for(const ya of [12000,10000,8000,6000,4000,2000,0]){ ctx.beginPath(); ctx.moveTo(TX(ya),TL.y); ctx.lineTo(TX(ya),TL.y+6); ctx.stroke(); ctx.fillText(ya?fmt(ya)+' years ago':'now',TX(ya),TL.y+20); }
-  for(const c of CENTRES){ if(c.ya==null) continue; const [x,y]=tlPos(c), on=hot===c.k; ctx.fillStyle=ageCol(c.ya); ctx.beginPath(); ctx.arc(x,y,on?7:5,0,7); ctx.fill(); ctx.strokeStyle=on?'#ffffff':'#121212'; ctx.lineWidth=1.5; ctx.stroke(); }
+  for(const c of CENTERS){ if(c.ya==null) continue; const [x,y]=tlPos(c), on=hot===c.k; ctx.fillStyle=ageCol(c.ya); ctx.beginPath(); ctx.arc(x,y,on?7:5,0,7); ctx.fill(); ctx.strokeStyle=on?'#ffffff':'#121212'; ctx.lineWidth=1.5; ctx.stroke(); }
   ctx.fillStyle='#9a9a9a'; ctx.textAlign='left'; ctx.fillText('the same places on a line of time, from the end of the ice age; the ice age ended about 11,700 years ago',TL.x,TL.y+40);
   return cv; }
 // dots that share a date stack upward on the line of time
-function tlPos(c){ const same=CENTRES.filter(x=>x.ya!=null&&Math.abs(x.ya-c.ya)<150); const i=same.findIndex(x=>x.k===c.k); return [TX(c.ya), TL.y-12-i*13]; }
-function originHit(x,y){ for(const c of CENTRES){ if(Math.hypot(x-MX(c.lon),y-MY(c.lat))<=12) return c.k; } for(const c of CENTRES){ if(c.ya==null) continue; const [tx,ty]=tlPos(c); if(Math.hypot(x-tx,y-ty)<=8) return c.k; } return null; }
+function tlPos(c){ const same=CENTERS.filter(x=>x.ya!=null&&Math.abs(x.ya-c.ya)<150); const i=same.findIndex(x=>x.k===c.k); return [TX(c.ya), TL.y-12-i*13]; }
+function originHit(x,y){ for(const c of CENTERS){ if(Math.hypot(x-MX(c.lon),y-MY(c.lat))<=12) return c.k; } for(const c of CENTERS){ if(c.ya==null) continue; const [tx,ty]=tlPos(c); if(Math.hypot(x-tx,y-ty)<=8) return c.k; } return null; }
 
 /* ---- the harvest ---- */
 const HB={x:190,y:30,w:700,bar:30};
 const HX=mt=>HB.x+mt/2000*HB.w;
 function harvestView(){ const rows=[...CROPS].sort((a,b)=>b.mt-a.mt); let s=''; const h=HB.y+rows.length*HB.bar+60;
   for(const v of [0,500,1000,1500,2000]){ s+='<line x1="'+HX(v).toFixed(1)+'" y1="'+HB.y+'" x2="'+HX(v).toFixed(1)+'" y2="'+(HB.y+rows.length*HB.bar)+'" stroke="#2b2b2b"/><text x="'+HX(v).toFixed(1)+'" y="'+(HB.y+rows.length*HB.bar+18)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">'+fmt(v)+'</text>'; }
-  s+='<text x="'+(HB.x+HB.w/2)+'" y="'+(HB.y+rows.length*HB.bar+40)+'" text-anchor="middle" font-size="11" fill="#9a9a9a">million tonnes in one year</text>';
+  s+='<text x="'+(HB.x+HB.w/2)+'" y="'+(HB.y+rows.length*HB.bar+40)+'" text-anchor="middle" font-size="11" fill="#9a9a9a">million metric tons in one year</text>';
   rows.forEach((c,i)=>{ const y=HB.y+i*HB.bar, on=hot===c.k; const col=['sugarcane','maize','rice','wheat','barley'].includes(c.k)?'#ffb02e':['potato','cassava','sugarbeet'].includes(c.k)?'#c9a6ff':c.k==='palmoil'||c.k==='soy'?'#9be564':'#f28cb0';
     s+='<g data-crop="'+c.k+'" style="cursor:pointer"><rect x="'+HB.x+'" y="'+(y+5)+'" width="'+(HX(c.mt)-HB.x).toFixed(1)+'" height="'+(HB.bar-10)+'" rx="3" fill="'+col+'" opacity="'+(on?1:0.8)+'"/><text x="'+(HB.x-8)+'" y="'+(y+HB.bar/2+4)+'" text-anchor="end" font-size="11.5" fill="'+(on?'#ffffff':'#c8c8c8')+'">'+esc(c.n)+'</text><text x="'+(HX(c.mt)+6).toFixed(1)+'" y="'+(y+HB.bar/2+4)+'" font-size="10.5" fill="#9a9a9a">'+fmt(c.mt)+', '+c.year+'</text></g>'; });
   s+='<text x="'+HB.x+'" y="'+(HB.y-10)+'" font-size="11" fill="#9a9a9a">orange: grasses; violet: roots; green: oil and protein crops; pink: fruit and vegetables</text>';
@@ -203,9 +203,9 @@ function landView(){ let s=''; const x0=80, w=820;
   s+='<g data-land="all" style="cursor:pointer"><rect x="'+x0+'" y="'+y1+'" width="'+w+'" height="'+hb+'" rx="6" fill="#2a3444"/><rect x="'+x0+'" y="'+y1+'" width="'+(w*agri).toFixed(1)+'" height="'+hb+'" rx="6" fill="#8a6a3a"/>';
   s+='<text x="'+(x0+w*agri/2).toFixed(1)+'" y="'+(y1+hb/2+4)+'" text-anchor="middle" font-size="11.5" fill="#ffffff">farmland, '+LAND.agri_share_habitable+'%: '+fmt(LAND.agri_km2/1e6)+' million km\\u00b2</text><text x="'+(x0+w*agri+(w-w*agri)/2).toFixed(1)+'" y="'+(y1+hb/2+4)+'" text-anchor="middle" font-size="11.5" fill="#c8c8c8">forest, shrub, cities, rivers and lakes, '+(100-LAND.agri_share_habitable)+'%</text></g>';
   const y2=110; s+='<text x="'+x0+'" y="'+(y2-10)+'" font-size="12" fill="#e6e6e6">the farmland</text>';
-  const parts=[['livestock','for livestock, pasture and feed crops',LAND.livestock_pct,'#a3583a'],['people','crops people eat',LAND.crops_people_pct,'#9be564'],['other','fibre and fuel',LAND.crops_other_pct,'#6ee7f2']]; let px=x0;
+  const parts=[['livestock','for livestock, pasture and feed crops',LAND.livestock_pct,'#a3583a'],['people','crops people eat',LAND.crops_people_pct,'#9be564'],['other','fiber and fuel',LAND.crops_other_pct,'#6ee7f2']]; let px=x0;
   for(const [k,n,pct,col] of parts){ const ww=w*pct/100; s+='<g data-land="'+k+'" style="cursor:pointer"><rect x="'+px.toFixed(1)+'" y="'+y2+'" width="'+ww.toFixed(1)+'" height="'+hb+'" fill="'+col+'" stroke="#121212"/>'+(ww>60?'<text x="'+(px+ww/2).toFixed(1)+'" y="'+(y2+hb/2+4)+'" text-anchor="middle" font-size="11.5" fill="#0b1a2b">'+esc(n)+', '+pct+'%</text>':'')+'</g>'; px+=ww; }
-  s+='<text x="'+(x0+w)+'" y="'+(y2+hb+16)+'" text-anchor="end" font-size="10.5" fill="#9a9a9a">the sliver at the right, 4%, is fibre and fuel</text>';
+  s+='<text x="'+(x0+w)+'" y="'+(y2+hb+16)+'" text-anchor="end" font-size="10.5" fill="#9a9a9a">the sliver at the right, 4%, is fiber and fuel</text>';
   const y3=200; s+='<text x="'+x0+'" y="'+(y3-10)+'" font-size="12" fill="#e6e6e6">what the animals give back</text>';
   for(const [i,[n,pct]] of [['of the calories people eat',LAND.animal_calories_pct],['of the protein',LAND.animal_protein_pct]].entries()){ const y=y3+i*34; s+='<g data-land="back" style="cursor:pointer"><rect x="'+x0+'" y="'+y+'" width="'+w+'" height="24" rx="4" fill="#2a3444"/><rect x="'+x0+'" y="'+y+'" width="'+(w*pct/100).toFixed(1)+'" height="24" rx="4" fill="#a3583a"/><text x="'+(x0+8)+'" y="'+(y+16)+'" font-size="11.5" fill="#ffffff">'+pct+'% '+n+'</text></g>'; }
   const y4=310; s+='<text x="'+x0+'" y="'+(y4-10)+'" font-size="12" fill="#e6e6e6">the mammals and the birds, by mass of carbon, on a log scale</text>';
@@ -215,7 +215,7 @@ function landView(){ let s=''; const x0=80, w=820;
   return {svg:s, h:y4+BIOMASS.length*30+40}; }
 function showLandPart(k){ if(k==='livestock') card('The farmland','For livestock',[['share',LAND.livestock_pct+'% of all farmland'],['what it is','pasture and rangeland, plus the cropland whose harvest is fed to animals, soybeans and maize above all'],['it returns',LAND.animal_calories_pct+'% of calories and '+LAND.animal_protein_pct+'% of protein']],'Grazing land is most of it, much of it dry country that would grow no crop; but the feed crops alone take more land than all the vegetables, fruit, roots and pulses people eat.','Ritchie & Roser 2024; Poore & Nemecek 2018');
   else if(k==='people') card('The farmland','Crops people eat',[['share',LAND.crops_people_pct+'% of all farmland'],['it returns',(100-LAND.animal_calories_pct)+'% of calories and '+(100-LAND.animal_protein_pct)+'% of protein']],'A sixth of the farmland grows five sixths of the food, counted in calories: the grains, the roots, the pulses, the oils, the fruit and vegetables.','Ritchie & Roser 2024');
-  else if(k==='other') card('The farmland','Fibre and fuel',[['share',LAND.crops_other_pct+'% of all farmland']],'Cotton, rubber, tobacco, and the maize and sugarcane and oil palm grown for ethanol and biodiesel rather than for food.','Ritchie & Roser 2024');
+  else if(k==='other') card('The farmland','Fiber and fuel',[['share',LAND.crops_other_pct+'% of all farmland']],'Cotton, rubber, tobacco, and the maize and sugarcane and oil palm grown for ethanol and biodiesel rather than for food.','Ritchie & Roser 2024');
   else if(k==='back') card('What the animals give back','A sixth of the food',[['calories',LAND.animal_calories_pct+'% of the world\\u2019s, from meat, dairy, eggs and farmed fish'],['protein',LAND.animal_protein_pct+'%'],['on',LAND.livestock_pct+'% of the farmland']],'The gap between the land the animals take and the food they return is the largest single fact about the world\\u2019s farming; it is the difference between grass and grain, and between an animal and a plant.','Poore & Nemecek 2018; Ritchie & Roser 2024');
   else showLand(); }
 
@@ -234,7 +234,7 @@ decode(LANDPNG,LW,LH,a=>{ land=a; render(); home(); });
 render(); showOrigins();
 window.__agri=(q)=>{ const o={view,hot,land:!!land,card:document.getElementById('numTxt').innerText,name:document.getElementById('nameTxt').innerText,body:document.getElementById('bodyTxt').innerText,
   bars:document.querySelectorAll('#asvg g[data-crop]').length, bios:document.querySelectorAll('#asvg g[data-bio]').length};
-  if(q&&q.centre){ const c=CENTRES.find(x=>x.k===q.centre); o.px=[MX(c.lon),MY(c.lat)]; o.tx=c.ya==null?null:TX(c.ya); }
+  if(q&&q.center){ const c=CENTERS.find(x=>x.k===q.center); o.px=[MX(c.lon),MY(c.lat)]; o.tx=c.ya==null?null:TX(c.ya); }
   if(q&&q.crop){ const r=document.querySelector('#asvg g[data-crop="'+q.crop+'"] rect'); o.barw=r?+r.getAttribute('width'):null; o.expect=HX(CROPS.find(c=>c.k===q.crop).mt)-HB.x; }
   if(q&&q.px){ const c=document.getElementById('ocanvas'); if(c){ const d=c.getContext('2d').getImageData(q.px[0],q.px[1],1,1).data; o.pixel=[d[0],d[1],d[2]]; } }
   return o; };
@@ -244,9 +244,9 @@ window.__agri=(q)=>{ const o={view,hot,land:!!land,card:document.getElementById(
 """
 
 html = (HTML.replace("__APACSS__", apa.CSS)
-        .replace("__CENTRES__", _js(centres)).replace("__CROPS__", _js(crops)).replace("__LAND__", _js(LAND)).replace("__BIOMASS__", _js(biomass))
+        .replace("__CENTRES__", _js(centers)).replace("__CROPS__", _js(crops)).replace("__LAND__", _js(LAND)).replace("__BIOMASS__", _js(biomass))
         .replace("__LANDPNG__", _js(GEO["land"])).replace("__LW__", str(GEO["landW"])).replace("__LH__", str(GEO["landH"]))
         .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2).replace("__METHOD__", METHOD)
         .replace("__REFS__", apa.render(REFS)))
 OUT.write_text(html, encoding="utf-8")
-print(f"wrote {OUT} ({len(html):,} B): {len(CENTRES)} centres, {len(CROPS)} crops")
+print(f"wrote {OUT} ({len(html):,} B): {len(CENTERS)} centers, {len(CROPS)} crops")

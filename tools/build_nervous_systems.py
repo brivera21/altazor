@@ -7,7 +7,7 @@ drawn in, from a sponge with none, through a nerve net, a ladder, a
 ventral cord with ganglia, an octopus with its arm cords, to a vertebrate's
 dorsal cord and brain; each under the pointer explains itself. The counts:
 neurons against body mass on log-log axes for twenty-one animals from a
-roundworm to an elephant, coloured by group, with the line a person sits on
+roundworm to an elephant, colored by group, with the line a person sits on
 and the birds and primates above it.
 
 Data: tools/nervous_systems_data.py.
@@ -24,7 +24,7 @@ from nervous_systems_data import PLANS, ANIMALS, GROUPS, REFS
 OUT = Path(__file__).parent.parent / "nervous-systems.html"
 
 NOTE1 = ("A sponge has no neurons. A jellyfish has a net of them with no "
-         "centre. A flatworm gathers some at the front, next to its "
+         "center. A flatworm gathers some at the front, next to its "
          "eyespots, and that is the first head. Worms and insects run a "
          "cord along the belly with a knot in every segment; an octopus "
          "keeps most of its neurons in its arms; and the vertebrates put "
@@ -149,7 +149,7 @@ const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 let view='plans', hot=null, group=null;
 const NERVE='#ffb02e', BODY='#2a3542', OUTLINE='#6b7a8c';
 const big=n=>n>=1e9?(n/1e9).toLocaleString('en-US',{maximumFractionDigits:n>=1e10?0:1})+' billion':n>=1e6?(n/1e6).toLocaleString('en-US',{maximumFractionDigits:n>=1e7?0:1})+' million':n.toLocaleString('en-US');
-const mass=g=>g>=1e6?(g/1e6).toLocaleString('en-US',{maximumFractionDigits:1})+(g<1.5e6?' tonne':' tonnes'):g>=1000?(g/1000).toLocaleString('en-US',{maximumFractionDigits:g>=1e4?0:1})+' kg':g>=1?g.toLocaleString('en-US',{maximumFractionDigits:1})+' g':g>=1e-3?(g*1e3).toLocaleString('en-US',{maximumFractionDigits:1})+' mg':(g*1e6).toLocaleString('en-US',{maximumFractionDigits:1})+' \\u00b5g';
+const mass=g=>g>=1e6?(g/1e6).toLocaleString('en-US',{maximumFractionDigits:1})+(g<1.5e6?' metric ton':' metric tons'):g>=1000?(g/1000).toLocaleString('en-US',{maximumFractionDigits:g>=1e4?0:1})+' kg':g>=1?g.toLocaleString('en-US',{maximumFractionDigits:1})+' g':g>=1e-3?(g*1e3).toLocaleString('en-US',{maximumFractionDigits:1})+' mg':(g*1e6).toLocaleString('en-US',{maximumFractionDigits:1})+' \\u00b5g';
 
 /* ---- the card ---- */
 function card(kind,name,rows,body,src){
@@ -185,7 +185,7 @@ function plans(){
       for(const [tx,ty] of tent) for(let k=1;k<=3;k++) pts.push([cx+(tx>0?10:-10)+(tx-(tx>0?10:-10))*k/3.2+(k%2?2:-2)*0, cy-40+(ty+40)*k/3.2]);
       for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){ const d=Math.hypot(pts[i][0]-pts[j][0],pts[i][1]-pts[j][1]); if(d<24) s+='<line x1="'+pts[i][0].toFixed(1)+'" y1="'+pts[i][1].toFixed(1)+'" x2="'+pts[j][0].toFixed(1)+'" y2="'+pts[j][1].toFixed(1)+'" stroke="'+NERVE+'" stroke-width="1" opacity="0.8"/>'; }
       for(const q of pts) s+='<circle cx="'+q[0].toFixed(1)+'" cy="'+q[1].toFixed(1)+'" r="2.2" fill="'+NERVE+'"/>';
-      s+='<text x="'+cx+'" y="'+(cy+112)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">a mesh, no centre, no front</text>';
+      s+='<text x="'+cx+'" y="'+(cy+112)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">a mesh, no center, no front</text>';
     } else if(p.k==='ladder'){ // a flatworm from above
       s+='<path d="M'+(cx-24)+','+(cy-95)+' Q'+cx+','+(cy-120)+' '+(cx+24)+','+(cy-95)+' Q'+(cx+44)+','+(cy-20)+' '+(cx+30)+','+(cy+60)+' Q'+cx+','+(cy+110)+' '+(cx-30)+','+(cy+60)+' Q'+(cx-44)+','+(cy-20)+' '+(cx-24)+','+(cy-95)+' Z" fill="'+BODY+'" stroke="'+OUTLINE+'" stroke-width="1.5"/>';
       s+='<circle cx="'+(cx-10)+'" cy="'+(cy-88)+'" r="3.5" fill="#e6e6e6"/><circle cx="'+(cx+10)+'" cy="'+(cy-88)+'" r="3.5" fill="#e6e6e6"/>';

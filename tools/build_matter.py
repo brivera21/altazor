@@ -5,7 +5,7 @@ The 118 confirmed elements on the standard 18-column grid, colored by family.
 The element under the cursor fills a side card with a photograph of the real
 substance, the way the film timelines show posters. Element data comes from
 the Periodic-Table-JSON dataset (CC BY-SA 3.0), trimmed at build time to the
-fields the page uses; Cesium is respelled Caesium to match IUPAC. Photographs
+fields the page uses; Cesium is respelled Cesium to match IUPAC. Photographs
 are hotlinked at view time from Wikimedia Commons and images-of-elements.com
 with each picture's own attribution shown in the card; none are stored in the
 repo. Synthetic elements without a photograph say so.
@@ -26,7 +26,7 @@ assert len(els) == 118
 # IUPAC spelling: the dataset's one deviation
 for e in els:
     if e["name"] == "Cesium":
-        e["name"] = "Caesium"
+        e["name"] = "Cesium"
 
 FAMILIES = [
     ("alkali metal", "Alkali metals", "#ff5c4d"),
@@ -56,9 +56,9 @@ for e in els:
 NO_PHOTO = "transactinoid"  # the dataset's placeholder image for synthetics
 
 # The year each element was first isolated or identified, for the scale that
-# colours the table by when it was found. The dataset carries who found an
+# colors the table by when it was found. The dataset carries who found an
 # element but not when, so the years are written out here. Elements known
-# since antiquity carry no year and stay grey.
+# since antiquity carry no year and stay gray.
 YEAR = {
     15: 1669, 27: 1735, 78: 1735, 28: 1751, 25: 1774, 8: 1774, 17: 1774,
     42: 1778, 52: 1782, 74: 1783, 40: 1789, 92: 1789, 22: 1791, 39: 1794,
@@ -97,8 +97,8 @@ def entry(e):
         "ap": (e.get("appearance") or "").strip(),
         "x": e["xpos"], "y": e["ypos"],
         "img": url, "att": att, "sum": summ,
-        # the measured properties the colour scales run on. None where the
-        # value has never been measured, which the scales leave grey.
+        # the measured properties the color scales run on. None where the
+        # value has never been measured, which the scales leave gray.
         "melt": e.get("melt"), "boil": e.get("boil"),
         "den": e.get("density"),
         "en": e.get("electronegativity_pauling"),
@@ -218,8 +218,8 @@ h1 { margin:0 0 12px; font-size:26px; }
 <div class="legend" id="legend"></div>
 <div id="scale" hidden></div>
 <p class="note">The 118 confirmed elements. The buttons repaint the table by
-a measured property, and periodicity shows itself: density and ionisation
-energy rise and fall down the rows in step. The temperature scale colours
+a measured property, and periodicity shows itself: density and ionization
+energy rise and fall down the rows in step. The temperature scale colors
 each element by the state it is in at that temperature, so the table melts
 from the bottom up as it rises, and tungsten is the last to go. The element
 under the cursor shows a photograph of the real substance.</p>
@@ -256,7 +256,7 @@ const SCALES={
   en:  {k:'en', l:'Electronegativity', u:'', log:false,
         fmt:v=>v.toFixed(2)+' Pauling',
         none:'no accepted value; the noble gases mostly have none'},
-  ion: {k:'ion', l:'First ionisation', u:'kJ/mol', log:false,
+  ion: {k:'ion', l:'First ionization', u:'kJ/mol', log:false,
         fmt:v=>Math.round(v)+' kJ/mol', none:'never measured'},
   yr:  {k:'yr', l:'Year found', u:'', log:false,
         fmt:v=>String(v),
@@ -336,7 +336,7 @@ function paint(){
   if(pinned!==null) show(pinned);
 }
 
-// what the colours mean, rewritten for whichever scale is showing
+// what the colors mean, rewritten for whichever scale is showing
 function legendFor(){
   const box=document.getElementById('scale');
   if(mode==='family'){ box.hidden=true; return; }
@@ -416,7 +416,7 @@ grid.addEventListener('click',e=>{
 // the scale buttons
 const MODES=[['family','Family'],['state','State at a temperature'],
   ['melt','Melting point'],['boil','Boiling point'],['den','Density'],
-  ['en','Electronegativity'],['ion','First ionisation'],['yr','Year found']];
+  ['en','Electronegativity'],['ion','First ionization'],['yr','Year found']];
 const bar=document.getElementById('bar');
 bar.innerHTML=MODES.map(([m,l])=>
   `<button data-m="${m}">${l}</button>`).join('');

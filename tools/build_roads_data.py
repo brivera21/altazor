@@ -125,7 +125,7 @@ def main():
              DATA / f"{st}_roads.json")
 
     # the city boxes: no state outline, since a city's roads run into its
-    # neighbours and the view box is the whole subject
+    # neighbors and the view box is the whole subject
     pre = {"i": "I-", "us": "US ", "sr": "SR "}
     for key, st in CITY_STATE.items():
         p = CITY_DATA / f"{key}.json"

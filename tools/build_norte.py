@@ -19,7 +19,7 @@ own course carries it the rest of the way to the Gulf, which is where the
 boundary runs in any case.
 
 The river layer has no names in it. Only rivers whose identity can be checked
-against two independent anchors are labelled; see the notes on the page.
+against two independent anchors are labeled; see the notes on the page.
 
 Usage: python3 build_norte.py      (needs /home/claude/nmex/*.pkl)
 """
@@ -195,7 +195,7 @@ occ = alta_in.intersection(unary_union([states["Sonora"], states["Chihuahua"]]))
 ori = alta_in.intersection(unary_union([states["Coahuila"], states["Nuevo León"],
                                         states["Tamaulipas"]]))
 # Only ranges whose position can be checked against the rugged layer and the
-# state they sit in are labelled. The Sierra de Juárez sits just north of San
+# state they sit in are labeled. The Sierra de Juárez sits just north of San
 # Pedro Mártir, but the peninsula has no room for both names at this scale.
 RANGES = [("Sierra Madre Occidental", belt_center(occ), 13, 0),
           ("Sierra Madre Oriental", belt_center(ori), 13, 0),

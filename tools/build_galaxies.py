@@ -5,7 +5,7 @@ One stage, four views. Kinds is Hubble's tuning fork, every class drawn
 from its definition, with the Milky Way's place on it marked. Sizes sets a
 dozen galaxies beside ours on one scale, the Sun marked in the Milky Way.
 The Milky Way is the anatomy of our own, face-on and edge-on, its parts
-answering when touched. Neighbours is the Local Group seen from above the
+answering when touched. Neighbors is the Local Group seen from above the
 galactic pole, on a log radius so the satellites and Andromeda share the
 map. A part under the cursor fills the card.
 
@@ -18,7 +18,7 @@ import json
 from pathlib import Path
 
 import apa
-from galaxies_data import KINDS, SIZES, PARTS, NEIGHBOURS, SUN_R, REFS
+from galaxies_data import KINDS, SIZES, PARTS, NEIGHBORS, SUN_R, REFS
 
 OUT = Path(__file__).parent.parent / "galaxies.html"
 
@@ -31,7 +31,7 @@ NOTE1 = ("Four views of one stage. Kinds is Hubble's fork: ellipticals by "
 NOTE2 = ("Sizes sets other galaxies beside ours on one scale, with the Sun "
          "marked where it is, a little past halfway out. The Milky Way is "
          "our own galaxy drawn from the measurements, face-on and edge-on, "
-         "and each part answers when touched. Neighbours is the Local Group "
+         "and each part answers when touched. Neighbors is the Local Group "
          "from above the galactic pole, on a log radius, so the satellites "
          "within a hundred thousand parsecs and Andromeda at three quarters "
          "of a million share one map.")
@@ -46,7 +46,7 @@ METHOD = ("Every galaxy here is a drawing from its class and its measured "
           "McConnachie's 2012 compilation, plotted by galactic longitude with "
           "the radius on a log scale from 15 to 1,500 kiloparsecs. The Milky "
           "Way's parts follow Bland-Hawthorn and Gerhard's 2016 review, the "
-          "Sun's distance to the centre the GRAVITY measurement, the arms "
+          "Sun's distance to the center the GRAVITY measurement, the arms "
           "Reid and others' 2019 parallaxes. In the edge-on view the disc is "
           "drawn at its true thickness against its width, which is why it is "
           "a line.")
@@ -121,7 +121,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   <button data-v="kinds" class="on">Kinds</button>
   <button data-v="sizes">Sizes</button>
   <button data-v="ours">The Milky Way</button>
-  <button data-v="near">Neighbours</button>
+  <button data-v="near">Neighbors</button>
 </div>
 <div class="bar2" id="sub"></div>
 <div class="stage">
@@ -311,7 +311,7 @@ function drawSizes(defs){
     if(hot) s+='<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(p.R+8)+'" fill="none" stroke="#58a6ff" stroke-width="1.4"/>';
     s+=galaxy(defs,g.c,p.x,p.y,Math.max(p.R,3),{incl:g.k==='m104'?1.25:0.25,tilt:g.tilt||0,phase:0.4,barAngle:-30,seed:5+g.k.length});
     if(g.k==='mw'){
-      // the Sun, at its measured radius from the centre, a little below the plane on this map
+      // the Sun, at its measured radius from the center, a little below the plane on this map
       const sx=p.x, sy=p.y+SUN_R*k*Math.cos(0.25);
       s+='<circle cx="'+sx.toFixed(1)+'" cy="'+sy.toFixed(1)+'" r="3" fill="#ffb02e" stroke="#121212" stroke-width="1"/>';
       s+='<text x="'+(sx+9)+'" y="'+(sy+12)+'" font-size="10.5" fill="#ffb02e">the Sun</text>';
@@ -337,7 +337,7 @@ function drawOurs(defs){
   const cx=W/2, cy=H/2-10;
   let s='';
   if(side==='face'){
-    // the disc, then the bar and arms, the Sun at its radius straight below the centre
+    // the disc, then the bar and arms, the Sun at its radius straight below the center
     s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+(15*K)+'" fill="'+grad(defs,'#dfe8ff','#3b4c80',50)+'" fill-opacity="0.55" data-k="thin"/>';
     s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+(15*K)+'" fill="none" stroke="#3d444d" stroke-dasharray="4 4"/>';
     // arms: r = r0 e^(k th), with the four crossing the Sun's line at their measured radii
@@ -387,7 +387,7 @@ function drawOurs(defs){
     // scale and orientation
     s+='<line x1="30" y1="'+(H-28)+'" x2="'+(30+5*K)+'" y2="'+(H-28)+'" stroke="#9a9a9a" stroke-width="2"/>';
     s+='<text x="30" y="'+(H-36)+'" font-size="11" fill="#9a9a9a">5 kpc, 16,300 light years</text>';
-    s+='<text x="'+(W-20)+'" y="'+(H-32)+'" text-anchor="end" font-size="11" fill="#6b7280">seen from the north galactic pole, the centre above the Sun; the disc turns clockwise</text>';
+    s+='<text x="'+(W-20)+'" y="'+(H-32)+'" text-anchor="end" font-size="11" fill="#6b7280">seen from the north galactic pole, the center above the Sun; the disc turns clockwise</text>';
   } else {
     // edge-on: everything at its true proportion, which makes the disc a line
     const thin=PARTS.find(p=>p.k==='thin'), thick=PARTS.find(p=>p.k==='thick');
@@ -430,7 +430,7 @@ function showPart(k){
   card('A part of the Milky Way',p.n,p.nums,p.b,p.s);
 }
 
-/* ---- view: Neighbours ---- */
+/* ---- view: Neighbors ---- */
 const LOG0=Math.log10(15), LOG1=Math.log10(1500);
 function drawNear(defs){
   const cx=W/2, cy=H/2-6, Rmax=300;
@@ -440,9 +440,9 @@ function drawNear(defs){
     s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R(d).toFixed(1)+'" fill="none" stroke="#2b2b2b"/>';
     s+='<text x="'+(cx+4)+'" y="'+(cy-R(d)-4).toFixed(1)+'" font-size="10.5" fill="#6b7280">'+d.toLocaleString('en-US')+' kpc</text>';
   }
-  // the Milky Way at the centre, and the direction of its centre marked
+  // the Milky Way at the center, and the direction of its center marked
   s+='<line x1="'+cx+'" y1="'+cy+'" x2="'+cx+'" y2="'+(cy-Rmax-14)+'" stroke="#3d444d" stroke-dasharray="3 4"/>';
-  s+='<text x="'+cx+'" y="'+(cy-Rmax-20)+'" text-anchor="middle" font-size="10.5" fill="#6b7280">toward the galactic centre, l = 0</text>';
+  s+='<text x="'+cx+'" y="'+(cy-Rmax-20)+'" text-anchor="middle" font-size="10.5" fill="#6b7280">toward the galactic center, l = 0</text>';
   s+='<text x="'+(cx-Rmax-10)+'" y="'+(cy+4)+'" text-anchor="end" font-size="10.5" fill="#6b7280">l = 90</text>';
   const COL={spiral:'#58a6ff',irregular:'#9be564',spheroidal:'#e0a458',elliptical:'#f28cb0'};
   const hotMW=sel==='mw';
@@ -452,7 +452,7 @@ function drawNear(defs){
     const l=g.l*Math.PI/180, b=g.lat*Math.PI/180;
     const dproj=Math.max(15.5,g.d*Math.cos(b));            // its distance in the plane
     const r=R(dproj);
-    // from the north pole, with the centre up, longitude runs to the left
+    // from the north pole, with the center up, longitude runs to the left
     return {g, x:cx-r*Math.sin(l), y:cy-r*Math.cos(l), rr:3+8*Math.log10(Math.max(g.size,0.5)/0.5)};
   });
   for(const p of pts){
@@ -525,11 +525,11 @@ window.__gal=()=>({view,side,sel,kinds:KINDS.length,sizes:SIZES.length,parts:PAR
 
 html = (HTML.replace("__APACSS__", apa.CSS)
         .replace("__KINDS__", _js(KINDS)).replace("__SIZES__", _js(SIZES))
-        .replace("__PARTS__", _js(PARTS)).replace("__NEAR__", _js(NEIGHBOURS))
+        .replace("__PARTS__", _js(PARTS)).replace("__NEAR__", _js(NEIGHBORS))
         .replace("__SUNR__", str(SUN_R))
         .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2)
         .replace("__METHOD__", METHOD)
         .replace("__REFS__", apa.render(REFS)))
 OUT.write_text(html, encoding="utf-8")
 print(f"wrote {OUT} ({len(html):,} B): {len(KINDS)} kinds, {len(SIZES)} galaxies to "
-      f"scale, {len(PARTS)} parts of the Milky Way, {len(NEIGHBOURS)} neighbours")
+      f"scale, {len(PARTS)} parts of the Milky Way, {len(NEIGHBORS)} neighbors")

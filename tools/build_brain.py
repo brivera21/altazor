@@ -32,8 +32,8 @@ NOTE1 = ("A kilogram and a half of tissue that is two percent of the body "
          "in one place: moving, feeling, speech, hearing, sight.")
 
 NOTE2 = ("Cut down the middle, the brain shows what the lobes hide: the "
-         "bridge of two hundred million fibres between the halves, the "
-         "thalamus at the centre through which nearly everything passes, "
+         "bridge of two hundred million fibers between the halves, the "
+         "thalamus at the center through which nearly everything passes, "
          "the small regulators of temperature, hunger and hormones beneath "
          "it, and the brainstem that keeps breathing going. The third view "
          "is the same organ over a lifetime: a quarter of its adult mass at "
@@ -164,9 +164,9 @@ function showWhole(){ card('The whole organ','A human brain, from the left',[
   ['energy','about '+WHOLE.energy_pct+'% of the body\\u2019s at rest, near '+WHOLE.watts+' watts'],
   ['neurons','86 billion, and about as many other cells'],
   ['where they are','16 billion in the cortex, 69 billion in the cerebellum, under 1 billion in all the rest'],
-  ['fibres','about '+fmt(WHOLE.fibres_km_m)+' km of insulated fibre in a man of twenty, '+fmt(WHOLE.fibres_km_f)+' in a woman'],
+  ['fibers','about '+fmt(WHOLE.fibres_km_m)+' km of insulated fiber in a man of twenty, '+fmt(WHOLE.fibres_km_f)+' in a woman'],
   ['blood','about '+fmt(WHOLE.blood_ml_min)+' mL a minute, '+WHOLE.blood_pct+'% of what the heart pumps']],
-  'The cortex is a sheet 2 to 4 mm thick and about a quarter of a square metre in all, two thirds of it folded out of sight. Each lobe, strip and patch answers under the pointer.','Azevedo et al. 2009; Marner et al. 2003; Raichle & Gusnard 2002; Toro et al. 2008; Wikipedia, Human brain'); }
+  'The cortex is a sheet 2 to 4 mm thick and about a quarter of a square meter in all, two thirds of it folded out of sight. Each lobe, strip and patch answers under the pointer.','Azevedo et al. 2009; Marner et al. 2003; Raichle & Gusnard 2002; Toro et al. 2008; Wikipedia, Human brain'); }
 function showInside(){ card('The inside','Cut down the middle',[
   ['the cortex','82% of the mass, 16 billion neurons'],
   ['the cerebellum','10% of the mass, 69 billion neurons'],

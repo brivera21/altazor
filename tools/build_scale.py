@@ -2,10 +2,10 @@
 """Generate scale.html, Scale: one line from the Planck length to everything.
 
 Sixty-two decades on one log axis, a factor of ten a step, with forty-odd
-measured things placed on it, coloured by realm. A lens two decades wide
+measured things placed on it, colored by realm. A lens two decades wide
 slides along the line, and whatever falls inside it is drawn below as circles
 at true proportion, which is the only way anything on a log line can be seen
-at its real size against its neighbours. Two things picked in turn give their
+at its real size against its neighbors. Two things picked in turn give their
 ratio. Each thing the site draws elsewhere links to that page.
 
 Data: tools/scale_data.py.
@@ -23,7 +23,7 @@ OUT = Path(__file__).parent.parent / "scale.html"
 
 NOTE1 = ("One line, sixty-two steps, each step a factor of ten, from the "
          "Planck length at the left to the observable universe at the right. "
-         "Every mark is a measured thing, coloured by realm. A person stands "
+         "Every mark is a measured thing, colored by realm. A person stands "
          "a little past the middle: thirty-five steps up from the smallest "
          "length that means anything, twenty-seven down from the whole "
          "universe.")
@@ -142,9 +142,9 @@ const LOG0=-35, LOG1=27;                          // decades on show
 const PANEL={x:30,y:270,w:920,h:420};             // the lens panel
 const el=document.getElementById('diagram');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
-const X=v=>L+(Math.log10(v)-LOG0)/(LOG1-LOG0)*(R-L);   // metres to pixels
-const XL=lg=>L+(lg-LOG0)/(LOG1-LOG0)*(R-L);            // log10 metres to pixels
-const LX=px=>LOG0+(px-L)/(R-L)*(LOG1-LOG0);            // pixels to log10 metres
+const X=v=>L+(Math.log10(v)-LOG0)/(LOG1-LOG0)*(R-L);   // meters to pixels
+const XL=lg=>L+(lg-LOG0)/(LOG1-LOG0)*(R-L);            // log10 meters to pixels
+const LX=px=>LOG0+(px-L)/(R-L)*(LOG1-LOG0);            // pixels to log10 meters
 let lensC=Math.log10(1.7), lensW=3.0, picks=[], hot=null;
 
 /* ---- numbers ---- */
@@ -254,7 +254,7 @@ function panel(){
     s+='<text x="'+(PANEL.x+PANEL.w/2)+'" y="'+(PANEL.y+PANEL.h/2)+'" text-anchor="middle" font-size="13" fill="#6b7280">nothing measured on this line falls in the window</text>';
     return s;
   }
-  const maxD=Math.min(PANEL.h-110, 330), k=maxD/inside[0].m;    // px per metre
+  const maxD=Math.min(PANEL.h-110, 330), k=maxD/inside[0].m;    // px per meter
   // lay them out left to right, biggest first, each in a slot of its width plus room for a name
   let x=PANEL.x+24; const cy=PANEL.y+34+maxD/2; let tiny=0;
   for(const o of inside){

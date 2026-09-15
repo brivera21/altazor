@@ -4,12 +4,12 @@
 Two views. The spectrum: eighteen decades of wavelength on one log line, the
 seven bands, twenty marks from annihilation gamma rays to AM radio, a strip
 showing which wavelengths reach the ground, and the visible octave opened out
-below in its own colours. A marker drags along the line and the card works
+below in its own colors. A marker drags along the line and the card works
 out frequency, photon energy and the temperature a body would need to peak
 there. A hot body: Planck's curve for any temperature from the microwave
 background to the hottest stars, on log-log axes where every curve is the
 same shape slid along Wien's line, with the visible band shaded, the share
-of the power that is light, and the colour the eye would see.
+of the power that is light, and the color the eye would see.
 
 Data: tools/light_data.py.
 
@@ -36,7 +36,7 @@ NOTE2 = ("Everything warm glows, and the second view draws that glow for "
          "any temperature between the sky's background at 2.7 kelvin and a "
          "star at forty thousand. The curve keeps its shape and slides up "
          "and to the left as the body heats; the peak crosses the visible "
-         "band near the Sun's temperature, and the swatch gives the colour "
+         "band near the Sun's temperature, and the swatch gives the color "
          "an eye would see, from ember red through white to a blue that "
          "stops changing.")
 
@@ -47,7 +47,7 @@ METHOD = ("Frequency is c over wavelength, photon energy is hc over "
           "fall elsewhere, which is why the Sun peaks in the green here and "
           "in the infrared on a frequency plot. The share of power in the "
           "visible band is the curve integrated from 380 to 750 nm over "
-          "sigma T to the fourth. Colours come from the CIE 1931 matching "
+          "sigma T to the fourth. Colors come from the CIE 1931 matching "
           "functions in the analytic fit of Wyman, Sloan and Shirley, "
           "converted to sRGB with brightness set aside, so the swatch shows "
           "hue only; below the Draper point, about 800 K, a body does not "
@@ -187,11 +187,11 @@ function xyzToRgb(X,Y,Z){ // linear sRGB, negatives desaturated, brightness set 
   const mx=Math.max(r,gg,b)||1; return [r/mx,gg/mx,b/mx]; }
 const gam=v=>v<=0.0031308?12.92*v:1.055*Math.pow(v,1/2.4)-0.055;
 const hex=rgb=>'#'+rgb.map(v=>Math.round(255*Math.max(0,Math.min(1,gam(v)))).toString(16).padStart(2,'0')).join('');
-function waveColour(nm){ // hue from the matching functions, faded toward the ends of sight
+function waveColor(nm){ // hue from the matching functions, faded toward the ends of sight
   const rgb=xyzToRgb(xbar(nm),ybar(nm),zbar(nm));
   const br=Math.min(1,Math.max(xbar(nm),ybar(nm),zbar(nm))/0.6);
   return hex(rgb.map(v=>v*br)); }
-function bodyColour(t){ let X=0,Y=0,Z=0; for(let l=380;l<=780;l+=5){ const B=planck(l*1e-9,t); X+=B*xbar(l); Y+=B*ybar(l); Z+=B*zbar(l); }
+function bodyColor(t){ let X=0,Y=0,Z=0; for(let l=380;l<=780;l+=5){ const B=planck(l*1e-9,t); X+=B*xbar(l); Y+=B*ybar(l); Z+=B*zbar(l); }
   const s=X+Y+Z||1; return {hex:hex(xyzToRgb(X/s,Y/s,Z/s)), x:X/s, y:Y/s}; }
 function colourWord(t){ return t<798?'no visible glow':t<1500?'a deep red':t<2500?'orange-red':t<3500?'orange':t<5000?'yellow-white':t<6500?'white':t<9000?'blue-white':'a blue-white that no longer changes'; }
 
@@ -212,11 +212,11 @@ function showPoint(m){ const bd=bandOf(m);
   card('A wavelength', si(m,'m'), photonRows(m), bd.t, ''); }
 function showMark(k){ const o=MARKS.find(x=>x.k===k); if(!o) return;
   card('A mark on the spectrum', esc(o.n), [['what',esc(o.what)], ...photonRows(o.m)], o.b, o.s); }
-function showBody(t){ const col=bodyColour(t), pk=bW/t, share=visShare(t), preset=BODIES.find(b=>Math.abs(b.T-t)/t<0.002);
+function showBody(t){ const col=bodyColor(t), pk=bW/t, share=visShare(t), preset=BODIES.find(b=>Math.abs(b.T-t)/t<0.002);
   card('A hot body', preset?esc(preset.n)+', '+fmtK(t):fmtK(t),
-    [['peak wavelength',si(pk,'m')+' ('+bandOf(pk).n+')'],['power from each square metre',si(sig*Math.pow(t,4),'W')],
+    [['peak wavelength',si(pk,'m')+' ('+bandOf(pk).n+')'],['power from each square meter',si(sig*Math.pow(t,4),'W')],
      ['share of it in the visible',(share*100).toFixed(share<0.01?3:1)+'%'],
-     ['colour','<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:'+(t<798?'#111':col.hex)+';vertical-align:-1px;border:1px solid #333"></span> '+colourWord(t)]],
+     ['color','<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:'+(t<798?'#111':col.hex)+';vertical-align:-1px;border:1px solid #333"></span> '+colourWord(t)]],
     preset?preset.b:'', preset?preset.s:''); }
 
 /* ---- the spectrum ---- */
@@ -253,8 +253,8 @@ function spectrum(){
   // the visible octave opened out
   const vx0=SX(3.8e-7), vx1=SX(7.5e-7);
   s+='<path d="M'+vx0.toFixed(1)+','+(S.Y+3)+' L'+V.L+','+(yV-28)+' L'+V.R+','+(yV-28)+' L'+vx1.toFixed(1)+','+(S.Y+3)+' Z" fill="#f4efe2" opacity="0.06"/>';
-  s+='<text x="'+V.L+'" y="'+(yV-34)+'" font-size="11" fill="#9a9a9a">the visible octave, 380 to 750 nm, in its own colours</text>';
-  for(let nm=V.a; nm<V.b; nm+=2){ s+='<rect x="'+VX(nm).toFixed(1)+'" y="'+(yV-26)+'" width="'+((V.R-V.L)/((V.b-V.a)/2)+0.6).toFixed(2)+'" height="26" fill="'+waveColour(nm+1)+'"/>'; }
+  s+='<text x="'+V.L+'" y="'+(yV-34)+'" font-size="11" fill="#9a9a9a">the visible octave, 380 to 750 nm, in its own colors</text>';
+  for(let nm=V.a; nm<V.b; nm+=2){ s+='<rect x="'+VX(nm).toFixed(1)+'" y="'+(yV-26)+'" width="'+((V.R-V.L)/((V.b-V.a)/2)+0.6).toFixed(2)+'" height="26" fill="'+waveColor(nm+1)+'"/>'; }
   for(const nm of [400,450,500,550,600,650,700,750]){ const x=VX(nm); s+='<line x1="'+x.toFixed(1)+'" y1="'+yV+'" x2="'+x.toFixed(1)+'" y2="'+(yV+5)+'" stroke="#8a94a6"/><text x="'+x.toFixed(1)+'" y="'+(yV+18)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">'+nm+'</text>'; }
   s+='<text x="'+VX(380).toFixed(1)+'" y="'+(yV+18)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">380 nm</text>';
   const vis=MARKS.filter(o=>o.m>=3.8e-7&&o.m<=7.5e-7); let vy=yV+36;
@@ -276,7 +276,7 @@ function body(){
   let s='';
   s+='<rect x="'+P.x+'" y="'+P.y+'" width="'+P.w+'" height="'+P.h+'" fill="none" stroke="#2b2b2b"/>';
   // the visible band
-  for(let nm=380; nm<750; nm+=5){ const x0=PX(nm*1e-9), x1=PX((nm+5)*1e-9); s+='<rect x="'+x0.toFixed(1)+'" y="'+P.y+'" width="'+(x1-x0+0.4).toFixed(1)+'" height="'+P.h+'" fill="'+waveColour(nm+2)+'" opacity="0.13"/>'; }
+  for(let nm=380; nm<750; nm+=5){ const x0=PX(nm*1e-9), x1=PX((nm+5)*1e-9); s+='<rect x="'+x0.toFixed(1)+'" y="'+P.y+'" width="'+(x1-x0+0.4).toFixed(1)+'" height="'+P.h+'" fill="'+waveColor(nm+2)+'" opacity="0.13"/>'; }
   // axes
   for(let lg=PL0; lg<=PL1; lg++){ const x=PX(Math.pow(10,lg)); s+='<line x1="'+x.toFixed(1)+'" y1="'+(P.y+P.h)+'" x2="'+x.toFixed(1)+'" y2="'+(P.y+P.h+6)+'" stroke="#8a94a6"/><text x="'+x.toFixed(1)+'" y="'+(P.y+P.h+20)+'" text-anchor="middle" font-size="11" fill="#9a9a9a">'+si(Math.pow(10,lg),'m')+'</text>'; }
   for(let lg=PB0; lg<=PB1; lg+=2){ const y=PY(Math.pow(10,lg)); s+='<line x1="'+(P.x-6)+'" y1="'+y.toFixed(1)+'" x2="'+P.x+'" y2="'+y.toFixed(1)+'" stroke="#8a94a6"/><text x="'+(P.x-9)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="10.5" fill="#9a9a9a">10<tspan dy="-4" font-size="8">'+lg+'</tspan></text>'; }
@@ -292,7 +292,7 @@ function body(){
     const pk=bW/b.T, x=PX(pk); let y=PY(planck(pk,b.T))-4; if(x-lastX<70 && Math.abs(y-lastY)<14) y=lastY-13;   // labels of close bodies step upward
     if(y>P.y+2&&y<P.y+P.h-4) s+='<text x="'+(x+6).toFixed(1)+'" y="'+y.toFixed(1)+'" font-size="10" fill="#6b7280">'+esc(b.n)+'</text>'; lastX=x; lastY=y; s+='</g>'; }
   // the body itself
-  const col=bodyColour(T).hex, dark=T<798;
+  const col=bodyColor(T).hex, dark=T<798;
   s+='<path d="'+curve(T)+'" fill="none" stroke="'+(dark?'#e6e6e6':col)+'" stroke-width="2.5"/>';
   const pk=bW/T, py=PY(planck(pk,T));
   if(py>P.y&&py<P.y+P.h) s+='<circle cx="'+PX(pk).toFixed(1)+'" cy="'+py.toFixed(1)+'" r="5" fill="#ffb02e" stroke="#121212" stroke-width="1.5"/><text x="'+PX(pk).toFixed(1)+'" y="'+(py-12).toFixed(1)+'" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffb02e">'+fmtK(T)+', peak '+si(pk,'m')+'</text>';
@@ -334,12 +334,12 @@ el.addEventListener('click',e=>{ if(swallow){ swallow=false; return; } const k=e
 
 render(); showPoint(lam);
 window.__light=(q)=>{ const o={view,lam,T,hot,marks:document.querySelectorAll('#lsvg g[data-k]').length,
-  planck:(m,t)=>planck(m,t), visShare:t=>visShare(t), colour:t=>bodyColour(t), wave:nm=>waveColour(nm),
+  planck:(m,t)=>planck(m,t), visShare:t=>visShare(t), color:t=>bodyColor(t), wave:nm=>waveColor(nm),
   cmf:l=>[xbar(l),ybar(l),zbar(l)], SX:m=>SX(m), PX:m=>PX(m), PY:B=>PY(B),
   marker:(()=>{ const c=document.querySelector('#marker circle'); return c?+c.getAttribute('cx'):null; })(),
   windows:[...document.querySelectorAll('#lsvg rect[fill="#9be564"]')].map(r=>[+r.getAttribute('x'),+r.getAttribute('width')]),
   card:document.getElementById('numTxt').innerText};
-  if(q&&q.planck) o.pv=planck(q.planck[0],q.planck[1]); if(q&&q.share!=null) o.sv=visShare(q.share); if(q&&q.colour!=null) o.cv=bodyColour(q.colour); if(q&&q.wave!=null) o.wv=waveColour(q.wave); if(q&&q.cmf!=null) o.cmfv=[xbar(q.cmf),ybar(q.cmf),zbar(q.cmf)];
+  if(q&&q.planck) o.pv=planck(q.planck[0],q.planck[1]); if(q&&q.share!=null) o.sv=visShare(q.share); if(q&&q.color!=null) o.cv=bodyColor(q.color); if(q&&q.wave!=null) o.wv=waveColor(q.wave); if(q&&q.cmf!=null) o.cmfv=[xbar(q.cmf),ybar(q.cmf),zbar(q.cmf)];
   return o; };
 </script>
 </body>

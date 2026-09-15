@@ -40,9 +40,9 @@ UPPER = [
     (600, 999.9, 8.21e-8, 1.14e-13, 11.51),
 ]
 
-# the layers of the air: k, name, from km, to km, colour, a line
+# the layers of the air: k, name, from km, to km, color, a line
 LAYERS = [
-    ("tropo", "the troposphere", 0, 11, "#58a6ff", "All the weather, three quarters of the air and nearly all the water vapour. Warmed from below, so it cools with height, six and a half degrees a kilometre, and convects. The top is higher at the equator, 17 km, and lower at the poles, 9."),
+    ("tropo", "the troposphere", 0, 11, "#58a6ff", "All the weather, three quarters of the air and nearly all the water vapor. Warmed from below, so it cools with height, six and a half degrees a kilometer, and convects. The top is higher at the equator, 17 km, and lower at the poles, 9."),
     ("strato", "the stratosphere", 11, 47, "#9be564", "Warms with height because ozone here absorbs the Sun's ultraviolet, so it does not convect: the air is layered and still, which is why airliners cruise at its bottom edge. The ozone layer peaks around 25 km."),
     ("meso", "the mesosphere", 47, 86, "#ffb02e", "Cools with height again to the coldest air on the planet, about minus 90 degrees at its top. Meteors burn up here, and the highest clouds, noctilucent, form at 80 km from ice on meteor dust."),
     ("thermo", "the thermosphere", 86, 600, "#f28cb0", "The Sun's far ultraviolet and X-rays are absorbed here and the thin gas heats to a thousand kelvin, though it would not feel warm: there are too few molecules to carry heat. The aurora, the ionosphere and the space station are all in it."),
@@ -56,7 +56,7 @@ MARKS = [
     ("airliner", "an airliner cruising", 11, "At the top of the troposphere, in still, cold air at minus 56 degrees, with a quarter of the pressure outside the window.", "Wikipedia, Cruise (aeronautics)"),
     ("vulture", "the highest bird", 11.3, "A Rüppell's vulture struck an aircraft at 11,300 m in 1973, the highest any bird has been found.", "Wikipedia, Rüppell's vulture"),
     ("armstrong", "the Armstrong limit", 19, "Where the pressure falls to 6.3 kPa and water boils at body temperature. Above this a person needs a pressure suit, not just oxygen.", "Wikipedia, Armstrong limit"),
-    ("ozone", "the ozone layer", 25, "Ozone is thickest here, a few parts per million, enough to stop the ultraviolet that would otherwise sterilise the surface.", "Wikipedia, Ozone layer"),
+    ("ozone", "the ozone layer", 25, "Ozone is thickest here, a few parts per million, enough to stop the ultraviolet that would otherwise sterilize the surface.", "Wikipedia, Ozone layer"),
     ("balloon", "a weather balloon bursting", 35, "Twice a day from hundreds of stations, a balloon rises until it swells to the size of a house and bursts, around 35 km.", "Wikipedia, Weather balloon"),
     ("jump", "Baumgartner's jump", 39, "The highest parachute jump from a balloon, in 2012, from 39 km; he broke the sound barrier on the way down.", "Wikipedia, Red Bull Stratos"),
     ("stratopause", "the stratopause", 47, "The warm top of the stratosphere, about minus 3 degrees, heated by ozone from below and the Sun above.", "US Standard Atmosphere 1976"),
@@ -64,7 +64,7 @@ MARKS = [
     ("meteor", "a meteor burning up", 90, "Shooting stars flare between 75 and 120 km, where the air first becomes thick enough to heat a grain of dust to incandescence.", "Wikipedia, Meteor"),
     ("karman", "the Kármán line", 100, "The conventional edge of space: above this the air is too thin for wings to lift at any speed below orbital.", "Wikipedia, Kármán line"),
     ("aurora", "the aurora", 110, "The green of the aurora is oxygen glowing at 100 to 150 km, hit by electrons coming down the magnetic field; the red is higher, at 200 to 300.", "Wikipedia, Aurora"),
-    ("iss", "the space station", 420, "Still inside the atmosphere: the thin air at 400 km drags the station down two kilometres a month, and it has to be boosted.", "Wikipedia, International Space Station"),
+    ("iss", "the space station", 420, "Still inside the atmosphere: the thin air at 400 km drags the station down two kilometers a month, and it has to be boosted.", "Wikipedia, International Space Station"),
     ("hubble", "the Hubble telescope", 540, "High enough to stay up for decades; low enough that the drag finally brings it down in the 2030s.", "Wikipedia, Hubble Space Telescope"),
 ]
 
@@ -77,15 +77,15 @@ GASES = [
     ("neon", "Ne", 18.18e-6, "Eighteen parts per million; a glass tube of it glows red-orange."),
     ("helium", "He", 5.24e-6, "Five parts per million, so light it escapes to space; the helium in balloons is mined from natural gas instead."),
     ("methane", "CH₄", 1.9e-6, "Two parts per million, from wetlands, cattle, rice and leaks, and thirty times as warming as carbon dioxide, molecule for molecule."),
-    ("krypton", "Kr", 1.14e-6, "A part per million; the metre was once defined by its light."),
+    ("krypton", "Kr", 1.14e-6, "A part per million; the meter was once defined by its light."),
     ("hydrogen", "H₂", 0.5e-6, "Half a part per million, escaping to space as fast as it is made."),
 ]
-WATER = ("water vapour", "H₂O", 0.0025, "Not counted in dry air because it varies from almost none over a desert to four percent in the tropics; a quarter of a percent of the air by mass on average, and the source of every cloud, all the rain, and most of the greenhouse effect.")
+WATER = ("water vapor", "H₂O", 0.0025, "Not counted in dry air because it varies from almost none over a desert to four percent in the tropics; a quarter of a percent of the air by mass on average, and the source of every cloud, all the rain, and most of the greenhouse effect.")
 
 # the column: total mass and where it sits
 COLUMN = {
     "mass": 5.148e18, "water": 1.27e16,
-    "note": "Five million billion tonnes, ten tonnes over every square metre; half of it below 5.5 km, ninety percent below 16, all but a millionth below 100.",
+    "note": "Five million billion metric tons, ten metric tons over every square meter; half of it below 5.5 km, ninety percent below 16, all but a millionth below 100.",
 }
 
 REFS = [

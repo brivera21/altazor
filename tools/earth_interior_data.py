@@ -64,7 +64,7 @@ GEOTHERM = [
     (671, 1960), (2741, 2580), (2891, 4000), (2892, 4100), (5149.5, 6230), (6371, 6300),
 ]
 
-# the layers, by depth (km): k, name, top, bottom, colour, state, what it is, a line, source
+# the layers, by depth (km): k, name, top, bottom, color, state, what it is, a line, source
 LAYERS = [
     ("crust", "the crust", 0, 24.4, "#9be564", "solid rock",
      "granite and basalt, with PREM's 3 km ocean on top",
@@ -80,7 +80,7 @@ LAYERS = [
      "PREM; Wikipedia, Transition zone (Earth)"),
     ("lower", "the lower mantle", 670, 2741, "#d9822b", "solid, and slowly flowing",
      "bridgmanite and ferropericlase",
-     "More than half of the Earth by volume, made largely of a mineral, bridgmanite, that exists nowhere at the surface. Density climbs from 4.4 to 5.5 g per cubic centimetre across it.",
+     "More than half of the Earth by volume, made largely of a mineral, bridgmanite, that exists nowhere at the surface. Density climbs from 4.4 to 5.5 g per cubic centimeter across it.",
      "PREM; Wikipedia, Lower mantle"),
     ("dpp", "the D&Prime; layer", 2741, 2891, "#b55d2a", "solid, uneven",
      "the bottom 150 km of the mantle",
@@ -92,7 +92,7 @@ LAYERS = [
      "PREM; Wikipedia, Earth's outer core"),
     ("inner", "the inner core", 5149.5, 6371, "#f4efe2", "solid metal",
      "iron-nickel crystal",
-     "Solid because the pressure of 330 gigapascals raises iron's melting point above the temperature there. It grows a millimetre a year as the core cools, and was found by Inge Lehmann in 1936.",
+     "Solid because the pressure of 330 gigapascals raises iron's melting point above the temperature there. It grows a millimeter a year as the core cools, and was found by Inge Lehmann in 1936.",
      "PREM; Wikipedia, Earth's inner core"),
 ]
 
@@ -102,11 +102,11 @@ PLACES = [
     ("trench", "the deepest ocean", 10.9, "The Challenger Deep in the Mariana Trench, 10.9 km below the surface, under 1,100 atmospheres of water.", "Wikipedia, Challenger Deep"),
     ("kola", "the deepest hole", 12.3, "The Kola Superdeep Borehole, 12.3 km, drilled over twenty years and stopped by rock at 180 degrees Celsius. A fifth of the way through the crust.", "Wikipedia, Kola Superdeep Borehole"),
     ("moho", "the Moho", 24.4, "The base of the crust, where wave speed jumps to 8 km per second; found by Mohorovičić in 1909 from earthquake arrivals.", "Wikipedia, Mohorovičić discontinuity"),
-    ("diamond", "where diamonds form", 175, "Most diamonds crystallise between 150 and 200 km down, in the roots of old continents, and ride up in volcanic eruptions.", "Wikipedia, Diamond"),
+    ("diamond", "where diamonds form", 175, "Most diamonds crystallize between 150 and 200 km down, in the roots of old continents, and ride up in volcanic eruptions.", "Wikipedia, Diamond"),
     ("quake", "the deepest earthquakes", 700, "Earthquakes stop at about 700 km, where the sinking slabs reach the bottom of the transition zone.", "Wikipedia, Deep-focus earthquake"),
     ("cmb", "the core-mantle boundary", 2891, "The sharpest boundary inside the planet: rock above, liquid metal below, density nearly doubling in a step.", "PREM"),
     ("icb", "the inner core boundary", 5149.5, "Where the iron freezes. The solid inner core grows outward from here as the planet cools.", "PREM; Anzellini et al. 2013"),
-    ("centre", "the centre", 6371, "364 gigapascals, 3.6 million atmospheres, and gravity at zero: every direction is up.", "PREM"),
+    ("center", "the center", 6371, "364 gigapascals, 3.6 million atmospheres, and gravity at zero: every direction is up.", "PREM"),
 ]
 
 REFS = [

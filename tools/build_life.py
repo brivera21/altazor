@@ -541,7 +541,7 @@ PAGES = [
      "three domains into two. A node under the cursor fills the card; "
      "a click pins it, and a second click lets go."
      + IMG_NOTE,
-     [("Woese, C. R., Kandler, O., & Wheelis, M. L. (1990). Towards a "
+     [("Woese, C. R., Kandler, O., & Wheelis, M. L. (1990). Toward a "
        "natural system of organisms: Proposal for the domains Archaea, "
        "Bacteria, and Eucarya. <i>Proceedings of the National Academy of "
        "Sciences, 87</i>(12), 4576-4579.",

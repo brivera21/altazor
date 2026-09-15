@@ -5,7 +5,7 @@ routes.
 Three views. The maps: the world in nine projections, drawn from the
 coastline raster by inverting each projection pixel by pixel, with the
 graticule, Tissot's circles at the crossings, and a circle of a thousand
-kilometres' radius that drags anywhere on the map and reads how many times
+kilometers' radius that drags anywhere on the map and reads how many times
 its true area it appears. The stretch: the area scale of each projection
 against latitude, with a marker on the latitude line and the cities that
 sit there. The routes: a great circle and the compass course between two
@@ -34,7 +34,7 @@ NOTE1 = ("A sphere will not lie flat. Every map of the world stretches "
          "Africa; Peters kept every area and pulled the tropics long; "
          "Robinson kept nothing exactly and everything tolerably. The "
          "first view is nine of these, with the same circle of a thousand "
-         "kilometres' radius to drag across each and watch it warp.")
+         "kilometers' radius to drag across each and watch it warp.")
 
 NOTE2 = ("The second view is the stretch itself, the area a map gives to a "
          "place against the area it has, from the Equator to the poles, "
@@ -131,7 +131,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <h1>Map Projections</h1>
 <div class="bar" id="views"><button data-v="maps" class="on">The maps</button><button data-v="stretch">The stretch</button><button data-v="routes">The routes</button></div>
 <div class="controls" id="mapCtl"><div class="presets" id="projs"></div></div>
-<div class="controls" id="centreCtl" hidden><label>the globe faces</label><div class="presets" id="centres"><button data-c="atl" class="on">the Atlantic</button><button data-c="pac">the Pacific</button><button data-c="np">the North Pole</button><button data-c="sp">the South Pole</button></div></div>
+<div class="controls" id="centreCtl" hidden><label>the globe faces</label><div class="presets" id="centers"><button data-c="atl" class="on">the Atlantic</button><button data-c="pac">the Pacific</button><button data-c="np">the North Pole</button><button data-c="sp">the South Pole</button></div></div>
 <div class="controls" id="stretchCtl" hidden><label>the marker</label><output id="latOut"></output></div>
 <div class="controls" id="routeCtl" hidden><div class="presets" id="routes"></div></div>
 <div class="stage">
@@ -157,8 +157,8 @@ const el=document.getElementById('diagram');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const fmt=(n,d)=>n.toLocaleString('en-US',{maximumFractionDigits:d==null?0:d,minimumFractionDigits:d==null?0:d});
 const D2R=Math.PI/180, R2D=180/Math.PI;
-let view='maps', proj='mercator', centre='atl', hot=null, cap={lon:-40,lat:60}, capR=1000, lat=51.5, route=0, land=null;
-const CENTRES={atl:[-30,30],pac:[-160,10],np:[0,90],sp:[0,-90]};
+let view='maps', proj='mercator', center='atl', hot=null, cap={lon:-40,lat:60}, capR=1000, lat=51.5, route=0, land=null;
+const CENTERS={atl:[-30,30],pac:[-160,10],np:[0,90],sp:[0,-90]};
 
 /* ---- the projections: forward and inverse, in units of the Earth's radius; lon, lat in radians ---- */
 const sinc=a=>a===0?1:Math.sin(a)/a;
@@ -177,8 +177,8 @@ const P={
   robinson:{ fwd:(l,p)=>{ const [pl,y]=robTab(p); return [0.8487*pl*l, 1.3523*y]; }, inv:(x,y)=>{ const yy=y/1.3523; if(Math.abs(yy)>1) return null; const p=robInvY(yy); const [pl]=robTab(p); const l=x/(0.8487*pl); if(Math.abs(l)>Math.PI) return null; return [l,p]; } },
   winkel:{ fwd:(l,p)=>{ const a=Math.acos(Math.cos(p)*Math.cos(l/2)); const s=sinc(a); return [0.5*(l*Math.cos(PHI1)+2*Math.cos(p)*Math.sin(l/2)/s), 0.5*(p+Math.sin(p)/s)]; },
     inv:(x,y)=>{ let l=x/(0.5*(Math.cos(PHI1)+1)), p=y; for(let i=0;i<12;i++){ const [fx,fy]=P.winkel.fwd(l,p); const ex=fx-x, ey=fy-y; if(Math.abs(ex)<1e-7&&Math.abs(ey)<1e-7) break; const h=1e-5; const [fx1,fy1]=P.winkel.fwd(l+h,p), [fx2,fy2]=P.winkel.fwd(l,p+h); const a=(fx1-fx)/h, b=(fx2-fx)/h, c=(fy1-fy)/h, d=(fy2-fy)/h; const det=a*d-b*c; if(Math.abs(det)<1e-12) return null; l-=(d*ex-b*ey)/det; p-=(-c*ex+a*ey)/det; if(Math.abs(p)>Math.PI/2+0.01||Math.abs(l)>Math.PI+0.01) return null; } if(Math.abs(p)>Math.PI/2||Math.abs(l)>Math.PI) return null; return [l,p]; } },
-  ortho:{ fwd:(l,p)=>{ const [l0,p0]=CENTRES[centre].map(v=>v*D2R); const c=Math.sin(p0)*Math.sin(p)+Math.cos(p0)*Math.cos(p)*Math.cos(l-l0); if(c<0) return null; return [Math.cos(p)*Math.sin(l-l0), Math.cos(p0)*Math.sin(p)-Math.sin(p0)*Math.cos(p)*Math.cos(l-l0)]; },
-    inv:(x,y)=>{ const [l0,p0]=CENTRES[centre].map(v=>v*D2R); const r=Math.hypot(x,y); if(r>1) return null; const c=Math.asin(r); if(r<1e-9) return [l0,p0]; const p=Math.asin(Math.cos(c)*Math.sin(p0)+y*Math.sin(c)*Math.cos(p0)/r); const l=l0+Math.atan2(x*Math.sin(c), r*Math.cos(c)*Math.cos(p0)-y*Math.sin(c)*Math.sin(p0)); return [l,p]; } },
+  ortho:{ fwd:(l,p)=>{ const [l0,p0]=CENTERS[center].map(v=>v*D2R); const c=Math.sin(p0)*Math.sin(p)+Math.cos(p0)*Math.cos(p)*Math.cos(l-l0); if(c<0) return null; return [Math.cos(p)*Math.sin(l-l0), Math.cos(p0)*Math.sin(p)-Math.sin(p0)*Math.cos(p)*Math.cos(l-l0)]; },
+    inv:(x,y)=>{ const [l0,p0]=CENTERS[center].map(v=>v*D2R); const r=Math.hypot(x,y); if(r>1) return null; const c=Math.asin(r); if(r<1e-9) return [l0,p0]; const p=Math.asin(Math.cos(c)*Math.sin(p0)+y*Math.sin(c)*Math.cos(p0)/r); const l=l0+Math.atan2(x*Math.sin(c), r*Math.cos(c)*Math.cos(p0)-y*Math.sin(c)*Math.sin(p0)); return [l,p]; } },
   azeq:{ fwd:(l,p)=>{ const rho=Math.PI/2-p; return [rho*Math.sin(l), rho*Math.cos(l)]; }, inv:(x,y)=>{ const rho=Math.hypot(x,y); if(rho>Math.PI) return null; return [Math.atan2(x,y), Math.PI/2-rho]; } },
 };
 function fwd(l,p){ const q=P[proj]; if(q.latMax){ p=Math.max(-q.latMax,Math.min(q.latMax,p)); } return q.fwd(l,p); }
@@ -189,7 +189,7 @@ const toPx=r=>r?[M.ox+(r[0]-M.cx)*M.s, M.oy-(r[1]-M.cy)*M.s]:null;
 const fromPx=(px,py)=>[(px-M.ox)/M.s+M.cx, M.cy-(py-M.oy)/M.s];
 const isLand=(lon,lat)=>{ if(!land) return false; let lx=Math.floor(((lon*R2D+540)%360)/360*LW), ly=Math.floor((90-lat*R2D)/180*LH); lx=Math.max(0,Math.min(LW-1,lx)); ly=Math.max(0,Math.min(LH-1,ly)); return land[ly*LW+lx]>0; };
 let cache={};
-function paintMap(ctx){ const key=proj+':'+centre; if(land&&cache[key]){ ctx.putImageData(cache[key],0,0); return; } const im=ctx.createImageData(W,M.H), d=im.data; const q=P[proj];
+function paintMap(ctx){ const key=proj+':'+center; if(land&&cache[key]){ ctx.putImageData(cache[key],0,0); return; } const im=ctx.createImageData(W,M.H), d=im.data; const q=P[proj];
   for(let py=0;py<M.H;py++) for(let px=0;px<W;px++){ const [x,y]=fromPx(px+0.5,py+0.5); const r=q.inv(x,y); const i=(py*W+px)*4; let c=[18,18,18];
     if(r&&Math.abs(r[1])<=Math.PI/2+1e-9&&Math.abs(r[0])<=Math.PI+1e-9&&!(q.latMax&&Math.abs(r[1])>q.latMax)) c=isLand(r[0],r[1])?[70,74,78]:[16,28,46];
     d[i]=c[0]; d[i+1]=c[1]; d[i+2]=c[2]; d[i+3]=255; }
@@ -255,13 +255,13 @@ function fixLabels(){ const ts=[...document.querySelectorAll('#psvg text[data-lb
 /* ---- the routes ---- */
 function routesView(){ const cv=document.createElement('canvas'); cv.width=W; cv.height=470; cv.id='rcanvas'; const ctx=cv.getContext('2d'); const [ka,kb]=ROUTES[route]; const a=CITIES[ka], b=CITIES[kb];
   // left: Mercator to 80 degrees
-  const save={proj,centre}; proj='mercator'; const LM=80*D2R; const mw=520, mh=Math.round(mw/(2*Math.PI)*2*Math.log(Math.tan(Math.PI/4+LM/2))), mx0=20, my0=(470-mh)/2-10;
+  const save={proj,center}; proj='mercator'; const LM=80*D2R; const mw=520, mh=Math.round(mw/(2*Math.PI)*2*Math.log(Math.tan(Math.PI/4+LM/2))), mx0=20, my0=(470-mh)/2-10;
   const mp=(l,p)=>[mx0+(l+Math.PI)/(2*Math.PI)*mw, my0+mh/2-Math.log(Math.tan(Math.PI/4+Math.max(-LM,Math.min(LM,p))/2))/Math.log(Math.tan(Math.PI/4+LM/2))*mh/2];
   const im=ctx.createImageData(mw,mh), d=im.data; for(let py=0;py<mh;py++) for(let px=0;px<mw;px++){ const l=(px+0.5)/mw*2*Math.PI-Math.PI; const yy=(mh/2-(py+0.5))/(mh/2)*Math.log(Math.tan(Math.PI/4+LM/2)); const p=2*Math.atan(Math.exp(yy))-Math.PI/2; const c=isLand(l,p)?[70,74,78]:[16,28,46]; const i=(py*mw+px)*4; d[i]=c[0]; d[i+1]=c[1]; d[i+2]=c[2]; d[i+3]=255; } ctx.putImageData(im,mx0,my0);
   ctx.strokeStyle='rgba(230,230,230,0.2)'; ctx.lineWidth=1; for(let l=-180;l<=180;l+=30){ const q=mp(l*D2R,0); ctx.beginPath(); ctx.moveTo(q[0],my0); ctx.lineTo(q[0],my0+mh); ctx.stroke(); } for(let p=-60;p<=60;p+=30){ const q=mp(0,p*D2R); ctx.beginPath(); ctx.moveTo(mx0,q[1]); ctx.lineTo(mx0+mw,q[1]); ctx.stroke(); }
   const drawPath=(pts,map,col,w,dash)=>{ ctx.strokeStyle=col; ctx.lineWidth=w; ctx.setLineDash(dash||[]); ctx.beginPath(); let last=null; for(const p of pts){ const q=map(p[0],p[1]); if(!q){ last=null; continue; } if(last&&Math.hypot(q[0]-last[0],q[1]-last[1])>80) last=null; last?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]); last=q; } ctx.stroke(); ctx.setLineDash([]); };
   drawPath(rhumbPts(a,b,100),mp,'#ffb02e',2.2,[6,4]); drawPath(gcPts(a,b,100),mp,'#ff8c6a',2.6);
-  // right: the globe centred on the midpoint of the great circle
+  // right: the globe centered on the midpoint of the great circle
   const mid=gcPts(a,b,2)[1]; const gx=780, gy=225, gr=185; const l0=mid[0], p0=mid[1];
   const gp=(l,p)=>{ const c=Math.sin(p0)*Math.sin(p)+Math.cos(p0)*Math.cos(p)*Math.cos(l-l0); if(c<0) return null; return [gx+gr*Math.cos(p)*Math.sin(l-l0), gy-gr*(Math.cos(p0)*Math.sin(p)-Math.sin(p0)*Math.cos(p)*Math.cos(l-l0))]; };
   const gim=ctx.createImageData(2*gr,2*gr), gd=gim.data; for(let py=0;py<2*gr;py++) for(let px=0;px<2*gr;px++){ const x=(px+0.5-gr)/gr, y=-(py+0.5-gr)/gr; const r=Math.hypot(x,y); const i=(py*2*gr+px)*4; if(r>1){ gd[i]=18; gd[i+1]=18; gd[i+2]=18; gd[i+3]=255; continue; } const c=Math.asin(r); const p=r<1e-9?p0:Math.asin(Math.cos(c)*Math.sin(p0)+y*Math.sin(c)*Math.cos(p0)/r); const l=r<1e-9?l0:l0+Math.atan2(x*Math.sin(c), r*Math.cos(c)*Math.cos(p0)-y*Math.sin(c)*Math.sin(p0)); const cc=isLand(l,p)?[70,74,78]:[16,28,46]; gd[i]=cc[0]; gd[i+1]=cc[1]; gd[i+2]=cc[2]; gd[i+3]=255; } ctx.putImageData(gim,gx-gr,gy-gr);
@@ -270,7 +270,7 @@ function routesView(){ const cv=document.createElement('canvas'); cv.width=W; cv
   drawPath(rhumbPts(a,b,200),gp,'#ffb02e',2.2,[6,4]); drawPath(gcPts(a,b,100),gp,'#ff8c6a',2.6);
   ctx.font='11px sans-serif'; for(const [c,map] of [[a,mp],[b,mp],[a,gp],[b,gp]]){ const q=map(c.lon*D2R,c.lat*D2R); if(!q) continue; ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.arc(q[0],q[1],3.5,0,7); ctx.fill(); ctx.textAlign='left'; ctx.fillStyle='#e6e6e6'; ctx.fillText(c.n,q[0]+7,q[1]-6); }
   ctx.fillStyle='#9a9a9a'; ctx.textAlign='left'; ctx.fillText('Mercator: the compass course is the straight dashed line; the great circle bows poleward',mx0,my0+mh+18); ctx.textAlign='center'; ctx.fillText('the globe, turned to the route: the great circle is the straight one',gx,gy+gr+22);
-  proj=save.proj; centre=save.centre; return cv; }
+  proj=save.proj; center=save.center; return cv; }
 
 /* ---- render and wiring ---- */
 function render(){ el.innerHTML=''; if(view==='maps') el.appendChild(mapsView()); else if(view==='routes') el.appendChild(routesView()); else { const q=stretchView(); el.innerHTML='<svg viewBox="0 0 '+W+' '+q.h+'" xmlns="http://www.w3.org/2000/svg" id="psvg"><rect width="'+W+'" height="'+q.h+'" fill="#121212"/>'+q.svg+'</svg>'; fixLabels(); }
@@ -280,7 +280,7 @@ function setView(v){ view=v; hot=null; for(const b of document.querySelectorAll(
 document.getElementById('views').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setView(b.dataset.v); });
 (function(){ const box=document.getElementById('projs'); box.innerHTML=PROJS.map(p=>'<button data-p="'+p.k+'"'+(p.k===proj?' class="on"':'')+'>'+esc(p.n)+'</button>').join(''); box.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; proj=b.dataset.p; for(const x of box.querySelectorAll('button')) x.classList.toggle('on',x===b); render(); showMap(); });
   const rb=document.getElementById('routes'); rb.innerHTML=ROUTES.map((r,i)=>'<button data-r="'+i+'"'+(i===route?' class="on"':'')+'>'+esc(CITIES[r[0]].n)+' to '+esc(CITIES[r[1]].n)+'</button>').join(''); rb.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; route=+b.dataset.r; for(const x of rb.querySelectorAll('button')) x.classList.toggle('on',x===b); render(); showRoute(); });
-  document.getElementById('centres').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; centre=b.dataset.c; for(const x of document.querySelectorAll('#centres button')) x.classList.toggle('on',x===b); render(); showMap(); }); })();
+  document.getElementById('centers').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; center=b.dataset.c; for(const x of document.querySelectorAll('#centers button')) x.classList.toggle('on',x===b); render(); showMap(); }); })();
 let dragging=false;
 const pt=e=>{ const c=el.firstElementChild, b=c.getBoundingClientRect(); const vh=c.tagName==='CANVAS'?c.height:c.viewBox.baseVal.height; return [(e.clientX-b.left)/b.width*W,(e.clientY-b.top)/b.height*vh]; };
 function setCap(px,py){ const [x,y]=fromPx(px,py); const r=P[proj].inv(x,y); if(!r||Math.abs(r[1])>Math.PI/2||Math.abs(r[0])>Math.PI) return; if(P[proj].latMax&&Math.abs(r[1])>P[proj].latMax) return; cap={lon:r[0]*R2D,lat:r[1]*R2D}; render(); showMap(); }
@@ -294,7 +294,7 @@ el.addEventListener('pointerleave',()=>{ if(hot){ hot=null; render(); home(); } 
 function decode(b64,w,h,cb){ const img=new Image(); img.onload=()=>{ const off=document.createElement('canvas'); off.width=w; off.height=h; const o=off.getContext('2d'); o.drawImage(img,0,0); const d=o.getImageData(0,0,w,h).data; const a=new Uint8Array(w*h); for(let i=0,p=0;i<d.length;i+=4,p++) a[p]=d[i]; cb(a); }; img.src='data:image/png;base64,'+b64; }
 decode(LAND,LW,LH,a=>{ land=a; cache={}; render(); home(); });
 render(); showMap();
-window.__proj=(q)=>{ const o={view,proj,centre,cap,lat,route,land:!!land,card:document.getElementById('numTxt').innerText,name:document.getElementById('nameTxt').innerText,body:document.getElementById('bodyTxt').innerText};
+window.__proj=(q)=>{ const o={view,proj,center,cap,lat,route,land:!!land,card:document.getElementById('numTxt').innerText,name:document.getElementById('nameTxt').innerText,body:document.getElementById('bodyTxt').innerText};
   if(q&&q.fwd){ const save=proj; if(q.proj) proj=q.proj; o.fwd=P[proj].fwd(q.fwd[0]*D2R,q.fwd[1]*D2R); o.inv=o.fwd?P[proj].inv(o.fwd[0],o.fwd[1]):null; if(o.inv) o.inv=o.inv.map(v=>v*R2D); proj=save; }
   if(q&&q.ratio){ const save=proj; if(q.proj) proj=q.proj; o.ratio=capRatio(q.ratio[0]*D2R,q.ratio[1]*D2R,q.ratio[2]||capR); proj=save; }
   if(q&&q.scale) o.scale=areaScale(q.scale[0],q.scale[1]);

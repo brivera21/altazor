@@ -8,7 +8,7 @@ glottocode a name, a level, a macroarea and an ISO 639-3 code.
 
 Each language also carries Glottolog's Agglomerated Endangerment Status
 (1 not endangered to 6 extinct), which folds EGIDS, the UNESCO atlas and
-the Catalogue of Endangered Languages into one scale.
+the Catalog of Endangered Languages into one scale.
 
 Dialects are pruned, so a tip is a language in Glottolog's sense.
 Glottolog's non-genealogical top-level nodes (sign languages, pidgins,
@@ -63,7 +63,7 @@ BLURB = {
                 "the Ob and the Volga.",
     "araw1281": "The Amazon and the Caribbean, the first American family "
                 "Europeans met.",
-    "tupi1275": "The Amazon and the Brazilian coast; Tupi words travelled "
+    "tupi1275": "The Amazon and the Brazilian coast; Tupi words traveled "
                 "into Portuguese and out to the world.",
     "utoa1244": "From the Great Basin to central Mexico, Nahuatl and "
                 "Shoshone at its ends.",

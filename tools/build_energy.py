@@ -28,13 +28,13 @@ OUT = Path(__file__).parent.parent / "energy.html"
 # energy of a uranium-235 fission.
 CONST = {
     "m_ref": 1.0,            # kilogram, the test mass for speed and height
-    "g": 9.80665,            # metres per second squared, standard gravity
-    "k_spring": 100.0,       # newtons per metre, a firm hand spring
+    "g": 9.80665,            # meters per second squared, standard gravity
+    "k_spring": 100.0,       # newtons per meter, a firm hand spring
     "sugar": 17.0e3,         # joules per gram of carbohydrate
     "volt": 1.5,             # volts, one alkaline cell
     "h": 6.62607015e-34,     # joule seconds
-    "c": 2.99792458e8,       # metres per second
-    "green": 550e-9,         # metres, the middle of the visible band
+    "c": 2.99792458e8,       # meters per second
+    "green": 550e-9,         # meters, the middle of the visible band
     "fission": 3.2436e-11,   # joules, 202.5 MeV recovered per fission
     "R": 8.31446261815324,   # joules per mole kelvin
 }
@@ -46,8 +46,8 @@ AMOUNTS = [
     ("a heartbeat", 1.0),
     ("an alkaline cell", 1.35e4),
     ("a day of food", 8.8e6),
-    ("a litre of petrol", 3.42e7),
-    ("a tonne of TNT", 4.184e9),
+    ("a liter of gasoline", 3.42e7),
+    ("a metric ton of TNT", 4.184e9),
     ("a magnitude 7 earthquake", 2.0e15),
     ("a hurricane, for a day", 5.2e19),
 ]
@@ -271,15 +271,15 @@ two lead out, and the one back to motion pays a toll set by the two
 temperatures. That one-way traffic is the second law.</p>
 <div class="method"><p>Each formula is solved on a stated reference case: a
 one kilogram mass for speed and for height, standard gravity at 9.80665
-metres per second squared, a spring of 100 newtons per metre, carbohydrate at
+meters per second squared, a spring of 100 newtons per meter, carbohydrate at
 the Atwater factor of 17 kilojoules per gram, one alkaline cell at 1.5 volts,
-green light at 550 nanometres, 202.5 megaelectronvolts recovered per fission
+green light at 550 nanometers, 202.5 megaelectronvolts recovered per fission
 of uranium-235, and one mole of a monatomic gas. Speed is worked
 relativistically, since above roughly a tenth of the speed of light the
 half-m-v-squared answer would pass the speed of light; below that the two
 agree to better than a percent. The other formulas are given their own
 answer at every amount, including amounts far outside the range they were
-written for: a height of a hundred million kilometres is what the near
+written for: a height of a hundred million kilometers is what the near
 surface formula returns, not a place where it still holds.</p></div>
 <h2 class="refh">References</h2>
 <div class="refs">
@@ -363,7 +363,7 @@ const SOLVE={
       'a mass of one kilogram, gravity at 9.80665 m/s²']; },
   ela:e=>{ const x=Math.sqrt(2*e/K.k_spring);
     return [si(x,'m'), '', 'x = √(2E / k) = '+si(x,'m'),
-      'a spring of 100 newtons per metre']; },
+      'a spring of 100 newtons per meter']; },
   chem:e=>{ const m=e/K.sugar;
     return [si(m,'g'), 'of sugar', 'm = E / 17 kJ per gram = '+si(m,'g'),
       'carbohydrate at the Atwater factor']; },
@@ -374,7 +374,7 @@ const SOLVE={
     return [count(n), 'photons', 'N = E λ / hc = '+count(n)+' photons'+
       (e<=1e-14?', and one photon carrying it all would have a wavelength of '
         +si(lam,'m'):''),
-      'green light at 550 nanometres']; },
+      'green light at 550 nanometers']; },
   nuc:e=>{ const n=e/K.fission;
     return [count(n), 'fissions', 'N = E / 202.5 MeV = '+count(n)+
       ' fissions, which is '+si(n*235/6.02214076e23,'g')+' of uranium-235',

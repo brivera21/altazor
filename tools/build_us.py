@@ -11,7 +11,7 @@ Four layers over the states:
 
   rivers          WDBII at full resolution, clipped to the country. The layer
                   carries no names, so a river is named only where one course in
-                  the layer passes within fifteen kilometres of a town on that
+                  the layer passes within fifteen kilometers of a town on that
                   river and the next course is four times further off;
                   verify_us.py redoes that test.
   rugged ground   the local roughness of Natural Earth's relief raster, the
@@ -93,9 +93,9 @@ NAME = {
 # regions and divisions document. Every state and the district belongs to
 # exactly one of each, so these are drawn as fills.
 #
-# Colour carries the region and lightness carries the division inside it, and
+# Color carries the region and lightness carries the division inside it, and
 # every area is also written on the map, which is what keeps the four hues
-# apart for a reader who cannot separate them by colour alone.
+# apart for a reader who cannot separate them by color alone.
 CENSUS_REGIONS = [
     ("Northeast", "#3692ca", "ME NH VT MA RI CT NY NJ PA"),
     ("Midwest", "#bd7634", "OH IN IL MI WI MN IA MO ND SD NE KS"),
@@ -181,11 +181,11 @@ FACTS = [
     ("Highest and lowest", "6,190 m and &minus;86 m",
      "Denali in Alaska, and Badwater Basin in Death Valley"),
     ("Longest river", "the Missouri, 3,767 km",
-     "and the Mississippi it joins is only a kilometre shorter"),
+     "and the Mississippi it joins is only a kilometer shorter"),
 ]
 
-# Rivers carry no name in the source. A course is labelled where it passes a
-# named place on that river: within fifteen kilometres of it, and with the next
+# Rivers carry no name in the source. A course is labeled where it passes a
+# named place on that river: within fifteen kilometers of it, and with the next
 # nearest course at least four times further off, so there is no question which
 # line is meant. Confluences fail that test and are left unlabelled, which is
 # why the Mississippi is named at Memphis and not at Vicksburg.
@@ -347,14 +347,14 @@ stroke-linejoin:round;pointer-events:none}
 #capital circle{fill:#f2c66b;stroke:#0d1a26;stroke-width:1.2;pointer-events:none}
 #capital text{fill:#f7dfa8;font-size:10px;font-family:inherit;
 paint-order:stroke;stroke:#0d1a26;stroke-width:2.6;pointer-events:none}
-/* neighbouring fills leave an anti-aliased hairline where they meet, which
-   reads as a ghost of the border; stroking each in its own colour closes it */
+/* neighboring fills leave an anti-aliased hairline where they meet, which
+   reads as a ghost of the border; stroking each in its own color closes it */
 svg.bare .state{stroke:var(--land);stroke-width:.9}
 svg.bare .state:hover{fill:var(--land)}
 svg.bare .state.on{fill:var(--land)}
 #labels text{fill:#bcd9f2;font-size:9px;font-family:inherit;
 paint-order:stroke;stroke:#0d1a26;stroke-width:2.6;pointer-events:none}
-/* over a coloured region the rugged ground reads as texture, not as its own
+/* over a colored region the rugged ground reads as texture, not as its own
    layer, so it goes translucent; with the lines off it is the map again */
 #rugged path{fill:#6d6455;fill-opacity:.42;stroke:none;pointer-events:none}
 #rugged path.high{fill:#8a7c66;fill-opacity:.5}
@@ -436,7 +436,7 @@ is a fifth of the country and reaches further west than Hawaii, and drawing all
 three to one scale leaves the lower 48 too small to read.</p>
 <p>The Census Bureau sorts every state and the district into one of four
 regions and one of nine divisions inside them, so both are drawn as fills:
-colour for the region, lightness for the division, the name written across the
+color for the region, lightness for the division, the name written across the
 states. East Coast, West Coast and the Northwest have no official line and
 stay as outlines.</p>
 <p>Rugged ground comes from a relief image, not an elevation grid, so it marks
@@ -510,7 +510,7 @@ const gg = el('regions');
 const vernEls = D.vern.map(r => make('path', {d: r.d, stroke: r.c}, gg));
 const ga = el('areas');
 
-// the two insets are on their own scales, so they are boxed and labelled
+// the two insets are on their own scales, so they are boxed and labeled
 for (const [x, y, w, h, t] of [[6, 514, 338, 226, 'Alaska'],
                                [726, 606, 214, 116, 'Hawaii']]) {
   make('rect', {x, y, width: w, height: h, rx: 6, class: 'inset'}, el('frames'));
@@ -519,8 +519,8 @@ for (const [x, y, w, h, t] of [[6, 514, 338, 226, 'Alaska'],
     + 'not to the same scale';
 }
 
-// Every state carries the colour of the group it belongs to, and the name of
-// the group is written on the map: the colour says which one, the writing says
+// Every state carries the color of the group it belongs to, and the name of
+// the group is written on the map: the color says which one, the writing says
 // which one it is.
 function paint() {
   const grupo = GRUPOS[modo];
@@ -704,21 +704,21 @@ def main():
         return [round(x, 1), round(y, 1)]
 
     regiones, divisiones, vern = [], [], []
-    for name, colour, codes in CENSUS_REGIONS:
+    for name, color, codes in CENSUS_REGIONS:
         cs = codes.split()
-        regiones.append({"n": name, "c": colour, "codes": cs,
+        regiones.append({"n": name, "c": color, "codes": cs,
                          "lab": rotulo(cs),
                          "note": f"Census Region, {len(cs)} states"})
-    for name, region, colour, codes in CENSUS_DIVISIONS:
+    for name, region, color, codes in CENSUS_DIVISIONS:
         cs = codes.split()
-        divisiones.append({"n": name, "c": colour, "codes": cs,
+        divisiones.append({"n": name, "c": color, "codes": cs,
                            "lab": rotulo(cs), "reg": region,
                            "note": f"Census Division, inside the {region}"})
-    for name, colour, note, codes in VERNACULAR:
+    for name, color, note, codes in VERNACULAR:
         cs = codes.split()
         d = "".join(path_of(g, T_of(c), 0.02) for c, g in
                     [(c, st[c]) for c in cs if c in st])
-        vern.append({"n": name, "c": colour, "codes": cs, "note": note, "d": d})
+        vern.append({"n": name, "c": color, "codes": cs, "note": note, "d": d})
 
     # rivers: the long ones, so the map is a river system and not a hairball
     courses = pickle.load(open(DATA / "courses.pkl", "rb"))

@@ -195,7 +195,7 @@ HIST["amherst"] = {
            "on the meadows and fishing places at the falls.",
     "nations": [
         {"n": "Norwottuck", "src": "en.wikipedia.org/wiki/Pocumtuc", "poly": [[-72.66, 42.28], [-72.42, 42.28], [-72.44, 42.47], [-72.66, 42.47]], "lat": 42.37, "lon": -72.55, "note": "A Pocumtuc community whose planting grounds became Hadley and Amherst.", "after": {"y": 1676, "t": "driven north after King Philip's War"}},
-        {"n": "Pocumtuc", "src": "en.wikipedia.org/wiki/Pocumtuc", "poly": [[-72.72, 42.45], [-72.48, 42.45], [-72.50, 42.68], [-72.74, 42.68]], "lat": 42.58, "lon": -72.60, "note": "The valley confederation centred at Deerfield, north of here.", "after": {"y": 1676, "t": "survivors withdrew north after King Philip's War"}},
+        {"n": "Pocumtuc", "src": "en.wikipedia.org/wiki/Pocumtuc", "poly": [[-72.72, 42.45], [-72.48, 42.45], [-72.50, 42.68], [-72.74, 42.68]], "lat": 42.58, "lon": -72.60, "note": "The valley confederation centered at Deerfield, north of here.", "after": {"y": 1676, "t": "survivors withdrew north after King Philip's War"}},
         {"n": "Nipmuc", "src": "en.wikipedia.org/wiki/Nipmuc", "poly": [[-72.35, 42.22], [-72.10, 42.22], [-72.12, 42.45], [-72.36, 42.45]], "lat": 42.33, "lon": -72.22, "note": "The uplands east of the river.", "after": {"y": 1676, "t": "interned on Deer Island, then scattered"}},
     ],
     "events": [

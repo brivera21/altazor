@@ -634,7 +634,7 @@ def main():
          "Checking the dates in the us strand, from the first tools to the "
          "end of the last glacial period."),
         ("https://en.wikipedia.org/wiki/Timeline_of_historic_inventions",
-         "Checking the dates in the farming, science and maths strands."),
+         "Checking the dates in the farming, science and math strands."),
         ("https://en.wikipedia.org/wiki/Timeline_of_world_history",
          "Checking the dates in the states and empires strand."),
     ]:

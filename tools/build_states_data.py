@@ -132,7 +132,7 @@ def main():
         data = {
             "name": state_name, "fips": fips, "W": W, "H": H,
             # mercator bbox for the client's terrain and land cover
-            # overlays (EPSG:3857 metres), aligned 1:1 with the view
+            # overlays (EPSG:3857 meters), aligned 1:1 with the view
             "m": [mx0, my0, mx1, my1],
             "ll": [minx - VP, miny - VP, maxx + VP, maxy + VP],
         }

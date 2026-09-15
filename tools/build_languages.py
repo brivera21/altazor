@@ -185,7 +185,7 @@ function draw(n){
     +(n.id===pinned?'<circle cx="'+x+'" cy="'+n.y+'" r="9" fill="none" stroke="var(--accent)" stroke-width="1.5"/>':'')
     +'<rect x="'+(x-10)+'" y="'+(n.y-11)+'" width="'+(W-PADL-x)+'" height="'+RS+'" fill="'+(n.id===pinned?'#1d2126':'transparent')+'"/>'
     // a branch is a square, a language a circle, so the vitality
-    // colours below belong to the tips alone
+    // colors below belong to the tips alone
     +(leaf
       ? '<circle cx="'+x+'" cy="'+n.y+'" r="4" fill="'+vc(n)+'" stroke="'+vc(n)+'" stroke-width="1.5"/>'
       : '<rect x="'+(x-4.5)+'" y="'+(n.y-4.5)+'" width="9" height="9" rx="1.5" fill="'+(isOpen?'#151515':'#8b949e')+'" stroke="#8b949e" stroke-width="1.5"/>')

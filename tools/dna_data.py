@@ -14,7 +14,7 @@ import apa
 
 HELIX = {"width_nm": 2.0, "pitch_nm": 3.57, "bp_per_turn": 10.5, "rise_nm": 0.34, "major_nm": 2.2, "minor_nm": 1.2}
 
-# the bases: letter, name, partner, hydrogen bonds, colour, kind
+# the bases: letter, name, partner, hydrogen bonds, color, kind
 BASES = [
     ("A", "adenine", "T", 2, "#58a6ff", "purine"),
     ("T", "thymine", "A", 2, "#ffb02e", "pyrimidine"),
@@ -44,7 +44,7 @@ AMINO = {k: {"abbr": v[0], "name": v[1]} for k, v in _AA.items()}
 
 # the start of human beta-globin, HBB, coding strand, 30 codons
 GENE = ("ATGGTGCATCTGACTCCTGAGGAGAAGTCTGCCGTTACTGCCCTGTGGGGCAAGGTGAACGTGGATGAAGTTGGTGGTGAGGCCCTGGGC")
-GENE_NOTE = ("The first thirty codons of the gene for beta-globin, half of the haemoglobin that carries oxygen in blood. "
+GENE_NOTE = ("The first thirty codons of the gene for beta-globin, half of the hemoglobin that carries oxygen in blood. "
              "The methionine at the front is the start signal and is cut off later; the protein goes on for 146 amino acids.")
 MUTATIONS = [
     ("sickle", "the sickle cell mutation", 19, "T", "One base, an A to a T in the seventh codon, turns glutamic acid into valine. The changed protein sticks to itself when it gives up its oxygen, the red cells bend into sickles, and they jam in small vessels. One copy of the gene protects against malaria, which is why the mutation is common where malaria is.", "Wikipedia, Sickle cell disease"),
@@ -70,7 +70,7 @@ CHROMOSOME_NOTES = {
     "Y": "Small, mostly repetitive, carrying the gene that starts a male body and little else; it is passed from father to son unchanged, apart from mutations, which is how paternal lines are traced.",
     "MT": "The mitochondrion's own ring of DNA, 16,569 bases, 37 genes, passed only from the mother, and the last relic of the bacterium the mitochondrion once was.",
 }
-GENOME = {"cells": 3.7e13, "coding_share": 0.015, "genes": 20000, "note": "About 3.1 billion base pairs in one set, 6.2 billion in the two sets each cell carries; two metres of it, coiled into a nucleus six microns across, in almost every one of the body's thirty-seven trillion cells. Only about one and a half percent of it codes for protein."}
+GENOME = {"cells": 3.7e13, "coding_share": 0.015, "genes": 20000, "note": "About 3.1 billion base pairs in one set, 6.2 billion in the two sets each cell carries; two meters of it, coiled into a nucleus six microns across, in almost every one of the body's thirty-seven trillion cells. Only about one and a half percent of it codes for protein."}
 
 REFS = [
     (apa.article("Watson, J. D., &amp; Crick, F. H. C.", 1953, "Molecular structure of nucleic acids: A structure for deoxyribose nucleic acid",

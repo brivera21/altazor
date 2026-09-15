@@ -543,7 +543,7 @@ SYMBOLS = {
        "the giant sequoia rather than choosing."},
  {"k": "Grass", "n": "Purple needlegrass", "b": "Stipa pulchra",
   "s": "Nassella pulchra", "y": 2004, "a": "Stipa pulchra",
-  "t": "A bunchgrass whose roots reach several metres down, which is how "
+  "t": "A bunchgrass whose roots reach several meters down, which is how "
        "it survives the dry season."},
 ],
 "az": [
@@ -1320,7 +1320,7 @@ for(const id in CH) document.getElementById(id).onclick=e=>{
 };
 
 // ---- terrain: AWS Terrain Tiles (terrarium), shaded and tinted ----
-// One hypsometric ramp for every map on the site: the colour of a pixel
+// One hypsometric ramp for every map on the site: the color of a pixel
 // is its height above the sea, not its rank within this frame.
 const HYPS=[[0,47,79,55],[50,74,102,58],[200,122,133,69],
             [500,168,148,88],[1000,156,122,90],[2000,154,148,144],
@@ -1385,8 +1385,8 @@ async function terrain(){
     for(let y2=0;y2<py;y2++)for(let x=0;x<px;x++){
       const i=y2*px+x, e=elev[i];
       if(water[i]){ o[i*4]=30; o[i*4+1]=68; o[i*4+2]=98; o[i*4+3]=235; continue; }
-      // an absolute ramp, keyed to metres above the sea, so a flat town
-      // and a mountain city are coloured on the same scale
+      // an absolute ramp, keyed to meters above the sea, so a flat town
+      // and a mountain city are colored on the same scale
       const ex=elev[y2*px+Math.min(px-1,x+1)], ey=elev[Math.min(py-1,y2+1)*px+x];
       // flat ground carries almost no shading, so the relief gain rises
       // as the map's own range falls
@@ -1590,7 +1590,7 @@ def mine_label(st, name):
     return None
 
 
-# migration waves: f and t are [lat, lon] region centres, p an order of
+# migration waves: f and t are [lat, lon] region centers, p an order of
 # magnitude for the people who moved, b the bow of the arrow
 MIG = {
 "ca": [

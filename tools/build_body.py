@@ -63,10 +63,10 @@ METHOD = (
     "BodyParts3D, keyed to a term in the Foundational Model of Anatomy. "
     "Every triangle was turned about the body's own vertical axis, "
     "projected, filled by scanline into a raster at between 1.4 and 8 "
-    "pixels per millimetre depending on the size of the part, and the "
+    "pixels per millimeter depending on the size of the part, and the "
     "silhouette of that raster traced and reduced to a polygon. What is "
     "drawn is therefore the true outline of the part seen from that "
-    "direction, at about a quarter of a millimetre, and not an artist's "
+    "direction, at about a quarter of a millimeter, and not an artist's "
     "reading of it. Four directions are traced and eight are shown: an "
     "orthographic silhouette seen from behind is the same outline mirrored, "
     "so the far half of the turn costs nothing but a reversal of the "
@@ -88,7 +88,7 @@ NERVENOTE = (
     "vertebra is, and the vagus ends on this heart and this stomach. The "
     "courses follow the standard descriptions in Gray's Anatomy and in "
     "Moore. What that buys is registration against the bones on screen. "
-    "What it does not buy is millimetre accuracy for any individual nerve "
+    "What it does not buy is millimeter accuracy for any individual nerve "
     "in any individual person, and nerves vary between people more than "
     "bones do.")
 
@@ -98,7 +98,7 @@ GAPNOTE = ("What the model does not hold. " +
 LICENSE = ("BodyParts3D, copyright The Database Center for Life Science, "
            "licensed under CC Attribution-Share Alike 2.1 Japan. The "
            "outlines on this page are a derived work and carry the same "
-           "licence.")
+           "license.")
 
 CSS = """
 :root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
@@ -243,7 +243,7 @@ const SC=P.scale, BOX=P.box;
 const NS='http://www.w3.org/2000/svg';
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 
-// the rings arrive as signed deltas on a quarter millimetre grid, five
+// the rings arrive as signed deltas on a quarter millimeter grid, five
 // bits to a character
 function decode(s){
   let i=0,px=0,py=0,d='';

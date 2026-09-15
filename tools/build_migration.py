@@ -265,7 +265,7 @@ at the date its own evidence gives, and the ones the literature argues about
 are drawn differently and say what the argument is.</p>
 <p>The lines join each site to the nearest one already occupied. That shows the
 order things happened in, not anyone's route: nobody walked those lines, and
-the paths themselves are not known. Sea level was 120 metres lower at the
+the paths themselves are not known. Sea level was 120 meters lower at the
 glacial maximum, which is how Australia and the Americas were reached at all,
 and that lower coast is not drawn here.</p>
 <p>The world total runs the whole way. The split by continent begins at seven
