@@ -24,6 +24,7 @@ title: Chess
 <div>
 <h2>Endgames</h2>
 <p><a href="endgames.html">Endgames</a></p>
-<p><a href="rook-endings.html">Rook Endings</a></p>
+<p><a href="endgame-threshold.html">Endgame Threshold</a></p>
+<p><a href="rook-endgames.html">Rook Endgames</a></p>
 </div>
 </div>
