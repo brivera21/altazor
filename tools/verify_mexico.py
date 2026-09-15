@@ -84,7 +84,7 @@ for i, a in enumerate(names):
 print(f"  {'ok  ' if not bad else 'FAIL'} no two faces share more than "
       "900 km2, which is a rounding of the shared border")
 
-print("--- the labelled rivers, identified again from the raw data ---")
+print("--- the labeled rivers, identified again from the raw data ---")
 from shapely.geometry import LineString, Point
 from shapely.ops import linemerge
 segs = [LineString(x) for x in U.read_wdb("rivers") if len(x) > 1]

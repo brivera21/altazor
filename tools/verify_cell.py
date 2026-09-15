@@ -34,10 +34,10 @@ vb = math.pi * (by["bacterium"][3] / 2) ** 2 * (by["bacterium"][2] - by["bacteri
 vp = by["plant"][2] * by["plant"][3] * by["plant"][3]
 check(1500 < va / vb < 2500, f"the bacterium has about a two thousandth of the animal cell's volume ({va / vb:.0f})")
 check(8 < vp / va < 10, f"the plant cell about nine times it ({vp / va:.1f})")
-check(any("2 metres" in p[6] or "two metres" in p[6].lower() for p in PARTS if p[1] == "animal"),
-      "the animal nucleus carries two metres of DNA")
-check(any("1.6 millimetres" in p[6] for p in PARTS if p[1] == "bacterium"),
-      "the bacterium's loop is 1.6 millimetres, 4.6 million bases at 0.34 nm")
+check(any("2 meters" in p[6] or "two meters" in p[6].lower() for p in PARTS if p[1] == "animal"),
+      "the animal nucleus carries two meters of DNA")
+check(any("1.6 millimeters" in p[6] for p in PARTS if p[1] == "bacterium"),
+      "the bacterium's loop is 1.6 millimeters, 4.6 million bases at 0.34 nm")
 check(abs(4.6e6 * 0.34e-9 - 1.6e-3) < 0.05e-3, "which is what 4.6 million bases at 0.34 nm come to")
 
 print("--- the drawing ---")

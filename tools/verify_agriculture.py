@@ -1,12 +1,12 @@
 """Check agriculture.html against its data and its drawing.
 
-  the data     twelve centres, each on land in the mask with a name, its
+  the data     twelve centers, each on land in the mask with a name, its
                plants or animals and a story; dates within the Holocene,
                the Fertile Crescent the oldest; twelve crops in order of
                tonnage with a year each, sugarcane above maize above rice
                and wheat; the land shares add to 100; the biomass figures
                are Bar-On's and livestock is fourteen times the wild
-  the drawing  the map is painted with land under the centres; each dot
+  the drawing  the map is painted with land under the centers; each dot
                stands at its coordinates and on the line of time at its
                date; the pointer over a dot gives its card; the bars have
                their lengths; no label overlaps another
@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from agriculture_data import CENTRES, CROPS, LAND, BIOMASS
+from agriculture_data import CENTERS, CROPS, LAND, BIOMASS
 
 ROOT = Path(__file__).resolve().parent.parent
 PAGE = ROOT / "agriculture.html"
@@ -30,8 +30,8 @@ def check(ok, msg, extra=""):
 
 
 print("--- the data ---")
-check(len(CENTRES) == 12 and all(c[1] and c[7] and (c[5] != "none" or c[6] != "none") for c in CENTRES), "twelve centres, each with a name, something domesticated and a story")
-dated = [c for c in CENTRES if c[4] is not None]
+check(len(CENTERS) == 12 and all(c[1] and c[7] and (c[5] != "none" or c[6] != "none") for c in CENTERS), "twelve centers, each with a name, something domesticated and a story")
+dated = [c for c in CENTERS if c[4] is not None]
 check(all(3000 <= c[4] <= 11700 for c in dated) and max(dated, key=lambda c: c[4])[0] == "crescent", "every date lies within the Holocene and the Fertile Crescent is the oldest")
 check([c[2] for c in CROPS] == sorted([c[2] for c in CROPS], reverse=True) and [c[0] for c in CROPS][:4] == ["sugarcane", "maize", "rice", "wheat"], "twelve crops in order: sugarcane, maize, rice, wheat first")
 check(all(2016 <= c[3] <= 2026 and c[2] > 0 and c[4] and c[5] for c in CROPS), "each crop has a recent year, a grower and a use")
@@ -66,8 +66,8 @@ with sync_playwright() as pw:
     TX = lambda ya: 60 + (12000 - ya) / 12000 * 860
     ok = True
     landok = True
-    for c in CENTRES:
-        d = st({"centre": c[0]})
+    for c in CENTERS:
+        d = st({"center": c[0]})
         if abs(d["px"][0] - MX(c[2])) > 0.6 or abs(d["px"][1] - MY(c[3])) > 0.6:
             ok = False
         if c[4] is not None and abs(d["tx"] - TX(c[4])) > 0.6:
@@ -79,8 +79,8 @@ with sync_playwright() as pw:
                 break
         else:
             landok = False
-    check(ok, "every centre's dot stands at its coordinates and at its date on the line of time")
-    check(landok, "every centre sits on painted land")
+    check(ok, "every center's dot stands at its coordinates and at its date on the line of time")
+    check(landok, "every center sits on painted land")
     cbox = pg.eval_on_selector("#ocanvas", "e=>{const r=e.getBoundingClientRect(); return {x:r.left,y:r.top,w:r.width,h:r.height,cw:e.width,ch:e.height}}")
     cx = lambda px: cbox["x"] + px / cbox["cw"] * cbox["w"]
     cy = lambda py: cbox["y"] + py / cbox["ch"] * cbox["h"]
@@ -99,11 +99,11 @@ with sync_playwright() as pw:
     pg.click('#views button[data-v="harvest"]')
     pg.wait_for_timeout(150)
     s = st({"crop": "rice"})
-    check(s["view"] == "harvest" and s["bars"] == 12 and abs(s["barw"] - s["expect"]) < 0.6 and "6.6 billion" in s["card"], "the harvest: twelve bars at their lengths, 6.6 billion tonnes together")
+    check(s["view"] == "harvest" and s["bars"] == 12 and abs(s["barw"] - s["expect"]) < 0.6 and "6.6 billion" in s["card"], "the harvest: twelve bars at their lengths, 6.6 billion metric tons together")
     pg.evaluate("()=>document.querySelector('#asvg g[data-crop=\"soy\"]').dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
     pg.wait_for_timeout(80)
     s = st()
-    check(s["name"] == "soybeans" and "353 million tonnes" in s["card"] and "feeds livestock" in s["card"] and "44 kg" in s["card"], "hovering soybeans: 353 million tonnes, feed, 44 kg a person")
+    check(s["name"] == "soybeans" and "353 million metric tons" in s["card"] and "feeds livestock" in s["card"] and "44 kg" in s["card"], "hovering soybeans: 353 million metric tons, feed, 44 kg a person")
     check(overlaps("#asvg text") == 0, "no two labels overlap on the harvest", f"{overlaps('#asvg text')}")
     pg.click('#views button[data-v="land"]')
     pg.wait_for_timeout(150)

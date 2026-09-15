@@ -6,7 +6,7 @@ a real engine rather than eyeballed: every move legal from the stated
 position, every check mark matching the board, every move's text equal
 to the notation the engine produces, and the sides alternating.
 
-The board is checked too. A diagram with its colours inverted reads as
+The board is checked too. A diagram with its colors inverted reads as
 wrong to anyone who plays, and the parity is easy to get backwards:
 a1 is dark and h1 is light.
 

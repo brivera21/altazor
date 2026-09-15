@@ -10,7 +10,7 @@ the boundaries are Bird's, from NUVEL-1A and later local models.
 import apa
 
 # the kinds of boundary, in the order of the data file's class codes
-# code, name, colour, a line
+# code, name, color, a line
 CLASSES = [
     ("OSR", "a spreading ridge", "#f28cb0", "Two plates pulling apart under the ocean. Mantle rises to fill the gap, melts, and freezes into new sea floor; the ridge stands high because the young rock is hot."),
     ("CRB", "a continental rift", "#f2a0c0", "A continent being pulled apart: a valley with faults on both sides and volcanoes down the middle. Given time it becomes a spreading ridge with an ocean in it."),
@@ -23,15 +23,15 @@ CLASSES = [
 
 # plates with something to say: code, a line, source
 NOTES = {
-    "PA": ("The largest plate, all ocean, and shrinking: trenches ring it on the north and west, and it is heading northwest at about seven centimetres a year, leaving the Hawaiian chain behind it as it passes over a hot spot.", "Bird 2003; Wikipedia, Pacific plate"),
+    "PA": ("The largest plate, all ocean, and shrinking: trenches ring it on the north and west, and it is heading northwest at about seven centimeters a year, leaving the Hawaiian chain behind it as it passes over a hot spot.", "Bird 2003; Wikipedia, Pacific plate"),
     "AF": ("Africa in the middle, ridges on three sides, so the plate is growing at its edges and moving slowly. The East African Rift is tearing the Somali side off it.", "Bird 2003; Wikipedia, African plate"),
     "AN": ("Ringed almost entirely by spreading ridges, with no trench, so the plate hardly moves and grows on every side.", "Bird 2003; Wikipedia, Antarctic plate"),
     "NA": ("The Atlantic half is growing at the Mid-Atlantic Ridge; the Pacific edge slides past the Pacific plate along the San Andreas and dives under it in Alaska.", "Bird 2003; Wikipedia, North American plate"),
     "EU": ("From the Mid-Atlantic Ridge to Japan. India has been pushing into its southern edge for fifty million years, building the Himalaya; Bird splits its eastern parts into the Amur, Okhotsk and Yangtze plates.", "Bird 2003; Wikipedia, Eurasian plate"),
-    "AU": ("Moving north at seven centimetres a year, among the fastest of the large plates, and colliding with Eurasia and the Pacific along a line from Sumatra to New Zealand.", "Bird 2003; Wikipedia, Australian plate"),
+    "AU": ("Moving north at seven centimeters a year, among the fastest of the large plates, and colliding with Eurasia and the Pacific along a line from Sumatra to New Zealand.", "Bird 2003; Wikipedia, Australian plate"),
     "SA": ("The Nazca plate dives beneath its western edge along the Peru-Chile trench, and the Andes stand on top of the subduction.", "Bird 2003; Wikipedia, South American plate"),
-    "NZ": ("A piece of ocean floor between the East Pacific Rise and South America, being consumed under the Andes at eight centimetres a year, one of the fastest convergences there is.", "Bird 2003; Wikipedia, Nazca plate"),
-    "IN": ("Broke away from Gondwana, crossed the Tethys Ocean at up to twenty centimetres a year, and hit Eurasia; still pushing north at five, which is why the Himalaya keep rising.", "Bird 2003; Wikipedia, Indian plate"),
+    "NZ": ("A piece of ocean floor between the East Pacific Rise and South America, being consumed under the Andes at eight centimeters a year, one of the fastest convergences there is.", "Bird 2003; Wikipedia, Nazca plate"),
+    "IN": ("Broke away from Gondwana, crossed the Tethys Ocean at up to twenty centimeters a year, and hit Eurasia; still pushing north at five, which is why the Himalaya keep rising.", "Bird 2003; Wikipedia, Indian plate"),
     "AR": ("Splitting from Africa along the Red Sea, one of the youngest oceans, and pushing into Iran to raise the Zagros.", "Bird 2003; Wikipedia, Arabian plate"),
     "CO": ("A small oceanic plate diving under Central America and making its volcanoes.", "Bird 2003; Wikipedia, Cocos plate"),
     "JF": ("The remnant of a plate that once filled the eastern Pacific, now a small slab going under Oregon and Washington and feeding the Cascade volcanoes.", "Bird 2003; Wikipedia, Juan de Fuca plate"),
@@ -44,16 +44,16 @@ GENERIC = ("One of the smaller plates in Bird's model, most of them slivers alon
 
 # places to jump to: k, name, lon, lat, a line, source
 PLACES = [
-    ("atlantic", "the Mid-Atlantic Ridge", -45.1, 15.3, "The seam down the middle of the Atlantic, where the ocean has been opening at about two and a half centimetres a year for 180 million years. Iceland is the ridge above water.", "Wikipedia, Mid-Atlantic Ridge"),
-    ("epr", "the East Pacific Rise", -113.6, -19.8, "The fastest spreading ridge, opening at up to fifteen centimetres a year, making the Pacific and Nazca plates.", "Wikipedia, East Pacific Rise"),
+    ("atlantic", "the Mid-Atlantic Ridge", -45.1, 15.3, "The seam down the middle of the Atlantic, where the ocean has been opening at about two and a half centimeters a year for 180 million years. Iceland is the ridge above water.", "Wikipedia, Mid-Atlantic Ridge"),
+    ("epr", "the East Pacific Rise", -113.6, -19.8, "The fastest spreading ridge, opening at up to fifteen centimeters a year, making the Pacific and Nazca plates.", "Wikipedia, East Pacific Rise"),
     ("andes", "the Peru-Chile Trench", -73, -22, "The Nazca plate going under South America. The Andes, the Atacama and the largest earthquake ever recorded, Valdivia in 1960, are all this boundary.", "Wikipedia, Peru-Chile Trench"),
-    ("japan", "the Japan Trench", 143, 38, "The Pacific plate diving under Japan at eight centimetres a year. The 2011 earthquake moved the sea floor fifty metres in minutes.", "Wikipedia, Japan Trench"),
+    ("japan", "the Japan Trench", 143, 38, "The Pacific plate diving under Japan at eight centimeters a year. The 2011 earthquake moved the sea floor fifty meters in minutes.", "Wikipedia, Japan Trench"),
     ("mariana", "the Mariana Trench", 143, 12, "The Pacific plate going under the Philippine Sea plate, the oldest and coldest ocean floor on the planet sinking into the deepest trench.", "Wikipedia, Mariana Trench"),
-    ("andreas", "the San Andreas Fault", -122.4, 37.6, "The Pacific and North American plates sliding past each other at four and a half centimetres a year. Los Angeles and San Francisco are on opposite sides.", "Wikipedia, San Andreas Fault"),
-    ("himalaya", "the Himalaya", 84, 28, "India driving into Eurasia. The crust here is twice its normal thickness, and the mountains rise about half a centimetre a year, worn down nearly as fast.", "Wikipedia, Himalayas"),
+    ("andreas", "the San Andreas Fault", -122.4, 37.6, "The Pacific and North American plates sliding past each other at four and a half centimeters a year. Los Angeles and San Francisco are on opposite sides.", "Wikipedia, San Andreas Fault"),
+    ("himalaya", "the Himalaya", 84, 28, "India driving into Eurasia. The crust here is twice its normal thickness, and the mountains rise about half a centimeter a year, worn down nearly as fast.", "Wikipedia, Himalayas"),
     ("rift", "the East African Rift", 36, 0, "Africa splitting in two from the Afar triangle to Mozambique: a valley with volcanoes and lakes along it, and a new plate boundary a few million years old.", "Wikipedia, East African Rift"),
-    ("redsea", "the Red Sea", 38, 20, "An ocean at birth: Arabia and Africa parted along it about thirty million years ago and it has been widening at a centimetre a year since.", "Wikipedia, Red Sea Rift"),
-    ("iceland", "Iceland", -19, 65, "The Mid-Atlantic Ridge above sea level, with a hot spot underneath; the island grows two centimetres wider a year.", "Wikipedia, Iceland hotspot"),
+    ("redsea", "the Red Sea", 38, 20, "An ocean at birth: Arabia and Africa parted along it about thirty million years ago and it has been widening at a centimeter a year since.", "Wikipedia, Red Sea Rift"),
+    ("iceland", "Iceland", -19, 65, "The Mid-Atlantic Ridge above sea level, with a hot spot underneath; the island grows two centimeters wider a year.", "Wikipedia, Iceland hotspot"),
 ]
 
 REFS = [
@@ -62,14 +62,14 @@ REFS = [
      "PB2002: the 52 plates, their boundaries in 5,824 steps, each classed and given a relative velocity."),
     (apa.web("Ahlenius, H.", 2014, "Tectonic plates: PB2002 boundaries, plates and orogens as GeoJSON", "GitHub, fraxen/tectonicplates",
              "https://github.com/fraxen/tectonicplates"),
-     "The digitised model as it is read here."),
+     "The digitized model as it is read here."),
     (apa.article("DeMets, C., Gordon, R. G., Argus, D. F., &amp; Stein, S.", 1994,
                  "Effect of recent revisions to the geomagnetic reversal time scale on estimates of current plate motions",
                  "Geophysical Research Letters", 21, 20, "2191-2194", "https://doi.org/10.1029/94GL02118"),
      "NUVEL-1A, the velocities Bird's model rests on for the large plates."),
     (apa.article("Wessel, P., &amp; Smith, W. H. F.", 1996, "A global, self-consistent, hierarchical, high-resolution shoreline database",
                  "Journal of Geophysical Research: Solid Earth", 101, "B4", "8741-8743", "https://doi.org/10.1029/96JB00104"),
-     "The coastlines, as rasterised for this site's Climate page."),
+     "The coastlines, as rasterized for this site's Climate page."),
 ]
 REFS += [(apa.wiki(f"https://en.wikipedia.org/wiki/{p}"), a) for p, a in [
     ("Plate_tectonics", "The theory, and the kinds of boundary."),

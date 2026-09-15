@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The objects on scale.html, one measured length each, in metres.
+"""The objects on scale.html, one measured length each, in meters.
 
 The length is a diameter unless the note says otherwise: a distance for the
 gaps between bodies, a height for the mountain and the tower, a length for
@@ -10,7 +10,7 @@ the article cited, since these are the numbers a reader will meet next.
 
 import apa
 
-# realm: the colour and the word for the region of the line
+# realm: the color and the word for the region of the line
 REALMS = {
     "quantum": ("#f28cb0", "the quantum realm"),
     "molecule": ("#e0a458", "molecules"),
@@ -22,7 +22,7 @@ REALMS = {
     "cosmos": ("#6ee7f2", "the cosmos"),
 }
 
-# k, name, metres, realm, what the length is, a line, source, a page on this site
+# k, name, meters, realm, what the length is, a line, source, a page on this site
 OBJECTS = [
     ("planck", "the Planck length", 1.616255e-35, "quantum", "the smallest length physics gives a meaning to",
      "Below this, quantum uncertainty and gravity make the notion of a distance stop working. Nothing measured comes within twenty decades of it.", "CODATA 2018", None),
@@ -33,17 +33,17 @@ OBJECTS = [
     ("water", "a water molecule", 2.75e-10, "molecule", "across the oxygen and its two hydrogens",
      "Three atoms, bent at 104.5 degrees, which is why water is polar and dissolves so much.", "Wikipedia, Properties of water", None),
     ("dna", "the DNA double helix", 2.0e-9, "molecule", "the width of the helix",
-     "Two nanometres wide and, uncoiled, two metres long in every human cell: a ratio of a billion.", "Wikipedia, DNA", None),
-    ("hemoglobin", "a haemoglobin molecule", 5.5e-9, "molecule", "diameter",
+     "Two nanometers wide and, uncoiled, two meters long in every human cell: a ratio of a billion.", "Wikipedia, DNA", None),
+    ("hemoglobin", "a hemoglobin molecule", 5.5e-9, "molecule", "diameter",
      "The protein that carries oxygen in blood, four chains folded together, with an iron atom at the heart of each.", "Wikipedia, Hemoglobin", None),
     ("ribosome", "a ribosome", 2.5e-8, "molecule", "diameter",
      "The machine that reads RNA and builds proteins; a cell has millions. The largest molecular machine drawn here.", "Wikipedia, Ribosome", None),
     ("virus", "a coronavirus", 1.0e-7, "cell", "diameter, SARS-CoV-2",
-     "A hundred nanometres across, smaller than the wavelength of the light a microscope uses, which is why viruses waited for the electron microscope.", "Wikipedia, SARS-CoV-2", None),
+     "A hundred nanometers across, smaller than the wavelength of the light a microscope uses, which is why viruses waited for the electron microscope.", "Wikipedia, SARS-CoV-2", None),
     ("green", "a wave of green light", 5.5e-7, "cell", "the wavelength",
      "Half a micron from crest to crest. Nothing smaller than roughly this can be seen with light, whatever the lens.", "Wikipedia, Visible spectrum", None),
     ("ecoli", "an E. coli bacterium", 2.0e-6, "cell", "length",
-     "Two microns long and half a micron wide, the best studied living thing. A thousand of them end to end make two millimetres.", "Wikipedia, Escherichia coli", None),
+     "Two microns long and half a micron wide, the best studied living thing. A thousand of them end to end make two millimeters.", "Wikipedia, Escherichia coli", None),
     ("rbc", "a red blood cell", 7.8e-6, "cell", "diameter",
      "A disc with no nucleus, made to squeeze through capillaries barely wider than itself. A drop of blood holds five million.", "Wikipedia, Red blood cell", None),
     ("hair", "a human hair", 8e-5, "everyday", "width",
@@ -51,29 +51,29 @@ OBJECTS = [
     ("egg", "a human egg cell", 1.2e-4, "cell", "diameter",
      "The largest human cell, and the only one the naked eye can just make out, about the width of a hair.", "Wikipedia, Egg cell", None),
     ("sand", "a grain of sand", 5e-4, "everyday", "diameter, mid-range",
-     "Sand is defined by size: between a sixteenth of a millimetre and two millimetres. Smaller is silt, larger is gravel.", "Wikipedia, Sand", None),
+     "Sand is defined by size: between a sixteenth of a millimeter and two millimeters. Smaller is silt, larger is gravel.", "Wikipedia, Sand", None),
     ("ant", "an ant", 4e-3, "everyday", "length, a typical worker",
-     "Ants run from under a millimetre to over five centimetres. The four millimetre worker is the common one.", "Wikipedia, Ant", None),
+     "Ants run from under a millimeter to over five centimeters. The four millimeter worker is the common one.", "Wikipedia, Ant", None),
     ("coin", "a coin", 2.4e-2, "everyday", "diameter, a US quarter",
-     "Twenty-four millimetres. The thing in a pocket that is nearest to a round number.", "Wikipedia, Quarter (United States coin)", None),
+     "Twenty-four millimeters. The thing in a pocket that is nearest to a round number.", "Wikipedia, Quarter (United States coin)", None),
     ("human", "a person", 1.7, "everyday", "height, an adult",
-     "About one and seven tenths metres, the measure the metre was made to be a comfortable fraction of. The middle of this line in the sense that matters to us.", "Wikipedia, Human height", "body.html"),
+     "About one and seven tenths meters, the measure the meter was made to be a comfortable fraction of. The middle of this line in the sense that matters to us.", "Wikipedia, Human height", "body.html"),
     ("whale", "a blue whale", 25, "everyday", "length",
-     "The largest animal that has ever lived, as far as is known, at up to thirty metres.", "Wikipedia, Blue whale", "animals.html"),
+     "The largest animal that has ever lived, as far as is known, at up to thirty meters.", "Wikipedia, Blue whale", "animals.html"),
     ("redwood", "the tallest tree", 115.9, "everyday", "height, Hyperion, a coast redwood",
-     "Measured at 115.92 metres in 2019. Trees stop near here because water cannot be lifted much higher against gravity and friction.", "Wikipedia, Hyperion (tree)", None),
+     "Measured at 115.92 meters in 2019. Trees stop near here because water cannot be lifted much higher against gravity and friction.", "Wikipedia, Hyperion (tree)", None),
     ("burj", "the tallest building", 828, "everyday", "height, Burj Khalifa",
-     "Eight hundred and twenty-eight metres, about seven redwoods.", "Wikipedia, Burj Khalifa", None),
+     "Eight hundred and twenty-eight meters, about seven redwoods.", "Wikipedia, Burj Khalifa", None),
     ("everest", "Everest", 8849, "everyday", "height above sea level",
-     "The 2020 survey figure. From the seabed, Mauna Kea is taller, at over ten kilometres.", "Wikipedia, Mount Everest", None),
+     "The 2020 survey figure. From the seabed, Mauna Kea is taller, at over ten kilometers.", "Wikipedia, Mount Everest", None),
     ("manhattan", "Manhattan", 2.16e4, "everyday", "length, tip to tip",
-     "Twenty-one and a half kilometres, a long walk in a day.", "Wikipedia, Manhattan", "new-york.html"),
+     "Twenty-one and a half kilometers, a long walk in a day.", "Wikipedia, Manhattan", "new-york.html"),
     ("marathon", "a marathon", 4.2195e4, "everyday", "the distance run",
-     "Forty-two kilometres and change, about the largest distance a body covers on foot in one go.", "Wikipedia, Marathon", None),
+     "Forty-two kilometers and change, about the largest distance a body covers on foot in one go.", "Wikipedia, Marathon", None),
     ("moon", "the Moon", 3.4748e6, "world", "diameter",
      "A quarter the Earth's width, and the largest moon in the solar system relative to its planet.", "Wikipedia, Moon", "solar-system.html"),
     ("earth", "the Earth", 1.2742e7, "world", "mean diameter",
-     "Twelve thousand seven hundred kilometres: three hundred marathons laid end to end.", "Wikipedia, Earth", "solar-system.html"),
+     "Twelve thousand seven hundred kilometers: three hundred marathons laid end to end.", "Wikipedia, Earth", "solar-system.html"),
     ("jupiter", "Jupiter", 1.398e8, "world", "mean diameter",
      "Eleven Earths across, and more than twice the mass of all the other planets together.", "Wikipedia, Jupiter", "solar-system.html"),
     ("moondist", "the Earth to the Moon", 3.844e8, "world", "mean distance",
@@ -89,7 +89,7 @@ OBJECTS = [
     ("heliosphere", "the heliosphere", 3.6e13, "star", "diameter, about 240 au",
      "Where the solar wind gives out against the gas between the stars. Voyager 1 crossed it in 2012.", "Wikipedia, Heliosphere", None),
     ("ly", "a light year", 9.4607e15, "star", "the distance light covers in a year",
-     "Nine and a half trillion kilometres, sixty-three thousand au.", "IAU", None),
+     "Nine and a half trillion kilometers, sixty-three thousand au.", "IAU", None),
     ("proxima", "the Sun to Proxima Centauri", 4.0175e16, "star", "distance, 4.25 light years",
      "The nearest other star. At Voyager's speed the trip would take seventy thousand years.", "Wikipedia, Proxima Centauri", None),
     ("mw", "the Milky Way", 8.27e20, "galaxy", "diameter of the stellar disc, 26.8 kpc",
@@ -99,14 +99,14 @@ OBJECTS = [
     ("lg", "the Local Group", 9.3e22, "galaxy", "diameter, about 3 Mpc",
      "The Milky Way, Andromeda and everything bound to them, some eighty galaxies in all.", "McConnachie 2012", "galaxies.html"),
     ("virgo", "the Milky Way to the Virgo cluster", 5.1e23, "galaxy", "distance, 16.5 Mpc",
-     "The nearest large cluster, over a thousand galaxies, at the centre of our supercluster.", "Wikipedia, Virgo Cluster", None),
+     "The nearest large cluster, over a thousand galaxies, at the center of our supercluster.", "Wikipedia, Virgo Cluster", None),
     ("laniakea", "Laniakea", 1.6e24, "cosmos", "diameter, 160 Mpc",
      "The supercluster the Local Group flows within, defined in 2014 by which way galaxies fall.", "Wikipedia, Laniakea Supercluster", None),
     ("universe", "the observable universe", 8.8e26, "cosmos", "diameter, 93 billion light years",
-     "Everything whose light has had time to reach us. Wider than 13.8 billion light years because space has stretched while the light travelled.", "Wikipedia, Observable universe", "universe.html"),
+     "Everything whose light has had time to reach us. Wider than 13.8 billion light years because space has stretched while the light traveled.", "Wikipedia, Observable universe", "universe.html"),
 ]
 
-# places the lens can jump to, by the object it centres on
+# places the lens can jump to, by the object it centers on
 JUMPS = [("hydrogen", "an atom"), ("rbc", "a cell"), ("human", "a person"),
          ("earth", "the Earth"), ("sun", "the Sun"), ("mw", "the Galaxy"),
          ("universe", "everything")]

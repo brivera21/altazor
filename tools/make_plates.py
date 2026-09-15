@@ -80,7 +80,7 @@ def main(plates_path, steps_path):
     plates = json.load(open(plates_path))
     steps = json.load(open(steps_path))
 
-    # the plates, rasterised; a ring that winds round a pole is closed through it
+    # the plates, rasterized; a ring that winds round a pole is closed through it
     ids = np.zeros((H, W), np.uint8)
     lat = np.radians(90 - (np.arange(H) + 0.5) * 180 / H)
     wt = np.cos(lat)[:, None] * np.ones((1, W))

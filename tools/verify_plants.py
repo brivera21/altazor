@@ -65,7 +65,7 @@ with sync_playwright() as pw:
 
     s = st()
     check(s["view"] == "parts" and s["parts"] == 6, "opens on the plant with six parts")
-    for k, nm, word in [("root", "the roots", "10,000 km"), ("leaf", "the leaf", "square millimetre"), ("flower", "the flower", "nine tenths"), ("chloroplast", "the chloroplasts", "tens to a hundred")]:
+    for k, nm, word in [("root", "the roots", "10,000 km"), ("leaf", "the leaf", "square millimeter"), ("flower", "the flower", "nine tenths"), ("chloroplast", "the chloroplasts", "tens to a hundred")]:
         pg.evaluate(f"()=>document.querySelector('#psvg g[data-part=\"{k}\"]').dispatchEvent(new PointerEvent('pointerover',{{bubbles:true}}))")
         pg.wait_for_timeout(80)
         s = st()
@@ -90,7 +90,7 @@ with sync_playwright() as pw:
     pg.evaluate("()=>document.querySelector('#psvg g[data-photo]').dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
     pg.wait_for_timeout(80)
     s = st()
-    check("2,870 kJ" in s["card"] and "104.9 billion tonnes" in s["card"] and "CO" in s["name"], "the equation's card: 2,870 kJ, 104.9 billion tonnes a year")
+    check("2,870 kJ" in s["card"] and "104.9 billion metric tons" in s["card"] and "CO" in s["name"], "the equation's card: 2,870 kJ, 104.9 billion metric tons a year")
     pg.click('#views button[data-v="kinds"]')
     pg.wait_for_timeout(150)
     s = st()

@@ -299,8 +299,8 @@ with sync_playwright() as pw:
     check("the page says the collapse view does not replace the emergency call",
           "does not replace the emergency number" in html)
     check("and owns up to how soft the cooling evidence is",
-          "no randomised trial" in html.lower()
-          or "There is no" in html and "randomised trial" in html)
+          "no randomized trial" in html.lower()
+          or "There is no" in html and "randomized trial" in html)
 
     check("no JS errors", not errs, "; ".join(errs)[:140])
     br.close()

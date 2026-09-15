@@ -163,7 +163,7 @@ with sync_playwright() as pw:
           f"the pointer over {target['n']} picks it out (hover {st2['hover']})")
     pg.mouse.move(700, 60)
 
-    # pulled back far enough, the moons go and the neighbours return
+    # pulled back far enough, the moons go and the neighbors return
     pg.evaluate("()=>{const c=document.getElementById('space');"
                 "for(let i=0;i<12;i++) c.dispatchEvent(new WheelEvent('wheel',"
                 "{deltaY:240,clientX:700,clientY:450,bubbles:true}));}")

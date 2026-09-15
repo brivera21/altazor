@@ -22,7 +22,7 @@ PROJECTIONS = [
     ("robinson", "Robinson", "compromise", 1963, "Arthur Robinson", "Made by eye rather than by formula, from a table of what looked right, to be neither equal-area nor conformal but tolerable everywhere. The National Geographic Society's world map from 1988 to 1998."),
     ("winkel", "Winkel tripel", "compromise", 1921, "Oswald Winkel", "The average of two older projections, chosen to keep area, angle and distance all moderately wrong instead of any of them badly. The National Geographic's map since 1998, and by most measures the least distorted of the whole-world maps."),
     ("ortho", "Orthographic", "perspective", -200, "known to Hipparchus", "The globe as seen from far away: half the world at a time, the middle true and the edges foreshortened to nothing. The only map that looks like the thing itself, which is why it is the one that fools nobody."),
-    ("azeq", "Azimuthal equidistant", "equidistant from the centre", 1500, "Guillaume Postel, and older", "Every distance and direction from the centre is right; everything else is wrong, more so toward the rim, where the point opposite the centre is smeared into the whole outer circle. Centred on the North Pole it is the emblem of the United Nations; centred on a city it is the map of where its flights go."),
+    ("azeq", "Azimuthal equidistant", "equidistant from the center", 1500, "Guillaume Postel, and older", "Every distance and direction from the center is right; everything else is wrong, more so toward the rim, where the point opposite the center is smeared into the whole outer circle. Centered on the North Pole it is the emblem of the United Nations; centered on a city it is the map of where its flights go."),
 ]
 
 # Robinson's table: latitude, PLEN (the length of the parallel), PDFE (the distance from the equator)
@@ -66,5 +66,5 @@ REFS += [(apa.wiki(f"https://en.wikipedia.org/wiki/{p}"), a) for p, a in [
     ("Equirectangular_projection", None), ("Gall%E2%80%93Peters_projection", None), ("Mollweide_projection", None), ("Sinusoidal_projection", None),
     ("Robinson_projection", "The table."), ("Winkel_tripel_projection", None), ("Orthographic_map_projection", None), ("Azimuthal_equidistant_projection", None),
     ("Great-circle_distance", "The haversine formula."), ("Rhumb_line", "The loxodrome and its length."),
-    ("Greenland", "2,166,086 square kilometres."), ("Africa", "About 30.4 million square kilometres."),
+    ("Greenland", "2,166,086 square kilometers."), ("Africa", "About 30.4 million square kilometers."),
 ]]

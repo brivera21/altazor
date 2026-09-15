@@ -8,7 +8,7 @@ Everything here is offline, from what basemap-data-hires bundles:
                    arcs: the counties already carry the coastline and every
                    inland water body the census counts.
   rivers_f.dat     WDBII rivers at full resolution. The layer has no names in
-                   it, so a river is labelled only when the same segment is the
+                   it, so a river is labeled only when the same segment is the
                    nearest one to two independent points on that river, far
                    apart; see verify_us.py.
   shadedrelief.jpg Natural Earth's relief raster at two arc minutes. There is
@@ -51,7 +51,7 @@ FRAMES = {
     "hi": (-160.5, -154.6, 18.8, 22.4),
 }
 
-WIN = 5                   # roughness window, about nine kilometres
+WIN = 5                   # roughness window, about nine kilometers
 TIERS = [("rough", 13.0, 1200.0), ("high", 22.0, 700.0)]   # name, floor, min km2
 
 

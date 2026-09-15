@@ -2,7 +2,7 @@
 """Build the continent outlines the reconstruction rotates.
 
 The plate model moves rigid plates, so every piece of land has to be given a
-plate to ride on. The seven continents already rasterised for Earth's Climate
+plate to ride on. The seven continents already rasterized for Earth's Climate
 are used, with two edits that matter for deep time:
 
   India is cut out of Asia and given plate 501. It spent most of the last

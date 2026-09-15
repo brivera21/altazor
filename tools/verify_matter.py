@@ -1,7 +1,7 @@
 """Checks matter.html against its data and against its drawing.
 
   the data     118 elements once each, on the standard grid, every family
-               known, IUPAC spellings, photographs where they exist
+               known, American spellings, photographs where they exist
   the page     draws the grid, the legend filters, and the card answers
 """
 import json
@@ -21,9 +21,9 @@ ok = len({(d["x"], d["y"]) for d in data}) == 118
 print(f"  {'ok  ' if ok else 'FAIL'} no two elements share a grid cell")
 if not ok: fails.append("grid collision")
 names = {d["z"]: d["n"] for d in data}
-ok = (names[13] == "Aluminium" and names[16] == "Sulfur"
-      and names[55] == "Caesium" and names[118] == "Oganesson")
-print(f"  {'ok  ' if ok else 'FAIL'} IUPAC spellings: Aluminium, Sulfur, Caesium")
+ok = (names[13] == "Aluminum" and names[16] == "Sulfur"
+      and names[55] == "Cesium" and names[118] == "Oganesson")
+print(f"  {'ok  ' if ok else 'FAIL'} IUPAC spellings: Aluminum, Sulfur, Cesium")
 if not ok: fails.append(f"spellings: {names[13]}, {names[16]}, {names[55]}")
 n_photo = sum(1 for d in data if d["img"])
 ok = n_photo >= 100 and all(

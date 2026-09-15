@@ -16,10 +16,10 @@ follows standard descriptions in Gray's Anatomy and Moore.
 
 What that buys is registration: the nerves land where they should
 against the bones on screen. What it does not buy is a claim of
-millimetre accuracy for any individual nerve, and the page does not make
+millimeter accuracy for any individual nerve, and the page does not make
 one.
 
-Everything is in millimetres, x to the subject's left, y from front to
+Everything is in millimeters, x to the subject's left, y from front to
 back, z up, the frame the meshes come in.
 """
 
@@ -420,7 +420,7 @@ add("cranial", "II Optic nerve",
     [[3, PONS[1] - 24, PONS[2] + 6], [10, EYE[1] + 24, EYE[2] + 8],
      [EYE[0] + 22, EYE[1] - 4, EYE[2]]],
     "A tract of brain pushed out to the eye during development rather than "
-    "a true peripheral nerve. Its fibres from the inner half of each retina "
+    "a true peripheral nerve. Its fibers from the inner half of each retina "
     "cross at the chiasm, so each side of the brain sees the opposite half "
     "of the world.", w=2.4)
 
@@ -454,7 +454,7 @@ add("cranial", "V2 Maxillary division",
 add("cranial", "V3 Mandibular division",
     [[40, MAND[1] + 10, MAND[2] + 34], [36, MAND[1] - 16, MAND[2] - 24]],
     "Lower jaw, lower teeth, and the muscles of chewing. The only division "
-    "that carries motor fibres.", w=1.3)
+    "that carries motor fibers.", w=1.3)
 
 add("cranial", "VI Abducens nerve",
     [[5, PONS[1] - 12, PONS[2] - 14], [16, EYE[1] + 22, EYE[2] - 2],
@@ -498,7 +498,7 @@ add("cranial", "XII Hypoglossal nerve",
 
 # ---- the sympathetic chain --------------------------------------------
 # Two chains of ganglia beside the vertebral bodies, from the base of the
-# skull to the coccyx. The fibres that feed them leave the cord only
+# skull to the coccyx. The fibers that feed them leave the cord only
 # between the first thoracic and the second lumbar nerve, which is the
 # whole of the sympathetic outflow.
 CHAIN_X, CHAIN_Y = 13.0, -9.0
@@ -508,7 +508,7 @@ for lev in ORDER:
     chain.append([CHAIN_X, v[1] + CHAIN_Y, v[2]])
 add("symp", "Sympathetic chain", chain,
     "A string of ganglia running the length of the spine just in front of "
-    "the vertebrae. A fibre entering it can go up, go down or pass "
+    "the vertebrae. A fiber entering it can go up, go down or pass "
     "straight through, which is how an outflow confined to the middle of "
     "the back reaches the eye at the top and the leg at the bottom.",
     w=2.4)
@@ -540,7 +540,7 @@ one("symp", "Ganglion impar", [[0, CO[1] + CHAIN_Y, CO[2]],
     "The bottom of both chains, where the left and right sides meet as a "
     "single midline ganglion in front of the coccyx.", k="ganglion", w=9)
 
-# the outflow: only T1 to L2 carries fibres out of the cord
+# the outflow: only T1 to L2 carries fibers out of the cord
 for lev in [f"T{i}" for i in range(1, 13)] + ["L1", "L2"]:
     v = LV[lev]
     add("symp", f"{lev} white ramus",
@@ -601,7 +601,7 @@ add("para", "Vagus nerve",
     "The tenth cranial nerve, and the one that leaves the head. It slows "
     "the heart, narrows the airways and drives the gut as far as the last "
     "third of the colon, where the sacral outflow takes over. Four fifths "
-    "of its fibres carry news up to the brain rather than orders down.",
+    "of its fibers carry news up to the brain rather than orders down.",
     w=2.6)
 
 add("para", "Cardiac branches of the vagus",
@@ -658,7 +658,7 @@ BLURB = {
  "periph": "Thirty-one pairs of spinal nerves, each leaving between two "
            "vertebrae and each serving a band of skin and a set of "
            "muscles. Four of them are rewoven into plexuses, which is why "
-           "one nerve in the arm carries fibres from four different levels "
+           "one nerve in the arm carries fibers from four different levels "
            "of the cord.",
  "cranial": "Twelve pairs leaving the brain directly rather than the cord. "
             "Two of them, the first and second, are not really nerves but "
@@ -668,7 +668,7 @@ BLURB = {
          "cord only between the first thoracic and the second lumbar "
          "nerve, and the chain beside the spine spreads it from the eye to "
          "the foot. Its ganglia sit near the spine and far from the "
-         "target, so one fibre in can drive many out.",
+         "target, so one fiber in can drive many out.",
  "para": "Rest and digest. The outflow is craniosacral: four cranial "
          "nerves and the second to fourth sacral, with nothing in between. "
          "Its ganglia sit on or in the organ itself, so its effects are "

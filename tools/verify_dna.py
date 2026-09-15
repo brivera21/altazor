@@ -8,7 +8,7 @@
                change; stop: seven amino acids; frame: a different chain)
   the genome   25 chromosomes summing to 3.09 billion base pairs and about
                20,000 genes; 19 the densest, 1 the longest, 21 the smallest
-               nuclear one; the stretched length near two metres a cell
+               nuclear one; the stretched length near two meters a cell
   the helix    40 pairs drawn, each base with its partner, purine with
                pyrimidine; the rungs advance 1/10.5 of a turn each; the
                pointer names a pair; the base clicks cycle A, C, G, T
@@ -79,7 +79,7 @@ check(min((c for c in CHROMOSOMES if c[0] not in ("MT",)), key=lambda c: c[1])[0
 check(max((c for c in CHROMOSOMES if c[0] != "MT"), key=lambda c: c[2] / c[1])[0] == "19", "19 the densest in genes")
 check(by["Y"][1] < by["X"][1] / 2 and by["Y"][2] < 100, "Y is under half of X and carries few genes")
 check(by["MT"][1] == 16569 and by["MT"][2] == 13, "the mitochondrial ring is 16,569 bases with 13 protein-coding genes")
-check(abs(tot * 0.34e-9 - 1.05) < 0.02, f"one set stretched is {tot * 0.34e-9:.2f} m, two sets about two metres")
+check(abs(tot * 0.34e-9 - 1.05) < 0.02, f"one set stretched is {tot * 0.34e-9:.2f} m, two sets about two meters")
 check(abs(HELIX["rise_nm"] * HELIX["bp_per_turn"] - HELIX["pitch_nm"]) < 0.01, "0.34 nm a step times 10.5 steps is a 3.57 nm turn")
 check(all(b[2] == {"A": "T", "T": "A", "G": "C", "C": "G"}[b[0]] and b[3] == (2 if b[0] in "AT" else 3) for b in BASES), "A with T by two bonds, G with C by three")
 

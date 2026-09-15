@@ -78,7 +78,7 @@ bad_h = []
 for p in parts.values():
     hs = [max(y for r in v for x, y in r) - min(y for r in v for x, y in r)
           for v in p["views"] if v]
-    # tracing at up to eight pixels to the millimetre leaves a little
+    # tracing at up to eight pixels to the millimeter leaves a little
     # rounding, which shows most on the smallest parts
     if hs and max(hs) - min(hs) > max(3.0, 0.03 * max(hs)):
         bad_h.append(p["name"])

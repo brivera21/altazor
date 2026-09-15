@@ -114,7 +114,7 @@ with sync_playwright() as pw:
         check(cls in near, nm + " (a line of that kind passes within 1.5 degrees)", str([G["classes"][c] for c in near]))
     # the raster's plate under a rendered pixel, and the map painted at all
     rgb = st({"pixel": [490, 245]})["rgb"]
-    check(sum(rgb) > 60, f"the map is painted (pixel at the centre is {rgb})")
+    check(sum(rgb) > 60, f"the map is painted (pixel at the center is {rgb})")
     # hover Africa with the real pointer
     box = pg.eval_on_selector("#map", "e=>{const r=e.getBoundingClientRect(); return [r.left,r.top,r.width,r.height]}")
     mx = lambda lon: box[0] + (lon + 180) / 360 * box[2]
@@ -122,7 +122,7 @@ with sync_playwright() as pw:
     pg.mouse.move(mx(18), my(8))
     pg.wait_for_timeout(150)
     s = st()
-    check(s["name"] == "Africa" and "58.4" in s["card"] and "11.5%" in s["card"] and "pulling apart" in s["card"] and "diving under a neighbour" in s["card"], "hovering Africa: 58.4 million km2, 11.5%, edges by kind, some of it diving under Eurasia")
+    check(s["name"] == "Africa" and "58.4" in s["card"] and "11.5%" in s["card"] and "pulling apart" in s["card"] and "diving under a neighbor" in s["card"], "hovering Africa: 58.4 million km2, 11.5%, edges by kind, some of it diving under Eurasia")
     st_af = s["stats"]["AF"]
     check(abs(st_af["by"][0] + st_af["by"][1] - 20318) < 50, "Africa's pulling-apart edge is 20,318 km, as the card says")
     pg.mouse.move(mx(-45.1), my(15.3))

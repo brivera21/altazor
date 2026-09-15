@@ -40,17 +40,17 @@ for k, poleward in [("gulf", True), ("kuroshio", True), ("brazil", True), ("agul
     check((d > 0) == poleward, f"{cur[k][1]} flows {'poleward' if d > 0 else 'toward the equator'} and is {cur[k][2]}")
     check((cur[k][2] == "warm") == poleward, f"  and {'warm' if poleward else 'cold'}, as a {'western' if poleward else 'eastern'} boundary current should be")
 # the gyres' senses from the order of their currents round the ring
-for gk, gn, sense, centre, _ in GYRES:
+for gk, gn, sense, center, _ in GYRES:
     pts = []
     for c in CURRENTS:
         if c[4] == gk:
             pts += c[3]
-    # the winding number about the centre
+    # the winding number about the center
     tot = 0.0
     for i in range(len(pts)):
         a, b = pts[i], pts[(i + 1) % len(pts)]
-        a1 = math.atan2(a[1] - centre[1], ((a[0] - centre[0] + 540) % 360) - 180)
-        a2 = math.atan2(b[1] - centre[1], ((b[0] - centre[0] + 540) % 360) - 180)
+        a1 = math.atan2(a[1] - center[1], ((a[0] - center[0] + 540) % 360) - 180)
+        a2 = math.atan2(b[1] - center[1], ((b[0] - center[0] + 540) % 360) - 180)
         d = a2 - a1
         while d > math.pi:
             d -= 2 * math.pi
@@ -58,8 +58,8 @@ for gk, gn, sense, centre, _ in GYRES:
             d += 2 * math.pi
         tot += d
     turns = tot / (2 * math.pi)
-    check((turns < -0.7) == (sense == "clockwise") and abs(turns) > 0.7, f"{gn} winds {turns:+.2f} turns about its centre: {sense}")
-check(all(g[2] == ("clockwise" if g[3][1] > 0 else "anticlockwise") for g in GYRES), "northern gyres clockwise, southern anticlockwise")
+    check((turns < -0.7) == (sense == "clockwise") and abs(turns) > 0.7, f"{gn} winds {turns:+.2f} turns about its center: {sense}")
+check(all(g[2] == ("clockwise" if g[3][1] > 0 else "counterclockwise") for g in GYRES), "northern gyres clockwise, southern counterclockwise")
 acc = cur["acc"][3]
 check(acc[0][0] == -180 and acc[-1][0] == 180 and all(acc[i][0] < acc[i + 1][0] for i in range(len(acc) - 1)) and all(-62 < p[1] < -50 for p in acc),
       "the circumpolar current runs east all the way round between 50 and 62 S")
@@ -104,7 +104,7 @@ with sync_playwright() as pw:
     pg.click('#gyres button[data-g="spac"]')
     pg.wait_for_timeout(150)
     s = st()
-    check(s["gyre"] == "spac" and "anticlockwise" in s["card"] and "Humboldt" in s["card"] and "East Australian" in s["card"], "the South Pacific gyre button: anticlockwise, Humboldt and East Australian among its currents")
+    check(s["gyre"] == "spac" and "counterclockwise" in s["card"] and "Humboldt" in s["card"] and "East Australian" in s["card"], "the South Pacific gyre button: counterclockwise, Humboldt and East Australian among its currents")
     pg.click('#gyres button[data-g="spac"]')
     pg.wait_for_timeout(100)
     check(st()["gyre"] is None, "pressing it again clears it")

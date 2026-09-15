@@ -126,7 +126,7 @@ AWARDS = [
 CANON = [
     # (year, title, author)
     (1818, "Frankenstein", "Mary Shelley"),
-    (1864, "Journey to the Centre of the Earth", "Jules Verne"),
+    (1864, "Journey to the Center of the Earth", "Jules Verne"),
     (1870, "Twenty Thousand Leagues Under the Seas", "Jules Verne"),
     (1895, "The Time Machine", "H. G. Wells"),
     (1896, "The Island of Doctor Moreau", "H. G. Wells"),

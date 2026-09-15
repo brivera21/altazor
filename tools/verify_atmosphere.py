@@ -2,7 +2,7 @@
 
   the model    the page's temperature, pressure and density agree with an
                independent hydrostatic integration of the seven lapse-rate
-               layers at every kilometre to 86 km, and with the published
+               layers at every kilometer to 86 km, and with the published
                table at the layer bases; the anchors above 86 km fall with
                height and sit within a factor of two of a hydrostatic
                integration through the thermosphere with the mean molecular
@@ -99,7 +99,7 @@ half = next(z for z in [i / 100 for i in range(0, 8600)] if mine(z)[1] / P0 < 0.
 check(abs(half - 5.5) < 0.1, f"half the air lies below {half:.2f} km")
 h99 = next(z for z in [i / 100 for i in range(0, 8600)] if mine(z)[1] / P0 < 0.01)
 check(abs(h99 - 31.1) < 0.3, f"ninety-nine percent below {h99:.1f} km")
-check(abs(P0 / G0 / 1000 - 10.33) < 0.01, "the column weighs 10.3 tonnes on a square metre")
+check(abs(P0 / G0 / 1000 - 10.33) < 0.01, "the column weighs 10.3 metric tons on a square meter")
 
 print("--- the words ---")
 check(all(MARKS[i][2] < MARKS[i + 1][2] for i in range(len(MARKS) - 1)) and 0 < MARKS[0][2] and MARKS[-1][2] <= 600, f"{len(MARKS)} marks in height order, 0 to 600 km")
@@ -129,7 +129,7 @@ with sync_playwright() as pw:
         a = st({"z": z})["at"]
         T, p, rho = mine(z)
         worst = max(worst, abs(a["T"] - T), abs(a["p"] / p - 1), abs(a["rho"] / rho - 1))
-    check(worst < 3e-3, f"the page agrees with the integration here at every kilometre to 86 km (worst {worst:.2e})")
+    check(worst < 3e-3, f"the page agrees with the integration here at every kilometer to 86 km (worst {worst:.2e})")
     a = st({"z": 0})["at"]
     check(abs(a["c"] - 340.3) < 0.2 and abs(a["boil"] - 100) < 0.2, f"at sea level sound goes {a['c']:.1f} m/s and water boils at {a['boil']:.1f} C")
     a = st({"z": 8.85})["at"]
@@ -175,7 +175,7 @@ with sync_playwright() as pw:
     check("carbon dioxide" in s["name"] and "425 parts per million" in s["card"], "hovering carbon dioxide: 425 parts per million")
     pg.evaluate("()=>document.querySelector('#asvg g[data-g=\"w\"]').dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
     pg.wait_for_timeout(100)
-    check("water vapour" in st()["name"], "and water vapour answers")
+    check("water vapor" in st()["name"], "and water vapor answers")
     over = pg.evaluate("()=>{const svg=document.querySelector('#asvg'); let n=0; for(const t of svg.querySelectorAll('text')){ if(t.hasAttribute('transform')) continue; const b=t.getBBox(); if(b.x<0||b.x+b.width>980) n++; } return n;}")
     check(over == 0, "no label runs off the edge", f"{over}")
     check(not errs, "no script errors", "; ".join(errs))

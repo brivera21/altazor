@@ -10,7 +10,7 @@ browser rather than a copy of it in Python.
 Then the drawing. The overlay the page actually painted is read back, not
 recomputed, because a terminator drawn inside out would still agree with the
 formula that drew it. Three things are asked of it: that it leaves half the
-surface lit whatever the date, that the lit half is centred on the sub-solar
+surface lit whatever the date, that the lit half is centered on the sub-solar
 point, and that the poles are covered and cleared on the right dates.
 
 Usage: pip install ephem

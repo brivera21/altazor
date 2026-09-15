@@ -14,7 +14,7 @@ Contents
     CONTESTED                 why a given arrival date is disputed
     POPULATION                world population through time (one point per date)
     POPULATION_RANGES         published low/high span where sources give one
-    SOURCE_DISAGREEMENTS      places where recognised sources differ by >2x
+    SOURCE_DISAGREEMENTS      places where recognized sources differ by >2x
     POPULATION_BY_CONTINENT   {continent: population} snapshots through time
     DEEP_PAST_GENETICS        effective-population-size / bottleneck claims
     SOURCES                   every URL actually consulted while building this
@@ -34,9 +34,9 @@ Honesty rules applied throughout
 * No number in this file was invented.  Every figure traces to the URL named in
   the comment above its block, all of which were fetched while building this.
 * Where the literature offers a range rather than a point, the range is given.
-* Where two recognised sources disagree by more than a factor of two, both are
+* Where two recognized sources disagree by more than a factor of two, both are
   given and the pair is listed in SOURCE_DISAGREEMENTS.
-* Where a figure is a modelled guess rather than a measurement, the comment
+* Where a figure is a modeled guess rather than a measurement, the comment
   says so.
 * Things that could not be verified are listed in CAVEATS, not silently fixed.
 
@@ -179,7 +179,7 @@ ARRIVALS = [
     ("Wallacea", -4.98, 119.66, 51200,
      "Leang Karampuang, Sulawesi, Indonesia", "secure",
      "Oldest known representational/narrative cave art; U-series minimum age "
-     "51,200 yr (53.5 +/- 2.3 ka). Behavioural, not skeletal, evidence."),
+     "51,200 yr (53.5 +/- 2.3 ka). Behavioral, not skeletal, evidence."),
 
     # --- SAHUL: AUSTRALIA AND NEW GUINEA --------------------------------
     # Madjedbebe: OSL-dated occupation "around 65,000 years ago".
@@ -191,7 +191,7 @@ ARRIVALS = [
     ("Australia (Sahul, earliest claim)", -12.34, 132.92, 65000,
      "Madjedbebe rock shelter, Northern Territory", "contested",
      "OSL puts occupation at ~65 ka; critics argue sandy sediments allowed "
-     "artefact movement, and that genomes date Neanderthal admixture to "
+     "artifact movement, and that genomes date Neanderthal admixture to "
      "50,500-43,500 BP, so arrival must be <50 ka. Disputed range 65,000-50,000."),
 
     # Lake Mungo (Mungo Man / Mungo Lady): ~42,000 years.
@@ -247,7 +247,7 @@ ARRIVALS = [
      "to the Holocene and challenged the identification; treat as overturned "
      "pending publication. Do NOT use as an arrival date."),
 
-    # Japanese archipelago colonised ~38,000 cal BP (Ishinomoto, Kyushu;
+    # Japanese archipelago colonized ~38,000 cal BP (Ishinomoto, Kyushu;
     # Idemaruyama, Honshu).
     # Source: Nature Communications (2026) review of the Japanese Palaeolithic
     #   https://www.nature.com/articles/s41467-026-74116-7
@@ -257,7 +257,7 @@ ARRIVALS = [
      "islands is very scarce, so this rests on lithic assemblages."),
 
     # Ryukyus: Yamashita-cho Cave I, Okinawa, infant leg bones in sediments
-    # dated ~36,500 cal BP; Okinawa colonised by ~36 ka despite the Kuroshio.
+    # dated ~36,500 cal BP; Okinawa colonized by ~36 ka despite the Kuroshio.
     # Sources: https://www.intechopen.com/chapters/89269
     #          https://www.nature.com/articles/s41467-026-74116-7
     ("Ryukyu Islands", 26.21, 127.69, 36500,
@@ -350,7 +350,7 @@ ARRIVALS = [
     #   https://en.wikipedia.org/wiki/Chiquihuite_cave
     ("Mexico (pre-LGM claim)", 25.50, -102.00, 26500,
      "Chiquihuite Cave, Zacatecas, Mexico", "contested",
-     "Nearly 2000 claimed artefacts from ~26.5 ka, possibly >30 ka. Critics "
+     "Nearly 2000 claimed artifacts from ~26.5 ka, possibly >30 ka. Critics "
      "(Chatters et al. 2021, Davis, Meltzer) argue the 'tools' are geofacts "
      "from limestone roof-fall; no hearths, no butchery, no human DNA."),
 
@@ -388,7 +388,7 @@ ARRIVALS = [
     #   https://pmc.ncbi.nlm.nih.gov/articles/PMC3033267
     ("Central East Polynesia", -17.53, -149.83, 878,
      "Society Islands", "secure",
-     "High-precision 14C chronology: colonised AD ~1025-1120, far later than "
+     "High-precision 14C chronology: colonized AD ~1025-1120, far later than "
      "older estimates. Point value is the midpoint of that range."),
 
     # East Polynesia, phase 2: the remote archipelagos, AD ~1190-1290.
@@ -473,10 +473,10 @@ ARRIVAL_RANGES = {
     "Europe (central)":                  ( 47000,  45000, "'over 45,000 years old', Prufer et al. 2021"),
     "Western Siberia":                   ( 47000,  43000, "direct 14C on the femur, ~45 ka"),
     "Arctic Siberia":                    ( 32500,  31000, "site ~32 ka cal BP; remains ~31,630 cal BP"),
-    "Eastern Beringia (Yukon)":          ( 24000,  12000, "24 ka claimed; sceptics allow only terminal Pleistocene"),
+    "Eastern Beringia (Yukon)":          ( 24000,  12000, "24 ka claimed; skeptics allow only terminal Pleistocene"),
     "Eastern Beringia (Alaska)":         ( 14500,  14000, "Swan Point occupation from ca. 14,500 cal BP"),
     "North America (pre-LGM claim)":     ( 23000,  21000, "Bennett 2021, Pigati 2023"),
-    "Mexico (pre-LGM claim)":            ( 33000,  13000, "Ardelean 2020; bulk of artefacts 16,600-13,000"),
+    "Mexico (pre-LGM claim)":            ( 33000,  13000, "Ardelean 2020; bulk of artifacts 16,600-13,000"),
     "South America":                     ( 14800,   8200, "14,800 cal BP vs Surovell et al. 2026 mid-Holocene claim"),
     "North America (Clovis horizon)":    ( 13050,  12750, "Waters, Stafford & Carlson 2020"),
     "Remote Oceania (Lapita)":           (  3100,   2800, "Lapita expansion, ~3000 BP"),
@@ -503,7 +503,7 @@ CONTESTED = {
 
     "Australia (Sahul, earliest claim)":
         "ARCHAEOLOGY says ~65 ka: Clarkson et al. (2017) dated the Madjedbebe "
-        "artefact bands by OSL with refits and stratigraphic checks. "
+        "artifact bands by OSL with refits and stratigraphic checks. "
         "GENETICS says <50 ka: all non-Africans carry Neanderthal ancestry "
         "from what looks like a single admixture pulse at 50,500-43,500 BP, "
         "and Indigenous Australians carry it too, so Allen & O'Connell argue "
@@ -530,7 +530,7 @@ CONTESTED = {
         "old (a hard-water reservoir effect). In 2023 the team dated ~75,000 "
         "terrestrial conifer pollen grains by 14C and independently ran OSL "
         "on quartz, giving a minimum of ~21,500 yr; all three agree. Residual "
-        "scepticism is now less about the dates than about the implication: "
+        "skepticism is now less about the dates than about the implication: "
         "if people were in New Mexico at 22 ka, they crossed before the "
         "ice-free corridor opened and left almost no other trace for 8,000 years.",
 
@@ -544,7 +544,7 @@ CONTESTED = {
 
     "South America":
         "Monte Verde II was the site that ended Clovis-First, at ~14,500 cal "
-        "BP, verified by a site visit from sceptics in 1997. In 2026 Surovell "
+        "BP, verified by a site visit from skeptics in 1997. In 2026 Surovell "
         "et al. argued from stratigraphy that the deposits are middle "
         "Holocene, no older than 8,200 BP, with Pleistocene organics "
         "redeposited. Dillehay's team replies that the new work extrapolates "
@@ -744,7 +744,7 @@ POPULATION_RANGES = {
 
 
 # -----------------------------------------------------------------------------
-# SOURCE_DISAGREEMENTS: every place where two recognised sources differ by
+# SOURCE_DISAGREEMENTS: every place where two recognized sources differ by
 # more than a factor of two. Layout:
 #   (label, ybp, source_a, value_a, source_b, value_b, comment)
 # The ratio is recomputed and re-checked in validate().
@@ -834,18 +834,18 @@ SOURCE_NOTES_SUBTHRESHOLD = [
 # which is far higher than most archaeologists would accept for a continent
 # occupied for at most a few thousand years by then, and it puts only ~229,000
 # in Africa, which is far too low relative to the archaeological record. Treat
-# the pre-Neolithic continental split as a modelled guess with an uncertainty
+# the pre-Neolithic continental split as a modeled guess with an uncertainty
 # of at least an order of magnitude, and say so on the map.
 
 CONTINENTS = ("Africa", "Asia", "Europe", "North America", "South America", "Oceania")
 
 POPULATION_BY_CONTINENT = [
 
-    # --- HYDE 3.3, 10,000 BC. MODELLED GUESS, see block comment above. ---
+    # --- HYDE 3.3, 10,000 BC. MODELED GUESS, see block comment above. ---
     (11950, {"Africa": 228973, "Asia": 1183783, "Europe": 481591,
              "North America": 1184755, "South America": 1097849, "Oceania": 324198}),
 
-    # --- HYDE 3.3, 8,000 BC (~10,000 BP). Early Neolithic. Still modelled. --
+    # --- HYDE 3.3, 8,000 BC (~10,000 BP). Early Neolithic. Still modeled. --
     (9950,  {"Africa": 465827, "Asia": 2405903, "Europe": 730273,
              "North America": 1731102, "South America": 1645189, "Oceania": 336328}),
 
@@ -957,7 +957,7 @@ DEEP_PAST_GENETICS = [
      "history of small numbers plus recent expansion."),
 
     ("Toba volcanic bottleneck", 74000, 74000, 10000, "rejected",
-     "Ambrose 1998 hypothesis; refutation summarised by John Hawks — "
+     "Ambrose 1998 hypothesis; refutation summarized by John Hawks — "
      "https://www.johnhawks.net/p/the-so-called-toba-bottleneck-didnt-happen",
      "The claim that Toba cut humanity to ~10,000 individuals is unsupported: "
      "no genetic analysis finds a bottleneck at 74 ka, Toba's SO2 injection "
@@ -966,7 +966,7 @@ DEEP_PAST_GENETICS = [
      "show no interruption."),
 
     ("Out-of-Africa founder effect", 60000, 50000, 10000, "accepted",
-     "Summarised by John Hawks — "
+     "Summarized by John Hawks — "
      "https://www.johnhawks.net/p/the-so-called-toba-bottleneck-didnt-happen",
      "A genuine bottleneck around 50 ka, caused by a founder effect in the "
      "population that left Africa, not by a global catastrophe. Also a "
@@ -1029,7 +1029,7 @@ SOURCES = [
     "https://www.science.org/doi/10.1126/sciadv.aaz0455",                # Age of Clovis, Waters 2020
     # The Pacific
     "https://pmc.ncbi.nlm.nih.gov/articles/PMC3944017/",                 # Teouma, Vanuatu
-    "https://www.journals.uchicago.edu/doi/10.1086/662201",              # Lapita colonisation
+    "https://www.journals.uchicago.edu/doi/10.1086/662201",              # Lapita colonization
     "https://pmc.ncbi.nlm.nih.gov/articles/PMC3033267",                  # Wilmshurst 2011 East Polynesia
     "https://pmc.ncbi.nlm.nih.gov/articles/PMC9674228/",                 # NZ chronology, Bunbury 2022
     # Late island and Arctic settlement
@@ -1349,7 +1349,7 @@ def validate() -> None:
                 f"at {ybp} BP the continents sum to {total:,} but the world "
                 f"series says {world:,} ({rel:.2%} apart)")
 
-    # Africa, Asia and Europe must never be empty at any modelled date, and
+    # Africa, Asia and Europe must never be empty at any modeled date, and
     # every continent must be non-empty once it is peopled.
     for ybp, dist in POPULATION_BY_CONTINENT:
         for cont in ("Africa", "Asia", "Europe"):
@@ -1375,7 +1375,7 @@ def validate() -> None:
     # A continent must not be shown as peopled before anyone got there --
     # allowing for the fact that HYDE's grid does exactly that in the deep
     # past. We check only the cases where the arrival evidence is secure and
-    # the gap would be a real contradiction rather than a modelling artefact.
+    # the gap would be a real contradiction rather than a modeling artifact.
     oceania_arrival = by_region["New Guinea (highlands)"]        # 49,000 BP
     assert POPULATION_BY_CONTINENT[0][0] < oceania_arrival, (
         "the earliest continental snapshot postdates the settlement of Sahul, "
@@ -1395,7 +1395,7 @@ def validate() -> None:
         assert older >= younger, f"inverted range in {label}"
         assert ne > 0, f"non-positive Ne in {label}"
         assert status in {"accepted", "contested", "rejected"}, f"bad status in {label}"
-        assert src.startswith(("Hu ", "Charlesworth", "Ambrose", "Summarised")), \
+        assert src.startswith(("Hu ", "Charlesworth", "Ambrose", "Summarized")), \
             f"unexpected source format in {label}"
         assert "http" in src or "http" in note, f"no URL for {label}"
 

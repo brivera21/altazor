@@ -4,7 +4,7 @@ gyres they make, and the great conveyor.
 
 The current paths are drawn by hand from the standard maps and are
 schematic: real currents meander, shed eddies and shift with the seasons.
-Transports are in sverdrups, a million cubic metres a second, and are the
+Transports are in sverdrups, a million cubic meters a second, and are the
 figures the cited articles give; where an article gives a range the range
 is kept.
 """
@@ -18,7 +18,7 @@ CURRENTS = [
     # the North Atlantic gyre, clockwise
     ("gulf", "the Gulf Stream", "warm", [(-81, 24.5), (-80, 28), (-78, 32), (-74, 35.5), (-68, 38), (-60, 40.5), (-50, 43)], "natl",
      "30 Sv through the Florida Strait, 150 Sv off Newfoundland", "up to 2.5 m/s",
-     "The strongest current in the Atlantic, a river of warm water a hundred kilometres wide that leaves Florida at walking pace and carries more water than all the rivers of the world a hundred times over.", "Wikipedia, Gulf Stream"),
+     "The strongest current in the Atlantic, a river of warm water a hundred kilometers wide that leaves Florida at walking pace and carries more water than all the rivers of the world a hundred times over.", "Wikipedia, Gulf Stream"),
     ("nad", "the North Atlantic Drift", "warm", [(-50, 43), (-38, 47), (-25, 51), (-12, 55), (-2, 60), (8, 66), (14, 71)], "natl",
      "", "",
      "The Gulf Stream's continuation, spreading and slowing across the ocean and on past Norway. It keeps northwestern Europe ten degrees warmer in winter than its latitude deserves.", "Wikipedia, North Atlantic Current"),
@@ -34,7 +34,7 @@ CURRENTS = [
     ("labrador", "the Labrador Current", "cold", [(-57, 61), (-53, 56), (-50, 51), (-51, 47), (-54, 43)], None,
      "", "",
      "Cold water and icebergs from Baffin Bay flowing south past Newfoundland to meet the Gulf Stream, which is where the Titanic sank and the fog on the Grand Banks comes from.", "Wikipedia, Labrador Current"),
-    # the South Atlantic gyre, anticlockwise
+    # the South Atlantic gyre, counterclockwise
     ("brazil", "the Brazil Current", "warm", [(-34, -12), (-37, -20), (-42, -26), (-48, -32), (-53, -38)], "satl",
      "", "",
      "The South Atlantic's western boundary current, weaker than its northern twin, flowing south along Brazil to meet the cold Malvinas water off Argentina.", "Wikipedia, Brazil Current"),
@@ -51,7 +51,7 @@ CURRENTS = [
     ("acc", "the Antarctic Circumpolar Current", "cold", [(-180, -56), (-150, -58), (-120, -60), (-90, -60), (-65, -58), (-40, -54), (-10, -52), (20, -52), (50, -54), (80, -56), (110, -58), (140, -60), (170, -60), (180, -58)], None,
      "about 135 Sv through the Drake Passage, 147 south of Tasmania", "",
      "The only current that goes all the way round the world, driven by the westerlies with no land to stop it. It carries more water than any other, and it walls the Antarctic off from warmer seas.", "Wikipedia, Antarctic Circumpolar Current"),
-    # the Indian Ocean gyre, anticlockwise
+    # the Indian Ocean gyre, counterclockwise
     ("agulhas", "the Agulhas Current", "warm", [(38, -23), (35.5, -28), (31, -33), (26, -36), (20, -38)], "ind",
      "about 70 Sv", "1.4 m/s at the core, up to 2.5",
      "The Indian Ocean's western boundary current, as strong as the Gulf Stream, running down the coast of Mozambique and South Africa; at the Cape it turns back on itself and sheds rings of warm water into the Atlantic.", "Wikipedia, Agulhas Current"),
@@ -85,11 +85,11 @@ CURRENTS = [
      "Cold, rich water from the Bering Sea down the Kuril Islands to meet the Kuroshio off Japan, one of the richest fishing grounds on the planet.", "Wikipedia, Oyashio Current"),
     ("alaska", "the Alaska Current", "warm", [(-132, 48), (-138, 53), (-146, 58), (-155, 57), (-165, 53)], None,
      "", "",
-     "The northern branch of the North Pacific Current, curving anticlockwise round the Gulf of Alaska and keeping its coast milder than Siberia's.", "Wikipedia, Alaska Current"),
+     "The northern branch of the North Pacific Current, curving counterclockwise round the Gulf of Alaska and keeping its coast milder than Siberia's.", "Wikipedia, Alaska Current"),
     ("pcc", "the Equatorial Counter Current", "warm", [(140, 6), (165, 6), (-170, 6), (-140, 6), (-110, 6)], None,
      "", "",
      "A narrow eastward flow between the two westward trade-wind currents, returning some of the water piled up in the west.", "Wikipedia, Equatorial Counter Current"),
-    # the South Pacific gyre, anticlockwise
+    # the South Pacific gyre, counterclockwise
     ("eac", "the East Australian Current", "warm", [(152, -18), (154, -25), (153, -31), (151, -36), (149, -41)], "spac",
      "up to 35 Sv at 30\u00b0S", "0.9 m/s at most",
      "Warm water down the coast of Queensland and New South Wales, breaking into eddies off Sydney; the current the turtles ride.", "Wikipedia, East Australian Current"),
@@ -104,13 +104,13 @@ CURRENTS = [
      "The gyre's southern side, east with the westerlies toward Chile.", "Wikipedia, South Pacific Gyre"),
 ]
 
-# the gyres: k, name, sense, centre lon lat, a line
+# the gyres: k, name, sense, center lon lat, a line
 GYRES = [
     ("natl", "the North Atlantic gyre", "clockwise", (-45, 30), "Wind and the Earth's spin pile the warm water into a mound in the middle, the Sargasso Sea, and the currents circle it clockwise, strongest on the western side."),
-    ("satl", "the South Atlantic gyre", "anticlockwise", (-15, -25), "The mirror of the northern gyre: anticlockwise, because the Coriolis turn is the other way south of the equator."),
-    ("ind", "the Indian Ocean gyre", "anticlockwise", (75, -27), "Only a southern gyre, since Asia closes the ocean at the top; the northern Indian Ocean reverses with the monsoon instead."),
-    ("npac", "the North Pacific gyre", "clockwise", (-160, 30), "The largest, and the one where floating plastic collects in the calm centre."),
-    ("spac", "the South Pacific gyre", "anticlockwise", (-120, -30), "The largest expanse of open ocean, and the clearest, poorest water on the planet at its centre."),
+    ("satl", "the South Atlantic gyre", "counterclockwise", (-15, -25), "The mirror of the northern gyre: counterclockwise, because the Coriolis turn is the other way south of the equator."),
+    ("ind", "the Indian Ocean gyre", "counterclockwise", (75, -27), "Only a southern gyre, since Asia closes the ocean at the top; the northern Indian Ocean reverses with the monsoon instead."),
+    ("npac", "the North Pacific gyre", "clockwise", (-160, 30), "The largest, and the one where floating plastic collects in the calm center."),
+    ("spac", "the South Pacific gyre", "counterclockwise", (-120, -30), "The largest expanse of open ocean, and the clearest, poorest water on the planet at its center."),
 ]
 
 # the conveyor: two paths, deep and cold, surface and warm, each a list of (lon, lat)
@@ -123,7 +123,7 @@ CONVEYOR = {
     "up": [(-160, 40), (68, 5)],
 }
 CONVEYOR_NOTE = ("In the far North Atlantic the water that came up from the tropics is cold, salty and heavy enough to sink to the "
-                 "bottom, some 15 million cubic metres a second. It creeps south along the floor of the Atlantic, joins the "
+                 "bottom, some 15 million cubic meters a second. It creeps south along the floor of the Atlantic, joins the "
                  "circumpolar current, and spreads into the Indian and Pacific oceans, where over centuries it warms and rises. "
                  "The surface flow that returns it runs through Indonesia, round the Cape of Good Hope, and back up the Atlantic. "
                  "One lap takes about a thousand years.")
@@ -144,7 +144,7 @@ REFS += [(apa.wiki(f"https://en.wikipedia.org/wiki/{p}"), a) for p, a in [
     ("Ocean_current", "The currents and the gyres."),
     ("Ocean_gyre", "The five gyres and why they turn as they do."),
     ("Thermohaline_circulation", "The conveyor's route and its thousand-year lap."),
-    ("Sverdrup", "The unit: a million cubic metres a second."),
+    ("Sverdrup", "The unit: a million cubic meters a second."),
     ("Gulf_Stream", None), ("North_Atlantic_Current", None), ("Canary_Current", None), ("North_Equatorial_Current", None),
     ("Loop_Current", None), ("Labrador_Current", None), ("Brazil_Current", None), ("South_Equatorial_Current", None),
     ("Benguela_Current", None), ("South_Atlantic_Current", None), ("Antarctic_Circumpolar_Current", None),

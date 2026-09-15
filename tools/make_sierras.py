@@ -23,7 +23,7 @@ ten flats are excluded. verify_norte.py re-runs that test on every build.
 Two tiers come out of it: "sierra" at 14, and "alta" at 24 for the crests.
 
 This is a measure of terrain, not a published boundary of any named range. The
-page says so, and only ranges whose position can be checked twice are labelled.
+page says so, and only ranges whose position can be checked twice are labeled.
 
 Usage: python3 make_sierras.py      (writes /home/claude/nmex/sierras.pkl)
 """

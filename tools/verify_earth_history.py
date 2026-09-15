@@ -159,7 +159,7 @@ with sync_playwright() as pw:
                 worst = (d, f"plate {pid} at {age} Ma")
     ok = worst[0] < 1e-6
     print(f"  {'ok  ' if ok else 'FAIL'} {n} rotations agree with the page to "
-          f"{worst[0] * 111000:.3f} metres on the ground, worst at {worst[1]}")
+          f"{worst[0] * 111000:.3f} meters on the ground, worst at {worst[1]}")
     if not ok:
         fails.append(f"the page rotates differently by {worst[0]} deg at {worst[1]}")
 

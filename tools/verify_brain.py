@@ -46,7 +46,7 @@ check(0.24 < GROWTH[0][1] / pk < 0.28, f"at birth {GROWTH[0][1] / pk * 100:.0f}%
 g3 = next(g for g in GROWTH if g[0] == 3)
 check(0.85 < g3[1] / pk < 0.92 and g3[1] / GROWTH[0][1] > 3.3, f"by three {g3[1] / pk * 100:.0f}% of the peak, and {g3[1] / GROWTH[0][1]:.1f} times the birth mass")
 check(0.88 < GROWTH[-1][1] / pk < 0.92, f"in the mid eighties {(1 - GROWTH[-1][1] / pk) * 100:.0f}% below the peak, about a tenth")
-check(WHOLE["fibres_km_m"] == 176000 and WHOLE["fibres_km_f"] == 149000, "Marner's fibre lengths, 176,000 and 149,000 km")
+check(WHOLE["fibres_km_m"] == 176000 and WHOLE["fibres_km_f"] == 149000, "Marner's fiber lengths, 176,000 and 149,000 km")
 
 print("--- the drawing ---")
 from playwright.sync_api import sync_playwright

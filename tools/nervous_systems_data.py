@@ -17,7 +17,7 @@ PLANS = [
      "Sponges have no nerve cells at all. Cells signal one another slowly with chemicals, and a sponge can close its openings over a minute or so; that is the whole repertoire.",
      "nowhere: the genes for synapses are there, the cells are not", "Wikipedia, Sponge"),
     ("net", "a nerve net", "hydras, jellyfish, sea anemones",
-     "Neurons scattered through the body wall and joined into a mesh with no centre. A touch anywhere spreads in every direction, which is enough to close a tentacle round prey or pulse a bell.",
+     "Neurons scattered through the body wall and joined into a mesh with no center. A touch anywhere spreads in every direction, which is enough to close a tentacle round prey or pulse a bell.",
      "everywhere, thinly; a hydra has a few thousand", "Wikipedia, Nerve net"),
     ("ladder", "a ladder", "flatworms",
      "The first head: a pair of ganglia at the front, next to the eyespots, with two nerve cords running back joined by rungs. Sensing is concentrated where the animal meets the world first.",
@@ -26,7 +26,7 @@ PLANS = [
      "A brain above the gut at the front, a ring round the gut, and a chain of ganglia along the belly, one or a few per segment, each running its own legs. A headless insect can still walk.",
      "a brain at the front and a knot in every segment", "Wikipedia, Ventral nerve cord"),
     ("octopus", "a brain and eight half-brains", "octopuses, squid",
-     "A large central brain between the eyes, two enormous optic lobes, and in each arm a cord with more neurons than the brain has, so that an arm can taste, grip and reach with little instruction from the centre.",
+     "A large central brain between the eyes, two enormous optic lobes, and in each arm a cord with more neurons than the brain has, so that an arm can taste, grip and reach with little instruction from the center.",
      "two thirds of them in the arms", "Wikipedia, Cephalopod intelligence"),
     ("dorsal", "a dorsal cord and a brain", "fish to mammals",
      "One hollow cord along the back, inside a spine, swelling at the front into a brain that grows across the vertebrates from a few million cells to a hundred billion. Everything the animal does passes through it.",
@@ -36,7 +36,7 @@ PLANS = [
 # neuron counts: k, animal, neurons, body mass in grams, group, plan, note, source
 ANIMALS = [
     ("sponge", "a sponge", 0, 100, "other", "none", "No neurons, and no need: it filters water and has nowhere to go.", "Wikipedia, Sponge"),
-    ("hydra", "a hydra", 5600, 0.01, "other", "net", "A nerve net of a few thousand cells in an animal a centimetre long.", "Wikipedia, List of animals by number of neurons"),
+    ("hydra", "a hydra", 5600, 0.01, "other", "net", "A nerve net of a few thousand cells in an animal a centimeter long.", "Wikipedia, List of animals by number of neurons"),
     ("celegans", "a roundworm, C. elegans", 302, 1e-6, "other", "cord", "Every one of its 302 neurons is known by name, and every connection between them: the first complete wiring diagram of any animal.", "White et al. 1986"),
     ("leech", "a leech", 10000, 2, "other", "cord", "Ten thousand, in 21 nearly identical ganglia, which is why neuroscientists like it.", "Wikipedia, List of animals by number of neurons"),
     ("aplysia", "a sea slug, Aplysia", 18000, 300, "molluscs", "cord", "Eighteen thousand neurons, some of them so large they can be seen without a microscope; learning and memory were first watched at the level of single cells in it.", "Wikipedia, Aplysia californica"),

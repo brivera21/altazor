@@ -115,7 +115,7 @@ with sync_playwright() as pw:
         m = re.fullmatch(r"-?[\d.]+", t)
         return float(t) * mul if m else None
 
-    for label, joules in [("a heartbeat", 1.0), ("a litre of petrol", 3.42e7),
+    for label, joules in [("a heartbeat", 1.0), ("a liter of gasoline", 3.42e7),
                           ("a hurricane, for a day", 5.2e19),
                           ("an electronvolt", 1.602176634e-19)]:
         pg.evaluate("(j)=>setE(j)", joules)

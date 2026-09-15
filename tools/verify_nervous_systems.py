@@ -2,7 +2,7 @@
 
   the data     six plans, each with examples, a place for the neurons and
                a source; every animal names a plan that exists, has a
-               group with a colour, a mass and a source; the counts are the
+               group with a color, a mass and a source; the counts are the
                published ones at the landmarks (302, 139,255, 86 billion,
                257 billion); neurons rise with mass within the mammals;
                primates sit above the mammal line; the neurons-per-gram
@@ -98,7 +98,7 @@ with sync_playwright() as pw:
     pg.evaluate("()=>document.querySelector('#nsvg g[data-a=\"elephant\"]').dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
     pg.wait_for_timeout(100)
     s = st()
-    check("elephant" in s["name"] and "257 billion" in s["card"] and "3.0 times as many" in s["card"] and "4 tonnes" in s["card"], "hovering the elephant: 257 billion, 3.0 times a person, 4 tonnes")
+    check("elephant" in s["name"] and "257 billion" in s["card"] and "3.0 times as many" in s["card"] and "4 metric tons" in s["card"], "hovering the elephant: 257 billion, 3.0 times a person, 4 metric tons")
     pg.evaluate("()=>document.querySelector('#nsvg g[data-a=\"celegans\"]').dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
     pg.wait_for_timeout(100)
     s = st()

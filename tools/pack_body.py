@@ -12,7 +12,7 @@ the same set mirrored left to right, so the view at an angle plus 180
 degrees is that view mirrored, with the stacking order reversed. The page
 does that, and the file stays half the size.
 
-Each ring is polyline-encoded: signed deltas on a quarter millimetre
+Each ring is polyline-encoded: signed deltas on a quarter millimeter
 grid, five bits to a character, the scheme Google uses for map polylines.
 It costs about a fifth of what a list of numbers would.
 
@@ -25,7 +25,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
 SRC = sys.argv[1] if len(sys.argv) > 1 else "/tmp/bp3d/spun"
-SCALE = 4          # quarter of a millimetre
+SCALE = 4          # quarter of a millimeter
 
 
 def enc1(v):

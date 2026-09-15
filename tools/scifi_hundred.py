@@ -113,7 +113,7 @@ BOOKS = [
     (96, "No Enemy But Time", "Michael Bishop", 1982, 33, 11, 33, "en"),
     (97, "Double Star", "Robert A. Heinlein", 1956, 33, 13, 40, "en"),
     (98, "The Island of Doctor Moreau", "H. G. Wells", 1896, 33, 13, 40, "en"),
-    (99, "Journey to the Centre of the Earth", "Jules Verne", 1864, 33, 13, 40, "fr"),
+    (99, "Journey to the Center of the Earth", "Jules Verne", 1864, 33, 13, 40, "fr"),
     (100, "Ammonite", "Nicola Griffith", 1993, 32, 12, 37, "en"),
 ]
 
@@ -139,6 +139,6 @@ ORIGINAL = {
                                               "1870.",
     "Roadside Picnic": "Published in Russian in 1972; the first English "
                        "translation came in 1977.",
-    "Journey to the Centre of the Earth": "Published in French in 1864 and "
+    "Journey to the Center of the Earth": "Published in French in 1864 and "
                                           "revised by Verne in 1867.",
 }

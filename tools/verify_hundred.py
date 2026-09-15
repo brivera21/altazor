@@ -2,7 +2,7 @@
 """Verify scifi-hundred.html against what the page actually draws.
 
 Offline (network cut): a hundred books ranked by citation share, the bars
-in descending order, the language colours and their counts, the Hugo and
+in descending order, the language colors and their counts, the Hugo and
 Nebula pips against the site's own award roster, the sorts and filters,
 the card's arithmetic, citations, no JS errors. Covers are a view-time
 fetch, checked live after publishing instead.

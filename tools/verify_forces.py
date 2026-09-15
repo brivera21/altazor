@@ -65,7 +65,7 @@ check(abs(fo["hgrav"][2] - hg) / hg < 0.01, f"gravity in hydrogen {hg:.3e} N")
 check(abs(fo["hydrogen"][2] - he) / he < 0.01, f"the electric pull in hydrogen {he:.3e} N")
 check(abs(he / hg - 2.27e39) / 2.27e39 < 0.01, f"and their ratio {he / hg:.3e}")
 tp = G * 70 * 70 / 1
-check(abs(fo["twopeople"][2] - tp) / tp < 0.02, f"two 70 kg people a metre apart {tp:.2e} N")
+check(abs(fo["twopeople"][2] - tp) / tp < 0.02, f"two 70 kg people a meter apart {tp:.2e} N")
 em = G * 5.9722e24 * 7.346e22 / 3.844e8 ** 2
 check(abs(fo["moon"][2] - em) / em < 0.01, f"Earth on Moon {em:.3e} N")
 se = G * 1.9885e30 * 5.9722e24 / 1.495978707e11 ** 2
@@ -73,7 +73,7 @@ check(abs(fo["sun"][2] - se) / se < 0.01, f"Sun on Earth {se:.3e} N")
 pf = c ** 4 / G
 check(abs(fo["planck"][2] - pf) / pf < 0.01, f"the Planck force c^4/G {pf:.3e} N")
 qq = 1e9 * e / 1e-15
-check(abs(fo["quarks"][2] - qq) / qq < 0.01, f"1 GeV per fm is {qq:.2e} N, {qq / 9.80665 / 1000:.1f} tonnes")
+check(abs(fo["quarks"][2] - qq) / qq < 0.01, f"1 GeV per fm is {qq:.2e} N, {qq / 9.80665 / 1000:.1f} metric tons")
 check(abs(fo["person"][2] - 70 * 9.80665) / 686 < 0.01 and abs(fo["car"][2] - 1500 * 9.80665) / 14710 < 0.02 and abs(fo["mosquito"][2] - 2.5e-6 * 9.80665) / 2.45e-5 < 0.03,
       "the weights: 70 kg, 1,500 kg, 2.5 mg")
 check(fo["croc"][2] == 1.64e4 and fo["bond"][2] == 2.0e-9, "the crocodile's 16.4 kN and the bond's 2.0 nN as published")
@@ -143,12 +143,12 @@ with sync_playwright() as pw:
     L, R, LOG0, LOG1 = 40, 940, -48, 45
     SX = lambda N: L + (math.log10(N) - LOG0) / (LOG1 - LOG0) * (R - L)
     check(abs(s["sx"] - SX(690)) < 0.6, "690 N lands at its log position")
-    check(s["wv"] == "the weight of 3,569 tonnes", f"35 MN reads as {s['wv']}")
+    check(s["wv"] == "the weight of 3,569 metric tons", f"35 MN reads as {s['wv']}")
     check("a person's weight" in s["name"] and "70.4 kg" in s["card"] and "gravity" in s["card"], "the card opens on a person's weight, 70.4 kg, gravity")
     pg.click('#jumps button[data-k="quarks"]')
     pg.wait_for_timeout(100)
     s = st()
-    check("16.3 tonnes" in s["card"] and "the strong force" in s["card"], "the quark string: 16.3 tonnes, the strong force")
+    check("16.3 metric tons" in s["card"] and "the strong force" in s["card"], "the quark string: 16.3 metric tons, the strong force")
     pg.evaluate("()=>document.querySelector('#fsvg g[data-k=\"hgrav\"]').dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
     pg.wait_for_timeout(100)
     s = st()

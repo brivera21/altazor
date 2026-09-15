@@ -6,10 +6,10 @@ compared:
 
   areas       every state polygon is measured on the sphere and compared with
               the Census Bureau's published total area for that state
-  rivers      the ten labelled rivers are re-identified from the raw WDBII
+  rivers      the ten labeled rivers are re-identified from the raw WDBII
               file, by finding the segment nearest to two points on that river
               far apart from each other, and the answer has to be the same
-              segment the page labelled
+              segment the page labeled
   rugged      twenty reference places, ten broken and ten flat, none of which
               were used to set the threshold
   regions     the four Census regions and the nine divisions are typed out
@@ -145,7 +145,7 @@ print(f"  {'ok  ' if err < 3 else 'FAIL'} they sum to {tot:,.0f} km2, "
 if err >= 3:
     fails.append(f"the states sum to {tot:,.0f} km2, {err:.1f}% off the land area")
 
-print("--- the labelled rivers, identified again from the raw data ---")
+print("--- the labeled rivers, identified again from the raw data ---")
 from shapely.geometry import LineString, Point
 from shapely.ops import linemerge
 segs = [LineString(x) for x in read_wdb("rivers") if len(x) > 1]
@@ -286,7 +286,7 @@ with sync_playwright() as pw:
         if not ok:
             fails.append(f"{bid} gives {u}")
 
-    print("--- the colour of a state is the colour of its group ---")
+    print("--- the color of a state is the color of its group ---")
     pg.click("#mReg")
     pg.wait_for_timeout(120)
     for code, name in (("TX", "South"), ("CA", "West"), ("ME", "Northeast"),

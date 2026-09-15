@@ -87,5 +87,5 @@ REFS += [(apa.wiki(f"https://en.wikipedia.org/wiki/{p}"), a) for p, a in [
     ("Hearing_range", "About 20 Hz to 20 kHz in a young adult, the top falling with age."),
     ("Vocal_range", "The ranges of the four voices."),
     ("Scale_(music)", None), ("Mode_(music)", None), ("Pentatonic_scale", None), ("Blues_scale", None), ("Whole-tone_scale", None), ("Octatonic_scale", None), ("Double_harmonic_scale", None),
-    ("Speed_of_sound", "343 metres a second in air at 20 degrees."),
+    ("Speed_of_sound", "343 meters a second in air at 20 degrees."),
 ]]

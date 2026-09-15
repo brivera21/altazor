@@ -2,7 +2,7 @@
 
 Geometry: each of the six faces is compared with the published INEGI area, and
 checked to lie south of the international boundary so no face has leaked into
-the United States. Naming: each labelled river is re-checked against the two
+the United States. Naming: each labeled river is re-checked against the two
 anchors that identified it. Page: the six states, the river layer, the labels,
 the slider and the readouts are exercised in a headless browser.
 
@@ -52,7 +52,7 @@ for nm, pub in PUBLISHED.items():
     print(f"  {nm:18} {km2:9,.0f} km2 vs {pub:9,}  ({off*100:4.1f}% off)  "
           f"lat {b[1]:.2f}..{b[3]:.2f}")
 
-print("--- the three labelled rivers ---")
+print("--- the three labeled rivers ---")
 
 
 def on_border(g, tol_km=4):
@@ -73,7 +73,7 @@ for L, g in bravo:
     f = on_border(g)
     print(f"  Río Bravo   {L:6.0f} km, {f*100:5.1f}% of its points on the boundary")
     if f < 0.9:
-        fails.append("Río Bravo: a labelled piece leaves the boundary")
+        fails.append("Río Bravo: a labeled piece leaves the boundary")
 
 conchos = [(L, g) for L, g in rivers if near(g, (-104.42, 29.57)) < 5
            and near(g, (-105.47, 28.19)) < 20]
@@ -137,7 +137,7 @@ if not 0.30 < frac < 0.60:
 print(f"  covers {frac*100:.0f}% of the six states, the high tier "
       f"{ALTA.intersection(six).area/six.area*100:.0f}%")
 
-# every labelled range must sit on rugged ground, inside the state claimed
+# every labeled range must sit on rugged ground, inside the state claimed
 LABELS = {"Sierra de San Pedro Mártir": "Baja California"}
 for nm, st_nm in LABELS.items():
     p = Point(-115.25, 30.75)
@@ -177,7 +177,7 @@ try:
         if sorted(got["labels"]) != sorted(PUBLISHED):
             fails.append(f"labels are {got['labels']}")
         if got["named"] < 3:
-            fails.append("fewer than three rivers are labelled on the page")
+            fails.append("fewer than three rivers are labeled on the page")
         rng = pg.evaluate("()=>[...document.querySelectorAll('text.rng')]"
                           ".map(t=>t.textContent)")
         want = ["Sierra Madre Occidental", "Sierra Madre Oriental",
@@ -191,7 +191,7 @@ try:
             return !!(h && f && (h.compareDocumentPosition(f) & 4));}""")
         if not h1_first:
             fails.append("the title does not come before the map")
-        print(f"  title above the map, {len(rng)} ranges labelled: {', '.join(rng)}")
+        print(f"  title above the map, {len(rng)} ranges labeled: {', '.join(rng)}")
         pg.hover('path.st[data-i="2"]')
         pg.wait_for_timeout(150)
         hov = pg.evaluate("()=>[hovname.textContent, hovsub.textContent]")
@@ -204,7 +204,7 @@ try:
         if after >= got["shown"]:
             fails.append("the slider did not remove any rivers")
         print(f"  {got['states']} states, {got['rivers']} river lines "
-              f"({got['named']} labelled, {got['ctx']} outside the six), "
+              f"({got['named']} labeled, {got['ctx']} outside the six), "
               f"{got['shown']} shown at 0 km and {after} at 200 km")
         if errs:
             fails.append(f"javascript errors: {errs}")

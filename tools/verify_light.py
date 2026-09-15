@@ -6,7 +6,7 @@
   the physics  Planck's law, Wien's peaks, Stefan-Boltzmann and the share of
                a body's power in the visible band, each worked here and
                compared with the page; the matching-function fit peaks where
-               the CIE curves peak; the Sun's colour sits on the Planckian
+               the CIE curves peak; the Sun's color sits on the Planckian
                locus; 6500 K is close to daylight white
   the drawing  marks and windows land at their log positions; the marker
                drags; hovering and the presets fill the card; the hot-body
@@ -89,15 +89,15 @@ with sync_playwright() as pw:
     pg.wait_for_selector("#lsvg")
 
     def st(q=None):
-        return pg.evaluate("(q)=>{const o=window.__light(q); delete o.planck; delete o.visShare; delete o.colour; delete o.wave; delete o.cmf; delete o.SX; delete o.PX; delete o.PY; return o;}", q)
+        return pg.evaluate("(q)=>{const o=window.__light(q); delete o.planck; delete o.visShare; delete o.color; delete o.wave; delete o.cmf; delete o.SX; delete o.PX; delete o.PY; return o;}", q)
 
-    s = st({"planck": [5.02e-7, 5772], "share": 5772, "colour": 5772})
+    s = st({"planck": [5.02e-7, 5772], "share": 5772, "color": 5772})
     check(s["view"] == "spectrum" and abs(s["lam"] - 5.02e-7) < 1e-12, "opens on the spectrum with the marker at the Sun's peak")
     check(abs(s["pv"] / planck(5.02e-7, 5772) - 1) < 1e-9, "the page's Planck agrees with the one here")
     check(abs(s["sv"] - sun_share) < 2e-3, f"and its visible share for the Sun ({s['sv'] * 100:.1f}%)")
     x, y = s["cv"]["x"], s["cv"]["y"]
     check(abs(x - 0.3260) < 0.006 and abs(y - 0.3350) < 0.006, f"the Sun's chromaticity ({x:.4f}, {y:.4f}) sits on the Planckian locus near (0.326, 0.335)")
-    s65 = st({"colour": 6504})
+    s65 = st({"color": 6504})
     check(abs(s65["cv"]["x"] - 0.3135) < 0.006 and abs(s65["cv"]["y"] - 0.3237) < 0.006, f"6504 K gives ({s65['cv']['x']:.4f}, {s65['cv']['y']:.4f}), the daylight white point's black body")
     # the matching-function fit
     cm = st({"cmf": 555})["cmfv"]
@@ -151,14 +151,14 @@ with sync_playwright() as pw:
     pg.click('#bodies button[data-t="310"]')
     pg.wait_for_timeout(100)
     s = st()
-    check(abs(s["T"] - 310) < 0.5 and "9.35" in s["card"] and "no visible glow" in s["card"] and "524 W" in s["card"], "a person: peak 9.35 microns, 524 W per square metre, no visible glow")
+    check(abs(s["T"] - 310) < 0.5 and "9.35" in s["card"] and "no visible glow" in s["card"] and "524 W" in s["card"], "a person: peak 9.35 microns, 524 W per square meter, no visible glow")
     pg.click('#bodies button[data-t="40000"]')
     pg.wait_for_timeout(100)
     s = st({"share": 40000})
     check("72.4 nm" in s["card"] and abs(s["sv"] - vis_share(40000)) < 2e-3, f"Zeta Puppis: peak 72.4 nm, {s['sv'] * 100:.1f}% visible")
     pg.evaluate("()=>{const s=document.getElementById('temp'); s.value=Math.round(Math.log10(2700)*1000); s.dispatchEvent(new Event('input'));}")
     pg.wait_for_timeout(100)
-    s = st({"colour": 2700})
+    s = st({"color": 2700})
     r, g_, b_ = rgb(s["cv"]["hex"])
     check(r > g_ > b_ and "tungsten" in pg.inner_text("#nameTxt"), f"a tungsten bulb at 2700 K is orange {s['cv']['hex']} and the card names it")
     shaded = pg.evaluate("()=>[...document.querySelectorAll('#lsvg rect[opacity=\"0.13\"]')].length")

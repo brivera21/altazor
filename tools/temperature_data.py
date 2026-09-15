@@ -8,7 +8,7 @@ number: it depends on the site, the hour and the person, so the normal
 band comes from a meta-analysis that reports each site separately rather
 than from the folk figure of {37}. And the classic heat-loss percentages
 are a textbook idealisation for one condition, a nude adult resting in
-still air near {21} degrees, so they are labelled as that.
+still air near {21} degrees, so they are labeled as that.
 """
 
 # --- the survivable span, drawn as bands on the column -------------------
@@ -29,7 +29,7 @@ ZONES = [
      "undress, a confused response called paradoxical undressing."),
     (32.0, 35.0, "cold1", "Mild hypothermia",
      "Shivering is at its hardest and the metabolic rate climbs. "
-     "Judgement and coordination go first, before the person feels in "
+     "Judgment and coordination go first, before the person feels in "
      "any danger."),
     (35.0, 36.16, "low", "Below the normal band",
      "Colder than the pooled normal range for a healthy adult, though a "
@@ -77,7 +77,7 @@ MARKS = [
      "Carl Wunderlich set the figure in 1868 from about a million "
      "readings, taken in the armpit. Converting his round 37 gives 98.6 "
      "in Fahrenheit, which looks like a measurement to three figures. The "
-     "precision is an artefact of the conversion."),
+     "precision is an artifact of the conversion."),
     (40.0, "Heat stroke", "r",
      "Core above {40} degrees with the nervous system failing, which means "
      "confusion, seizures or coma. Well trained athletes reach {41.5} in a "
@@ -159,14 +159,14 @@ ROUTES = [
      "air."),
     ("Evaporation", 22, "#58a6ff",
      "Water leaving the skin and the lungs. At rest most of this is "
-     "insensible, about 600 to 700 millilitres a day, before any "
+     "insensible, about 600 to 700 milliliters a day, before any "
      "sweating."),
 ]
 
 POWER = dict(rest=100, hard=1400, peak=2500,
              sweat_typ=1.0, sweat_max=3.0, sweat_rec=3.71,
-             latent=2426,          # kJ per litre
-             evap_w_per_lh=674,    # watts removed per litre an hour
+             latent=2426,          # kJ per liter
+             evap_w_per_lh=674,    # watts removed per liter an hour
              skin=35.0)
 
 # --- the scales ----------------------------------------------------------
@@ -223,7 +223,7 @@ LINES = [
     (38.6, "Where cooling stops", "#31d67a",
      "The experimental stopping point for cooling a heat stroke patient, "
      "from a study that immersed volunteers and watched what happened after "
-     "they came out. Stopping at {37.5} overshot to {35.7} in the oesophagus; "
+     "they came out. Stopping at {37.5} overshot to {35.7} in the esophagus; "
      "stopping at {38.6} did not overshoot at all. Authorities place the "
      "line anywhere from {38.0} to {39.4}."),
     (40.0, "The heat stroke line", "#e0673f",
@@ -353,7 +353,7 @@ TELL_NOTE = (
 # draws them as points on purpose. No published figure spans this range,
 # because the two halves come from incompatible states: the shivering peak
 # needs an awake person defending their temperature, and every measurement
-# below about 33 degrees comes from someone anaesthetised, paralysed or on
+# below about 33 degrees comes from someone anesthetized, paralyzed or on
 # bypass, which is the only reason those temperatures were reachable at all.
 #
 # (core temperature, per cent of resting, source key, awake?)
@@ -374,11 +374,11 @@ MEASURED = [
 MSRC = {
     "base": ("Resting", "The rate every other figure on this panel is a "
              "percentage of."),
-    "zhu": ("Zhu, 2003", "Twenty anaesthetised and paralysed patients heated "
+    "zhu": ("Zhu, 2003", "Twenty anesthetized and paralyzed patients heated "
             "to {41.8} degrees, with a catheter in the pulmonary artery. The "
              "climb decelerates, from about 9 per cent a degree Celsius over "
              "the first two to 5 and then 4. "
-            "then 5, then 4. Anaesthesia removes shivering and the work of "
+            "then 5, then 4. Anesthesia removes shivering and the work of "
             "breathing, so this is close to the pure effect of heat on "
             "tissue and probably understates an intact person."),
     "eyolfson": ("Eyolfson, 2001", "Peak shivering in fifteen people put in "
@@ -414,7 +414,7 @@ REGIMES = [
      "awake, or sedated but still their own thermostat. It is also the only "
      "part of the range where a person still defends their temperature, so "
      "the shivering peak sits here and nowhere below."),
-    (18.0, 33.0, "Anaesthetised, paralysed, or on bypass", "#58a6ff",
+    (18.0, 33.0, "Anesthetized, paralyzed, or on bypass", "#58a6ff",
      "Every whole-body measurement below about {33} degrees was taken from a "
      "patient whose thermoregulation had been switched off by drugs or by a "
      "bypass machine. That is the only reason anyone has been measured this "
@@ -461,7 +461,7 @@ PER_DEGREE = {
         "a degree Celsius at first to 5 and then 4.",
     40: "Above here with the nervous system failing is heat stroke. Athletes "
         "reach {41.5} in a race without harm.",
-    39: "Measured 18 per cent above resting in anaesthetised patients heated "
+    39: "Measured 18 per cent above resting in anesthetized patients heated "
         "deliberately. A raised set point.",
     38: "The usual fever cut-off, written for a rectal reading. Cooling a "
         "heat stroke patient stops at {38.6}.",
@@ -471,7 +471,7 @@ PER_DEGREE = {
         "modern mean is {36.6}.",
     35: "Peak shivering sits near here, almost five times resting. Reaching "
         "it depends on how cold the skin is.",
-    34: "Judgement and coordination are already going, before the person "
+    34: "Judgment and coordination are already going, before the person "
         "feels in any danger.",
     33: "The coldest a sedated volunteer has been taken with the metabolism "
         "measured: 79 per cent of resting.",

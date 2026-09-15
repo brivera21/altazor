@@ -4,7 +4,7 @@
                landmarks: the Earth's mass, the moment of inertia factor,
                densities and wave speeds at each boundary, gravity at the
                core, the pressure at the core-mantle boundary, the inner
-               core boundary and the centre, all integrated here on a
+               core boundary and the center, all integrated here on a
                0.1 km grid and compared with PREM's table
   the page     the page's own integration agrees with this one; the card
                reads the right numbers at the presets; layers tile the
@@ -69,8 +69,8 @@ check(abs(gr(N) - 9.82) < 0.01, f"surface gravity {gr(N):.3f} m/s^2")
 check(abs(gr(idx(3480)) - 10.68) < 0.02, f"gravity at the core-mantle boundary {gr(idx(3480)):.2f} (10.68 published)")
 check(abs(P[idx(3480)] / 1e9 - 135.75) < 0.5, f"pressure at the core-mantle boundary {P[idx(3480)] / 1e9:.1f} GPa (135.75)")
 check(abs(P[idx(1221.5)] / 1e9 - 328.85) < 0.6, f"at the inner core boundary {P[idx(1221.5)] / 1e9:.1f} GPa (328.85)")
-check(abs(P[0] / 1e9 - 363.85) < 0.6, f"at the centre {P[0] / 1e9:.1f} GPa (363.85)")
-land = [("centre", 0, 13.0885, 11.2622, 3.6678), ("inner core boundary, inside", 1221.4999, 12.7636, 11.0283, 3.5043),
+check(abs(P[0] / 1e9 - 363.85) < 0.6, f"at the center {P[0] / 1e9:.1f} GPa (363.85)")
+land = [("center", 0, 13.0885, 11.2622, 3.6678), ("inner core boundary, inside", 1221.4999, 12.7636, 11.0283, 3.5043),
         ("inner core boundary, outside", 1221.5001, 12.1663, 10.3557, 0), ("core-mantle boundary, core side", 3479.999, 9.9035, 8.0648, 0),
         ("core-mantle boundary, mantle side", 3480.001, 5.5665, 13.7166, 7.2647), ("670 km, below", 5700.999, 4.3807, 10.7513, 5.9451),
         ("670 km, above", 5701.001, 3.9921, 10.2662, 5.5702), ("400 km, below", 5970.999, 3.7238, 9.1340, 4.9325),
@@ -86,7 +86,7 @@ geo = dict(GEOTHERM)
 check(geo[400] == 1839 and geo[670] == 1994 and geo[5149.5] == 6230 and geo[2891] == 4000, "the geotherm hits Katsura's 1839 and 1994 K, 4,000 K at the core, Anzellini's 6230 K")
 check(all(GEOTHERM[i][0] < GEOTHERM[i + 1][0] for i in range(len(GEOTHERM) - 1)), "and its points are in depth order")
 pl = {p[0]: p for p in PLACES}
-check(pl["cmb"][2] == RE - 3480 and pl["icb"][2] == RE - 1221.5 and abs(pl["moho"][2] - (RE - 6346.6)) < 1e-9 and pl["centre"][2] == RE, "the boundary presets sit on PREM's radii")
+check(pl["cmb"][2] == RE - 3480 and pl["icb"][2] == RE - 1221.5 and abs(pl["moho"][2] - (RE - 6346.6)) < 1e-9 and pl["center"][2] == RE, "the boundary presets sit on PREM's radii")
 
 print("--- the page ---")
 from playwright.sync_api import sync_playwright
@@ -119,7 +119,7 @@ with sync_playwright() as pw:
     pg.click('#places button[data-d="6371"]')
     pg.wait_for_timeout(100)
     s = st()
-    check("the centre" in s["name"] and "13.09 g/cm" in s["card"] and "0.00 m/s" in s["card"] and "364." in s["card"] and "3.59 million atmospheres" in s["card"], "the centre: 13.09 g/cm3, gravity zero, 364 GPa, 3.59 million atmospheres")
+    check("the center" in s["name"] and "13.09 g/cm" in s["card"] and "0.00 m/s" in s["card"] and "364." in s["card"] and "3.59 million atmospheres" in s["card"], "the center: 13.09 g/cm3, gravity zero, 364 GPa, 3.59 million atmospheres")
     pg.click('#places button[data-d="2891"]')
     pg.wait_for_timeout(100)
     s = st()
@@ -133,7 +133,7 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(100)
     s = st()
     check(s["hot"] == "outer" and "the outer core" in s["name"] and "30.8%" in s["card"] and "15.6%" in s["card"] and "liquid metal" in s["card"], "hovering the outer core: 30.8% of the mass, 15.6% of the volume, liquid metal")
-    # drag on the disc: a point at radius 165 px from the centre is 3185.5 km down
+    # drag on the disc: a point at radius 165 px from the center is 3185.5 km down
     box = pg.eval_on_selector("#esvg", "e=>{const r=e.getBoundingClientRect(); return {x:r.left,y:r.top,w:r.width,h:r.height,vh:e.viewBox.baseVal.height}}")
     sx = lambda px: box["x"] + px / 980 * box["w"]
     sy = lambda py: box["y"] + py / box["vh"] * box["h"]

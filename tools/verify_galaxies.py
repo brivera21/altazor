@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from galaxies_data import KINDS, SIZES, PARTS, NEIGHBOURS, SUN_R
+from galaxies_data import KINDS, SIZES, PARTS, NEIGHBORS, SUN_R
 
 ROOT = Path(__file__).resolve().parent.parent
 PAGE = ROOT / "galaxies.html"
@@ -39,7 +39,7 @@ bykey = {g["k"]: g for g in SIZES}
 check(set(D) == set(bykey), f"{len(SIZES)} galaxies to scale, the Milky Way among them")
 check(all(abs(bykey[k]["d"] - d) < 1e-9 for k, d in D.items()), "every diameter matches the figure entered here")
 check(bykey["mw"]["c"] == "MW" and "SBbc" in bykey["mw"]["t"], "the Milky Way is drawn as a barred spiral and called SBbc")
-check(abs(SUN_R - 8.2) < 1e-9, f"the Sun's distance to the centre is {SUN_R} kpc")
+check(abs(SUN_R - 8.2) < 1e-9, f"the Sun's distance to the center is {SUN_R} kpc")
 arms = [p for p in PARTS if p.get("arm")]
 check(len(arms) == 4 and all(3 < a["rSun"] < 15 and 8 < a["pitch"] < 18 for a in arms),
       "four arms, each with a pitch angle and the radius where it crosses the Sun's line")
@@ -50,10 +50,10 @@ thick = next(p for p in PARTS if p["k"] == "thick")
 check(thin["h"] == 0.3 and thick["h"] == 0.9, "thin disc 300 pc, thick disc 900 pc")
 # McConnachie 2012, a sample entered again here
 MC = {"lmc": 50, "smc": 62, "sgr": 26, "for": 147, "leo1": 254, "m31": 765, "m33": 840, "wlm": 930}
-nb = {g["k"]: g for g in NEIGHBOURS}
+nb = {g["k"]: g for g in NEIGHBORS}
 check(all(nb[k]["d"] == d for k, d in MC.items()), "the Local Group distances match McConnachie for the sample")
-check(all(-90 <= g["lat"] <= 90 and 0 <= g["l"] < 360 for g in NEIGHBOURS), "every member has a galactic longitude and latitude")
-check(all(g["b"] and g["sizeTxt"] and g["group"] for g in NEIGHBOURS), "and a size, a group and a line of its own")
+check(all(-90 <= g["lat"] <= 90 and 0 <= g["l"] < 360 for g in NEIGHBORS), "every member has a galactic longitude and latitude")
+check(all(g["b"] and g["sizeTxt"] and g["group"] for g in NEIGHBORS), "and a size, a group and a line of its own")
 
 print("--- the drawing ---")
 from playwright.sync_api import sync_playwright
@@ -67,7 +67,7 @@ with sync_playwright() as pw:
     pg.wait_for_selector("#gsvg")
 
     def hover(sel):
-        # the pointer event itself, on the element: a bounding box centre would
+        # the pointer event itself, on the element: a bounding box center would
         # land on whatever sits under the middle of an arm's arc
         pg.evaluate("(s)=>document.querySelector(s).dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))", sel)
         pg.wait_for_timeout(120)
@@ -111,7 +111,7 @@ with sync_playwright() as pw:
       out.arms={};
       for(const k of ['perseus','sagcar','sctcen','outer']){
         const pts=document.querySelector('#gsvg g[data-k="'+k+'"] polyline').getAttribute('points').trim().split(/\\s+/).map(p=>p.split(',').map(Number));
-        // the point nearest to straight below the centre
+        // the point nearest to straight below the center
         let best=null;
         for(const [x,y] of pts){ const ang=Math.atan2(y-out.cy,x-out.cx); const d=Math.abs(ang-Math.PI/2);
           if(!best||d<best.d) best={d, r:Math.hypot(x-out.cx,y-out.cy)}; }
@@ -119,7 +119,7 @@ with sync_playwright() as pw:
       }
       return out;}""")
     check(abs(geo["sx"] - geo["cx"]) < 0.5 and abs((geo["sy"] - geo["cy"]) / 22 - SUN_R) < 0.01,
-          f"the Sun is drawn {((geo['sy'] - geo['cy']) / 22):.2f} kpc straight below the centre")
+          f"the Sun is drawn {((geo['sy'] - geo['cy']) / 22):.2f} kpc straight below the center")
     worst = max(abs(geo["arms"][a["k"]] - a["rSun"]) for a in arms)
     check(worst < 0.15, f"each arm crosses the Sun's line at its measured radius (worst {worst:.2f} kpc out)")
     check("rotate(118)" in geo["bar"], f"the bar's near end points to positive longitude ({geo['bar']})")
@@ -145,7 +145,7 @@ with sync_playwright() as pw:
     check(pos["m31"][0] < pos["mw"][0] and pos["lmc"][0] > pos["mw"][0],
           "from the north pole Andromeda (l=121) lies to the left and the Large Cloud (l=280) to the right")
     check(0 < pos["mw"][0] - pos["sgr"][0] < 6 and pos["sgr"][1] < pos["mw"][1],
-          "the Sagittarius dwarf (l=5.6) sits toward the centre, a hair left of the l=0 line")
+          "the Sagittarius dwarf (l=5.6) sits toward the center, a hair left of the l=0 line")
     r = lambda k: math.hypot(pos[k][0] - pos["mw"][0], pos[k][1] - pos["mw"][1])
     want = lambda d, lat: (math.log10(d * math.cos(math.radians(lat))) - math.log10(15)) / (math.log10(1500) - math.log10(15)) * 300
     check(abs(r("m31") - want(765, -21.6)) < 0.5 and abs(r("lmc") - want(50, -32.9)) < 0.5,

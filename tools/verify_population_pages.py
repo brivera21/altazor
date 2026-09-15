@@ -7,7 +7,7 @@ closing headings run How to read this, Notes, References.
 Numbers: ranks run 1..N without a gap, populations fall, every green lead is
 exactly the difference to the row below (the last row compares against the
 named runner-up where the list is a cut of a longer ranking), the totals row
-adds up, and every row carries one inline bar whose colour agrees with its sign.
+adds up, and every row carries one inline bar whose color agrees with its sign.
 
 Flags: one per row, from flagcdn or drawn inline, never with loading="lazy" or
 srcset, which stopped them loading at all in Brian's Chrome.
