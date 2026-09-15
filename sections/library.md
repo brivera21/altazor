@@ -26,6 +26,8 @@ title: Library
 <h2>The Universe</h2>
 <p><a href="energy.html">Energy</a></p>
 <p><a href="matter.html">Matter</a></p>
+<p><a href="light.html">Light</a></p>
+<p><a href="forces.html">Forces</a></p>
 <p><a href="cosmic-timeline.html">The Universe in Time</a></p>
 <p><a href="universe.html">The Universe</a></p>
 <p><a href="galaxies.html">Galaxies</a></p>
@@ -35,6 +37,7 @@ title: Library
 <div>
 <h2>Earth</h2>
 <p><a href="earth-history.html">Geological History</a></p>
+<p><a href="earth-interior.html">The Interior</a></p>
 <p><a href="earth.html">Climate</a></p>
 <p><a href="orbit-sine.html">Rotation</a></p>
 <p><a href="moon.html">Lunar Cycle</a></p>
