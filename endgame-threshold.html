@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Endgame Threshold &middot; Altazor</title>
+<style>
+:root{
+  --ink:#111;
+  --ink-soft:#555;
+  --ink-faint:#8a8a86;
+  --paper:#fdfdfc;
+  --line:#d8d7d1;
+  --line-soft:#ebeae5;
+  --off:#c9c8c2;
+  --hit:#111;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --ink:#f0efec;
+    --ink-soft:#b6b5ae;
+    --ink-faint:#86857f;
+    --paper:#141413;
+    --line:#35343048;
+    --line-soft:#2a2a28;
+    --off:#4a4945;
+    --hit:#f0efec;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:760px;margin:0 auto;padding:2rem 1.25rem 5rem}
+header.site{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin-bottom:1.5rem}
+.brand{font-weight:700;font-size:20px;letter-spacing:.1em;text-decoration:none;color:var(--ink)}
+.brand:hover{color:var(--ink-soft)}
+nav.site{display:flex;gap:16px;flex-wrap:wrap}
+nav.site a{color:var(--ink-soft);text-decoration:none;font-size:14px}
+nav.site a:hover{color:var(--ink)}
+.board{padding-top:.5rem}
+.side{margin-bottom:1.25rem}
+.side-head{
+  display:flex;align-items:baseline;justify-content:space-between;
+  font-size:13px;color:var(--ink-soft);margin-bottom:.4rem;
+  letter-spacing:.02em;
+}
+.side-head b{font-weight:500;color:var(--ink)}
+.pieces{display:flex;gap:6px;flex-wrap:wrap}
+.pc{
+  width:46px;height:46px;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+  font-size:27px;line-height:1;
+  background:transparent;color:var(--hit);
+  border:1px solid var(--line);border-radius:6px;
+  cursor:pointer;padding:0;
+  transition:opacity .12s,border-color .12s,color .12s;
+}
+.pc:hover{border-color:var(--ink-soft)}
+.pc.gone{color:var(--off);border-color:var(--line-soft);border-style:dashed;text-decoration:line-through;text-decoration-thickness:1px}
+.pc:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.readout{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:.6rem 1.5rem;margin:1.75rem 0 0;
+  border-top:1px solid var(--line);padding-top:1.25rem;
+}
+.cell .lab{font-size:12px;color:var(--ink-faint);letter-spacing:.04em;text-transform:uppercase}
+.cell .val{font-size:22px;font-weight:500;letter-spacing:-.01em}
+.cell .sub{font-size:13px;color:var(--ink-soft)}
+.meter{height:6px;background:var(--line-soft);border-radius:3px;margin-top:.5rem;position:relative;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--ink);border-radius:3px;transition:width .18s}
+.meter u{position:absolute;top:-2px;bottom:-2px;width:1px;background:var(--ink-faint)}
+.verdicts{margin:1.75rem 0 0;border-top:1px solid var(--line);padding-top:1.25rem}
+.vrow{display:flex;align-items:baseline;gap:.6rem;padding:.35rem 0;font-size:15px}
+.tag{
+  font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  border:1px solid var(--line);border-radius:3px;padding:2px 7px;
+  color:var(--ink-soft);white-space:nowrap;
+}
+.tag.on{border-color:var(--ink);color:var(--ink)}
+.note{font-size:14px;color:var(--ink-soft);margin-top:.75rem;min-height:1.65em}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin-top:1.5rem}
+.presets button{
+  font:inherit;font-size:13px;background:transparent;color:var(--ink-soft);
+  border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer;
+}
+.presets button:hover{border-color:var(--ink-soft);color:var(--ink)}
+.prose{margin-top:4rem;border-top:1px solid var(--line);padding-top:2rem}
+.prose h2{font-size:17px;font-weight:500;margin:2.25rem 0 .5rem}
+.prose h1{font-size:21px;font-weight:500;margin:0 0 .75rem}
+.prose p{margin:0 0 1rem;color:var(--ink-soft)}
+.prose li{color:var(--ink-soft);margin-bottom:.3rem}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:1rem 0 1.5rem}
+th,td{text-align:left;padding:5px 10px 5px 0;border-bottom:1px solid var(--line-soft);color:var(--ink-soft)}
+th{color:var(--ink);font-weight:500;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+td.n{font-variant-numeric:tabular-nums}
+tr.twin td{color:var(--ink)}
+.src{font-size:13px;color:var(--ink-faint)}
+.src li{color:var(--ink-faint)}
+.src a{color:var(--ink-soft)}
+@media (max-width:480px){
+  .readout{grid-template-columns:1fr}
+  .pc{width:40px;height:40px;font-size:23px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="chess.html">&larr; Chess</a>
+  <a href="endgames.html">Endgames</a>
+  <a href="rook-endgames.html">Rook Endgames</a></nav>
+</header>
+
+<div class="board">
+  <div class="side" id="side-w">
+    <div class="side-head"><b>White</b><span class="s-sum"></span></div>
+    <div class="pieces"></div>
+    <div class="meter"><i></i><u></u></div>
+  </div>
+  <div class="side" id="side-b">
+    <div class="side-head"><b>Black</b><span class="s-sum"></span></div>
+    <div class="pieces"></div>
+    <div class="meter"><i></i><u></u></div>
+  </div>
+
+  <div class="readout">
+    <div class="cell">
+      <div class="lab">Material remaining</div>
+      <div class="val" id="v-mat"></div>
+      <div class="sub" id="s-mat"></div>
+    </div>
+    <div class="cell">
+      <div class="lab">Trade ratio</div>
+      <div class="val" id="v-ratio"></div>
+      <div class="sub" id="s-ratio"></div>
+    </div>
+  </div>
+
+  <div class="verdicts">
+    <div class="vrow"><span class="tag" id="t-points">Points rule</span><span id="x-points"></span></div>
+    <div class="vrow"><span class="tag" id="t-ratio">Ratio rule</span><span id="x-ratio"></span></div>
+    <div class="vrow"><span class="tag" id="t-phase">Tapered phase</span><span id="x-phase"></span></div>
+    <p class="note" id="note"></p>
+  </div>
+
+  <div class="presets">
+    <button data-p="start">Starting position</button>
+    <button data-p="queensoff">Queens off</button>
+    <button data-p="minorsoff">All minors traded</button>
+    <button data-p="heavyoff">All heavy pieces traded</button>
+    <button data-p="rook2m">Rook and two minors each</button>
+    <button data-p="qvs3m">Queen against three minors</button>
+  </div>
+</div>
+
+<div class="prose">
+<h1>Endgame threshold</h1>
+
+<p>Fourteen pieces, seven a side, and no pawns; a click takes any piece off the board and puts it back. Pawns never leave, so counting them only muddies the question.</p>
+
+<p>The points rule is Speelman's: an endgame is a position where each player holds thirteen points or less of material, kings excluded, using the ordinary nine for a queen, five for a rook, three for a bishop or knight. The ratio rule counts pieces instead of points. Seven trade units a side, and the endgame arrives once four have gone and three are left, a ratio of 4 to 3.</p>
+
+<p>The two rules disagree twice. With every minor piece traded, the ratio rule calls it an endgame at 4 to 3, while nineteen points of queen and rooks sit on the board waiting to attack. With the queen and both rooks traded instead, the ratio rule still says middlegame at 3 to 4, though four minor pieces and pawns play like an endgame by anyone's account. Composition beats the count. Weighting the units to fix this rebuilds the points rule.</p>
+
+<div class="method">
+<h2>Reaching the threshold</h2>
+
+<p>Thirteen points remaining means eighteen or more points traded, out of thirty one. Exactly eighteen has one solution, queen plus three minors. Everything at or past the line:</p>
+
+<table>
+<thead><tr><th>Traded</th><th>Pts</th><th>Remaining</th><th>Pts</th></tr></thead>
+<tbody>
+<tr><td>Q + 3m</td><td class="n">18</td><td>2R + 1m</td><td class="n">13</td></tr>
+<tr class="twin"><td>Q + 2R</td><td class="n">19</td><td>4m</td><td class="n">12</td></tr>
+<tr class="twin"><td>2R + 3m</td><td class="n">19</td><td>Q + 1m</td><td class="n">12</td></tr>
+<tr><td>Q + R + 2m</td><td class="n">20</td><td>R + 2m</td><td class="n">11</td></tr>
+<tr><td>Q + 4m</td><td class="n">21</td><td>2R</td><td class="n">10</td></tr>
+<tr class="twin"><td>Q + 2R + 1m</td><td class="n">22</td><td>3m</td><td class="n">9</td></tr>
+<tr class="twin"><td>2R + 4m</td><td class="n">22</td><td>Q</td><td class="n">9</td></tr>
+<tr><td>Q + R + 3m</td><td class="n">23</td><td>R + 1m</td><td class="n">8</td></tr>
+<tr><td>Q + 2R + 2m</td><td class="n">25</td><td>2m</td><td class="n">6</td></tr>
+<tr><td>Q + R + 4m</td><td class="n">26</td><td>R</td><td class="n">5</td></tr>
+<tr><td>Q + 2R + 3m</td><td class="n">28</td><td>1m</td><td class="n">3</td></tr>
+<tr><td>Q + 2R + 4m</td><td class="n">31</td><td>none</td><td class="n">0</td></tr>
+</tbody>
+</table>
+
+<p>Twelve ways in, and m stands for a minor piece. Two totals repeat, marked in darker type. At nineteen points traded and again at twenty two, two different sets of pieces carry identical value, and both reduce to a queen facing three minor pieces. Every other total is unique, so unequal totals mean one side is simply ahead rather than holding a different kind of army.</p>
+
+<p>Totals of 24, 27, 29 and 30 cannot be built from nines, fives and threes under these constraints, so the scale has gaps near the top.</p>
+
+<h2>What the engines count</h2>
+
+<p>Engines gave up on thresholds. Tapered evaluation computes a phase value from the non-pawn material left standing, weighting a knight or bishop 1, a rook 2, and a queen 4, for 24 at the start, then blends a middlegame score with an endgame score in that proportion. Nothing flips. The idea appeared in Berliner's work in 1979 and in engines like The King and Phalanx, and spread widely after Fruit. The third readout above shows it, reporting the game thirty percent of the way to an ending while both other rules still say middlegame.</p>
+
+<h2>Other people's lines</h2>
+
+<ul>
+<li>Alekhine held that the boundary cannot be stated at all.</li>
+<li>Fine: no queens on the board.</li>
+<li>Minev: four or fewer pieces besides kings and pawns.</li>
+<li>Flear: at most one piece each besides kings and pawns.</li>
+<li>Speelman: thirteen points or less each, or alternatively, the point at which the king becomes usable as an attacking piece.</li>
+</ul>
+
+<p>The points rule has a known flaw worth sitting with. Because it looks only at material, a position can leave the endgame and return to it, and a king, queen, rook and pawn against king, queen and rook can follow a rook and pawn ending. Phases were never guaranteed to run in order.</p>
+
+</div>
+<h2 class="refh">Sources</h2>
+<ul class="src refs">
+<li>Speelman, J. (1981). <i>Endgame preparation</i> (pp. 7-8). Batsford.</li>
+<li>Fine, R. (1952). <i>The middle game in chess</i> (p. 430). McKay.</li>
+<li>Minev, N. (2004). <i>A practical guide to rook endgames</i> (p. 5). Russell Enterprises.</li>
+<li>Flear, G. (2007). <i>Practical endgame play: Beyond the basics</i> (pp. 7-8). Everyman Chess.</li>
+<li>Haworth, G. M. (2013). Chess endgame news. <i>ICGA Journal, 36</i>(3), 143-145. <a href="https://centaur.reading.ac.uk/34267/">https://centaur.reading.ac.uk/34267/</a> On material definitions running out of order: by Speelman's rule the middlegame KQRPKQR can follow the endgame KRPPKRP.</li>
+<li>Chess Programming Wiki. (n.d.). <i>Tapered eval</i>. <a href="https://www.chessprogramming.org/Tapered_Eval">https://www.chessprogramming.org/Tapered_Eval</a> The phase weights and the history: The King, Phalanx, Fruit.</li>
+<li>Berliner, H. (1979). On the construction of evaluation functions for large domains. In <i>Proceedings of the 6th International Joint Conference on Artificial Intelligence</i> (Vol. 1, pp. 53-55). IJCAI. <a href="https://bkgm.com/articles/Berliner/EvaluationFunctionsLargeDomains/">https://bkgm.com/articles/Berliner/EvaluationFunctionsLargeDomains/</a></li>
+</ul>
+</div>
+
+</div>
+
+<script>
+(function(){
+  var GLYPH={q:{w:"\u2655",b:"\u265B"},r:{w:"\u2656",b:"\u265C"},b:{w:"\u2657",b:"\u265D"},n:{w:"\u2658",b:"\u265E"}};
+  var NAME={q:"queen",r:"rook",b:"bishop",n:"knight"};
+  var PTS={q:9,r:5,b:3,n:3};
+  var PHS={q:4,r:2,b:1,n:1};
+  var LAYOUT=["q","r","r","b","b","n","n"];
+  var state={w:[],b:[]};
+
+  function build(color){
+    var host=document.querySelector("#side-"+color+" .pieces");
+    host.innerHTML="";
+    state[color]=[];
+    LAYOUT.forEach(function(t,i){
+      var btn=document.createElement("button");
+      btn.className="pc";
+      btn.type="button";
+      btn.textContent=GLYPH[t][color];
+      btn.setAttribute("aria-pressed","false");
+      btn.setAttribute("aria-label",(color==="w"?"White ":"Black ")+NAME[t]+", on the board");
+      btn.addEventListener("click",function(){
+        state[color][i].on=!state[color][i].on;
+        render();
+      });
+      host.appendChild(btn);
+      state[color].push({type:t,on:true,el:btn});
+    });
+  }
+
+  function tally(color){
+    var pts=0,phase=0,left=0,rem={q:0,r:0,m:0};
+    state[color].forEach(function(p){
+      if(p.on){
+        pts+=PTS[p.type];
+        phase+=PHS[p.type];
+        left++;
+        if(p.type==="q")rem.q++;else if(p.type==="r")rem.r++;else rem.m++;
+      }
+    });
+    return {pts:pts,phase:phase,left:left,traded:7-left,rem:rem};
+  }
+
+  function describe(r){
+    var bits=[];
+    if(r.q)bits.push("Q");
+    if(r.r)bits.push(r.r===1?"R":r.r+"R");
+    if(r.m)bits.push(r.m+"m");
+    return bits.length?bits.join(" + "):"bare king";
+  }
+
+  function imbalance(a,b){
+    var d=[];
+    if(a.q!==b.q)d.push("queen");
+    if(a.r!==b.r)d.push("rook");
+    if(a.m!==b.m)d.push("minor piece");
+    return d;
+  }
+
+  function render(){
+    var W=tally("w"),B=tally("b");
+
+    ["w","b"].forEach(function(c){
+      var t=c==="w"?W:B;
+      state[c].forEach(function(p){
+        p.el.classList.toggle("gone",!p.on);
+        p.el.setAttribute("aria-pressed",p.on?"false":"true");
+        p.el.setAttribute("aria-label",(c==="w"?"White ":"Black ")+NAME[p.type]+(p.on?", on the board":", traded"));
+      });
+      var head=document.querySelector("#side-"+c+" .s-sum");
+      head.textContent=describe(t.rem)+", "+t.pts+" pts";
+      var m=document.querySelector("#side-"+c+" .meter i");
+      m.style.width=Math.round(t.pts/31*100)+"%";
+      document.querySelector("#side-"+c+" .meter u").style.left=Math.round(13/31*100)+"%";
+    });
+
+    document.getElementById("v-mat").textContent=W.pts+" and "+B.pts;
+    document.getElementById("s-mat").textContent="out of 31 each, threshold 13";
+
+    document.getElementById("v-ratio").textContent=W.traded+":"+W.left+" and "+B.traded+":"+B.left;
+    document.getElementById("s-ratio").textContent="traded to remaining, threshold 4:3";
+
+    var byPoints=(W.pts<=13&&B.pts<=13);
+    var byRatio=(W.traded>=4&&B.traded>=4);
+    var phasePct=Math.round((24-(W.phase+B.phase))/24*100);
+
+    set("t-points","x-points",byPoints,byPoints?"Endgame":"Middlegame");
+    set("t-ratio","x-ratio",byRatio,byRatio?"Endgame":"Middlegame");
+    set("t-phase","x-phase",phasePct>=50,phasePct+"% toward the ending");
+
+    var note="";
+    if(byPoints!==byRatio){
+      note=byRatio
+        ? "The rules disagree. Four units are gone, but what remains is heavy enough to keep the kings in hiding."
+        : "The rules disagree. Only three units are gone, and all of them mattered.";
+    }else{
+      var d=imbalance(W.rem,B.rem);
+      if(d.length&&W.pts===B.pts){
+        note="Material is level at "+W.pts+" points, but the armies are unlike. The difference runs through the "+d.join(" and the ")+".";
+      }else if(d.length){
+        note="Unequal armies. "+(W.pts>B.pts?"White":"Black")+" holds "+Math.abs(W.pts-B.pts)+" points more.";
+      }else{
+        note="Both sides hold the same material.";
+      }
+    }
+    document.getElementById("note").textContent=note;
+  }
+
+  function set(tagId,textId,on,label){
+    document.getElementById(tagId).classList.toggle("on",on);
+    document.getElementById(textId).textContent=label;
+  }
+
+  function apply(w,b){
+    [["w",w],["b",b]].forEach(function(pair){
+      var off=pair[1].slice();
+      state[pair[0]].forEach(function(p){
+        var i=off.indexOf(p.type);
+        if(i>-1){p.on=false;off.splice(i,1);}else{p.on=true;}
+      });
+    });
+    render();
+  }
+
+  var PRESETS={
+    start:[[],[]],
+    queensoff:[["q"],["q"]],
+    minorsoff:[["b","b","n","n"],["b","b","n","n"]],
+    heavyoff:[["q","r","r"],["q","r","r"]],
+    rook2m:[["q","r","b","n"],["q","r","b","n"]],
+    qvs3m:[["r","r","b","b","n","n"],["q","r","r","n"]]
+  };
+
+  document.querySelectorAll(".presets button").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var p=PRESETS[btn.dataset.p];
+      apply(p[0],p[1]);
+    });
+  });
+
+  build("w");build("b");render();
+})();
+</script>
+</body>
+</html>
