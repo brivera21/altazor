@@ -49,6 +49,9 @@ title: Library
 <div>
 <h2>Life</h2>
 <p><a href="cell.html">The Cell</a></p>
+<p><a href="dna.html">DNA</a></p>
+<p><a href="nervous-systems.html">Nervous Systems</a></p>
+<p><a href="plants.html">Plants</a></p>
 <p><a href="tree-of-life.html">Tree of Life</a></p>
 <p><a href="animals.html">Animals</a></p>
 <p><a href="mammals.html">Mammals</a></p>
