@@ -1,0 +1,267 @@
+#!/usr/bin/env python3
+"""Generate nervous-systems.html, Nervous Systems: the plans across the
+animals, and how many neurons each has.
+
+Two views. The plans: six animals in outline with their nervous systems
+drawn in, from a sponge with none, through a nerve net, a ladder, a
+ventral cord with ganglia, an octopus with its arm cords, to a vertebrate's
+dorsal cord and brain; each under the pointer explains itself. The counts:
+neurons against body mass on log-log axes for twenty-one animals from a
+roundworm to an elephant, coloured by group, with the line a person sits on
+and the birds and primates above it.
+
+Data: tools/nervous_systems_data.py.
+
+Usage: python3 build_nervous_systems.py
+"""
+
+import json
+from pathlib import Path
+
+import apa
+from nervous_systems_data import PLANS, ANIMALS, GROUPS, REFS
+
+OUT = Path(__file__).parent.parent / "nervous-systems.html"
+
+NOTE1 = ("A sponge has no neurons. A jellyfish has a net of them with no "
+         "centre. A flatworm gathers some at the front, next to its "
+         "eyespots, and that is the first head. Worms and insects run a "
+         "cord along the belly with a knot in every segment; an octopus "
+         "keeps most of its neurons in its arms; and the vertebrates put "
+         "one cord along the back and let its front swell into a brain. "
+         "Six plans, each under the pointer.")
+
+NOTE2 = ("The second view counts. On log axes the animals climb from a "
+         "roundworm's 302 neurons to an elephant's 257 billion, roughly in "
+         "step with body mass, but not on one line: birds and primates sit "
+         "above the mammals, with more neurons for their size, and a "
+         "person is where a primate of seventy kilograms should be. The "
+         "elephant has three times as many as a person and most of them in "
+         "the cerebellum, working the trunk.")
+
+METHOD = ("The plans are outlines, not anatomy; each is drawn to show one "
+          "arrangement, and the animals in it vary a great deal. The counts "
+          "for vertebrates are whole-brain counts by the isotropic "
+          "fractionator, which dissolves a brain and counts its nuclei, and "
+          "for invertebrates they are whole nervous systems, since that is "
+          "what has been counted; the two are not the same measure, and the "
+          "octopus's arms are the clearest case. Body masses are typical "
+          "adults and are the roughest numbers on the page; the counts "
+          "themselves rest on a few animals each, sometimes one. A sponge "
+          "is placed at the bottom with no neurons, which a log axis cannot "
+          "hold.")
+
+
+def _js(o):
+    return json.dumps(o, separators=(",", ":"), ensure_ascii=False)
+
+
+plans = [{"k": k, "n": n, "ex": ex, "b": b, "where": w, "s": s} for k, n, ex, b, w, s in PLANS]
+animals = [{"k": k, "n": n, "N": N, "m": m, "g": g, "p": p, "b": b, "s": s} for k, n, N, m, g, p, b, s in ANIMALS]
+
+HTML = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nervous Systems &middot; Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff; }
+* { box-sizing:border-box; }
+[hidden] { display:none !important; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; margin-right:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 12px; font-size:26px; }
+.bar { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 12px; }
+.bar button, .presets button { background:var(--panel); color:var(--muted); border:1px solid var(--line);
+  border-radius:999px; padding:6px 14px; font-size:13px; cursor:pointer; font-family:inherit; }
+.bar button.on, .presets button.on { background:var(--accent); color:#0b1a2b; border-color:var(--accent); font-weight:600; }
+.bar button:hover, .presets button:hover { color:var(--text); border-color:#3d3d3d; }
+.bar button.on:hover, .presets button.on:hover { color:#0b1a2b; }
+.controls { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 12px; min-height:34px; }
+.controls label { font-size:13px; color:var(--muted); }
+.presets { display:flex; gap:6px; flex-wrap:wrap; }
+.presets button { padding:5px 11px; font-size:12.5px; }
+.stage { display:flex; gap:22px; align-items:flex-start; }
+#diagram { flex:1 1 640px; min-width:0; }
+#diagram svg { width:100%; height:auto; display:block; user-select:none; }
+.side { flex:0 0 300px; min-width:0; position:sticky; top:16px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; overflow-wrap:anywhere; }
+#kindTxt { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+#nameTxt { font-weight:700; font-size:17px; margin:2px 0 6px; }
+#numTxt { font-size:13.5px; line-height:1.55; font-variant-numeric:tabular-nums; }
+#numTxt b { color:var(--muted); font-weight:400; }
+#bodyTxt { color:var(--muted); font-size:13.5px; line-height:1.55; margin-top:9px; }
+#srcTxt { color:var(--muted); font-size:12px; margin-top:10px; border-top:1px solid var(--line); padding-top:8px; }
+.note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.method { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+.refs p { margin:0 0 8px; overflow-wrap:anywhere; }
+.refs a { color:var(--accent); }
+__APACSS__
+h2.refh { font-size:15px; margin:26px 0 8px; }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="library.html">&larr; Library &middot; Life</a><a href="animals.html">Animals</a><a href="cell.html">The Cell</a><a href="body.html">The Human Body</a></nav>
+</header>
+<h1>Nervous Systems</h1>
+<div class="bar" id="views"><button data-v="plans" class="on">The plans</button><button data-v="counts">The counts</button></div>
+<div class="controls" id="countCtl" hidden>
+  <label>groups</label>
+  <span class="presets" id="groups"></span>
+</div>
+<div class="stage">
+  <div id="diagram"></div>
+  <div class="side"><div class="card">
+    <div id="kindTxt"></div>
+    <div id="nameTxt"></div>
+    <div id="numTxt"></div>
+    <div id="bodyTxt"></div>
+    <div id="srcTxt"></div>
+  </div></div>
+</div>
+<p class="note">__NOTE1__</p>
+<p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
+<div class="method"><p>__METHOD__</p></div>
+<h2 class="refh">References</h2>
+<div class="refs">__REFS__</div>
+</div>
+<script>
+const PLANS=__PLANS__, ANIMALS=__ANIMALS__, GROUPS=__GROUPS__;
+const W=980;
+const el=document.getElementById('diagram');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+let view='plans', hot=null, group=null;
+const NERVE='#ffb02e', BODY='#2a3542', OUTLINE='#6b7a8c';
+const big=n=>n>=1e9?(n/1e9).toLocaleString('en-US',{maximumFractionDigits:n>=1e10?0:1})+' billion':n>=1e6?(n/1e6).toLocaleString('en-US',{maximumFractionDigits:n>=1e7?0:1})+' million':n.toLocaleString('en-US');
+const mass=g=>g>=1e6?(g/1e6).toLocaleString('en-US',{maximumFractionDigits:1})+(g<1.5e6?' tonne':' tonnes'):g>=1000?(g/1000).toLocaleString('en-US',{maximumFractionDigits:g>=1e4?0:1})+' kg':g>=1?g.toLocaleString('en-US',{maximumFractionDigits:1})+' g':g>=1e-3?(g*1e3).toLocaleString('en-US',{maximumFractionDigits:1})+' mg':(g*1e6).toLocaleString('en-US',{maximumFractionDigits:1})+' \\u00b5g';
+
+/* ---- the card ---- */
+function card(kind,name,rows,body,src){
+  document.getElementById('kindTxt').textContent=kind;
+  document.getElementById('nameTxt').innerHTML=name;
+  document.getElementById('numTxt').innerHTML=rows.filter(r=>r[1]).map(([k,v])=>'<b>'+esc(k)+'</b> '+v).join('<br>');
+  document.getElementById('bodyTxt').textContent=body;
+  document.getElementById('srcTxt').textContent=src;
+}
+function showPlan(k){ const p=PLANS.find(x=>x.k===k); const ex=ANIMALS.filter(a=>a.p===k);
+  card('A plan', esc(p.n), [['in',esc(p.ex)],['the neurons',esc(p.where)],['counted here',ex.length?ex.map(a=>a.n.replace(/^an? /,'')+' '+big(a.N)).join('; '):'']], p.b, p.s); }
+function showAnimal(k){ const a=ANIMALS.find(x=>x.k===k); const p=PLANS.find(x=>x.k===a.p); const h=ANIMALS.find(x=>x.k==='human');
+  card('An animal', esc(a.n), [['neurons',a.N?big(a.N):'none'],['body',mass(a.m)],['neurons per gram',a.N?big(Math.round(a.N/a.m)):''],['against a person',a.N?(a.N>=h.N?(a.N/h.N).toFixed(1)+' times as many':'one '+Math.round(h.N/a.N).toLocaleString('en-US')+'th'):''],['plan',p.n]], a.b, a.s); }
+function showCounts(){ card('The counts','Neurons against body mass',[['animals',ANIMALS.length],['from',big(ANIMALS.find(a=>a.k==='celegans').N)+' to '+big(Math.max(...ANIMALS.map(a=>a.N)))]],'A dot under the pointer names its animal; a group above lights its dots.','Herculano-Houzel and colleagues; Wikipedia, List of animals by number of neurons'); }
+
+/* ---- the plans ---- */
+function plans(){
+  const PW=306, PH=250, cols=3; let s='';
+  PLANS.forEach((p,i)=>{ const x=20+(i%cols)*(PW+16), y=30+Math.floor(i/cols)*(PH+40); const on=hot===p.k;
+    s+='<g data-plan="'+p.k+'" style="cursor:pointer"><rect x="'+x+'" y="'+y+'" width="'+PW+'" height="'+PH+'" rx="8" fill="'+(on?'#1b2230':'#161616')+'" stroke="'+(on?'#58a6ff':'#2b2b2b')+'"/>';
+    s+='<text x="'+(x+12)+'" y="'+(y-10)+'" font-size="12.5" fill="#e6e6e6">'+esc(p.n)+'</text><text x="'+(x+PW-8)+'" y="'+(y-10)+'" text-anchor="end" font-size="10.5" fill="#6b7280">'+esc(p.ex)+'</text>';
+    const cx=x+PW/2, cy=y+PH/2;
+    if(p.k==='none'){ // a sponge: a vase with pores, no nerves
+      s+='<path d="M'+(cx-40)+','+(cy+90)+' C'+(cx-60)+','+(cy)+' '+(cx-30)+','+(cy-70)+' '+(cx-22)+','+(cy-90)+' L'+(cx+22)+','+(cy-90)+' C'+(cx+30)+','+(cy-70)+' '+(cx+60)+','+(cy)+' '+(cx+40)+','+(cy+90)+' Z" fill="'+BODY+'" stroke="'+OUTLINE+'" stroke-width="1.5"/>';
+      s+='<ellipse cx="'+cx+'" cy="'+(cy-90)+'" rx="22" ry="6" fill="#121212" stroke="'+OUTLINE+'"/>';
+      for(const [dx,dy] of [[-22,-40],[10,-55],[-8,-10],[20,-5],[-25,25],[15,35],[-5,60],[25,65],[-30,-70],[28,-35]]) s+='<circle cx="'+(cx+dx)+'" cy="'+(cy+dy)+'" r="3" fill="#121212" stroke="'+OUTLINE+'"/>';
+      s+='<text x="'+cx+'" y="'+(cy+112)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">no neurons at all</text>';
+    } else if(p.k==='net'){ // a hydra with a mesh
+      s+='<path d="M'+(cx-14)+','+(cy+95)+' L'+(cx-16)+','+(cy-40)+' L'+(cx+16)+','+(cy-40)+' L'+(cx+14)+','+(cy+95)+' Z" fill="'+BODY+'" stroke="'+OUTLINE+'" stroke-width="1.5"/>';
+      const tent=[[-60,-95],[-35,-105],[-8,-110],[18,-108],[42,-100],[62,-85]];
+      for(const [tx,ty] of tent) s+='<path d="M'+(cx+(tx>0?10:-10))+','+(cy-40)+' Q'+(cx+tx*0.6)+','+(cy+ty*0.6)+' '+(cx+tx)+','+(cy+ty)+'" fill="none" stroke="'+OUTLINE+'" stroke-width="3" stroke-linecap="round"/>';
+      const pts=[]; for(let r=0;r<9;r++) for(let c=0;c<2;c++) pts.push([cx-8+c*16+(r%2?3:-3), cy-30+r*14]);
+      for(const [tx,ty] of tent) for(let k=1;k<=3;k++) pts.push([cx+(tx>0?10:-10)+(tx-(tx>0?10:-10))*k/3.2+(k%2?2:-2)*0, cy-40+(ty+40)*k/3.2]);
+      for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){ const d=Math.hypot(pts[i][0]-pts[j][0],pts[i][1]-pts[j][1]); if(d<24) s+='<line x1="'+pts[i][0].toFixed(1)+'" y1="'+pts[i][1].toFixed(1)+'" x2="'+pts[j][0].toFixed(1)+'" y2="'+pts[j][1].toFixed(1)+'" stroke="'+NERVE+'" stroke-width="1" opacity="0.8"/>'; }
+      for(const q of pts) s+='<circle cx="'+q[0].toFixed(1)+'" cy="'+q[1].toFixed(1)+'" r="2.2" fill="'+NERVE+'"/>';
+      s+='<text x="'+cx+'" y="'+(cy+112)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">a mesh, no centre, no front</text>';
+    } else if(p.k==='ladder'){ // a flatworm from above
+      s+='<path d="M'+(cx-24)+','+(cy-95)+' Q'+cx+','+(cy-120)+' '+(cx+24)+','+(cy-95)+' Q'+(cx+44)+','+(cy-20)+' '+(cx+30)+','+(cy+60)+' Q'+cx+','+(cy+110)+' '+(cx-30)+','+(cy+60)+' Q'+(cx-44)+','+(cy-20)+' '+(cx-24)+','+(cy-95)+' Z" fill="'+BODY+'" stroke="'+OUTLINE+'" stroke-width="1.5"/>';
+      s+='<circle cx="'+(cx-10)+'" cy="'+(cy-88)+'" r="3.5" fill="#e6e6e6"/><circle cx="'+(cx+10)+'" cy="'+(cy-88)+'" r="3.5" fill="#e6e6e6"/>';
+      s+='<ellipse cx="'+(cx-10)+'" cy="'+(cy-72)+'" rx="7" ry="6" fill="'+NERVE+'"/><ellipse cx="'+(cx+10)+'" cy="'+(cy-72)+'" rx="7" ry="6" fill="'+NERVE+'"/><line x1="'+(cx-4)+'" y1="'+(cy-72)+'" x2="'+(cx+4)+'" y2="'+(cy-72)+'" stroke="'+NERVE+'" stroke-width="2"/>';
+      s+='<path d="M'+(cx-10)+','+(cy-66)+' Q'+(cx-18)+','+(cy-10)+' '+(cx-10)+','+(cy+80)+'" fill="none" stroke="'+NERVE+'" stroke-width="2.5"/><path d="M'+(cx+10)+','+(cy-66)+' Q'+(cx+18)+','+(cy-10)+' '+(cx+10)+','+(cy+80)+'" fill="none" stroke="'+NERVE+'" stroke-width="2.5"/>';
+      for(let k=0;k<8;k++){ const yy=cy-50+k*17; const dx=14-Math.abs(k-3.5)*1.2; s+='<line x1="'+(cx-dx)+'" y1="'+yy+'" x2="'+(cx+dx)+'" y2="'+yy+'" stroke="'+NERVE+'" stroke-width="1.5"/>'; }
+      s+='<text x="'+cx+'" y="'+(cy+112)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">two front ganglia, two cords, rungs between</text>';
+    } else if(p.k==='cord'){ // an insect from the side
+      s+='<ellipse cx="'+(cx-95)+'" cy="'+(cy)+'" rx="22" ry="18" fill="'+BODY+'" stroke="'+OUTLINE+'" stroke-width="1.5"/><ellipse cx="'+(cx-45)+'" cy="'+(cy)+'" rx="34" ry="22" fill="'+BODY+'" stroke="'+OUTLINE+'" stroke-width="1.5"/><path d="M'+(cx-12)+','+(cy-18)+' Q'+(cx+110)+','+(cy-30)+' '+(cx+120)+','+cy+' Q'+(cx+110)+','+(cy+30)+' '+(cx-12)+','+(cy+18)+' Z" fill="'+BODY+'" stroke="'+OUTLINE+'" stroke-width="1.5"/>';
+      s+='<circle cx="'+(cx-104)+'" cy="'+(cy-6)+'" r="5" fill="#e6e6e6"/><path d="M'+(cx-110)+','+(cy-14)+' q-20,-30 -34,-40 M'+(cx-100)+','+(cy-16)+' q-4,-34 4,-48" fill="none" stroke="'+OUTLINE+'" stroke-width="1.5"/>';
+      for(const lx of [-60,-40,-20]) s+='<path d="M'+(cx+lx)+','+(cy+18)+' l-6,22 l-10,12 M'+(cx+lx)+','+(cy+18)+' l6,22 l10,12" fill="none" stroke="'+OUTLINE+'" stroke-width="1.5"/>';
+      s+='<ellipse cx="'+(cx-98)+'" cy="'+(cy-8)+'" rx="9" ry="6" fill="'+NERVE+'"/><path d="M'+(cx-92)+','+(cy-5)+' q4,10 0,14" fill="none" stroke="'+NERVE+'" stroke-width="2"/><ellipse cx="'+(cx-90)+'" cy="'+(cy+11)+'" rx="6" ry="4" fill="'+NERVE+'"/>';
+      let px=cx-84; s+='<path d="M'+px+','+(cy+11)+' L'+(cx+108)+','+(cy+8)+'" fill="none" stroke="'+NERVE+'" stroke-width="2"/>';
+      for(const gx of [-62,-42,-22,2,22,42,62,82]) s+='<ellipse cx="'+(cx+gx)+'" cy="'+(cy+10-(gx+62)*0.02)+'" rx="'+(gx<-10?7:5)+'" ry="4" fill="'+NERVE+'"/>';
+      s+='<text x="'+cx+'" y="'+(cy+112)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">a brain, then a chain of ganglia along the belly</text>';
+    } else if(p.k==='octopus'){ // an octopus from the front
+      s+='<ellipse cx="'+cx+'" cy="'+(cy-50)+'" rx="42" ry="48" fill="'+BODY+'" stroke="'+OUTLINE+'" stroke-width="1.5"/>';
+      for(let k=0;k<8;k++){ const ax=cx-49+k*14; s+='<path d="M'+ax+','+(cy-10)+' C'+(ax+(k-3.5)*6)+','+(cy+40)+' '+(ax+(k-3.5)*14)+','+(cy+60)+' '+(ax+(k-3.5)*18)+','+(cy+100)+'" fill="none" stroke="'+BODY+'" stroke-width="10" stroke-linecap="round"/><path d="M'+ax+','+(cy-10)+' C'+(ax+(k-3.5)*6)+','+(cy+40)+' '+(ax+(k-3.5)*14)+','+(cy+60)+' '+(ax+(k-3.5)*18)+','+(cy+100)+'" fill="none" stroke="'+OUTLINE+'" stroke-width="11" stroke-linecap="round" opacity="0.5"/>'; }
+      for(let k=0;k<8;k++){ const ax=cx-49+k*14; s+='<path d="M'+ax+','+(cy-10)+' C'+(ax+(k-3.5)*6)+','+(cy+40)+' '+(ax+(k-3.5)*14)+','+(cy+60)+' '+(ax+(k-3.5)*18)+','+(cy+100)+'" fill="none" stroke="'+NERVE+'" stroke-width="2"/>'; }
+      s+='<circle cx="'+(cx-22)+'" cy="'+(cy-40)+'" r="7" fill="#e6e6e6"/><circle cx="'+(cx+22)+'" cy="'+(cy-40)+'" r="7" fill="#e6e6e6"/>';
+      s+='<ellipse cx="'+(cx-22)+'" cy="'+(cy-28)+'" rx="10" ry="7" fill="'+NERVE+'" opacity="0.9"/><ellipse cx="'+(cx+22)+'" cy="'+(cy-28)+'" rx="10" ry="7" fill="'+NERVE+'" opacity="0.9"/><ellipse cx="'+cx+'" cy="'+(cy-24)+'" rx="10" ry="9" fill="'+NERVE+'"/><line x1="'+(cx-12)+'" y1="'+(cy-26)+'" x2="'+(cx+12)+'" y2="'+(cy-26)+'" stroke="'+NERVE+'" stroke-width="3"/>';
+      s+='<text x="'+cx+'" y="'+(cy+112)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">a brain, two optic lobes, a cord in every arm</text>';
+    } else { // a fish from the side
+      s+='<path d="M'+(cx-120)+','+cy+' Q'+(cx-40)+','+(cy-55)+' '+(cx+60)+','+(cy-30)+' Q'+(cx+95)+','+(cy-18)+' '+(cx+100)+','+cy+' Q'+(cx+95)+','+(cy+18)+' '+(cx+60)+','+(cy+30)+' Q'+(cx-40)+','+(cy+55)+' '+(cx-120)+','+cy+' Z" fill="'+BODY+'" stroke="'+OUTLINE+'" stroke-width="1.5"/>';
+      s+='<path d="M'+(cx+100)+','+cy+' l30,-28 l-6,28 l6,28 Z" fill="'+BODY+'" stroke="'+OUTLINE+'" stroke-width="1.5"/><circle cx="'+(cx-95)+'" cy="'+(cy-8)+'" r="5" fill="#e6e6e6"/>';
+      for(let k=0;k<11;k++){ const vx=cx-60+k*15; s+='<rect x="'+(vx-4)+'" y="'+(cy-20)+'" width="8" height="10" rx="2" fill="none" stroke="'+OUTLINE+'" opacity="0.7"/>'; }
+      s+='<ellipse cx="'+(cx-78)+'" cy="'+(cy-14)+'" rx="16" ry="9" fill="'+NERVE+'"/><path d="M'+(cx-64)+','+(cy-15)+' L'+(cx+96)+','+(cy-12)+'" fill="none" stroke="'+NERVE+'" stroke-width="3.5"/>';
+      for(let k=0;k<11;k++){ const vx=cx-60+k*15; s+='<path d="M'+vx+','+(cy-14)+' l2,18 M'+vx+','+(cy-14)+' l-3,-12" fill="none" stroke="'+NERVE+'" stroke-width="1.2"/>'; }
+      s+='<text x="'+cx+'" y="'+(cy+112)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">one cord along the back, inside the spine, a brain at the front</text>';
+    }
+    s+='</g>'; });
+  return {svg:s, h:30+2*(PH+40)};
+}
+
+/* ---- the counts ---- */
+const P={x:80,y:30,w:840,h:560}, MX0=-6.5, MX1=7, NY0=2, NY1=12;   // log10 g, log10 neurons
+const PX=g=>P.x+(Math.log10(g)-MX0)/(MX1-MX0)*P.w, PY=N=>P.y+P.h-(Math.log10(N)-NY0)/(NY1-NY0)*P.h;
+function counts(){
+  let s='<rect x="'+P.x+'" y="'+P.y+'" width="'+P.w+'" height="'+P.h+'" fill="none" stroke="#2b2b2b"/>';
+  for(let e=-6;e<=6;e+=2){ const x=PX(Math.pow(10,e)); s+='<line x1="'+x.toFixed(1)+'" y1="'+(P.y+P.h)+'" x2="'+x.toFixed(1)+'" y2="'+(P.y+P.h+6)+'" stroke="#8a94a6"/><text x="'+x.toFixed(1)+'" y="'+(P.y+P.h+20)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">'+mass(Math.pow(10,e))+'</text>'; }
+  for(let e=2;e<=12;e+=2){ const y=PY(Math.pow(10,e)); s+='<line x1="'+(P.x-6)+'" y1="'+y.toFixed(1)+'" x2="'+P.x+'" y2="'+y.toFixed(1)+'" stroke="#8a94a6"/><text x="'+(P.x-9)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="10.5" fill="#9a9a9a">'+(e>=9?(Math.pow(10,e-9))+' billion':e>=6?Math.pow(10,e-6)+' million':Math.pow(10,e).toLocaleString('en-US'))+'</text>'; }
+  s+='<text x="'+(P.x+P.w/2)+'" y="'+(P.y+P.h+42)+'" text-anchor="middle" font-size="11.5" fill="#9a9a9a">body mass</text><text transform="translate(16,'+(P.y+P.h/2)+') rotate(-90)" text-anchor="middle" font-size="11.5" fill="#9a9a9a">neurons</text>';
+  // a line for the mammals (excluding primates) and one for primates, fitted here
+  const fit=list=>{ const xs=list.map(a=>Math.log10(a.m)), ys=list.map(a=>Math.log10(a.N)); const n=xs.length, mx=xs.reduce((a,b)=>a+b)/n, my=ys.reduce((a,b)=>a+b)/n; const b=xs.reduce((a,x,i)=>a+(x-mx)*(ys[i]-my),0)/xs.reduce((a,x)=>a+(x-mx)*(x-mx),0); return {b, a:my-b*mx}; };
+  for(const [g,col] of [['mammals','#58a6ff'],['primates','#b48cf2']]){ const list=ANIMALS.filter(a=>a.g===g&&a.N>0); if(list.length<2) continue; const f=fit(list); const x0=Math.min(...list.map(a=>Math.log10(a.m)))-0.5, x1=Math.max(...list.map(a=>Math.log10(a.m)))+0.5;
+    s+='<line x1="'+PX(Math.pow(10,x0)).toFixed(1)+'" y1="'+PY(Math.pow(10,f.a+f.b*x0)).toFixed(1)+'" x2="'+PX(Math.pow(10,x1)).toFixed(1)+'" y2="'+PY(Math.pow(10,f.a+f.b*x1)).toFixed(1)+'" stroke="'+col+'" stroke-dasharray="4 4" opacity="0.5"/>'; }
+  const lanes=[];
+  for(const a of ANIMALS){ if(!a.N) continue; const x=PX(a.m), y=PY(a.N), lit=!group||a.g===group, on=hot===a.k;
+    s+='<g data-a="'+a.k+'" style="cursor:pointer" opacity="'+(lit?1:0.25)+'"><circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(on?8:5.5)+'" fill="'+GROUPS[a.g]+'" stroke="#121212" stroke-width="1.5"/>';
+    let ly=y-10; while(lanes.some(([lx,l])=>Math.abs(lx-x)<78&&Math.abs(l-ly)<12)) ly-=12; lanes.push([x,ly]);
+    s+='<text x="'+x.toFixed(1)+'" y="'+ly.toFixed(1)+'" text-anchor="middle" font-size="10" fill="'+(on?'#e6e6e6':'#9a9a9a')+'">'+esc(a.n.replace(/^an? /,'').replace(/,.*$/,''))+'</text></g>'; }
+  const sp=ANIMALS.find(a=>a.k==='sponge'); s+='<g data-a="sponge" style="cursor:pointer"><circle cx="'+PX(sp.m).toFixed(1)+'" cy="'+(P.y+P.h-8)+'" r="5.5" fill="'+GROUPS.other+'" stroke="#121212" stroke-width="1.5"/><text x="'+PX(sp.m).toFixed(1)+'" y="'+(P.y+P.h-16)+'" text-anchor="middle" font-size="10" fill="#9a9a9a">a sponge, none</text></g>';
+  return {svg:s, h:P.y+P.h+50};
+}
+
+/* ---- render and wiring ---- */
+function render(){ const q=view==='plans'?plans():counts(); el.innerHTML='<svg viewBox="0 0 '+W+' '+q.h+'" xmlns="http://www.w3.org/2000/svg" id="nsvg"><rect width="'+W+'" height="'+q.h+'" fill="#121212"/>'+q.svg+'</svg>'; document.getElementById('countCtl').hidden=view!=='counts'; }
+function setView(v){ view=v; hot=null; for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render(); if(v==='plans') card('The plans','Six ways to wire an animal',[['plans',PLANS.length]],'A plan under the pointer explains itself and names the animals counted with it.','Wikipedia, Nervous system'); else showCounts(); }
+document.getElementById('views').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setView(b.dataset.v); });
+document.getElementById('groups').innerHTML=Object.keys(GROUPS).map(g=>'<button type="button" data-g="'+g+'"><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+GROUPS[g]+';margin-right:6px"></i>'+g+'</button>').join('');
+document.getElementById('groups').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; group=group===b.dataset.g?null:b.dataset.g; for(const x of document.querySelectorAll('#groups button')) x.classList.toggle('on',x.dataset.g===group); render(); });
+el.addEventListener('pointerover',e=>{ const p=e.target.closest('[data-plan]'); if(p){ const k=p.getAttribute('data-plan'); if(k===hot) return; hot=k; render(); showPlan(k); return; }
+  const a=e.target.closest('[data-a]'); if(a){ const k=a.getAttribute('data-a'); if(k===hot) return; hot=k; render(); showAnimal(k); } });
+el.addEventListener('pointerleave',()=>{ if(hot){ hot=null; render(); if(view==='counts') showCounts(); } });
+
+render(); setView('plans');
+window.__ns=(q)=>{ const o={view,hot,group,card:document.getElementById('numTxt').innerText,name:document.getElementById('nameTxt').innerText,plans:document.querySelectorAll('#nsvg g[data-plan]').length,dots:document.querySelectorAll('#nsvg g[data-a]').length};
+  if(q&&q.at){ o.px=PX(q.at[0]); o.py=PY(q.at[1]); } if(q&&q.dot){ const c=document.querySelector('#nsvg g[data-a="'+q.dot+'"] circle'); o.dot=c?[+c.getAttribute('cx'),+c.getAttribute('cy')]:null; } return o; };
+</script>
+</body>
+</html>
+"""
+
+html = (HTML.replace("__APACSS__", apa.CSS)
+        .replace("__PLANS__", _js(plans)).replace("__ANIMALS__", _js(animals)).replace("__GROUPS__", _js(GROUPS))
+        .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2).replace("__METHOD__", METHOD)
+        .replace("__REFS__", apa.render(REFS)))
+OUT.write_text(html, encoding="utf-8")
+print(f"wrote {OUT} ({len(html):,} B): {len(PLANS)} plans, {len(ANIMALS)} animals")
