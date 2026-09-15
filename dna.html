@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DNA &middot; Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff; }
+* { box-sizing:border-box; }
+[hidden] { display:none !important; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; margin-right:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 12px; font-size:26px; }
+.bar { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 12px; }
+.bar button, .presets button { background:var(--panel); color:var(--muted); border:1px solid var(--line);
+  border-radius:999px; padding:6px 14px; font-size:13px; cursor:pointer; font-family:inherit; }
+.bar button.on, .presets button.on { background:var(--accent); color:#0b1a2b; border-color:var(--accent); font-weight:600; }
+.bar button:hover, .presets button:hover { color:var(--text); border-color:#3d3d3d; }
+.bar button.on:hover, .presets button.on:hover { color:#0b1a2b; }
+.controls { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 12px; min-height:34px; }
+.controls label { font-size:13px; color:var(--muted); }
+.controls input[type=range] { width:200px; accent-color:var(--accent); }
+.presets { display:flex; gap:6px; flex-wrap:wrap; }
+.presets button { padding:5px 11px; font-size:12.5px; }
+.stage { display:flex; gap:22px; align-items:flex-start; }
+#diagram { flex:1 1 640px; min-width:0; }
+#diagram svg { width:100%; height:auto; display:block; user-select:none; }
+.side { flex:0 0 300px; min-width:0; position:sticky; top:16px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; overflow-wrap:anywhere; }
+#kindTxt { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+#nameTxt { font-weight:700; font-size:17px; margin:2px 0 6px; }
+#numTxt { font-size:13.5px; line-height:1.55; font-variant-numeric:tabular-nums; }
+#numTxt b { color:var(--muted); font-weight:400; }
+#bodyTxt { color:var(--muted); font-size:13.5px; line-height:1.55; margin-top:9px; }
+#srcTxt { color:var(--muted); font-size:12px; margin-top:10px; border-top:1px solid var(--line); padding-top:8px; }
+.note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.method { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+.refs p { margin:0 0 8px; overflow-wrap:anywhere; }
+.refs a { color:var(--accent); }
+.refs p { padding-left:2em; text-indent:-2em; }
+.refs .ann { color:#7d7d7d; display:block; padding-left:0; text-indent:0; margin-top:2px; }
+h2.refh { font-size:15px; margin:26px 0 8px; }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="library.html">&larr; Library &middot; Life</a><a href="cell.html">The Cell</a><a href="tree-of-life.html">Tree of Life</a><a href="scale.html">Scale</a></nav>
+</header>
+<h1>DNA</h1>
+<div class="bar" id="views"><button data-v="helix" class="on">The helix</button><button data-v="code">The code</button><button data-v="genome">The genome</button></div>
+<div class="controls" id="helixCtl">
+  <label for="turn">turn</label>
+  <input type="range" id="turn" min="0" max="360" step="1" value="0">
+  <label><input type="checkbox" id="spin" checked> turning</label>
+</div>
+<div class="controls" id="codeCtl" hidden>
+  <label>a change</label>
+  <span class="presets" id="muts"></span>
+  <button type="button" class="presets" id="reset" style="padding:5px 11px;font-size:12.5px;border-radius:999px;background:var(--panel);color:var(--muted);border:1px solid var(--line);cursor:pointer;font-family:inherit">as written</button>
+</div>
+<div class="controls" id="genomeCtl" hidden>
+  <label>sort by</label>
+  <span class="presets" id="sorts"><button type="button" data-s="number" class="on">number</button><button type="button" data-s="length">length</button><button type="button" data-s="genes">genes</button><button type="button" data-s="density">genes per million bases</button></span>
+</div>
+<div class="stage">
+  <div id="diagram"></div>
+  <div class="side"><div class="card">
+    <div id="kindTxt"></div>
+    <div id="nameTxt"></div>
+    <div id="numTxt"></div>
+    <div id="bodyTxt"></div>
+    <div id="srcTxt"></div>
+  </div></div>
+</div>
+<p class="note">Two chains wound round each other, two nanometres across, ten and a half steps to a turn, and every step a pair of bases joined by hydrogen bonds: adenine with thymine, guanine with cytosine, always. That rule is the whole trick. Either chain carries the order of the other, so a cell can pull them apart and rebuild both, and the sequence of bases along one chain is a text.</p>
+<p class="note" style="border-top:none; padding-top:0;">The text is read three letters at a time, and each triplet names one of twenty amino acids or says stop; the second view shows the first thirty triplets of a real gene, the one for the beta-globin in blood, and lets any letter be changed to watch the protein change, including the single change that makes sickle cells. The third view is the whole text laid out by chromosome, three billion letters in one set.</p>
+<div class="method"><p>The helix is drawn as B-DNA: a rise of 0.34 nm a base pair and 10.5 pairs a turn, so 3.6 nm a turn, where Watson and Crick's model had ten pairs and 3.4 nm; 2 nm across, the two backbones offset so the major groove is wider than the minor. The code is the standard table; the gene is the coding strand of HBB, read as its messenger RNA would be, with T standing in for U. The mutations are the classic ones at their real positions. Chromosome lengths are GRCh38's, gene counts are protein-coding genes as Ensembl tallies them and Wikipedia reports them, and both shift a little with each release; the gapless T2T sequence of 2022 comes to 3.055 billion base pairs.</p></div>
+<h2 class="refh">References</h2>
+<div class="refs"><p>Watson, J. D., &amp; Crick, F. H. C. (1953). Molecular structure of nucleic acids: A structure for deoxyribose nucleic acid. <i>Nature, 171</i>(4356), 737-738. <a href="https://doi.org/10.1038/171737a0">https://doi.org/10.1038/171737a0</a><span class="ann">The double helix: two chains, the bases paired inside, 3.4 &Aring; a base and ten bases a turn.</span></p>
+<p>Franklin, R. E., &amp; Gosling, R. G. (1953). Molecular configuration in sodium thymonucleate. <i>Nature, 171</i>(4356), 740-741. <a href="https://doi.org/10.1038/171740a0">https://doi.org/10.1038/171740a0</a><span class="ann">The X-ray evidence for the helix and its dimensions.</span></p>
+<p>Nirenberg, M. W., &amp; Matthaei, J. H. (1961). The dependence of cell-free protein synthesis in E. coli upon naturally occurring or synthetic polyribonucleotides. <i>Proceedings of the National Academy of Sciences, 47</i>(10), 1588-1602. <a href="https://doi.org/10.1073/pnas.47.10.1588">https://doi.org/10.1073/pnas.47.10.1588</a><span class="ann">The first word of the code: UUU is phenylalanine.</span></p>
+<p>International Human Genome Sequencing Consortium. (2004). Finishing the euchromatic sequence of the human genome. <i>Nature, 431</i>(7011), 931-945. <a href="https://doi.org/10.1038/nature03001">https://doi.org/10.1038/nature03001</a><span class="ann">The finished sequence, and the count of 20,000 to 25,000 genes.</span></p>
+<p>Nurk, S., Koren, S., Rhie, A., Rautiainen, M., Bzikadze, A. V., Mikheenko, A., Vollger, M. R., Altemose, N., Uralsky, L., Gershman, A., Aganezov, S., Hoyt, S. J., Diekhans, M., Logsdon, G. A., Alonge, M., Antonarakis, S. E., Borchers, M., Bouffard, G. G., Brooks, S. Y., ... Phillippy, A. M. (2022). The complete sequence of a human genome. <i>Science, 376</i>(6588), 44-53. <a href="https://doi.org/10.1126/science.abj6987">https://doi.org/10.1126/science.abj6987</a><span class="ann">The gapless sequence, 3.055 billion base pairs.</span></p>
+<p>Sender, R., Fuchs, S., &amp; Milo, R. (2016). Revised estimates for the number of human and bacteria cells in the body. <i>PLOS Biology, 14</i>(8), e1002533. <a href="https://doi.org/10.1371/journal.pbio.1002533">https://doi.org/10.1371/journal.pbio.1002533</a><span class="ann">Thirty-seven trillion cells.</span></p>
+<p>Nucleic acid double helix. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Nucleic_acid_double_helix">https://en.wikipedia.org/wiki/Nucleic_acid_double_helix</a><span class="ann">The helix's width, pitch and grooves.</span></p>
+<p>Genetic code. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Genetic_code">https://en.wikipedia.org/wiki/Genetic_code</a><span class="ann">The table of sixty-four codons.</span></p>
+<p>Human genome. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Human_genome">https://en.wikipedia.org/wiki/Human_genome</a><span class="ann">The chromosomes, their lengths in GRCh38 and their gene counts.</span></p>
+<p>HBB. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/HBB">https://en.wikipedia.org/wiki/HBB</a><span class="ann">The beta-globin gene.</span></p>
+<p>Sickle cell disease. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Sickle_cell_disease">https://en.wikipedia.org/wiki/Sickle_cell_disease</a></p>
+<p>Synonymous substitution. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Synonymous_substitution">https://en.wikipedia.org/wiki/Synonymous_substitution</a></p>
+<p>Nonsense mutation. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Nonsense_mutation">https://en.wikipedia.org/wiki/Nonsense_mutation</a></p>
+<p>Frameshift mutation. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Frameshift_mutation">https://en.wikipedia.org/wiki/Frameshift_mutation</a></p>
+<p>Chromosome 1. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Chromosome_1">https://en.wikipedia.org/wiki/Chromosome_1</a></p>
+<p>Chromosome 19. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Chromosome_19">https://en.wikipedia.org/wiki/Chromosome_19</a></p>
+<p>Chromosome 21. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Chromosome_21">https://en.wikipedia.org/wiki/Chromosome_21</a></p>
+<p>X chromosome. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/X_chromosome">https://en.wikipedia.org/wiki/X_chromosome</a></p>
+<p>Y chromosome. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Y_chromosome">https://en.wikipedia.org/wiki/Y_chromosome</a></p>
+<p>Mitochondrial DNA. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Mitochondrial_DNA">https://en.wikipedia.org/wiki/Mitochondrial_DNA</a></p></div>
+</div>
+<script>
+const HELIX={"width_nm":2.0,"pitch_nm":3.57,"bp_per_turn":10.5,"rise_nm":0.34,"major_nm":2.2,"minor_nm":1.2}, BASES=[{"b":"A","n":"adenine","p":"T","h":2,"c":"#58a6ff","k":"purine"},{"b":"T","n":"thymine","p":"A","h":2,"c":"#ffb02e","k":"pyrimidine"},{"b":"G","n":"guanine","p":"C","h":3,"c":"#9be564","k":"purine"},{"b":"C","n":"cytosine","p":"G","h":3,"c":"#f28cb0","k":"pyrimidine"}], CODE={"TTT":"F","TTC":"F","TTA":"L","TTG":"L","TCT":"S","TCC":"S","TCA":"S","TCG":"S","TAT":"Y","TAC":"Y","TAA":"*","TAG":"*","TGT":"C","TGC":"C","TGA":"*","TGG":"W","CTT":"L","CTC":"L","CTA":"L","CTG":"L","CCT":"P","CCC":"P","CCA":"P","CCG":"P","CAT":"H","CAC":"H","CAA":"Q","CAG":"Q","CGT":"R","CGC":"R","CGA":"R","CGG":"R","ATT":"I","ATC":"I","ATA":"I","ATG":"M","ACT":"T","ACC":"T","ACA":"T","ACG":"T","AAT":"N","AAC":"N","AAA":"K","AAG":"K","AGT":"S","AGC":"S","AGA":"R","AGG":"R","GTT":"V","GTC":"V","GTA":"V","GTG":"V","GCT":"A","GCC":"A","GCA":"A","GCG":"A","GAT":"D","GAC":"D","GAA":"E","GAG":"E","GGT":"G","GGC":"G","GGA":"G","GGG":"G"}, AMINO={"F":{"abbr":"Phe","name":"phenylalanine"},"L":{"abbr":"Leu","name":"leucine"},"S":{"abbr":"Ser","name":"serine"},"Y":{"abbr":"Tyr","name":"tyrosine"},"C":{"abbr":"Cys","name":"cysteine"},"W":{"abbr":"Trp","name":"tryptophan"},"P":{"abbr":"Pro","name":"proline"},"H":{"abbr":"His","name":"histidine"},"Q":{"abbr":"Gln","name":"glutamine"},"R":{"abbr":"Arg","name":"arginine"},"I":{"abbr":"Ile","name":"isoleucine"},"M":{"abbr":"Met","name":"methionine"},"T":{"abbr":"Thr","name":"threonine"},"N":{"abbr":"Asn","name":"asparagine"},"K":{"abbr":"Lys","name":"lysine"},"V":{"abbr":"Val","name":"valine"},"A":{"abbr":"Ala","name":"alanine"},"D":{"abbr":"Asp","name":"aspartic acid"},"E":{"abbr":"Glu","name":"glutamic acid"},"G":{"abbr":"Gly","name":"glycine"},"*":{"abbr":"Stop","name":"stop"}}, GENE="ATGGTGCATCTGACTCCTGAGGAGAAGTCTGCCGTTACTGCCCTGTGGGGCAAGGTGAACGTGGATGAAGTTGGTGGTGAGGCCCTGGGC", GENENOTE="The first thirty codons of the gene for beta-globin, half of the haemoglobin that carries oxygen in blood. The methionine at the front is the start signal and is cut off later; the protein goes on for 146 amino acids.", MUTS=[{"k":"sickle","n":"the sickle cell mutation","i":19,"b":"T","t":"One base, an A to a T in the seventh codon, turns glutamic acid into valine. The changed protein sticks to itself when it gives up its oxygen, the red cells bend into sickles, and they jam in small vessels. One copy of the gene protects against malaria, which is why the mutation is common where malaria is.","s":"Wikipedia, Sickle cell disease"},{"k":"silent","n":"a silent change","i":8,"b":"C","t":"The third base of a codon often does not matter: CAT and CAC both mean histidine, so this change makes no difference to the protein. Most of the code's redundancy sits in the third position.","s":"Wikipedia, Synonymous substitution"},{"k":"stop","n":"a stop","i":21,"b":"T","t":"A G to a T in the eighth codon turns glutamic acid into a stop signal, and the protein ends after seven amino acids. A change like this in beta-globin gives a form of thalassaemia.","s":"Wikipedia, Nonsense mutation"},{"k":"frame","n":"a lost base","i":4,"b":"","t":"Take one base out and every codon after it is read in the wrong frame: a different protein altogether, until a stop turns up by chance. This is what makes the code's three-letter rhythm so fragile to insertions and deletions.","s":"Wikipedia, Frameshift mutation"}], CHR=[{"n":"1","bp":248956422,"g":2058,"t":"The largest, with a twelfth of the genome and the most genes."},{"n":"2","bp":242193529,"g":1309,"t":""},{"n":"3","bp":198295559,"g":1078,"t":""},{"n":"4","bp":190214555,"g":752,"t":""},{"n":"5","bp":181538259,"g":876,"t":""},{"n":"6","bp":170805979,"g":1048,"t":""},{"n":"7","bp":159345973,"g":989,"t":""},{"n":"8","bp":145138636,"g":677,"t":""},{"n":"9","bp":138394717,"g":786,"t":""},{"n":"10","bp":133797422,"g":733,"t":""},{"n":"11","bp":135086622,"g":1298,"t":""},{"n":"12","bp":133275309,"g":1034,"t":""},{"n":"13","bp":114364328,"g":327,"t":"One of the three whose extra copy a person can survive, with Patau syndrome; 18 and 21 are the others."},{"n":"14","bp":107043718,"g":830,"t":""},{"n":"15","bp":101991189,"g":613,"t":""},{"n":"16","bp":90338345,"g":873,"t":""},{"n":"17","bp":83257441,"g":1197,"t":""},{"n":"18","bp":80373285,"g":270,"t":""},{"n":"19","bp":58617616,"g":1472,"t":"Small but the densest in genes, more than a thousand of them in 59 million bases."},{"n":"20","bp":64444167,"g":544,"t":""},{"n":"21","bp":46709983,"g":234,"t":"The smallest, and the one whose extra copy causes Down syndrome."},{"n":"22","bp":50818468,"g":488,"t":""},{"n":"X","bp":156040895,"g":842,"t":"One copy in men, two in women, one of which is switched off in every cell."},{"n":"Y","bp":57227415,"g":71,"t":"Small, mostly repetitive, carrying the gene that starts a male body and little else; it is passed from father to son unchanged, apart from mutations, which is how paternal lines are traced."},{"n":"MT","bp":16569,"g":13,"t":"The mitochondrion's own ring of DNA, 16,569 bases, 37 genes, passed only from the mother, and the last relic of the bacterium the mitochondrion once was."}], GENOME={"cells":37000000000000.0,"coding_share":0.015,"genes":20000,"note":"About 3.1 billion base pairs in one set, 6.2 billion in the two sets each cell carries; two metres of it, coiled into a nucleus six microns across, in almost every one of the body's thirty-seven trillion cells. Only about one and a half percent of it codes for protein."};
+const W=980;
+const el=document.getElementById('diagram');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const BASE=Object.fromEntries(BASES.map(b=>[b.b,b]));
+let view='helix', turn=0, spinning=true, hot=null, seq=GENE, mut=null, sortBy='number';
+// the helix's own sequence: 40 pairs, chosen once
+const HSEQ='ATGCGTACCGATTAGCCGATAGGCTTACGCAATGGCTCAG';
+
+/* ---- the card ---- */
+function card(kind,name,rows,body,src){
+  document.getElementById('kindTxt').textContent=kind;
+  document.getElementById('nameTxt').innerHTML=name;
+  document.getElementById('numTxt').innerHTML=rows.filter(r=>r[1]).map(([k,v])=>'<b>'+esc(k)+'</b> '+v).join('<br>');
+  document.getElementById('bodyTxt').textContent=body;
+  document.getElementById('srcTxt').textContent=src;
+}
+function showHelix(){ card('The double helix','B-DNA',[['across',HELIX.width_nm+' nm'],['one turn',HELIX.pitch_nm.toFixed(1)+' nm, '+HELIX.bp_per_turn+' base pairs'],['a step',HELIX.rise_nm+' nm'],['grooves','major '+HELIX.major_nm+' nm, minor '+HELIX.minor_nm+' nm']],'A base pair under the pointer names its two bases and the bonds between them.','Watson and Crick 1953; Franklin and Gosling 1953'); }
+function showPair(i){ const b=BASE[HSEQ[i]], p=BASE[b.p];
+  card('A base pair', b.n+' and '+p.n, [['on the left strand',b.b+', a '+b.k],['on the right',p.b+', a '+p.k],['held by',b.h+' hydrogen bonds'],['step',(i+1)+' of '+HSEQ.length+', '+(i*HELIX.rise_nm).toFixed(2)+' nm along']],
+    b.h===3?'A purine and a pyrimidine, three bonds: the stronger pair, and the one that makes DNA with more G and C harder to pull apart.':'A purine and a pyrimidine, two bonds. Every pair is one big base and one small, so the helix keeps the same width whatever the sequence.','Wikipedia, Nucleic acid double helix'); }
+function protein(s){ const out=[]; for(let i=0;i+2<s.length;i+=3){ const c=s.slice(i,i+3), a=CODE[c]; out.push({c,a}); if(a==='*') break; } return out; }
+function showCode(){ const pr=protein(seq), ref=protein(GENE); const diff=pr.map((p,i)=>ref[i]&&ref[i].a!==p.a?i:-1).filter(i=>i>=0);
+  const m=MUTS.find(x=>x.k===mut);
+  card(m?'A change':'A gene', m?esc(m.n):'beta-globin, HBB', [['bases',seq.length],['codons read',pr.length+(pr.length&&pr[pr.length-1].a==='*'?', ending in a stop':'')],['protein',pr.map(p=>AMINO[p.a].abbr).join('-')],
+    ['changed from the original', diff.length?diff.length+' amino acid'+(diff.length>1?'s':'')+(diff.length<6?': '+diff.map(i=>AMINO[ref[i].a].abbr+' to '+AMINO[pr[i].a].abbr+' at '+(i+1)).join(', '):''):(seq===GENE?'':'none')]], m?m.t:GENENOTE, m?m.s:'Wikipedia, HBB'); }
+function showCodon(i){ const c=seq.slice(i*3,i*3+3); if(c.length<3) return; const a=CODE[c], syn=Object.keys(CODE).filter(k=>CODE[k]===a);
+  card('A codon', c+' is '+AMINO[a].name, [['position',(i+1)+' of '+Math.floor(seq.length/3)],['read as messenger RNA',c.replace(/T/g,'U')],['other codons for it',syn.length>1?syn.filter(k=>k!==c).join(', '):'none, it has only this one']], a==='*'?'A stop: the ribosome lets go of the chain here.':a==='M'?'Methionine, and the start signal: every protein begins with this codon, and most lose the methionine afterwards.':'Any base in the row can be clicked to change it and see what the protein does.','Wikipedia, Genetic code'); }
+function showChr(n){ const c=CHR.find(x=>x.n===n); const tot=CHR.reduce((a,x)=>a+x.bp,0);
+  card('A chromosome', n==='MT'?'the mitochondrial DNA':'chromosome '+n, [['length',(c.bp/1e6).toLocaleString('en-US',{maximumFractionDigits:c.bp<1e6?3:1})+' million base pairs'],['share of one set',(c.bp/tot*100).toFixed(1)+'%'],['protein-coding genes',c.g.toLocaleString('en-US')],['genes per million bases',(c.g/(c.bp/1e6)).toFixed(1)],['stretched out',(c.bp*0.34e-9*100).toFixed(1)+' cm']], c.t||'', 'Wikipedia, Human genome'); }
+function showGenome(){ const tot=CHR.reduce((a,x)=>a+x.bp,0), g=CHR.reduce((a,x)=>a+x.g,0);
+  card('The human genome','One set of chromosomes',[['base pairs',(tot/1e9).toFixed(2)+' billion'],['protein-coding genes',g.toLocaleString('en-US')],['stretched out',(tot*0.34e-9).toFixed(2)+' m, '+(2*tot*0.34e-9).toFixed(1)+' m in a cell with two sets'],['coding for protein','about '+(GENOME.coding_share*100).toFixed(1)+'%']], GENOME.note, 'International Human Genome Sequencing Consortium 2004; Nurk et al. 2022; Sender et al. 2016'); }
+
+/* ---- the helix ---- */
+function helix(){
+  const cx=300, top=40, n=HSEQ.length, rise=14, R=60, per=HELIX.bp_per_turn;   // 14 px a base pair; a turn is 147 px
+  let s=''; const items=[];
+  for(let i=0;i<n;i++){ const y=top+i*rise, th=(i/per)*2*Math.PI+turn*Math.PI/180; const x1=cx+R*Math.sin(th), x2=cx+R*Math.sin(th+Math.PI*0.9), z1=Math.cos(th), z2=Math.cos(th+Math.PI*0.9);   // the second backbone 162 degrees round, which gives the grooves
+    items.push({i,y,x1,x2,z:(z1+z2)/2,z1,z2}); }
+  // the backbones as ribbons: draw back segments first, then front
+  const seg=(a,b,which)=>{ const xa=which===1?a.x1:a.x2, xb=which===1?b.x1:b.x2, za=which===1?a.z1:a.z2; const front=za>0; return {front, d:'M'+xa.toFixed(1)+','+a.y+' L'+xb.toFixed(1)+','+b.y, w:2.5+za*1.2, o:0.45+0.5*(za+1)/2}; };
+  const segs=[]; for(let i=0;i<n-1;i++){ segs.push(seg(items[i],items[i+1],1)); segs.push(seg(items[i],items[i+1],2)); }
+  for(const q of segs.filter(q=>!q.front)) s+='<path d="'+q.d+'" stroke="#8a94a6" stroke-width="'+q.w.toFixed(1)+'" opacity="'+q.o.toFixed(2)+'" fill="none" stroke-linecap="round"/>';
+  for(const it of items){ const b=BASE[HSEQ[it.i]], p=BASE[b.p]; const mid=(it.x1+it.x2)/2; const front=it.z>-0.2; const o=0.35+0.65*(it.z+1)/2;
+    s+='<g data-p="'+it.i+'" style="cursor:pointer" opacity="'+o.toFixed(2)+'"><line x1="'+it.x1.toFixed(1)+'" y1="'+it.y+'" x2="'+mid.toFixed(1)+'" y2="'+it.y+'" stroke="'+b.c+'" stroke-width="'+(hot===it.i?7:5)+'" stroke-linecap="round"/><line x1="'+mid.toFixed(1)+'" y1="'+it.y+'" x2="'+it.x2.toFixed(1)+'" y2="'+it.y+'" stroke="'+p.c+'" stroke-width="'+(hot===it.i?7:5)+'" stroke-linecap="round"/>';
+    for(let h=0;h<b.h;h++) s+='<circle cx="'+mid.toFixed(1)+'" cy="'+(it.y-(b.h-1)*2.2+h*4.4).toFixed(1)+'" r="1.3" fill="#e6e6e6"/>';
+    s+='</g>'; }
+  for(const q of segs.filter(q=>q.front)) s+='<path d="'+q.d+'" stroke="#c9d1dc" stroke-width="'+q.w.toFixed(1)+'" opacity="'+q.o.toFixed(2)+'" fill="none" stroke-linecap="round"/>';
+  // the scale and the labels
+  const H=top+(n-1)*rise;
+  s+='<line x1="'+(cx+110)+'" y1="'+top+'" x2="'+(cx+110)+'" y2="'+(top+per*rise)+'" stroke="#9a9a9a"/><text x="'+(cx+118)+'" y="'+(top+per*rise/2+4)+'" font-size="11" fill="#9a9a9a">one turn: '+HELIX.pitch_nm.toFixed(1)+' nm, '+HELIX.bp_per_turn+' pairs</text>';
+  s+='<line x1="'+(cx-R-8)+'" y1="'+(H+16)+'" x2="'+(cx+R+8)+'" y2="'+(H+16)+'" stroke="#9a9a9a"/><text x="'+cx+'" y="'+(H+32)+'" text-anchor="middle" font-size="11" fill="#9a9a9a">2 nm across</text>';
+  s+='<text x="'+(cx+118)+'" y="'+(top+per*rise+60)+'" font-size="11" fill="#9a9a9a">the wide groove and the narrow one:</text><text x="'+(cx+118)+'" y="'+(top+per*rise+74)+'" font-size="11" fill="#9a9a9a">the two backbones are not opposite each other</text>';
+  let lx=cx+118, ly=top+per*rise+110; for(const b of BASES){ s+='<rect x="'+lx+'" y="'+(ly-9)+'" width="12" height="12" rx="2" fill="'+b.c+'"/><text x="'+(lx+18)+'" y="'+(ly+1)+'" font-size="11" fill="#9a9a9a">'+b.b+' '+b.n+', pairs with '+b.p+', '+b.h+' bonds</text>'; ly+=18; }
+  return {svg:s, h:H+50};
+}
+
+/* ---- the code ---- */
+function code(){
+  const n=Math.floor(seq.length/3), perRow=10, cw=88, x0=20, y0=40, rowH=118;
+  let s=''; const pr=protein(seq), ref=protein(GENE);
+  for(let i=0;i<n;i++){ const r=Math.floor(i/perRow), c=i%perRow, x=x0+c*cw, y=y0+r*rowH; const codon=seq.slice(i*3,i*3+3), a=CODE[codon], stopped=pr.length<=i, changed=ref[i]&&ref[i].a!==a;
+    s+='<g data-c="'+i+'" style="cursor:pointer" opacity="'+(stopped?0.3:1)+'">';
+    s+='<text x="'+(x+cw/2-8)+'" y="'+(y-14)+'" text-anchor="middle" font-size="9.5" fill="#6b7280">'+(i+1)+'</text>';
+    for(let j=0;j<3;j++){ const b=codon[j], idx=i*3+j; s+='<g data-b="'+idx+'" style="cursor:pointer"><rect x="'+(x+j*24)+'" y="'+y+'" width="22" height="24" rx="4" fill="'+BASE[b].c+'" opacity="'+(GENE[idx]!==b?1:0.75)+'" stroke="'+(GENE[idx]!==b?'#e6e6e6':'none')+'" stroke-width="1.5"/><text x="'+(x+j*24+11)+'" y="'+(y+17)+'" text-anchor="middle" font-size="14" font-weight="700" fill="#0b1a2b">'+b+'</text></g>'; }
+    s+='<text x="'+(x+cw/2-8)+'" y="'+(y+42)+'" text-anchor="middle" font-size="9.5" fill="#6b7280">'+codon.replace(/T/g,'U')+'</text>';
+    s+='<line x1="'+(x+cw/2-8)+'" y1="'+(y+48)+'" x2="'+(x+cw/2-8)+'" y2="'+(y+58)+'" stroke="#3d444d"/>';
+    s+='<rect x="'+(x+8)+'" y="'+(y+60)+'" width="'+(cw-24)+'" height="26" rx="13" fill="'+(a==='*'?'#3d444d':changed?'#ffb02e':'#1f2a36')+'" stroke="'+(changed?'#ffb02e':'#2b2b2b')+'"/>';
+    s+='<text x="'+(x+cw/2-8)+'" y="'+(y+77)+'" text-anchor="middle" font-size="11.5" font-weight="600" fill="'+(changed?'#0b1a2b':'#e6e6e6')+'">'+AMINO[a].abbr+'</text>';
+    s+='</g>'; }
+  const H=y0+Math.ceil(n/perRow)*rowH;
+  s+='<text x="'+x0+'" y="'+(H-10)+'" font-size="11" fill="#9a9a9a">the bases as written on the coding strand, the messenger RNA beneath, and the amino acid each triplet names; click a base to change it</text>';
+  return {svg:s, h:H+6};
+}
+
+/* ---- the genome ---- */
+function genome(){
+  const list=[...CHR]; const key={number:c=>CHR.indexOf(c), length:c=>-c.bp, genes:c=>-c.g, density:c=>-(c.g/c.bp)}[sortBy]; list.sort((a,b)=>key(a)-key(b));
+  const x0=60, y0=30, rowH=22, maxBp=Math.max(...CHR.map(c=>c.bp)), bw=560; let s='';
+  const maxG=Math.max(...CHR.map(c=>c.g));
+  s+='<text x="'+(x0)+'" y="'+(y0-12)+'" font-size="11" fill="#9a9a9a">length, million base pairs</text><text x="'+(x0+bw+40)+'" y="'+(y0-12)+'" font-size="11" fill="#9a9a9a">protein-coding genes</text>';
+  list.forEach((c,i)=>{ const y=y0+i*rowH; const w=Math.max(1.5,c.bp/maxBp*bw), gw=c.g/maxG*220;
+    s+='<g data-ch="'+c.n+'" style="cursor:pointer"><rect x="0" y="'+(y-2)+'" width="'+W+'" height="'+rowH+'" fill="'+(hot===c.n?'#1b2230':'transparent')+'"/>';
+    s+='<text x="'+(x0-8)+'" y="'+(y+13)+'" text-anchor="end" font-size="12" fill="'+(hot===c.n?'#e6e6e6':'#9a9a9a')+'">'+c.n+'</text>';
+    s+='<rect x="'+x0+'" y="'+(y+2)+'" width="'+w.toFixed(1)+'" height="14" rx="3" fill="'+(c.n==='X'||c.n==='Y'?'#f28cb0':c.n==='MT'?'#9be564':'#58a6ff')+'" opacity="0.85"/>';
+    s+='<text x="'+(x0+w+6).toFixed(1)+'" y="'+(y+13)+'" font-size="10" fill="#9a9a9a">'+(c.bp/1e6).toFixed(c.bp<1e6?3:0)+'</text>';
+    s+='<rect x="'+(x0+bw+40)+'" y="'+(y+2)+'" width="'+gw.toFixed(1)+'" height="14" rx="3" fill="#ffb02e" opacity="0.8"/><text x="'+(x0+bw+40+gw+6).toFixed(1)+'" y="'+(y+13)+'" font-size="10" fill="#9a9a9a">'+c.g.toLocaleString('en-US')+'</text></g>'; });
+  const H=y0+list.length*rowH+30; const tot=CHR.reduce((a,x)=>a+x.bp,0);
+  s+='<text x="'+x0+'" y="'+(H-8)+'" font-size="11" fill="#9a9a9a">one set: '+(tot/1e9).toFixed(2)+' billion base pairs, '+CHR.reduce((a,x)=>a+x.g,0).toLocaleString('en-US')+' protein-coding genes</text>';
+  return {svg:s, h:H};
+}
+
+/* ---- render and wiring ---- */
+function render(){
+  const q=view==='helix'?helix():view==='code'?code():genome();
+  el.innerHTML='<svg viewBox="0 0 '+W+' '+q.h+'" xmlns="http://www.w3.org/2000/svg" id="dsvg"><rect width="'+W+'" height="'+q.h+'" fill="#121212"/>'+q.svg+'</svg>';
+  for(const id of ['helixCtl','codeCtl','genomeCtl']) document.getElementById(id).hidden=!id.startsWith(view);
+}
+function setView(v){ view=v; hot=null; for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render(); if(v==='helix') showHelix(); else if(v==='code') showCode(); else showGenome(); }
+document.getElementById('views').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setView(b.dataset.v); });
+document.getElementById('turn').addEventListener('input',e=>{ turn=+e.target.value; render(); });
+document.getElementById('spin').addEventListener('change',e=>{ spinning=e.target.checked; });
+(function tick(){ if(view==='helix'&&spinning&&hot===null){ turn=(turn+0.4)%360; document.getElementById('turn').value=Math.round(turn); render(); } requestAnimationFrame(tick); })();
+document.getElementById('muts').innerHTML=MUTS.map(m=>'<button type="button" data-m="'+m.k+'">'+esc(m.n)+'</button>').join('');
+function applyMut(k){ const m=MUTS.find(x=>x.k===k); seq=m.b?GENE.slice(0,m.i)+m.b+GENE.slice(m.i+1):GENE.slice(0,m.i)+GENE.slice(m.i+1); mut=k; for(const b of document.querySelectorAll('#muts button')) b.classList.toggle('on',b.dataset.m===k); render(); showCode(); }
+document.getElementById('muts').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) applyMut(b.dataset.m); });
+document.getElementById('reset').addEventListener('click',()=>{ seq=GENE; mut=null; for(const b of document.querySelectorAll('#muts button')) b.classList.remove('on'); render(); showCode(); });
+document.getElementById('sorts').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; sortBy=b.dataset.s; for(const x of document.querySelectorAll('#sorts button')) x.classList.toggle('on',x.dataset.s===sortBy); render(); });
+el.addEventListener('click',e=>{ const g=e.target.closest('[data-b]'); if(g&&view==='code'){ const i=+g.getAttribute('data-b'); const order='ACGT'; const next=order[(order.indexOf(seq[i])+1)%4]; seq=seq.slice(0,i)+next+seq.slice(i+1); mut=null; for(const b of document.querySelectorAll('#muts button')) b.classList.remove('on'); render(); showCode(); } });
+el.addEventListener('pointerover',e=>{ const p=e.target.closest('[data-p]'); if(p){ const i=+p.getAttribute('data-p'); if(i===hot) return; hot=i; render(); showPair(i); return; }
+  const c=e.target.closest('[data-c]'); if(c&&view==='code'){ showCodon(+c.getAttribute('data-c')); return; }
+  const ch=e.target.closest('[data-ch]'); if(ch){ const n=ch.getAttribute('data-ch'); if(n===hot) return; hot=n; render(); showChr(n); } });
+el.addEventListener('pointerleave',()=>{ if(view==='helix'&&hot!==null){ hot=null; render(); showHelix(); } if(view==='code') showCode(); if(view==='genome'&&hot!==null){ hot=null; render(); showGenome(); } });
+
+render(); showHelix();
+window.__dna=(q)=>{ const o={view,turn,hot,seq,mut,sortBy,card:document.getElementById('numTxt').innerText,name:document.getElementById('nameTxt').innerText,
+  pairs:document.querySelectorAll('#dsvg g[data-p]').length, codons:document.querySelectorAll('#dsvg g[data-c]').length, chroms:document.querySelectorAll('#dsvg g[data-ch]').length,
+  protein:protein(seq).map(p=>p.a).join('')};
+  if(q&&q.translate) o.tr=protein(q.translate).map(p=>p.a).join(''); if(q&&q.code) o.code=CODE; return o; };
+</script>
+</body>
+</html>
