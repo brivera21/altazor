@@ -120,4 +120,4 @@ title: Library
 
 [Music](music.html)
 
-[Colour](colour.html)
+[Color](color.html)
