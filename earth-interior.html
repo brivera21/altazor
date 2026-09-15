@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Earth&rsquo;s Interior &middot; Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff; }
+* { box-sizing:border-box; }
+[hidden] { display:none !important; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; margin-right:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 12px; font-size:26px; }
+.bar { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 12px; }
+.bar button, .presets button { background:var(--panel); color:var(--muted); border:1px solid var(--line);
+  border-radius:999px; padding:6px 14px; font-size:13px; cursor:pointer; font-family:inherit; }
+.bar button.on { background:var(--accent); color:#0b1a2b; border-color:var(--accent); font-weight:600; }
+.bar button:hover, .presets button:hover { color:var(--text); border-color:#3d3d3d; }
+.bar button.on:hover { color:#0b1a2b; }
+.controls { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 12px; min-height:34px; }
+.controls label { font-size:13px; color:var(--muted); }
+.controls input[type=range] { width:220px; accent-color:var(--accent); }
+.controls output { font-size:13px; color:var(--text); font-variant-numeric:tabular-nums; min-width:70px; }
+.presets { display:flex; gap:6px; flex-wrap:wrap; }
+.presets button { padding:5px 11px; font-size:12.5px; }
+.stage { display:flex; gap:22px; align-items:flex-start; }
+#diagram { flex:1 1 640px; min-width:0; }
+#diagram svg { width:100%; height:auto; display:block; user-select:none; }
+.side { flex:0 0 300px; min-width:0; position:sticky; top:16px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; overflow-wrap:anywhere; }
+#kindTxt { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+#nameTxt { font-weight:700; font-size:17px; margin:2px 0 6px; }
+#numTxt { font-size:13.5px; line-height:1.55; font-variant-numeric:tabular-nums; }
+#numTxt b { color:var(--muted); font-weight:400; }
+#bodyTxt { color:var(--muted); font-size:13.5px; line-height:1.55; margin-top:9px; }
+#srcTxt { color:var(--muted); font-size:12px; margin-top:10px; border-top:1px solid var(--line); padding-top:8px; }
+.note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.method { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+.refs p { margin:0 0 8px; overflow-wrap:anywhere; }
+.refs a { color:var(--accent); }
+.refs p { padding-left:2em; text-indent:-2em; }
+.refs .ann { color:#7d7d7d; display:block; padding-left:0; text-indent:0; margin-top:2px; }
+h2.refh { font-size:15px; margin:26px 0 8px; }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="library.html">&larr; Library &middot; Earth</a><a href="earth-history.html">Geological History</a><a href="earth.html">Climate</a><a href="day-night.html">Light Cycle</a></nav>
+</header>
+<h1>Earth&rsquo;s Interior</h1>
+<div class="bar" id="views"><button data-v="cut" class="on">A cut</button><button data-v="profiles">Profiles</button></div>
+<div class="controls">
+  <label for="depth">depth</label>
+  <input type="range" id="depth" min="0" max="6371" step="1" value="1000">
+  <output id="depthOut">1,000 km</output>
+  <span class="presets" id="places"></span>
+</div>
+<div class="stage">
+  <div id="diagram"></div>
+  <div class="side"><div class="card">
+    <div id="kindTxt"></div>
+    <div id="nameTxt"></div>
+    <div id="numTxt"></div>
+    <div id="bodyTxt"></div>
+    <div id="srcTxt"></div>
+  </div></div>
+</div>
+<p class="note">The Earth in section, to scale: a crust thinner than a line, a mantle of slowly flowing rock that is most of the planet, a liquid iron core and, inside that, a solid one the size of the Moon. The marker drags down the depth line, and the card reads off what the rock is doing there: how dense, how hot, how hard it is being squeezed, and how fast an earthquake's waves would cross it.</p>
+<p class="note" style="border-top:none; padding-top:0;">The profiles put the same five quantities side by side against depth. Density jumps at the transition zone and nearly doubles at the core; the shear wave vanishes in the liquid outer core, which is how the core was known to be liquid before anything else about it; gravity stays near 10 all the way to the core and then falls to nothing at the centre; pressure climbs to 3.6 million atmospheres.</p>
+<div class="method"><p>Density and the two wave speeds are the Preliminary Reference Earth Model of Dziewonski and Anderson, PREM, evaluated from its polynomials; mass, gravity and pressure are integrated from the density on a half-kilometre grid, and the total mass comes out at 5.973 times 10 to the 24 kg, the centre at 364 GPa, as in PREM. PREM is an average Earth with a 3 km ocean and a 24 km crust; it puts the transition zone's boundaries at 400 and 670 km where later work has 410 and 660. Temperature is not in PREM: the mantle follows Katsura's adiabat, the core-mantle boundary is set at 4,000 K and the inner core boundary at Anzellini's 6,230 K, joined by straight lines, and the uncertainties there are several hundred kelvin. The section is drawn to scale, so the crust is one pixel.</p></div>
+<h2 class="refh">References</h2>
+<div class="refs"><p>Dziewonski, A. M., &amp; Anderson, D. L. (1981). Preliminary reference Earth model. <i>Physics of the Earth and Planetary Interiors, 25</i>(4), 297-356. <a href="https://doi.org/10.1016/0031-9201(81)90046-7">https://doi.org/10.1016/0031-9201(81)90046-7</a><span class="ann">PREM: the density and wave-speed polynomials, and the depths of the boundaries, from which mass, gravity and pressure are integrated here.</span></p>
+<p>Katsura, T. (2022). A revised adiabatic temperature profile for the mantle. <i>Journal of Geophysical Research: Solid Earth, 127</i>, e2021JB023562. <a href="https://doi.org/10.1029/2021JB023562">https://doi.org/10.1029/2021JB023562</a><span class="ann">The mantle temperatures: 1839 K at 410 km, 1994 K above 660, 2587 K at 2800 km.</span></p>
+<p>Anzellini, S., Dewaele, A., Mezouar, M., Loubeyre, P., &amp; Morard, G. (2013). Melting of iron at Earth's inner core boundary based on fast X-ray diffraction. <i>Science, 340</i>(6131), 464-466. <a href="https://doi.org/10.1126/science.1233514">https://doi.org/10.1126/science.1233514</a><span class="ann">The inner core boundary at 6230 &plusmn; 500 K.</span></p>
+<p>Structure of Earth. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Structure_of_Earth">https://en.wikipedia.org/wiki/Structure_of_Earth</a><span class="ann">The layers and their states.</span></p>
+<p>Core–mantle boundary. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Core%E2%80%93mantle_boundary">https://en.wikipedia.org/wiki/Core%E2%80%93mantle_boundary</a><span class="ann">About 4,000 K at the top of the core.</span></p>
+<p>Crust (geology). (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Crust_(geology)">https://en.wikipedia.org/wiki/Crust_(geology)</a></p>
+<p>Upper mantle. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Upper_mantle">https://en.wikipedia.org/wiki/Upper_mantle</a></p>
+<p>Transition zone (Earth). (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Transition_zone_(Earth)">https://en.wikipedia.org/wiki/Transition_zone_(Earth)</a></p>
+<p>Lower mantle. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Lower_mantle">https://en.wikipedia.org/wiki/Lower_mantle</a></p>
+<p>D″ layer. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/D%E2%80%B3_layer">https://en.wikipedia.org/wiki/D%E2%80%B3_layer</a></p>
+<p>Earth's outer core. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Earth%27s_outer_core">https://en.wikipedia.org/wiki/Earth%27s_outer_core</a></p>
+<p>Earth's inner core. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Earth%27s_inner_core">https://en.wikipedia.org/wiki/Earth%27s_inner_core</a></p>
+<p>Mponeng Gold Mine. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Mponeng_Gold_Mine">https://en.wikipedia.org/wiki/Mponeng_Gold_Mine</a></p>
+<p>Challenger Deep. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Challenger_Deep">https://en.wikipedia.org/wiki/Challenger_Deep</a></p>
+<p>Kola Superdeep Borehole. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Kola_Superdeep_Borehole">https://en.wikipedia.org/wiki/Kola_Superdeep_Borehole</a></p>
+<p>Mohorovičić discontinuity. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Mohorovi%C4%8Di%C4%87_discontinuity">https://en.wikipedia.org/wiki/Mohorovi%C4%8Di%C4%87_discontinuity</a></p>
+<p>Diamond. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Diamond">https://en.wikipedia.org/wiki/Diamond</a></p>
+<p>Deep-focus earthquake. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Deep-focus_earthquake">https://en.wikipedia.org/wiki/Deep-focus_earthquake</a></p></div>
+</div>
+<script>
+const RHO=[[0,1221.5,[13.0885,0,-8.8381,0]],[1221.5,3480,[12.5815,-1.2638,-3.6426,-5.5281]],[3480,5701,[7.9565,-6.4761,5.5283,-3.0807]],[5701,5771,[5.3197,-1.4836,0,0]],[5771,5971,[11.2494,-8.0298,0,0]],[5971,6151,[7.1089,-3.8045,0,0]],[6151,6346.6,[2.691,0.6924,0,0]],[6346.6,6356,[2.9,0,0,0]],[6356,6368,[2.6,0,0,0]],[6368,6371,[1.02,0,0,0]]], VP=[[0,1221.5,[11.2622,0,-6.364,0]],[1221.5,3480,[11.0487,-4.0362,4.8023,-13.5732]],[3480,3630,[15.3891,-5.3181,5.5242,-2.5514]],[3630,5600,[24.952,-40.4673,51.4832,-26.6419]],[5600,5701,[29.2766,-23.6027,5.5242,-2.5514]],[5701,5771,[19.0957,-9.8672,0,0]],[5771,5971,[39.7027,-32.6166,0,0]],[5971,6151,[20.3926,-12.2569,0,0]],[6151,6346.6,[4.1875,3.9382,0,0]],[6346.6,6356,[6.8,0,0,0]],[6356,6368,[5.8,0,0,0]],[6368,6371,[1.45,0,0,0]]], VS=[[0,1221.5,[3.6678,0,-4.4475,0]],[1221.5,3480,[0,0,0,0]],[3480,3630,[6.9254,1.4672,-2.0834,0.9783]],[3630,5600,[11.1671,-13.7818,17.4575,-9.2777]],[5600,5701,[22.3459,-17.2473,-2.0834,0.9783]],[5701,5771,[9.9839,-4.9324,0,0]],[5771,5971,[22.3512,-18.5856,0,0]],[5971,6151,[8.9496,-4.4597,0,0]],[6151,6346.6,[2.1519,2.3481,0,0]],[6346.6,6356,[3.9,0,0,0]],[6356,6368,[3.2,0,0,0]],[6368,6371,[0,0,0,0]]], GEO=[[0,288],[24.4,800],[100,1550],[220,1720],[400,1839],[670,1994],[671,1960],[2741,2580],[2891,4000],[2892,4100],[5149.5,6230],[6371,6300]], LAYERS=[{"k":"crust","n":"the crust","top":0,"bot":24.4,"c":"#9be564","state":"solid rock","what":"granite and basalt, with PREM's 3 km ocean on top","b":"Thinner on the Earth than the skin on an apple: 7 km under the oceans, 35 under the continents, 24 in this average model. Everything ever dug or drilled is in the top half of it.","s":"PREM; Wikipedia, Crust (geology)"},{"k":"upper","n":"the upper mantle","top":24.4,"bot":400,"c":"#e0a458","state":"solid, and slowly flowing","what":"peridotite: olivine and pyroxene","b":"Rock hot enough to creep over millions of years, which is what moves the plates. The top 80 km or so is stiff and rides along with the crust as the lithosphere; below it a softer zone lets the plates slide.","s":"PREM; Wikipedia, Upper mantle"},{"k":"transition","n":"the transition zone","top":400,"bot":670,"c":"#f2c94c","state":"solid","what":"olivine squeezed into denser crystal forms","b":"Two jumps in density and wave speed, at 410 and 660 km, where the pressure forces olivine into new, tighter structures. The deepest earthquakes stop here.","s":"PREM; Wikipedia, Transition zone (Earth)"},{"k":"lower","n":"the lower mantle","top":670,"bot":2741,"c":"#d9822b","state":"solid, and slowly flowing","what":"bridgmanite and ferropericlase","b":"More than half of the Earth by volume, made largely of a mineral, bridgmanite, that exists nowhere at the surface. Density climbs from 4.4 to 5.5 g per cubic centimetre across it.","s":"PREM; Wikipedia, Lower mantle"},{"k":"dpp","n":"the D&Prime; layer","top":2741,"bot":2891,"c":"#b55d2a","state":"solid, uneven","what":"the bottom 150 km of the mantle","b":"A lumpy boundary layer against the core, with temperature rising by something like a thousand kelvin across it, continent-sized piles of dense rock, and the roots of mantle plumes.","s":"PREM; Wikipedia, D″ layer"},{"k":"outer","n":"the outer core","top":2891,"bot":5149.5,"c":"#f28cb0","state":"liquid metal","what":"iron and nickel with some lighter elements","b":"Molten iron, as hot as the surface of the Sun, stirred by heat and by the settling of the inner core. Its currents make the magnetic field. Shear waves cannot cross it: Oldham found the core in 1906 and Jeffreys showed it liquid in 1926.","s":"PREM; Wikipedia, Earth's outer core"},{"k":"inner","n":"the inner core","top":5149.5,"bot":6371,"c":"#f4efe2","state":"solid metal","what":"iron-nickel crystal","b":"Solid because the pressure of 330 gigapascals raises iron's melting point above the temperature there. It grows a millimetre a year as the core cools, and was found by Inge Lehmann in 1936.","s":"PREM; Wikipedia, Earth's inner core"}], PLACES=[{"k":"mine","n":"the deepest mine","d":4.0,"b":"Mponeng, in South Africa, 4 km down, where the rock face is 66 degrees Celsius and has to be cooled with ice.","s":"Wikipedia, Mponeng Gold Mine"},{"k":"trench","n":"the deepest ocean","d":10.9,"b":"The Challenger Deep in the Mariana Trench, 10.9 km below the surface, under 1,100 atmospheres of water.","s":"Wikipedia, Challenger Deep"},{"k":"kola","n":"the deepest hole","d":12.3,"b":"The Kola Superdeep Borehole, 12.3 km, drilled over twenty years and stopped by rock at 180 degrees Celsius. A fifth of the way through the crust.","s":"Wikipedia, Kola Superdeep Borehole"},{"k":"moho","n":"the Moho","d":24.4,"b":"The base of the crust, where wave speed jumps to 8 km per second; found by Mohorovičić in 1909 from earthquake arrivals.","s":"Wikipedia, Mohorovičić discontinuity"},{"k":"diamond","n":"where diamonds form","d":175,"b":"Most diamonds crystallise between 150 and 200 km down, in the roots of old continents, and ride up in volcanic eruptions.","s":"Wikipedia, Diamond"},{"k":"quake","n":"the deepest earthquakes","d":700,"b":"Earthquakes stop at about 700 km, where the sinking slabs reach the bottom of the transition zone.","s":"Wikipedia, Deep-focus earthquake"},{"k":"cmb","n":"the core-mantle boundary","d":2891,"b":"The sharpest boundary inside the planet: rock above, liquid metal below, density nearly doubling in a step.","s":"PREM"},{"k":"icb","n":"the inner core boundary","d":5149.5,"b":"Where the iron freezes. The solid inner core grows outward from here as the planet cools.","s":"PREM; Anzellini et al. 2013"},{"k":"centre","n":"the centre","d":6371,"b":"364 gigapascals, 3.6 million atmospheres, and gravity at zero: every direction is up.","s":"PREM"}];
+const RE=6371.0, G=6.67430e-11, W=980;
+const el=document.getElementById('diagram');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+let view='cut', depth=1000, hot=null;
+
+/* ---- PREM ---- */
+function prem(T,r){ const x=r/RE; for(const [a,b,c] of T){ if(r>=a&&r<=b) return c[0]+c[1]*x+c[2]*x*x+c[3]*x*x*x; } return 0; }
+const rho=r=>prem(RHO,r), vp=r=>prem(VP,r), vs=r=>prem(VS,r);
+// mass from the centre, then gravity, then pressure from the surface, on a half-kilometre grid
+const DR=0.5, N=Math.round(RE/DR), M=new Float64Array(N+1), GR=new Float64Array(N+1), PR=new Float64Array(N+1);
+for(let i=0;i<N;i++){ const rm=(i+0.5)*DR; M[i+1]=M[i]+4*Math.PI*Math.pow(rm*1e3,2)*rho(rm)*1e3*DR*1e3; }
+for(let i=1;i<=N;i++) GR[i]=G*M[i]/Math.pow(i*DR*1e3,2);
+for(let i=N;i>0;i--){ const rm=(i-0.5)*DR; PR[i-1]=PR[i]+rho(rm)*1e3*0.5*(GR[i]+GR[i-1])*DR*1e3; }
+const massBelow=r=>M[Math.round(r/DR)], gAt=r=>GR[Math.round(r/DR)], pAt=r=>PR[Math.round(r/DR)];
+const MASS=M[N];
+function temp(d){ for(let i=1;i<GEO.length;i++){ if(d<=GEO[i][0]){ const [d0,t0]=GEO[i-1],[d1,t1]=GEO[i]; return t0+(t1-t0)*(d-d0)/(d1-d0); } } return GEO[GEO.length-1][1]; }
+const layerOf=d=>LAYERS.find(l=>d>=l.top&&d<l.bot)||LAYERS[LAYERS.length-1];
+const shellMass=(top,bot)=>massBelow(RE-top)-massBelow(RE-bot);
+const shellVol=(top,bot)=>Math.pow(RE-top,3)-Math.pow(RE-bot,3);
+
+/* ---- numbers ---- */
+const km=d=>Math.round(d).toLocaleString('en-US')+' km';
+const f1=x=>x.toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1});
+const f2=x=>x.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+function pressure(P){ return P<1e9?f1(P/1e6)+' MPa, '+Math.round(P/101325).toLocaleString('en-US')+' atmospheres':f1(P/1e9)+' GPa, '+(P/101325/1e6).toFixed(2)+' million atmospheres'; }
+
+/* ---- the card ---- */
+function card(kind,name,rows,body,src){
+  document.getElementById('kindTxt').textContent=kind;
+  document.getElementById('nameTxt').innerHTML=name;
+  document.getElementById('numTxt').innerHTML=rows.filter(r=>r[1]).map(([k,v])=>'<b>'+esc(k)+'</b> '+v).join('<br>');
+  document.getElementById('bodyTxt').textContent=body;
+  document.getElementById('srcTxt').textContent=src;
+}
+function showDepth(d){ const r=RE-d, L=layerOf(d), s=vs(r);
+  const pl=PLACES.find(p=>Math.abs(p.d-d)<=Math.max(1,d*0.002));
+  card('At a depth of', km(d)+(pl?', '+esc(pl.n):''),
+    [['layer',L.n],['radius from the centre',km(r)],['density',f2(rho(r))+' g/cm\u00b3'],['P wave',f2(vp(r))+' km/s'],['S wave',s>0?f2(s)+' km/s':'none: it is liquid'],
+     ['gravity',f2(gAt(r))+' m/s\u00b2'],['pressure',pressure(pAt(r))],['temperature','about '+Math.round(temp(d)).toLocaleString('en-US')+' K'],
+     ['mass beneath',(massBelow(r)/MASS*100).toFixed(1)+'% of the Earth']],
+    pl?pl.b:L.b, pl?pl.s:L.s); }
+function showLayer(k){ const L=LAYERS.find(x=>x.k===k); if(!L) return; const r0=RE-L.top, r1=RE-L.bot;
+  card('A layer', L.n, [['depth',km(L.top)+' to '+km(L.bot)],['thickness',km(L.bot-L.top)],['state',L.state],['made of',esc(L.what)],
+    ['density',f2(rho(r0-0.01))+' to '+f2(rho(r1+0.01))+' g/cm\u00b3'],['share of the volume',(shellVol(L.top,L.bot)/Math.pow(RE,3)*100).toFixed(1)+'%'],['share of the mass',(shellMass(L.top,L.bot)/MASS*100).toFixed(1)+'%'],
+    ['temperature','about '+Math.round(temp(L.top+0.01)).toLocaleString('en-US')+' to '+Math.round(temp(L.bot-0.01)).toLocaleString('en-US')+' K']], L.b, L.s); }
+
+/* ---- the cut ---- */
+const C={cx:520,cy:370,R:330};
+function cut(){
+  let s='';
+  const half=(r)=>'M'+C.cx+','+(C.cy-r)+' A'+r+','+r+' 0 0 0 '+C.cx+','+(C.cy+r)+' Z';
+  for(const L of LAYERS){ const r=C.R*(RE-L.top)/RE; s+='<path data-l="'+L.k+'" d="'+half(r)+'" fill="'+L.c+'" opacity="'+(hot&&hot!==L.k?0.55:0.9)+'" style="cursor:pointer"/>'; }
+  // the crust as a stroke so it can be seen at all
+  s+='<path d="M'+C.cx+','+(C.cy-C.R)+' A'+C.R+','+C.R+' 0 0 0 '+C.cx+','+(C.cy+C.R)+'" fill="none" stroke="'+LAYERS[0].c+'" stroke-width="2"/>';
+  s+='<line x1="'+C.cx+'" y1="'+(C.cy-C.R)+'" x2="'+C.cx+'" y2="'+(C.cy+C.R)+'" stroke="#121212" stroke-width="2"/>';
+  // the depth line: from the surface at the top down to the centre
+  s+='<line x1="'+C.cx+'" y1="'+(C.cy-C.R)+'" x2="'+C.cx+'" y2="'+C.cy+'" stroke="#e6e6e6" stroke-width="1" opacity="0.5"/>';
+  for(const d of [0,1000,2000,3000,4000,5000,6000]){ const y=C.cy-C.R+C.R*d/RE; s+='<line x1="'+(C.cx-4)+'" y1="'+y.toFixed(1)+'" x2="'+(C.cx+4)+'" y2="'+y.toFixed(1)+'" stroke="#e6e6e6" opacity="0.6"/>'; }
+  s+='<text x="'+(C.cx-10)+'" y="'+(C.cy+4)+'" text-anchor="end" font-size="10.5" fill="#4a4540">the centre, 6,371 km</text>';
+  // layer labels down the right, spaced apart
+  let lastY=-1e9;
+  for(const L of LAYERS){ const mid=(L.top+L.bot)/2, y0=C.cy-C.R+C.R*mid/RE; let y=Math.max(y0,lastY+17); lastY=y;
+    s+='<g data-l="'+L.k+'" style="cursor:pointer"><line x1="'+(C.cx+6)+'" y1="'+y0.toFixed(1)+'" x2="'+(C.cx+40)+'" y2="'+y.toFixed(1)+'" stroke="#3d444d"/><circle cx="'+(C.cx+6)+'" cy="'+y0.toFixed(1)+'" r="2" fill="'+L.c+'"/>';
+    s+='<text x="'+(C.cx+46)+'" y="'+(y+4).toFixed(1)+'" font-size="12" fill="'+(hot===L.k?'#e6e6e6':L.c)+'">'+L.n+'</text>';
+    s+='<text x="'+(C.cx+46)+'" y="'+(y+16).toFixed(1)+'" font-size="10" fill="#6b7280">'+km(L.top)+' to '+km(L.bot)+', '+L.state+'</text></g>'; lastY=y+14; }
+  // the marker
+  const y=C.cy-C.R+C.R*depth/RE;
+  s+='<g id="marker"><circle cx="'+C.cx+'" cy="'+y.toFixed(1)+'" r="6" fill="#ffb02e" stroke="#121212" stroke-width="1.5"/>';
+  s+='<text x="'+(C.cx-12)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="11.5" font-weight="700" fill="#ffb02e">'+km(depth)+'</text></g>';
+  s+='<text x="'+(C.cx-C.R)+'" y="'+(C.cy+C.R+26)+'" font-size="11" fill="#9a9a9a">to scale: 330 pixels to 6,371 km</text>';
+  return {svg:s, h:C.cy+C.R+40};
+}
+
+/* ---- the profiles ---- */
+const PAN=[{k:'rho',n:'density, g/cm\u00b3',max:14,f:r=>rho(r),c:'#e0a458'},{k:'v',n:'wave speed, km/s',max:14,f:r=>vp(r),f2:r=>vs(r),c:'#58a6ff',c2:'#9be564'},
+           {k:'g',n:'gravity, m/s\u00b2',max:11,f:r=>gAt(r),c:'#f4efe2'},{k:'P',n:'pressure, GPa',max:380,f:r=>pAt(r)/1e9,c:'#f28cb0'},{k:'T',n:'temperature, K',max:7000,f:r=>temp(RE-r),c:'#ffb02e'}];
+const PR0={x:90,y:40,w:144,gap:12,h:560};
+const DY=d=>PR0.y+d/RE*PR0.h;
+function profiles(){
+  let s='';
+  PAN.forEach((p,i)=>{ const x0=PR0.x+i*(PR0.w+PR0.gap); const X=v=>x0+v/p.max*PR0.w;
+    s+='<rect x="'+x0+'" y="'+PR0.y+'" width="'+PR0.w+'" height="'+PR0.h+'" fill="none" stroke="#2b2b2b"/>';
+    s+='<text x="'+x0+'" y="'+(PR0.y-10)+'" font-size="11" fill="#9a9a9a">'+p.n+'</text>';
+    for(const v of [0,p.max/2,p.max]) s+='<text x="'+X(v).toFixed(1)+'" y="'+(PR0.y+PR0.h+16)+'" text-anchor="middle" font-size="10" fill="#6b7280">'+v+'</text>';
+    for(const L of LAYERS){ if(L.top===0) continue; const y=DY(L.top); s+='<line x1="'+x0+'" y1="'+y.toFixed(1)+'" x2="'+(x0+PR0.w)+'" y2="'+y.toFixed(1)+'" stroke="#2b2b2b" stroke-dasharray="3 4"/>'; }
+    const draw=(f,c)=>{ let d=''; for(let dd=0; dd<=RE; dd+=2){ const r=RE-dd, v=f(r); d+=(d?'L':'M')+X(v).toFixed(1)+','+DY(dd).toFixed(1); } return '<path d="'+d+'" fill="none" stroke="'+c+'" stroke-width="2"/>'; };
+    if(p.f2) s+=draw(p.f2,p.c2); s+=draw(p.f,p.c);
+    if(p.f2){ s+='<text x="'+(x0+PR0.w-4)+'" y="'+(PR0.y+PR0.h-30)+'" text-anchor="end" font-size="10.5" fill="'+p.c+'">P</text><text x="'+(x0+PR0.w-4)+'" y="'+(PR0.y+PR0.h-16)+'" text-anchor="end" font-size="10.5" fill="'+p.c2+'">S</text>'; }
+    const r=RE-depth, v=p.f(r);
+    s+='<circle cx="'+X(v).toFixed(1)+'" cy="'+DY(depth).toFixed(1)+'" r="4.5" fill="#ffb02e" stroke="#121212" stroke-width="1.2"/>';
+    if(p.f2&&p.f2(r)>0) s+='<circle cx="'+X(p.f2(r)).toFixed(1)+'" cy="'+DY(depth).toFixed(1)+'" r="4.5" fill="#ffb02e" stroke="#121212" stroke-width="1.2"/>';
+  });
+  // depth axis and layer names down the left
+  for(const d of [0,1000,2000,3000,4000,5000,6000]){ const y=DY(d); s+='<line x1="'+(PR0.x-6)+'" y1="'+y.toFixed(1)+'" x2="'+PR0.x+'" y2="'+y.toFixed(1)+'" stroke="#8a94a6"/><text x="'+(PR0.x-9)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="10.5" fill="#9a9a9a">'+d.toLocaleString('en-US')+'</text>'; }
+  s+='<text transform="translate(14,'+(PR0.y+PR0.h/2)+') rotate(-90)" text-anchor="middle" font-size="11.5" fill="#9a9a9a">depth, km</text>';
+  const xr=PR0.x+PAN.length*(PR0.w+PR0.gap)-PR0.gap;
+  for(const L of LAYERS){ if(L.bot-L.top<150) continue; const y=DY((L.top+L.bot)/2); s+='<text x="'+(xr+8)+'" y="'+(y+4).toFixed(1)+'" font-size="10.5" fill="'+L.c+'">'+L.n+'</text>'; }
+  const y=DY(depth);
+  s+='<g id="marker"><line x1="'+PR0.x+'" y1="'+y.toFixed(1)+'" x2="'+xr+'" y2="'+y.toFixed(1)+'" stroke="#ffb02e" stroke-width="1" opacity="0.7"/><text x="'+(xr+8)+'" y="'+(y-6).toFixed(1)+'" font-size="11" font-weight="700" fill="#ffb02e">'+km(depth)+'</text></g>';
+  return {svg:s, h:PR0.y+PR0.h+40};
+}
+
+/* ---- render and wiring ---- */
+function render(){
+  const q=view==='cut'?cut():profiles();
+  el.innerHTML='<svg viewBox="0 0 '+W+' '+q.h+'" xmlns="http://www.w3.org/2000/svg" id="esvg"><rect width="'+W+'" height="'+q.h+'" fill="#121212"/>'+q.svg+'</svg>';
+  document.getElementById('depthOut').textContent=km(depth);
+}
+function setView(v){ view=v; hot=null; for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render(); showDepth(depth); }
+function setDepth(d){ depth=Math.max(0,Math.min(RE,Math.round(d*10)/10)); document.getElementById('depth').value=Math.round(depth); render(); showDepth(depth); }
+document.getElementById('views').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setView(b.dataset.v); });
+document.getElementById('depth').addEventListener('input',e=>{ depth=+e.target.value; render(); showDepth(depth); });
+document.getElementById('places').innerHTML=PLACES.map(p=>'<button type="button" data-d="'+p.d+'">'+esc(p.n)+'</button>').join('');
+document.getElementById('places').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setDepth(+b.dataset.d); });
+let dragging=false;
+const svgPt=e=>{ const svg=document.getElementById('esvg'), b=svg.getBoundingClientRect(); return [(e.clientX-b.left)/b.width*W,(e.clientY-b.top)/b.height*svg.viewBox.baseVal.height]; };
+function depthAt(x,y){ if(view==='cut'){ const dx=x-C.cx, dy=y-C.cy, rr=Math.sqrt(dx*dx+dy*dy); return rr<=C.R+8?RE*(1-Math.min(1,rr/C.R)):null; }
+  return (y>=PR0.y-8&&y<=PR0.y+PR0.h+8)?RE*Math.max(0,Math.min(1,(y-PR0.y)/PR0.h)):null; }
+el.addEventListener('pointerdown',e=>{ const [x,y]=svgPt(e); const d=depthAt(x,y); if(d!=null){ dragging=true; hot=null; setDepth(d); e.preventDefault(); } });
+el.addEventListener('pointermove',e=>{ if(!dragging) return; const [x,y]=svgPt(e); const d=depthAt(x,y); if(d!=null) setDepth(d); });
+window.addEventListener('pointerup',()=>{ dragging=false; });
+el.addEventListener('pointerover',e=>{ if(dragging) return; const g=e.target.closest('[data-l]'); if(g){ const k=g.getAttribute('data-l'); if(k===hot) return; hot=k; render(); showLayer(hot); } });
+el.addEventListener('pointerleave',()=>{ if(hot){ hot=null; render(); showDepth(depth); } });
+
+render(); showDepth(depth);
+window.__earth=(q)=>{ const o={view,depth,hot,mass:MASS,layers:document.querySelectorAll('#esvg path[data-l]').length,
+  card:document.getElementById('numTxt').innerText, name:document.getElementById('nameTxt').innerText,
+  marker:(()=>{ const c=document.querySelector('#marker circle, #marker line'); return c?[+(c.getAttribute('cx')||c.getAttribute('x1')),+(c.getAttribute('cy')||c.getAttribute('y1'))]:null; })()};
+  if(q&&q.r!=null){ const r=q.r; o.at={rho:rho(r),vp:vp(r),vs:vs(r),g:gAt(r),P:pAt(r),m:massBelow(r),T:temp(RE-r)}; }
+  if(q&&q.shell){ o.shell={m:shellMass(q.shell[0],q.shell[1])/MASS, v:shellVol(q.shell[0],q.shell[1])/Math.pow(RE,3)}; }
+  return o; };
+</script>
+</body>
+</html>
