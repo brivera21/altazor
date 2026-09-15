@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colour &middot; Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff; }
+* { box-sizing:border-box; }
+[hidden] { display:none !important; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; margin-right:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 12px; font-size:26px; }
+.bar { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 12px; }
+.bar button { background:var(--panel); color:var(--muted); border:1px solid var(--line);
+  border-radius:999px; padding:6px 14px; font-size:13px; cursor:pointer; font-family:inherit; }
+.bar button.on { background:var(--accent); color:#0b1a2b; border-color:var(--accent); font-weight:600; }
+.bar button:hover { color:var(--text); border-color:#3d3d3d; }
+.bar button.on:hover { color:#0b1a2b; }
+.controls { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 12px; min-height:34px; }
+.controls label { font-size:13px; color:var(--muted); }
+.controls output { font-size:13px; color:var(--text); font-variant-numeric:tabular-nums; }
+.stage { display:flex; gap:22px; align-items:flex-start; }
+#diagram { flex:1 1 640px; min-width:0; }
+#diagram svg, #diagram canvas { width:100%; height:auto; display:block; user-select:none; touch-action:none; }
+.side { flex:0 0 300px; min-width:0; position:sticky; top:16px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; overflow-wrap:anywhere; }
+#kindTxt { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+#nameTxt { font-weight:700; font-size:17px; margin:2px 0 6px; }
+#numTxt { font-size:13.5px; line-height:1.55; font-variant-numeric:tabular-nums; }
+#numTxt b { color:var(--muted); font-weight:400; }
+#numTxt .sw { display:inline-block; width:14px; height:14px; border-radius:3px; vertical-align:-2px; margin-right:4px; border:1px solid #3d3d3d; }
+#bodyTxt { color:var(--muted); font-size:13.5px; line-height:1.55; margin-top:9px; }
+#srcTxt { color:var(--muted); font-size:12px; margin-top:10px; border-top:1px solid var(--line); padding-top:8px; }
+.note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.method { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+.refs p { margin:0 0 8px; overflow-wrap:anywhere; }
+.refs a { color:var(--accent); }
+.refs p { padding-left:2em; text-indent:-2em; }
+.refs .ann { color:#7d7d7d; display:block; padding-left:0; text-indent:0; margin-top:2px; }
+h2.refh { font-size:15px; margin:26px 0 8px; }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="library.html">&larr; Library &middot; Abstractions</a><a href="light.html">Light</a><a href="brain.html">The Brain</a><a href="languages.html">Languages</a></nav>
+</header>
+<h1>Colour</h1>
+<div class="bar" id="views"><button data-v="eye" class="on">The eye</button><button data-v="gamut">The gamut</button><button data-v="names">The names</button></div>
+<div class="controls" id="eyeCtl"><label>the marker</label><output id="lamOut"></output></div>
+<div class="controls" id="gamutCtl" hidden><label>the marker</label><output id="xyOut"></output></div>
+<div class="stage">
+  <div id="diagram"></div>
+  <div class="side"><div class="card">
+    <div id="kindTxt"></div>
+    <div id="nameTxt"></div>
+    <div id="numTxt"></div>
+    <div id="bodyTxt"></div>
+    <div id="srcTxt"></div>
+  </div></div>
+</div>
+<p class="note">Colour is not in the light. Light has a wavelength; colour is what a brain makes of the answers of three kinds of cone, tuned to short, middle and long waves, and every hue anyone has seen is a mixture of three numbers. The first view is those three curves, with the rod that works at night, over the spectrum; the marker reads how each answers to any wavelength.</p>
+<p class="note" style="border-top:none; padding-top:0;">The second view is the map of everything the eye can see, the horseshoe of the 1931 diagram, with the small triangle inside it that a screen can show, the curve of glowing things from red-hot to blue-white, and the white of daylight at the centre; the marker reads any colour's place. The third is what languages do with all this: eleven names, acquired in nearly the same order everywhere, dark and light first, red next, blue late.</p>
+<div class="method"><p>The receptor curves are drawn as bells at the peaks Bowmaker and Dartnall measured in a human retina, 420, 534, 563 and 498 nm, with widths chosen to match the published sensitivities; they are not the measured curves point for point, and the lens and the yellow spot in front of the retina shift the effective peaks a little. The horseshoe is computed from the CIE 1931 two-degree observer in Wyman, Sloan and Shirley's analytic fit, between 420 and 640 nm, closed with the observer's tabulated points at 380, 660 and 700 nm where the fit's tails are unreliable; its fill is the nearest colour a screen can show, so everything outside the triangle is shown less saturated than it is. The black-body curve is Planck's law run through the same observer. The naming sequence is Berlin and Kay's as revised by the World Color Survey; it is a strong tendency with exceptions, not a law.</p></div>
+<h2 class="refh">References</h2>
+<div class="refs"><p>Bowmaker, J. K., &amp; Dartnall, H. J. A. (1980). Visual pigments of rods and cones in a human retina. <i>The Journal of Physiology, 298</i>(1), 501-511. <a href="https://doi.org/10.1113/jphysiol.1980.sp013097">https://doi.org/10.1113/jphysiol.1980.sp013097</a><span class="ann">The peaks of the four pigments measured in one human retina: rods 498 nm, cones 420, 534 and 563.</span></p>
+<p>Curcio, C. A., Sloan, K. R., Kalina, R. E., &amp; Hendrickson, A. E. (1990). Human photoreceptor topography. <i>Journal of Comparative Neurology, 292</i>(4), 497-523. <a href="https://doi.org/10.1002/cne.902920402">https://doi.org/10.1002/cne.902920402</a><span class="ann">4.6 million cones and 92 million rods in the average retina, 199,000 cones a square millimetre at the fovea.</span></p>
+<p>Wyman, C., Sloan, P.-P., &amp; Shirley, P. (2013). Simple analytic approximations to the CIE XYZ color matching functions. <i>Journal of Computer Graphics Techniques, 2</i>(2), 1-11. <a href="https://jcgt.org/published/0002/02/01/">https://jcgt.org/published/0002/02/01/</a><span class="ann">The fit to the 1931 observer used to draw the spectrum, the horseshoe and the black-body curve.</span></p>
+<p>Berlin, B., &amp; Kay, P. (1969). <i>Basic color terms: Their universality and evolution</i>. University of California Press.<span class="ann">The eleven basic terms and the order in which languages acquire them.</span></p>
+<p>Kay, P., Berlin, B., Maffi, L., Merrifield, W. R., &amp; Cook, R. (2009). <i>The World Color Survey</i>. CSLI Publications.<span class="ann">The sequence tested and revised on 110 unwritten languages.</span></p>
+<p>Cone cell. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Cone_cell">https://en.wikipedia.org/wiki/Cone_cell</a><span class="ann">The three cones, their peaks and their share of the retina.</span></p>
+<p>Rod cell. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Rod_cell">https://en.wikipedia.org/wiki/Rod_cell</a><span class="ann">The rods, their sensitivity and their peak at 498 nm.</span></p>
+<p>CIE 1931 color space. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/CIE_1931_color_space">https://en.wikipedia.org/wiki/CIE_1931_color_space</a><span class="ann">The chromaticity diagram, the spectral locus, the white points and the dominant wavelength.</span></p>
+<p>SRGB. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/SRGB">https://en.wikipedia.org/wiki/SRGB</a><span class="ann">The primaries at (0.64, 0.33), (0.30, 0.60), (0.15, 0.06) and the D65 white.</span></p>
+<p>Planckian locus. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Planckian_locus">https://en.wikipedia.org/wiki/Planckian_locus</a><span class="ann">The black-body curve across the diagram.</span></p>
+<p>Standard illuminant. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Standard_illuminant">https://en.wikipedia.org/wiki/Standard_illuminant</a><span class="ann">D65 and illuminant A.</span></p>
+<p>Color blindness. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Color_blindness">https://en.wikipedia.org/wiki/Color_blindness</a><span class="ann">About 8 percent of men and 0.5 percent of women with red-green deficiency.</span></p>
+<p>Linguistic relativity and the color naming debate. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Linguistic_relativity_and_the_color_naming_debate">https://en.wikipedia.org/wiki/Linguistic_relativity_and_the_color_naming_debate</a><span class="ann">Grue, Dani, Tzeltal, and the two blues of Russian and Greek.</span></p>
+<p>Blue–green distinction in language. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Blue%E2%80%93green_distinction_in_language">https://en.wikipedia.org/wiki/Blue%E2%80%93green_distinction_in_language</a></p></div>
+</div>
+<script>
+const RECEPTORS=[{"k":"s","n":"S cones, blue","peak":420,"w":[22,32],"c":"#6ea0ff","count":"roughly a twentieth of the cones, and none at the very centre of gaze","b":"The rarest cone, tuned to violet and blue. There are so few that the eye cannot resolve fine detail in blue alone, which is why blue text on black is hard to read."},{"k":"m","n":"M cones, green","peak":534,"w":[40,44],"c":"#7ddc7d","count":"about a third of the cones","b":"Tuned to green, though it answers to most of the visible spectrum. Its curve lies almost on top of the L cone's; colour vision in the green-to-red range is the small difference between the two."},{"k":"l","n":"L cones, red","peak":564,"w":[44,50],"c":"#ff7d6a","count":"about two thirds of the cones","b":"Tuned to yellow-green, not red: red is what the brain makes of a strong L and a weak M. The gene for it sits on the X chromosome, which is why one man in twelve has it wrong and confuses red with green."},{"k":"rod","n":"rods","peak":498,"w":[36,44],"c":"#9a9a9a","count":"about 92 million, twenty times the cones","b":"The night receptors, a hundred times more sensitive than cones and blind to colour. At dusk the world goes grey, and, because rods peak in the blue-green, reds go dark first and blues last."}], COUNTS={"cones":4600000.0,"rods":92000000.0,"fovea_per_mm2":199000,"cone_share":[5,32,63]}, SRGB={"r":[0.64,0.33],"g":[0.3,0.6],"b":[0.15,0.06],"w":[0.3127,0.329]}, POINTS=[{"k":"d65","n":"daylight white, D65","x":0.3127,"y":0.329,"b":"The white a screen aims for: average noon daylight, and the point of no hue at all. Every colour is a direction and a distance from here."},{"k":"a","n":"a tungsten bulb, illuminant A","x":0.4476,"y":0.4074,"b":"The warm white of a filament at 2,856 kelvin; the eye calls it white too, once it has been in the room a minute."},{"k":"sun","n":"the Sun's surface, 5,800 kelvin","x":0.3268,"y":0.3358,"b":"A black body at the Sun's temperature: nearly the same white as daylight, a shade warmer."}], TERMS=[{"stage":1,"n":"black","c":"#111111","b":"Every language has a word for dark and one for light; where there are only two, they split the world into dark-and-cool and light-and-warm."},{"stage":1,"n":"white","c":"#f2f2f2","b":"The other of the first two."},{"stage":2,"n":"red","c":"#d62828","b":"The first hue to get a name, everywhere: the colour of blood and ripe fruit."},{"stage":3,"n":"green","c":"#2a9d3f","b":"Green or yellow comes next; which one first depends on the language."},{"stage":3,"n":"yellow","c":"#f2c11a","b":"Yellow or green."},{"stage":5,"n":"blue","c":"#2b5cd6","b":"Blue comes late. Many languages have one word for green and blue together, which linguists call grue; Homer's sea was wine-dark, and Japanese ao covered both until the last century."},{"stage":6,"n":"brown","c":"#7a4a1e","b":"Brown is next, once blue is separate."},{"stage":7,"n":"purple","c":"#7b3fa0","b":"The last four come in no fixed order."},{"stage":7,"n":"pink","c":"#f28cb0","b":"Pink, in English, is red made light; most languages that name it name it late."},{"stage":7,"n":"orange","c":"#f26a1b","b":"Orange, named in English for the fruit, and not before the fruit arrived."},{"stage":7,"n":"grey","c":"#8a8a8a","b":"Grey is last, or near it; some languages acquire it early and out of sequence."}], STAGES={"1":{"n":"two terms","what":"dark and light","eg":"the Dani of New Guinea: mili for dark and cool colours, mola for light and warm"},"2":{"n":"three terms","what":"black, white and red","eg":"many languages of New Guinea, Africa and the Americas"},"3":{"n":"four terms","what":"plus green or yellow","eg":""},"4":{"n":"five terms","what":"plus the other of green and yellow","eg":"Tzeltal, in Chiapas: black, white, red, yellow, and one word, yash, for green and blue together"},"5":{"n":"six terms","what":"plus blue","eg":""},"6":{"n":"seven terms","what":"plus brown","eg":""},"7":{"n":"eight to eleven terms","what":"plus purple, pink, orange and grey","eg":"English and most European languages; Russian and Greek have twelve, with two blues, light and dark, as separate basic terms; Hungarian has two reds"}};
+const W=980;
+const el=document.getElementById('diagram');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const fmt=(n,d)=>n.toLocaleString('en-US',{maximumFractionDigits:d==null?0:d,minimumFractionDigits:d==null?0:d});
+let view='eye', hot=null, lam=550, mk={x:0.3127,y:0.3290};
+
+/* ---- the observer, as on the Light page ---- */
+const g=(l,mu,s1,s2)=>{ const s=l<mu?s1:s2; const t=(l-mu)/s; return Math.exp(-0.5*t*t); };
+const xbar=l=>1.056*g(l,599.8,37.9,31.0)+0.362*g(l,442.0,16.0,26.7)-0.065*g(l,501.1,20.4,26.2);
+const ybar=l=>0.821*g(l,568.8,46.9,40.5)+0.286*g(l,530.9,16.3,31.1);
+const zbar=l=>1.217*g(l,437.0,11.8,36.0)+0.681*g(l,459.0,26.0,13.8);
+function xyzToLin(X,Y,Z){ return [3.2406*X-1.5372*Y-0.4986*Z, -0.9689*X+1.8758*Y+0.0415*Z, 0.0557*X-0.2040*Y+1.0570*Z]; }
+const gam=v=>v<=0.0031308?12.92*v:1.055*Math.pow(v,1/2.4)-0.055;
+const hex=rgb=>'#'+rgb.map(v=>Math.round(255*Math.max(0,Math.min(1,gam(v)))).toString(16).padStart(2,'0')).join('');
+function fit(rgb){ let [r,gg,b]=rgb; const m=Math.min(r,gg,b); if(m<0){ r-=m; gg-=m; b-=m; } const mx=Math.max(r,gg,b)||1; return [r/mx,gg/mx,b/mx]; }
+function waveColour(nm){ const rgb=fit(xyzToLin(xbar(nm),ybar(nm),zbar(nm))); const br=Math.min(1,Math.max(xbar(nm),ybar(nm),zbar(nm))/0.6); return hex(rgb.map(v=>v*br)); }
+function xyColour(x,y){ if(y<=0) return '#000000'; const Y=1, X=x/y*Y, Z=(1-x-y)/y*Y; return hex(fit(xyzToLin(X,Y,Z))); }
+function inSRGB(x,y){ const [r,g2,b]=[SRGB.r,SRGB.g,SRGB.b]; const sgn=(p,q,r2)=>(p[0]-r2[0])*(q[1]-r2[1])-(q[0]-r2[0])*(p[1]-r2[1]); const d1=sgn([x,y],r,g2), d2=sgn([x,y],g2,b), d3=sgn([x,y],b,r); const eps=1e-6; return !((d1<-eps||d2<-eps||d3<-eps)&&(d1>eps||d2>eps||d3>eps)); }
+// the spectral locus: the fit between 420 and 640 nm, where it is good, closed with the observer's own tabulated points at 380, 660 and 700
+const locus=[[0.1741,0.0050,380]]; for(let l=420;l<=640;l++){ const X=xbar(l),Y=ybar(l),Z=zbar(l), s=X+Y+Z; locus.push([X/s,Y/s,l]); } locus.push([0.7300,0.2700,660],[0.7347,0.2653,700]);
+const locusAt=nm=>locus.find(p=>p[2]===nm);
+function planckXY(T){ let X=0,Y=0,Z=0; for(let l=380;l<=780;l+=5){ const lm=l*1e-9; const B=1/(Math.pow(lm,5)*(Math.exp(1.438776877e-2/(lm*T))-1)); X+=B*xbar(l); Y+=B*ybar(l); Z+=B*zbar(l); } const s=X+Y+Z; return [X/s,Y/s]; }
+const receptor=(r,nm)=>{ const [s1,s2]=r.w; const s=nm<r.peak?s1:s2; const t=(nm-r.peak)/s; return Math.exp(-0.5*t*t); };
+const colourName=nm=>nm<450?'violet':nm<495?'blue':nm<570?'green':nm<590?'yellow':nm<620?'orange':'red';
+
+/* ---- the card ---- */
+function card(kind,name,rows,body,src){
+  document.getElementById('kindTxt').textContent=kind;
+  document.getElementById('nameTxt').innerHTML=name;
+  document.getElementById('numTxt').innerHTML=rows.filter(r=>r[1]).map(([k,v])=>'<b>'+esc(k)+'</b> '+v).join('<br>');
+  document.getElementById('bodyTxt').textContent=body;
+  document.getElementById('srcTxt').textContent=src;
+}
+const sw=c=>'<span class="sw" style="background:'+c+'"></span>';
+function showLam(nm){ const rs=RECEPTORS.map(r=>[r,receptor(r,nm)]); const [S,M,L]=['s','m','l'].map(k=>receptor(RECEPTORS.find(r=>r.k===k),nm));
+  card('Light at', nm+' nm, '+colourName(nm), [['looks like',sw(waveColour(nm))+waveColour(nm)],['S cones answer',fmt(S*100,0)+'% of their most'],['M cones',fmt(M*100,0)+'%'],['L cones',fmt(L*100,0)+'%'],['rods',fmt(receptor(RECEPTORS[3],nm)*100,0)+'%'],['the ratio L to M',M>0.01?fmt(L/M,2):'no M signal']],
+    L>M*1.5?'The L cones answer well ahead of the M: the brain reads that as red or orange.':L>M*1.05?'L a little ahead of M: yellow.':M>=L&&M>S*3?'M at or ahead of L, with little S: green.':S>M?'The S cones lead: blue or violet.':'M and S in balance with L behind: blue-green.', 'Bowmaker & Dartnall 1980; Wikipedia, Cone cell'); }
+function showReceptor(k){ const r=RECEPTORS.find(x=>x.k===k); card(k==='rod'?'The night receptor':'A cone', esc(r.n), [['peak',r.peak+' nm'],['how many',r.count]], r.b, 'Bowmaker & Dartnall 1980; Curcio et al. 1990'); }
+function showEye(){ card('The eye','Three cones and a rod',[['cones','about '+fmt(COUNTS.cones/1e6,1)+' million in a retina, '+fmt(COUNTS.fovea_per_mm2)+' a square millimetre at the centre of gaze'],['rods','about '+fmt(COUNTS.rods/1e6,0)+' million'],['peaks','420, 534 and 564 nm for the cones, 498 for the rods']],'Every colour is three numbers, the answers of the three cones; two lights that give the same three numbers look identical, however different their spectra. The curves answer under the pointer, and the marker reads any wavelength.','Bowmaker & Dartnall 1980; Curcio et al. 1990'); }
+function dominant(x,y){ const w=SRGB.w; const dx=x-w[0], dy=y-w[1]; if(Math.hypot(dx,dy)<1e-4) return null; let best=null;
+  const seg=(ax,ay,bx,by)=>{ const den=dx*(by-ay)-dy*(bx-ax); if(Math.abs(den)<1e-12) return null; const t=((ax-w[0])*(by-ay)-(ay-w[1])*(bx-ax))/den; const u=((ax-w[0])*dy-(ay-w[1])*dx)/den; if(t>0&&u>=0&&u<=1) return [t,u]; return null; };
+  for(let i=0;i<locus.length-1;i++){ const h=seg(locus[i][0],locus[i][1],locus[i+1][0],locus[i+1][1]); if(h&&(!best||h[0]<best.t)) best={t:h[0],nm:locus[i][2]+h[1]*(locus[i+1][2]-locus[i][2]),purple:false}; }
+  const h=seg(locus[locus.length-1][0],locus[locus.length-1][1],locus[0][0],locus[0][1]); if(h&&(!best||h[0]<best.t)){ best={t:h[0],purple:true}; const dx2=-dx, dy2=-dy; let comp=null; for(let i=0;i<locus.length-1;i++){ const ax=locus[i][0],ay=locus[i][1],bx=locus[i+1][0],by=locus[i+1][1]; const den=dx2*(by-ay)-dy2*(bx-ax); if(Math.abs(den)<1e-12) continue; const t=((ax-w[0])*(by-ay)-(ay-w[1])*(bx-ax))/den; const u=((ax-w[0])*dy2-(ay-w[1])*dx2)/den; if(t>0&&u>=0&&u<=1&&(comp==null||t<comp.t)) comp={t,nm:locus[i][2]+u*(locus[i+1][2]-locus[i][2])}; } best.comp=comp?comp.nm:null; }
+  if(best) best.purity=Math.min(1,1/best.t); return best; }
+function showXY(x,y){ const d=dominant(x,y); const inside=inSRGB(x,y);
+  card('A colour', 'x = '+x.toFixed(3)+', y = '+y.toFixed(3), [['nearest a screen can show',sw(xyColour(x,y))+xyColour(x,y)],['dominant wavelength',d?(d.purple?'none: a purple, the complement of '+fmt(d.comp,0)+' nm':fmt(d.nm,0)+' nm, '+colourName(d.nm)):'none, this is white'],['purity',d?fmt(d.purity*100,0)+'% of the way from white to the spectrum':'0%'],['on a screen',inside?'inside the sRGB triangle: a screen can show it':'outside the triangle: no screen shows it, and the swatch above is a paler stand-in']],
+    'The marker\u2019s place on the horseshoe: its hue is the direction from the white point, and its purity how far along that line it lies toward the pure spectral colour at the edge.', 'Wikipedia, CIE 1931 color space; Wyman, Sloan & Shirley 2013'); }
+function showPoint(k){ const p=POINTS.find(q=>q.k===k); card('A point on the map', esc(p.n), [['x, y',p.x.toFixed(4)+', '+p.y.toFixed(4)],['looks like',sw(xyColour(p.x,p.y))+xyColour(p.x,p.y)]], p.b, 'Wikipedia, Standard illuminant; Wikipedia, Planckian locus'); }
+function showTerm(i){ const t=TERMS[i]; const st=STAGES[t.stage]; card('Stage '+['I','II','III','IV','V','VI','VII'][t.stage-1]+', '+st.n, sw(t.c)+esc(t.n), [['appears','stage '+t.stage+' of 7, '+st.what],['languages at this stage',st.eg||'the survey found few languages exactly here; most pass through quickly']], t.b, 'Berlin & Kay 1969; Kay et al. 2009'); }
+function showNames(){ card('The names','Eleven words, in order',[['first','black and white, in every language'],['then','red'],['then','green and yellow, either first'],['then','blue, then brown'],['last','purple, pink, orange and grey']],'Berlin and Kay found in 1969 that languages with few colour words have the same few, and that as words are added they come in nearly the same order everywhere, as if the spectrum were cut along the same lines by every people. Each swatch answers under the pointer.','Berlin & Kay 1969; Kay et al. 2009'); }
+
+/* ---- the eye ---- */
+const E={x:80,y:50,w:820,h:330,a:380,b:750};
+const EX=nm=>E.x+(nm-E.a)/(E.b-E.a)*E.w;
+function eyeView(){ let s='';
+  for(let nm=E.a; nm<E.b; nm+=2) s+='<rect x="'+EX(nm).toFixed(1)+'" y="'+(E.y+E.h)+'" width="'+((E.w/((E.b-E.a)/2))+0.6).toFixed(2)+'" height="26" fill="'+waveColour(nm+1)+'"/>';
+  s+='<rect x="'+E.x+'" y="'+E.y+'" width="'+E.w+'" height="'+E.h+'" fill="none" stroke="#2b2b2b"/>';
+  for(const nm of [400,450,500,550,600,650,700,750]) s+='<text x="'+EX(nm).toFixed(1)+'" y="'+(E.y+E.h+42)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">'+nm+'</text>';
+  s+='<text x="'+(E.x+E.w/2)+'" y="'+(E.y+E.h+60)+'" text-anchor="middle" font-size="11" fill="#9a9a9a">wavelength, nm</text>';
+  s+='<text transform="translate(18,'+(E.y+E.h/2)+') rotate(-90)" text-anchor="middle" font-size="11" fill="#9a9a9a">sensitivity, each at its own peak</text>';
+  for(const r of RECEPTORS){ let d=''; for(let nm=E.a; nm<=E.b; nm+=1){ const v=receptor(r,nm); d+=(d?'L':'M')+EX(nm).toFixed(1)+','+(E.y+E.h-v*(E.h-30)).toFixed(1); } const on=hot===r.k;
+    s+='<path data-rec="'+r.k+'" d="'+d+'" fill="none" stroke="'+r.c+'" stroke-width="'+(on?3.2:2.2)+'"'+(r.k==='rod'?' stroke-dasharray="6 4"':'')+' style="cursor:pointer"/>';
+    s+='<text x="'+EX(r.peak).toFixed(1)+'" y="'+(E.y+18)+'" text-anchor="middle" font-size="11" fill="'+r.c+'">'+(r.k==='rod'?'rods':r.k.toUpperCase())+' '+r.peak+'</text>'; }
+  const mx=EX(lam);
+  s+='<g id="marker" style="cursor:ew-resize"><line x1="'+mx.toFixed(1)+'" y1="'+E.y+'" x2="'+mx.toFixed(1)+'" y2="'+(E.y+E.h+26)+'" stroke="#ffffff" stroke-width="1.5"/>';
+  for(const r of RECEPTORS) s+='<circle cx="'+mx.toFixed(1)+'" cy="'+(E.y+E.h-receptor(r,lam)*(E.h-30)).toFixed(1)+'" r="5" fill="'+r.c+'" stroke="#121212" stroke-width="1.5"/>';
+  s+='<text x="'+mx.toFixed(1)+'" y="'+(E.y-10)+'" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">'+lam+' nm</text></g>';
+  return {svg:s, h:E.y+E.h+75}; }
+
+/* ---- the gamut ---- */
+const P={x0:100,y0:600,s:640};
+const PX=x=>P.x0+x*P.s, PY=y=>P.y0-y*P.s;
+const IX=px=>(px-P.x0)/P.s, IY=py=>(P.y0-py)/P.s;
+let fill=null;
+function inHorseshoe(x,y){ let inside=false; const n=locus.length; for(let i=0,j=n-1;i<n;j=i++){ const xi=locus[i][0],yi=locus[i][1],xj=locus[j][0],yj=locus[j][1]; if((yi>y)!==(yj>y)&&x<(xj-xi)*(y-yi)/(yj-yi)+xi) inside=!inside; } return inside; }
+function makeFill(ctx){ const w=W, h=640; const img=ctx.createImageData(w,h); const d=img.data;
+  for(let py=0;py<h;py++) for(let px=0;px<w;px++){ const x=IX(px+0.5), y=IY(py+0.5); const i=(py*w+px)*4; if(y>0&&inHorseshoe(x,y)){ const c=xyColour(x,y); d[i]=parseInt(c.slice(1,3),16); d[i+1]=parseInt(c.slice(3,5),16); d[i+2]=parseInt(c.slice(5,7),16); d[i+3]=255; } else { d[i]=18; d[i+1]=18; d[i+2]=18; d[i+3]=255; } }
+  return img; }
+function gamutView(){ const cv=document.createElement('canvas'); cv.width=W; cv.height=640; cv.id='gcanvas'; const ctx=cv.getContext('2d');
+  const halo=(t,x,y)=>{ ctx.save(); ctx.lineJoin='round'; ctx.strokeStyle='#121212'; ctx.lineWidth=3.5; ctx.strokeText(t,x,y); ctx.restore(); ctx.fillText(t,x,y); };
+  if(!fill) fill=makeFill(ctx); ctx.putImageData(fill,0,0);
+  // the axes
+  ctx.strokeStyle='#2b2b2b'; ctx.fillStyle='#9a9a9a'; ctx.font='10.5px sans-serif'; ctx.textAlign='center';
+  for(let v=0;v<=0.8;v+=0.1){ ctx.beginPath(); ctx.moveTo(PX(v),P.y0); ctx.lineTo(PX(v),P.y0+6); ctx.stroke(); ctx.fillText(v.toFixed(1),PX(v),P.y0+20); }
+  ctx.textAlign='right'; for(let v=0;v<=0.9;v+=0.1){ ctx.beginPath(); ctx.moveTo(P.x0-6,PY(v)); ctx.lineTo(P.x0,PY(v)); ctx.stroke(); ctx.fillText(v.toFixed(1),P.x0-10,PY(v)+4); }
+  ctx.textAlign='center'; ctx.fillText('x',PX(0.4),P.y0+36); ctx.save(); ctx.translate(P.x0-40,PY(0.45)); ctx.rotate(-Math.PI/2); ctx.fillText('y',0,0); ctx.restore();
+  // the locus and its wavelengths
+  ctx.strokeStyle='#e6e6e6'; ctx.lineWidth=1.2; ctx.beginPath(); locus.forEach((p,i)=>{ i?ctx.lineTo(PX(p[0]),PY(p[1])):ctx.moveTo(PX(p[0]),PY(p[1])); }); ctx.closePath(); ctx.stroke();
+  ctx.fillStyle='#e6e6e6'; ctx.font='10.5px sans-serif';
+  for(const nm of [420,460,470,480,490,500,510,520,540,560,580,600,620,700]){ const p=locusAt(nm); const cx=PX(0.33),cy=PY(0.33); const dx=PX(p[0])-cx, dy=PY(p[1])-cy, L=Math.hypot(dx,dy); const tx=PX(p[0])+dx/L*16, ty=PY(p[1])+dy/L*16; ctx.beginPath(); ctx.arc(PX(p[0]),PY(p[1]),2.2,0,7); ctx.fill(); ctx.textAlign=dx<0?'right':'left'; halo(String(nm),tx+(dx<0?4:-4),ty+4); }
+  // the black-body curve
+  ctx.strokeStyle='#ffb02e'; ctx.lineWidth=1.5; ctx.beginPath(); let first=true; for(let T=1000;T<=20000;T*=1.04){ const [x,y]=planckXY(T); first?ctx.moveTo(PX(x),PY(y)):ctx.lineTo(PX(x),PY(y)); first=false; } ctx.stroke();
+  ctx.fillStyle='#ffb02e'; for(const [T,dx,dy,al] of [[2000,6,-8,'left'],[3000,6,-8,'left'],[10000,-8,14,'right']]){ const [x,y]=planckXY(T); ctx.beginPath(); ctx.arc(PX(x),PY(y),2.5,0,7); ctx.fill(); ctx.textAlign=al; halo(fmt(T)+' K',PX(x)+dx,PY(y)+dy); }
+  // the sRGB triangle
+  ctx.strokeStyle='#ffffff'; ctx.lineWidth=1.5; ctx.setLineDash([5,4]); ctx.beginPath(); ctx.moveTo(PX(SRGB.r[0]),PY(SRGB.r[1])); ctx.lineTo(PX(SRGB.g[0]),PY(SRGB.g[1])); ctx.lineTo(PX(SRGB.b[0]),PY(SRGB.b[1])); ctx.closePath(); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle='#ffffff'; ctx.font='11px sans-serif'; ctx.textAlign='left'; halo('the sRGB triangle: what a screen can show',PX(SRGB.g[0])+14,PY(SRGB.g[1])-4);
+  // named points
+  for(const p of POINTS){ ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.arc(PX(p.x),PY(p.y),4,0,7); ctx.fill(); ctx.strokeStyle='#121212'; ctx.lineWidth=1; ctx.stroke(); ctx.fillStyle='#e6e6e6'; const [dx,dy,al]=p.k==='d65'?[-8,-6,'right']:p.k==='sun'?[8,16,'left']:[6,18,'left']; ctx.textAlign=al; halo(p.n,PX(p.x)+dx,PY(p.y)+dy); }
+  // the marker
+  ctx.strokeStyle='#ffffff'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(PX(mk.x),PY(mk.y),8,0,7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(PX(mk.x)-14,PY(mk.y)); ctx.lineTo(PX(mk.x)+14,PY(mk.y)); ctx.moveTo(PX(mk.x),PY(mk.y)-14); ctx.lineTo(PX(mk.x),PY(mk.y)+14); ctx.stroke();
+  ctx.fillStyle='#9a9a9a'; ctx.font='11px sans-serif'; ctx.textAlign='left'; ctx.fillText('every colour the eye can see, as the CIE 1931 diagram: the curved edge is the pure spectrum,',PX(0.22),PY(0.86));
+  ctx.fillText('the straight bottom the purples that no wavelength makes; the orange curve is a glowing body, 1,000 to 20,000 K',PX(0.22),PY(0.83));
+  return cv; }
+
+/* ---- the names ---- */
+function namesView(){ let s=''; const x0=90, cw=118, y0=70, sw2=78, sh=58, gap=30;
+  for(let st=1;st<=7;st++){ const x=x0+(st-1)*cw; const on=hot==='st'+st; s+='<g data-stage="'+st+'" style="cursor:pointer"><text x="'+(x+sw2/2)+'" y="'+(y0-30)+'" text-anchor="middle" font-size="12" font-weight="700" fill="'+(on?'#ffffff':'#e6e6e6')+'">'+['I','II','III','IV','V','VI','VII'][st-1]+'</text><text x="'+(x+sw2/2)+'" y="'+(y0-14)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">'+esc(STAGES[st].n)+'</text></g>';
+    if(st<7) s+='<text x="'+(x+sw2+(cw-sw2)/2)+'" y="'+(y0+sh/2+5)+'" text-anchor="middle" font-size="16" fill="#3d444d">\u2192</text>'; }
+  const rows={}; TERMS.forEach((t,i)=>{ const st=t.stage===4?3:t.stage; const col=t.stage; rows[col]=(rows[col]||0); const x=x0+(col-1)*cw, y=y0+rows[col]*(sh+gap); rows[col]++; const on=hot==='t'+i;
+    s+='<g data-term="'+i+'" style="cursor:pointer"><rect x="'+x+'" y="'+y+'" width="'+sw2+'" height="'+sh+'" rx="8" fill="'+t.c+'" stroke="'+(on?'#ffffff':'#3d3d3d')+'" stroke-width="'+(on?2:1)+'"/><text x="'+(x+sw2/2)+'" y="'+(y+sh+16)+'" text-anchor="middle" font-size="11.5" fill="'+(on?'#ffffff':'#c8c8c8')+'">'+esc(t.n)+'</text></g>'; });
+  // the fourth stage: whichever of green and yellow came second
+  s+='<text x="'+(x0+3*cw+sw2/2)+'" y="'+(y0+sh/2-4)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">the other of</text><text x="'+(x0+3*cw+sw2/2)+'" y="'+(y0+sh/2+12)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">green and yellow</text>';
+  const H=y0+4*(sh+gap)+40;
+  s+='<text x="'+x0+'" y="'+(H-10)+'" font-size="11" fill="#9a9a9a">the eleven basic colour terms of Berlin and Kay, in the order languages acquire them; a column is one stage, and within the last the order varies</text>';
+  return {svg:s, h:H}; }
+
+/* ---- render and wiring ---- */
+function render(){ if(view==='gamut'){ el.innerHTML=''; el.appendChild(gamutView()); } else { const q=view==='eye'?eyeView():namesView(); el.innerHTML='<svg viewBox="0 0 '+W+' '+q.h+'" xmlns="http://www.w3.org/2000/svg" id="csvg"><rect width="'+W+'" height="'+q.h+'" fill="#121212"/>'+q.svg+'</svg>'; }
+  document.getElementById('eyeCtl').hidden=view!=='eye'; document.getElementById('gamutCtl').hidden=view!=='gamut'; document.getElementById('lamOut').textContent=lam+' nm, '+colourName(lam); document.getElementById('xyOut').textContent='x '+mk.x.toFixed(3)+', y '+mk.y.toFixed(3); }
+function home(){ if(view==='eye') showEye(); else if(view==='gamut') showXY(mk.x,mk.y); else showNames(); }
+function setView(v){ view=v; hot=null; for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render(); home(); }
+document.getElementById('views').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setView(b.dataset.v); });
+let dragging=false;
+const pt=e=>{ const c=el.firstElementChild, b=c.getBoundingClientRect(); const vh=c.tagName==='CANVAS'?c.height:c.viewBox.baseVal.height; return [(e.clientX-b.left)/b.width*W,(e.clientY-b.top)/b.height*vh]; };
+function setLam(x){ lam=Math.round(Math.max(E.a,Math.min(E.b,E.a+(x-E.x)/E.w*(E.b-E.a)))); render(); showLam(lam); }
+function setMk(px,py){ const x=IX(px), y=IY(py); if(y<=0.005||!inHorseshoe(x,y)) return; mk={x,y}; render(); showXY(x,y); }
+el.addEventListener('pointerdown',e=>{ const [x,y]=pt(e); if(view==='eye'&&y>=E.y-20&&y<=E.y+E.h+30&&x>=E.x-6&&x<=E.x+E.w+6){ dragging=true; setLam(x); e.preventDefault(); } if(view==='gamut'){ dragging=true; setMk(x,y); e.preventDefault(); } });
+el.addEventListener('pointermove',e=>{ if(!dragging) return; const [x,y]=pt(e); if(view==='eye') setLam(x); else if(view==='gamut') setMk(x,y); });
+window.addEventListener('pointerup',()=>{ dragging=false; });
+el.addEventListener('pointerover',e=>{ if(dragging) return; const g=e.target.closest('[data-rec],[data-term],[data-stage]'); if(!g) return;
+  const k=g.hasAttribute('data-rec')?g.getAttribute('data-rec'):g.hasAttribute('data-term')?'t'+g.getAttribute('data-term'):'st'+g.getAttribute('data-stage'); if(k===hot) return; hot=k; render();
+  if(g.hasAttribute('data-rec')) showReceptor(k); else if(g.hasAttribute('data-term')) showTerm(+g.getAttribute('data-term')); else { const st=+g.getAttribute('data-stage'); card('Stage '+['I','II','III','IV','V','VI','VII'][st-1], esc(STAGES[st].n), [['what is named',STAGES[st].what],['languages',STAGES[st].eg||'few sit exactly here']], 'Each stage adds a term to those before it; a language at a later stage has every earlier word.', 'Berlin & Kay 1969; Kay et al. 2009'); } });
+el.addEventListener('pointerleave',()=>{ if(hot){ hot=null; render(); home(); } });
+
+render(); showEye();
+window.__colour=(q)=>{ const o={view,hot,lam,mk,card:document.getElementById('numTxt').innerText,name:document.getElementById('nameTxt').innerText,body:document.getElementById('bodyTxt').innerText,
+  curves:document.querySelectorAll('#csvg path[data-rec]').length, swatches:document.querySelectorAll('#csvg g[data-term]').length,
+  marker:(()=>{ const c=document.querySelector('#marker line'); return c?+c.getAttribute('x1'):null; })()};
+  if(q&&q.nm!=null){ o.resp=RECEPTORS.map(r=>receptor(r,q.nm)); o.ex=EX(q.nm); o.col=waveColour(q.nm); }
+  if(q&&q.xy){ const [x,y]=q.xy; o.dom=dominant(x,y); o.inside=inSRGB(x,y); o.hex=xyColour(x,y); o.inHorse=inHorseshoe(x,y); o.px=[PX(x),PY(y)]; }
+  if(q&&q.T!=null) o.planck=planckXY(q.T);
+  if(q&&q.locus) o.locus=locus.filter(p=>q.locus.includes(p[2])).map(p=>[p[0],p[1],p[2]]);
+  o.locusN=locus.length;
+  return o; };
+</script>
+</body>
+</html>
