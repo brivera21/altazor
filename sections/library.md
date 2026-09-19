@@ -58,6 +58,7 @@ title: Library
 <p><a href="mammals.html">Mammals</a></p>
 <p><a href="primates.html">Primates</a></p>
 <p><a href="hominins.html">Hominins</a></p>
+<p><a href="planet-earth-species.html">Planet Earth (2006)</a></p>
 </div>
 <div>
 <h2>Homo Sapiens</h2>
