@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate plates.html, Plate Tectonics: the plates, their edges, and the
+"""Generate plates.html, Tectonic Plates: the plates, their edges, and the
 three ways an edge can move.
 
 Two views. The map: the 52 plates of Bird's PB2002 model on an equirectangular
@@ -67,7 +67,7 @@ HTML = """<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Plate Tectonics &middot; Altazor</title>
+<title>Tectonic Plates &middot; Altazor</title>
 <style>
 :root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
         --line:#2b2b2b; --accent:#58a6ff; }
@@ -126,7 +126,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   <a class="brand" href="index.html">ALTAZOR</a>
   <nav class="site"><a href="library.html">&larr; Library &middot; Earth</a><a href="earth-interior.html">The Interior</a><a href="earth-history.html">Geological History</a><a href="earth.html">Climate</a></nav>
 </header>
-<h1>Plate Tectonics</h1>
+<h1>Tectonic Plates</h1>
 <div class="bar" id="views"><button data-v="map" class="on">The plates</button><button data-v="edges">The edges</button></div>
 <div class="controls" id="mapCtl">
   <label>places</label>
