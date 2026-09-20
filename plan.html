@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P.L.A.N. &middot; Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff; --good:#7cc97a; --bad:#e0684b; }
+* { box-sizing:border-box; }
+[hidden] { display:none !important; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; margin-right:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 4px; font-size:26px; }
+p.sub2 { margin:0 0 14px; color:var(--muted); font-size:14px; }
+.controls { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:0 0 12px; }
+.controls .lab { font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+.controls button { background:var(--panel); color:var(--muted); border:1px solid var(--line);
+  border-radius:999px; padding:5px 13px; font-size:13px; cursor:pointer; font-family:inherit; }
+.controls button:hover { color:var(--text); border-color:#3d3d3d; }
+.stage { display:flex; gap:22px; align-items:flex-start; }
+#diagram { flex:1 1 640px; min-width:0; }
+#diagram > svg { width:100%; height:auto; display:block; user-select:none; }
+.side { flex:0 0 320px; min-width:0; position:sticky; top:16px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; overflow-wrap:anywhere; }
+#kindTxt { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+#nameTxt { font-weight:700; font-size:17px; margin:2px 0 8px; }
+#numTxt { font-size:13.5px; line-height:1.55; }
+#bodyTxt { color:var(--muted); font-size:13.5px; line-height:1.55; margin-top:10px; }
+#srcTxt { color:var(--muted); font-size:12px; margin-top:10px; border-top:1px solid var(--line); padding-top:8px; }
+.q { border-top:1px solid var(--line); padding:9px 0 2px; }
+.q:first-child { border-top:none; padding-top:2px; }
+.q p { margin:0 0 6px; font-size:13.5px; }
+.q .yn { display:flex; gap:6px; }
+.q .yn button { flex:1; background:none; color:var(--muted); border:1px solid var(--line);
+  border-radius:7px; padding:4px 0; font-size:12.5px; cursor:pointer; font-family:inherit; }
+.q .yn button:hover { color:var(--text); }
+.q .yn button.yes.on { background:#22331f; border-color:var(--good); color:var(--good); font-weight:600; }
+.q .yn button.no.on { background:#331f1c; border-color:var(--bad); color:var(--bad); font-weight:600; }
+.note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.method { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+
+.grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+@media (max-width:1050px){ .grid{ grid-template-columns:repeat(2,1fr);} }
+@media (max-width:640px){ .grid{ grid-template-columns:1fr;} }
+.stg { background:var(--panel); border:1px solid var(--line); border-radius:11px; padding:12px 13px 14px; }
+.stg.on { border-color:var(--accent); }
+.stg h3 { margin:0 0 2px; font-size:14px; font-weight:600; }
+.stg h3 b { color:var(--accent); font-size:17px; margin-right:6px; }
+.stg .lead { color:var(--muted); font-size:11.5px; line-height:1.45; margin:0 0 9px; }
+.stg .opt { display:block; width:100%; text-align:left; background:none; color:#c8c8c8;
+  border:1px solid var(--line); border-radius:7px; padding:5px 8px; margin:0 0 5px;
+  font-size:12.5px; cursor:pointer; font-family:inherit; line-height:1.35; }
+.stg .opt:hover { color:var(--text); border-color:#3d3d3d; }
+.stg .opt.on { background:#1d2c3f; border-color:var(--accent); color:#ffffff; }
+.stg .opt i { display:block; font-style:normal; color:var(--muted); font-size:11px; }
+.stg .opt.on i { color:#a9c7e8; }
+.out { margin-top:16px; background:#151a21; border:1px solid var(--line); border-left:3px solid var(--accent);
+  border-radius:10px; padding:13px 15px; }
+.out .lab { font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+.out p { margin:4px 0 0; font-size:14.5px; line-height:1.55; }
+
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="chess.html">&larr; Chess</a><a href="scout.html">S.C.O.U.T.</a><a href="imbalances.html">I.M.B.A.L.A.N.C.E.S.</a><a href="plan.html">P.L.A.N.</a><a href="intuition.html">Board Intuition</a></nav>
+</header>
+<h1>P.L.A.N.</h1>
+<p class="sub2">Always enter the middlegame with a plan.</p>
+<div class="controls"><span class="lab">A plan</span><button id="resetBtn" type="button">Start over</button></div>
+<div class="stage">
+  <div id="diagram"></div>
+  <div class="side"><div class="card">
+    <div id="kindTxt"></div>
+    <div id="nameTxt"></div>
+    <div id="numTxt"></div>
+    <div id="bodyTxt"></div>
+    <div id="srcTxt"></div>
+  </div></div>
+</div>
+<p class="note">Pinpoint the imbalances, Locate where to attack, Arrange your pieces, Nail your move: four stages, each with its own choices. What is chosen at one stage narrows what makes sense at the next, and the goal through all four is strengthen your position until an opportunity for a concrete attack presents itself.</p>
+<p class="note" style="border-top:none; padding-top:0;">The line under the four stages is the plan those choices add up to, written out, and it rewrites itself with every choice.</p>
+<div class="method"><p>The wording of every step, feature and stage is Brian Rivera's own, from the sheets he wrote for himself, and nothing here was added to it. Nothing is stored between visits, so a run starts empty every time the page is opened.</p></div>
+</div>
+<script>
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function card(kind,name,rows,body,src){
+  document.getElementById('kindTxt').textContent=kind;
+  document.getElementById('nameTxt').textContent=name;
+  document.getElementById('numTxt').innerHTML=rows;
+  document.getElementById('bodyTxt').textContent=body||'';
+  document.getElementById('srcTxt').textContent=src||'';
+}
+
+const ST=[["pinpoint","P","Pinpoint the imbalances","Look for these key imbalances on the board","many",[["material","Material","Hanging/underdefended pieces"],["squares","Square control","Weak squares, outposts"],["pawns","Pawn structure","Isolated, doubled, weak pawns"],["time","Time","Development/tempo advantages"],["king","King safety","Exposed king, weak shelter"],["space","Space","Territorial control, cramped positions"],["activity","Piece activity","Passive pieces, bad bishops"]]],["locate","L","Locate where to attack","Choose your battlefield based on the imbalances you pinpointed","one",[["queenside","Queenside","Attack weak pawns, create passed pawns"],["center","Center","Fight for key squares, control files"],["kingside","Kingside","Target enemy king, pawn storms"]]],["arrange","A","Arrange your pieces","Identify the best squares for each piece to support your attack plan","many",[["outposts","Outposts","Pawn-defended squares"],["holes","Holes","Weak squares in enemy camp"],["open","Open files","Clear verticals for rook activity"],["halfopen","Half-open files","Files with only opponent pawns"],["diagonals","Long diagonals","Key highways for bishops"],["central","Central squares","e4, d4, e5, d5"],["blockade","Blockade squares","Stop dangerous pawns"],["advanced","Advanced squares","Deep penetration points"]]],["nail","N","Nail your move","Based on pinpointed imbalances, chosen attack location, and piece arrangements","all",[["generate","Generate","Checks, captures, threats. Improve worst piece. Advance plan"],["calculate","Calculate","Safety check. Replies. Look 2-3 moves ahead. Risk/reward, gains should outweigh losses"],["execute","Execute","Commit to calculated decisions, avoid analysis paralysis. Re-evaluate after opponent responds"]]]], RISKS="Material loss, king exposure, weak squares, tempo waste", REWARDS="Material gain, better position, attack chances, initiative";
+let sel=0, pick=ST.map(s=>[]);
+
+function draw(){
+  let s='<div class="grid" id="stages">';
+  ST.forEach((st,i)=>{
+    s+='<div class="stg'+(sel===i?' on':'')+'" data-stage="'+i+'">';
+    s+='<h3><b>'+st[1]+'</b>'+esc(st[2])+'</h3><p class="lead">'+esc(st[3])+'</p>';
+    st[5].forEach((o,j)=>{
+      s+='<button class="opt'+(pick[i].includes(j)?' on':'')+'" data-stage="'+i+'" data-opt="'+j+'">'
+        +esc(o[1])+'<i>'+esc(o[2])+'</i></button>';
+    });
+    s+='</div>';
+  });
+  s+='</div>';
+  s+='<div class="out"><div class="lab">The plan so far</div><p id="planTxt">'+sentence()+'</p></div>';
+  document.getElementById('diagram').innerHTML=s;
+}
+const names=i=>pick[i].map(j=>ST[i][5][j][1]);
+function joinList(a){ return a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1]; }
+function sentence(){
+  const p=names(0), l=names(1), a=names(2), n=names(3);
+  if(!p.length&&!l.length&&!a.length&&!n.length) return 'Nothing pinpointed yet.';
+  let out='';
+  out += p.length ? 'With '+joinList(p).toLowerCase()+' on the board' : 'With the imbalances still unread';
+  out += l.length ? ', attack on the '+l[0].toLowerCase() : ', with no battlefield chosen yet';
+  out += a.length ? ', arranging pieces around '+joinList(a).toLowerCase() : '';
+  out += '.';
+  if(n.length===ST[3][5].length) out+=' Generated, calculated and executed: the plan is ready.';
+  else if(n.length) out+=' Still to do: '+joinList(ST[3][5].filter((_,j)=>!pick[3].includes(j)).map(o=>o[1].toLowerCase()))+'.';
+  return out;
+}
+function show(){
+  let rows='';
+  ST.forEach((st,i)=>{
+    const chosen=pick[i].map(j=>st[5][j][1]);
+    rows+='<div class="q"><p'+(sel===i?' style="color:#ffffff"':'')+'><b>'+st[1]+'</b> '+esc(st[2])+'</p>'
+      +'<p style="color:'+(chosen.length?'#58a6ff':'#7d7d7d')+';font-size:12.5px;margin:0">'
+      +(chosen.length?esc(joinList(chosen)):'nothing chosen')+'</p></div>';
+  });
+  if(sel===3) rows+='<div class="q"><p style="color:#9a9a9a;font-size:12.5px;margin:0">'
+    +'<b style="color:#e0684b">Risks</b> '+esc(RISKS)+'<br><b style="color:#7cc97a">Rewards</b> '+esc(REWARDS)+'</p></div>';
+  const st=ST[sel];
+  card('Stage '+(sel+1)+' of '+ST.length, st[2], rows,
+    st[4]==='one' ? 'One battlefield at a time.' : st[4]==='all' ? 'All three, in order.' : 'As many as the position shows.',
+    pick.reduce((a,b)=>a+b.length,0)+' chosen across the four stages');
+  draw();
+}
+document.getElementById('diagram').addEventListener('click',ev=>{
+  const b=ev.target.closest('button[data-opt]');
+  if(b){ const i=+b.dataset.stage, j=+b.dataset.opt;
+    sel=i;
+    if(ST[i][4]==='one') pick[i] = pick[i][0]===j ? [] : [j];
+    else pick[i] = pick[i].includes(j) ? pick[i].filter(x=>x!==j) : pick[i].concat(j).sort((a,b)=>a-b);
+    show(); return; }
+  const d=ev.target.closest('div[data-stage]');
+  if(d){ sel=+d.dataset.stage; show(); }
+});
+document.getElementById('resetBtn').addEventListener('click',()=>{ pick=ST.map(s=>[]); sel=0; show(); });
+show();
+window.__plan=function(q){
+  if(q&&q.pick){ const [i,j]=q.pick; sel=i;
+    if(ST[i][4]==='one') pick[i]=[j]; else if(!pick[i].includes(j)) pick[i]=pick[i].concat(j).sort((a,b)=>a-b);
+    show(); }
+  if(q&&q.select!=null){ sel=q.select; show(); }
+  if(q&&q.reset){ pick=ST.map(s=>[]); sel=0; show(); }
+  return {sel, pick:pick.map(a=>a.slice()), sentence:sentence(),
+    kind:document.getElementById('kindTxt').textContent,
+    name:document.getElementById('nameTxt').textContent,
+    card:document.getElementById('numTxt').textContent,
+    src:document.getElementById('srcTxt').textContent,
+    stages:document.querySelectorAll('#stages .stg').length,
+    options:document.querySelectorAll('#stages button[data-opt]').length};
+};
+
+</script>
+</body>
+</html>
