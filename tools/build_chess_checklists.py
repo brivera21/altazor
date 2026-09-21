@@ -18,12 +18,42 @@ import json
 from pathlib import Path
 
 from chess_checklists_data import SCOUT, IMBALANCES, PLAN, RISKS, REWARDS, PLAN_GOAL
+from chess_examples_data import EXAMPLES
 
 ROOT = Path(__file__).resolve().parent.parent
 
 
 def _js(o):
     return json.dumps(o, separators=(",", ":"), ensure_ascii=False)
+
+
+def games():
+    """Replay each example so the page carries positions, not a chess engine.
+
+    A mistyped or illegal move raises here and stops the build, which is the
+    point: nothing reaches the board without having been played out first.
+    """
+    import chess
+    out = {}
+    for k, e in EXAMPLES.items():
+        b = chess.Board()
+        fens, sans, frm, to = [b.fen().split(" ")[0]], [], [], []
+        for t in e["moves"].split():
+            m = b.parse_san(t)
+            sans.append(b.san(m))
+            frm.append(chess.square_name(m.from_square))
+            to.append(chess.square_name(m.to_square))
+            b.push(m)
+            fens.append(b.fen().split(" ")[0])
+        assert e["key"] in sans, (k, e["key"])
+        i = sans.index(e["key"])
+        assert ("White" if i % 2 == 0 else "Black") == e["side"], (k, e["side"])
+        out[k] = {"w": e["white"], "b": e["black"], "ev": e["event"], "y": e["year"],
+                  "nm": e["name"], "key": i, "side": e["side"], "note": e["note"],
+                  "src": e["source"], "trunc": e.get("truncated", ""),
+                  "mate": b.is_checkmate(),
+                  "fens": fens, "sans": sans, "frm": frm, "to": to}
+    return out
 
 
 NAV = ('<nav class="site"><a href="chess.html">&larr; Chess</a>'
@@ -56,6 +86,9 @@ h1 { margin:0 0 4px; font-size:26px; }
 p.sub2 { margin:0 0 14px; color:var(--muted); font-size:14px; }
 .controls { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:0 0 12px; }
 .controls .lab { font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+#letters { display:inline-flex; gap:4px; }
+#letters button { min-width:30px; padding:5px 0; font-weight:600; }
+#letters button.on { background:var(--accent); color:#0b1a2b; border-color:var(--accent); }
 .controls button { background:var(--panel); color:var(--muted); border:1px solid var(--line);
   border-radius:999px; padding:5px 13px; font-size:13px; cursor:pointer; font-family:inherit; }
 .controls button:hover { color:var(--text); border-color:#3d3d3d; }
@@ -69,6 +102,8 @@ p.sub2 { margin:0 0 14px; color:var(--muted); font-size:14px; }
 #numTxt { font-size:13.5px; line-height:1.55; }
 #bodyTxt { color:var(--muted); font-size:13.5px; line-height:1.55; margin-top:10px; }
 #srcTxt { color:var(--muted); font-size:12px; margin-top:10px; border-top:1px solid var(--line); padding-top:8px; }
+#srcTxt a { color:var(--accent); text-decoration:none; border-bottom:1px solid rgba(88,166,255,0.35); }
+#srcTxt a:hover { border-bottom-color:var(--accent); }
 .q { border-top:1px solid var(--line); padding:9px 0 2px; }
 .q:first-child { border-top:none; padding-top:2px; }
 .q p { margin:0 0 6px; font-size:13.5px; }
@@ -116,7 +151,7 @@ function card(kind,name,rows,body,src){
   document.getElementById('nameTxt').textContent=name;
   document.getElementById('numTxt').innerHTML=rows;
   document.getElementById('bodyTxt').textContent=body||'';
-  document.getElementById('srcTxt').textContent=src||'';
+  document.getElementById('srcTxt').innerHTML=src||'';
 }
 __SCRIPT__
 </script>
@@ -128,6 +163,17 @@ METHOD = ("The wording of every step, feature and stage is Brian Rivera's own, f
           "the sheets he wrote for himself, and nothing here was added to it. Nothing "
           "is stored between visits, so a run starts empty every time the page is "
           "opened.")
+
+IMB_METHOD = ("The ten features and their questions are Brian Rivera's own. The games "
+              "are not. Each was chosen for the feature it turns on, and every move list "
+              "was replayed with a chess library before it reached the page, so a "
+              "mistyped or illegal move would have stopped the build rather than drawn a "
+              "wrong position. Four of the ten finish in mate, and they finish in the "
+              "recorded mate, which is a second check on the transcription. Two of the "
+              "notes here were rewritten when the board disagreed with them: the Immortal "
+              "Game's sacrifices do not all come before the move shown, and Saemisch had "
+              "twenty-seven legal moves left rather than none at all. Each card links to "
+              "the article its score was taken from.")
 
 # ------------------------------------------------------------------ SCOUT
 
@@ -233,120 +279,130 @@ window.__scout=function(q){
 
 # ------------------------------------------------------------- IMBALANCES
 
-IMB_SCRIPT = """
-const F=__FACTORS__;
-const W=980, ROW=42, TOP=74, CX=640, HALF=290;
-const H=TOP+F.length*ROW+30;
-let sel=0, side=F.map(()=>0);   // -1 them, 0 level, 1 you
+IMB_SCRIPT = r"""
+const G=__GAMES__, F=__FACTORS__;
+const FILES='abcdefgh';
+const S=58, M=20, BW=8*S+2*M;
+const GLYPH={k:'♚',q:'♛',r:'♜',b:'♝',n:'♞',p:'♟'};
+let sel=F[0][0], ply=G[F[0][0]].key+1;      // open on the position after the key move
 
-const tally=s=>side.filter(v=>v===s).length;
-
-function draw(){
-  let s='<svg id="isvg" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ten features of the position, each weighed toward one side or called level">';
-  s+='<text x="0" y="18" font-size="12" fill="#9a9a9a">a row leans to the side it favors; the middle band is level</text>';
-  s+='<text x="'+(CX-HALF)+'" y="40" text-anchor="middle" font-size="12" fill="#e0684b">them '+tally(-1)+'</text>';
-  s+='<text x="'+CX+'" y="40" text-anchor="middle" font-size="12" fill="#9a9a9a">level '+tally(0)+'</text>';
-  s+='<text x="'+(CX+HALF)+'" y="40" text-anchor="middle" font-size="12" fill="#58a6ff">you '+tally(1)+'</text>';
-  const net=tally(1)-tally(-1), bw=Math.abs(net)/F.length*HALF;
-  s+='<rect x="'+(CX-HALF)+'" y="50" width="'+(HALF*2)+'" height="10" rx="5" fill="#20242a"/>';
-  if(net) s+='<rect x="'+(net>0?CX:CX-bw).toFixed(1)+'" y="50" width="'+bw.toFixed(1)+'" height="10" rx="5" fill="'+(net>0?'#58a6ff':'#e0684b')+'"/>';
-  s+='<line x1="'+CX+'" y1="46" x2="'+CX+'" y2="64" stroke="#e6e6e6" stroke-width="1.5"/>';
-  F.forEach((f,i)=>{
-    const y=TOP+i*ROW+ROW/2, on=sel===i, v=side[i];
-    s+='<g data-f="'+i+'" style="cursor:pointer">';
-    s+='<rect x="0" y="'+(y-ROW/2+3)+'" width="'+W+'" height="'+(ROW-6)+'" rx="7" fill="'+(on?'#1d2531':'transparent')+'"/>';
-    s+='<circle cx="22" cy="'+y+'" r="13" fill="#20242a" stroke="'+(on?'#58a6ff':'#2b2b2b')+'"/>';
-    s+='<text x="22" y="'+(y+5)+'" text-anchor="middle" font-size="14" font-weight="700" fill="'+(on?'#ffffff':'#c8c8c8')+'">'+f[1]+'</text>';
-    s+='<text x="44" y="'+(y+5)+'" font-size="13.5" fill="'+(on?'#ffffff':'#c8c8c8')+'">'+esc(f[2])+'</text>';
-    // the track, three zones
-    s+='<rect x="'+(CX-HALF)+'" y="'+(y-11)+'" width="'+(HALF-40)+'" height="22" rx="5" fill="#181c22" data-set="-1"/>';
-    s+='<rect x="'+(CX-40)+'" y="'+(y-11)+'" width="80" height="22" rx="5" fill="#181c22" data-set="0"/>';
-    s+='<rect x="'+(CX+40)+'" y="'+(y-11)+'" width="'+(HALF-40)+'" height="22" rx="5" fill="#181c22" data-set="1"/>';
-    if(v===0) s+='<rect x="'+(CX-40)+'" y="'+(y-11)+'" width="80" height="22" rx="5" fill="#2b3139" data-set="0"/>';
-    else { const w=HALF-40;
-      s+='<rect x="'+(v>0?CX+40:CX-HALF).toFixed(1)+'" y="'+(y-11)+'" width="'+w+'" height="22" rx="5" fill="'+(v>0?'#1d3category':'#000')+'"/>'; }
-    s+='<line x1="'+CX+'" y1="'+(y-13)+'" x2="'+CX+'" y2="'+(y+13)+'" stroke="#3d434b"/>';
-    s+='</g>';
-  });
-  s+='</svg>';
-  document.getElementById('diagram').innerHTML=s;
+const g=()=>G[sel];
+function board(fen){
+  const rows=fen.split('/'); const sq={};
+  rows.forEach((row,ri)=>{ let f=0;
+    for(const ch of row){
+      if(ch>='1'&&ch<='8') f+=+ch;
+      else { sq[FILES[f]+(8-ri)]=ch; f++; }
+    }});
+  return sq;
 }
-"""
-
-# the imbalance drawing is finicky enough to be worth writing out plainly
-IMB_SCRIPT = """
-const F=__FACTORS__;
-const W=980, ROW=44, TOP=78, CX=650, HALF=300, MID=44;
-const H=TOP+F.length*ROW+26;
-let sel=0, side=F.map(()=>0);   // -1 them, 0 level, 1 you
-const tally=s=>side.filter(v=>v===s).length;
-const COLYOU='#58a6ff', COLTHEM='#e0684b';
-
+function drawBoard(){
+  const gm=g(), sqs=board(gm.fens[ply]);
+  const from=ply>0?gm.frm[ply-1]:null, to=ply>0?gm.to[ply-1]:null;
+  let s='<svg viewBox="0 0 '+BW+' '+BW+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The position after '+
+    (ply?esc(gm.sans[ply-1]):'no moves')+'">';
+  s+='<rect x="'+(M-4)+'" y="'+(M-4)+'" width="'+(8*S+8)+'" height="'+(8*S+8)+'" rx="6" fill="#0d0d0d" stroke="#333"/>';
+  for(let f=0;f<8;f++) for(let r=1;r<=8;r++){
+    const x=M+f*S, y=M+(8-r)*S, dark=(f+r)%2===1, name=FILES[f]+r;
+    let fill=dark?'#5a6472':'#a9b2be';
+    if(name===from) fill=dark?'#6d7a52':'#9aa871';
+    if(name===to)   fill=dark?'#85914f':'#b4bf72';
+    s+='<rect x="'+x+'" y="'+y+'" width="'+S+'" height="'+S+'" fill="'+fill+'"/>';
+    // coordinates on the outside edges only, the way a printed board carries them
+    if(f===0) s+='<text x="'+(M-8)+'" y="'+(y+S/2+4)+'" text-anchor="end" font-size="11" fill="#7c7c7c">'+r+'</text>';
+    if(r===1) s+='<text x="'+(x+S/2)+'" y="'+(M+8*S+16)+'" text-anchor="middle" font-size="11" fill="#7c7c7c">'+FILES[f]+'</text>';
+  }
+  for(const name in sqs){
+    const c=sqs[name], white=c===c.toUpperCase();
+    const f=FILES.indexOf(name[0]), r=+name[1];
+    const x=M+f*S+S/2, y=M+(8-r)*S+S/2;
+    s+='<text x="'+x+'" y="'+(y+S*0.33)+'" text-anchor="middle" font-size="'+(S*0.86)+
+       '" fill="'+(white?'#f6f6f4':'#15181c')+'" stroke="'+(white?'#15181c':'#000')+
+       '" stroke-width="1.1" paint-order="stroke">'+GLYPH[c.toLowerCase()]+'</text>';
+  }
+  return s+'</svg>';
+}
+function strip(){
+  const gm=g(); let s='';
+  for(let i=0;i<gm.sans.length;i++){
+    if(i%2===0) s+='<span class="no">'+(i/2+1)+'.</span>';
+    s+='<span class="mv'+(i===ply-1?' on':'')+(i===gm.key?' key':'')+'" data-ply="'+(i+1)+'">'+esc(gm.sans[i])+'</span>';
+  }
+  return s;
+}
 function draw(){
-  const net=tally(1)-tally(-1), bw=Math.abs(net)/F.length*HALF;
-  let s='<svg id="isvg" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ten features of the position, each weighed toward one side or called level">';
-  s+='<text x="0" y="18" font-size="12" fill="#9a9a9a">each row leans to the side it favors; the middle band is level</text>';
-  s+='<text x="'+(CX-HALF+40)+'" y="42" text-anchor="middle" font-size="12" fill="'+COLTHEM+'">them '+tally(-1)+'</text>';
-  s+='<text x="'+CX+'" y="42" text-anchor="middle" font-size="12" fill="#9a9a9a">level '+tally(0)+'</text>';
-  s+='<text x="'+(CX+HALF-40)+'" y="42" text-anchor="middle" font-size="12" fill="'+COLYOU+'">you '+tally(1)+'</text>';
-  s+='<rect x="'+(CX-HALF)+'" y="52" width="'+(HALF*2)+'" height="11" rx="5.5" fill="#20242a"/>';
-  if(net) s+='<rect x="'+(net>0?CX:CX-bw).toFixed(1)+'" y="52" width="'+bw.toFixed(1)+'" height="11" rx="5.5" fill="'+(net>0?COLYOU:COLTHEM)+'"/>';
-  s+='<line x1="'+CX+'" y1="48" x2="'+CX+'" y2="67" stroke="#e6e6e6" stroke-width="1.5"/>';
-  F.forEach((f,i)=>{
-    const y=TOP+i*ROW+ROW/2, on=sel===i, v=side[i], w=HALF-MID;
-    s+='<g data-f="'+i+'" style="cursor:pointer">';
-    s+='<rect x="0" y="'+(y-ROW/2+3)+'" width="'+W+'" height="'+(ROW-6)+'" rx="7" fill="'+(on?'#1d2531':'transparent')+'"/>';
-    s+='<circle cx="22" cy="'+y+'" r="13" fill="#20242a" stroke="'+(on?COLYOU:'#2b2b2b')+'"/>';
-    s+='<text x="22" y="'+(y+5)+'" text-anchor="middle" font-size="14" font-weight="700" fill="'+(on?'#ffffff':'#c8c8c8')+'">'+f[1]+'</text>';
-    s+='<text x="44" y="'+(y+5)+'" font-size="13.5" fill="'+(on?'#ffffff':'#c8c8c8')+'">'+esc(f[2])+'</text>';
-    s+='<rect data-set="-1" x="'+(CX-HALF)+'" y="'+(y-12)+'" width="'+w+'" height="24" rx="6" fill="'+(v<0?COLTHEM:'#181c22')+'" opacity="'+(v<0?0.85:1)+'"/>';
-    s+='<rect data-set="0" x="'+(CX-MID)+'" y="'+(y-12)+'" width="'+(MID*2)+'" height="24" rx="6" fill="'+(v===0?'#333a44':'#181c22')+'"/>';
-    s+='<rect data-set="1" x="'+(CX+MID)+'" y="'+(y-12)+'" width="'+w+'" height="24" rx="6" fill="'+(v>0?COLYOU:'#181c22')+'" opacity="'+(v>0?0.85:1)+'"/>';
-    if(v===0) s+='<text x="'+CX+'" y="'+(y+4)+'" text-anchor="middle" font-size="11" fill="#9a9a9a" pointer-events="none">level</text>';
-    s+='<line x1="'+CX+'" y1="'+(y-14)+'" x2="'+CX+'" y2="'+(y+14)+'" stroke="#3d434b" pointer-events="none"/>';
-    s+='</g>';
-  });
-  s+='</svg>';
-  document.getElementById('diagram').innerHTML=s;
+  const gm=g();
+  document.getElementById('diagram').innerHTML=
+    '<div class="boardwrap"><div id="board">'+drawBoard()+'</div>'+
+    '<div class="movecol"><p class="gamehead"><b>'+esc(gm.w)+'</b> versus <b>'+esc(gm.b)+'</b><br>'+
+    esc(gm.ev)+', '+gm.y+(gm.nm?'<br>'+esc(gm.nm):'')+'</p>'+
+    '<div class="strip" id="strip">'+strip()+'</div></div></div>';
+  const on=document.querySelector('#strip .mv.on'); if(on) on.scrollIntoView({block:'nearest'});
+  for(const b of document.querySelectorAll('#letters button')) b.classList.toggle('on', b.dataset.f===sel);
 }
 function show(){
-  const f=F[sel], v=side[sel];
-  let rows='';
-  f[4].forEach(q=>{ rows+='<div class="q"><p>'+esc(q)+'</p></div>'; });
-  rows+='<div class="q"><p style="color:#9a9a9a">this one is '
-    +(v>0?'<b style="color:'+COLYOU+'">yours</b>':v<0?'<b style="color:'+COLTHEM+'">theirs</b>':'<b>level</b>')+'</p></div>';
-  card(f[1]+' \\u00b7 '+f[2], f[3], rows, '', verdict());
+  const gm=g(), f=F.find(x=>x[0]===sel);
+  const at=ply-1, played=at>=0?gm.sans[at]:null;
+  let rows='<div class="q"><p><b>'+(gm.key%2===0?Math.floor(gm.key/2)+1+'.':Math.floor(gm.key/2)+1+'...')+
+    ' '+esc(gm.sans[gm.key])+'</b> is the move, by '+gm.side+'.</p></div>';
+  rows+=f[4].map(q=>'<div class="q"><p style="color:#9a9a9a;font-size:12.5px;margin:0">'+esc(q)+'</p></div>').join('');
+  if(played && at!==gm.key)
+    rows+='<div class="q"><p style="color:#9a9a9a;font-size:12.5px;margin:0">on the board now: '+
+      (at%2===0?Math.floor(at/2)+1+'.':Math.floor(at/2)+1+'...')+' '+esc(played)+'</p></div>';
+  card(f[1]+' · '+f[2], f[3], rows, gm.note,
+    '<a href="'+gm.src+'">'+esc(gm.nm||gm.ev)+'</a>'+(gm.trunc?' · '+esc(gm.trunc):''));
   draw();
 }
-function joinList(a){ return a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1]; }
-function verdict(){
-  const y=tally(1), t=tally(-1);
-  if(!y&&!t) return 'Nothing weighed yet; all ten sit level.';
-  if(y===t) return 'Level overall, '+y+' each way, with '+tally(0)+' still level.';
-  const mine=y>t;
-  const names=joinList(F.filter((_,i)=>side[i]===(mine?1:-1)).map(f=>f[2]));
-  return (mine?'You lead ':'They lead ')+Math.max(y,t)+' to '+Math.min(y,t)+', on '+names+'.';
-}
-document.getElementById('diagram').addEventListener('click',ev=>{
-  const g=ev.target.closest('g[data-f]'); if(!g) return;
-  sel=+g.dataset.f;
-  const r=ev.target.closest('rect[data-set]');
-  if(r) side[sel]=+r.dataset.set;
-  show();
+document.getElementById('letters').innerHTML=F.map(f=>
+  '<button type="button" data-f="'+f[0]+'" title="'+esc(f[2]+': '+f[3])+'">'+f[1]+'</button>').join('');
+document.getElementById('letters').addEventListener('click',ev=>{
+  const b=ev.target.closest('button[data-f]'); if(!b) return;
+  sel=b.dataset.f; ply=g().key+1; show();
 });
-document.getElementById('resetBtn').addEventListener('click',()=>{ side=F.map(()=>0); sel=0; show(); });
+document.getElementById('diagram').addEventListener('click',ev=>{
+  const m=ev.target.closest('.mv'); if(!m) return;
+  ply=+m.dataset.ply; show();
+});
+document.getElementById('prevBtn').addEventListener('click',()=>{ if(ply>0){ply--; show();} });
+document.getElementById('nextBtn').addEventListener('click',()=>{ if(ply<g().sans.length){ply++; show();} });
+document.getElementById('keyBtn').addEventListener('click',()=>{ ply=g().key+1; show(); });
+document.addEventListener('keydown',ev=>{
+  if(ev.key==='ArrowLeft'&&ply>0){ply--; show();}
+  else if(ev.key==='ArrowRight'&&ply<g().sans.length){ply++; show();}
+});
 show();
 window.__imb=function(q){
-  if(q&&q.set){ const [i,v]=q.set; sel=i; side[i]=v; show(); }
-  if(q&&q.select!=null){ sel=q.select; show(); }
-  if(q&&q.reset){ side=F.map(()=>0); sel=0; show(); }
-  return {sel, side:side.slice(), you:tally(1), them:tally(-1), level:tally(0),
+  if(q&&q.pick){ sel=q.pick; ply=g().key+1; show(); }
+  if(q&&q.ply!=null){ ply=q.ply; show(); }
+  const gm=g();
+  return {sel, ply, keyPly:gm.key+1, plies:gm.sans.length, side:gm.side, key:gm.sans[gm.key],
+    white:gm.w, black:gm.b, year:gm.y, fen:gm.fens[ply], mate:gm.mate,
     kind:document.getElementById('kindTxt').textContent,
     name:document.getElementById('nameTxt').textContent,
     card:document.getElementById('numTxt').textContent,
+    body:document.getElementById('bodyTxt').textContent,
     src:document.getElementById('srcTxt').textContent,
-    rows:document.querySelectorAll('#isvg g[data-f]').length};
+    letters:document.querySelectorAll('#letters button').length,
+    moves:document.querySelectorAll('#strip .mv').length,
+    pieces:document.querySelectorAll('#board text').length-64};
 };
+"""
+
+IMB_CSS = """
+.boardwrap { display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap; }
+#board { flex:0 0 clamp(300px,48vw,470px); }
+#board svg { width:100%; height:auto; display:block; }
+.movecol { flex:1 1 220px; min-width:0; }
+.gamehead { font-size:12.5px; color:var(--muted); line-height:1.5; margin:0 0 8px; }
+.gamehead b { color:var(--text); font-weight:600; }
+.strip { max-height:330px; overflow:auto; font-size:13px; line-height:1.75;
+  font-variant-numeric:tabular-nums; }
+.strip .mv { display:inline-block; padding:0 5px; border-radius:4px; cursor:pointer;
+  color:#c8c8c8; }
+.strip .mv:hover { color:#ffffff; background:#20242a; }
+.strip .mv.on { background:var(--accent); color:#0b1a2b; font-weight:600; }
+.strip .mv.key { box-shadow:inset 0 -2px 0 var(--accent); }
+.strip .no { color:var(--muted); padding-left:4px; }
 """
 
 PLAN_CSS = """
@@ -460,15 +516,23 @@ PAGES = [
          note2=("The run answers as it goes, moving to the next open step as each one "
                 "clears, and the strip beneath the flow fills as it does.")),
     dict(out="imbalances.html", title="I.M.B.A.L.A.N.C.E.S.", h1="I.M.B.A.L.A.N.C.E.S.",
-         tagline="Ten features of a position, weighed one at a time.",
-         controls='<span class="lab">A position</span><button id="resetBtn" type="button">Start over</button>',
-         extracss="", script=IMB_SCRIPT.replace("__FACTORS__", _js(IMBALANCES)),
+         tagline="Ten features of a position, one played game each.",
+         controls=('<span class="lab">Feature</span><span id="letters"></span>'
+                   '<button id="prevBtn" type="button">&larr;</button>'
+                   '<button id="nextBtn" type="button">&rarr;</button>'
+                   '<button id="keyBtn" type="button">The move</button>'),
+         extracss=IMB_CSS,
+         script=(IMB_SCRIPT.replace("__FACTORS__", _js(IMBALANCES))
+                 .replace("__GAMES__", _js(games()))),
          note1=("Initiative, Material, Bishops, Activity, Lines, Attacks, Numbers, "
-                "Castling, Endgame, Space: ten things a position can be read for, each "
-                "with three questions. A row leans left or right for the side it favors, "
-                "or sits in the middle band when it is level."),
-         note2=("The bar at the top is the running total of those ten judgments, which "
-                "is a reading of the position rather than an engine's number.")),
+                "Castling, Endgame, Space: ten features of a position, and for each "
+                "one a game where that feature decided it. The board opens at the move "
+                "the game turns on, with the two squares of that move marked, and the "
+                "score beside it steps back and forward through the whole game."),
+         note2=("The games run from Morphy in 1858 to Carlsen in 2021, and five of the "
+                "ten are called somebody's Immortal, which is what tends to happen when "
+                "one idea gets carried all the way to the end of a game."),
+         method=IMB_METHOD),
     dict(out="plan.html", title="P.L.A.N.", h1="P.L.A.N.",
          tagline="Always enter the middlegame with a plan.",
          controls='<span class="lab">A plan</span><button id="resetBtn" type="button">Start over</button>',
@@ -491,7 +555,7 @@ def build():
                 .replace("__CONTROLS__", p["controls"]).replace("__DIAGRAM__", "")
                 .replace("__EXTRACSS__", p["extracss"]).replace("__SCRIPT__", p["script"])
                 .replace("__NOTE1__", p["note1"]).replace("__NOTE2__", p["note2"])
-                .replace("__METHOD__", METHOD))
+                .replace("__METHOD__", p.get("method", METHOD)))
         (ROOT / p["out"]).write_text(html, encoding="utf-8")
         print(f"  {p['out']:22} {len(html):>7,} B")
 
