@@ -75,7 +75,7 @@ REFS = [
              "Planet Earth [Television series]", "BBC Natural History Unit",
              "https://www.bbc.co.uk/programmes/b006mywy"),
      "The eleven episodes. The species, the names and the filming locations are "
-     "Brian Rivera's own record of them."),
+     "a record taken down from them."),
     (apa.web("International Union for Conservation of Nature", 2026,
              "The IUCN Red List of Threatened Species (Version 2026-1)", None,
              "https://www.iucnredlist.org"),
@@ -337,7 +337,7 @@ function showMap(){
      ['open marks',ROWS.filter((_,i)=>passes(i)).filter(r=>!solid(r.r)).length+' broader, or not a taxon'],
      ['centroids',ROWS.filter((_,i)=>passes(i)).filter(r=>r.p==='region').length+' of them stand for a region rather than a place']],
     'Each mark answers under the pointer with what it is, where the episode filmed it, and what the Red List makes of it.',
-    'Brian Rivera\\u2019s record of the series; IUCN Red List 2026-1');
+    'A record taken from the episodes; IUCN Red List 2026-1');
 }
 function showEpisode(n){
   const e=epOf(n), rs=ROWS.filter(r=>r.e===n);
@@ -348,7 +348,7 @@ function showEpisode(n){
      ['groups',gs],
      ['shared with other episodes',rep?rep+' of them turn up elsewhere in the series':'none; everything here is filmed once'],
      ['on some streaming apps',e.streaming_episode!==e.episode?'numbered '+e.streaming_episode:'numbered '+n+' as well']],
-    '', 'Brian Rivera\\u2019s record of the series');
+    '', 'A record taken from the episodes');
 }
 function showRepeat(s){
   const rs=ROWS.filter(r=>r.s===s), r0=rs[0];
@@ -367,7 +367,7 @@ function showRepeats(){
      ['the rest','appear in two'],
      ['everything else','121 distinct taxa in all, so 107 are filmed once']],
     'The only thread the series leaves between its episodes is what it filmed twice.',
-    'Brian Rivera\\u2019s record of the series');
+    'A record taken from the episodes');
 }
 
 /* ---- the map ---- */

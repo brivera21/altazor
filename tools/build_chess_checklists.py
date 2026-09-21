@@ -159,21 +159,17 @@ __SCRIPT__
 </html>
 """
 
-METHOD = ("The wording of every step, feature and stage is Brian Rivera's own, from "
-          "the sheets he wrote for himself, and nothing here was added to it. Nothing "
-          "is stored between visits, so a run starts empty every time the page is "
-          "opened.")
+METHOD = ("The wording of every step, feature and stage comes from a handwritten "
+          "checklist, and nothing here was added to it. Nothing is stored between "
+          "visits, so a run starts empty every time the page is opened.")
 
-IMB_METHOD = ("The ten features and their questions are Brian Rivera's own. The games "
-              "are not. Each was chosen for the feature it turns on, and every move list "
-              "was replayed with a chess library before it reached the page, so a "
-              "mistyped or illegal move would have stopped the build rather than drawn a "
-              "wrong position. Four of the ten finish in mate, and they finish in the "
-              "recorded mate, which is a second check on the transcription. Two of the "
-              "notes here were rewritten when the board disagreed with them: the Immortal "
-              "Game's sacrifices do not all come before the move shown, and Saemisch had "
-              "twenty-seven legal moves left rather than none at all. Each card links to "
-              "the article its score was taken from.")
+IMB_METHOD = ("The ten features and their questions come from a handwritten checklist. "
+              "The games do not. Each was chosen for the feature its key move turns on, "
+              "and every score was replayed with a chess library before it reached the "
+              "page, so a mistyped or illegal move stops the build rather than drawing a "
+              "wrong position. Four of the ten finish in the recorded mate, which checks "
+              "the transcription a second way. Each card links to the article its score "
+              "was taken from.")
 
 # ------------------------------------------------------------------ SCOUT
 
