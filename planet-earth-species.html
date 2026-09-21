@@ -107,7 +107,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <p class="note" style="border-top:none; padding-top:0;">Fourteen taxa turn up in more than one episode, and two of them, the wolf and the African bush elephant, in three. Those repeats are the only structure the series itself leaves behind linking one episode to another, and the third view is made of them.</p>
 <div class="method"><p>The episodes are numbered as the BBC broadcast them, which is how IMDb, Metacritic and TV Guide list them too. Some streaming apps move three: Seasonal Forests to 8, Jungles to 9 and Shallow Seas to 10. Every episode panel and every card gives both numbers. Coordinates follow the filming location rather than the animal's range. Thirty-seven rows name a place a pin can sit on; the other hundred name a region, a biome or a habitat, and there the mark is a representative centroid, with the card saying which one was chosen and why. Every pin was checked against the coastline raster the Earth pages share, so that nothing marine sits on dry land. Conservation status is set only where a row resolves to a species or a subspecies: a genus or a family has no Red List category, and none is guessed from a member species. Where the Red List assesses an animal under a name the series did not use, or covers a subspecies only through its parent species, the card says so.</p></div>
 <h2 class="refh">References</h2>
-<div class="refs"><p>British Broadcasting Corporation. (2006). <i>Planet Earth [Television series]</i>. BBC Natural History Unit. <a href="https://www.bbc.co.uk/programmes/b006mywy">https://www.bbc.co.uk/programmes/b006mywy</a><span class="ann">The eleven episodes. The species, the names and the filming locations are Brian Rivera's own record of them.</span></p>
+<div class="refs"><p>British Broadcasting Corporation. (2006). <i>Planet Earth [Television series]</i>. BBC Natural History Unit. <a href="https://www.bbc.co.uk/programmes/b006mywy">https://www.bbc.co.uk/programmes/b006mywy</a><span class="ann">The eleven episodes. The species, the names and the filming locations are a record taken down from them.</span></p>
 <p>International Union for Conservation of Nature. (2026). <i>The IUCN Red List of Threatened Species (Version 2026-1)</i>. <a href="https://www.iucnredlist.org">https://www.iucnredlist.org</a><span class="ann">The conservation status of every row that resolves to a species or a subspecies, checked September 19, 2026.</span></p>
 <p>International Union for Conservation of Nature. (2026). <i>The IUCN Red List of Threatened Species</i> [Data set]. GBIF. <a href="https://www.gbif.org/dataset/19491596-35ae-4a91-9a98-85cf505f1bd3">https://www.gbif.org/dataset/19491596-35ae-4a91-9a98-85cf505f1bd3</a><span class="ann">The Red List as GBIF distributes it, published July 28, 2026, which is how the categories here were read in bulk.</span></p>
 <p>Wikipedia contributors. (2026). <i>Wikipedia</i>. <a href="https://en.wikipedia.org">https://en.wikipedia.org</a><span class="ann">The coordinates of the named places, taken from each place's own article where it carries one; 62 of the 137 rows are placed this way, and the rest carry a centroid chosen here and described in the card.</span></p></div>
@@ -226,7 +226,7 @@ function showMap(){
      ['open marks',ROWS.filter((_,i)=>passes(i)).filter(r=>!solid(r.r)).length+' broader, or not a taxon'],
      ['centroids',ROWS.filter((_,i)=>passes(i)).filter(r=>r.p==='region').length+' of them stand for a region rather than a place']],
     'Each mark answers under the pointer with what it is, where the episode filmed it, and what the Red List makes of it.',
-    'Brian Rivera\u2019s record of the series; IUCN Red List 2026-1');
+    'A record taken from the episodes; IUCN Red List 2026-1');
 }
 function showEpisode(n){
   const e=epOf(n), rs=ROWS.filter(r=>r.e===n);
@@ -237,7 +237,7 @@ function showEpisode(n){
      ['groups',gs],
      ['shared with other episodes',rep?rep+' of them turn up elsewhere in the series':'none; everything here is filmed once'],
      ['on some streaming apps',e.streaming_episode!==e.episode?'numbered '+e.streaming_episode:'numbered '+n+' as well']],
-    '', 'Brian Rivera\u2019s record of the series');
+    '', 'A record taken from the episodes');
 }
 function showRepeat(s){
   const rs=ROWS.filter(r=>r.s===s), r0=rs[0];
@@ -256,7 +256,7 @@ function showRepeats(){
      ['the rest','appear in two'],
      ['everything else','121 distinct taxa in all, so 107 are filmed once']],
     'The only thread the series leaves between its episodes is what it filmed twice.',
-    'Brian Rivera\u2019s record of the series');
+    'A record taken from the episodes');
 }
 
 /* ---- the map ---- */
