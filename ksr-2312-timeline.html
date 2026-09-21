@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Centuries Before 2312 &middot; Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff; --mars:#6fbf73; --ny:#58a6ff;
+        --book:#ffb02e; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; margin-right:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 6px; font-size:26px; }
+.sub { color:var(--muted); margin:0 0 16px; font-size:15px; }
+.bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+button { font:inherit; font-size:13.5px; padding:6px 14px; border-radius:999px;
+  border:1px solid var(--line); background:#1a1a1a; color:var(--text); cursor:pointer; }
+button:hover { border-color:var(--accent); }
+button.on { background:var(--accent); border-color:var(--accent); color:#0b1a2b; font-weight:600; }
+.stage { display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:22px; align-items:start; }
+@media (max-width:1000px){ .stage { grid-template-columns:1fr; } }
+#diagram > svg { width:100%; height:auto; display:block; background:#0d0d0d;
+  border:1px solid #333; border-radius:6px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:16px 18px; }
+#kindTxt { color:var(--muted); font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
+#nameTxt { font-size:19px; font-weight:650; margin:4px 0 2px; }
+#numTxt { color:var(--book); font-size:14px; margin-bottom:10px; }
+#bodyTxt { font-size:14.5px; color:#d4d4d4; }
+#srcTxt { color:var(--muted); font-size:12px; margin-top:12px; border-top:1px solid var(--line); padding-top:8px; }
+.legend { display:flex; gap:16px; flex-wrap:wrap; color:var(--muted); font-size:12.5px; margin:10px 0 14px; }
+.legend i { display:inline-block; width:22px; height:9px; border-radius:2px; margin-right:6px; vertical-align:middle; }
+.note { color:#c9c9c9; font-size:15px; max-width:70ch; }
+.method, .refs { color:var(--muted); font-size:13.5px; max-width:78ch; }
+.method { border-top:1px solid var(--line); margin-top:34px; padding-top:14px; }
+.refh { font-size:14px; color:var(--muted); margin:26px 0 8px; letter-spacing:.06em; text-transform:uppercase; }
+hr.sep { border:0; border-top:1px solid var(--line); margin:30px 0 18px; }
+.refs p { padding-left:2em; text-indent:-2em; }
+.refs .ann { color:#7d7d7d; display:block; padding-left:0; text-indent:0; margin-top:2px; }
+[hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site">
+    <a href="science-fiction.html">&larr; Science Fiction</a>
+    <a href="solar-system-2312.html">The Solar System of 2312</a>
+    <a href="red-mars.html">The Mars of Red Mars</a>
+  </nav>
+</header>
+
+<h1>The Centuries Before 2312</h1>
+<p class="sub">Three futures Robinson wrote for the same three hundred years.</p>
+
+<div class="bar" id="views">
+  <button data-v="all" class="on">The three books</button>
+  <button data-v="periods">Shortback's periods</button>
+  <button data-v="qubes">The qube thread</button>
+  <button data-v="clash">Where they disagree</button>
+</div>
+
+<div class="legend" id="legend"></div>
+
+<div class="stage">
+  <div id="diagram"></div>
+  <div class="side">
+    <div class="card">
+      <div id="kindTxt"></div>
+      <div id="nameTxt"></div>
+      <div id="numTxt"></div>
+      <div id="bodyTxt"></div>
+      <div id="srcTxt"></div>
+    </div>
+  </div>
+</div>
+
+<hr class="sep">
+<p class="note">Charlotte Shortback is a historian inside 2312 who cuts the
+long postmodern into six named stretches, from the Dithering to the
+Balkanization. Her scheme is the top track. The Mars trilogy and New York 2140
+run beneath it on the same axis.</p>
+<p class="note">Robinson says the three are not one future history. They are
+kept apart here for that reason, and the places where their numbers contradict
+each other are drawn rather than smoothed.</p>
+
+<div class="method"><p>The 2312 dates are the novel's own, quoted by page from the Orbit edition. The Mars and New York dates come from secondary sources, which is weaker, and where those sources disagree the entry is drawn with a dashed edge and says so rather than picking a winner. Three of them disagree: the Dorsa Brevia conference, the Great Flood, and the years of the Second Pulse. The three books are kept on separate tracks because Robinson has said they are not one future history.</p></div>
+<h2 class="refh">References</h2>
+<div class="refs"><p>Robinson, K. S. (2012). <i>2312</i>. Orbit.<span class="ann">Charlotte Shortback's periodization, pages 255 to 257; the first space elevator at Quito, page 134; sea level at eleven meters, page 100; Pauline among the first qubes, page 58. Read through the Internet Archive's full text search of the scanned Orbit edition.</span></p>
+<p>Liptak, A. (2020). <i>Kim Stanley Robinson on climate change and The Ministry for the Future</i>. Reactor. <a href="https://reactormag.com/kim-stanley-robinson-the-ministry-for-the-future-climate-change-interview/">https://reactormag.com/kim-stanley-robinson-the-ministry-for-the-future-climate-change-interview/</a><span class="ann">Robinson saying the books are not from the same future history, which is why this page draws them apart.</span></p>
+<p>Robinson, K. S. (1992). <i>Red Mars</i>. Bantam Spectra.<span class="ann">With <i>Green Mars</i> (1993) and <i>Blue Mars</i> (1996), the second track.</span></p>
+<p>Robinson, K. S. (2017). <i>New York 2140</i>. Orbit.<span class="ann">The third track.</span></p>
+<p>KimStanleyRobinson.info. (n.d.). <i>Mars trilogy timeline</i>. Retrieved September 4, 2026, from <a href="https://www.kimstanleyrobinson.info/content/mars-trilogy-timeline">https://www.kimstanleyrobinson.info/content/mars-trilogy-timeline</a><span class="ann">Most of the Mars dates. A fan reference, and it contradicts itself on several of them, which is why the disputed ones are drawn as disputed.</span></p>
+<p>Mars trilogy. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Mars_trilogy">https://en.wikipedia.org/wiki/Mars_trilogy</a><span class="ann">Cross check on the 2026, 2061, 2127 and 2212 dates.</span></p>
+<p>Sherwood, S., & Vicars, K. (2017). <i>New York 2140: a novelist's vision of a drowned city that still never sleeps</i>. The Conversation. <a href="https://theconversation.com/new-york-2140-a-novelists-vision-of-a-drowned-city-that-still-never-sleeps-73718">https://theconversation.com/new-york-2140-a-novelists-vision-of-a-drowned-city-that-still-never-sleeps-73718</a><span class="ann">The two Pulses and their sea level figures, written by climate scientists.</span></p>
+<p>Robinson, K. S. (2017). <i>Making it in a futuristic flooded New York</i>. Science Friday. <a href="https://www.sciencefriday.com/articles/making-it-in-a-futuristic-flooded-new-york/">https://www.sciencefriday.com/articles/making-it-in-a-futuristic-flooded-new-york/</a><span class="ann">An authorized excerpt: each Pulse a decade, and the drowned line at about Fortieth Street.</span></p></div>
+</div>
+<script>
+const D = {"t0": 2000, "t1": 2330, "periods": [{"a": 2005, "b": 2060, "k": "dithering", "n": "The Dithering", "g": "From the end of the postmodern, a date Shortback takes from the UN announcement of climate change, to the fall into crisis. The novel's verdict on these fifty five years is that they were wasted.", "s": "2312, p. 255", "c": "#7a5c2e"}, {"a": 2060, "b": 2130, "k": "crisis", "n": "The Crisis", "g": "Arctic summer ice disappears, permafrost melts past recovery and releases its methane, and major sea rise becomes unavoidable. Average global temperature rises five kelvin and sea level five meters. In the 2120s the bill arrives as food shortages, mass riots and death on every continent.", "s": "2312, p. 255", "c": "#8f4b3a"}, {"a": 2130, "b": 2160, "k": "turnaround", "n": "The Turnaround", "g": "Verteswandel, Shortback's mutation of values, and then revolutions. Strong AI and self replicating factories arrive together. Fusion power, synthetic biology, space elevators on Earth and Mars, fast propulsion, the beginning of the space diaspora and of the terraforming of Mars. The Mondragon Accord is signed. Climate modification is tried and one attempt goes badly wrong.", "s": "2312, p. 255", "c": "#3f6b52"}, {"a": 2160, "b": 2220, "k": "accelerando", "n": "The Accelerando", "g": "Every new power applied at once, human longevity among them. The novel puts the largest jump in the longevity graphs at the start of this period and says many think that was no coincidence.", "s": "2312, pp. 98, 255", "c": "#2f5d80"}, {"a": 2220, "b": 2270, "k": "ritard", "n": "The Ritard", "g": "Historians argue about why the Accelerando slowed. The reasons offered are that Mars finished its terraforming and withdrew from the Mondragon into isolation, that every good terrarium candidate was taken, and that the system's easily reached helium, nitrogen, rare earths, fossil fuels and photosynthesis had almost all been spoken for.", "s": "2312, p. 256", "c": "#4a4a7a"}, {"a": 2270, "b": 2320, "k": "balkanization", "n": "The Balkanization", "g": "Cold war between Mars and Earth for control of the solar system. Mars keeps to itself, Venus fights with itself, the Jovian moons decide to terraform their big three. Unaffiliated terraria multiply and whole populations vanish behind event horizons. Qubes are listed among the causes. Shortages turn to hoarding and then to tribalism.", "s": "2312, p. 256", "c": "#7a3f62"}], "events": [{"a": 2076, "b": null, "k": "quito", "n": "The first space elevator", "g": "Built at Quito. The novel says traffic between Earth and space rose by a factor of a hundred million once the elevators were up, and that this is the moment the solar system became reachable.", "s": "2312, p. 134"}, {"a": 2142, "b": 2154, "k": "iceage", "n": "The Little Ice Age", "g": "Twelve years, and the novel calls it disastrous. It is filed under climate modification efforts, which is to say it was something people did on purpose and then could not undo.", "s": "2312, p. 255"}, {"a": 2312, "b": null, "k": "now", "n": "The novel's present", "g": "Earth stands eleven meters above its old sea level, ice free but for Antarctica and Greenland, and the flooded coastline is named as one of the main drivers of the human disaster there.", "s": "2312, pp. 2, 100"}], "qubes": [{"a": 2130, "b": 2160, "n": "Strong AI appears", "g": "Listed in the Turnaround beside self replicating factories and fusion power, as one item in a burst of arrivals rather than an event of its own.", "s": "2312, p. 255"}, {"a": 2160, "b": 2220, "n": "The first generation ages", "g": "Swan's qube Pauline is described as one of the first and weakest of them, which places her line near the beginning.", "s": "2312, p. 58"}, {"a": 2270, "b": 2320, "n": "Influence of qubes", "g": "By the Balkanization they are named among the causes of the period, alongside cold war and shortage. The book's plot turns on qubes that have begun programming themselves.", "s": "2312, pp. 256, 464"}], "mars": [{"a": 2020, "b": null, "n": "First feet on Mars", "g": "John Boone lands on Chryse Planitia.", "s": "KSR.info; Wikipedia", "d": false}, {"a": 2026, "b": null, "n": "The Ares departs", "g": "21 December, carrying the First Hundred on a nine month crossing.", "s": "KSR.info", "d": false}, {"a": 2027, "b": null, "n": "Underhill", "g": "The First Hundred land and build the first settlement.", "s": "KSR.info", "d": false}, {"a": 2040, "b": 2049, "n": "The longevity treatment", "g": "Developed at Acheron by Vlad Taneev's group. The decade is as close as the sources get.", "s": "KSR.info", "d": false}, {"a": 2061, "b": null, "n": "The First Martian Revolution", "g": "It fails. Aquifers are broken and flood the surface, the space elevator is brought down, Phobos is driven out of orbit. World War Three runs on Earth at the same time.", "s": "KSR.info; Wikipedia; AHA", "d": false}, {"a": 2100, "b": null, "n": "The second elevator", "g": "Anchored at Sheffield.", "s": "KSR.info", "d": false}, {"a": 2101, "b": null, "n": "The soletta", "g": "Moved into position. The firmest terraforming date.", "s": "KSR.info", "d": false}, {"a": 2104, "b": null, "n": "Dorsa Brevia", "g": "The underground's conference, and the declaration that becomes the basis of the constitution. One page of the same source dates it to about 2107.", "s": "KSR.info", "d": true}, {"a": 2127, "b": null, "n": "The Great Flood", "g": "The West Antarctic ice sheet collapses and sea level rises about seven meters, much of it fast. One source says 2126.", "s": "KSR.info", "d": true}, {"a": 2127, "b": null, "n": "The Second Martian Revolution", "g": "It succeeds while Earth is busy drowning. Mars becomes independent and Burroughs is deliberately flooded.", "s": "KSR.info; AHA", "d": false}, {"a": 2128, "b": null, "n": "The Martian constitution", "g": "Voted on 27 February, local year M-52, and passed with 78 percent. Nadia Cherneshevsky serves as first president to 2134.", "s": "KSR.info", "d": false}, {"a": 2160, "b": 2169, "n": "Pulsed fusion", "g": "Fast propulsion arrives and the outer system opens.", "s": "KSR.info", "d": false}, {"a": 2212, "b": null, "n": "The end of Blue Mars", "g": "A cable crisis and a third revolution. One source runs the novel's span on to about 2225.", "s": "KSR.info; Wikipedia", "d": true}], "ny": [{"a": 2050, "b": 2059, "n": "The First Pulse", "g": "About ten feet of sea level rise in about ten years, as the ice sheets let go. The novel calls each Pulse a complete psychodrama decade.", "s": "The Conversation; Science Friday excerpt", "d": false}, {"a": 2060, "b": 2069, "n": "The great depression", "g": "The novel says the people of the 2060s staggered on through it. The wealthy came out of it well and prescribed austerity for everyone else.", "s": "quoted in reviews", "d": false}, {"a": 2085, "b": 2100, "n": "The Second Pulse", "g": "Another forty feet, beginning with the Aurora Basin. The refugee crisis is rated at ten thousand katrinas. The exact years are one reviewer's reading, not the novel's.", "s": "The Conversation; reviews", "d": true}, {"a": 2140, "b": null, "n": "The novel opens", "g": "Fifty feet of rise in total. Manhattan below about Fortieth Street is drowned to the second or third floor and the streets are canals. The band between wet and dry is the intertidal.", "s": "Science Friday excerpt; Wikipedia", "d": false}, {"a": 2142, "b": null, "n": "The storm", "g": "A superstorm leaves much of the city homeless and the Householders' Union demands the uptown towers be requisitioned.", "s": "Progress in Political Economy", "d": false}, {"a": 2143, "b": null, "n": "The strike", "g": "A universal debt strike breaks the banks, and the Treasury nationalizes them rather than bailing them out.", "s": "Progress in Political Economy; reviews", "d": false}], "conflicts": [{"n": "Sea level", "g": "2312 puts Earth five meters up by 2130 and eleven meters up by 2312. New York 2140 reaches about fifteen meters by 2140, a year when 2312 has only just entered its Turnaround. The two figures cannot both hold."}, {"n": "Mars", "g": "2312 lists the terraforming of Mars as beginning in the Turnaround, between 2130 and 2160. In the trilogy it was approved around 2030 and Mars is an independent republic by 2128. 2312's Mars runs a century behind the trilogy's."}, {"n": "The author", "g": "Robinson told Reactor in May 2020 that these books are not from the same future history, while allowing a fair bit of congruence to the thinking. The congruence is easy to see. All three put a catastrophe and a turn between about 2050 and 2140."}], "after": {"g": "Shortback leaves the next period unnamed but offers two candidates for it, the Atomization or the Dissolution, either of which she expects to be worse than the Ritard and possibly worse than the Crisis. The novel opens in 2312, eight years before her last period is due to end.", "s": "2312, pp. 2, 257"}};
+
+const W=1120, M={l:20,r:20,t:26,b:34};
+const IW=W-M.l-M.r;
+const x = y => M.l + (y-D.t0)/(D.t1-D.t0)*IW;
+const esc = s => String(s).replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+let view='all', sel=null;
+
+function card(kind,name,num,body,src){
+  document.getElementById('kindTxt').textContent=kind||'';
+  document.getElementById('nameTxt').textContent=name||'';
+  document.getElementById('numTxt').textContent=num||'';
+  document.getElementById('bodyTxt').textContent=body||'';
+  document.getElementById('srcTxt').textContent=src?('Source: '+src):'';
+}
+const span = (a,b) => b? (a+' to '+b) : String(a);
+
+function axis(yy){
+  let s='';
+  for(let y=2000;y<=D.t1;y+=20){
+    const X=x(y), major=(y%100===0);
+    s+='<line x1="'+X+'" y1="'+(yy-5)+'" x2="'+X+'" y2="'+(yy+(major?7:3))+'" stroke="'+(major?'#666':'#3a3a3a')+'"/>';
+    if(y%40===0) s+='<text x="'+X+'" y="'+(yy+22)+'" text-anchor="middle" font-size="11" fill="#7c7c7c">'+y+'</text>';
+  }
+  s+='<line x1="'+M.l+'" y1="'+yy+'" x2="'+(W-M.r)+'" y2="'+yy+'" stroke="#3a3a3a"/>';
+  return s;
+}
+
+function band(o,yy,h,fill,id,dash){
+  const X=x(o.a), X2=x(o.b||o.a), w=Math.max(X2-X,3);
+  const on = sel===id;
+  let s='<g class="hit" data-id="'+id+'" style="cursor:pointer">';
+  s+='<rect x="'+X+'" y="'+yy+'" width="'+w+'" height="'+h+'" rx="3" fill="'+fill+'"'
+   + ' stroke="'+(on?'#fff':'rgba(255,255,255,.22)')+'" stroke-width="'+(on?2:1)+'"'
+   + (dash?' stroke-dasharray="5 3"':'')+'/>';
+  if(w>62) s+='<text x="'+(X+7)+'" y="'+(yy+h/2+4)+'" font-size="11.5" fill="#f0f0f0">'+esc(o.n)+'</text>';
+  s+='</g>';
+  return s;
+}
+
+function mark(o,yy,color,id,dash){
+  const X=x(o.a), on=sel===id;
+  let s='<g class="hit" data-id="'+id+'" style="cursor:pointer">';
+  if(o.b){ const w=Math.max(x(o.b)-X,3);
+    s+='<rect x="'+X+'" y="'+(yy-5)+'" width="'+w+'" height="10" rx="2" fill="'+color+'" opacity="'+(on?1:.75)+'"'
+     +(dash?' stroke="'+color+'" stroke-dasharray="4 3" fill-opacity=".3"':'')+'/>';
+  } else {
+    s+='<circle cx="'+X+'" cy="'+yy+'" r="'+(on?6:4.5)+'" fill="'+color+'"'
+     +(dash?' stroke="#0d0d0d" stroke-width="1.5"':'')+'/>';
+  }
+  s+='<rect x="'+(X-9)+'" y="'+(yy-11)+'" width="18" height="22" fill="transparent"/></g>';
+  return s;
+}
+
+function draw(){
+  let s='<svg viewBox="0 0 '+W+' '+height()+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three Robinson futures on one time axis">';
+  let y=M.t;
+
+  if(view==='clash'){
+    s+='<text x="'+M.l+'" y="'+(y+2)+'" font-size="12.5" fill="#9a9a9a">Three points where the books cannot both be right</text>';
+    y+=26;
+    D.conflicts.forEach((c,i)=>{
+      const on=sel===('clash'+i);
+      s+='<g class="hit" data-id="clash'+i+'" style="cursor:pointer">';
+      s+='<rect x="'+M.l+'" y="'+y+'" width="'+IW+'" height="44" rx="5" fill="'+(on?'#23262b':'#17191d')+'" stroke="'+(on?'#fff':'#333')+'"/>';
+      s+='<text x="'+(M.l+14)+'" y="'+(y+27)+'" font-size="14" fill="#e6e6e6">'+esc(c.n)+'</text></g>';
+      y+=54;
+    });
+    y+=6;
+  }
+
+  if(view==='all'||view==='periods'||view==='clash'){
+    s+='<text x="'+M.l+'" y="'+(y+2)+'" font-size="12.5" fill="#ffb02e">2312</text>';
+    y+=10;
+    const h = (view==='periods')?52:30;
+    D.periods.forEach(p=>{ s+=band(p,y,h,p.c,'p:'+p.k,false); });
+    y+=h+8;
+    if(view==='periods'){
+      D.events.forEach(e=>{ s+=mark(e,y+6,'#ffb02e','e:'+e.k,false); });
+      y+=22;
+    }
+  }
+
+  if(view==='qubes'){
+    s+='<text x="'+M.l+'" y="'+(y+2)+'" font-size="12.5" fill="#9a9a9a">The six periods, with the qube entries lit</text>';
+    y+=12;
+    D.periods.forEach(p=>{
+      const lit = D.qubes.some(q=>q.a===p.a);
+      s+=band(p,y,34, lit?p.c:'#1d1d1d','p:'+p.k,false);
+    });
+    y+=50;
+    s+='<text x="'+M.l+'" y="'+(y+6)+'" font-size="12.5" fill="#ffb02e">What the book says about qubes, in order</text>';
+    D.qubes.forEach((q,i)=>{ s+=band(q,y+16,26,'#6b5326','q:'+i,false); });
+    y+=50;
+  }
+
+  if(view==='all'){
+    s+='<text x="'+M.l+'" y="'+(y+12)+'" font-size="12.5" fill="#6fbf73">Mars trilogy</text>';
+    y+=22;
+    D.mars.forEach((m,i)=>{ s+=mark(m,y,'#6fbf73','m:'+i,m.d); });
+    y+=26;
+    s+='<text x="'+M.l+'" y="'+(y+8)+'" font-size="12.5" fill="#58a6ff">New York 2140</text>';
+    y+=20;
+    D.ny.forEach((n,i)=>{ s+=mark(n,y,'#58a6ff','n:'+i,n.d); });
+    y+=24;
+  }
+
+  s+=axis(y+6);
+  return s+'</svg>';
+}
+
+function height(){
+  if(view==='clash') return 330;
+  if(view==='periods') return 170;
+  if(view==='qubes') return 210;
+  return 230;
+}
+
+function find(id){
+  const [t,k]=[id.slice(0,id.indexOf(':')), id.slice(id.indexOf(':')+1)];
+  if(id.startsWith('clash')) return ['Disagreement', D.conflicts[+id.slice(5)], null];
+  if(t==='p'){ const o=D.periods.find(p=>p.k===k); return ['Period · 2312', o, o]; }
+  if(t==='e'){ const o=D.events.find(p=>p.k===k); return ['Event · 2312', o, o]; }
+  if(t==='q'){ const o=D.qubes[+k]; return ['Qubes · 2312', o, o]; }
+  if(t==='m'){ const o=D.mars[+k]; return ['Mars trilogy', o, o]; }
+  if(t==='n'){ const o=D.ny[+k]; return ['New York 2140', o, o]; }
+  return [null,null,null];
+}
+
+function show(id){
+  sel=id;
+  if(!id){ intro(); render(); return; }
+  const [kind,o] = find(id);
+  if(!o){ intro(); render(); return; }
+  if(id.startsWith('clash')) card(kind, o.n, '', o.g, '');
+  else card(kind, o.n, span(o.a,o.b), o.g + (o.d?'  The sources disagree about this date.':''), o.s);
+  render();
+}
+
+function intro(){
+  if(view==='clash') card('Three books','Where they disagree','','Robinson has said these are not one future history. Each row below is a place where reading them as one breaks something.','');
+  else if(view==='qubes') card('2312','The qube thread','2130 to 2320','Strong AI arrives in the Turnaround, in a list with fusion power and self replicating factories. A hundred and forty years later the Balkanization names qubes among its causes.','2312, pp. 255, 256');
+  else if(view==='periods') card('2312','Shortback’s periods','2005 to 2320', D.after.g, D.after.s);
+  else card('Three books','The same three centuries','2000 to 2320','Charlotte Shortback’s six periods on top, the Mars trilogy and New York 2140 beneath. Every band and mark carries the source its date came from.','');
+}
+
+function render(){
+  document.getElementById('diagram').innerHTML=draw();
+  const L=[['#ffb02e','2312'],['#6fbf73','Mars trilogy'],['#58a6ff','New York 2140']];
+  document.getElementById('legend').innerHTML =
+    L.map(([c,n])=>'<span><i style="background:'+c+'"></i>'+n+'</span>').join('')
+    + '<span><i style="background:transparent;border:1px dashed #888"></i>sources disagree</span>';
+  for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on', b.dataset.v===view);
+}
+
+document.getElementById('diagram').addEventListener('click', ev=>{
+  const g=ev.target.closest('.hit');
+  if(g) show(g.dataset.id);
+});
+document.getElementById('views').addEventListener('click', ev=>{
+  const b=ev.target.closest('button'); if(!b) return;
+  view=b.dataset.v; sel=null; intro(); render();
+});
+
+window.__ksr = function(q){
+  q=q||{};
+  if(q.view){ view=q.view; sel=null; intro(); render(); }
+  if(q.pick){ show(q.pick); }
+  return {view, sel,
+    periods: D.periods.length, mars: D.mars.length, ny: D.ny.length,
+    qubes: D.qubes.length, conflicts: D.conflicts.length,
+    bands: document.querySelectorAll('#diagram .hit').length,
+    name: document.getElementById('nameTxt').textContent,
+    num: document.getElementById('numTxt').textContent,
+    body: document.getElementById('bodyTxt').textContent,
+    src: document.getElementById('srcTxt').textContent,
+    svgH: height()};
+};
+
+intro(); render();
+
+</script>
+</body>
+</html>
