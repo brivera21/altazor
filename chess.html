@@ -177,34 +177,44 @@ footer.site a:hover { color: var(--accent); }
 <style>
 .section-body { max-width: none; }
 .chess-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 2.4rem; }
-.chess-cols h2:first-child { margin-top: 0; }
+.chess-cols h2:first-child, .chess-row.first h2 { margin-top: 0; }
+.chess-row.first { margin-bottom: 2.2rem; }
+.chess-row.last { margin-top: 2.2rem; }
 @media (max-width: 54rem) { .chess-cols { grid-template-columns: 1fr; } }
 </style>
+
+<div class="chess-row first">
+<h2>Fundamentals</h2>
+<p><a href="intuition.html">Board Intuition</a></p>
+</div>
 
 <div class="chess-cols">
 <div>
 <h2>Openings</h2>
+<p><a href="opening-terms.html">Opening Terms</a></p>
 <p><a href="openings.html">Openings by Frequency</a></p>
 <p><a href="ruy-lopez.html">The Ruy Lopez</a></p>
 <p><a href="scout.html">S.C.O.U.T.</a></p>
-<p><a href="opening-terms.html">Opening Terms</a></p>
 </div>
 <div>
 <h2>Middle Games</h2>
-<p><a href="timeline.html">50 Greatest Games</a></p>
-<p><a href="world-champions.html">World Champions</a></p>
-<p><a href="intuition.html">Board Intuition</a></p>
+<p><a href="middlegame-terms.html">Middlegame Terms</a></p>
 <p><a href="imbalances.html">I.M.B.A.L.A.N.C.E.S.</a></p>
 <p><a href="plan.html">P.L.A.N.</a></p>
-<p><a href="middlegame-terms.html">Middlegame Terms</a></p>
 </div>
 <div>
 <h2>Endgames</h2>
+<p><a href="endgame-terms.html">Endgame Terms</a></p>
 <p><a href="endgames.html">Endgames</a></p>
 <p><a href="endgame-threshold.html">Endgame Threshold</a></p>
 <p><a href="rook-endgames.html">Rook Endgames</a></p>
-<p><a href="endgame-terms.html">Endgame Terms</a></p>
 </div>
+</div>
+
+<div class="chess-row last">
+<h2>Miscellaneous</h2>
+<p><a href="timeline.html">50 Greatest Games</a></p>
+<p><a href="world-champions.html">World Champions</a></p>
 </div>
 </div>
 <footer class="site"><a href="index.html">Altazor</a> · <a href="library.html#abstractions">Abstractions</a></footer>
