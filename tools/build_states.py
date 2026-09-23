@@ -777,6 +777,9 @@ h1 { margin:0 0 10px; font-size:26px; }
 .method { color:var(--muted); font-size:12.5px; margin-top:14px;
   max-width:820px; }
 .method summary { cursor:pointer; color:var(--accent); }
+details.sources { margin-top:22px; border-top:1px solid var(--line); padding-top:10px; }
+details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; }
+details.sources > summary:hover { color:var(--accent); }
 .method p { margin:9px 0 0; }
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
 .refs p { margin:0 0 8px; overflow-wrap:anywhere; }
@@ -846,13 +849,13 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   <div class="eraband" id="eband"></div>
 </div>
 <p class="note">__NOTE1__</p>
-<p class="note">__NOTE2__</p>
+<details class="sources"><summary>Sources</summary>
 <div class="method"><details><summary>What the population line is made
 of</summary><p>__METHOD__</p></details></div>
 <div class="method"><details><summary>About the living symbols</summary>
 <p>__SYMNOTE__</p></details></div>
-<h2 class="refh">References</h2>
 <div class="refs">__REFS__</div>
+</details>
 </div>
 <script>
 const ST=__ST__, HIST=__HIST__, ROADS=__ROADS__, SYM=__SYM__;
@@ -1458,24 +1461,14 @@ window.__state=()=>({year, layers:{...layers}, counties:ST.counties.length,
 </html>
 """
 
-NOTE1 = ("The map is the real state in Web Mercator: rivers and lakes from "
-         "Natural Earth, county lines and recent populations from the "
-         "Census Bureau's cartographic files, terrain shaded live "
-         "from the AWS Terrain Tiles, and the woods layer drawn from the "
-         "USGS National Land Cover Database, forest classes only. Each "
-         "chip turns one layer on or off; a mark under the cursor fills "
-         "the card, a click pins it. The border, neighbor names and counties "
-         "appear from the years they were drawn, and each highway from the "
-         "year its number reached the state.")
-NOTE2 = ("The slider runs from 1492: first the nations, as colored patches "
-         "approximating documented homelands, their populations scholarly "
-         "estimates; then settlements, capitals and removals year by year, "
-         "while the flag panel shows whose claim covered the land. City "
-         "circles grow green through yellow and orange to red at 10 "
-         "thousand, 100 thousand, one million. Golden arrows are migration "
-         "waves, joining regions rather than exact places. These nations "
-         "still exist today; Native Land Digital maps their territories "
-         "fully, with community input, and is the place to see them.")
+NOTE1 = ("The real state, with its terrain, woods, rivers, counties and roads, "
+         "each a layer to switch. The slider runs from 1492: the nations first, "
+         "then settlements, capitals and removals, with the flag of whoever "
+         "claimed the land. These nations still exist; Native Land Digital maps "
+         "their territories with their input.")
+# the caption rule (September 2026): one caption; the map and its key carry the rest
+NOTE2 = ""
+
 
 
 METHOD = ("What the population line is made of, and where it is soft. Every "

@@ -57,7 +57,7 @@ PAIRS = {
 # phrases and names that keep their spelling
 # Phrases that must keep a British spelling: place names, the titles of cited
 # works, and Wikipedia article titles, whose spelling is part of the address.
-KEEP = ["Grey Range", "Greylock", "Sama Mum", "Mum\"", "Tyre", "Third reference catalogue of bright galaxies", "Towards a natural system of organisms", "colour_", "Colour_", "_colour", "Labourdonnais", "Great grey owl", "Great_grey_owl"]
+KEEP = ["Grey Range", "Greylock", "Sama Mum", "Mum\"", "Tyre", "Third reference catalogue of bright galaxies", "Towards a natural system of organisms", "colour_", "Colour_", "_colour", "Labourdonnais", "Great grey owl", "Great_grey_owl", "Centre County", '"n":"Centre"']
 
 WORD = re.compile(r"\b(" + "|".join(sorted(PAIRS, key=len, reverse=True)) + r")\b", re.I)
 

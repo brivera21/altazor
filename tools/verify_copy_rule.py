@@ -13,6 +13,16 @@ underneath it, and stays short.
      for the whole site, English and Spanish alike.
   4. No em dashes anywhere.
 
+The caption rule (September 2026). The diagram does the teaching, so the
+words around it shrink to a caption. A page held to it has at most 60 words
+of description, no paragraph over 60, at most 80 words of diagram text on
+load, and its sources and method notes inside a closed <details>, so they are
+there for anyone who wants them and never read as part of the page. Every new
+page is held to it. Pages built before it are listed in copy_backlog.txt:
+they must still meet the older limits below, their distance from the caption
+rule is reported, and a page leaves the list when it is retrofitted.
+`--write-backlog` rewrites the list from what currently falls short.
+
 Sources, citations and method notes are a different kind of text: they are
 reference material, not description, so they sit below the description in a
 .refs or .method block and are not counted against its budget.
@@ -56,8 +66,15 @@ PART_OF_DIAGRAM = (".diagram-text",)
 # are allowed above the diagram and are never counted as description.
 FURNITURE = (".stamp", ".legend", ".sub2", ".controls", "figcaption")
 
-MAX_PARA = 100      # words in any single paragraph below the diagram
-MAX_TAIL = 180      # words in the whole tail
+MAX_PARA = 100      # older limit, still binding on backlog pages
+MAX_TAIL = 180      # older limit, still binding on backlog pages
+CAP_TAIL = 60       # the caption rule: words of description in all
+CAP_PARA = 60       # the caption rule: words in any one paragraph
+CAP_PART = 80       # the caption rule: diagram text showing on load
+BACKLOG_FILE = ROOT / "tools" / "copy_backlog.txt"
+BACKLOG = {l.strip() for l in BACKLOG_FILE.read_text().splitlines()
+           if l.strip() and not l.startswith("#")} if BACKLOG_FILE.exists() else set()
+WRITE_BACKLOG = "--write-backlog" in sys.argv
 MAX_ABOVE = 12      # words allowed in any text above the diagram
 TARGET = (40, 80)   # comfortable band, reported but not enforced
 
@@ -103,10 +120,12 @@ JS = """([sel, ref, furn, part]) => {
   const words = t => (t || '').trim().split(/\\s+/).filter(Boolean).length;
   const out = {diagram: diagram ? diagram.tagName + (diagram.className
       ? '.' + String(diagram.className).split(' ')[0] : '') : null,
-    above: [], below: [], reference: 0, part: 0};
+    above: [], below: [], reference: 0, part: 0,
+    loose: [...document.querySelectorAll(ref.join(','))].filter(e => !e.closest('details')).length};
   for (const p of document.querySelectorAll('p')) {
     const t = p.innerText.trim();
     if (!t) continue;
+    if (!p.getClientRects().length) continue;   // not rendered: display:none, or in a closed <details>
     if (diagram && diagram.contains(p)) continue;
     const n = words(t);
     if (part.some(s => p.closest(s))) { out.part += n; continue; }
@@ -149,6 +168,7 @@ except ImportError:
     print("playwright is required for this check")
     sys.exit(2)
 
+shortfall = {}
 with sync_playwright() as pw:
     br = pw.chromium.launch()
     pg = br.new_page(viewport={"width": 1200, "height": 1400})
@@ -184,6 +204,22 @@ with sync_playwright() as pw:
                              f"{a['t'][:60]!r}")
             if got["diagram"] is None and name not in PROSE:
                 notes.append(f"{name}: no diagram element found, rule 1 skipped")
+        short = []                       # where the page falls short of the caption rule
+        if not exempt:
+            if tail > CAP_TAIL:
+                short.append(f"description {tail}w (caption rule {CAP_TAIL})")
+            over = [b["n"] for b in got["below"] if b["n"] > CAP_PARA]
+            if over:
+                short.append(f"a paragraph of {max(over)}w (caption rule {CAP_PARA})")
+            if got["part"] > CAP_PART:
+                short.append(f"diagram text {got['part']}w on load (caption rule {CAP_PART})")
+            if got["loose"]:
+                short.append("sources not tucked into a closed Sources line")
+        if short:
+            shortfall[name] = short
+            if name not in BACKLOG and not WRITE_BACKLOG:
+                for w in short:
+                    fails.append(f"{name}: {w}")
         if not exempt:
             for b in got["below"]:
                 if b["n"] > MAX_PARA:
@@ -207,6 +243,17 @@ with sync_playwright() as pw:
 print()
 for n in notes:
     print("note", n)
+if WRITE_BACKLOG:
+    BACKLOG_FILE.write_text(
+        "# Pages built before the caption rule (September 2026) that still fall short\n"
+        "# of it. A page comes off this list when it is retrofitted.\n"
+        + "".join(f"{n}\n" for n in sorted(shortfall)))
+    print(f"\nwrote {BACKLOG_FILE.name}: {len(shortfall)} pages")
+else:
+    done = sorted(BACKLOG - set(shortfall))
+    if done:
+        print("\nnow meets the caption rule, take it off the backlog:", ", ".join(done))
+    print(f"\nbacklog: {len(BACKLOG & set(shortfall))} pages still short of the caption rule")
 if fails:
     print()
     for f in fails:

@@ -187,7 +187,11 @@ h1 { margin:0 0 6px; font-size:26px; }
 .refs a { color:var(--accent); overflow-wrap:anywhere; }
 .stage > .left { min-width:0; }
 .stage .eraPanel { margin-top:18px; }
-.method { border-top:1px solid var(--line); margin-top:30px; padding-top:14px; }
+.method { margin-top:10px; }
+details.sources { margin-top:26px; border-top:1px solid var(--line); padding-top:12px; }
+details.sources summary { color:var(--muted); font-size:13px; letter-spacing:.06em;
+  text-transform:uppercase; cursor:pointer; }
+details.sources summary:hover { color:var(--accent); }
 .refh { font-size:14px; color:var(--muted); margin:26px 0 8px; letter-spacing:.06em; text-transform:uppercase; }
 footer.site { margin-top:50px; padding-top:18px; border-top:1px solid var(--line); font-size:13px; color:var(--muted); }
 footer.site a { color:var(--muted); }
@@ -230,16 +234,17 @@ HTML = """<!DOCTYPE html>
 
 <div class="gaps diagram-text">
   <div id="gapbar"></div>
-  <p>__CLOSING__</p>
 </div>
 
 <div class="desc">
 __INTRO__
 </div>
 
-<div class="method"><p>__METHOD__</p></div>
-<h2 class="refh">References</h2>
-<div class="refs">__REFS__</div>
+<details class="sources">
+  <summary>Sources</summary>
+  <div class="method"><p>__METHOD__</p></div>
+  <div class="refs">__REFS__</div>
+</details>
 
 <footer class="site"><a href="index.html">Altazor</a> &middot; <a href="science-fiction.html">Science Fiction</a></footer>
 </div>
@@ -611,7 +616,6 @@ def main():
     html_ = (HTML.replace("__CSS__", css)
                  .replace("__TITLE__", TITLE)
                  .replace("__TAGLINE__", mdh(TAGLINE))
-                 .replace("__CLOSING__", mdh(CLOSING))
                  .replace("__INTRO__", "\n".join(f"<p>{mdh(p)}</p>" for p in INTRO))
                  .replace("__METHOD__", METHOD)
                  .replace("__REFS__", REFS)

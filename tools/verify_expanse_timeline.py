@@ -73,7 +73,7 @@ for gone, why in [("telemetry", "Epstein's design: no telemetry"),
 for here, why in [("launched at Mars", "hybrids at Mars"),
                   ("home computer", "the plans on his home computer"),
                   ("since 2307", "the gin label"),
-                  ("apart from a single date", "the wiki's one exception")]:
+                  ("only certain date", "the wiki's one exception")]:
     check(here in T, f"correction in place ({why})")
 gin = next(m for m in MILESTONES if m["sort"] == 2307)
 check(gin["source"] == "Show", "2307 rests on the show, not the novels")
@@ -82,8 +82,11 @@ check(len(CORRECTIONS) >= 10, f"every departure from the brief is listed ({len(C
 print("--- the numbers ---")
 g = [b - a for a, b, _ in GAPS]
 check(g == [163, 137, 3], f"intervals {g}: 2050 to 2213, 2213 to 2350, 2350 to 2353")
-check("About 160 years" in CLOSING and "about 140" in CLOSING and "four years" in CLOSING,
-      "the closing note uses the computed intervals")
+check(not CLOSING, "no closing paragraph: the gap bar carries it")
+W = lambda x: len(x.split())
+bw = lambda b: sum(W(x) if isinstance(x, str) else sum(W(t) + W(d) for t, d in x["dl"]) for x in b)
+check(max(bw(m["body"]) for m in MILESTONES) <= 60, "every milestone is a caption, 60 words or fewer")
+check(len(INTRO) == 1 and W(INTRO[0]) <= 60, f"one caption under the diagram ({W(INTRO[0])} words)")
 AU, DAY, GM = 1.495978707e11, 86400.0, 1.32712440018e20
 hoh = math.pi * math.sqrt(((1 + 1.524) / 2 * AU) ** 3 / GM) / DAY
 brach = 2 * math.sqrt(0.5 * AU / (9.80665 / 3)) / DAY
@@ -130,6 +133,12 @@ with sync_playwright() as p:
     pg.focus('#diagram .hit[data-i="0"]')
     pg.keyboard.press("Enter")
     check(pg.evaluate("() => window.__exp()")["sel"] == 0, "Enter on a focused marker opens it")
+    bar = pg.evaluate("() => document.querySelector('#gapbar').textContent")
+    check("about 160 years" in bar and "about 140 years" in bar and "four years" in bar,
+          "the gap bar labels the computed intervals")
+    check(pg.evaluate("() => { const d = document.querySelector('details.sources'); "
+                      "return !!d && !d.open && !!d.querySelector('.refs') && !!d.querySelector('.method'); }"),
+          "sources and method sit behind a closed Sources line")
     check(not errs, "no script errors" + (f" ({errs[0]})" if errs else ""))
     pg.close()
 
