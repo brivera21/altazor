@@ -15,7 +15,13 @@ underneath it, and stays short.
 
 Sources, citations and method notes are a different kind of text: they are
 reference material, not description, so they sit below the description in a
-.refs or .method block and are not counted against its budget. They still may
+.refs or .method block and are not counted against its budget.
+
+Text that changes with the diagram is part of the diagram, the way a side card
+is. The Chess terms pages show one term at a time under the board, and what
+sits there swaps when another term is picked, so it is marked .diagram-text and
+kept out of the budget. It is still held to rules 3 and 4, and the check prints
+its length so a runaway term stays visible. They still may
 not appear above the diagram. Pages that are prose rather than diagrams, and
 pages that are lists of links, are exempt from the length budget.
 
@@ -41,6 +47,10 @@ PROSE = {"hello.html", "good-of-the-internet.html"}
 # Reference material: cited below the description, outside its word budget.
 # It may not appear above the diagram.
 REFERENCE = (".refs", ".method", "#footnote")
+
+# Text that swaps with the diagram's own selection: part of the diagram, not
+# its description. Outside the budget, still checked for orders and em dashes.
+PART_OF_DIAGRAM = (".diagram-text",)
 
 # Furniture rather than prose: a date stamp, a legend, a control readout. These
 # are allowed above the diagram and are never counted as description.
@@ -83,7 +93,7 @@ def order_re(words):
 
 ORDER_RE, WATCH_RE = order_re(ORDERS), order_re(WATCH)
 
-JS = """([sel, ref, furn]) => {
+JS = """([sel, ref, furn, part]) => {
   let diagram = null;
   const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT);
   while (walk.nextNode()) {
@@ -93,12 +103,13 @@ JS = """([sel, ref, furn]) => {
   const words = t => (t || '').trim().split(/\\s+/).filter(Boolean).length;
   const out = {diagram: diagram ? diagram.tagName + (diagram.className
       ? '.' + String(diagram.className).split(' ')[0] : '') : null,
-    above: [], below: [], reference: 0};
+    above: [], below: [], reference: 0, part: 0};
   for (const p of document.querySelectorAll('p')) {
     const t = p.innerText.trim();
     if (!t) continue;
     if (diagram && diagram.contains(p)) continue;
     const n = words(t);
+    if (part.some(s => p.closest(s))) { out.part += n; continue; }
     if (furn.some(s => p.matches(s) || p.closest(s))) continue;
     const isRef = ref.some(s => p.matches(s) || p.closest(s));
     const above = diagram && (diagram.compareDocumentPosition(p) & 2);
@@ -160,7 +171,8 @@ with sync_playwright() as pw:
                 notes.append(f"{name}: reads like an order, check it: "
                              f"{frag[max(0, m.start() - 25):m.end() + 30]!r}")
 
-        got = pg.evaluate(JS, [list(CONTENT), list(REFERENCE), list(FURNITURE)])
+        got = pg.evaluate(JS, [list(CONTENT), list(REFERENCE), list(FURNITURE),
+                                list(PART_OF_DIAGRAM)])
         above = [a for a in got["above"] if a["n"] > MAX_ABOVE]
         tail = sum(b["n"] for b in got["below"])
         longest = max((b["n"] for b in got["below"]), default=0)
@@ -188,7 +200,8 @@ with sync_playwright() as pw:
               f"above {len(got['above']):2}  description {tail:4}w in "
               f"{len(got['below']):2} para, longest {longest:3}{band} "
               f" reference {got['reference']:4}w"
-              + ("   (exempt)" if exempt else ""))
+              + ("   (exempt)" if exempt else "")
+              + (f"   diagram text {got['part']}w" if got["part"] else ""))
     br.close()
 
 print()
