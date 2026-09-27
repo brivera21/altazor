@@ -152,6 +152,9 @@ FACTS = [
      abs(4 * math.pi * 1188.3 ** 2 / 1.77e7 - 1) < 0.005 and 1.77e7 > 1.71e7),
     ("1.303e22 kg is 18% of the Moon", round(1.303e22 / 7.346e22 * 100) == 18),
     ("Charon is half as wide as Pluto", abs(1212 / 2376.6 - 0.5) < 0.02),
+    ("and an eighth of its mass", abs(1.586e21 / 1.303e22 - 1 / 8) < 0.01),
+    ("the point both circle lies about a ninth of the way to Charon",
+     abs(1.586e21 / (1.303e22 + 1.586e21) - 1 / 9) < 0.005),
     ("so their balance point lies outside Pluto",
      19591 * 1.586e21 / (1.303e22 + 1.586e21) > 1188.3),
     ("New Horizons flew nine and a half years", abs((2015 + 195 / 365) - (2006 + 19 / 365) - 9.5) < 0.05),
@@ -538,6 +541,26 @@ with sync_playwright() as pw:
             fails.append(f"{name}: the Moon is not drawn around it to scale ({g})")
         elif g["r"] * 2 > pg.evaluate("()=>Math.min(innerWidth, innerHeight)"):
             fails.append(f"{name}: the Moon ring runs off the window")
+        if name == "Pluto":
+            pg.wait_for_timeout(1500)          # the zoom in from the whole line is a long one
+            c = pg.evaluate("()=>__dbg.charon")
+            box = pg.evaluate("()=>({w: innerWidth, panel: document.querySelector('#info').getBoundingClientRect().right})")
+            if not c:
+                fails.append("Pluto: Charon is not drawn")
+            else:
+                if abs(c["r"] / c["Rd"] - 606 / 1188.3) > 1e-6:
+                    fails.append(f"Charon's size is {c['r'] / c['Rd']:.3f} Pluto radii")
+                if abs((c["x"] - c["x0"]) / c["Rd"] - 19591 / 1188.3) > 1e-6:
+                    fails.append(f"Charon sits {(c['x'] - c['x0']) / c['Rd']:.2f} Pluto radii out")
+                fb = 19591 * 1.586e21 / (1.303e22 + 1.586e21) / 1188.3
+                if abs((c["bx"] - c["x0"]) / c["Rd"] - fb) > 1e-6:
+                    fails.append("the point both circle is misplaced")
+                if not c["bx"] - c["x0"] > c["Rd"]:
+                    fails.append("the point both circle falls inside Pluto")
+                if c["x0"] - c["Rd"] * 1737.4 / 1188.3 < box["panel"] or c["x"] + c["r"] > box["w"]:
+                    fails.append(f"Pluto, its Moon ring and Charon do not fit between the panel and the edge")
+                print(f"  ok   Charon sits {19591 / 1188.3:.1f} Pluto radii out at {606 / 1188.3:.2f} "
+                      f"of its size, and the point both circle is {fb:.2f} radii out, past the surface")
         print(f"  ok   a click on {name} opens its panel ({got['x']}), "
               f"with the Moon drawn around it {1737.4 / rkm:.1f} times wider")
     belt_mass = pg.evaluate("()=>{document.querySelector('.chip[data-name=\"Asteroid Belt\"]').click();"
