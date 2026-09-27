@@ -86,8 +86,7 @@ TOPICS = [
  dict(id="kpk", g="Working Backwards", t="King and pawn against king",
       c="The ending everything else reduces to. One pawn decides the game, "
         "and the kings decide the pawn. Three positions here, played out "
-        "one move at a time and checked against a solved table of this "
-        "ending: the same center pawn winning and drawing depending only "
+        "one move at a time: the same center pawn winning and drawing depending only "
         "on whose turn it is, and a rook pawn that cannot be won at all.",
       strong=[], soft=[],
       legend=[("w", "the squares the pawn attacks"),
@@ -196,10 +195,7 @@ TOPICS = [
              "it wants is how wins turn into stalemates.",
              "Rook pawns, on the a-file and the h-file, are the exception "
              "to all of it. If the defending king reaches the corner, or "
-             "even the square beside it, no amount of technique wins.",
-             "Every position and every move here was checked against a "
-             "table of this ending computed from scratch, so the verdicts "
-             "are exact, not rules of thumb."]),
+             "even the square beside it, no amount of technique wins."]),
  dict(id="kpkmap", g="Working Backwards", t="Every placement", map=True,
       strong=[],
       c="The whole ending at once. The white king and the pawn go anywhere, "
@@ -959,8 +955,7 @@ g.pc text { paint-order: stroke; transition: transform .55s ease; }
 </div>
 <p class="note">King and pawn against king, then the basic checkmates, played
 out one move at a time. Every placement paints the whole king and pawn table on
-the board at once, and Black always plays the reply that holds out longest in a
-solved table of each ending, so every verdict is exact.</p>
+the board at once, and Black always plays the reply that holds out longest.</p>
 </div>
 <script>
 const TOPICS=__TOPICS__;

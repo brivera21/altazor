@@ -144,9 +144,6 @@ __EXTRACSS__
   </div></div>
 </div>
 <p class="note">__NOTE1__</p>
-<details class="sources"><summary>Sources</summary>
-<div class="method"><p>__METHOD__</p></div>
-</details>
 </div>
 <script>
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -162,18 +159,6 @@ __SCRIPT__
 </body>
 </html>
 """
-
-METHOD = ("The wording of every step, feature and stage comes from a handwritten "
-          "checklist, and nothing here was added to it. Nothing is stored between "
-          "visits, so a run starts empty every time the page is opened.")
-
-IMB_METHOD = ("The ten features and their questions come from a handwritten checklist. "
-              "The games do not. Each was chosen for the feature its key move turns on, "
-              "and every score was replayed with a chess library before it reached the "
-              "page, so a mistyped or illegal move stops the build rather than drawing a "
-              "wrong position. Four of the ten finish in the recorded mate, which checks "
-              "the transcription a second way. Each card links to the article its score "
-              "was taken from.")
 
 # ------------------------------------------------------------------ SCOUT
 
@@ -527,7 +512,7 @@ PAGES = [
                 "two squares marked, and the score beside it steps through the whole "
                 "game. They run from Morphy in 1858 to Carlsen in 2021; five are called "
                 "somebody's Immortal."),
-         method=IMB_METHOD),
+         ),
     dict(out="plan.html", title="P.L.A.N.", h1="P.L.A.N.",
          tagline="Always enter the middlegame with a plan.",
          controls='<span class="lab">A plan</span><button id="resetBtn" type="button">Start over</button>',
@@ -547,8 +532,7 @@ def build():
                 .replace("__H1__", p["h1"]).replace("__TAGLINE__", p["tagline"])
                 .replace("__CONTROLS__", p["controls"]).replace("__DIAGRAM__", "")
                 .replace("__EXTRACSS__", p["extracss"]).replace("__SCRIPT__", p["script"])
-                .replace("__NOTE1__", p["note1"])
-                .replace("__METHOD__", p.get("method", METHOD)))
+                .replace("__NOTE1__", p["note1"]))
         (ROOT / p["out"]).write_text(html, encoding="utf-8")
         print(f"  {p['out']:22} {len(html):>7,} B")
 

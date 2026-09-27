@@ -126,8 +126,6 @@ NOTE2 = ("The usual way of sorting the material is by what is left on the "
          "they appear, because the bigger positions keep reducing into "
          "them.")
 
-SOON = ("Short side and long side defenses, the f and h pawn pair, and the "
-        "four against three on one wing still to come.")
 
 HTML = """<!DOCTYPE html>
 <html lang="en">
@@ -238,7 +236,6 @@ g.pc text { paint-order:stroke; transition: transform .4s ease; }
 </div>
 <p class="note">__NOTE1__</p>
 <p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
-<p class="note" style="border-top:none; padding-top:0;"><em>__SOON__</em></p>
 <div class="method"><details><summary>What each position is</summary>
 __THEORY__
 </details></div>
@@ -393,7 +390,7 @@ def main():
     html = (HTML
             .replace("__NOTE1__", NOTE1)
             .replace("__NOTE2__", NOTE2)
-            .replace("__SOON__", SOON)
+
             .replace("__THEORY__", theory)
             .replace("__POS__", json.dumps(data, ensure_ascii=False,
                                            separators=(",", ":"))))

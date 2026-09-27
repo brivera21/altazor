@@ -187,6 +187,12 @@ h1 { margin:0 0 6px; font-size:26px; }
 .legend span.sw { width:11px; height:11px; border-radius:3px; display:inline-block; margin-right:5px; }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
+details.sources { margin-top:14px; max-width:760px; }
+details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px;
+  letter-spacing:.06em; text-transform:uppercase; }
+details.sources > summary:hover { color:var(--accent); }
+.refs { color:var(--muted); font-size:12.5px; margin:8px 0 0; }
+.refs a { color:var(--accent); }
 .note a { color:var(--accent); }
 @media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;}
   #portrait{max-width:200px; margin:0 auto;} }
@@ -226,13 +232,11 @@ through the rematch clause of his day, and Fischer forfeited in 1975 without
 a move played.</p>
 <p class="note">From 1993 to 2006 two rival titles existed after Kasparov
 left FIDE. This page draws the classical line, reunified when Kramnik beat
-the FIDE champion Topalov in 2006. Carlsen declined to defend in 2023. The
-reigns can be checked against the
-<a href="https://en.wikipedia.org/wiki/World_Chess_Championship">list of
-world chess champions</a>, and the next match is set out in
-<a href="https://www.fide.com/geneva-to-host-fide-world-championship-match-2026/">FIDE's
-announcement</a>. Portraits load at view time from Wikipedia's public API for
-identification and are not stored on this site.</p>
+the FIDE champion Topalov in 2006. Carlsen declined to defend in 2023.</p>
+<details class="sources"><summary>Sources</summary>
+<p class="refs"><a href="https://en.wikipedia.org/wiki/World_Chess_Championship">World Chess Championship</a> (Wikipedia) &middot;
+<a href="https://www.fide.com/geneva-to-host-fide-world-championship-match-2026/">FIDE, the 2026 match</a></p>
+</details>
 </div>
 <script>
 const REIGNS=__REIGNS__, ERAS=__ERAS__;

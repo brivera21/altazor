@@ -115,8 +115,7 @@ atk_diags = sorted(set(diag(1, 1, 1, 1) + diag(1, 8, 1, -1)) - {"h7", "h2"})
 
 TOPICS = [
  dict(id="reference", g="Geography", t="Reference board",
-      c="Corner labels stay readable with pieces on the board. Every topic "
-        "that follows repaints this same board.",
+      c="Corner labels stay readable with pieces on the board.",
       strong=[], soft=[], legend=[]),
  dict(id="ranks", g="Geography", t="Pawn ranks and back ranks",
       c="Every pawn starts on the 2nd or 7th rank. Every piece starts on the "
@@ -442,8 +441,6 @@ g.pc text { paint-order: stroke; transition: transform .55s ease; }
 <p class="note">Diagrams of board geography, drawn on the same reference
 board. A topic repaints the highlights, a square under the cursor names
 itself, and the buttons or the arrow keys move through the set.</p>
-<p class="note">After the Board intuition trainer diagrams. The same reference
-board underlies every topic; only the paint changes.</p>
 </div>
 <script>
 const TOPICS=__TOPICS__;

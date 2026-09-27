@@ -154,10 +154,7 @@ they belong to, from As-Suli in 950 to Gukesh in 2024. The wheel or a pinch zoom
 dragging pans, a click on an era band zooms into it, and anything under the
 cursor shows its details.</p>
 <p class="note">Games are placed at the year they were played and colored by
-era; champions sit below the axis at the start of each reign. The game list is
-a personal selection. The axis starts at 1800; the medieval and early games
-live in the Before 1800 box so a thousand mostly empty years do not stretch
-the canvas.</p>
+era; champions sit below the axis at the start of each reign.</p>
 </div>
 <script>
 const GAMES=__GAMES__, CHAMPS=__CHAMPS__, PERIODS=__PERIODS__, THEMES=__THEMES__, PRE=__PRE__;
