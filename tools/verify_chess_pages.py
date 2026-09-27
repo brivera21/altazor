@@ -479,7 +479,7 @@ am = subprocess.run([sys.executable, str(ROOT / "tools" / "americanize.py"), "--
                     capture_output=True, text=True, cwd=ROOT).stdout
 check("0 files would change" in am, "americanize.py finds nothing to change")
 idx = (ROOT / "chess.html").read_text(encoding="utf-8")
-fund = re.search(r"<h2>Fundamentals</h2>(.*?)</div>", idx, re.S).group(1)
+fund = re.search(r"<h2>Fundamentals</h2>(.*?)<h2>Openings</h2>", idx, re.S).group(1)
 for f, t, col, *_ in NEW:
     if col == "Fundamentals":
         check(f'href="{f}">{t}<' in fund, f"{t} is listed under Fundamentals")
