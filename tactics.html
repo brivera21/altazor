@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Endgame Terms &middot; Altazor</title>
-<meta name="description" content="Terms from the endgame, each on the position that shows it.">
+<title>Tactics &middot; Altazor</title>
+<meta name="description" content="Double attacks, pins and the rest, each on a position.">
 <style>
 :root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
         --line:#2b2b2b; --accent:#58a6ff;
@@ -92,11 +92,16 @@ footer.site a:hover { color:var(--accent); }
 <header class="site">
   <a class="brand" href="index.html">ALTAZOR</a>
   <nav class="site"><a href="chess.html">&larr; Chess</a>
-  <a href="opening-terms.html">Opening Terms</a>
-  <a href="middlegame-terms.html">Middlegame Terms</a>
-  <a href="checkmates.html">Checkmates</a></nav>
+  <a href="intuition.html">Board Intuition</a>
+  <a href="fundamental-terms.html">Fundamental Terms</a>
+  <a href="pawn.html">Pawn</a>
+  <a href="knight.html">Knight</a>
+  <a href="bishop.html">Bishop</a>
+  <a href="rook.html">Rook</a>
+  <a href="queen.html">Queen</a>
+  <a href="king.html">King</a></nav>
 </header>
-<h1>Endgame Terms</h1>
+<h1>Tactics</h1>
 <div class="controls">
   <div class="chips" id="chips" role="tablist" style="display:contents"></div>
   <span class="keys">Arrow keys step through the terms.</span>
@@ -118,121 +123,474 @@ footer.site a:hover { color:var(--accent); }
   <div id="body"></div>
 </div>
 
-<footer class="site"><a href="index.html">Altazor</a> &middot; <a href="chess.html">Chess</a> &middot; Endgames</footer>
+<footer class="site"><a href="index.html">Altazor</a> &middot; <a href="chess.html">Chess</a> &middot; Fundamentals</footer>
 </div>
 
 <script>
 const TERMS = [
   {
-    "name": "Two weaknesses",
-    "tagline": "One target can be held. Two on opposite wings usually cannot.",
-    "fen": "8/r4pkp/p5p1/R7/4PP1P/1P3KP1/8/8",
+    "name": "Double attack",
+    "tagline": "One move, two threats.",
+    "fen": "6k1/pp3ppp/8/8/1b5n/8/PP3PPP/3Q2K1",
     "turn": "White to move",
     "marks": {
-      "a6": "target",
-      "a7": "subject",
-      "h4": "plan",
-      "h5": "plan",
-      "g6": "target"
+      "c4": "plan",
+      "e4": "plan",
+      "f4": "plan",
+      "g4": "plan",
+      "b4": "target",
+      "h4": "target",
+      "d4": "subject"
     },
     "legend": [
       [
-        "target",
-        "the weaknesses"
+        "subject",
+        "where the queen goes"
       ],
       [
-        "subject",
-        "the rook tied to the first one"
+        "target",
+        "two loose pieces"
       ],
       [
         "plan",
-        "h4-h5, the second front"
+        "the rank it attacks along"
       ]
     ],
     "body": [
-      "Black's a-pawn is the first weakness. No pawn can defend it, so the rook sits on a7 and does nothing else all game. On its own that holds. The defender only has to stand still, and White's rook cannot make progress by itself.",
-      "So White opens a second front as far from the first as the board allows. h4-h5 hits g6. If Black takes, the h-file opens. If he does not, White takes and the h-pawn is left backward. Now the same rook is asked to watch a6 and the kingside at once.",
-      "The half that gets forgotten is that the first weakness is never released. It is what freezes the defender while the second one is built. When pressure on one target stops producing anything, that is the signal to create another, not to go looking for a different plan."
+      "|1.Qd4",
+      "Both black pieces stand on the fourth rank with no defender, and Black can move only one of them. Loose pieces are what double attacks feed on."
     ]
   },
   {
-    "name": "Mutual zugzwang",
-    "tagline": "The same position wins or draws depending only on whose turn it is.",
-    "fen": "8/4k3/8/4K3/4P3/8/8/8",
-    "turn": "Either side to move, which is the whole point",
+    "name": "Fork",
+    "tagline": "One piece attacking two at once.",
+    "fen": "r3k2r/pp3ppp/8/1N6/8/8/PPP2PPP/R3K2R",
+    "turn": "White to move",
     "marks": {
+      "e8": "target",
+      "a8": "target",
+      "c7": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the forking square"
+      ],
+      [
+        "target",
+        "king and rook"
+      ]
+    ],
+    "body": [
+      "|1.Nc7+ and 2.Nxa8",
+      "The knight checks the king and attacks the rook in the same move. The king must move, and the rook falls."
+    ]
+  },
+  {
+    "name": "Pin, absolute",
+    "tagline": "Pinned to the king, so it may not move at all.",
+    "fen": "r1bqkbnr/ppp2ppp/2np4/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R",
+    "turn": "After 3...d6",
+    "marks": {
+      "d7": "zone",
+      "e8": "zone",
+      "c6": "target",
+      "b5": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the pinning bishop"
+      ],
+      [
+        "target",
+        "the pinned knight"
+      ],
+      [
+        "zone",
+        "the line to the king"
+      ]
+    ],
+    "body": [
+      "After ...d6 the knight stands between the bishop and the king. Moving it would expose the king to check, so the rules forbid it, and it cannot recapture on e5 or d4 while the pin lasts."
+    ]
+  },
+  {
+    "name": "Pin, relative",
+    "tagline": "Pinned to a more valuable piece; it may move, at a price.",
+    "fen": "rnbqkb1r/ppp2ppp/4pn2/3p2B1/2PP4/2N5/PP2PPPP/R2QKBNR",
+    "turn": "Queen's Gambit Declined, after 4.Bg5",
+    "marks": {
+      "e7": "zone",
+      "d8": "zone",
+      "f6": "target",
+      "g5": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the pinning bishop"
+      ],
+      [
+        "target",
+        "the pinned knight"
+      ],
+      [
+        "zone",
+        "the line to the queen"
+      ]
+    ],
+    "body": [
+      "The knight on f6 may legally move, but then Bxd8. The rule allows it; the material does not. Black usually answers with ...Be7, breaking the pin."
+    ]
+  },
+  {
+    "name": "Skewer",
+    "tagline": "A pin in reverse: the bigger piece in front.",
+    "fen": "4r3/5ppp/2k5/8/8/8/5PPP/3B2K1",
+    "turn": "White to move",
+    "marks": {
+      "b5": "zone",
+      "d7": "zone",
+      "c6": "target",
+      "e8": "target",
+      "a4": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the skewering check"
+      ],
+      [
+        "target",
+        "king in front, rook behind"
+      ],
+      [
+        "zone",
+        "the line"
+      ]
+    ],
+    "body": [
+      "|1.Ba4+ and 2.Bxe8",
+      "The king has to step off the diagonal, and the rook behind it is left to the bishop."
+    ]
+  },
+  {
+    "name": "Discovered attack",
+    "tagline": "One piece moves and uncovers another's attack.",
+    "fen": "4k3/pq1p1ppp/8/8/4N3/8/P4PPP/4R1K1",
+    "turn": "White to move",
+    "marks": {
+      "e1": "zone",
       "d6": "plan",
-      "e6": "plan",
-      "f6": "plan",
-      "e5": "subject",
-      "e7": "target"
-    },
-    "legend": [
-      [
-        "plan",
-        "the three squares that decide it"
-      ],
-      [
-        "subject",
-        "White's king"
-      ],
-      [
-        "target",
-        "Black's king"
-      ]
-    ],
-    "body": [
-      "Kings facing each other with the pawn behind. If White's king reaches d6, e6 or f6, the pawn promotes. If it cannot, the game is drawn.",
-      "With Black to move, every legal move gives one of those squares away. From e7 he can go to d7, d8, e8, f7 or f8, and White answers Kf6, Ke6, Ke6, Kd6, Ke6 in turn.",
-      "|With White to move, he cannot get in: 1.Kd5 Kd7, 1.Kf5 Kf7, and Black keeps meeting him. Running the pawn fails too. 1.Kf5 Kf7 2.e5 Ke7 3.e6 Ke8 4.Kf6 Kf8 5.e7+ Ke8 6.Ke6 is stalemate.",
-      "Both players want to pass and neither can. Once you recognize a position of this kind, the endgame turns into a single question: how do I arrive here with him to move? Triangulation and corresponding squares are the two techniques for answering it. The pure version, a pawn each, where whoever moves has to abandon his pawn, is called the trebuchet."
-    ]
-  },
-  {
-    "name": "Zugzwang",
-    "tagline": "Every move makes things worse, and passing is not allowed.",
-    "fen": "6k1/3q2p1/p2bp2p/3p1r2/1p1Pp3/3bQ1PP/PP1B1rB1/1N2R1RK",
-    "turn": "Sämisch against Nimzowitsch, Copenhagen, 1923, White to move",
-    "marks": {
-      "h1": "target",
-      "e3": "target",
-      "g1": "target",
-      "e1": "target",
-      "d2": "target",
-      "b1": "target"
-    },
-    "legend": [
-      [
-        "target",
-        "White's pieces, none with a safe move"
-      ]
-    ],
-    "body": [
-      "White resigned here with nearly all the pieces still on. Any king or rook move, any queen move and any bishop or knight move loses material or allows mate. The rare middlegame zugzwang."
-    ]
-  },
-  {
-    "name": "Waiting move",
-    "tagline": "A move that changes nothing but hands over the obligation to move.",
-    "fen": "6k1/3q2pp/p2bp3/3p1r2/1p1Pp3/3bQ1PP/PP1B1rB1/1N2R1RK",
-    "turn": "Sämisch against Nimzowitsch, 1923, Black to move",
-    "marks": {
-      "h6": "plan",
-      "h7": "subject"
+      "e8": "target",
+      "b7": "target",
+      "e4": "subject"
     },
     "legend": [
       [
         "subject",
-        "the pawn that waits"
+        "the piece that moves"
       ],
       [
         "plan",
-        "its one step"
+        "where it goes"
+      ],
+      [
+        "target",
+        "king and queen"
+      ],
+      [
+        "zone",
+        "the rook behind"
       ]
     ],
     "body": [
-      "|25...h6",
-      "Black has nothing to gain by attacking, so he makes a harmless pawn move and leaves White to move in a position where every move loses."
+      "|1.Nd6+ and 2.Nxb7",
+      "The knight steps off the e-file and the rook checks the king. From d6 the knight gives check too, a double check, and attacks the queen. Only the king can move, and the queen falls."
+    ]
+  },
+  {
+    "name": "X-ray",
+    "tagline": "A piece acting through another on its line.",
+    "fen": "r3r1k1/5ppp/1q6/8/8/8/4QPPP/4R1K1",
+    "turn": "White to move",
+    "marks": {
+      "e2": "plan",
+      "e8": "target",
+      "e1": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the rook behind"
+      ],
+      [
+        "plan",
+        "the queen in front"
+      ],
+      [
+        "target",
+        "the square both hit"
+      ]
+    ],
+    "body": [
+      "|1.Qxe8+ Rxe8 2.Rxe8 mate",
+      "The rook on e1 stands behind its own queen and still counts as an attacker of e8. Black guards e8 once, with the rook on a8; White hits it twice, and the back rank does the rest."
+    ]
+  },
+  {
+    "name": "Decoy",
+    "tagline": "A sacrifice that lures a piece onto a bad square.",
+    "fen": "3q2k1/pp3pp1/8/6N1/8/8/PP3PP1/6KR",
+    "turn": "White to move",
+    "marks": {
+      "g5": "plan",
+      "f7": "target",
+      "d8": "target",
+      "h8": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the decoy square"
+      ],
+      [
+        "target",
+        "where the fork lands"
+      ],
+      [
+        "plan",
+        "the knight"
+      ]
+    ],
+    "body": [
+      "|1.Rh8+ Kxh8 2.Nxf7+ and 3.Nxd8",
+      "The rook check leaves the king one move, onto h8, where the knight from f7 checks it and hits the queen together. When the lured piece is the king, this is also called attraction."
+    ]
+  },
+  {
+    "name": "Deflection",
+    "tagline": "Forcing a defender away from what it guards.",
+    "fen": "2r1r1k1/1p1q1ppp/3p1b2/p2P4/3Q4/5N2/PP2RPPP/4R1K1",
+    "turn": "Adams against Torre, as usually published, White to move",
+    "marks": {
+      "g4": "plan",
+      "d7": "target",
+      "e8": "target",
+      "d4": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "White's queen"
+      ],
+      [
+        "plan",
+        "where it goes"
+      ],
+      [
+        "target",
+        "the two defenders of e8"
+      ]
+    ],
+    "body": [
+      "|18.Qg4 Qb5 19.Qc4 Qd7 20.Qc7 Qb5 21.a4 Qxa4 22.Re4 Qb5 23.Qxb7",
+      "Black's queen and rook both guard e8 against Rxe8+. White keeps putting the queen where taking it would pull a defender off e8; in the game the black queen was pushed off that duty, and 23.Qxb7 won."
+    ]
+  },
+  {
+    "name": "Attraction",
+    "tagline": "A sacrifice that draws the king onto a square.",
+    "fen": "rnb1kb1r/pp3ppp/2p5/4q3/4n3/3Q4/PPPB1PPP/2KR1BNR",
+    "turn": "Réti against Tartakower, Vienna, 1910, White to move",
+    "marks": {
+      "d2": "plan",
+      "d1": "plan",
+      "e8": "target",
+      "d8": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the square the king is drawn to"
+      ],
+      [
+        "target",
+        "the king"
+      ],
+      [
+        "plan",
+        "bishop and rook behind"
+      ]
+    ],
+    "body": [
+      "|9.Qd8+ Kxd8 10.Bg5+ Kc7 11.Bd8 mate",
+      "The queen gives itself up on the square next to the king. Once the king takes on d8, the bishop moves with double check, from itself and from the rook behind it."
+    ]
+  },
+  {
+    "name": "Clearance",
+    "tagline": "Moving a piece out of the way of another.",
+    "fen": "r4rk1/pp3pp1/8/7N/8/3B4/PPP5/1K5Q",
+    "turn": "White to move",
+    "marks": {
+      "h2": "zone",
+      "h3": "zone",
+      "h4": "zone",
+      "h6": "zone",
+      "h7": "plan",
+      "f6": "target",
+      "h5": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the piece in the way"
+      ],
+      [
+        "target",
+        "where it goes, with check"
+      ],
+      [
+        "zone",
+        "the line it clears"
+      ],
+      [
+        "plan",
+        "the mating square"
+      ]
+    ],
+    "body": [
+      "|1.Nf6+ gxf6 2.Qh7 mate",
+      "The knight blocks the queen's file. It leaves with check, so Black has no time to use the tempo, and the open h-file ends in mate."
+    ]
+  },
+  {
+    "name": "Overloaded piece",
+    "tagline": "One defender, two jobs.",
+    "fen": "3q2k1/1p3ppp/bn6/8/8/1Q6/P4PPP/4R1K1",
+    "turn": "White to move",
+    "marks": {
+      "b3": "plan",
+      "b6": "target",
+      "e8": "target",
+      "d8": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the overloaded queen"
+      ],
+      [
+        "target",
+        "the two things it guards"
+      ],
+      [
+        "plan",
+        "White's queen"
+      ]
+    ],
+    "body": [
+      "|1.Qxb6",
+      "Black's queen guards both the knight and the back rank. If it takes back on b6, Re8 is mate, so the knight is simply lost."
+    ]
+  },
+  {
+    "name": "Desperado",
+    "tagline": "A piece that gives itself up on purpose.",
+    "fen": "7k/4R3/8/8/8/p7/P1q5/K7",
+    "turn": "White to move",
+    "marks": {
+      "a1": "zone",
+      "b1": "zone",
+      "b2": "zone",
+      "h8": "target",
+      "e7": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the desperado rook"
+      ],
+      [
+        "target",
+        "the king it checks"
+      ],
+      [
+        "zone",
+        "White's king, with no move"
+      ]
+    ],
+    "body": [
+      "|1.Rh7+ Kg8 2.Rg7+ Kf8 3.Rf7+",
+      "White's king has no move, so if the rook is ever taken it is stalemate. The rook checks forever, and Black cannot escape it without taking it."
+    ]
+  },
+  {
+    "name": "Windmill",
+    "tagline": "A discovered check that repeats, taking something each time.",
+    "fen": "r3rnk1/pb3pp1/3ppB1p/7q/1P1P4/4N1R1/P4PPP/4R1K1",
+    "turn": "Torre against Lasker, Moscow, 1925, White to move",
+    "marks": {
+      "h5": "plan",
+      "g7": "target",
+      "f7": "target",
+      "b7": "target",
+      "g3": "subject",
+      "f6": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "rook and bishop"
+      ],
+      [
+        "target",
+        "what the rook collects"
+      ],
+      [
+        "plan",
+        "Black's queen, taken at the end"
+      ]
+    ],
+    "body": [
+      "|26.Rxg7+ Kh8 27.Rxf7+ Kg8 28.Rg7+ Kh8 29.Rxb7+ Kg8 30.Rg7+ Kh8 31.Rg5+ Kh7 32.Rxh5",
+      "The bishop on f6 holds the king in the corner. Each time the rook leaves g7 it gives discovered check and takes a piece, then comes back with check."
+    ]
+  },
+  {
+    "name": "Zwischenzug",
+    "tagline": "An in-between move before the expected one.",
+    "fen": "r2qk2r/p1pb1ppp/2p5/2bpP3/4B3/8/PPP2PPP/RNBQK2R",
+    "turn": "Lichtenhein against Morphy, New York, 1857, Black to move",
+    "marks": {
+      "e4": "zone",
+      "h4": "plan",
+      "f2": "target",
+      "d8": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "Black's queen"
+      ],
+      [
+        "plan",
+        "where it goes first"
+      ],
+      [
+        "target",
+        "the mate it threatens"
+      ],
+      [
+        "zone",
+        "the bishop still to be taken"
+      ]
+    ],
+    "body": [
+      "|10...Qh4",
+      "White has just taken the knight on e4, and ...dxe4 is expected. Morphy first threatens mate on f2; the bishop cannot retreat to f3 because of ...Qxf2 mate, and it is still taken a move later."
     ]
   }
 ];

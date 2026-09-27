@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Endgame Terms &middot; Altazor</title>
-<meta name="description" content="Terms from the endgame, each on the position that shows it.">
+<title>Knight &middot; Altazor</title>
+<meta name="description" content="Where a knight sees most, and where it belongs.">
 <style>
 :root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
         --line:#2b2b2b; --accent:#58a6ff;
@@ -92,11 +92,16 @@ footer.site a:hover { color:var(--accent); }
 <header class="site">
   <a class="brand" href="index.html">ALTAZOR</a>
   <nav class="site"><a href="chess.html">&larr; Chess</a>
-  <a href="opening-terms.html">Opening Terms</a>
-  <a href="middlegame-terms.html">Middlegame Terms</a>
-  <a href="checkmates.html">Checkmates</a></nav>
+  <a href="intuition.html">Board Intuition</a>
+  <a href="fundamental-terms.html">Fundamental Terms</a>
+  <a href="pawn.html">Pawn</a>
+  <a href="bishop.html">Bishop</a>
+  <a href="rook.html">Rook</a>
+  <a href="queen.html">Queen</a>
+  <a href="king.html">King</a>
+  <a href="tactics.html">Tactics</a></nav>
 </header>
-<h1>Endgame Terms</h1>
+<h1>Knight</h1>
 <div class="controls">
   <div class="chips" id="chips" role="tablist" style="display:contents"></div>
   <span class="keys">Arrow keys step through the terms.</span>
@@ -118,121 +123,132 @@ footer.site a:hover { color:var(--accent); }
   <div id="body"></div>
 </div>
 
-<footer class="site"><a href="index.html">Altazor</a> &middot; <a href="chess.html">Chess</a> &middot; Endgames</footer>
+<footer class="site"><a href="index.html">Altazor</a> &middot; <a href="chess.html">Chess</a> &middot; Fundamentals</footer>
 </div>
 
 <script>
 const TERMS = [
   {
-    "name": "Two weaknesses",
-    "tagline": "One target can be held. Two on opposite wings usually cannot.",
-    "fen": "8/r4pkp/p5p1/R7/4PP1P/1P3KP1/8/8",
-    "turn": "White to move",
-    "marks": {
-      "a6": "target",
-      "a7": "subject",
-      "h4": "plan",
-      "h5": "plan",
-      "g6": "target"
-    },
+    "name": "Knight mobility",
+    "tagline": "How many squares a knight attacks from each square.",
+    "fen": "8/8/8/8/8/8/8/8",
+    "turn": "",
+    "marks": {},
     "legend": [
       [
-        "target",
-        "the weaknesses"
-      ],
-      [
         "subject",
-        "the rook tied to the first one"
+        "more squares"
       ],
       [
-        "plan",
-        "h4-h5, the second front"
+        "zone",
+        "fewer"
       ]
     ],
     "body": [
-      "Black's a-pawn is the first weakness. No pawn can defend it, so the rook sits on a7 and does nothing else all game. On its own that holds. The defender only has to stand still, and White's rook cannot make progress by itself.",
-      "So White opens a second front as far from the first as the board allows. h4-h5 hits g6. If Black takes, the h-file opens. If he does not, White takes and the h-pawn is left backward. Now the same rook is asked to watch a6 and the kingside at once.",
-      "The half that gets forgotten is that the first weakness is never released. It is what freezes the defender while the second one is built. When pressure on one target stops producing anything, that is the signal to create another, not to go looking for a different plan."
-    ]
+      "Two in the corner, eight in the center. This is why the rim is dim."
+    ],
+    "numbers": {
+      "a1": 2,
+      "a2": 3,
+      "a3": 4,
+      "a4": 4,
+      "a5": 4,
+      "a6": 4,
+      "a7": 3,
+      "a8": 2,
+      "b1": 3,
+      "b2": 4,
+      "b3": 6,
+      "b4": 6,
+      "b5": 6,
+      "b6": 6,
+      "b7": 4,
+      "b8": 3,
+      "c1": 4,
+      "c2": 6,
+      "c3": 8,
+      "c4": 8,
+      "c5": 8,
+      "c6": 8,
+      "c7": 6,
+      "c8": 4,
+      "d1": 4,
+      "d2": 6,
+      "d3": 8,
+      "d4": 8,
+      "d5": 8,
+      "d6": 8,
+      "d7": 6,
+      "d8": 4,
+      "e1": 4,
+      "e2": 6,
+      "e3": 8,
+      "e4": 8,
+      "e5": 8,
+      "e6": 8,
+      "e7": 6,
+      "e8": 4,
+      "f1": 4,
+      "f2": 6,
+      "f3": 8,
+      "f4": 8,
+      "f5": 8,
+      "f6": 8,
+      "f7": 6,
+      "f8": 4,
+      "g1": 3,
+      "g2": 4,
+      "g3": 6,
+      "g4": 6,
+      "g5": 6,
+      "g6": 6,
+      "g7": 4,
+      "g8": 3,
+      "h1": 2,
+      "h2": 3,
+      "h3": 4,
+      "h4": 4,
+      "h5": 4,
+      "h6": 4,
+      "h7": 3,
+      "h8": 2
+    }
   },
   {
-    "name": "Mutual zugzwang",
-    "tagline": "The same position wins or draws depending only on whose turn it is.",
-    "fen": "8/4k3/8/4K3/4P3/8/8/8",
-    "turn": "Either side to move, which is the whole point",
+    "name": "Outpost territory",
+    "tagline": "Where a knight is strongest.",
+    "fen": "8/8/8/8/8/8/8/8",
+    "turn": "",
     "marks": {
-      "d6": "plan",
-      "e6": "plan",
-      "f6": "plan",
+      "a5": "zone",
+      "a6": "zone",
+      "b5": "zone",
+      "b6": "zone",
+      "g5": "zone",
+      "g6": "zone",
+      "h5": "zone",
+      "h6": "zone",
+      "c5": "subject",
+      "c6": "subject",
+      "d5": "subject",
+      "d6": "subject",
       "e5": "subject",
-      "e7": "target"
-    },
-    "legend": [
-      [
-        "plan",
-        "the three squares that decide it"
-      ],
-      [
-        "subject",
-        "White's king"
-      ],
-      [
-        "target",
-        "Black's king"
-      ]
-    ],
-    "body": [
-      "Kings facing each other with the pawn behind. If White's king reaches d6, e6 or f6, the pawn promotes. If it cannot, the game is drawn.",
-      "With Black to move, every legal move gives one of those squares away. From e7 he can go to d7, d8, e8, f7 or f8, and White answers Kf6, Ke6, Ke6, Kd6, Ke6 in turn.",
-      "|With White to move, he cannot get in: 1.Kd5 Kd7, 1.Kf5 Kf7, and Black keeps meeting him. Running the pawn fails too. 1.Kf5 Kf7 2.e5 Ke7 3.e6 Ke8 4.Kf6 Kf8 5.e7+ Ke8 6.Ke6 is stalemate.",
-      "Both players want to pass and neither can. Once you recognize a position of this kind, the endgame turns into a single question: how do I arrive here with him to move? Triangulation and corresponding squares are the two techniques for answering it. The pure version, a pawn each, where whoever moves has to abandon his pawn, is called the trebuchet."
-    ]
-  },
-  {
-    "name": "Zugzwang",
-    "tagline": "Every move makes things worse, and passing is not allowed.",
-    "fen": "6k1/3q2p1/p2bp2p/3p1r2/1p1Pp3/3bQ1PP/PP1B1rB1/1N2R1RK",
-    "turn": "Sämisch against Nimzowitsch, Copenhagen, 1923, White to move",
-    "marks": {
-      "h1": "target",
-      "e3": "target",
-      "g1": "target",
-      "e1": "target",
-      "d2": "target",
-      "b1": "target"
-    },
-    "legend": [
-      [
-        "target",
-        "White's pieces, none with a safe move"
-      ]
-    ],
-    "body": [
-      "White resigned here with nearly all the pieces still on. Any king or rook move, any queen move and any bishop or knight move loses material or allows mate. The rare middlegame zugzwang."
-    ]
-  },
-  {
-    "name": "Waiting move",
-    "tagline": "A move that changes nothing but hands over the obligation to move.",
-    "fen": "6k1/3q2pp/p2bp3/3p1r2/1p1Pp3/3bQ1PP/PP1B1rB1/1N2R1RK",
-    "turn": "Sämisch against Nimzowitsch, 1923, Black to move",
-    "marks": {
-      "h6": "plan",
-      "h7": "subject"
+      "e6": "subject",
+      "f5": "subject",
+      "f6": "subject"
     },
     "legend": [
       [
         "subject",
-        "the pawn that waits"
+        "prime outpost squares: c5 to f6"
       ],
       [
-        "plan",
-        "its one step"
+        "zone",
+        "the rest of the 5th and 6th ranks"
       ]
     ],
     "body": [
-      "|25...h6",
-      "Black has nothing to gain by attacking, so he makes a harmless pawn move and leaves White to move in a position where every move loses."
+      "A knight is strongest on the 5th or 6th rank where no enemy pawn can chase it away. The c, d, e and f files matter most."
     ]
   }
 ];

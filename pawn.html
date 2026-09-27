@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Middlegame Terms &middot; Altazor</title>
-<meta name="description" content="Terms from the middlegame, each on the position that shows it.">
+<title>Pawn &middot; Altazor</title>
+<meta name="description" content="The pawn, and the words for what pawns do.">
 <style>
 :root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
         --line:#2b2b2b; --accent:#58a6ff;
@@ -92,11 +92,16 @@ footer.site a:hover { color:var(--accent); }
 <header class="site">
   <a class="brand" href="index.html">ALTAZOR</a>
   <nav class="site"><a href="chess.html">&larr; Chess</a>
-  <a href="opening-terms.html">Opening Terms</a>
-  <a href="endgame-terms.html">Endgame Terms</a>
-  <a href="checkmates.html">Checkmates</a></nav>
+  <a href="intuition.html">Board Intuition</a>
+  <a href="fundamental-terms.html">Fundamental Terms</a>
+  <a href="knight.html">Knight</a>
+  <a href="bishop.html">Bishop</a>
+  <a href="rook.html">Rook</a>
+  <a href="queen.html">Queen</a>
+  <a href="king.html">King</a>
+  <a href="tactics.html">Tactics</a></nav>
 </header>
-<h1>Middlegame Terms</h1>
+<h1>Pawn</h1>
 <div class="controls">
   <div class="chips" id="chips" role="tablist" style="display:contents"></div>
   <span class="keys">Arrow keys step through the terms.</span>
@@ -118,302 +123,490 @@ footer.site a:hover { color:var(--accent); }
   <div id="body"></div>
 </div>
 
-<footer class="site"><a href="index.html">Altazor</a> &middot; <a href="chess.html">Chess</a> &middot; Middle Games</footer>
+<footer class="site"><a href="index.html">Altazor</a> &middot; <a href="chess.html">Chess</a> &middot; Fundamentals</footer>
 </div>
 
 <script>
 const TERMS = [
   {
-    "name": "Outpost",
-    "tagline": "A square in his half that no pawn of his can ever attack again.",
-    "fen": "r4rk1/1bq1bppp/p2p4/1p1Np3/4P3/3B4/PPPQ1PPP/R4RK1",
-    "turn": "Sicilian structure, Black to move",
+    "name": "Passed pawn",
+    "tagline": "No enemy pawn can stop it on the way to promotion.",
+    "fen": "6k1/pp3ppp/8/3P4/8/8/PP3PPP/6K1",
+    "turn": "White to move",
     "marks": {
-      "d5": "subject",
-      "c6": "target",
-      "e6": "target",
-      "e5": "plan"
+      "d6": "plan",
+      "d7": "plan",
+      "d8": "plan",
+      "d5": "subject"
     },
     "legend": [
       [
         "subject",
-        "the outpost"
-      ],
-      [
-        "target",
-        "squares no black pawn can reach"
+        "the passed pawn"
       ],
       [
         "plan",
-        "the pawn that gave it up"
+        "its road to d8"
       ]
     ],
     "body": [
-      "The knight on d5 is not visiting. Count the pawns that could ever attack that square: the c-pawn was traded early, and the e-pawn has gone to e5, past it. Neither can come back. Only a piece can remove the knight, and every piece trade of that kind costs Black something.",
-      "So the question is short, and it is about pawns rather than pieces. Which squares can his pawns never attack again? Traded pawns and advanced pawns both make them, which is why the same knight maneuver keeps appearing in the same structures.",
-      "What justifies the time it takes to get there is what happens after the trade. If Black plays Bxd5, White answers exd5 and a pawn takes the square over, gaining space and keeping Black's pieces out of it. The square stays White's whichever way the exchanges go."
+      "No black pawn stands on the c-, d- or e-file in front of it, so nothing can take it or block it except a piece, and a piece that blockades a passed pawn is tied to that job."
     ]
   },
   {
-    "name": "Hook",
-    "tagline": "A pawn of his that gives your pawn something to hit.",
-    "fen": "r4rk1/pp1bppbp/2np1np1/q7/2BNP2P/2N1BP2/PPPQ2P1/2KR3R",
-    "turn": "Opposite castling, White to move",
+    "name": "Protected passed pawn",
+    "tagline": "A passed pawn with a pawn guarding it.",
+    "fen": "6k1/pp3ppp/8/3P4/2P5/8/P4PPP/6K1",
+    "turn": "White to move",
     "marks": {
-      "g6": "subject",
-      "h4": "plan",
-      "h5": "plan",
-      "h7": "target"
+      "c4": "plan",
+      "d5": "subject"
     },
     "legend": [
       [
         "subject",
-        "the hook"
+        "the passed pawn"
       ],
       [
         "plan",
-        "h4-h5, the move it allows"
-      ],
-      [
-        "target",
-        "what the open file reaches"
+        "the pawn that guards it"
       ]
     ],
     "body": [
-      "White plays h4-h5, and it works only because g6 is there to make contact. If Black takes on h5, the h-file opens toward h7. If he leaves it, hxg6 opens the same file. One pawn move buys the line either way.",
-      "Clear g6 and h7 off the board and White has nothing to open with. Pawns cannot attack empty squares, so an attack with no hook has to be carried by pieces alone, which is much slower.",
-      "This is the part that changes a decision you actually face. Before pushing a pawn near your own king, h6 against a queenside castle, a6 against a kingside attack, ask what it hands the attacker to hit. And use it when counting: an attack with a hook usually lands a move or two sooner, and in opposite-castling positions a move or two is the whole game."
+      "The black king cannot win d5 by attacking it, because c4 takes back. When the pieces come off, a protected passer ties the enemy king down while the other king goes shopping."
     ]
   },
   {
-    "name": "Lever",
-    "tagline": "Pawn contact. Without it, nothing opens.",
-    "fen": "r3r1k1/ppq2ppp/2pb1n2/3p4/3P4/3BPN2/PPQ2PPP/1RR3K1",
-    "turn": "Carlsbad structure, White to move",
+    "name": "Connected passed pawns",
+    "tagline": "Two passed pawns on neighboring files.",
+    "fen": "6k1/5ppp/8/2PP4/8/8/5PPP/6K1",
+    "turn": "White to move",
     "marks": {
-      "b2": "subject",
-      "b4": "plan",
-      "b5": "plan",
-      "c6": "target",
-      "c5": "subject"
+      "c6": "plan",
+      "d6": "plan",
+      "c7": "plan",
+      "d7": "plan",
+      "c5": "subject",
+      "d5": "subject"
     },
     "legend": [
       [
         "subject",
-        "the pawns that can make contact"
+        "the connected pair"
       ],
       [
         "plan",
-        "b4-b5, White's lever"
-      ],
-      [
-        "target",
-        "the pawn it hits"
+        "the squares they cover as they go"
       ]
     ],
     "body": [
-      "Carlsbad structure from the Exchange Queen's Gambit Declined. White has two queenside pawns against three, and b4 then b5 makes contact with c6. After the trade Black has either a weak c-pawn or an open file to defend, and White has a target he manufactured himself. That is the minority attack, and its point is not material, it is making a weakness where there was none.",
-      "Black's levers are c6-c5 against d4, and the slower f7-f5 and f4 against e3. Both open the side of the board where his pieces are better placed.",
-      "In any position where nothing can be captured, list the pawn contacts available to each side. That list is usually the complete set of plans, and it is shorter than it feels. Pieces then go wherever the lever you intend needs them, rather than the other way around."
+      "Each one can guard the square the other advances to, so they walk up together, and a blockader in front of one is attacked by the other."
     ]
   },
   {
-    "name": "Prophylaxis",
-    "tagline": "A move spent on his plan instead of your own.",
-    "fen": "r1bq1rk1/2p1bppp/p1np1n2/1p2p3/4P3/1BP2N2/PP1P1PPP/RNBQR1K1",
-    "turn": "Closed Ruy Lopez after 8...O-O, White to move",
+    "name": "Outside passed pawn",
+    "tagline": "A passed pawn far from the other pawns.",
+    "fen": "8/5p1p/4k1p1/8/P7/4K1P1/5P1P/8",
+    "turn": "White to move",
     "marks": {
-      "h2": "plan",
-      "h3": "plan",
-      "g4": "target",
-      "f3": "subject",
+      "f7": "target",
+      "g6": "target",
+      "h7": "target",
+      "a4": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the outside passer"
+      ],
+      [
+        "target",
+        "what is left behind"
+      ]
+    ],
+    "body": [
+      "The kingside is three pawns each and even. When the black king goes to stop the a-pawn, the white king walks over and eats the kingside. In king and pawn endings this is usually the whole game."
+    ]
+  },
+  {
+    "name": "Backward pawn",
+    "tagline": "Left behind by its neighbors, it can no longer be defended by a pawn.",
+    "fen": "6k1/pp3ppp/3p4/3Np3/4P3/8/PPP2PPP/3R2K1",
+    "turn": "White to move",
+    "marks": {
+      "d2": "zone",
+      "d3": "zone",
+      "d4": "zone",
+      "d6": "target",
+      "d5": "subject"
+    },
+    "legend": [
+      [
+        "target",
+        "the backward pawn"
+      ],
+      [
+        "subject",
+        "the square in front of it"
+      ],
+      [
+        "zone",
+        "the half-open file behind"
+      ]
+    ],
+    "body": [
+      "No black pawn is left on c7 or e7 to guard d6, and it cannot step forward because d5 is White's. That makes d5 a permanent home for a white piece and d6 a fixed target down the file."
+    ]
+  },
+  {
+    "name": "Isolated pawn",
+    "tagline": "No friendly pawn on either neighboring file.",
+    "fen": "r2q1rk1/pp2bppp/2n1pn2/8/3P4/2N2N2/PP2BPPP/R2Q1RK1",
+    "turn": "White to move",
+    "marks": {
+      "c5": "plan",
+      "e5": "plan",
+      "d5": "target",
       "d4": "subject"
     },
     "legend": [
       [
-        "plan",
-        "9.h3"
+        "subject",
+        "the isolated d-pawn"
       ],
       [
         "target",
-        "the square it takes away"
-      ],
-      [
-        "subject",
-        "what White wants next"
-      ]
-    ],
-    "body": [
-      "White's move here is 9.h3. It develops nothing, attacks nothing and threatens nothing. It takes g4 away, because White intends d2-d4 and does not want Bg4 leaning on the knight that holds the center together.",
-      "The habit worth building is small. Before choosing a move, name his best next move. Often one quiet pawn move makes it impossible, and you end up in a position where you have every plan and he has none. Karpov built a career on this and Petrosian built one on it before him.",
-      "It costs a tempo, so it is right only when his plan is real. A prophylactic move against something he was never going to do is just a slow move, and you will usually find that out two moves later."
-    ]
-  },
-  {
-    "name": "Hole",
-    "tagline": "A square no pawn of one's own can guard anymore.",
-    "fen": "rnb1k2r/pp2q1pp/2pbpn2/3p1p2/2PP4/1P3NP1/P3PPBP/RNBQ1RK1",
-    "turn": "Dutch Stonewall, after 7...Qe7",
-    "marks": {
-      "e5": "target",
-      "d5": "subject",
-      "e6": "subject",
-      "f5": "subject"
-    },
-    "legend": [
-      [
-        "target",
-        "the hole in Black's camp"
-      ],
-      [
-        "subject",
-        "the pawns that left it"
-      ]
-    ],
-    "body": [
-      "The d- and f-pawns have both advanced to the fifth rank, and pawns never go back, so no black pawn can ever attack e5 again. Only pieces can contest it."
-    ]
-  },
-  {
-    "name": "Strong square",
-    "tagline": "A square one side can use and the other cannot attack with a pawn.",
-    "fen": "rnb2rk1/pp2q1pp/2pbpn2/3pNp2/2PP4/1P4P1/P3PPBP/RNBQ1RK1",
-    "turn": "Dutch Stonewall, after 8...O-O",
-    "marks": {
-      "d4": "plan",
-      "e6": "target",
-      "c6": "target",
-      "f7": "target",
-      "e5": "subject"
-    },
-    "legend": [
-      [
-        "subject",
-        "the knight on its strong square"
+        "the blockade square"
       ],
       [
         "plan",
-        "its pawn support"
-      ],
-      [
-        "target",
-        "what it presses on"
+        "outposts it gives White's knights"
       ]
     ],
     "body": [
-      "Black's hole on e5 is White's strong square. The knight cannot be driven off by a pawn and is backed by d4; Black's usual answer is to trade it with ...Nd7 or ...Bxe5."
+      "Only pieces can defend d4, and Black wants a piece on d5 to stop it. In return the pawn gives White space, open files and the c5 and e5 squares, so White looks for an attack before the ending."
     ]
   },
   {
-    "name": "Weakness",
-    "tagline": "A pawn or square that can be attacked and is hard to defend.",
-    "fen": "2r3k1/p4ppp/2p5/3p4/3P4/4P3/P4PPP/2R3K1",
-    "turn": "White to move",
+    "name": "Doubled pawns",
+    "tagline": "Two pawns of the same color on one file.",
+    "fen": "r1bqkbnr/1pp2ppp/p1p5/4p3/4P3/5N2/PPPP1PPP/RNBQK2R",
+    "turn": "After 4...dxc6, White to move",
     "marks": {
-      "c2": "zone",
-      "c3": "zone",
-      "c4": "zone",
-      "c5": "zone",
-      "c6": "target",
-      "c1": "subject"
+      "f2": "zone",
+      "g2": "zone",
+      "h2": "zone",
+      "e4": "zone",
+      "c6": "subject",
+      "c7": "subject"
     },
     "legend": [
       [
-        "target",
-        "the weak pawn"
-      ],
-      [
         "subject",
-        "White's rook"
+        "Black's doubled c-pawns"
       ],
       [
         "zone",
-        "the half-open file"
+        "White's healthy kingside majority"
       ]
     ],
     "body": [
-      "The c6 pawn cannot be guarded by another pawn and cannot safely advance, so a piece has to stand guard over it for the rest of the game. That tie is the real cost of a weakness."
+      "Once the d-pawns come off, White has four pawns against three on the kingside and can make a passed pawn there. Black's four against three on the queenside, two of them on the c-file, cannot. In return Black has the two bishops."
     ]
   },
   {
-    "name": "Tension",
-    "tagline": "Pawns or pieces attacking each other, with neither side taking.",
-    "fen": "rnbq1rk1/2p1bppp/p2p1n2/1p2p3/3PP3/1BP2N1P/PP3PP1/RNBQR1K1",
-    "turn": "Closed Ruy Lopez, after 10.d4",
+    "name": "Advanced pawn",
+    "tagline": "A pawn deep in enemy territory, gaining space.",
+    "fen": "rnbqkbnr/ppp2ppp/4p3/3pP3/3P4/8/PPP2PPP/RNBQKBNR",
+    "turn": "French Advance, after 3.e5",
     "marks": {
-      "d4": "subject",
+      "d4": "plan",
+      "d6": "target",
+      "f6": "target",
       "e5": "subject"
     },
     "legend": [
       [
         "subject",
-        "the pawns that attack each other"
-      ]
-    ],
-    "body": [
-      "Either side can capture, and neither wants to first. Taking releases the tension and usually gives the other side something, a free square or an open file, so keeping it is often the stronger choice."
-    ]
-  },
-  {
-    "name": "Blocked position",
-    "tagline": "Locked pawn chains dividing the board.",
-    "fen": "r1bq1rk1/ppp1npbp/3p1np1/3Pp3/2P1P3/2N2N2/PP2BPPP/R1BQ1RK1",
-    "turn": "King's Indian, Mar del Plata, White to move",
-    "marks": {
-      "c4": "plan",
-      "f7": "target",
-      "d5": "subject",
-      "e4": "subject",
-      "d6": "subject",
-      "e5": "subject"
-    },
-    "legend": [
-      [
-        "subject",
-        "the locked center"
-      ],
-      [
-        "plan",
-        "White's lever, c4-c5"
+        "the advanced pawn"
       ],
       [
         "target",
-        "Black's lever, f7-f5"
+        "squares it takes from Black"
+      ],
+      [
+        "plan",
+        "its base"
       ]
     ],
     "body": [
-      "No center file can open, so the pieces maneuver behind the lines and the game turns on pawn breaks on the wings: c4-c5 on the queenside for White, f7-f5 on the kingside for Black."
+      "On e5 the pawn takes f6 from the black knight and d6 from the bishop. The price is that it has to be held where it stands, and Black spends the next moves hitting its base with c5."
     ]
   },
   {
-    "name": "Counterplay",
-    "tagline": "The defending side's own threats.",
+    "name": "Overextended pawns",
+    "tagline": "Pawns pushed further than they can be supported.",
+    "fen": "rnbqkb1r/ppp1pppp/1n1p4/4P3/2PP1P2/8/PP4PP/RNBQKBNR",
+    "turn": "Alekhine's Defense, Four Pawns Attack, after 5.f4",
+    "marks": {
+      "d6": "plan",
+      "b6": "plan",
+      "c4": "subject",
+      "d4": "subject",
+      "e5": "subject",
+      "f4": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "White's four pawns"
+      ],
+      [
+        "plan",
+        "Black's pieces and pawn aimed at them"
+      ]
+    ],
+    "body": [
+      "White holds the whole center with four pawns; Black's whole defense is the claim that they are overextended. With ...dxe5, ...Nc6 and ...Bg4 Black attacks them until one needs more defending than White can give."
+    ]
+  },
+  {
+    "name": "Pawn structure",
+    "tagline": "The skeleton the pieces work around.",
+    "fen": "6k1/pp3ppp/2p5/3p4/3P4/4P3/PP3PPP/6K1",
+    "turn": "The Carlsbad structure, White to move",
+    "marks": {
+      "a2": "plan",
+      "b2": "plan",
+      "c6": "target",
+      "d4": "subject",
+      "d5": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the central pawns"
+      ],
+      [
+        "plan",
+        "White's queenside minority"
+      ],
+      [
+        "target",
+        "what it aims at"
+      ]
+    ],
+    "body": [
+      "Pawns move slowly and never back, so their layout outlasts most piece positions and decides where pieces belong. This one comes from the Queen's Gambit Exchange: White plays on the queenside, Black on the kingside."
+    ]
+  },
+  {
+    "name": "Minority attack",
+    "tagline": "Fewer pawns attacking more, to leave a weakness behind.",
+    "fen": "6k1/pp3ppp/2p5/1P1p4/P2P4/4P3/5PPP/6K1",
+    "turn": "White to move",
+    "marks": {
+      "d5": "plan",
+      "c6": "target",
+      "a4": "subject",
+      "b5": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "White's two queenside pawns"
+      ],
+      [
+        "target",
+        "the pawn they hit"
+      ],
+      [
+        "plan",
+        "the pawn left weak if Black takes"
+      ]
+    ],
+    "body": [
+      "White's two pawns go at Black's three. After bxc6 bxc6 Black has a backward c-pawn on a half-open file; after ...cxb5 axb5 the d-pawn is isolated. Either way there is a target for the rest of the game."
+    ]
+  },
+  {
+    "name": "Pawn race",
+    "tagline": "Both sides running passed pawns, counting moves.",
+    "fen": "2K5/8/8/P7/5k1p/8/8/8",
+    "turn": "White to move",
+    "marks": {
+      "b7": "plan",
+      "c6": "plan",
+      "d5": "plan",
+      "e4": "plan",
+      "f3": "plan",
+      "g2": "plan",
+      "h1": "plan",
+      "h4": "target",
+      "a5": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "White's runner"
+      ],
+      [
+        "target",
+        "Black's runner"
+      ],
+      [
+        "plan",
+        "the diagonal from a8 to h1"
+      ]
+    ],
+    "body": [
+      "Each pawn needs three moves and White moves first, so White queens first. The new queen on a8 also covers h1, and Black's queen is taken as it appears."
+    ]
+  },
+  {
+    "name": "Pawn roller",
+    "tagline": "Connected pawns advancing side by side.",
+    "fen": "rnbqk2r/ppp1ppbp/6p1/8/3PP3/2P5/P4PPP/R1BQKBNR",
+    "turn": "Grünfeld Exchange, after 6...Bg7",
+    "marks": {
+      "d5": "plan",
+      "e5": "plan",
+      "d4": "subject",
+      "e4": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the central pair"
+      ],
+      [
+        "plan",
+        "where they roll next"
+      ]
+    ],
+    "body": [
+      "Side by side, each pawn guards the square the other moves to, so they push the pieces in front of them back one square at a time. Black's whole plan is to stop them rolling with ...c5 and pressure on d4."
+    ]
+  },
+  {
+    "name": "Pawn storm",
+    "tagline": "Pawns thrown at the enemy king.",
     "fen": "r4rk1/pp2ppbp/3pbnp1/q7/3BP1PP/2N2P2/PPPQ4/2KR1B1R",
     "turn": "Sicilian Dragon, after 12.h4",
     "marks": {
-      "c8": "plan",
-      "b5": "plan",
-      "a2": "target",
-      "c3": "target",
-      "a5": "subject",
-      "g7": "subject"
+      "h5": "plan",
+      "g6": "target",
+      "h7": "target",
+      "g4": "subject",
+      "h4": "subject"
     },
     "legend": [
       [
         "subject",
-        "Black's attackers"
+        "the storming pawns"
       ],
       [
         "target",
-        "what they aim at"
+        "the king's cover"
       ],
       [
         "plan",
-        "where more are coming from"
+        "the next step"
       ]
     ],
     "body": [
-      "White's pawns are coming at Black's king. Black answers not by defending but by attacking the other king, down the c-file and with ...b5, so that White has to spend moves defending too."
+      "With the kings on opposite wings, White can throw the g- and h-pawns forward without exposing his own king. h4-h5 hits g6 to open the h-file against the black king."
+    ]
+  },
+  {
+    "name": "Push",
+    "tagline": "A pawn move straight ahead.",
+    "fen": "rnbqkbnr/pp2pppp/3p4/2p5/3PP3/5N2/PPP2PPP/RNBQKB1R",
+    "turn": "Open Sicilian, after 3.d4",
+    "marks": {
+      "c3": "zone",
+      "e3": "zone",
+      "c5": "plan",
+      "e5": "plan",
+      "d4": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the pawn just pushed"
+      ],
+      [
+        "plan",
+        "squares it now covers"
+      ],
+      [
+        "zone",
+        "squares it no longer covers"
+      ]
+    ],
+    "body": [
+      "Every push trades squares: on d2 the pawn guarded c3 and e3, on d4 it guards c5 and e5. A pawn never comes back, so whatever it stops guarding stays unguarded by it for good."
+    ]
+  },
+  {
+    "name": "Breakthrough",
+    "tagline": "Pawns sacrificed to force one through.",
+    "fen": "6k1/ppp5/8/PPP5/8/8/8/6K1",
+    "turn": "White to move",
+    "marks": {
+      "b6": "plan",
+      "a7": "target",
+      "b7": "target",
+      "c7": "target",
+      "b5": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the pawn that goes first"
+      ],
+      [
+        "plan",
+        "where it goes"
+      ],
+      [
+        "target",
+        "Black's pawns"
+      ]
+    ],
+    "body": [
+      "|1.b6 axb6 2.c6 bxc6 3.a6, or 1.b6 cxb6 2.a6 bxa6 3.c6",
+      "Three against three, and White gives two pawns so the third runs free. The black king on g8 is too far away to catch it."
+    ]
+  },
+  {
+    "name": "Underpromotion",
+    "tagline": "Promoting to something less than a queen.",
+    "fen": "8/2q1P1k1/8/8/8/8/PP6/K7",
+    "turn": "White to move",
+    "marks": {
+      "e8": "plan",
+      "g7": "target",
+      "c7": "target",
+      "e7": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the pawn"
+      ],
+      [
+        "plan",
+        "the promotion square"
+      ],
+      [
+        "target",
+        "what a knight on e8 attacks"
+      ]
+    ],
+    "body": [
+      "|1.e8=N+ and 2.Nxc7",
+      "A new queen would lose to ...Qc1 mate. A knight gives check and hits the queen at once. The knight is the only piece whose move a queen cannot make, which is why most underpromotions are to a knight."
     ]
   }
 ];

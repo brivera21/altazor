@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Endgame Terms &middot; Altazor</title>
-<meta name="description" content="Terms from the endgame, each on the position that shows it.">
+<title>Checkmates &middot; Altazor</title>
+<meta name="description" content="Named mating patterns, each on a position.">
 <style>
 :root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
         --line:#2b2b2b; --accent:#58a6ff;
@@ -94,9 +94,9 @@ footer.site a:hover { color:var(--accent); }
   <nav class="site"><a href="chess.html">&larr; Chess</a>
   <a href="opening-terms.html">Opening Terms</a>
   <a href="middlegame-terms.html">Middlegame Terms</a>
-  <a href="checkmates.html">Checkmates</a></nav>
+  <a href="endgame-terms.html">Endgame Terms</a></nav>
 </header>
-<h1>Endgame Terms</h1>
+<h1>Checkmates</h1>
 <div class="controls">
   <div class="chips" id="chips" role="tablist" style="display:contents"></div>
   <span class="keys">Arrow keys step through the terms.</span>
@@ -124,115 +124,61 @@ footer.site a:hover { color:var(--accent); }
 <script>
 const TERMS = [
   {
-    "name": "Two weaknesses",
-    "tagline": "One target can be held. Two on opposite wings usually cannot.",
-    "fen": "8/r4pkp/p5p1/R7/4PP1P/1P3KP1/8/8",
+    "name": "Scholar's mate",
+    "tagline": "Queen and bishop on f7 in four moves.",
+    "fen": "r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR",
+    "turn": "After 4.Qxf7, mate",
+    "marks": {
+      "e8": "zone",
+      "c4": "plan",
+      "h5": "plan",
+      "f7": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the mating square"
+      ],
+      [
+        "plan",
+        "where queen and bishop came from"
+      ],
+      [
+        "zone",
+        "the king"
+      ]
+    ],
+    "body": [
+      "f7 is guarded only by the king, and queen and bishop both hit it. 3...g6 or 3...Qe7 would have stopped it; 3...Nf6 attacked the queen and ignored the threat."
+    ]
+  },
+  {
+    "name": "Smothered mate",
+    "tagline": "A knight mates a king hemmed in by its own pieces.",
+    "fen": "1r5k/6pp/7N/3Q4/8/8/8/K7",
     "turn": "White to move",
     "marks": {
-      "a6": "target",
-      "a7": "subject",
-      "h4": "plan",
-      "h5": "plan",
-      "g6": "target"
-    },
-    "legend": [
-      [
-        "target",
-        "the weaknesses"
-      ],
-      [
-        "subject",
-        "the rook tied to the first one"
-      ],
-      [
-        "plan",
-        "h4-h5, the second front"
-      ]
-    ],
-    "body": [
-      "Black's a-pawn is the first weakness. No pawn can defend it, so the rook sits on a7 and does nothing else all game. On its own that holds. The defender only has to stand still, and White's rook cannot make progress by itself.",
-      "So White opens a second front as far from the first as the board allows. h4-h5 hits g6. If Black takes, the h-file opens. If he does not, White takes and the h-pawn is left backward. Now the same rook is asked to watch a6 and the kingside at once.",
-      "The half that gets forgotten is that the first weakness is never released. It is what freezes the defender while the second one is built. When pressure on one target stops producing anything, that is the signal to create another, not to go looking for a different plan."
-    ]
-  },
-  {
-    "name": "Mutual zugzwang",
-    "tagline": "The same position wins or draws depending only on whose turn it is.",
-    "fen": "8/4k3/8/4K3/4P3/8/8/8",
-    "turn": "Either side to move, which is the whole point",
-    "marks": {
-      "d6": "plan",
-      "e6": "plan",
-      "f6": "plan",
-      "e5": "subject",
-      "e7": "target"
-    },
-    "legend": [
-      [
-        "plan",
-        "the three squares that decide it"
-      ],
-      [
-        "subject",
-        "White's king"
-      ],
-      [
-        "target",
-        "Black's king"
-      ]
-    ],
-    "body": [
-      "Kings facing each other with the pawn behind. If White's king reaches d6, e6 or f6, the pawn promotes. If it cannot, the game is drawn.",
-      "With Black to move, every legal move gives one of those squares away. From e7 he can go to d7, d8, e8, f7 or f8, and White answers Kf6, Ke6, Ke6, Kd6, Ke6 in turn.",
-      "|With White to move, he cannot get in: 1.Kd5 Kd7, 1.Kf5 Kf7, and Black keeps meeting him. Running the pawn fails too. 1.Kf5 Kf7 2.e5 Ke7 3.e6 Ke8 4.Kf6 Kf8 5.e7+ Ke8 6.Ke6 is stalemate.",
-      "Both players want to pass and neither can. Once you recognize a position of this kind, the endgame turns into a single question: how do I arrive here with him to move? Triangulation and corresponding squares are the two techniques for answering it. The pure version, a pawn each, where whoever moves has to abandon his pawn, is called the trebuchet."
-    ]
-  },
-  {
-    "name": "Zugzwang",
-    "tagline": "Every move makes things worse, and passing is not allowed.",
-    "fen": "6k1/3q2p1/p2bp2p/3p1r2/1p1Pp3/3bQ1PP/PP1B1rB1/1N2R1RK",
-    "turn": "Sämisch against Nimzowitsch, Copenhagen, 1923, White to move",
-    "marks": {
-      "h1": "target",
-      "e3": "target",
-      "g1": "target",
-      "e1": "target",
-      "d2": "target",
-      "b1": "target"
-    },
-    "legend": [
-      [
-        "target",
-        "White's pieces, none with a safe move"
-      ]
-    ],
-    "body": [
-      "White resigned here with nearly all the pieces still on. Any king or rook move, any queen move and any bishop or knight move loses material or allows mate. The rare middlegame zugzwang."
-    ]
-  },
-  {
-    "name": "Waiting move",
-    "tagline": "A move that changes nothing but hands over the obligation to move.",
-    "fen": "6k1/3q2pp/p2bp3/3p1r2/1p1Pp3/3bQ1PP/PP1B1rB1/1N2R1RK",
-    "turn": "Sämisch against Nimzowitsch, 1923, Black to move",
-    "marks": {
-      "h6": "plan",
-      "h7": "subject"
+      "f7": "plan",
+      "h8": "target",
+      "g8": "subject"
     },
     "legend": [
       [
         "subject",
-        "the pawn that waits"
+        "the queen sacrifice"
       ],
       [
         "plan",
-        "its one step"
+        "the mating square"
+      ],
+      [
+        "target",
+        "the king"
       ]
     ],
     "body": [
-      "|25...h6",
-      "Black has nothing to gain by attacking, so he makes a harmless pawn move and leaves White to move in a position where every move loses."
+      "|1.Qg8+ Rxg8 2.Nf7 mate",
+      "The queen gives itself up on g8, and the rook that takes it fills the king's last square. The knight mates a king that cannot move."
     ]
   }
 ];

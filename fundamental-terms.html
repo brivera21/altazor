@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Endgame Terms &middot; Altazor</title>
-<meta name="description" content="Terms from the endgame, each on the position that shows it.">
+<title>Fundamental Terms &middot; Altazor</title>
+<meta name="description" content="Terms that belong to no one phase of the game.">
 <style>
 :root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
         --line:#2b2b2b; --accent:#58a6ff;
@@ -92,11 +92,16 @@ footer.site a:hover { color:var(--accent); }
 <header class="site">
   <a class="brand" href="index.html">ALTAZOR</a>
   <nav class="site"><a href="chess.html">&larr; Chess</a>
-  <a href="opening-terms.html">Opening Terms</a>
-  <a href="middlegame-terms.html">Middlegame Terms</a>
-  <a href="checkmates.html">Checkmates</a></nav>
+  <a href="intuition.html">Board Intuition</a>
+  <a href="pawn.html">Pawn</a>
+  <a href="knight.html">Knight</a>
+  <a href="bishop.html">Bishop</a>
+  <a href="rook.html">Rook</a>
+  <a href="queen.html">Queen</a>
+  <a href="king.html">King</a>
+  <a href="tactics.html">Tactics</a></nav>
 </header>
-<h1>Endgame Terms</h1>
+<h1>Fundamental Terms</h1>
 <div class="controls">
   <div class="chips" id="chips" role="tablist" style="display:contents"></div>
   <span class="keys">Arrow keys step through the terms.</span>
@@ -118,121 +123,273 @@ footer.site a:hover { color:var(--accent); }
   <div id="body"></div>
 </div>
 
-<footer class="site"><a href="index.html">Altazor</a> &middot; <a href="chess.html">Chess</a> &middot; Endgames</footer>
+<footer class="site"><a href="index.html">Altazor</a> &middot; <a href="chess.html">Chess</a> &middot; Fundamentals</footer>
 </div>
 
 <script>
 const TERMS = [
   {
-    "name": "Two weaknesses",
-    "tagline": "One target can be held. Two on opposite wings usually cannot.",
-    "fen": "8/r4pkp/p5p1/R7/4PP1P/1P3KP1/8/8",
+    "name": "Tempo",
+    "tagline": "One move's worth of time.",
+    "fen": "rnb1kbnr/ppp1pppp/8/3q4/8/2N5/PPPP1PPP/R1BQKBNR",
+    "turn": "Scandinavian, after 3.Nc3",
+    "marks": {
+      "d5": "target",
+      "c3": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the developing knight"
+      ],
+      [
+        "target",
+        "the queen it attacks"
+      ]
+    ],
+    "body": [
+      "The knight develops and attacks the queen, which has to move again. White has made a useful move and Black has not: White gains a tempo."
+    ]
+  },
+  {
+    "name": "Line",
+    "tagline": "A file, rank or diagonal; also a sequence of moves.",
+    "fen": "6k1/5ppp/8/8/8/2B5/5PPP/R5K1",
+    "turn": "",
+    "marks": {
+      "a2": "zone",
+      "a3": "zone",
+      "a4": "zone",
+      "a5": "plan",
+      "a6": "zone",
+      "a7": "zone",
+      "a8": "zone",
+      "d4": "plan",
+      "e5": "plan",
+      "f6": "plan",
+      "g7": "plan",
+      "b2": "plan",
+      "b4": "plan",
+      "d2": "plan",
+      "e1": "plan",
+      "a1": "subject",
+      "c3": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "rook and bishop"
+      ],
+      [
+        "zone",
+        "the rook's file"
+      ],
+      [
+        "plan",
+        "the bishop's diagonals"
+      ]
+    ],
+    "body": [
+      "On the board, a line is any file, rank or diagonal a long-range piece moves along. In analysis, a line is a sequence of moves from a position, as in the main line of an opening."
+    ]
+  },
+  {
+    "name": "Active and passive pieces",
+    "tagline": "Pieces that threaten, and pieces that guard.",
+    "fen": "r5k1/pR3ppp/8/8/8/8/P4PPP/6K1",
     "turn": "White to move",
     "marks": {
-      "a6": "target",
-      "a7": "subject",
-      "h4": "plan",
-      "h5": "plan",
-      "g6": "target"
-    },
-    "legend": [
-      [
-        "target",
-        "the weaknesses"
-      ],
-      [
-        "subject",
-        "the rook tied to the first one"
-      ],
-      [
-        "plan",
-        "h4-h5, the second front"
-      ]
-    ],
-    "body": [
-      "Black's a-pawn is the first weakness. No pawn can defend it, so the rook sits on a7 and does nothing else all game. On its own that holds. The defender only has to stand still, and White's rook cannot make progress by itself.",
-      "So White opens a second front as far from the first as the board allows. h4-h5 hits g6. If Black takes, the h-file opens. If he does not, White takes and the h-pawn is left backward. Now the same rook is asked to watch a6 and the kingside at once.",
-      "The half that gets forgotten is that the first weakness is never released. It is what freezes the defender while the second one is built. When pressure on one target stops producing anything, that is the signal to create another, not to go looking for a different plan."
-    ]
-  },
-  {
-    "name": "Mutual zugzwang",
-    "tagline": "The same position wins or draws depending only on whose turn it is.",
-    "fen": "8/4k3/8/4K3/4P3/8/8/8",
-    "turn": "Either side to move, which is the whole point",
-    "marks": {
-      "d6": "plan",
-      "e6": "plan",
-      "f6": "plan",
-      "e5": "subject",
-      "e7": "target"
-    },
-    "legend": [
-      [
-        "plan",
-        "the three squares that decide it"
-      ],
-      [
-        "subject",
-        "White's king"
-      ],
-      [
-        "target",
-        "Black's king"
-      ]
-    ],
-    "body": [
-      "Kings facing each other with the pawn behind. If White's king reaches d6, e6 or f6, the pawn promotes. If it cannot, the game is drawn.",
-      "With Black to move, every legal move gives one of those squares away. From e7 he can go to d7, d8, e8, f7 or f8, and White answers Kf6, Ke6, Ke6, Kd6, Ke6 in turn.",
-      "|With White to move, he cannot get in: 1.Kd5 Kd7, 1.Kf5 Kf7, and Black keeps meeting him. Running the pawn fails too. 1.Kf5 Kf7 2.e5 Ke7 3.e6 Ke8 4.Kf6 Kf8 5.e7+ Ke8 6.Ke6 is stalemate.",
-      "Both players want to pass and neither can. Once you recognize a position of this kind, the endgame turns into a single question: how do I arrive here with him to move? Triangulation and corresponding squares are the two techniques for answering it. The pure version, a pawn each, where whoever moves has to abandon his pawn, is called the trebuchet."
-    ]
-  },
-  {
-    "name": "Zugzwang",
-    "tagline": "Every move makes things worse, and passing is not allowed.",
-    "fen": "6k1/3q2p1/p2bp2p/3p1r2/1p1Pp3/3bQ1PP/PP1B1rB1/1N2R1RK",
-    "turn": "Sämisch against Nimzowitsch, Copenhagen, 1923, White to move",
-    "marks": {
-      "h1": "target",
-      "e3": "target",
-      "g1": "target",
-      "e1": "target",
-      "d2": "target",
-      "b1": "target"
-    },
-    "legend": [
-      [
-        "target",
-        "White's pieces, none with a safe move"
-      ]
-    ],
-    "body": [
-      "White resigned here with nearly all the pieces still on. Any king or rook move, any queen move and any bishop or knight move loses material or allows mate. The rare middlegame zugzwang."
-    ]
-  },
-  {
-    "name": "Waiting move",
-    "tagline": "A move that changes nothing but hands over the obligation to move.",
-    "fen": "6k1/3q2pp/p2bp3/3p1r2/1p1Pp3/3bQ1PP/PP1B1rB1/1N2R1RK",
-    "turn": "Sämisch against Nimzowitsch, 1923, Black to move",
-    "marks": {
-      "h6": "plan",
-      "h7": "subject"
+      "a7": "plan",
+      "f7": "plan",
+      "a8": "target",
+      "b7": "subject"
     },
     "legend": [
       [
         "subject",
-        "the pawn that waits"
+        "White's active rook"
+      ],
+      [
+        "target",
+        "Black's passive rook"
       ],
       [
         "plan",
-        "its one step"
+        "pawns the active rook attacks"
       ]
     ],
     "body": [
-      "|25...h6",
-      "Black has nothing to gain by attacking, so he makes a harmless pawn move and leaves White to move in a position where every move loses."
+      "Material is level. White's rook on the seventh attacks a7 and f7; Black's rook does nothing but guard a7. An active piece makes threats, a passive one answers them."
+    ]
+  },
+  {
+    "name": "Domination",
+    "tagline": "Every square a piece could go to is covered.",
+    "fen": "n6k/8/8/B7/4K3/8/6P1/8",
+    "turn": "White to move",
+    "marks": {
+      "b6": "plan",
+      "c7": "plan",
+      "a8": "target",
+      "a5": "subject"
+    },
+    "legend": [
+      [
+        "target",
+        "the dominated knight"
+      ],
+      [
+        "plan",
+        "its only moves"
+      ],
+      [
+        "subject",
+        "the bishop covering both"
+      ]
+    ],
+    "body": [
+      "The knight has two moves, b6 and c7, and the bishop covers both from one diagonal. Nothing attacks the knight, and still it is out of the game: any move it makes loses it, so White plays on as if a piece up."
+    ]
+  },
+  {
+    "name": "Inaccuracy",
+    "tagline": "A move that gives away part of an advantage. Marked ?!",
+    "fen": "r1bqkb1r/ppp2ppp/2n5/3np1N1/2B5/8/PPPP1PPP/RNBQK2R",
+    "turn": "Two Knights, after 5...Nxd5?!",
+    "marks": {
+      "g5": "plan",
+      "c4": "plan",
+      "f7": "target",
+      "d5": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the dubious recapture"
+      ],
+      [
+        "target",
+        "the square it leaves weak"
+      ],
+      [
+        "plan",
+        "White's attackers"
+      ]
+    ],
+    "body": [
+      "Taking back on d5 looks natural, but it lets White play Nxf7, the Fried Liver, or the quieter d4 with a strong attack. 5...Na5 is the main move. Not a loss, but an edge handed over: an inaccuracy."
+    ]
+  },
+  {
+    "name": "Blunder",
+    "tagline": "A move that throws the game away. Marked ??",
+    "fen": "r1b1kbnr/pppp1ppp/8/4N1q1/2BnP3/8/PPPP1PPP/RNBQK2R",
+    "turn": "After 4...Qg5, White to move",
+    "marks": {
+      "g5": "plan",
+      "f7": "target",
+      "g2": "target",
+      "e5": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "White's knight"
+      ],
+      [
+        "target",
+        "the bait and what it costs"
+      ],
+      [
+        "plan",
+        "Black's queen"
+      ]
+    ],
+    "body": [
+      "|5.Nxf7?? Qxg2 6.Rf1 Qxe4+ 7.Be2 Nf3 mate",
+      "The knight takes on f7 and forks queen and rook, which looks like it wins. It loses at once: the queen takes g2 and mates within three moves."
+    ]
+  },
+  {
+    "name": "Brilliant move",
+    "tagline": "A strong, surprising move, often a sacrifice. Marked !!",
+    "fen": "rnbQkb1r/pp3ppp/2p5/4q3/4n3/8/PPPB1PPP/2KR1BNR",
+    "turn": "Réti against Tartakower, Vienna, 1910, after 9.Qd8+!!",
+    "marks": {
+      "d2": "plan",
+      "d1": "plan",
+      "d8": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the queen sacrifice"
+      ],
+      [
+        "plan",
+        "bishop and rook, waiting"
+      ]
+    ],
+    "body": [
+      "White is a knight down and gives up the queen as well. 9...Kxd8 is forced, and 10.Bg5+ is double check and mate next move. A brilliant move is both best and hard to see."
+    ]
+  },
+  {
+    "name": "Illegal move",
+    "tagline": "A move the rules do not allow.",
+    "fen": "4k3/8/8/8/2b5/8/8/4K2R",
+    "turn": "White to move",
+    "marks": {
+      "e1": "zone",
+      "g1": "zone",
+      "f1": "target",
+      "c4": "subject"
+    },
+    "legend": [
+      [
+        "target",
+        "the square the king would cross"
+      ],
+      [
+        "subject",
+        "the bishop covering it"
+      ],
+      [
+        "zone",
+        "king and castling square"
+      ]
+    ],
+    "body": [
+      "Castling here is illegal: the king would pass over f1, which the bishop attacks. So is any move that leaves one's own king in check, including moving a piece pinned to the king."
+    ]
+  },
+  {
+    "name": "Interposing",
+    "tagline": "Answering a check by putting something in the way.",
+    "fen": "r1bqk1nr/pppp1ppp/2n5/8/1b2P3/2P1Q3/PP3PPP/RNB1KBNR",
+    "turn": "Center Game, after 5.c3",
+    "marks": {
+      "d2": "zone",
+      "e1": "zone",
+      "b4": "target",
+      "c3": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the interposed pawn"
+      ],
+      [
+        "target",
+        "the checking bishop"
+      ],
+      [
+        "zone",
+        "the line to the king"
+      ]
+    ],
+    "body": [
+      "There are three answers to a check: move the king, take the checking piece, or interpose. Here the pawn blocks the diagonal and attacks the bishop too. Against a knight, interposing is never possible."
     ]
   }
 ];

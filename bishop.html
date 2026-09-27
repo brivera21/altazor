@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Endgame Terms &middot; Altazor</title>
-<meta name="description" content="Terms from the endgame, each on the position that shows it.">
+<title>Bishop &middot; Altazor</title>
+<meta name="description" content="The bishop's diagonals, and the terms that go with them.">
 <style>
 :root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
         --line:#2b2b2b; --accent:#58a6ff;
@@ -92,11 +92,16 @@ footer.site a:hover { color:var(--accent); }
 <header class="site">
   <a class="brand" href="index.html">ALTAZOR</a>
   <nav class="site"><a href="chess.html">&larr; Chess</a>
-  <a href="opening-terms.html">Opening Terms</a>
-  <a href="middlegame-terms.html">Middlegame Terms</a>
-  <a href="checkmates.html">Checkmates</a></nav>
+  <a href="intuition.html">Board Intuition</a>
+  <a href="fundamental-terms.html">Fundamental Terms</a>
+  <a href="pawn.html">Pawn</a>
+  <a href="knight.html">Knight</a>
+  <a href="rook.html">Rook</a>
+  <a href="queen.html">Queen</a>
+  <a href="king.html">King</a>
+  <a href="tactics.html">Tactics</a></nav>
 </header>
-<h1>Endgame Terms</h1>
+<h1>Bishop</h1>
 <div class="controls">
   <div class="chips" id="chips" role="tablist" style="display:contents"></div>
   <span class="keys">Arrow keys step through the terms.</span>
@@ -118,121 +123,306 @@ footer.site a:hover { color:var(--accent); }
   <div id="body"></div>
 </div>
 
-<footer class="site"><a href="index.html">Altazor</a> &middot; <a href="chess.html">Chess</a> &middot; Endgames</footer>
+<footer class="site"><a href="index.html">Altazor</a> &middot; <a href="chess.html">Chess</a> &middot; Fundamentals</footer>
 </div>
 
 <script>
 const TERMS = [
   {
-    "name": "Two weaknesses",
-    "tagline": "One target can be held. Two on opposite wings usually cannot.",
-    "fen": "8/r4pkp/p5p1/R7/4PP1P/1P3KP1/8/8",
+    "name": "Bishop mobility",
+    "tagline": "How many squares a bishop attacks from each square.",
+    "fen": "8/8/8/8/8/8/8/8",
+    "turn": "",
+    "marks": {},
+    "legend": [
+      [
+        "subject",
+        "more squares"
+      ],
+      [
+        "zone",
+        "fewer"
+      ]
+    ],
+    "body": [
+      "Seven anywhere on the rim, rising by two with each ring inward to thirteen on the four center squares. A bishop never changes color, so even at its best it sees thirteen of the thirty two squares it can ever reach."
+    ],
+    "numbers": {
+      "a1": 7,
+      "a2": 7,
+      "a3": 7,
+      "a4": 7,
+      "a5": 7,
+      "a6": 7,
+      "a7": 7,
+      "a8": 7,
+      "b1": 7,
+      "b2": 9,
+      "b3": 9,
+      "b4": 9,
+      "b5": 9,
+      "b6": 9,
+      "b7": 9,
+      "b8": 7,
+      "c1": 7,
+      "c2": 9,
+      "c3": 11,
+      "c4": 11,
+      "c5": 11,
+      "c6": 11,
+      "c7": 9,
+      "c8": 7,
+      "d1": 7,
+      "d2": 9,
+      "d3": 11,
+      "d4": 13,
+      "d5": 13,
+      "d6": 11,
+      "d7": 9,
+      "d8": 7,
+      "e1": 7,
+      "e2": 9,
+      "e3": 11,
+      "e4": 13,
+      "e5": 13,
+      "e6": 11,
+      "e7": 9,
+      "e8": 7,
+      "f1": 7,
+      "f2": 9,
+      "f3": 11,
+      "f4": 11,
+      "f5": 11,
+      "f6": 11,
+      "f7": 9,
+      "f8": 7,
+      "g1": 7,
+      "g2": 9,
+      "g3": 9,
+      "g4": 9,
+      "g5": 9,
+      "g6": 9,
+      "g7": 9,
+      "g8": 7,
+      "h1": 7,
+      "h2": 7,
+      "h3": 7,
+      "h4": 7,
+      "h5": 7,
+      "h6": 7,
+      "h7": 7,
+      "h8": 7
+    }
+  },
+  {
+    "name": "The long diagonals",
+    "tagline": "a1 to h8 and a8 to h1.",
+    "fen": "8/8/8/8/8/8/8/8",
+    "turn": "",
+    "marks": {
+      "a1": "zone",
+      "c3": "zone",
+      "d4": "zone",
+      "e5": "zone",
+      "f6": "zone",
+      "h8": "zone",
+      "a8": "plan",
+      "c6": "plan",
+      "d5": "plan",
+      "e4": "plan",
+      "f3": "plan",
+      "h1": "plan",
+      "g2": "target",
+      "b7": "target",
+      "b2": "subject",
+      "g7": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "fianchetto squares on the dark diagonal"
+      ],
+      [
+        "zone",
+        "a1 to h8, all dark"
+      ],
+      [
+        "target",
+        "fianchetto squares on the light diagonal"
+      ],
+      [
+        "plan",
+        "a8 to h1, all light"
+      ]
+    ],
+    "body": [
+      "Eight squares each. A fianchettoed bishop on b2, g2, b7 or g7 rakes one of them end to end."
+    ]
+  },
+  {
+    "name": "The attacking diagonals",
+    "tagline": "b1 to h7 and b8 to h2.",
+    "fen": "8/7p/8/8/8/3B4/8/8",
+    "turn": "",
+    "marks": {
+      "b1": "zone",
+      "b8": "zone",
+      "c2": "zone",
+      "c7": "zone",
+      "d3": "zone",
+      "d6": "zone",
+      "e4": "zone",
+      "e5": "zone",
+      "f4": "zone",
+      "f5": "zone",
+      "g3": "zone",
+      "g6": "zone",
+      "h7": "subject",
+      "h2": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "h7 and h2, the sacrifice squares"
+      ],
+      [
+        "zone",
+        "the diagonals that reach them"
+      ]
+    ],
+    "body": [
+      "A bishop here points straight at the square in front of a castled king. This is the geometry of the Greek gift, Bxh7+."
+    ]
+  },
+  {
+    "name": "Bishop pair",
+    "tagline": "Both bishops against bishop and knight, or two knights.",
+    "fen": "6k1/p2nbppp/8/8/8/P2B4/1B3PPP/6K1",
     "turn": "White to move",
     "marks": {
-      "a6": "target",
-      "a7": "subject",
-      "h4": "plan",
-      "h5": "plan",
-      "g6": "target"
-    },
-    "legend": [
-      [
-        "target",
-        "the weaknesses"
-      ],
-      [
-        "subject",
-        "the rook tied to the first one"
-      ],
-      [
-        "plan",
-        "h4-h5, the second front"
-      ]
-    ],
-    "body": [
-      "Black's a-pawn is the first weakness. No pawn can defend it, so the rook sits on a7 and does nothing else all game. On its own that holds. The defender only has to stand still, and White's rook cannot make progress by itself.",
-      "So White opens a second front as far from the first as the board allows. h4-h5 hits g6. If Black takes, the h-file opens. If he does not, White takes and the h-pawn is left backward. Now the same rook is asked to watch a6 and the kingside at once.",
-      "The half that gets forgotten is that the first weakness is never released. It is what freezes the defender while the second one is built. When pressure on one target stops producing anything, that is the signal to create another, not to go looking for a different plan."
-    ]
-  },
-  {
-    "name": "Mutual zugzwang",
-    "tagline": "The same position wins or draws depending only on whose turn it is.",
-    "fen": "8/4k3/8/4K3/4P3/8/8/8",
-    "turn": "Either side to move, which is the whole point",
-    "marks": {
-      "d6": "plan",
-      "e6": "plan",
-      "f6": "plan",
-      "e5": "subject",
-      "e7": "target"
-    },
-    "legend": [
-      [
-        "plan",
-        "the three squares that decide it"
-      ],
-      [
-        "subject",
-        "White's king"
-      ],
-      [
-        "target",
-        "Black's king"
-      ]
-    ],
-    "body": [
-      "Kings facing each other with the pawn behind. If White's king reaches d6, e6 or f6, the pawn promotes. If it cannot, the game is drawn.",
-      "With Black to move, every legal move gives one of those squares away. From e7 he can go to d7, d8, e8, f7 or f8, and White answers Kf6, Ke6, Ke6, Kd6, Ke6 in turn.",
-      "|With White to move, he cannot get in: 1.Kd5 Kd7, 1.Kf5 Kf7, and Black keeps meeting him. Running the pawn fails too. 1.Kf5 Kf7 2.e5 Ke7 3.e6 Ke8 4.Kf6 Kf8 5.e7+ Ke8 6.Ke6 is stalemate.",
-      "Both players want to pass and neither can. Once you recognize a position of this kind, the endgame turns into a single question: how do I arrive here with him to move? Triangulation and corresponding squares are the two techniques for answering it. The pure version, a pawn each, where whoever moves has to abandon his pawn, is called the trebuchet."
-    ]
-  },
-  {
-    "name": "Zugzwang",
-    "tagline": "Every move makes things worse, and passing is not allowed.",
-    "fen": "6k1/3q2p1/p2bp2p/3p1r2/1p1Pp3/3bQ1PP/PP1B1rB1/1N2R1RK",
-    "turn": "Sämisch against Nimzowitsch, Copenhagen, 1923, White to move",
-    "marks": {
-      "h1": "target",
-      "e3": "target",
-      "g1": "target",
-      "e1": "target",
-      "d2": "target",
-      "b1": "target"
-    },
-    "legend": [
-      [
-        "target",
-        "White's pieces, none with a safe move"
-      ]
-    ],
-    "body": [
-      "White resigned here with nearly all the pieces still on. Any king or rook move, any queen move and any bishop or knight move loses material or allows mate. The rare middlegame zugzwang."
-    ]
-  },
-  {
-    "name": "Waiting move",
-    "tagline": "A move that changes nothing but hands over the obligation to move.",
-    "fen": "6k1/3q2pp/p2bp3/3p1r2/1p1Pp3/3bQ1PP/PP1B1rB1/1N2R1RK",
-    "turn": "Sämisch against Nimzowitsch, 1923, Black to move",
-    "marks": {
-      "h6": "plan",
-      "h7": "subject"
+      "a1": "zone",
+      "a6": "zone",
+      "b1": "zone",
+      "b5": "zone",
+      "c1": "zone",
+      "c2": "zone",
+      "c3": "zone",
+      "c4": "zone",
+      "d4": "zone",
+      "e2": "zone",
+      "e4": "zone",
+      "e5": "zone",
+      "f1": "zone",
+      "f5": "zone",
+      "f6": "zone",
+      "g6": "zone",
+      "d3": "subject",
+      "b2": "subject"
     },
     "legend": [
       [
         "subject",
-        "the pawn that waits"
+        "the pair"
       ],
       [
-        "plan",
-        "its one step"
+        "zone",
+        "the squares they reach"
       ]
     ],
     "body": [
-      "|25...h6",
-      "Black has nothing to gain by attacking, so he makes a harmless pawn move and leaves White to move in a position where every move loses."
+      "Between them the two bishops cover both colors, so nothing can hide on one. In open positions the pair is worth about half a pawn more than bishop and knight."
+    ]
+  },
+  {
+    "name": "Opposite-color bishops",
+    "tagline": "One bishop on light squares, the other on dark.",
+    "fen": "8/4k1p1/5p2/2b5/2B5/1P3P2/4K1P1/8",
+    "turn": "White to move",
+    "marks": {
+      "b3": "plan",
+      "c5": "target",
+      "c4": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "White's light-squared bishop"
+      ],
+      [
+        "target",
+        "Black's dark-squared bishop"
+      ],
+      [
+        "plan",
+        "White's extra pawn"
+      ]
+    ],
+    "body": [
+      "A pawn up, White cannot win: the black bishop holds the dark squares White's pawns must cross, and White's bishop can never contest them. In the middlegame the same imbalance helps the attacker, whose bishop has no opposite number."
+    ]
+  },
+  {
+    "name": "Fianchetto",
+    "tagline": "A bishop developed on the long diagonal, behind a knight pawn.",
+    "fen": "rnbqkb1r/ppp1pppp/5n2/3p4/8/5NP1/PPPPPPBP/RNBQK2R",
+    "turn": "After 3.Bg2",
+    "marks": {
+      "f3": "target",
+      "e4": "zone",
+      "d5": "zone",
+      "c6": "zone",
+      "b7": "zone",
+      "a8": "zone",
+      "h3": "target",
+      "g2": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the fianchettoed bishop"
+      ],
+      [
+        "zone",
+        "its diagonal"
+      ],
+      [
+        "target",
+        "the holes if it is ever traded"
+      ]
+    ],
+    "body": [
+      "The g-pawn steps to g3 and the bishop goes to g2, looking down the whole long diagonal. The weakened f3 and h3 squares are the cost if that bishop is ever exchanged."
+    ]
+  },
+  {
+    "name": "Spanish bishop",
+    "tagline": "The Ruy Lopez bishop, aimed at f7 from b3 or c2.",
+    "fen": "r1bq1rk1/2p1bppp/p1np1n2/1p2p3/4P3/1BP2N1P/PP1P1PP1/RNBQR1K1",
+    "turn": "Closed Ruy Lopez, after 9.h3",
+    "marks": {
+      "c4": "zone",
+      "d5": "zone",
+      "e6": "zone",
+      "f7": "target",
+      "g8": "target",
+      "b3": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the Spanish bishop"
+      ],
+      [
+        "zone",
+        "its diagonal"
+      ],
+      [
+        "target",
+        "where it points"
+      ]
+    ],
+    "body": [
+      "It goes b5, a4, b3 and often later c2. It looks idle, but from b3 it presses along a2-g8 at f7 and the castled king for the whole game, and Black's plans have to allow for it."
     ]
   }
 ];

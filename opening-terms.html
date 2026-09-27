@@ -9,7 +9,7 @@
 :root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
         --line:#2b2b2b; --accent:#58a6ff;
         --sq-light:#a9b2be; --sq-dark:#5a6472;
-        --subject:#f09b28; --target:#e0684b; --plan:#58a6ff; }
+        --subject:#f09b28; --target:#e0684b; --plan:#58a6ff; --zone:#f5d49a; }
 * { box-sizing:border-box; }
 body { margin:0; background:var(--bg); color:var(--text);
   font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
@@ -52,6 +52,11 @@ h1 { margin:0 0 14px; font-size:26px; }
 .sq[data-mark="subject"] { color:var(--subject); }
 .sq[data-mark="target"] { color:var(--target); }
 .sq[data-mark="plan"] { color:var(--plan); }
+.sq[data-mark="zone"] { color:var(--zone); }
+.sq[data-mark="zone"]::after { opacity:.30; }
+.heat { position:absolute; inset:0; background:var(--subject); pointer-events:none; }
+.num { position:relative; z-index:1; font-size:min(4.2vw, 21px); font-weight:650;
+  color:#101316; font-variant-numeric:tabular-nums; }
 .pc { position:relative; z-index:1; font-size:min(10vw, 56px); line-height:1; user-select:none; }
 .pc.w { color:#f6f6f4; -webkit-text-stroke:1.3px #15181c; text-shadow:0 0 1px #15181c; }
 .pc.b { color:#15181c; text-shadow:0 0 2px rgba(255,255,255,.35); }
@@ -64,6 +69,7 @@ h1 { margin:0 0 14px; font-size:26px; }
 .sw-subject { color:var(--subject); }
 .sw-target { color:var(--target); }
 .sw-plan { color:var(--plan); }
+.sw-zone { color:var(--zone); }
 
 .text { margin:30px 0 0; border-top:1px solid var(--line); padding-top:22px; max-width:72ch; }
 .text h2 { font-size:21px; margin:0 0 2px; font-weight:650; }
@@ -87,7 +93,8 @@ footer.site a:hover { color:var(--accent); }
   <a class="brand" href="index.html">ALTAZOR</a>
   <nav class="site"><a href="chess.html">&larr; Chess</a>
   <a href="middlegame-terms.html">Middlegame Terms</a>
-  <a href="endgame-terms.html">Endgame Terms</a></nav>
+  <a href="endgame-terms.html">Endgame Terms</a>
+  <a href="checkmates.html">Checkmates</a></nav>
 </header>
 <h1>Opening Terms</h1>
 <div class="controls">
@@ -151,6 +158,144 @@ const TERMS = [
       "Two consequences at the board. First, choosing an opening is choosing which bishop you will live with, so a structure that hands you a bad one needs a plan for it before you play into it. Second, the fix is usually the pawn structure rather than the piece: getting one pawn off your bishop's color does more than finding the bishop a marginally better square.",
       "Mihai Suba's line is worth keeping in mind as a check on the whole idea. Bad bishops protect good pawns. A bishop sitting behind its pawns is doing defensive work, and trading it can leave what it was guarding loose."
     ]
+  },
+  {
+    "name": "Control of the center",
+    "tagline": "Pawns and pieces on or aimed at d4, d5, e4 and e5.",
+    "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R",
+    "turn": "Scotch Game, after 3.d4",
+    "marks": {
+      "f3": "plan",
+      "c6": "plan",
+      "d5": "target",
+      "e5": "target",
+      "d4": "subject",
+      "e4": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "White's center pawns"
+      ],
+      [
+        "target",
+        "the other two center squares"
+      ],
+      [
+        "plan",
+        "knights aimed at the center"
+      ]
+    ],
+    "body": [
+      "Pieces placed in the center reach both wings fastest, so the first moves of nearly every opening fight for these four squares, by occupying them or by aiming at them."
+    ]
+  },
+  {
+    "name": "King pawn opening",
+    "tagline": "1.e4.",
+    "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR",
+    "turn": "After 1.e4",
+    "marks": {
+      "f1": "zone",
+      "d1": "zone",
+      "d5": "plan",
+      "f5": "plan",
+      "e4": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the king pawn"
+      ],
+      [
+        "plan",
+        "squares it controls"
+      ],
+      [
+        "zone",
+        "the queen and bishop it frees"
+      ]
+    ],
+    "body": [
+      "The king pawn takes two center squares and opens lines for the queen and the king's bishop at once. The positions tend to open early and turn on tactics and development."
+    ]
+  },
+  {
+    "name": "Queen pawn opening",
+    "tagline": "1.d4.",
+    "fen": "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR",
+    "turn": "After 1.d4",
+    "marks": {
+      "c1": "zone",
+      "d1": "zone",
+      "c5": "plan",
+      "e5": "plan",
+      "d4": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the queen pawn"
+      ],
+      [
+        "plan",
+        "squares it controls"
+      ],
+      [
+        "zone",
+        "the bishop and queen it frees"
+      ]
+    ],
+    "body": [
+      "Unlike e4, the pawn on d4 is already guarded by the queen. Queen pawn games tend to be slower and more positional, with c4 often following to fight for d5."
+    ]
+  },
+  {
+    "name": "Open and closed games",
+    "tagline": "1.e4 e5 is an open game; 1.d4 d5 a closed one.",
+    "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR",
+    "turn": "An open game, after 1...e5",
+    "marks": {
+      "e4": "subject",
+      "e5": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the king pawns, face to face"
+      ]
+    ],
+    "body": [
+      "The names sort openings by the first moves: open games start 1.e4 e5, closed games 1.d4 d5. An open position is a different idea, one with open files and few center pawns, and a closed opening can still produce one."
+    ]
+  },
+  {
+    "name": "Semi-closed games",
+    "tagline": "1.d4 answered by anything but 1...d5.",
+    "fen": "rnbqkb1r/pppppppp/5n2/8/3P4/8/PPP1PPPP/RNBQKBNR",
+    "turn": "After 1...Nf6",
+    "marks": {
+      "e4": "plan",
+      "f6": "target",
+      "d4": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "White's queen pawn"
+      ],
+      [
+        "target",
+        "Black's knight"
+      ],
+      [
+        "plan",
+        "the square it stops White taking with a pawn"
+      ]
+    ],
+    "body": [
+      "The Indian defenses start here. Black controls e4 with a piece instead of meeting d4 with a pawn. The mirror, 1.e4 answered by anything but 1...e5, is called semi-open."
+    ]
   }
 ];
 
@@ -183,12 +328,27 @@ function drawBoard(term) {
       sq.className = "sq " + (((f + rank) % 2 === 0) ? "l" : "d");
       sq.dataset.sq = name;
       if (term.marks[name]) sq.dataset.mark = term.marks[name];
+      if (term.numbers && term.numbers[name] !== undefined) {
+        // a count on the square, and a wash that deepens with it
+        const vals = Object.values(term.numbers);
+        const lo = Math.min(...vals), hi = Math.max(...vals);
+        const heat = document.createElement("div");
+        heat.className = "heat";
+        heat.style.opacity = (hi === lo ? 0.5 : 0.12 + 0.6 * (term.numbers[name] - lo) / (hi - lo)).toFixed(3);
+        sq.appendChild(heat);
+        sq.dataset.n = term.numbers[name];
+      }
       const p = pieces[name];
       if (p) {
         const span = document.createElement("span");
         span.className = "pc " + (p === p.toUpperCase() ? "w" : "b");
         span.textContent = GLYPH[p.toLowerCase()];
         sq.appendChild(span);
+      } else if (sq.dataset.n !== undefined) {
+        const n = document.createElement("span");
+        n.className = "num";
+        n.textContent = sq.dataset.n;
+        sq.appendChild(n);
       }
       board.appendChild(sq);
     }
@@ -199,6 +359,7 @@ function render(index) {
   const term = TERMS[index];
   drawBoard(term);
   document.getElementById("turn").textContent = term.turn;
+  document.getElementById("turn").hidden = !term.turn;
   document.getElementById("name").textContent = term.name;
   document.getElementById("tagline").textContent = term.tagline;
 
@@ -273,6 +434,7 @@ window.__terms = function (q) {
     pieces: sq.filter(s => s.querySelector(".pc")).map(s => s.dataset.sq + ":" +
       (s.querySelector(".pc").classList.contains("w") ? "w" : "b") + s.querySelector(".pc").textContent),
     marks: sq.filter(s => s.dataset.mark).map(s => s.dataset.sq + ":" + s.dataset.mark),
+    numbers: Object.fromEntries(sq.filter(s => s.dataset.n !== undefined).map(s => [s.dataset.sq, +s.dataset.n])),
     legend: document.querySelectorAll("#legend > div").length,
     name: document.getElementById("name").textContent,
     turn: document.getElementById("turn").textContent,
