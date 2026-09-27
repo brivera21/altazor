@@ -49,8 +49,11 @@
   #scaleBtn:hover { background: #223354; }
   #scaleBtn.on { background: var(--accent); color: #0b1120; font-weight: 600; }
   #modeNote { font-size: 11.5px; color: var(--dim); }
-  #about { margin-top: 9px; font-size: 11.5px; color: var(--dim); line-height: 1.45;
-    border-top: 1px solid var(--line); padding-top: 8px; }
+  details.sources { font-size: 11.5px; color: var(--dim); }
+  details.sources summary { cursor: pointer; }
+  details.sources summary:hover { color: var(--text); }
+  details.sources[open] { flex-basis: 100%; line-height: 1.45; }
+  details.sources a { color: var(--accent); }
 
   #info {
     position: absolute; top: 14px; left: 16px; width: 295px;
@@ -94,6 +97,8 @@
   <div class="type" id="iType"></div>
   <dl>
     <dt id="lDist">Distance from the Sun</dt><dd id="iDist"></dd>
+    <span id="rowDay" style="display:contents"><dt id="lDay">Length of a day</dt><dd id="iDay"></dd></span>
+    <span id="rowYear" style="display:contents"><dt id="lYear">Length of a year</dt><dd id="iYear"></dd></span>
     <dt id="lDiam">Diameter</dt><dd id="iDiam"></dd>
     <dt id="lArea">Surface area</dt><dd id="iArea"></dd>
     <dt id="lMass">Mass</dt><dd id="iMass"></dd>
@@ -110,19 +115,13 @@
   <div id="row2">
     <button id="scaleBtn">Make to scale</button>
     <span id="modeNote">Lenient scale: sizes and spacing are exaggerated so every planet is visible.</span>
+    <details class="sources"><summary>Sources</summary>
+      Planets, the Sun and Pluto: NASA's <a href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/">planetary
+      fact sheets</a>. Ceres, Vesta and the belts: the
+      <a href="https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html">JPL Small-Body Database</a> and the Dawn
+      and New Horizons results. A day is sunrise to sunrise; a year is one orbit of the Sun, in Earth time.
+    </details>
   </div>
-  <div id="about">All eight planets lined up on one side of the Sun, a moment real orbits never quite produce.
-    Each planet opens up close, with its numbers: area, mass, moons, what it is made of, when it was discovered
-    and when a probe first reached it. <b>Make to scale</b> sets the true distances and sizes; almost everything
-    left is space. There, a pulse of light leaves the Sun and crosses the diagram in true proportion,
-    carrying its elapsed time, and under each planet sits how long sunlight takes to reach it.
-    Up close, a planet's named moons sit beside it in a row, enlarged and set close so each can be seen, in
-    order outward, with its name and its true distance beneath; <b>Make to scale</b> sends them out to their
-    real distances at their real sizes, and the ones then past the edge are listed there. The pointer over a
-    moon tells who found it.
-    The view pans and zooms freely. Figures follow NASA's
-    <a href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/" style="color:var(--accent)">planetary
-    fact sheets</a>.</div>
 </div>
 
 <div id="scalebar" style="display:none">
@@ -147,30 +146,43 @@
     made: "Plasma: ~73% hydrogen, ~25% helium by mass",
     disc: "Known to every human culture",
     probe: "Parker Solar Probe flew through the corona, 2021; closest pass 6.1 million km, 2024",
-    distText: "n/a"
+    distText: "n/a",
+    labels: { day: "One turn on its axis", year: "One trip around the galaxy" },
+    day: "About 25 days at the equator and about 35 near the poles. It is not solid, so it does not turn as one piece",
+    year: "About 230 million years"
   };
   const PLANETS = [
     { name:"Mercury", type:"Rocky planet", au:0.387, rKm:2439.7, lenR:9,
+      day:"176 Earth days from one sunrise to the next, two of its own years. It turns on its axis every 58.6 days, three turns for every two orbits",
+      year:"88 Earth days",
       area:"7.48 × 10<sup>7</sup> km²", mass:"3.301 × 10<sup>23</sup> kg (0.055 Earths)",
       moons:"0", made:"Rock and metal: an iron core spanning ~85% of its radius under a silicate mantle and crust",
       disc:"Known since antiquity (visible to the naked eye)",
       probe:"Mariner 10, flyby, March 29, 1974; first orbited by MESSENGER, 2011" },
     { name:"Venus", type:"Rocky planet", au:0.723, rKm:6051.8, lenR:15,
+      day:"117 Earth days from one sunrise to the next. It turns backward, once every 243 days, so the Sun rises in the west",
+      year:"225 Earth days, shorter than one turn on its axis",
       area:"4.60 × 10<sup>8</sup> km²", mass:"4.867 × 10<sup>24</sup> kg (0.815 Earths)",
       moons:"0", made:"Rock and metal: iron core and silicate mantle under a crushing CO₂ atmosphere with sulfuric-acid clouds",
       disc:"Known since antiquity",
       probe:"Mariner 2, flyby, December 14, 1962, the first successful visit to another planet; Venera 7 made the first landing, 1970" },
     { name:"Earth", type:"Rocky planet", au:1.000, rKm:6371.0, lenR:16,
+      day:"24 hours from noon to noon. Against the stars it turns once in 23 h 56 min",
+      year:"365¼ days. The quarter day is why a leap day is added almost every fourth year",
       area:"5.10 × 10<sup>8</sup> km²", mass:"5.972 × 10<sup>24</sup> kg",
       moons:"1, the Moon", made:"Iron–nickel core, silicate mantle and crust; 71% of the surface covered by ocean",
       disc:"Home. Recognized as a planet after the Copernican revolution, 16th century",
       probe:"First orbited from space by Sputnik 1, October 4, 1957" },
     { name:"Mars", type:"Rocky planet", au:1.524, rKm:3389.5, lenR:11,
+      day:"24 h 40 min, a sol, close enough to ours that rover teams have worked on Mars time",
+      year:"687 Earth days, 1.9 Earth years",
       area:"1.44 × 10<sup>8</sup> km²", mass:"6.417 × 10<sup>23</sup> kg (0.107 Earths)",
       moons:"2, Phobos and Deimos", made:"Rock: iron-sulfide core, basaltic mantle, and a surface rusted red by iron-oxide dust",
       disc:"Known since antiquity",
       probe:"Mariner 4, flyby, July 15, 1965; Viking 1 made the first working landing, 1976" },
     { name:"Jupiter", type:"Gas giant", au:5.204, rKm:69911, lenR:46,
+      day:"9 h 56 min, the shortest of any planet. The spin flattens it: it is about 7% wider at the equator than pole to pole",
+      year:"11.9 Earth years",
       labels: { extra: "The Great Red Spot" },
       extra: "A storm a little wider than Earth, drawn here at its measured size. It has been followed since 1831, and perhaps since a spot Cassini recorded in 1665, and it has been narrowing the whole time: nineteenth century measurements put it near three Earths across",
       area:"6.14 × 10<sup>10</sup> km² (cloud tops)", mass:"1.898 × 10<sup>27</sup> kg (318 Earths)",
@@ -178,16 +190,22 @@
       disc:"Known since antiquity",
       probe:"Pioneer 10, flyby, December 3, 1973; first orbited by Galileo, 1995" },
     { name:"Saturn", type:"Gas giant", au:9.573, rKm:58232, lenR:38,
+      day:"10 h 34 min, timed from waves its interior sets up in the rings",
+      year:"29.4 Earth years",
       area:"4.27 × 10<sup>10</sup> km² (cloud tops)", mass:"5.683 × 10<sup>26</sup> kg (95 Earths)",
       moons:"285 recognized (2026), the most of any planet", made:"Hydrogen and helium; rings of almost pure water ice",
       disc:"Known since antiquity; rings first seen by Galileo, 1610",
       probe:"Pioneer 11, flyby, September 1, 1979; first orbited by Cassini, 2004" },
     { name:"Uranus", type:"Ice giant", au:19.19, rKm:25362, lenR:24,
+      day:"17 h 14 min. It spins backward, lying on its side",
+      year:"84 Earth years. Each pole has about 42 years of sunlight, then 42 of darkness",
       area:"8.08 × 10<sup>9</sup> km² (cloud tops)", mass:"8.681 × 10<sup>25</sup> kg (14.5 Earths)",
       moons:"29 known (incl. S/2025 U1, found by JWST in 2025)", made:"Water, methane and ammonia “ices” over a rocky core, under a hydrogen–helium envelope; methane absorbs red light, leaving its cyan color",
       disc:"William Herschel, March 13, 1781, the first planet found with a telescope",
       probe:"Voyager 2, flyby, January 24, 1986, still the only visit" },
     { name:"Neptune", type:"Ice giant", au:30.07, rKm:24622, lenR:23,
+      day:"16 h 7 min",
+      year:"165 Earth years. It finished its first orbit since its discovery in 2011",
       area:"7.62 × 10<sup>9</sup> km² (cloud tops)", mass:"1.024 × 10<sup>26</sup> kg (17 Earths)",
       moons:"16 known", made:"Water, methane and ammonia ices over a rocky core, under hydrogen and helium; the deepest blue of the planets",
       disc:"Predicted mathematically by Le Verrier; observed by Johann Galle, September 23, 1846",
@@ -204,6 +222,7 @@
     labels: { diam: "Width of the belt", area: "Why there is no planet here",
               moons: "Largest members", extra: "How empty it is" },
     dist: "2.1 to 3.3 au (314 to 494 million km). Ceres, the largest member, orbits at 2.77 au",
+    year: "3.0 Earth years at the inner edge, 6.0 at the outer",
     diam: "About 1.2 au from inner to outer edge, roughly 180 million km",
     area: "Jupiter's pull keeps these orbits tilted and stretched, so the rocks meet at speeds that break them apart instead of joining them. Nothing large ever formed here. And where an asteroid's year is a simple fraction of Jupiter's, the same tug lands in the same place over and over and empties that band. Those are the Kirkwood gaps: 2.50 au (three orbits for each one of Jupiter's), 2.82 au (five for two), 2.95 au (seven for three) and 3.28 au (two for one)",
     mass: "About 2.4 × 10<sup>21</sup> kg, some 3% of the Moon and 0.04% of Earth. Ceres alone holds about two fifths of it, Vesta about a tenth, and the four largest bodies together about three fifths",
@@ -223,6 +242,7 @@
     labels: { diam: "Width of the belt", area: "Why there is no planet here",
               moons: "Largest members", extra: "The Kuiper cliff" },
     dist: "About 30 to 50 au (4.5 to 7.5 billion km). It starts at Neptune's orbit, so Neptune is its inner edge",
+    year: "164 Earth years at the inner edge, 354 at the outer. Pluto takes 248",
     diam: "Roughly 20 au from inner to outer edge, about 3 billion km, some seventeen times the width of the asteroid belt",
     area: "This far out the material moved too slowly and was spread too thin to gather into anything large before the solar system finished forming. Neptune then migrated outward and scattered most of what was there. The bodies that survive are held in place by Neptune rather than destroyed by it: Pluto and the ones like it cross its orbit but circle twice for every three turns Neptune makes, so the two are never in the same place at the same time",
     mass: "Somewhere between a hundredth and a tenth of Earth. That is far too little to have grown the bodies now in it, so the belt must have started with perhaps ten to thirty Earths and lost almost all of it",
@@ -244,6 +264,8 @@
     name: "Ceres", type: "Dwarf planet, in the asteroid belt", au: 2.766, rKm: 469.7,
     lenR: 4, small: true, flat: 891.8 / 966.2,
     labels: { extra: "Why it is a dwarf planet" },
+    day: "9 h 4 min",
+    year: "4.6 Earth years",
     diam: "939 km on average: 966 km across the equator and 892 km pole to pole, a little flattened by its spin",
     area: "2.77 × 10<sup>6</sup> km², about the land area of Argentina",
     mass: "9.38 × 10<sup>20</sup> kg, 1.3% of the Moon and about two fifths of the whole asteroid belt",
@@ -257,6 +279,8 @@
     name: "Vesta", type: "Asteroid, the second largest in the belt", au: 2.362, rKm: 262.7,
     lenR: 4 * 262.7 / 469.7, small: true, flat: 446.4 / 572.6,   // Ceres to Vesta in true proportion
     labels: { extra: "Why it is not a dwarf planet" },
+    day: "5 h 21 min",
+    year: "3.6 Earth years",
     diam: "525 km on average: 573 km across the equator and 446 km pole to pole, flattened by the basin at its south pole",
     area: "8.66 × 10<sup>5</sup> km², about the area of Pakistan",
     mass: "2.59 × 10<sup>20</sup> kg, 0.35% of the Moon and about a tenth of the whole asteroid belt",
@@ -266,7 +290,28 @@
     disc: "Heinrich Olbers, March 29, 1807, at Bremen, the fourth asteroid found. It is the brightest, and at its best it can just be seen without a telescope",
     probe: "Dawn, in orbit from July 16, 2011 to September 5, 2012, before it went on to Ceres"
   };
-  const SMALL = [VESTA, CERES];                  // in order outward
+  // Pluto, in the Kuiper belt, drawn the same way. Figures: NASA's Pluto fact
+  // sheet and New Horizons (Stern and others, 2015; Nimmo and others, 2017,
+  // for the radius). It is round to within the measurements, so it is not
+  // flattened. Lenient size: between Ceres and Mercury, which it is.
+  const PLUTO = {
+    name: "Pluto", type: "Dwarf planet, in the Kuiper belt", au: 39.48, rKm: 1188.3,
+    lenR: 6, small: true, flat: 1,
+    labels: { extra: "Why it is not a planet" },
+    dist: "39.5 au (5.9 billion km, average), from 29.7 au at its closest to 49.3 au at its farthest",
+    day: "6.4 Earth days, turning backward. Charon turns in exactly the same time, so each always shows the other the same face",
+    year: "248 Earth years. It has not finished one since it was found",
+    diam: "2,377 km, about two thirds the width of the Moon",
+    area: "1.77 × 10<sup>7</sup> km², a little more than the area of Russia",
+    mass: "1.30 × 10<sup>22</sup> kg, 18% of the Moon",
+    moons: "5: Charon, Styx, Nix, Kerberos and Hydra. Charon is half as wide as Pluto, so the two circle a point in the space between them",
+    made: "Rock and ice: a rocky core under a mantle of water ice, perhaps with an ocean inside it, and a surface of frozen nitrogen, methane and carbon monoxide. The bright heart is Sputnik Planitia, a plain of nitrogen ice about 1,000 km across",
+    extra: "In 2006 the International Astronomical Union ruled that a planet must have cleared its orbit, and Pluto shares its orbit with the rest of the Kuiper belt. The orbit is stretched enough to carry it inside Neptune's for about 20 of every 248 years, most recently from 1979 to 1999",
+    disc: "Clyde Tombaugh, February 18, 1930, at Lowell Observatory, comparing two photographs of the sky taken six days apart. It was counted the ninth planet for 76 years",
+    probe: "New Horizons, flyby, July 14, 2015, nine and a half years after launch, passing 12,500 km above the surface"
+  };
+  VESTA.region = BELT; CERES.region = BELT; PLUTO.region = KUIPER;
+  const SMALL = [VESTA, CERES, PLUTO];           // in order outward
 
   // ---------- Layouts (world units u) ----------
   // Lenient: even spacing, exaggerated radii. True: everything ∝ km.
@@ -348,11 +393,12 @@
     g.edgeOut = () => mix(g.xLenOut + shifted(g.xLenIn), g.xTrueOut, ease(m));
   });
   const ROCKS = BELT.rocks;                          // kept for the debug hook
-  // Inside the belt both layouts are linear in au, so each body sits at the
-  // same fraction of the way across it in either one.
+  // Inside a belt both layouts are linear in au, so each body sits at the
+  // same fraction of the way across its belt in either one.
   SMALL.forEach(b => {
-    b.fr = (b.au - BELT.auIn) / (BELT.auOut - BELT.auIn);
-    b.xLen = BELT.xLenIn + b.fr * (BELT.xLenOut - BELT.xLenIn);
+    const g = b.region;
+    b.fr = (b.au - g.auIn) / (g.auOut - g.auIn);
+    b.xLen = g.xLenIn + b.fr * (g.xLenOut - g.xLenIn);
     b.xTrue = b.au * AU * KM2U; b.rTrue = b.rKm * KM2U;
   });
   const SUN_R_TRUE = SUN.rKm * KM2U;
@@ -544,7 +590,8 @@
     info.style.maxHeight = Math.max(150, ceiling - above - 24) + "px";
   }
   window.addEventListener("resize", fitPanel);
-  const DEFAULT_LABELS = { dist: "Distance from the Sun", diam: "Diameter",
+  const DEFAULT_LABELS = { dist: "Distance from the Sun", day: "Length of a day",
+    year: "Length of a year", diam: "Diameter",
     area: "Surface area", mass: "Mass", moons: "Moons", made: "Made of" };
   function showInfo(o) {
     el("iName").textContent = o.name;
@@ -554,6 +601,10 @@
       el("l" + k[0].toUpperCase() + k.slice(1)).textContent =
         (o.labels && o.labels[k]) || DEFAULT_LABELS[k];
     el("rowExtra").style.display = o.extra ? "" : "none";
+    el("rowDay").style.display = o.day ? "" : "none";
+    el("rowYear").style.display = o.year ? "" : "none";
+    el("iDay").innerHTML = o.day || "";
+    el("iYear").innerHTML = o.year || "";
     if (o.extra) {
       el("lExtra").textContent = (o.labels && o.labels.extra) || "Also";
       el("iExtra").innerHTML = o.extra;
@@ -1006,7 +1057,8 @@
   // Vesta is not, which is the difference between a dwarf planet and an
   // asteroid; both are drawn with their measured pole to pole flattening,
   // north up, and Vesta's south polar basin at the bottom.
-  const SMALL_TONE = { Ceres: ["#9a968f", "#34322e"], Vesta: ["#b8ab95", "#433b30"] };
+  const SMALL_TONE = { Ceres: ["#9a968f", "#34322e"], Vesta: ["#b8ab95", "#433b30"],
+                       Pluto: ["#d8c2a4", "#5a4434"] };
   function drawSmall(b) {
     const x = sx(px(b)), wr = pr(b) * cam.z, r = Math.max(wr, 1.1);
     if (x + r < -60 || x - r > W + 60) return;
@@ -1032,6 +1084,14 @@
         ctx.fillStyle = "rgba(250,250,245,0.9)";
         circle(x - 0.12*r, y0 + 0.05*ry, Math.max(0.05*r, 0.8)); ctx.fill();
         circle(x - 0.06*r, y0 + 0.1*ry, Math.max(0.025*r, 0.6)); ctx.fill();
+      } else if (b.name === "Pluto") {
+        // Cthulhu, the dark band along the equator, and the bright heart,
+        // Sputnik Planitia on its western lobe
+        ctx.fillStyle = "rgba(70,38,26,0.6)";
+        ctx.beginPath(); ctx.ellipse(x - 0.5*r, y0 + 0.2*ry, 0.5*r, 0.2*ry, -0.2, 0, 7); ctx.fill();
+        ctx.fillStyle = "rgba(246,238,224,0.88)";
+        ctx.beginPath(); ctx.ellipse(x + 0.12*r, y0 + 0.08*ry, 0.24*r, 0.3*ry, 0.35, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(x + 0.4*r, y0 + 0.02*ry, 0.2*r, 0.26*ry, -0.3, 0, 7); ctx.fill();
       } else {
         // Rheasilvia: a broad dark floor across the south pole, its peak in the middle
         ctx.fillStyle = "rgba(45,38,30,0.45)";
@@ -1043,8 +1103,8 @@
       if (hot) { ctx.strokeStyle = "rgba(88,166,255,0.9)"; ctx.lineWidth = 1.2;
         ctx.beginPath(); ctx.ellipse(x, y0, r + 3, ry + 3, 0, 0, 7); ctx.stroke(); }
     }
-    // named once the belt has room for names on the screen
-    if (hot || sx(BELT.edgeOut()) - sx(BELT.edgeIn()) >= 80)
+    // named once its belt has room for names on the screen
+    if (hot || sx(b.region.edgeOut()) - sx(b.region.edgeIn()) >= 80)
       label(b.name, x, y0 - Math.max(r, 3.5) - 10, hot);
   }
 
@@ -1158,7 +1218,7 @@
     if (!selected || selected.isBelt) return;
     if (selected.name === "Earth") return;
     if (selected.small) {
-      // Earth would be a ring thirteen to twenty-four times wider than these,
+      // Earth would be a ring five to twenty-four times wider than these,
       // off every screen, so the yardstick here is the Moon, drawn around it
       const x = sx(px(selected)), Rd = pr(selected) * cam.z;
       if (Rd < 6) return;
@@ -1342,7 +1402,7 @@
                 cliff: KUIPER.cliff },
       small: SMALL.map(b => ({ name: b.name, au: b.au, fr: b.fr,
         x: px(b), sx: sx(px(b)), r: pr(b) * cam.z, trueX: b.xTrue, rTrue: b.rTrue,
-        beltIn: BELT.edgeIn(), beltOut: BELT.edgeOut() })),
+        region: b.region.name, beltIn: b.region.edgeIn(), beltOut: b.region.edgeOut() })),
       ghost: ghostState,
       moons: moonState,
       light: lightState, speedup: LIGHT_SPEEDUP,
