@@ -114,6 +114,9 @@
   h3.tbl { font-size: 14px; margin: 26px 0 8px; }
 
   footer.note { margin-top: 26px; font-size: .88rem; color: var(--muted); line-height: 1.65; max-width: 78ch; }
+  details.sources > summary { cursor: pointer; color: var(--muted); font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; }
+  details.sources > summary:hover { color: var(--accent); }
+  details.sources #footnote { margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -169,7 +172,7 @@
   </div>
 
   <footer class="note"><p>Cada pueblo está en su latitud y longitud reales respecto a El Terrero. Las líneas son carreteras que existen, y el número sobre cada línea es la distancia de manejo entre esos dos pueblos, no la línea recta. El área del círculo va con la población del censo 2020.</p></footer>
-  <footer class="note" id="footnote"></footer>
+  <footer class="note"><details class="sources"><summary>Fuentes</summary><div id="footnote"></div></details></footer>
 </div>
 
 <div id="tip" role="tooltip"></div>

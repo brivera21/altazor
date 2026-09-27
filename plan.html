@@ -51,8 +51,11 @@ p.sub2 { margin:0 0 14px; color:var(--muted); font-size:14px; }
 .q .yn button.no.on { background:#331f1c; border-color:var(--bad); color:var(--bad); font-weight:600; }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
-.method { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px;
-  border-top:1px solid var(--line); padding-top:12px; }
+.method { color:var(--muted); font-size:12.5px; margin-top:8px; max-width:760px; }
+details.sources { margin-top:18px; max-width:760px; border-top:1px solid var(--line); padding-top:10px; }
+details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px;
+  letter-spacing:.06em; text-transform:uppercase; }
+details.sources > summary:hover { color:var(--accent); }
 
 .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
 @media (max-width:1050px){ .grid{ grid-template-columns:repeat(2,1fr);} }
@@ -96,9 +99,10 @@ p.sub2 { margin:0 0 14px; color:var(--muted); font-size:14px; }
     <div id="srcTxt"></div>
   </div></div>
 </div>
-<p class="note">Pinpoint the imbalances, Locate where to attack, Arrange your pieces, Nail your move: four stages, each with its own choices. What is chosen at one stage narrows what makes sense at the next, and the goal through all four is strengthen your position until an opportunity for a concrete attack presents itself.</p>
-<p class="note" style="border-top:none; padding-top:0;">The line under the four stages is the plan those choices add up to, written out, and it rewrites itself with every choice.</p>
+<p class="note">Four stages, each with its own choices. What is chosen at one stage narrows what makes sense at the next, and the line beneath writes out the plan those choices add up to. The goal through all four is strengthen your position until an opportunity for a concrete attack presents itself.</p>
+<details class="sources"><summary>Sources</summary>
 <div class="method"><p>The wording of every step, feature and stage comes from a handwritten checklist, and nothing here was added to it. Nothing is stored between visits, so a run starts empty every time the page is opened.</p></div>
+</details>
 </div>
 <script>
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
