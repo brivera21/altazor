@@ -24,18 +24,22 @@ nav.site a { color:var(--muted); text-decoration:none; font-size:14px; margin-ri
 nav.site a:hover { color:var(--accent); }
 h1 { margin:0 0 14px; font-size:26px; }
 
-.controls { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:0 0 18px; }
-.chip { font:inherit; font-size:13.5px; padding:6px 14px; border-radius:999px;
+/* the terms in a column on the left, the board and its caption on the right */
+.layout { display:grid; grid-template-columns:220px minmax(0, 1fr); gap:32px; align-items:start; }
+.termcol { position:sticky; top:16px; max-height:calc(100vh - 32px); overflow-y:auto; }
+.chips { display:flex; flex-direction:column; gap:4px; }
+.chip { font:inherit; font-size:13.5px; padding:6px 12px; border-radius:8px; text-align:left;
   border:1px solid var(--line); background:var(--panel); color:var(--text); cursor:pointer; }
 .chip:hover { border-color:var(--accent); }
 .chip[aria-selected="true"] { background:var(--accent); border-color:var(--accent);
   color:#0b1a2b; font-weight:600; }
-.keys { color:var(--muted); font-size:12.5px; margin-left:6px; }
+.keys { display:block; color:var(--muted); font-size:12px; margin:12px 2px 0; }
+.main { display:flex; flex-wrap:wrap; gap:8px 36px; align-items:flex-start; }
 
-.boardcol { max-width:560px; }
+.boardcol { --bs:clamp(260px, 42vw, 500px); flex:0 0 auto; width:calc(1.4em + var(--bs)); }
 .board-grid { display:grid;
-  grid-template-columns:1.4em min(86vw, 520px);
-  grid-template-rows:min(86vw, 520px) 1.4em;
+  grid-template-columns:1.4em var(--bs);
+  grid-template-rows:var(--bs) 1.4em;
   align-items:center; justify-items:center; }
 .ranks, .files { display:grid; width:100%; height:100%; }
 .ranks { grid-template-rows:repeat(8, 1fr); }
@@ -71,7 +75,7 @@ h1 { margin:0 0 14px; font-size:26px; }
 .sw-plan { color:var(--plan); }
 .sw-zone { color:var(--zone); }
 
-.text { margin:30px 0 0; border-top:1px solid var(--line); padding-top:22px; max-width:72ch; }
+.text { flex:1 1 300px; margin:0; max-width:60ch; }
 .text h2 { font-size:21px; margin:0 0 2px; font-weight:650; }
 .tagline { color:var(--muted); margin:0 0 16px; }
 .text p { margin:0 0 14px; color:#d4d4d4; }
@@ -81,8 +85,15 @@ footer.site { margin-top:60px; padding-top:18px; border-top:1px solid var(--line
   font-size:13px; color:var(--muted); }
 footer.site a { color:var(--muted); }
 footer.site a:hover { color:var(--accent); }
+@media (max-width:760px) {
+  .layout { grid-template-columns:1fr; gap:18px; }
+  .termcol { position:static; max-height:none; }
+  .chips { flex-direction:row; flex-wrap:wrap; }
+  .chip { border-radius:999px; }
+  .boardcol { --bs:min(calc(100vw - 64px), 520px); }
+  .text { margin-top:14px; }
+}
 @media (max-width:520px) {
-  .board-grid { grid-template-columns:1.2em min(90vw, 520px); grid-template-rows:min(90vw, 520px) 1.2em; }
   .pc.w { -webkit-text-stroke:.8px #15181c; }
 }
 </style>
@@ -97,11 +108,13 @@ footer.site a:hover { color:var(--accent); }
   <a href="checkmates.html">Checkmates</a></nav>
 </header>
 <h1>Middlegame Terms</h1>
-<div class="controls">
-  <div class="chips" id="chips" role="tablist" style="display:contents"></div>
+<div class="layout">
+<div class="termcol">
+  <div class="chips" id="chips" role="tablist" aria-orientation="vertical"></div>
   <span class="keys">Arrow keys step through the terms.</span>
 </div>
 
+<div class="main">
 <div class="boardcol">
   <div class="board-grid">
     <div class="ranks" id="ranks"></div>
@@ -116,6 +129,8 @@ footer.site a:hover { color:var(--accent); }
   <h2 id="name"></h2>
   <p class="tagline" id="tagline"></p>
   <div id="body"></div>
+</div>
+</div>
 </div>
 
 <footer class="site"><a href="index.html">Altazor</a> &middot; <a href="chess.html">Chess</a> &middot; Middle Games</footer>
