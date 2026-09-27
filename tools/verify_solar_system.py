@@ -109,6 +109,55 @@ FACTS = [
      1.15 < GRS_W / GRS_H < 1.35),
     ("22 degrees south puts it where the spot actually is",
      abs(math.sin(math.radians(22)) - 0.3746) < 0.001),
+    # --- days and years (NASA fact sheets; Kepler's third law, P = a^1.5) ---
+    ("Mercury's solar day, 4222.6 h, is 176 Earth days", round(4222.6 / 24) == 176),
+    ("and two of its 88-day years", abs(4222.6 / 24 / 87.97 - 2) < 0.01),
+    ("it turns once in 58.6 days, three turns for two orbits",
+     abs(1407.6 / 24 - 58.6) < 0.05 and abs(3 * 1407.6 / 24 - 2 * 87.97) < 0.2),
+    ("Venus's solar day, 2802 h, is 117 Earth days", round(2802.0 / 24) == 117),
+    ("its backward turn, 5832.5 h, is 243 days, longer than its 224.7-day year",
+     round(5832.5 / 24) == 243 and 5832.5 / 24 > 224.7),
+    ("Mars's 24.66 h sol is 24 h 40 min", round(24.6597 * 60) == 24 * 60 + 40),
+    ("687 days is 1.9 Earth years", round(687.0 / 365.25, 1) == 1.9),
+    ("Jupiter's 9.925 h is 9 h 56 min", round(9.925 * 60) == 9 * 60 + 56),
+    ("Jupiter is about 7% wider at the equator", abs(71492 / 66854 - 1.07) < 0.005),
+    ("Saturn's 10 h 33 min 38 s rounds to 10 h 34 min", round(10 * 60 + 33 + 38 / 60) == 634),
+    ("Uranus's 17.24 h is 17 h 14 min", round(17.24 * 60) == 17 * 60 + 14),
+    ("Neptune's 16 h 6 min 36 s rounds to 16 h 7 min", round(16 * 60 + 6 + 36 / 60) == 967),
+    ("Jupiter's year, 4331 days, is 11.9 Earth years", round(4331 / 365.25, 1) == 11.9),
+    ("Saturn's, 10,747 days, is 29.4", round(10747 / 365.25, 1) == 29.4),
+    ("Uranus's, 30,589 days, is 84", round(30589 / 365.25) == 84),
+    ("Neptune's, 60,190 days, is 165, finished in 2011",
+     round(60190 / 365.25) == 165 and int(1846.73 + 60190 / 365.25) == 2011),
+    ("Pluto's, 90,560 days, is 248, not yet finished since 1930",
+     round(90560 / 365.25) == 248 and 1930 + 248 > 2026),
+    ("Pluto turns in 153.3 h, 6.4 days", round(153.29 / 24, 1) == 6.4),
+    ("Ceres at 2.766 au takes 4.6 years", round(2.766 ** 1.5, 1) == 4.6),
+    ("Vesta at 2.362 au takes 3.6 years", round(2.362 ** 1.5, 1) == 3.6),
+    ("Ceres turns in 9.074 h, 9 h 4 min", round(9.074 * 60) == 9 * 60 + 4),
+    ("Vesta turns in 5.342 h, 5 h 21 min", round(5.342 * 60) == 5 * 60 + 21),
+    ("the asteroid belt's years run 3.0 to 6.0",
+     round(BELT_IN ** 1.5, 1) == 3.0 and round(BELT_OUT ** 1.5, 1) == 6.0),
+    ("the Kuiper belt's run 164 to 354",
+     round(KUIPER_IN ** 1.5) == 164 and round(KUIPER_OUT ** 1.5) == 354),
+    # --- Pluto ---
+    ("Pluto at 39.48 au sits inside the Kuiper belt, at the plutinos",
+     KUIPER_IN < 39.48 < KUIPER_OUT and abs(39.48 - NEPTUNE_AU * 1.5 ** (2 / 3)) < 0.2),
+    ("5,906 million km is 39.5 au, 5.9 billion km", round(5906.4 / 149.6, 1) == 39.5),
+    ("perihelion 4,436.8 million km is 29.7 au, inside Neptune",
+     round(4436.8 / 149.6, 1) == 29.7 and 4436.8 < 4471.1),
+    ("aphelion 7,375.9 million km is 49.3 au", round(7375.9 / 149.6, 1) == 49.3),
+    ("2,377 km is about two thirds of the Moon's width", abs(2376.6 / 3474.8 - 2 / 3) < 0.03),
+    ("its surface is 1.77e7 km², a little more than Russia's 1.71e7",
+     abs(4 * math.pi * 1188.3 ** 2 / 1.77e7 - 1) < 0.005 and 1.77e7 > 1.71e7),
+    ("1.303e22 kg is 18% of the Moon", round(1.303e22 / 7.346e22 * 100) == 18),
+    ("Charon is half as wide as Pluto", abs(1212 / 2376.6 - 0.5) < 0.02),
+    ("so their balance point lies outside Pluto",
+     19591 * 1.586e21 / (1.303e22 + 1.586e21) > 1188.3),
+    ("New Horizons flew nine and a half years", abs((2015 + 195 / 365) - (2006 + 19 / 365) - 9.5) < 0.05),
+    ("Pluto was a planet for 76 years", 2006 - 1930 == 76),
+    ("Earth is five to twenty-four times the width of the three small bodies",
+     round(6371 / 1188.3) == 5 and round(6371 / 262.7) == 24),
 ]
 
 fails = []
@@ -119,8 +168,12 @@ for claim, ok in FACTS:
         fails.append(claim)
 
 html = PAGE.read_text(encoding="utf-8")
-if "—" in html.split("<script>")[0]:
-    fails.append("an em dash in the page chrome")
+if "—" in html:
+    fails.append("an em dash in the page")
+if 'id="about"' in html or "lined up on one side" in html:
+    fails.append("the long about paragraph is back")
+if not __import__("re").search(r'<details class="sources">(?!\s*open)', html):
+    fails.append("the sources are not in a closed details")
 
 try:
     from playwright.sync_api import sync_playwright
@@ -250,7 +303,7 @@ with sync_playwright() as pw:
       dist: iDist.textContent, mass: iMass.textContent,
       extraShown: getComputedStyle(rowExtra).display !== 'none',
       empty: [...document.querySelectorAll('#info dd')].filter(d=>
-        !d.textContent.trim() && getComputedStyle(d).display !== 'none').length,
+        !d.textContent.trim() && d.getClientRects().length).length,
       sel: __dbg.sel, ex: __dbg.ex, er: __dbg.er })""")
     if panel["name"] != "Asteroid Belt":
         fails.append(f"the panel names it {panel['name']!r}")
@@ -293,8 +346,21 @@ with sync_playwright() as pw:
             if box["clipped"] and not box["scrollable"]:
                 fails.append(f"{chip} at {h}px: the panel is cut off and "
                              "cannot be scrolled")
+            if h == 900:
+                dy = pg.evaluate("()=>({day: rowDay.style.display !== 'none' && iDay.textContent.trim(),"
+                                 " year: rowYear.style.display !== 'none' && iYear.textContent.trim(),"
+                                 " blank: [...document.querySelectorAll('#info dd')].filter(d=>"
+                                 "!d.textContent.trim() && d.getClientRects().length).length})")
+                belt = "BELT" in chip
+                if not dy["year"]:
+                    fails.append(f"{chip}: no length of a year")
+                if bool(dy["day"]) == belt:
+                    fails.append(f"{chip}: the day row is {'shown' if belt else 'missing'}")
+                if dy["blank"]:
+                    fails.append(f"{chip}: {dy['blank']} blank rows")
         print(f"  ok   at {h}px tall the panel clears the control bar for all "
-              f"{len(WANT_CHIPS) - 1} entries")
+              f"{len(WANT_CHIPS) - 1} entries" +
+              (", each with its year, and its day unless it is a belt" if h == 900 else ""))
     pg.set_viewport_size({"width": 1400, "height": 900})
     pg.wait_for_timeout(300)
 
@@ -409,21 +475,25 @@ with sync_playwright() as pw:
     else:
         print("  ok   Jupiter's panel carries a Great Red Spot row")
 
-    # Ceres and Vesta sit on the line inside the belt, each at its real
-    # fraction of the way across in both layouts, and each opens its panel.
-    SMALL = {"Vesta": (2.362, 262.7, "525"), "Ceres": (2.766, 469.7, "939")}
+    # Ceres, Vesta and Pluto sit on the line inside their belts, each at its
+    # real fraction of the way across in both layouts, and each opens its panel.
+    SMALL = {"Vesta": (2.362, 262.7, "525"), "Ceres": (2.766, 469.7, "939"),
+             "Pluto": (39.48, 1188.3, "2,377")}
+    REGION = {"Vesta": (BELT_IN, BELT_OUT), "Ceres": (BELT_IN, BELT_OUT),
+              "Pluto": (KUIPER_IN, KUIPER_OUT)}
     for scale in ("lenient", "true"):
         pg.click('.chip:text-is("Overview")')
         if scale == "true":
             pg.click("#scaleBtn")
         pg.wait_for_timeout(2200)
         sm = {b["name"]: b for b in pg.evaluate("()=>__dbg.small")}
-        if list(sm) != ["Vesta", "Ceres"]:
-            fails.append(f"the belt holds {list(sm)}, expected Vesta then Ceres")
+        if list(sm) != ["Vesta", "Ceres", "Pluto"]:
+            fails.append(f"the belts hold {list(sm)}, expected Vesta, Ceres, Pluto")
             continue
         for name, (au, rkm, _) in SMALL.items():
             b = sm[name]
-            want = b["beltIn"] + (au - BELT_IN) / (BELT_OUT - BELT_IN) * (b["beltOut"] - b["beltIn"])
+            lo, hi = REGION[name]
+            want = b["beltIn"] + (au - lo) / (hi - lo) * (b["beltOut"] - b["beltIn"])
             if abs(b["x"] - want) > 1e-6:
                 fails.append(f"{scale}: {name} at {b['x']:.2f} u, expected {want:.2f}")
             if not b["beltIn"] < b["x"] < b["beltOut"]:
@@ -435,10 +505,13 @@ with sync_playwright() as pw:
             rr = sm["Ceres"]["rTrue"] / sm["Vesta"]["rTrue"]
             if abs(rr - 469.7 / 262.7) > 1e-6:
                 fails.append(f"true scale: their radii in the ratio {rr:.4f}")
+            if abs(sm["Pluto"]["trueX"] / sm["Ceres"]["trueX"] - 39.48 / 2.766) > 1e-6:
+                fails.append("true scale: Pluto is not at its distance")
             pg.click("#scaleBtn")
             pg.wait_for_timeout(2200)
-        print(f"  ok   {scale}: Vesta and Ceres sit inside the belt at "
-              f"{sm['Vesta']['fr']:.3f} and {sm['Ceres']['fr']:.3f} of its width")
+        print(f"  ok   {scale}: Vesta and Ceres sit inside the asteroid belt at "
+              f"{sm['Vesta']['fr']:.3f} and {sm['Ceres']['fr']:.3f} of its width, "
+              f"Pluto inside the Kuiper belt at {sm['Pluto']['fr']:.3f}")
 
     for name, (au, rkm, diam) in SMALL.items():
         pg.click('.chip:text-is("Overview")')
@@ -458,7 +531,7 @@ with sync_playwright() as pw:
             fails.append(f"{name}: the panel's diameter reads {got['d']!r}")
         if not all(got["rows"]):
             fails.append(f"{name}: a blank row in the panel")
-        if "dwarf planet" not in got["x"]:
+        if "dwarf planet" not in got["x"] and not (name == "Pluto" and "not a planet" in got["x"]):
             fails.append(f"{name}: the extra row is labeled {got['x']!r}")
         g = pg.evaluate("()=>__dbg.ghost")
         if not g or g["kind"] != "moon" or abs(g["r"] / g["Rd"] - 1737.4 / rkm) > 1e-6:
