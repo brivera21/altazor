@@ -2,8 +2,9 @@
 """Generate intuition.html: Board Intuition, an interactive version of the
 "Board intuition trainer" PDF for the Chess section.
 
-One board, 18 topics in three groups (Geography / Piece vision / Endgame
-rules). Clicking a topic repaints the board with tiered amber highlights
+One board, topics in two groups (Geography / Endgame rules); the piece
+vision topics moved to the piece pages, knight.html to king.html.
+Clicking a topic repaints the board with tiered amber highlights
 (smooth CSS transitions), optional piece glyphs, and optional per-square
 numbers (mobility heatmaps). Hovering any square shows its coordinate.
 
@@ -159,80 +160,6 @@ TOPICS = [
         "half.",
       strong=dark_squares, soft=[],
       legend=[("s", "the 32 dark squares, a1 through h8")]),
- dict(id="knight", g="Piece vision", t="Knight mobility",
-      c="The number of squares a knight attacks from each square. Two in the "
-        "corner, eight in the center. This is why the rim is dim.",
-      strong=[], soft=[], numbers=knight_counts(), heat=True,
-      legend=[("s", "more squares attacked"), ("w", "fewer")]),
- dict(id="king", g="Piece vision", t="King mobility",
-      c="Squares a king reaches in one move. Three in the corner, five on an "
-        "edge, eight in the middle. Endgame kings belong in the middle.",
-      strong=[], soft=[], numbers=king_counts(), heat=True,
-      legend=[("s", "more squares reached"), ("w", "fewer")]),
- dict(id="bishop", g="Piece vision", t="Bishop mobility",
-      c="The number of squares a bishop attacks from each square. Seven "
-        "anywhere on the rim, rising by two with each ring inward to thirteen "
-        "on the four center squares. A bishop never changes color, so even at "
-        "its best it sees thirteen of the thirty two squares it can ever "
-        "reach.",
-      strong=[], soft=[], numbers=bishop_counts(), heat=True,
-      legend=[("s", "more squares attacked"), ("w", "fewer")]),
- dict(id="rook", g="Piece vision", t="Rook mobility",
-      c="Fourteen from every square on the board. The rook is the only piece "
-        "whose reach does not change with where it stands, so on an empty "
-        "board a1 is worth as much as e5 and the only question is what "
-        "stands in the way.",
-      strong=[], soft=[], numbers=rook_counts(), heat=True,
-      legend=[("s", "fourteen squares, the same from everywhere")]),
- dict(id="rookpawn", g="Piece vision", t="Rook behind its own pawn",
-      c="The same board with one white pawn on e4. Off the e-file and the "
-        "fourth rank nothing changes. On the cross through the pawn the count "
-        "falls to nine or ten, and the three squares behind it, e1 to e3, are "
-        "the worst at nine: the file shuts at once and only the rank is left.",
-      strong=[], soft=[], numbers=rook_counts_blocked(), heat=True,
-      pieces={ROOK_PAWN: "wP"},
-      legend=[("s", "more squares reached"), ("w", "fewer"),
-              ("blocked", "e4, where the pawn stands")]),
- dict(id="soft", g="Piece vision", t="f2 and f7, the soft squares",
-      c="In the starting position these two squares are defended by the king "
-        "and nothing else. Most early tactics against beginners aim here.",
-      strong=["f2", "f7"], soft=f7_diags,
-      legend=[("s", "f2 and f7"),
-              ("w", "the diagonals that attack them")]),
- dict(id="longdiag", g="Piece vision", t="The long diagonals",
-      c="a1 to h8 and a8 to h1, eight squares each. A fianchettoed bishop on "
-        "b2, g2, b7 or g7 rakes one of them end to end. One diagonal runs on "
-        "dark squares, the other on light.",
-      strong=["b2", "g7"],
-      soft=sorted(set(diag(0, 1, 1, 1)) - {"b2", "g7"}),
-      strong2=["g2", "b7"],
-      soft2=sorted(set(diag(0, 8, 1, -1)) - {"g2", "b7"}),
-      legend=[("s", "fianchetto squares on the dark diagonal: b2 and g7"),
-              ("w", "the a1 to h8 long diagonal, all dark squares"),
-              ("s2", "fianchetto squares on the light diagonal: g2 and b7"),
-              ("w2", "the a8 to h1 long diagonal, all light squares")]),
- dict(id="atkdiag", g="Piece vision", t="The attacking diagonals",
-      c="b1 to h7 and b8 to h2. A bishop here points straight at the square "
-        "in front of a castled king. This is the Greek gift geometry.",
-      strong=["h7", "h2"], soft=atk_diags,
-      pieces={"d3": "wB", "h7": "bP"},
-      legend=[("s", "h7 and h2, the sacrifice squares"),
-              ("w", "the diagonals that reach them")]),
- dict(id="outpost", g="Piece vision", t="Outpost territory",
-      c="A knight is strongest on the 5th or 6th rank where no enemy pawn "
-        "can chase it away. The c, d, e and f files matter most.",
-      strong=frange(2, 5, 5, 6),
-      soft=sorted(set(rank(5) + rank(6)) - set(frange(2, 5, 5, 6))),
-      legend=[("s", "prime outpost squares: c5 to f6"),
-              ("w", "the rest of the 5th and 6th ranks")]),
- dict(id="rook7", g="Piece vision", t="Rook on the 7th",
-      c="The 7th rank is where a rook attacks pawns that have not moved and "
-        "traps the king on its back rank. Two rooks there usually decide the "
-        "game.",
-      strong=rank(7), soft=rank(8),
-      pieces={"d7": "wR", "g8": "bK", "a7": "bP", "b7": "bP", "f7": "bP"},
-      legend=[("s", "the 7th rank, where the pawns still sit"),
-              ("w", "the 8th rank, where the king is confined")]),
  dict(id="square", g="Endgame rules", t="The rule of the square",
       c="Draw the square whose corners are the pawn and its promotion "
         "square. If the defending king is inside it, or can step inside, it "
@@ -412,7 +339,7 @@ g.pc text { paint-order: stroke; transition: transform .55s ease; }
 <div class="wrap">
 <header class="site">
   <a class="brand" href="index.html">ALTAZOR</a>
-  <nav class="site"><a href="chess.html">&larr; Chess</a></nav>
+  <nav class="site"><a href="chess.html">&larr; Chess</a> <a href="fundamental-terms.html">Fundamental Terms</a> <a href="pawn.html">Pawn</a> <a href="knight.html">Knight</a> <a href="bishop.html">Bishop</a> <a href="rook.html">Rook</a> <a href="queen.html">Queen</a> <a href="king.html">King</a> <a href="tactics.html">Tactics</a></nav>
 </header>
 <h1>Board Intuition</h1>
 <div class="stage">

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Puts the three Chess terms pages in the site's clothes.
+"""Builds the Chess section's term pages: the three supplied terms pages,
+and the pages that share their form (the six piece pages, Tactics,
+Checkmates and Fundamental Terms).
+
+The first part of this note is about the three supplied pages.
 
 opening-terms.html, middlegame-terms.html and endgame-terms.html each keep
 their content in a TERMS array at the top of the script. That array is the
@@ -15,11 +19,26 @@ standalone pages as they were supplied, from the uploads folder.
 The board renderer is the supplied one, unchanged in what it does: it reads
 the FEN directly, and a square is dark when (file + rank) is odd, which puts
 a1 on a dark square. Only the colors changed, to the site's board colors.
+
+The other pages are written from tools/chess_pages_data.py, and so are the
+terms added to the three supplied pages: those are merged into each page's
+own array by name, after the supplied terms, which stay byte for byte as
+they were. An entry given as a line of moves is played here with
+python-chess and its FEN taken from the result, so an illegal move stops the
+build. Two things the supplied renderer did not do are added for the new
+entries, and the supplied terms never use them: a fourth mark color
+("zone"), and a count on every square drawn as a heat map ("numbers").
 """
 
+import json
 import pathlib
 import re
 import sys
+
+import chess
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from chess_pages_data import PAGES as DATA  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 UPLOADS = pathlib.Path("/root/.claude/uploads/f95ea291-68fe-5058-9839-3897087404c1")
@@ -37,6 +56,30 @@ PAGES = [
      "ed8cd110-endgame-terms.html"),
 ]
 
+# the pages written from the data file: file, title, column, description, data key
+NEW = [
+    ("fundamental-terms.html", "Fundamental Terms", "Fundamentals",
+     "Terms that belong to no one phase of the game.", "fundamental"),
+    ("pawn.html", "Pawn", "Fundamentals", "The pawn, and the words for what pawns do.", "pawn"),
+    ("knight.html", "Knight", "Fundamentals", "Where a knight sees most, and where it belongs.", "knight"),
+    ("bishop.html", "Bishop", "Fundamentals", "The bishop's diagonals, and the terms that go with them.", "bishop"),
+    ("rook.html", "Rook", "Fundamentals", "The rook's files and ranks, and the terms that go with them.", "rook"),
+    ("queen.html", "Queen", "Fundamentals", "How far the queen sees.", "queen"),
+    ("king.html", "King", "Fundamentals", "The king in attack, defense and the ending.", "king"),
+    ("tactics.html", "Tactics", "Fundamentals", "Double attacks, pins and the rest, each on a position.", "tactics"),
+    ("checkmates.html", "Checkmates", "Endgames", "Named mating patterns, each on a position.", "checkmates"),
+]
+
+# which pages share a navigation row
+NAV_GROUPS = [
+    ["intuition.html", "fundamental-terms.html", "pawn.html", "knight.html", "bishop.html",
+     "rook.html", "queen.html", "king.html", "tactics.html"],
+    ["opening-terms.html", "middlegame-terms.html", "endgame-terms.html", "checkmates.html"],
+]
+TITLES = {f: t for f, t, *_ in PAGES}
+TITLES.update({f: t for f, t, *_ in NEW})
+TITLES["intuition.html"] = "Board Intuition"
+
 TERMS_RE = re.compile(r"const TERMS = \[\n.*?\n\];", re.S)
 
 
@@ -51,7 +94,7 @@ CSS = """
 :root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
         --line:#2b2b2b; --accent:#58a6ff;
         --sq-light:#a9b2be; --sq-dark:#5a6472;
-        --subject:#f09b28; --target:#e0684b; --plan:#58a6ff; }
+        --subject:#f09b28; --target:#e0684b; --plan:#58a6ff; --zone:#f5d49a; }
 * { box-sizing:border-box; }
 body { margin:0; background:var(--bg); color:var(--text);
   font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
@@ -94,6 +137,11 @@ h1 { margin:0 0 14px; font-size:26px; }
 .sq[data-mark="subject"] { color:var(--subject); }
 .sq[data-mark="target"] { color:var(--target); }
 .sq[data-mark="plan"] { color:var(--plan); }
+.sq[data-mark="zone"] { color:var(--zone); }
+.sq[data-mark="zone"]::after { opacity:.30; }
+.heat { position:absolute; inset:0; background:var(--subject); pointer-events:none; }
+.num { position:relative; z-index:1; font-size:min(4.2vw, 21px); font-weight:650;
+  color:#101316; font-variant-numeric:tabular-nums; }
 .pc { position:relative; z-index:1; font-size:min(10vw, 56px); line-height:1; user-select:none; }
 .pc.w { color:#f6f6f4; -webkit-text-stroke:1.3px #15181c; text-shadow:0 0 1px #15181c; }
 .pc.b { color:#15181c; text-shadow:0 0 2px rgba(255,255,255,.35); }
@@ -106,6 +154,7 @@ h1 { margin:0 0 14px; font-size:26px; }
 .sw-subject { color:var(--subject); }
 .sw-target { color:var(--target); }
 .sw-plan { color:var(--plan); }
+.sw-zone { color:var(--zone); }
 
 .text { margin:30px 0 0; border-top:1px solid var(--line); padding-top:22px; max-width:72ch; }
 .text h2 { font-size:21px; margin:0 0 2px; font-weight:650; }
@@ -196,12 +245,27 @@ function drawBoard(term) {
       sq.className = "sq " + (((f + rank) % 2 === 0) ? "l" : "d");
       sq.dataset.sq = name;
       if (term.marks[name]) sq.dataset.mark = term.marks[name];
+      if (term.numbers && term.numbers[name] !== undefined) {
+        // a count on the square, and a wash that deepens with it
+        const vals = Object.values(term.numbers);
+        const lo = Math.min(...vals), hi = Math.max(...vals);
+        const heat = document.createElement("div");
+        heat.className = "heat";
+        heat.style.opacity = (hi === lo ? 0.5 : 0.12 + 0.6 * (term.numbers[name] - lo) / (hi - lo)).toFixed(3);
+        sq.appendChild(heat);
+        sq.dataset.n = term.numbers[name];
+      }
       const p = pieces[name];
       if (p) {
         const span = document.createElement("span");
         span.className = "pc " + (p === p.toUpperCase() ? "w" : "b");
         span.textContent = GLYPH[p.toLowerCase()];
         sq.appendChild(span);
+      } else if (sq.dataset.n !== undefined) {
+        const n = document.createElement("span");
+        n.className = "num";
+        n.textContent = sq.dataset.n;
+        sq.appendChild(n);
       }
       board.appendChild(sq);
     }
@@ -212,6 +276,7 @@ function render(index) {
   const term = TERMS[index];
   drawBoard(term);
   document.getElementById("turn").textContent = term.turn;
+  document.getElementById("turn").hidden = !term.turn;
   document.getElementById("name").textContent = term.name;
   document.getElementById("tagline").textContent = term.tagline;
 
@@ -286,6 +351,7 @@ window.__terms = function (q) {
     pieces: sq.filter(s => s.querySelector(".pc")).map(s => s.dataset.sq + ":" +
       (s.querySelector(".pc").classList.contains("w") ? "w" : "b") + s.querySelector(".pc").textContent),
     marks: sq.filter(s => s.dataset.mark).map(s => s.dataset.sq + ":" + s.dataset.mark),
+    numbers: Object.fromEntries(sq.filter(s => s.dataset.n !== undefined).map(s => [s.dataset.sq, +s.dataset.n])),
     legend: document.querySelectorAll("#legend > div").length,
     name: document.getElementById("name").textContent,
     turn: document.getElementById("turn").textContent,
@@ -300,7 +366,42 @@ window.__terms = function (q) {
 
 
 def nav_for(fname):
-    return "\n".join(f'  <a href="{f}">{t}</a>' for f, t, *_ in PAGES if f != fname)
+    group = next(g for g in NAV_GROUPS if fname in g)
+    return "\n".join(f'  <a href="{f}">{TITLES[f]}</a>' for f in group if f != fname)
+
+
+def prepare(term):
+    """A data entry as a TERMS object: moves played out into a FEN."""
+    out = {"name": term["name"], "tagline": term["tagline"]}
+    if "moves" in term:
+        b = chess.Board()
+        for t in term["moves"].split():
+            b.push_san(t)
+        out["fen"] = b.board_fen()
+    else:
+        out["fen"] = term["fen"]
+    out["turn"] = term["turn"]
+    out["marks"] = term["marks"]
+    out["legend"] = term["legend"]
+    out["body"] = term["body"]
+    if "numbers" in term:
+        out["numbers"] = term["numbers"]
+    return out
+
+
+def block_of(terms):
+    return "const TERMS = " + json.dumps(terms, indent=2, ensure_ascii=False) + ";"
+
+
+def write(fname, title, section, desc, block):
+    html = (HTML.replace("__CSS__", CSS)
+                .replace("__TITLE__", title)
+                .replace("__DESC__", desc)
+                .replace("__SECTION__", section)
+                .replace("__NAV__", nav_for(fname))
+                .replace("__TERMS__", block))
+    (ROOT / fname).write_text(html, encoding="utf-8")
+    return html
 
 
 def main():
@@ -308,15 +409,21 @@ def main():
         page = ROOT / fname
         src = page if page.exists() else UPLOADS / upload
         block = terms_block(src)
-        html = (HTML.replace("__CSS__", CSS)
-                    .replace("__TITLE__", title)
-                    .replace("__DESC__", desc)
-                    .replace("__SECTION__", section)
-                    .replace("__NAV__", nav_for(fname))
-                    .replace("__TERMS__", block))
-        page.write_text(html, encoding="utf-8")
-        n = block.count('"name":')
-        print(f"  {fname:24} {len(html):>7,} B   {n} term{'s' if n != 1 else ''}   (TERMS read from {src.parent.name}/{src.name})")
+        terms = json.loads(block[len("const TERMS = "):-1])
+        # the additions, merged by name after whatever the page already holds
+        for add in map(prepare, DATA.get(fname, [])):
+            at = next((i for i, t in enumerate(terms) if t["name"] == add["name"]), None)
+            if at is None:
+                terms.append(add)
+            else:
+                terms[at] = add
+        block = block_of(terms)
+        html = write(fname, title, section, desc, block)
+        print(f"  {fname:24} {len(html):>7,} B   {len(terms)} terms")
+    for fname, title, section, desc, key in NEW:
+        terms = [prepare(t) for t in DATA[key]]
+        html = write(fname, title, section, desc, block_of(terms))
+        print(f"  {fname:24} {len(html):>7,} B   {len(terms)} terms")
 
 
 if __name__ == "__main__":

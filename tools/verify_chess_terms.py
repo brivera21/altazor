@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Checks the three Chess terms pages.
 
-  the arrays    each page's TERMS array is byte for byte the one supplied, and
+  the arrays    each page's TERMS array starts with the supplied terms, unchanged
+                (terms added later follow them and are checked by
+                verify_chess_pages.py), and
                 every term has its seven fields, real squares and known marks
   the positions each FEN is a legal diagram, and the move sequences quoted in
                 the text are legal from it. This only reports. The analysis
@@ -64,14 +66,17 @@ def play(fen, side, line):
     return b
 
 
-terms = {}
+terms, total = {}, {}
 print("--- the arrays ---")
 for fname, title, section, desc, upload in PAGES:
-    built = TERMS_RE.search((ROOT / fname).read_text(encoding="utf-8")).group(0)
-    given = TERMS_RE.search((UPLOADS / upload).read_text(encoding="utf-8")).group(0)
-    check(built == given, f"{fname}: TERMS array identical to the one supplied ({len(given):,} chars)")
-    arr = js_array(built)
+    built = js_array(TERMS_RE.search((ROOT / fname).read_text(encoding="utf-8")).group(0))
+    given = js_array(TERMS_RE.search((UPLOADS / upload).read_text(encoding="utf-8")).group(0))
+    # the supplied terms come first and unchanged; terms added later follow them
+    check(built[:len(given)] == given,
+          f"{fname}: the {len(given)} supplied term(s) first and unchanged, {len(built) - len(given)} added after")
+    arr = built[:len(given)]
     terms[fname] = arr
+    total[fname] = len(built)
     for t in arr:
         keys = {"name", "tagline", "fen", "turn", "marks", "legend", "body"}
         check(set(t) == keys, f"{fname} / {t.get('name')}: the seven fields, nothing more")
@@ -143,7 +148,7 @@ with sync_playwright() as p:
         last = pg.evaluate("() => window.__terms()")["current"]
         pg.keyboard.press("ArrowRight")
         first = pg.evaluate("() => window.__terms()")["current"]
-        check(last == len(arr) - 1 and first == 0, f"{fname}: the arrow keys wrap both ways")
+        check(last == total[fname] - 1 and first == 0, f"{fname}: the arrow keys wrap both ways")
         check(not errs, f"{fname}: no script errors" + (f" ({errs[0]})" if errs else ""))
         pg.close()
     br.close()
