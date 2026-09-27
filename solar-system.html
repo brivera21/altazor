@@ -206,7 +206,7 @@
     dist: "2.1 to 3.3 au (314 to 494 million km). Ceres, the largest member, orbits at 2.77 au",
     diam: "About 1.2 au from inner to outer edge, roughly 180 million km",
     area: "Jupiter's pull keeps these orbits tilted and stretched, so the rocks meet at speeds that break them apart instead of joining them. Nothing large ever formed here. And where an asteroid's year is a simple fraction of Jupiter's, the same tug lands in the same place over and over and empties that band. Those are the Kirkwood gaps: 2.50 au (three orbits for each one of Jupiter's), 2.82 au (five for two), 2.95 au (seven for three) and 3.28 au (two for one)",
-    mass: "About 2.4 × 10<sup>21</sup> kg, some 3% of the Moon and 0.04% of Earth. Ceres alone holds roughly a third of it, and the four largest bodies about half",
+    mass: "About 2.4 × 10<sup>21</sup> kg, some 3% of the Moon and 0.04% of Earth. Ceres alone holds about two fifths of it, Vesta about a tenth, and the four largest bodies together about three fifths",
     moons: "Ceres, 939 km across and a dwarf planet in its own right, then Vesta 525 km, Pallas 512 km and Hygiea 434 km",
     made: "Rock and metal near the inner edge, turning carbon-rich and increasingly icy outward. Ceres carries water ice and briny material under its crust",
     extra: "Spacecraft cross it without steering around anything. The objects big enough to have been cataloged sit about a million kilometers apart",
@@ -233,6 +233,40 @@
     probe: "New Horizons passed Pluto on July 14, 2015, then Arrokoth on January 1, 2019 at 44 au, the most distant object a spacecraft has ever reached"
   };
   const REGIONS = [BELT, KUIPER];
+
+  // The two largest bodies in the main belt, drawn on the line at their real
+  // distances inside it. Figures: JPL Small-Body Database; shape, size and
+  // mass from Dawn (Park and others, 2019, for Ceres; Russell and others,
+  // 2012, for Vesta). Shares of the belt use the 2.394 × 10^21 kg total of
+  // Pitjeva and Pitjev, 2018. They are not planets, so they sit apart from
+  // the planet list and take no chip; a click on either opens its panel.
+  const CERES = {
+    name: "Ceres", type: "Dwarf planet, in the asteroid belt", au: 2.766, rKm: 469.7,
+    lenR: 4, small: true, flat: 891.8 / 966.2,
+    labels: { extra: "Why it is a dwarf planet" },
+    diam: "939 km on average: 966 km across the equator and 892 km pole to pole, a little flattened by its spin",
+    area: "2.77 × 10<sup>6</sup> km², about the land area of Argentina",
+    mass: "9.38 × 10<sup>20</sup> kg, 1.3% of the Moon and about two fifths of the whole asteroid belt",
+    moons: "0",
+    made: "Rock and water ice, only partly separated: a muddy interior under a crust of ice, salts and clays, with brine below it. The bright spots in Occator crater are sodium carbonate, salt left where that brine reached the surface",
+    extra: "Its own gravity has pulled it round, but it shares its orbit with the rest of the belt instead of clearing it. It was counted a planet for about half a century after its discovery, then an asteroid, and since 2006 a dwarf planet, the only one in the inner solar system",
+    disc: "Giuseppe Piazzi, January 1, 1801, at Palermo. He took it for a planet",
+    probe: "Dawn, into orbit on March 6, 2015, after leaving Vesta: the first spacecraft to orbit a dwarf planet, and the first to orbit two bodies beyond Earth"
+  };
+  const VESTA = {
+    name: "Vesta", type: "Asteroid, the second largest in the belt", au: 2.362, rKm: 262.7,
+    lenR: 4 * 262.7 / 469.7, small: true, flat: 446.4 / 572.6,   // Ceres to Vesta in true proportion
+    labels: { extra: "Why it is not a dwarf planet" },
+    diam: "525 km on average: 573 km across the equator and 446 km pole to pole, flattened by the basin at its south pole",
+    area: "8.66 × 10<sup>5</sup> km², about the area of Pakistan",
+    mass: "2.59 × 10<sup>20</sup> kg, 0.35% of the Moon and about a tenth of the whole asteroid belt",
+    moons: "0",
+    made: "Rock and metal, separated like a planet's: an iron-nickel core, a rocky mantle and a crust of basalt. Pieces of that crust reach Earth as the HED meteorites, about one meteorite in sixteen",
+    extra: "It is not round. Two giant impacts dug the basins at its south pole, Rheasilvia among them, 500 km across with a central peak 23 km high, and its interior had already set too stiff to pull the dent back out",
+    disc: "Heinrich Olbers, March 29, 1807, at Bremen, the fourth asteroid found. It is the brightest, and at its best it can just be seen without a telescope",
+    probe: "Dawn, in orbit from July 16, 2011 to September 5, 2012, before it went on to Ceres"
+  };
+  const SMALL = [VESTA, CERES];                  // in order outward
 
   // ---------- Layouts (world units u) ----------
   // Lenient: even spacing, exaggerated radii. True: everything ∝ km.
@@ -314,6 +348,13 @@
     g.edgeOut = () => mix(g.xLenOut + shifted(g.xLenIn), g.xTrueOut, ease(m));
   });
   const ROCKS = BELT.rocks;                          // kept for the debug hook
+  // Inside the belt both layouts are linear in au, so each body sits at the
+  // same fraction of the way across it in either one.
+  SMALL.forEach(b => {
+    b.fr = (b.au - BELT.auIn) / (BELT.auOut - BELT.auIn);
+    b.xLen = BELT.xLenIn + b.fr * (BELT.xLenOut - BELT.xLenIn);
+    b.xTrue = b.au * AU * KM2U; b.rTrue = b.rKm * KM2U;
+  });
   const SUN_R_TRUE = SUN.rKm * KM2U;
 
   // ---------- State ----------
@@ -327,7 +368,7 @@
   let stars = [];
   let lightClock = 0;                     // seconds since the light pulse left the Sun (scaled)
   const C_KM_S = 299792.458;              // speed of light
-  const EARTH_R_KM = 6371, JUP_R_KM = 69911;
+  const EARTH_R_KM = 6371, JUP_R_KM = 69911, MOON_R_KM = 1737.4;
   // The Great Red Spot. It has been narrowing for as long as anyone has
   // measured it: near 40,000 km in the 19th century, 23,000 at Voyager in
   // 1979, about 16,000 at Juno in 2017. Drawn at 15,000 by 12,000 km, which
@@ -379,6 +420,11 @@
       const a = obj.edgeIn(), b = obj.edgeOut();
       const wantW = Math.min(W * 0.42, beltHalfHeight() * 2 * 0.8);
       camT.c = (a + b) / 2; camT.z = wantW / Math.max(b - a, 1e-9);
+    }
+    else if (obj.small) {
+      // sized so the Moon, drawn around it at the same scale, fits the window
+      const Rd = Math.min(H, W) * 0.24 * obj.rKm / MOON_R_KM;
+      camT.z = Rd / pr(obj); camT.c = px(obj);
     }
     else {
       let Rd = Math.min(H, W) * 0.20, cx = W / 2;
@@ -744,6 +790,10 @@
         if (mx > sx(g.edgeIn()) - 6 && mx < sx(g.edgeOut()) + 6 &&
             Math.abs(e.clientY - y0) < beltHalfHeight()) hit = g;
       }
+      for (const b of SMALL) {
+        const r = Math.max(pr(b) * cam.z, 9);
+        if (Math.abs(sx(px(b)) - mx) < r && Math.abs(e.clientY - y0) < r + 8) hit = b;
+      }
       for (const p of PLANETS) {
         const r = Math.max(pr(p) * cam.z, 12);
         if (Math.abs(sx(px(p)) - mx) < r && Math.abs(e.clientY - y0) < r + 8) hit = p;
@@ -952,6 +1002,52 @@
                  lx, top - 8);
   }
 
+  // Ceres and Vesta, on the line inside the belt. Up close Ceres is round and
+  // Vesta is not, which is the difference between a dwarf planet and an
+  // asteroid; both are drawn with their measured pole to pole flattening,
+  // north up, and Vesta's south polar basin at the bottom.
+  const SMALL_TONE = { Ceres: ["#9a968f", "#34322e"], Vesta: ["#b8ab95", "#433b30"] };
+  function drawSmall(b) {
+    const x = sx(px(b)), wr = pr(b) * cam.z, r = Math.max(wr, 1.1);
+    if (x + r < -60 || x - r > W + 60) return;
+    const hot = b === selected, [base, dark] = SMALL_TONE[b.name];
+    if (r < 3.5) {
+      // this small it is a dot among the rocks, so a faint halo marks it out
+      ctx.strokeStyle = hot ? "rgba(88,166,255,0.9)" : "rgba(214,200,170,0.45)"; ctx.lineWidth = 1;
+      circle(x, y0, r + 3.5); ctx.stroke();
+      ctx.fillStyle = hot ? "#ffffff" : base; circle(x, y0, r); ctx.fill();
+    } else {
+      const ry = r * b.flat;
+      ctx.save();
+      ctx.beginPath(); ctx.ellipse(x, y0, r, ry, 0, 0, 7); ctx.clip();
+      const g = ctx.createRadialGradient(x - r*0.45, y0 - ry*0.2, r*0.1, x, y0, r*1.25);
+      g.addColorStop(0, base); g.addColorStop(1, dark);
+      ctx.fillStyle = g; ctx.fillRect(x - r, y0 - ry, 2 * r, 2 * ry);
+      if (b.name === "Ceres") {
+        // the bright salt of Occator, and a few darker craters
+        ctx.fillStyle = "rgba(40,38,34,0.35)";
+        for (const [cx, cy, cr] of [[-0.3,-0.3,0.16],[0.35,0.25,0.12],[0.05,0.5,0.1],[0.45,-0.35,0.08]]) {
+          circle(x + cx*r, y0 + cy*ry, cr*r); ctx.fill();
+        }
+        ctx.fillStyle = "rgba(250,250,245,0.9)";
+        circle(x - 0.12*r, y0 + 0.05*ry, Math.max(0.05*r, 0.8)); ctx.fill();
+        circle(x - 0.06*r, y0 + 0.1*ry, Math.max(0.025*r, 0.6)); ctx.fill();
+      } else {
+        // Rheasilvia: a broad dark floor across the south pole, its peak in the middle
+        ctx.fillStyle = "rgba(45,38,30,0.45)";
+        ctx.beginPath(); ctx.ellipse(x, y0 + ry * 1.02, r * 0.86, ry * 0.42, 0, 0, 7); ctx.fill();
+        ctx.fillStyle = "rgba(200,188,165,0.55)";
+        circle(x + 0.05*r, y0 + ry * 0.8, Math.max(0.06*r, 0.8)); ctx.fill();
+      }
+      ctx.restore();
+      if (hot) { ctx.strokeStyle = "rgba(88,166,255,0.9)"; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.ellipse(x, y0, r + 3, ry + 3, 0, 0, 7); ctx.stroke(); }
+    }
+    // named once the belt has room for names on the screen
+    if (hot || sx(BELT.edgeOut()) - sx(BELT.edgeIn()) >= 80)
+      label(b.name, x, y0 - Math.max(r, 3.5) - 10, hot);
+  }
+
   function drawPlanet(p) {
     const wr = pr(p) * cam.z;
     const x = sx(px(p));
@@ -1061,6 +1157,25 @@
     // size of its own. Jupiter gets its own treatment, below.
     if (!selected || selected.isBelt) return;
     if (selected.name === "Earth") return;
+    if (selected.small) {
+      // Earth would be a ring thirteen to twenty-four times wider than these,
+      // off every screen, so the yardstick here is the Moon, drawn around it
+      const x = sx(px(selected)), Rd = pr(selected) * cam.z;
+      if (Rd < 6) return;
+      const gr = Rd * MOON_R_KM / selected.rKm;
+      ctx.fillStyle = "rgba(200,200,200,0.06)";
+      circle(x, y0, gr); ctx.fill();
+      ctx.strokeStyle = "rgba(210,215,225,0.7)";
+      ctx.setLineDash([4, 4]); ctx.lineWidth = 1.2;
+      circle(x, y0, gr); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(220,225,235,0.9)";
+      ctx.fillText("The Moon, to scale", x, y0 - gr - 10);
+      ghostState = { kind: "moon", r: gr, x, y: y0, of: selected.name, Rd };
+      return;
+    }
     const isSun = selected === SUN;
     const x = isSun ? sx(0) : sx(px(selected));
     const Rd = (isSun ? sunR() : pr(selected)) * cam.z;   // drawn radius of the selected body
@@ -1200,6 +1315,7 @@
     if (roomU === 0 && !showing) roomFrom = Infinity;
     drawSun();
     for (const g of REGIONS) drawBelt(g);
+    for (const b of SMALL) drawSmall(b);
     for (const p of PLANETS) drawPlanet(p);
     drawMoons();
     flushLabels();
@@ -1224,6 +1340,9 @@
               rockV: ROCKS.map(k => k.v) },
       kuiper: { plutino: KUIPER.plutino, twotino: KUIPER.twotino,
                 cliff: KUIPER.cliff },
+      small: SMALL.map(b => ({ name: b.name, au: b.au, fr: b.fr,
+        x: px(b), sx: sx(px(b)), r: pr(b) * cam.z, trueX: b.xTrue, rTrue: b.rTrue,
+        beltIn: BELT.edgeIn(), beltOut: BELT.edgeOut() })),
       ghost: ghostState,
       moons: moonState,
       light: lightState, speedup: LIGHT_SPEEDUP,
