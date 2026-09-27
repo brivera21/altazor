@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Candidate Moves &middot; Altazor</title>
+<style>
+:root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
+        --line:#2b2b2b; --accent:#58a6ff;
+        --check:#d95926; --capture:#199e70; --attack:#3987e5; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+.wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+.brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
+.brand:hover { color:var(--accent); }
+nav.site a { color:var(--muted); text-decoration:none; font-size:14px; margin-right:14px; }
+nav.site a:hover { color:var(--accent); }
+h1 { margin:0 0 4px; font-size:26px; }
+p.sub2 { margin:0 0 14px; color:var(--muted); font-size:14px; }
+.controls { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:0 0 12px; }
+.controls .lab { font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+.controls button { background:var(--panel); color:var(--muted); border:1px solid var(--line);
+  border-radius:999px; padding:5px 13px; font-size:13px; cursor:pointer; font-family:inherit; }
+.controls button:hover { color:var(--text); border-color:#3d3d3d; }
+.controls button.on { background:var(--accent); color:#0b1a2b; border-color:var(--accent); font-weight:600; }
+.controls button.done { color:#c8c8c8; border-color:#3d3d3d; }
+.controls .sep { width:1px; height:22px; background:var(--line); margin:0 4px; }
+.stage { display:flex; gap:24px; align-items:flex-start; }
+#board { flex:0 0 clamp(290px,36vw,460px); }
+.right { flex:1 1 480px; min-width:0; }
+#board svg { width:100%; height:auto; display:block; user-select:none; }
+#treewrap { overflow-x:auto; }
+#tree { display:block; min-width:560px; width:100%; max-width:820px; height:auto; }
+#tree .nd { cursor:pointer; }
+#tree .nd:hover rect { stroke:#6a6a6a; }
+.right .card { margin-top:14px; max-width:620px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; overflow-wrap:anywhere; }
+#stepTxt { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+.card p { margin:6px 0 0; font-size:13.5px; line-height:1.55; }
+.gamehead { color:var(--muted); font-size:12px; line-height:1.5; border-top:1px solid var(--line); margin-top:12px; padding-top:8px; }
+#candBox { border-top:1px solid var(--line); margin-top:12px; padding-top:10px; }
+#candBox:empty { display:none; }
+#candName { font-weight:700; font-size:17px; }
+#candName .k { font-weight:400; font-size:12px; letter-spacing:.06em; text-transform:uppercase; margin-left:6px; }
+#candLine { font-size:13px; color:#c8c8c8; font-variant-numeric:tabular-nums; margin-top:4px; }
+#candEval { font-size:13px; margin-top:4px; color:var(--muted); }
+#candEval b { color:var(--text); }
+.legend { display:flex; gap:14px; flex-wrap:wrap; font-size:12.5px; color:var(--muted); margin:8px 0 0; }
+.legend span i { display:inline-block; width:18px; height:4px; border-radius:2px; vertical-align:middle; margin-right:6px; }
+.research { margin-top:30px; border-top:1px solid var(--line); padding-top:18px; }
+.research h2 { font-size:17px; margin:0 0 2px; font-weight:600; }
+.research .sub { color:var(--muted); font-size:13px; margin:0 0 12px; }
+.charts { display:flex; gap:26px; flex-wrap:wrap; }
+.chart { flex:1 1 340px; min-width:0; }
+.chart h3 { font-size:13px; font-weight:600; margin:0 0 6px; color:#c8c8c8; }
+.chart svg { width:100%; max-width:470px; height:auto; display:block; }
+.chart .bar { fill:var(--accent); }
+.chart .row:hover .bar { fill:#8cc3ff; }
+.findings { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:18px; }
+@media (max-width:1000px){ .findings { grid-template-columns:repeat(2,1fr); } }
+@media (max-width:560px){ .findings { grid-template-columns:1fr; } }
+.finding { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+.finding .who { font-size:12px; letter-spacing:.04em; color:var(--accent); }
+.finding .what { font-size:13.5px; line-height:1.45; color:#d6d6d6; margin-top:3px; }
+#tip { position:fixed; pointer-events:none; background:#0d0d0d; border:1px solid #3a3a3a;
+  border-radius:8px; padding:6px 9px; font-size:12px; color:var(--text); display:none; z-index:5;
+  max-width:240px; line-height:1.45; }
+.note { color:var(--muted); font-size:12.5px; margin-top:22px; max-width:760px;
+  border-top:1px solid var(--line); padding-top:12px; }
+.method, .refs { color:var(--muted); font-size:12.5px; max-width:760px; }
+.method p, .refs p { margin:8px 0 0; }
+.refs a { color:var(--accent); overflow-wrap:anywhere; }
+details.sources { margin-top:14px; max-width:760px; }
+details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px;
+  letter-spacing:.06em; text-transform:uppercase; }
+details.sources > summary:hover { color:var(--accent); }
+@media (max-width:900px){ .stage{flex-direction:column;} #board{flex:none; width:100%; max-width:460px;} .right{width:100%;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">ALTAZOR</a>
+  <nav class="site"><a href="chess.html">&larr; Chess</a><a href="middlegame-terms.html">Middlegame Terms</a><a href="imbalances.html">I.M.B.A.L.A.N.C.E.S.</a><a href="plan.html">P.L.A.N.</a><a href="scout.html">S.C.O.U.T.</a></nav>
+</header>
+<h1>Candidate Moves</h1>
+<p class="sub2">One position, worked the way Kotov describes.</p>
+<div class="controls">
+  <span class="lab">Step</span><span id="steps"></span>
+  <span class="sep"></span>
+  <span class="lab">Candidate</span><span id="cands"></span>
+  <span class="sep"></span>
+  <button id="prevBtn" type="button" aria-label="Back one move">&larr;</button>
+  <button id="nextBtn" type="button" aria-label="Forward one move">&rarr;</button>
+</div>
+<div class="stage" id="diagram">
+  <div id="board"></div>
+  <div class="right">
+    <div id="treewrap"><svg id="tree" role="img" aria-label="The tree of analysis"></svg></div>
+    <div class="legend"><span><i style="background:var(--check)"></i>check</span>
+      <span><i style="background:var(--capture)"></i>capture</span>
+      <span><i style="background:var(--attack)"></i>attack</span></div>
+    <div class="card">
+    <div id="stepTxt"></div>
+    <div class="diagram-text"><p id="stepBody"></p></div>
+    <div id="candBox" class="diagram-text"></div>
+    <div class="gamehead">Richard Réti versus Savielly Tartakower, Vienna, 1910. White to play, move 9, after 8...Nxe4 took White's knight.</div>
+    </div>
+  </div>
+</div>
+
+<section class="research">
+  <h2>How players actually search</h2>
+  <div class="sub">Gobet, 1998: 48 players thinking aloud, 12 in each class.</div>
+  <div class="charts">
+    <div class="chart"><h3>Different first moves looked at</h3><svg id="cBase"></svg></div>
+    <div class="chart"><h3>How far each was followed, in plies</h3><svg id="cDepth"></svg></div>
+  </div>
+  <div class="findings" id="findings"></div>
+</section>
+
+<p class="note">Candidate moves are Alexander Kotov's term, from <i>Think Like a Grandmaster</i>, for the few moves in a position worth calculating: listed before any is calculated, each line followed once, the ends compared. The small version belongs in a player's first games, checks, captures and threats for both sides on every move; the full list belongs to the critical moments.</p>
+<details class="sources"><summary>Sources</summary>
+<div class="refs"><p>Campitelli, G., &amp; Gobet, F. (2004). Adaptive expert decision making: Skilled chess players search more and deeper. <i>ICGA Journal, 27</i>(4), 209-216. <a href="https://doi.org/10.3233/ICG-2004-27403">https://doi.org/10.3233/ICG-2004-27403</a></p><p>Chessable Science Team. (2024). <i>Candidate moves: When you see a good move, look for a better one</i> [Research paper]. Chessable. <a href="https://www.chessable.com/blog/wp-content/uploads/2024/04/Candidate-Moves-Research-Paper-final-version-April-15-2024-Chessable-science-team.pdf">https://www.chessable.com/blog/wp-content/uploads/2024/04/Candidate-Moves-Research-Paper-final-version-April-15-2024-Chessable-science-team.pdf</a></p><p>de Groot, A. D. (1965). <i>Thought and choice in chess</i>. Mouton. (Original work published 1946)</p><p>Gobet, F. (1998). Chess players' thinking revisited. <i>Swiss Journal of Psychology, 57</i>, 18-32. <a href="https://www.academia.edu/92473745/Chess_players_thinking_revisited">https://www.academia.edu/92473745/Chess_players_thinking_revisited</a></p><p>Klein, G., Wolf, S., Militello, L., &amp; Zsambok, C. (1995). Characteristics of skilled option generation in chess. <i>Organizational Behavior and Human Decision Processes, 62</i>(1), 63-69. <a href="https://doi.org/10.1006/obhd.1995.1031">https://doi.org/10.1006/obhd.1995.1031</a></p><p>Kotov, A. (1971). <i>Think like a grandmaster</i> (B. Cafferty, Trans.). Batsford.</p><p>Winter, E. (n.d.). R&eacute;ti v Tartakower, Vienna, 1910. <i>Chess Notes</i>. <a href="https://www.chesshistory.com/winter/extra/retitartakower.html">https://www.chesshistory.com/winter/extra/retitartakower.html</a></p></div>
+</details>
+</div>
+<div id="tip"></div>
+<script>
+const ROOT={"fen":"rnb1kb1r/pp3ppp/2p5/4q3/4n3/3Q4/PPPB1PPP/2KR1BNR"}, C=[{"san":"Qd8+","kind":"check","eval":"#3","verdict":"Mate. The queen is given up to open the d-file, 10.Bg5+ checks twice at once, from the bishop and from the rook behind it, and either king move is mated.","mate":3,"nodes":[{"san":"Qd8+","no":"9.","frm":"d3","to":"d8","fen":"rnbQkb1r/pp3ppp/2p5/4q3/4n3/8/PPPB1PPP/2KR1BNR","check":true,"mate":false,"parent":-1,"depth":0},{"san":"Kxd8","no":"9...","frm":"e8","to":"d8","fen":"rnbk1b1r/pp3ppp/2p5/4q3/4n3/8/PPPB1PPP/2KR1BNR","check":false,"mate":false,"parent":0,"depth":1},{"san":"Bg5+","no":"10.","frm":"d2","to":"g5","fen":"rnbk1b1r/pp3ppp/2p5/4q1B1/4n3/8/PPP2PPP/2KR1BNR","check":true,"mate":false,"parent":1,"depth":2},{"san":"Kc7","no":"10...","frm":"d8","to":"c7","fen":"rnb2b1r/ppk2ppp/2p5/4q1B1/4n3/8/PPP2PPP/2KR1BNR","check":false,"mate":false,"parent":2,"depth":3},{"san":"Bd8#","no":"11.","frm":"g5","to":"d8","fen":"rnbB1b1r/ppk2ppp/2p5/4q3/4n3/8/PPP2PPP/2KR1BNR","check":true,"mate":true,"parent":3,"depth":4},{"san":"Ke8","no":"10...","frm":"d8","to":"e8","fen":"rnb1kb1r/pp3ppp/2p5/4q1B1/4n3/8/PPP2PPP/2KR1BNR","check":false,"mate":false,"parent":2,"depth":3},{"san":"Rd8#","no":"11.","frm":"d1","to":"d8","fen":"rnbRkb1r/pp3ppp/2p5/4q1B1/4n3/8/PPP2PPP/2K2BNR","check":true,"mate":true,"parent":5,"depth":4}]},{"san":"Qd7+","kind":"check","eval":"−9.7","verdict":"Three black pieces can take the queen, and nothing follows. White ends a queen and a knight down.","mate":null,"nodes":[{"san":"Qd7+","no":"9.","frm":"d3","to":"d7","fen":"rnb1kb1r/pp1Q1ppp/2p5/4q3/4n3/8/PPPB1PPP/2KR1BNR","check":true,"mate":false,"parent":-1,"depth":0},{"san":"Nxd7","no":"9...","frm":"b8","to":"d7","fen":"r1b1kb1r/pp1n1ppp/2p5/4q3/4n3/8/PPPB1PPP/2KR1BNR","check":false,"mate":false,"parent":0,"depth":1}]},{"san":"Qxe4","kind":"capture","eval":"−5.7","verdict":"The obvious recapture. Nothing guards e4, so Black's queen takes back, and White has traded the queen for a knight.","mate":null,"nodes":[{"san":"Qxe4","no":"9.","frm":"d3","to":"e4","fen":"rnb1kb1r/pp3ppp/2p5/4q3/4Q3/8/PPPB1PPP/2KR1BNR","check":false,"mate":false,"parent":-1,"depth":0},{"san":"Qxe4","no":"9...","frm":"e5","to":"e4","fen":"rnb1kb1r/pp3ppp/2p5/8/4q3/8/PPPB1PPP/2KR1BNR","check":false,"mate":false,"parent":0,"depth":1}]},{"san":"Bf4","kind":"attack","eval":"−6.7","verdict":"The bishop attacks the queen, but the queen simply takes it, with check. White is two pieces down.","mate":null,"nodes":[{"san":"Bf4","no":"9.","frm":"d2","to":"f4","fen":"rnb1kb1r/pp3ppp/2p5/4q3/4nB2/3Q4/PPP2PPP/2KR1BNR","check":false,"mate":false,"parent":-1,"depth":0},{"san":"Qxf4+","no":"9...","frm":"e5","to":"f4","fen":"rnb1kb1r/pp3ppp/2p5/8/4nq2/3Q4/PPP2PPP/2KR1BNR","check":true,"mate":false,"parent":0,"depth":1}]},{"san":"Re1","kind":"attack","eval":"+0.8","verdict":"The one quiet move. The rook lines up on the knight, with the queen and king behind it, and White wins the piece back: material level, White a little better.","mate":null,"nodes":[{"san":"Re1","no":"9.","frm":"d1","to":"e1","fen":"rnb1kb1r/pp3ppp/2p5/4q3/4n3/3Q4/PPPB1PPP/2K1RBNR","check":false,"mate":false,"parent":-1,"depth":0},{"san":"Bf5","no":"9...","frm":"c8","to":"f5","fen":"rn2kb1r/pp3ppp/2p5/4qb2/4n3/3Q4/PPPB1PPP/2K1RBNR","check":false,"mate":false,"parent":0,"depth":1},{"san":"g4","no":"10.","frm":"g2","to":"g4","fen":"rn2kb1r/pp3ppp/2p5/4qb2/4n1P1/3Q4/PPPB1P1P/2K1RBNR","check":false,"mate":false,"parent":1,"depth":2},{"san":"Be6","no":"10...","frm":"f5","to":"e6","fen":"rn2kb1r/pp3ppp/2p1b3/4q3/4n1P1/3Q4/PPPB1P1P/2K1RBNR","check":false,"mate":false,"parent":2,"depth":3},{"san":"Rxe4","no":"11.","frm":"e1","to":"e4","fen":"rn2kb1r/pp3ppp/2p1b3/4q3/4R1P1/3Q4/PPPB1P1P/2K2BNR","check":false,"mate":false,"parent":3,"depth":4}]}], STEPS=[["List","Before any line is calculated, the moves worth calculating are written down. Forcing moves come first, for both sides: here two checks, one capture and two attacks. The recapture 9.Qxe4 looks automatic and goes on the list with the rest."],["Analyze","Each candidate is followed once, far enough to judge where it ends, and then left alone. Going back and forth between two lines and then playing a third, unchecked, is the habit Kotov warned against."],["Compare","Four of the five lose material, the obvious recapture among them. 9.Qd8+ gives up the queen and mates. Tartakower resigned after 10.Bg5+; the mates are what he saw coming."]], GOBET=[{"cls":"Masters","base":3.2,"base_sd":2.7,"depth":5.0,"depth_sd":2.3},{"cls":"Experts","base":4.8,"base_sd":2.2,"depth":4.6,"depth_sd":1.9},{"cls":"Class A","base":6.5,"base_sd":2.8,"depth":3.7,"depth_sd":2.1},{"cls":"Class B","base":4.8,"base_sd":2.9,"depth":2.9,"depth_sd":1.1}], FIND=[["de Groot, 1946","Grandmasters and experts looked at about as many moves; the grandmasters' were better."],["Klein and others, 1995","The first move a skilled player thinks of is usually a good one."],["Campitelli and Gobet, 2004","Strong players search far more when a position demands it."],["Chessable, 2024","Told to consider candidate moves, 207 players solved tactics no better."]];
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const FILES='abcdefgh', S=52, M=20, BW=8*S+2*M;
+const GLYPH={k:'♚',q:'♛',r:'♜',b:'♝',n:'♞',p:'♟'};
+const COLOR={check:'#d95926',capture:'#199e70',attack:'#3987e5'};
+
+let step=0, cand=null, node=-1;   // node: index into C[cand].nodes, -1 = the root position
+const seen=new Set();              // candidates already followed
+
+function squares(fen){
+  const sq={}; fen.split('/').forEach((row,ri)=>{ let f=0;
+    for(const ch of row){ if(ch>='1'&&ch<='8') f+=+ch; else { sq[FILES[f]+(8-ri)]=ch; f++; } } });
+  return sq;
+}
+const cx=n=>M+FILES.indexOf(n[0])*S+S/2, cy=n=>M+(8-+n[1])*S+S/2;
+function arrow(frm,to,col,w,op,off){
+  let x1=cx(frm),y1=cy(frm),x2=cx(to),y2=cy(to);
+  const L=Math.hypot(x2-x1,y2-y1), ux=(x2-x1)/L, uy=(y2-y1)/L, h=w*2.6;
+  x1+=-uy*(off||0); y1+=ux*(off||0); x2+=-uy*(off||0); y2+=ux*(off||0);
+  const bx=x2-ux*h, by=y2-uy*h, px=-uy, py=ux;
+  const d='M'+(x1+ux*10)+','+(y1+uy*10)+' L'+bx+','+by;
+  const head=(x2)+','+(y2)+' '+(bx+px*h*0.6)+','+(by+py*h*0.6)+' '+(bx-px*h*0.6)+','+(by-py*h*0.6);
+  return '<g opacity="'+op+'"><path d="'+d+'" stroke="#0d0d0d" stroke-width="'+(w+3)+'" stroke-linecap="round"/>'+
+    '<polygon points="'+head+'" fill="#0d0d0d" stroke="#0d0d0d" stroke-width="3" stroke-linejoin="round"/>'+
+    '<path d="'+d+'" stroke="'+col+'" stroke-width="'+w+'" stroke-linecap="round"/>'+
+    '<polygon points="'+head+'" fill="'+col+'"/></g>';
+}
+function drawBoard(){
+  const c=cand!==null?C[cand]:null, n=c&&node>=0?c.nodes[node]:null;
+  const fen=n?n.fen:ROOT.fen, sq=squares(fen);
+  let s='<svg viewBox="0 0 '+BW+' '+BW+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+
+    esc(n?'The position after '+n.no+' '+n.san:'White to play, move 9')+'">';
+  s+='<rect x="'+(M-4)+'" y="'+(M-4)+'" width="'+(8*S+8)+'" height="'+(8*S+8)+'" rx="6" fill="#0d0d0d" stroke="#333"/>';
+  for(let f=0;f<8;f++) for(let r=1;r<=8;r++){
+    const x=M+f*S, y=M+(8-r)*S, dark=(f+r)%2===1, name=FILES[f]+r;
+    let fill=dark?'#5a6472':'#a9b2be';
+    if(n&&name===n.frm) fill=dark?'#6d7a52':'#9aa871';
+    if(n&&name===n.to) fill=dark?'#85914f':'#b4bf72';
+    s+='<rect class="sq '+(dark?'d':'l')+'" data-sq="'+name+'" x="'+x+'" y="'+y+'" width="'+S+'" height="'+S+'" fill="'+fill+'"/>';
+    if(f===0) s+='<text x="'+(M-8)+'" y="'+(y+S/2+4)+'" text-anchor="end" font-size="11" fill="#7c7c7c">'+r+'</text>';
+    if(r===1) s+='<text x="'+(x+S/2)+'" y="'+(M+8*S+16)+'" text-anchor="middle" font-size="11" fill="#7c7c7c">'+FILES[f]+'</text>';
+  }
+  for(const name in sq){
+    const ch=sq[name], white=ch===ch.toUpperCase();
+    s+='<text class="pc" data-sq="'+name+'" x="'+cx(name)+'" y="'+(cy(name)+S*0.33)+'" text-anchor="middle" font-size="'+(S*0.86)+
+      '" fill="'+(white?'#f6f6f4':'#15181c')+'" stroke="'+(white?'#15181c':'#000')+
+      '" stroke-width="1.1" paint-order="stroke">'+GLYPH[ch.toLowerCase()]+'</text>';
+  }
+  // on the root position, an arrow for each candidate
+  if(!n){
+    // arrows that leave the same square in the same direction sit side by side
+    const groups={};
+    C.forEach((k,i)=>{ const f=k.nodes[0], dx=cx(f.to)-cx(f.frm), dy=cy(f.to)-cy(f.frm), L=Math.hypot(dx,dy);
+      const key=f.frm+':'+Math.round(dx/L*100)+','+Math.round(dy/L*100); (groups[key]=groups[key]||[]).push(i); k._g=key; });
+    C.forEach((k,i)=>{
+      const first=k.nodes[0], g=groups[k._g], j=g.indexOf(i), off=(j-(g.length-1)/2)*11;
+      const best=step===2&&k.mate, faded=(step===2&&!k.mate)||(step===1&&cand!==null&&cand!==i);
+      s+='<g class="arrow" data-kind="'+k.kind+'" data-san="'+esc(k.san)+'">'+arrow(first.frm,first.to,COLOR[k.kind],best?7:5,faded?0.3:0.95,off)+'</g>';
+    });
+  }
+  document.getElementById('board').innerHTML=s+'</svg>';
+}
+
+// ---- the tree of analysis: root at the left, one row per line end ----
+const TX0=10, COLW=92, ROWH=38, NW=76, NH=26;
+function layout(){
+  const rows=[]; let r=0;
+  C.forEach((k,ci)=>{
+    k.nodes.forEach((n,ni)=>{
+      const hasKid=k.nodes.some(m=>m.parent===ni);
+      if(ni>0 && n.parent!==ni-1) r++;       // a new branch starts a new row
+      n.row=r; n.col=n.depth+1;
+      if(!hasKid) n.leaf=true;
+    });
+    k.row0=k.nodes[0].row; r++;
+  });
+  return r;
+}
+const NROWS=layout();
+function drawTree(){
+  const H=NROWS*ROWH+22, W=TX0+6*COLW+NW+54;
+  const svg=document.getElementById('tree');
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  const ry=row=>18+row*ROWH+NH/2;
+  const rootY=ry((NROWS-1)/2);
+  let s='';
+  // root
+  s+='<g class="nd" data-c="-1"><rect x="'+TX0+'" y="'+(rootY-NH/2)+'" width="'+(NW-6)+'" height="'+NH+'" rx="6" fill="#20242a" stroke="#3a3f47"/>'+
+     '<text x="'+(TX0+(NW-6)/2)+'" y="'+(rootY+4)+'" text-anchor="middle" font-size="11.5" fill="#c8c8c8">move 9</text></g>';
+  C.forEach((k,ci)=>{
+    const open=step===2||(step===1&&(seen.has(ci)||cand===ci));
+    const col=COLOR[k.kind];
+    k.nodes.forEach((n,ni)=>{
+      if(ni>0&&!open) return;
+      const x=TX0+n.col*COLW, y=ry(n.row);
+      const px=n.parent<0?TX0+NW-6:TX0+k.nodes[n.parent].col*COLW+NW, py=n.parent<0?rootY:ry(k.nodes[n.parent].row);
+      const lit=cand===ci&&(ni===node||(node>=0&&isAncestor(k,ni,node)));
+      s+='<path d="M'+px+','+py+' C'+(px+12)+','+py+' '+(x-12)+','+y+' '+x+','+y+'" fill="none" stroke="'+(ni===0?col:'#444a52')+'" stroke-width="'+(ni===0?2.4:1.4)+'"/>';
+      s+='<g class="nd" data-c="'+ci+'" data-n="'+ni+'"><rect x="'+x+'" y="'+(y-NH/2)+'" width="'+NW+'" height="'+NH+'" rx="6" fill="'+(lit?'#2c3b52':'#1d2024')+
+         '" stroke="'+(ni===0?col:lit?'#58a6ff':'#3a3f47')+'" stroke-width="'+(ni===0?2:1)+'"/>'+
+         '<text x="'+(x+NW/2)+'" y="'+(y+4)+'" text-anchor="middle" font-size="12" fill="'+(n.depth%2?'#b8b8b8':'#f0f0f0')+'">'+esc(n.no.replace('...','…')+n.san)+'</text></g>';
+      if(n.leaf&&(step===2||seen.has(ci))){
+        const good=k.mate||k.eval.startsWith('+');
+        s+='<text class="ev" x="'+(x+NW+10)+'" y="'+(y+4)+'" font-size="12.5" font-weight="600" fill="'+(k.mate?'#f0f0f0':good?'#c8c8c8':'#8a8a8a')+'">'+esc(k.eval)+'</text>';
+      }
+    });
+  });
+  svg.innerHTML=s;
+}
+function isAncestor(k,a,b){ let p=b; while(p>=0){ if(p===a) return true; p=k.nodes[p].parent; } return false; }
+
+function lineTo(k,ni){ const out=[]; let p=ni; while(p>=0){ out.unshift(k.nodes[p]); p=k.nodes[p].parent; } return out; }
+function firstLeaf(k,ni){ let p=ni; for(;;){ const kid=k.nodes.findIndex(m=>m.parent===p); if(kid<0) return p; p=kid; } }
+
+function drawCard(){
+  document.getElementById('stepTxt').textContent='Step '+(step+1)+' of 3 · '+STEPS[step][0];
+  document.getElementById('stepBody').textContent=STEPS[step][1];
+  const box=document.getElementById('candBox');
+  if(cand===null){ box.innerHTML=''; return; }
+  const k=C[cand], leaf=node>=0?firstLeaf(k,node):firstLeaf(k,0);
+  const line=lineTo(k,leaf).map((n,i)=>(i===0||n.no.indexOf('...')<0?n.no:'')+n.san).join(' ');
+  const atEnd=node>=0&&k.nodes[node].leaf;
+  box.innerHTML='<div id="candName">9.'+esc(k.san)+'<span class="k" style="color:'+COLOR[k.kind]+'">'+k.kind+'</span></div>'+
+    '<div id="candLine">'+esc(line)+'</div>'+
+    ((atEnd||step===2||seen.has(cand))?'<div id="candEval">Stockfish: <b>'+esc(k.mate?'mate in '+k.mate:k.eval)+'</b></div><p>'+esc(k.verdict)+'</p>':'');
+}
+function drawControls(){
+  document.getElementById('steps').innerHTML=STEPS.map((s,i)=>'<button type="button" data-s="'+i+'" class="'+(i===step?'on':'')+'">'+(i+1)+' · '+s[0]+'</button>').join(' ');
+  document.getElementById('cands').innerHTML=C.map((k,i)=>'<button type="button" data-c="'+i+'" class="'+(i===cand?'on':seen.has(i)?'done':'')+'" style="border-bottom:3px solid '+COLOR[k.kind]+'">'+esc(k.san)+'</button>').join(' ');
+}
+function render(){ drawControls(); drawBoard(); drawTree(); drawCard(); }
+
+function pick(i){
+  cand=i; node=-1;
+  if(step===0) step=1;
+  render();
+}
+document.getElementById('steps').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-s]'); if(!b) return;
+  step=+b.dataset.s; if(step===0){ cand=null; node=-1; } if(step===2){ node=-1; }
+  render();
+});
+document.getElementById('cands').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-c]'); if(b) pick(+b.dataset.c);
+});
+document.getElementById('tree').addEventListener('click',e=>{
+  const g=e.target.closest('.nd'); if(!g) return;
+  const c=+g.dataset.c;
+  if(c<0){ cand=null; node=-1; render(); return; }
+  cand=c; node=+g.dataset.n; if(step===0) step=1;
+  if(C[c].nodes[node].leaf) seen.add(c);
+  render();
+});
+function stepMove(d){
+  if(cand===null){ if(d>0) pick(0); return; }
+  const k=C[cand];
+  if(d>0){ const kid=k.nodes.findIndex(m=>m.parent===node); if(kid>=0) node=kid; }
+  else { node=node>=0?k.nodes[node].parent:-1; }
+  if(node>=0&&k.nodes[node].leaf) seen.add(cand);
+  render();
+}
+document.getElementById('prevBtn').addEventListener('click',()=>stepMove(-1));
+document.getElementById('nextBtn').addEventListener('click',()=>stepMove(1));
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight') stepMove(1); else if(e.key==='ArrowLeft') stepMove(-1);
+});
+
+// ---- the research charts ----
+const tip=document.getElementById('tip');
+function bars(id,key,sd,max,unit){
+  const W=420, rowH=34, L=78, H=GOBET.length*rowH+28, sc=v=>(W-L-50)*v/max;
+  let s='';
+  for(let t=0;t<=max;t+=(max>6?2:1)){
+    const x=L+sc(t);
+    s+='<line x1="'+x+'" y1="4" x2="'+x+'" y2="'+(H-22)+'" stroke="#2b2b2b"/>'+
+       '<text x="'+x+'" y="'+(H-8)+'" text-anchor="middle" font-size="11" fill="#7c7c7c">'+t+'</text>';
+  }
+  GOBET.forEach((g,i)=>{
+    const y=8+i*rowH, v=g[key];
+    s+='<g class="row" data-tip="'+esc(g.cls+': '+v+' '+unit+' on average, standard deviation '+g[sd]+'; 12 players')+'">'+
+       '<rect x="0" y="'+(y-4)+'" width="'+W+'" height="'+rowH+'" fill="transparent"/>'+
+       '<text x="'+(L-10)+'" y="'+(y+15)+'" text-anchor="end" font-size="12.5" fill="#c8c8c8">'+esc(g.cls)+'</text>'+
+       '<rect class="bar" x="'+L+'" y="'+(y+3)+'" width="'+sc(v)+'" height="18" rx="4"/>'+
+       '<text x="'+(L+sc(v)+7)+'" y="'+(y+16)+'" font-size="12.5" fill="#e6e6e6">'+v.toFixed(1)+'</text></g>';
+  });
+  const el=document.getElementById(id);
+  el.setAttribute('viewBox','0 0 '+W+' '+H); el.innerHTML=s;
+  el.setAttribute('role','img');
+  el.setAttribute('aria-label',GOBET.map(g=>g.cls+' '+g[key]).join(', '));
+}
+bars('cBase','base','base_sd',8,'first moves');
+bars('cDepth','depth','depth_sd',6,'plies');
+for(const el of document.querySelectorAll('.chart .row')){
+  el.addEventListener('mousemove',e=>{ tip.style.display='block'; tip.textContent=el.dataset.tip;
+    tip.style.left=Math.min(e.clientX+14,innerWidth-250)+'px'; tip.style.top=(e.clientY+14)+'px'; });
+  el.addEventListener('mouseleave',()=>{ tip.style.display='none'; });
+}
+document.getElementById('findings').innerHTML=FIND.map(f=>
+  '<div class="finding"><div class="who">'+esc(f[0])+'</div><div class="what">'+esc(f[1])+'</div></div>').join('');
+
+render();
+window.__cand=function(q){
+  if(q&&q.step!=null){ step=q.step; if(step===0){cand=null;} node=-1; render(); }
+  if(q&&q.pick!=null) pick(q.pick);
+  if(q&&q.node!=null){ node=q.node; if(node>=0&&C[cand].nodes[node].leaf) seen.add(cand); render(); }
+  return {step, cand, node, cands:C.length,
+    arrows:[...document.querySelectorAll('#board .arrow')].map(a=>a.dataset.kind),
+    pieces:[...document.querySelectorAll('#board .pc')].map(p=>p.dataset.sq+':'+p.textContent+(p.getAttribute('fill')==='#f6f6f4'?'w':'b')).sort(),
+    a1:document.querySelector('#board .sq[data-sq=a1]').classList.contains('d'),
+    h1:document.querySelector('#board .sq[data-sq=h1]').classList.contains('l'),
+    treeNodes:document.querySelectorAll('#tree .nd').length,
+    evals:[...document.querySelectorAll('#tree .ev')].map(e=>e.textContent),
+    card:document.getElementById('candBox').textContent,
+    stepText:document.getElementById('stepBody').textContent};
+};
+</script>
+</body>
+</html>
