@@ -527,20 +527,12 @@ HOMININS = N(
     ])
 
 
-IMG_NOTE = (" Each living tip carries the photograph from its group's "
-            "Wikipedia article, fetched at view time.")
-HOM_IMG_NOTE = (" Each species carries the photograph from its Wikipedia "
-                "article, fetched at view time.")
-
 PAGES = [
     ("tree-of-life.html", "Tree of Life", TREE_OF_LIFE,
-     "The tree runs from the last universal common ancestor at the left to "
-     "living groups at the right; branch lengths carry no time information. "
-     "The eukaryotes are drawn where current evidence places them, beside "
-     "the Asgard archaea inside the archaeal branch, which turns Woese's "
-     "three domains into two. A node under the cursor fills the card; "
-     "a click pins it, and a second click lets go."
-     + IMG_NOTE,
+     "From the last universal common ancestor at the left to living groups "
+     "at the right; branch lengths carry no time. The eukaryotes sit where "
+     "current evidence places them, beside the Asgard archaea inside the "
+     "archaeal branch, which turns Woese's three domains into two.",
      [("Woese, C. R., Kandler, O., & Wheelis, M. L. (1990). Toward a "
        "natural system of organisms: Proposal for the domains Archaea, "
        "Bacteria, and Eucarya. <i>Proceedings of the National Academy of "
@@ -566,13 +558,11 @@ PAGES = [
        "view time; each is credited on its article page.",
        "https://en.wikipedia.org/")]),
     ("animals.html", "Animals", ANIMALS,
-     "The main divisions of the animals, from the one ancestor at the left "
-     "to living phyla and, inside the chordates, the vertebrate classes; "
-     "branch lengths carry no time information, and counts are described "
-     "species from Zhang's 2013 census. The comb jellies branch first, a "
-     "placement settled by chromosome-scale genomes in 2023, and the fishes "
-     "are drawn as one grade of several branches. A node under the cursor "
-     "fills the card; a click pins it, and a second click lets go." + IMG_NOTE,
+     "From the one ancestor at the left to living phyla and, inside the "
+     "chordates, the vertebrate classes; branch lengths carry no time, and "
+     "counts are described species from Zhang's 2013 census. The comb "
+     "jellies branch first, as gene order in chromosome-scale genomes "
+     "indicated in 2023, and the fishes are one grade of several branches.",
      [("Schultz, D. T., Haddock, S. H. D., Bredeson, J. V., Green, R. E., "
        "Simakov, O., & Rokhsar, D. S. (2023). Ancient gene linkages support "
        "ctenophores as sister to other animals. <i>Nature, 618</i>, "
@@ -593,13 +583,10 @@ PAGES = [
        "view time; each is credited on its article page.",
        "https://en.wikipedia.org/")]),
     ("mammals.html", "Mammals", MAMMALS,
-     "The main divisions of the living mammals, from the deepest split at "
-     "the left to orders at the right; branch lengths carry no time "
-     "information, and species counts are the Mammal Diversity Database's, "
-     "rounded. The root inside the placentals is drawn with Afrotheria "
-     "branching first, one of two arrangements the genomes still allow. A "
-     "node under the cursor fills the card; a click pins it, and a second "
-     "click lets go." + IMG_NOTE,
+     "From the deepest split at the left to orders at the right; branch "
+     "lengths carry no time, and species counts are the Mammal Diversity "
+     "Database's, rounded. The four placental superorders leave from one "
+     "point, since the genomes still allow three ways to root them.",
      [("Burgin, C. J., Colella, J. P., Kahn, P. L., & Upham, N. S. (2018). "
        "How many species of mammals are there? <i>Journal of Mammalogy, "
        "99</i>(1), 1-14.", "https://doi.org/10.1093/jmammal/gyx147"),
@@ -621,13 +608,10 @@ PAGES = [
        "view time; each is credited on its article page.",
        "https://en.wikipedia.org/")]),
     ("primates.html", "Primates", PRIMATES,
-     "The branches of the tree of life that lead to and through the "
-     "primates, from the mammal superorder at the left to the living "
-     "great apes at the right; branch lengths carry no time information. "
-     "The human line sits beside the chimpanzees and bonobos, from whom it "
-     "parted roughly six to eight million years ago. A node under the "
-     "cursor fills the card; a click pins it, and a second click lets go."
-     + IMG_NOTE,
+     "From the mammal superorder at the left to the living great apes at "
+     "the right; branch lengths carry no time. The human line sits beside "
+     "the chimpanzees and bonobos, from whom it parted roughly six to eight "
+     "million years ago.",
      [("Perelman, P., Johnson, W. E., Roos, C., Seuanez, H. N., Horvath, "
        "J. E., Moreira, M. A. M., Kessing, B., Pontius, J., Roelke, M., "
        "Rumpler, Y., Schneider, M. P. C., Silva, A., O'Brien, S. J., & "
@@ -651,13 +635,10 @@ PAGES = [
        "https://en.wikipedia.org/")]),
     ("hominins.html", "Hominins", HOMININS,
      "The human tribe from the chimpanzee split to the present: the "
-     "australopiths, the robust Paranthropus side branch, and every named "
-     "branch of Homo down to the three that overlapped last, with fossil "
-     "date ranges beside each species (Ma, millions of years ago; ka, "
-     "thousands). Polytomies mark relationships the fossils leave "
-     "unresolved. A node "
-     "under the cursor fills the card; a click pins it, and a second click "
-     "lets go." + HOM_IMG_NOTE,
+     "australopiths, the robust Paranthropus side branch and every named "
+     "branch of Homo, with fossil date ranges beside each species (Ma, "
+     "millions of years ago; ka, thousands). Where several branches leave "
+     "one point, the fossils leave their order unresolved.",
      [("Smithsonian National Museum of Natural History. (n.d.). Human "
        "origins: Species. Human Origins Program.",
        "https://humanorigins.si.edu/evidence/human-fossils/species"),
@@ -746,6 +727,9 @@ h1 { margin:0 0 6px; font-size:26px; }
 .refs a { color:var(--accent); }
 __APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
+details.sources { margin-top:22px; border-top:1px solid var(--line); padding-top:10px; max-width:760px; }
+details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; }
+details.sources > summary:hover { color:var(--accent); }
 @media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
 </style>
 </head>
@@ -767,8 +751,9 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   </div></div>
 </div>
 <p class="note">__NOTE__</p>
-<h2 class="refh">References</h2>
+<details class="sources"><summary>Sources</summary>
 <div class="refs">__REFS__</div>
+</details>
 </div>
 <script>
 const ROOT=__DATA__, UP=__UP__;

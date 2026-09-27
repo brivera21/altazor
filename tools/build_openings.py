@@ -104,14 +104,13 @@ def main():
         "title": "Openings by Frequency · Altazor",
         "heading": "Openings by Frequency",
         "lede": "The opening tree of 3.9 million games. Ring position is the move "
-                "number, arc size is how often the line is played. A click on an arc "
-                "zooms into that line, a click on the center backs out, and the arc "
-                "under the cursor shows its position.",
-        "note": "Arcs cover only the lines above the frequency cutoff of the 394-node "
-                "tree; the gaps are everything rarer. Counts are from the <a "
+                "number and arc size how often the line is played, as a share of all "
+                "games; gaps are the lines rarer than the tree's cutoff. A click on an "
+                "arc zooms into it, and a click on the center backs out.",
+        "note": "Counts are from the <a "
                 "href=\"https://www.365chess.com/chess-games.php\">365chess.com "
-                "Big Database</a>, 3,902,072 games, accessed August 2026. Percentages are "
-                "the share of all games.",
+                "Big Database</a>, 3,902,072 games, accessed August 2026. The tree "
+                "has 394 nodes, every line above its frequency cutoff.",
         "mode": "games",
         "total": ALL_GAMES,
         "allName": "all games",

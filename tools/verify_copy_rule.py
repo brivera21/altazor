@@ -75,6 +75,8 @@ BACKLOG_FILE = ROOT / "tools" / "copy_backlog.txt"
 BACKLOG = {l.strip() for l in BACKLOG_FILE.read_text().splitlines()
            if l.strip() and not l.startswith("#")} if BACKLOG_FILE.exists() else set()
 WRITE_BACKLOG = "--write-backlog" in sys.argv
+WHY = "--why" in sys.argv          # list what each backlog page still lacks
+ONLY = {a for a in sys.argv[1:] if a.endswith(".html")}   # check just these pages
 MAX_ABOVE = 12      # words allowed in any text above the diagram
 TARGET = (40, 80)   # comfortable band, reported but not enforced
 
@@ -159,7 +161,8 @@ COPY_JS = """() => {
 # not held to the Altazor copy rule.
 PORTED = {"oneill-ring.html", "generation-starship.html",
           "hard-scifi-timeline.html", "space-elevator.html"}
-pages = sorted(p.name for p in ROOT.glob("*.html") if p.name not in PORTED)
+pages = sorted(p.name for p in ROOT.glob("*.html") if p.name not in PORTED
+               and (not ONLY or p.name in ONLY))
 fails, notes = [], []
 
 try:
@@ -250,7 +253,11 @@ if WRITE_BACKLOG:
         + "".join(f"{n}\n" for n in sorted(shortfall)))
     print(f"\nwrote {BACKLOG_FILE.name}: {len(shortfall)} pages")
 else:
-    done = sorted(BACKLOG - set(shortfall))
+    if WHY:
+        print()
+        for n in sorted(shortfall):
+            print(f"short {n}: " + "; ".join(shortfall[n]))
+    done = sorted((BACKLOG & set(pages)) - set(shortfall))
     if done:
         print("\nnow meets the caption rule, take it off the backlog:", ", ".join(done))
     print(f"\nbacklog: {len(BACKLOG & set(shortfall))} pages still short of the caption rule")

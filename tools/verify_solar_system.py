@@ -43,8 +43,23 @@ FACTS = [
      2.5 < 2.4e21 / 7.342e22 * 100 < 3.5),
     ("2.4e21 kg is about 0.04% of Earth",
      0.035 < 2.4e21 / 5.972e24 * 100 < 0.045),
-    ("Ceres holds roughly a third of the belt",
-     0.30 < 9.38e20 / 2.4e21 < 0.42),
+    # shares of the belt against the 2.394e21 kg total (Pitjeva and Pitjev 2018)
+    ("Ceres holds about two fifths of the belt",
+     0.37 < 9.384e20 / 2.394e21 < 0.43),
+    ("Vesta holds about a tenth of it",
+     0.09 < 2.590e20 / 2.394e21 < 0.12),
+    ("the four largest hold about three fifths",
+     0.57 < (9.384 + 2.590 + 2.04 + 0.87) / 23.94 < 0.65),
+    ("Ceres is 1.3% of the Moon's mass", abs(9.384e20 / 7.342e22 * 100 - 1.3) < 0.05),
+    ("Vesta is 0.35% of the Moon's mass", abs(2.590e20 / 7.342e22 * 100 - 0.35) < 0.01),
+    ("Ceres's surface, 2.77e6 km², follows from its 939.4 km mean diameter",
+     abs(math.pi * 939.4 ** 2 / 2.77e6 - 1) < 0.01),
+    ("Vesta's surface, 8.66e5 km², follows from its 525.4 km mean diameter",
+     abs(math.pi * 525.4 ** 2 / 8.66e5 - 1) < 0.01),
+    ("Vesta at 2.362 au falls inside the belt and clear of the 3:1 gap",
+     BELT_IN < 2.362 < BELT_OUT and abs(2.362 - 5.204 * (1 / 3) ** (2 / 3)) > 0.035),
+    ("Ceres at 2.766 au falls clear of the 5:2 gap",
+     abs(2.766 - 5.204 * (2 / 5) ** (2 / 3)) > 0.020),
     ("Ceres at 2.77 au falls inside the belt", BELT_IN < 2.77 < BELT_OUT),
     ("every Kirkwood gap quoted falls inside the belt",
      all(BELT_IN < g < BELT_OUT for g in (2.50, 2.82, 2.95, 3.28))),
@@ -393,6 +408,71 @@ with sync_playwright() as pw:
         fails.append("Jupiter's panel does not explain the spot")
     else:
         print("  ok   Jupiter's panel carries a Great Red Spot row")
+
+    # Ceres and Vesta sit on the line inside the belt, each at its real
+    # fraction of the way across in both layouts, and each opens its panel.
+    SMALL = {"Vesta": (2.362, 262.7, "525"), "Ceres": (2.766, 469.7, "939")}
+    for scale in ("lenient", "true"):
+        pg.click('.chip:text-is("Overview")')
+        if scale == "true":
+            pg.click("#scaleBtn")
+        pg.wait_for_timeout(2200)
+        sm = {b["name"]: b for b in pg.evaluate("()=>__dbg.small")}
+        if list(sm) != ["Vesta", "Ceres"]:
+            fails.append(f"the belt holds {list(sm)}, expected Vesta then Ceres")
+            continue
+        for name, (au, rkm, _) in SMALL.items():
+            b = sm[name]
+            want = b["beltIn"] + (au - BELT_IN) / (BELT_OUT - BELT_IN) * (b["beltOut"] - b["beltIn"])
+            if abs(b["x"] - want) > 1e-6:
+                fails.append(f"{scale}: {name} at {b['x']:.2f} u, expected {want:.2f}")
+            if not b["beltIn"] < b["x"] < b["beltOut"]:
+                fails.append(f"{scale}: {name} falls outside the belt")
+        if scale == "true":
+            ratio = sm["Ceres"]["trueX"] / sm["Vesta"]["trueX"]
+            if abs(ratio - 2.766 / 2.362) > 1e-6:
+                fails.append(f"true scale: Ceres and Vesta in the ratio {ratio:.4f}")
+            rr = sm["Ceres"]["rTrue"] / sm["Vesta"]["rTrue"]
+            if abs(rr - 469.7 / 262.7) > 1e-6:
+                fails.append(f"true scale: their radii in the ratio {rr:.4f}")
+            pg.click("#scaleBtn")
+            pg.wait_for_timeout(2200)
+        print(f"  ok   {scale}: Vesta and Ceres sit inside the belt at "
+              f"{sm['Vesta']['fr']:.3f} and {sm['Ceres']['fr']:.3f} of its width")
+
+    for name, (au, rkm, diam) in SMALL.items():
+        pg.click('.chip:text-is("Overview")')
+        pg.wait_for_timeout(1800)
+        b = next(x for x in pg.evaluate("()=>__dbg.small") if x["name"] == name)
+        pg.mouse.click(b["sx"], pg.evaluate("()=>innerHeight*0.46"))
+        pg.wait_for_timeout(2000)
+        got = pg.evaluate("()=>({n:document.querySelector('#iName').textContent,"
+                          "d:document.querySelector('#iDiam').textContent,"
+                          "x:document.querySelector('#lExtra').textContent,"
+                          "rows:[...document.querySelectorAll('#info dd')].filter(d=>d.offsetParent)"
+                          ".map(d=>d.textContent.trim()), sel:__dbg.sel})")
+        if got["n"] != name or got["sel"] != name:
+            fails.append(f"a click on {name} opened {got['n']!r}")
+            continue
+        if diam not in got["d"]:
+            fails.append(f"{name}: the panel's diameter reads {got['d']!r}")
+        if not all(got["rows"]):
+            fails.append(f"{name}: a blank row in the panel")
+        if "dwarf planet" not in got["x"]:
+            fails.append(f"{name}: the extra row is labeled {got['x']!r}")
+        g = pg.evaluate("()=>__dbg.ghost")
+        if not g or g["kind"] != "moon" or abs(g["r"] / g["Rd"] - 1737.4 / rkm) > 1e-6:
+            fails.append(f"{name}: the Moon is not drawn around it to scale ({g})")
+        elif g["r"] * 2 > pg.evaluate("()=>Math.min(innerWidth, innerHeight)"):
+            fails.append(f"{name}: the Moon ring runs off the window")
+        print(f"  ok   a click on {name} opens its panel ({got['x']}), "
+              f"with the Moon drawn around it {1737.4 / rkm:.1f} times wider")
+    belt_mass = pg.evaluate("()=>{document.querySelector('.chip[data-name=\"Asteroid Belt\"]').click();"
+                            "return document.querySelector('#iMass').textContent}")
+    if "two fifths" not in belt_mass or "a third" in belt_mass:
+        fails.append(f"the belt panel's mass row reads {belt_mass!r}")
+    else:
+        print("  ok   the belt panel gives Ceres two fifths of the belt")
 
     if errs:
         fails.append(f"javascript errors: {errs}")

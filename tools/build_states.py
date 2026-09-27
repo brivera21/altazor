@@ -777,7 +777,7 @@ h1 { margin:0 0 10px; font-size:26px; }
 .method { color:var(--muted); font-size:12.5px; margin-top:14px;
   max-width:820px; }
 .method summary { cursor:pointer; color:var(--accent); }
-details.sources { margin-top:22px; border-top:1px solid var(--line); padding-top:10px; }
+details.sources { margin-top:22px; border-top:1px solid var(--line); padding-top:10px; max-width:760px; }
 details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; }
 details.sources > summary:hover { color:var(--accent); }
 .method p { margin:9px 0 0; }

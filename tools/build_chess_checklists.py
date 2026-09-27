@@ -115,8 +115,11 @@ p.sub2 { margin:0 0 14px; color:var(--muted); font-size:14px; }
 .q .yn button.no.on { background:#331f1c; border-color:var(--bad); color:var(--bad); font-weight:600; }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
-.method { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px;
-  border-top:1px solid var(--line); padding-top:12px; }
+.method { color:var(--muted); font-size:12.5px; margin-top:8px; max-width:760px; }
+details.sources { margin-top:18px; max-width:760px; border-top:1px solid var(--line); padding-top:10px; }
+details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px;
+  letter-spacing:.06em; text-transform:uppercase; }
+details.sources > summary:hover { color:var(--accent); }
 __EXTRACSS__
 @media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
 </style>
@@ -141,8 +144,9 @@ __EXTRACSS__
   </div></div>
 </div>
 <p class="note">__NOTE1__</p>
-<p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
+<details class="sources"><summary>Sources</summary>
 <div class="method"><p>__METHOD__</p></div>
+</details>
 </div>
 <script>
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -505,12 +509,10 @@ PAGES = [
          tagline="Five checks, in order, before a move.",
          controls='<span class="lab">A run</span><button id="resetBtn" type="button">Start over</button>',
          extracss=SCOUT_CSS, script=SCOUT_SCRIPT.replace("__STEPS__", _js(SCOUT)),
-         note1=("Safety, Checks, Opponent, Upgrade, Test: the five things worth asking "
-                "before a move is played, each with two questions and a yes or no. A step "
-                "goes green when both of its questions are yes, and red on a single no, "
-                "which is the signal to look at a different move."),
-         note2=("The run answers as it goes, moving to the next open step as each one "
-                "clears, and the strip beneath the flow fills as it does.")),
+         note1=("Five things worth asking before a move is played, each with two "
+                "questions and a yes or no. A step goes green when both answers are "
+                "yes and red on a single no, the signal to look at a different move. "
+                "The run moves on to the next open step as each one clears.")),
     dict(out="imbalances.html", title="I.M.B.A.L.A.N.C.E.S.", h1="I.M.B.A.L.A.N.C.E.S.",
          tagline="Ten features of a position, one played game each.",
          controls=('<span class="lab">Feature</span><span id="letters"></span>'
@@ -520,14 +522,11 @@ PAGES = [
          extracss=IMB_CSS,
          script=(IMB_SCRIPT.replace("__FACTORS__", _js(IMBALANCES))
                  .replace("__GAMES__", _js(games()))),
-         note1=("Initiative, Material, Bishops, Activity, Lines, Attacks, Numbers, "
-                "Castling, Endgame, Space: ten features of a position, and for each "
-                "one a game where that feature decided it. The board opens at the move "
-                "the game turns on, with the two squares of that move marked, and the "
-                "score beside it steps back and forward through the whole game."),
-         note2=("The games run from Morphy in 1858 to Carlsen in 2021, and five of the "
-                "ten are called somebody's Immortal, which is what tends to happen when "
-                "one idea gets carried all the way to the end of a game."),
+         note1=("Ten features of a position, and for each a game where that feature "
+                "decided it. The board opens at the move the game turns on, with its "
+                "two squares marked, and the score beside it steps through the whole "
+                "game. They run from Morphy in 1858 to Carlsen in 2021; five are called "
+                "somebody's Immortal."),
          method=IMB_METHOD),
     dict(out="plan.html", title="P.L.A.N.", h1="P.L.A.N.",
          tagline="Always enter the middlegame with a plan.",
@@ -535,12 +534,10 @@ PAGES = [
          extracss=PLAN_CSS,
          script=(PLAN_SCRIPT.replace("__STAGES__", _js(PLAN))
                  .replace("__RISKS__", _js(RISKS)).replace("__REWARDS__", _js(REWARDS))),
-         note1=("Pinpoint the imbalances, Locate where to attack, Arrange your pieces, "
-                "Nail your move: four stages, each with its own choices. What is chosen "
-                "at one stage narrows what makes sense at the next, and the goal through "
-                "all four is " + PLAN_GOAL[0].lower() + PLAN_GOAL[1:-1] + "."),
-         note2=("The line under the four stages is the plan those choices add up to, "
-                "written out, and it rewrites itself with every choice.")),
+         note1=("Four stages, each with its own choices. What is chosen at one stage "
+                "narrows what makes sense at the next, and the line beneath writes out "
+                "the plan those choices add up to. The goal through all four is "
+                + PLAN_GOAL[0].lower() + PLAN_GOAL[1:-1] + ".")),
 ]
 
 
@@ -550,7 +547,7 @@ def build():
                 .replace("__H1__", p["h1"]).replace("__TAGLINE__", p["tagline"])
                 .replace("__CONTROLS__", p["controls"]).replace("__DIAGRAM__", "")
                 .replace("__EXTRACSS__", p["extracss"]).replace("__SCRIPT__", p["script"])
-                .replace("__NOTE1__", p["note1"]).replace("__NOTE2__", p["note2"])
+                .replace("__NOTE1__", p["note1"])
                 .replace("__METHOD__", p.get("method", METHOD)))
         (ROOT / p["out"]).write_text(html, encoding="utf-8")
         print(f"  {p['out']:22} {len(html):>7,} B")

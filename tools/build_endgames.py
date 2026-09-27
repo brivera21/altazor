@@ -958,13 +958,9 @@ g.pc text { paint-order: stroke; transition: transform .55s ease; }
   </div></div>
 </div>
 <p class="note">King and pawn against king, then the basic checkmates, played
-out one move at a time. The arrows and the arrow keys step through a line, and
-any square under the cursor names itself. Every placement paints the whole king and pawn
-table on the board at once.</p>
-<p class="note">Black always plays the reply that holds out longest, taken from a
-solved table of each ending, so every verdict here is exact. After the Board
-intuition trainer diagrams; the same reference board underlies every topic, only
-the paint changes.</p>
+out one move at a time. Every placement paints the whole king and pawn table on
+the board at once, and Black always plays the reply that holds out longest in a
+solved table of each ending, so every verdict is exact.</p>
 </div>
 <script>
 const TOPICS=__TOPICS__;

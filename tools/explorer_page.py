@@ -51,6 +51,12 @@ h1 { margin:0 0 6px; font-size:26px; }
 .crumbs a { color:var(--accent); text-decoration:none; cursor:pointer; }
 .note { color:var(--muted); font-size:12.5px; margin-top:22px; max-width:720px;
   border-top:1px solid var(--line); padding-top:12px; }
+details.sources { margin-top:14px; max-width:720px; }
+details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px;
+  letter-spacing:.06em; text-transform:uppercase; }
+details.sources > summary:hover { color:var(--accent); }
+.method { color:var(--muted); font-size:12.5px; margin:8px 0 0; }
+.method a { color:var(--accent); }
 </style>
 </head>
 <body>
@@ -76,7 +82,9 @@ h1 { margin:0 0 6px; font-size:26px; }
   </div>
 </div>
 <p class="note">__LEDE__</p>
-<p class="note">__NOTE__</p>
+<details class="sources"><summary>Sources</summary>
+<p class="method">__NOTE__</p>
+</details>
 </div>
 <script>
 const DATA = __DATA__;

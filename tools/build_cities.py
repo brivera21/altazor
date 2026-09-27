@@ -509,22 +509,14 @@ MINE = {
     "northfield": ("St. Olaf College", "St. Olaf"),
 }
 
-NOTE1 = ("The ground itself: relief shaded live from the AWS Terrain "
-         "Tiles and colored by height above the sea on one scale shared by "
-         "every map here, woods and water from the USGS land cover, county "
-         "lines from the Census files. Green dashes are the city limits. "
-         "Each chip turns a layer on or off; a mark under the cursor fills "
-         "the card and a click pins it.")
+NOTE1 = ("The real city and its ground: terrain, woods, water, counties "
+         "and the city limits in green dashes, each a layer to switch. The "
+         "slider runs from 1492: the nations' homelands first, then the "
+         "founding, the turns, the losses and the migrations that filled it. "
+         "These nations still exist; Native Land Digital maps their "
+         "territories with their input.")
 
-NOTE2 = ("The slider runs from 1492: first the peoples whose ground this "
-         "was, as colored patches approximating documented homelands, then "
-         "the founding, the turns and the losses year by year. The city's "
-         "circle grows with its census once it passes ten thousand, green "
-         "through yellow and orange to red. Golden arrows carry the name of "
-         "the migration each stands for, and join regions rather than exact "
-         "places. Roads carry their route numbers, mortarboards are "
-         "colleges, and a gold square is a founding claim where one is "
-         "documented.")
+NOTE2 = ""
 
 
 def densify(poly, n=4):
@@ -569,6 +561,36 @@ def refs_for(key, hist):
     out = [apa.auto(u, ann) for u, ann in rows]
     out += [apa.entry(t, u) for t, u in hist["refs"]]
     return apa.render(out)
+
+
+# The state template carries two things a city does not have: the card of
+# state symbols, and the notes on the state population series and on those
+# symbols. Both come out here, so the city pages share every other part of
+# the template (layers, slider, rail, readout) with the state pages.
+CITY_CUTS = [
+    """    <div class="card">
+      <div class="symh">The living symbols</div>
+      <div id="symList"></div>
+    </div>
+""",
+    """<div class="method"><details><summary>What the population line is made
+of</summary><p>__METHOD__</p></details></div>
+<div class="method"><details><summary>About the living symbols</summary>
+<p>__SYMNOTE__</p></details></div>
+""",
+]
+
+
+def city_template(html):
+    for cut in CITY_CUTS:
+        if cut not in html:
+            raise SystemExit("the state template changed; update CITY_CUTS")
+        html = html.replace(cut, "")
+    guard = "  const box=document.getElementById('symList');\n"
+    if guard not in html:
+        raise SystemExit("the state template changed; update the symbols guard")
+    html = html.replace(guard, guard + "  if(!box) return;\n")
+    return html.replace("SYM=__SYM__", "SYM=[]")
 
 
 def main():
@@ -617,7 +639,7 @@ def main():
         sibs = (f' <a href="{up_href}">{up_name}</a>'
                 + "".join(f' <a href="{f}">{n}</a>'
                           for f, n in sibs_all if f != fname))
-        html = (HTML.replace("__APACSS__", apa.CSS)
+        html = (city_template(HTML).replace("__APACSS__", apa.CSS)
                 .replace("__TITLE__", title)
                 .replace("&larr; Library &middot; USA",
                          "&larr; Library &middot; USA &middot; Cities")

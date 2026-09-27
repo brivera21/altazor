@@ -85,6 +85,11 @@ h1 { margin:0 0 6px; font-size:26px; }
 .legend span.sw { width:11px; height:11px; border-radius:3px; display:inline-block; margin-right:5px; }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
+details.sources { margin-top:14px; max-width:760px; }
+details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px;
+  letter-spacing:.06em; text-transform:uppercase; }
+details.sources > summary:hover { color:var(--accent); }
+.method { color:var(--muted); font-size:12.5px; margin:8px 0 0; }
 @media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;}
   #cover{max-width:220px; margin:0 auto;} }
 </style>
@@ -112,9 +117,11 @@ h1 { margin:0 0 6px; font-size:26px; }
 </div>
 <div class="legend" id="legend"></div>
 <p class="note">__LEDE__</p>
-<p class="note">Covers come from <a href="https://openlibrary.org"
+<details class="sources"><summary>Sources</summary>
+<p class="method">Covers come from <a href="https://openlibrary.org"
 style="color:var(--accent)">Open Library</a> and are loaded from its
 servers for identification only.__XNOTE__</p>
+</details>
 </div>
 <script>
 const BOOKS=__BOOKS__, CATS=__CATS__, COVERS=__COVERS__;
@@ -368,11 +375,10 @@ emit(
     "hugo-nebula.html",
     "Hugo and Nebula Winners",
     "Hugo and Nebula Winners",
-    "Every Best Novel winner of both awards on one timeline. A book that "
-    "won both appears once, in green. A click on the band of a decade "
-    "enters it and shows each book with its year, and a book under the "
-    "cursor shows its cover. Ctrl (or ⌘) with the wheel zooms; the wheel "
-    "alone scrolls inside the frame and dragging pans the view.",
+    "Every Best Novel winner of both awards on one timeline; a book that "
+    "won both appears once, in green. A click on a decade's band enters it "
+    "and shows each book with its year, and a book under the cursor shows "
+    "its cover. Ctrl (or ⌘) with the wheel zooms, and dragging pans.",
     award_books, AWARD_CATS, 1948, 2028,
     ' &nbsp;·&nbsp; <a href="scifi-canon.html">The canon</a>'
     ' &nbsp;·&nbsp; <a href="hard-scifi-timeline.html">Hard SF</a>',
@@ -397,12 +403,12 @@ emit(
     "A Canon of Science Fiction",
     "A Canon of Science Fiction",
     "The books that built the genre, from Frankenstein forward, colored "
-    "by era. A click on the band of a decade enters it, and a book under "
-    "the cursor shows its cover. Ctrl (or ⌘) with the wheel zooms; the "
-    "wheel alone scrolls inside the frame and dragging pans the view.",
+    "by era. The list is editorial: the books that defined what science "
+    "fiction could do, not a complete history. A click on a decade's band "
+    "enters it and a book under the cursor shows its cover; Ctrl (or ⌘) "
+    "with the wheel zooms, and dragging pans.",
     canon_books, canon_cats, 1810, 2028,
     ' &nbsp;·&nbsp; <a href="hugo-nebula.html">Hugo and Nebula</a>'
     ' &nbsp;·&nbsp; <a href="hard-scifi-timeline.html">Hard SF</a>',
-    " The list is editorial: the books here are the ones that defined "
-    "what science fiction could do, not a complete history.",
+    "",
 )

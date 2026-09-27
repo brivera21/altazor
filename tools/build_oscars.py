@@ -130,6 +130,11 @@ h1 { margin:0 0 6px; font-size:26px; }
 .legend span.sw { width:11px; height:11px; border-radius:3px; display:inline-block; margin-right:5px; }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
+details.sources { margin-top:14px; max-width:760px; }
+details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px;
+  letter-spacing:.06em; text-transform:uppercase; }
+details.sources > summary:hover { color:var(--accent); }
+.method { color:var(--muted); font-size:12.5px; margin:8px 0 0; }
 @media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;}
   #poster{max-width:220px; margin:0 auto;} }
 </style>
@@ -156,15 +161,16 @@ h1 { margin:0 0 6px; font-size:26px; }
 </div>
 <div class="legend" id="legend"></div>
 <p class="note">Every Academy Award Best Picture winner, from Wings at the
-first ceremony in 1929 to Anora in 2025, grouped into eight Hollywood eras.
-The wheel zooms, dragging pans, a click on an era band zooms into it, and a
-film under the cursor shows its poster.</p>
-<p class="note">Years are ceremony years, and the winners can be checked against
-the Academy's records via the
+first ceremony in 1929 to Anora in 2025, grouped into eight Hollywood eras;
+years are ceremony years. The wheel zooms, dragging pans, a click on an era
+band zooms into it, and a film under the cursor shows its poster.</p>
+<details class="sources"><summary>Sources</summary>
+<p class="method">The winners can be checked against the Academy's records via the
 <a href="https://en.wikipedia.org/wiki/Academy_Award_for_Best_Picture"
 style="color:var(--accent)">list of Best Picture winners</a>. Posters are
 loaded at view time from Wikipedia's public API for identification and are not
 stored on this site; a few may fail to resolve.</p>
+</details>
 </div>
 <script>
 const FILMS=__FILMS__, ERAS=__ERAS__;

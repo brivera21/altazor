@@ -177,6 +177,9 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}}
 .method h2{{font-size:.95rem;font-weight:400;color:var(--ink2);margin:0 0 .6rem}}
 .method p{{margin:0 0 .9rem}}
 .method a{{color:var(--accent)}}
+details.sources{{margin-top:1.8rem;border-top:1px solid var(--line);padding-top:.7rem;max-width:78ch}}
+details.sources>summary{{cursor:pointer;color:var(--ink3);font-size:.8rem;letter-spacing:.06em;text-transform:uppercase}}
+details.sources>summary:hover{{color:var(--accent)}}
 table.mix{{border-collapse:collapse;font-size:.85rem;margin:.4rem 0 1rem;width:100%}}
 table.mix th,table.mix td{{text-align:right;padding:3px 8px;border-bottom:1px solid var(--line)}}
 table.mix th:first-child,table.mix td:first-child{{text-align:left}}
@@ -228,18 +231,15 @@ table.mix td{{font-variant-numeric:tabular-nums}}
 <div class="legend">{legend}</div>
 
 <div class="notes">
-<h2>About the map</h2>
-<p>Every continent under the cursor fills the panel with its area and the
-climates that cover it. The colors are the five main Koppen groups, the
-classification that sorts land by what its temperature and rainfall do through
-the year rather than by where it sits.</p>
-<p>The projection is equirectangular, which keeps latitude and longitude square
-and stretches everything toward the poles. Greenland and Antarctica look far
-larger here than they are, which is why the areas are given as numbers.</p>
+<p>The colors are the five main K&ouml;ppen groups, which sort land by what its
+temperature and rainfall do through the year rather than by where it sits. The
+equirectangular projection keeps latitude and longitude square and stretches
+everything toward the poles, so Greenland and Antarctica look far larger than
+they are; the areas are given as numbers.</p>
 </div>
 
+<details class="sources"><summary>Sources</summary>
 <div class="method">
-<h2>Method and sources</h2>
 <p>Coastlines are GSHHG at full resolution, the same shoreline data used for
 nautical work, rasterized to a sixth of a degree. Africa, Eurasia, the two
 Americas and Australia are separate polygons in that data, so Suez and Panama
@@ -280,6 +280,7 @@ global inventory of lakes based on high-resolution satellite imagery.
 Earth?</i> Water Science School, after Gleick (1996).
 <a href="https://www.usgs.gov/water-science-school/science/how-much-water-there-earth">https://www.usgs.gov/water-science-school/science/how-much-water-there-earth</a></p>
 </div>
+</details>
 </main>
 <script>
 const D = {json.dumps(js)};

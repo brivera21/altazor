@@ -116,7 +116,10 @@ button.on { background:var(--accent); border-color:var(--accent); color:#0b1a2b;
 .legend i { display:inline-block; width:22px; height:9px; border-radius:2px; margin-right:6px; vertical-align:middle; }
 .note { color:#c9c9c9; font-size:15px; max-width:70ch; }
 .method, .refs { color:var(--muted); font-size:13.5px; max-width:78ch; }
-.method { border-top:1px solid var(--line); margin-top:34px; padding-top:14px; }
+.method { margin-top:10px; }
+details.sources { border-top:1px solid var(--line); margin-top:34px; padding-top:12px; max-width:78ch; }
+details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; }
+details.sources > summary:hover { color:var(--accent); }
 .refh { font-size:14px; color:var(--muted); margin:26px 0 8px; letter-spacing:.06em; text-transform:uppercase; }
 hr.sep { border:0; border-top:1px solid var(--line); margin:30px 0 18px; }
 __APACSS__
@@ -168,17 +171,17 @@ HTML = """<!DOCTYPE html>
 </div>
 
 <hr class="sep">
-<p class="note">Charlotte Shortback is a historian inside 2312 who cuts the
-long postmodern into six named stretches, from the Dithering to the
-Balkanization. Her scheme is the top track. The Mars trilogy and New York 2140
-run beneath it on the same axis.</p>
-<p class="note">Robinson says the three are not one future history. They are
-kept apart here for that reason, and the places where their numbers contradict
-each other are drawn rather than smoothed.</p>
+<p class="note">Charlotte Shortback, a historian inside 2312, cuts the long
+postmodern into six named stretches, from the Dithering to the Balkanization;
+her scheme is the top track. The Mars trilogy and New York 2140 run beneath on
+the same axis, kept apart because Robinson says they are not one future
+history, with their contradictions drawn rather than smoothed.</p>
 
+<details class="sources"><summary>Sources</summary>
 <div class="method"><p>__METHOD__</p></div>
 <h2 class="refh">References</h2>
 <div class="refs">__REFS__</div>
+</details>
 </div>
 <script>
 const D = __DATA__;
