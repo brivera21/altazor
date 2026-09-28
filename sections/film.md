@@ -2,6 +2,8 @@
 title: Film
 ---
 
+## Timelines
+
 [Best Picture Winners](oscars.html). Every Academy Award Best Picture winner from 1929 to 2025 on a zoomable timeline, grouped into eight Hollywood eras, with posters on hover.
 
 [Palme d'Or Winners](palme-dor.html). The top prize at Cannes from 1946 to 2025 on the same kind of timeline, grouped into seven festival eras.

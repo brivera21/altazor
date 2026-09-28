@@ -2,13 +2,19 @@
 title: Science Fiction
 ---
 
-[Hugo and Nebula Winners](hugo-nebula.html)
-
 [A Canon of Science Fiction](scifi-canon.html)
 
 [A Hundred Science Fiction Novels](scifi-hundred.html)
 
+## Timelines
+
+[Hugo and Nebula Winners](hugo-nebula.html)
+
 [Hard Science Fiction Timeline](hard-scifi-timeline.html)
+
+[The Centuries Before 2312](ksr-2312-timeline.html)
+
+[The Expanse: A Timeline by Milestone Year](expanse-timeline.html)
 
 ## Science Fiction Concepts
 
@@ -21,10 +27,6 @@ title: Science Fiction
 [The Mars of Red Mars](red-mars.html)
 
 [The Solar System of 2312](solar-system-2312.html)
-
-[The Centuries Before 2312](ksr-2312-timeline.html)
-
-[The Expanse: A Timeline by Milestone Year](expanse-timeline.html)
 
 ## Armor of God
 
