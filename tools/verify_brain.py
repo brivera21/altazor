@@ -6,8 +6,12 @@
                masses by age rise to a peak near twenty and fall after,
                men above women throughout, a quarter of the peak at birth
                and nine tenths by three
-  the drawing  every region is under the pointer where its label says it
-               is; hovering gives its card; the marker drags along the
+  the shapes   traced from real brains by brain_geometry.py: every region
+               has a shape, the hemisphere is as long and as tall as an
+               adult's, the brainstem splits at plausible levels, and the
+               parts that lie off the cut or out of sight are dashed
+  the drawing  every region is under the pointer at the point the tracer
+               found deepest inside it; hovering gives its card; the marker drags along the
                years and the card reads the mass there; no label overlaps
                another; no script errors
 """
@@ -17,6 +21,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from brain_data import WHOLE, OUTSIDE, INSIDE, GROWTH
+import json
+SHAPES = json.loads((Path(__file__).parent / "brain_shapes.json").read_text())
 
 ROOT = Path(__file__).resolve().parent.parent
 PAGE = ROOT / "brain.html"
@@ -48,6 +54,21 @@ check(0.85 < g3[1] / pk < 0.92 and g3[1] / GROWTH[0][1] > 3.3, f"by three {g3[1]
 check(0.88 < GROWTH[-1][1] / pk < 0.92, f"in the mid eighties {(1 - GROWTH[-1][1] / pk) * 100:.0f}% below the peak, about a tenth")
 check(WHOLE["fibres_km_m"] == 176000 and WHOLE["fibres_km_f"] == 149000, "Marner's fiber lengths, 176,000 and 149,000 km")
 
+print("--- the shapes ---")
+import re
+def extent(d):
+    nums = [float(v) for v in re.findall(r"-?\d+\.?\d*", d)]
+    xs, ys = nums[0::2], nums[1::2]
+    return (max(xs) - min(xs)) / SHAPES["scale_px_per_mm"], (max(ys) - min(ys)) / SHAPES["scale_px_per_mm"]
+check(all(SHAPES["outside"].get(p[0]) for p in OUTSIDE) and all(SHAPES["inside"].get(p[0]) for p in INSIDE), "every region outside and inside has a traced shape")
+L, H = extent(SHAPES["outside"]["outline"])
+check(160 < L < 185 and 105 < H < 135, f"the hemisphere is {L:.0f} mm long and {H:.0f} mm tall, an adult's (about 170 by 120)")
+Li, Hi = extent(SHAPES["inside"]["cerebellum"])
+check(45 < Li < 70 and 40 < Hi < 65, f"the cerebellum, cut near the midline, is {Li:.0f} by {Hi:.0f} mm")
+m = SHAPES["marks"]
+check(-30 < m["z_mid"] < -10 and -55 < m["z_med"] < -38 and m["z_mid"] - m["z_med"] > 20, f"the pons runs from {m['z_mid']} to {m['z_med']} mm, {m['z_mid'] - m['z_med']:.0f} mm long")
+check(len(SHAPES["inside"]["sulci"]) > 2000 and len(SHAPES["outside"]["sulci"]) > 2000, "both views carry their folds")
+
 print("--- the drawing ---")
 from playwright.sync_api import sync_playwright
 
@@ -74,9 +95,7 @@ with sync_playwright() as pw:
     s = st()
     check(s["view"] == "outside" and sorted(s["regions"]) == sorted(p[0] for p in OUTSIDE), "opens on the outside with all twelve regions drawn")
     check("1,400 g" in s["card"] and "176,000 km" in s["card"] and "86 billion" in s["card"], "the whole-organ card: 1,400 g, 176,000 km, 86 billion")
-    probes = {"frontal": (300, 250), "parietal": (600, 200), "temporal": (450, 420), "occipital": (770, 250), "cerebellum": (700, 520), "brainstem": (580, 560),
-              "motor": (472, 202), "sensory": (498, 202), "broca": (355, 318), "wernicke": (600, 340), "auditory": (470, 356), "visual": (762, 340)}
-    for k, p in probes.items():
+    for k, p in SHAPES["outside_probes"].items():
         at = st({"probe": list(p)})["at"]
         check(at == k, f"the pointer at {p} finds {k}", f"found {at}")
     s = hover("temporal")
@@ -84,13 +103,14 @@ with sync_playwright() as pw:
     s = hover("cerebellum")
     check("69 billion" in s["card"], "the cerebellum's number: 69 billion")
     check(no_overlap("#bsvg text") == 0, "no two labels overlap outside", f"{no_overlap('#bsvg text')}")
+    dashed = pg.evaluate("()=>[...document.querySelectorAll('#bsvg [stroke-dasharray][data-region]')].map(e=>e.getAttribute('data-region')).sort()")
+    check(dashed == ["auditory", "visual"], f"hearing and sight, out of sight from here, are dashed ({dashed})")
     pg.click('#views button[data-v="inside"]')
     pg.wait_for_timeout(150)
     s = st()
     check(s["view"] == "inside" and sorted(s["regions"]) == sorted(p[0] for p in INSIDE), "the inside view draws all thirteen regions")
     check("82% of the mass" in s["card"] and "under a billion" in s["card"], "the inside card: 82% of the mass, under a billion neurons outside cortex and cerebellum")
-    for k, p in {"thalamus": (515, 300), "callosum": (500, 212), "cingulate": (500, 178), "hypothalamus": (500, 352), "pituitary": (492, 398), "basal": (436, 292),
-                 "midbrain": (570, 364), "pons": (575, 425), "medulla": (575, 500), "cord": (580, 590), "cerebellum": (740, 470), "amygdala": (474, 430), "hippocampus": (590, 380)}.items():
+    for k, p in SHAPES["inside_probes"].items():
         at = st({"probe": list(p)})["at"]
         check(at == k, f"the pointer at {p} finds {k}", f"found {at}")
     s = hover("callosum")
@@ -98,6 +118,8 @@ with sync_playwright() as pw:
     s = hover("hippocampus")
     check("H. M." in s["body"] and "taxi" in s["card"], "the hippocampus: H. M. and the taxi drivers")
     check(no_overlap("#bsvg text") == 0, "no two labels overlap inside", f"{no_overlap('#bsvg text')}")
+    dashed = pg.evaluate("()=>[...document.querySelectorAll('#bsvg [stroke-dasharray][data-region]')].map(e=>e.getAttribute('data-region')).sort()")
+    check(dashed == ["amygdala", "basal", "hippocampus"], f"the parts off the cut are dashed ({dashed})")
     pg.click('#views button[data-v="growth"]')
     pg.wait_for_timeout(150)
     s = st({"age": 20})

@@ -20,7 +20,7 @@ import math
 from pathlib import Path
 
 import apa
-from atmosphere_data import LAYERS_76, UPPER, LAYERS, MARKS, GASES, WATER, COLUMN, REFS, P0, G0, R_AIR, M_AIR, R_GAS
+from atmosphere_data import LAYERS_76, UPPER, LAYERS, MARKS, OBJECTS, GASES, WATER, COLUMN, REFS, P0, G0, R_AIR, M_AIR, R_GAS
 
 OUT = Path(__file__).parent.parent / "atmosphere.html"
 
@@ -63,6 +63,7 @@ def _js(o):
 
 layers = [{"k": k, "n": n, "a": a, "b": b, "c": c, "t": t} for k, n, a, b, c, t in LAYERS]
 marks = [{"k": k, "n": n, "z": z, "b": b, "s": s} for k, n, z, b, s in MARKS]
+objects = [{"k": k, "n": n, "z": z, "f": f, "kind": kind, "b": b, "s": s} for k, n, z, f, kind, b, s in OBJECTS]
 gases = [{"n": n, "f": f, "x": x, "b": b} for n, f, x, b in GASES]
 water = {"n": WATER[0], "f": WATER[1], "x": WATER[2], "b": WATER[3]}
 
@@ -153,7 +154,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <div class="refs">__REFS__</div>
 </div>
 <script>
-const L76=__L76__, UPPER=__UPPER__, LAYERS=__LAYERS__, MARKS=__MARKS__, GASES=__GASES__, WATER=__WATER__, COLUMN=__COLUMN__;
+const L76=__L76__, UPPER=__UPPER__, LAYERS=__LAYERS__, MARKS=__MARKS__, OBJECTS=__OBJECTS__, GASES=__GASES__, WATER=__WATER__, COLUMN=__COLUMN__;
 const P0=__P0__, G0=__G0__, RA=__RA__, RE=6356.766, ZTOP=600, W=980;
 const el=document.getElementById('diagram');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
@@ -205,6 +206,8 @@ function up(){
   s+='<line x1="'+P.x+'" y1="'+YZ(ZB).toFixed(1)+'" x2="'+(P.x+P.w)+'" y2="'+YZ(ZB).toFixed(1)+'" stroke="#3d444d" stroke-dasharray="4 3"/><text x="'+(P.x+P.w-6)+'" y="'+(YZ(ZB)-4).toFixed(1)+'" text-anchor="end" font-size="9.5" fill="#6b7280">compressed above 120 km</text>';
   for(const zk of [0,20,40,60,80,100,120,200,300,400,500,600]){ const y=YZ(zk); s+='<line x1="'+(P.x-5)+'" y1="'+y.toFixed(1)+'" x2="'+P.x+'" y2="'+y.toFixed(1)+'" stroke="#8a94a6"/><text x="'+(P.x-8)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="10.5" fill="#9a9a9a">'+zk+'</text>'; }
   s+='<text transform="translate(16,'+(P.y+P.h/2)+') rotate(-90)" text-anchor="middle" font-size="11.5" fill="#9a9a9a">height, km</text>';
+  // the things in the air, each at its height
+  s+=objectsSvg();
   // the marks, packed
   let lastY=1e9; const sorted=[...MARKS].sort((a,b)=>a.z-b.z);
   for(const m of sorted){ const y0=YZ(m.z); let y=Math.min(y0,lastY-14); lastY=y; const on=hot===m.k;
@@ -225,6 +228,42 @@ function up(){
   s+='<text x="'+(P.x+P.w/2+12)+'" y="'+(y+4).toFixed(1)+'" font-size="11.5" font-weight="700" fill="#ffb02e">'+km(z)+'</text></g>';
   return {svg:s, h:P.y+P.h+30};
 }
+
+/* ---- things in the air ---- */
+const ICON={
+  airliner:'<path d="M-9,0C-9,-1.7 6,-1.9 9,-0.5L9,0.6C6,1.7 -9,1.7 -9,0Z"/><path d="M-9,-0.6L-11,-5L-7.8,-5L-5.2,-1Z"/><path d="M-2.5,0.6L3,0.6L-1,4.2L-3.4,4.2Z"/>',
+  concorde:'<path d="M-10,-0.2L7,-0.9L12,0.9L7,0.9L-10,0.8Z"/><path d="M-10,-0.2L-10.8,-5L-7.6,-0.4Z"/><path d="M-7,0.8L4,0.8L-7,3.2Z"/>',
+  u2:'<path d="M-9,0C-9,-1.2 6,-1.3 9,-0.2L9,0.4C6,1.2 -9,1.2 -9,0Z"/><path d="M-9,-0.4L-10.5,-4.2L-7.6,-4.2L-5.8,-0.8Z"/><path d="M-6,0.2L6,0.2L6,1L-6,1Z"/>',
+  sr71:'<path d="M-11,0.4L7,-0.9L12,0.1L7,1L-11,1.2Z"/><path d="M-9.5,-0.1L-10.5,-3.8L-7.8,-3.8L-6.8,-0.3Z"/><path d="M-7,1L2,1L-7,3Z"/>',
+  x15:'<path d="M-7,0L6,-1.2L10,0L6,1.2Z"/><path d="M-7,-0.9L-9,-4.8L-5,-1Z"/><path d="M-7,0.9L-9,4.8L-5,1Z"/>',
+  balloon:'<circle cx="0" cy="-5" r="4"/><path d="M0,-1L0,3" fill="none" stroke-width="0.8"/><rect x="-1.2" y="3" width="2.4" height="2"/>',
+  station:'<path d="M-11,-0.4L11,-0.4L11,0.4L-11,0.4Z"/><rect x="-11" y="-4.5" width="4" height="9"/><rect x="-5.5" y="-4.5" width="4" height="9"/><rect x="1.5" y="-4.5" width="4" height="9"/><rect x="7" y="-4.5" width="4" height="9"/><rect x="-1.2" y="-1.6" width="2.4" height="3.2"/>',
+  telescope:'<rect x="-5" y="-2" width="10" height="4" rx="1"/><rect x="-3" y="-7" width="6" height="4"/><rect x="-3" y="3" width="6" height="4"/>',
+  cloud:'<path d="M-12,2C-14,2 -14,-2 -11,-2C-11,-5 -6,-6 -4,-3C-3,-7 4,-7 5,-3C7,-5 11,-4 11,-1C14,-1 14,2 11,2Z"/>'
+};
+function objectsSvg(){
+  let s='';
+  for(const o of OBJECTS){
+    const m=o.n?null:MARKS.find(x=>x.k===o.k), key=o.k, on=hot===key;
+    const x=P.x+o.f*P.w, y=YZ(o.z), col=on?'#ffb02e':'#d8dee8';
+    const attr=(m?'data-k':'data-o')+'="'+key+'" style="cursor:pointer"';
+    if(o.kind==='storm'){ // from the cloud base to the anvil at the tropopause
+      const yb=YZ(1.5), yt=y, w=16;
+      s+='<g '+attr+'><path d="M'+(x-w)+','+yb.toFixed(1)+'C'+(x-w-4)+','+(yb-8).toFixed(1)+' '+(x-w+2)+','+(yt+14).toFixed(1)+' '+(x-8)+','+(yt+5).toFixed(1)+'L'+(x-30)+','+(yt+2).toFixed(1)+'C'+(x-28)+','+(yt-3).toFixed(1)+' '+(x+28)+','+(yt-3).toFixed(1)+' '+(x+34)+','+(yt+2).toFixed(1)+'L'+(x+9)+','+(yt+5).toFixed(1)+'C'+(x+w)+','+(yt+14).toFixed(1)+' '+(x+w+4)+','+(yb-8).toFixed(1)+' '+(x+w)+','+yb.toFixed(1)+'Z" fill="'+col+'" fill-opacity="'+(on?0.6:0.42)+'" stroke="'+col+'" stroke-opacity="0.7" stroke-width="0.8"/></g>';
+      continue; }
+    if(o.kind==='wisp'){ s+='<g '+attr+'><path d="M'+(x-30)+','+y.toFixed(1)+'q7,-3 14,0t14,0t14,0t14,0" fill="none" stroke="'+(on?'#ffb02e':'#8fd3ff')+'" stroke-width="1.6" opacity="0.8"/><rect x="'+(x-30)+'" y="'+(y-5).toFixed(1)+'" width="56" height="10" fill="transparent"/></g>'; continue; }
+    if(o.kind==='meteor'){ s+='<g '+attr+'><path d="M'+(x-14)+','+(y-8).toFixed(1)+'L'+x+','+y.toFixed(1)+'" stroke="'+(on?'#ffb02e':'#ffe7a8')+'" stroke-width="1.4" stroke-linecap="round"/><circle cx="'+x+'" cy="'+y.toFixed(1)+'" r="1.8" fill="'+(on?'#ffb02e':'#fff4d6')+'"/><rect x="'+(x-16)+'" y="'+(y-10).toFixed(1)+'" width="20" height="14" fill="transparent"/></g>'; continue; }
+    if(o.kind==='aurora'){ // the green curtain from 100 to 150 km
+      const y1=YZ(100), y2=YZ(150); let g='';
+      for(let i=0;i<6;i++){ const xx=x-14+i*5.6; g+='<line x1="'+xx.toFixed(1)+'" y1="'+(y1-2*(i%2)).toFixed(1)+'" x2="'+xx.toFixed(1)+'" y2="'+(y2+3*(i%3)).toFixed(1)+'" stroke="'+(on?'#ffb02e':'#5ef08a')+'" stroke-width="2.2" opacity="'+(0.35+0.1*(i%3))+'"/>'; }
+      s+='<g '+attr+'>'+g+'<rect x="'+(x-16)+'" y="'+y2.toFixed(1)+'" width="32" height="'+(y1-y2).toFixed(1)+'" fill="transparent"/></g>'; continue; }
+    const sc=o.kind==='cloud'?1.1:1;
+    s+='<g '+attr+' transform="translate('+x.toFixed(1)+','+y.toFixed(1)+') scale('+sc+')" fill="'+col+'" stroke="none">'+ICON[o.kind]+'<rect x="-12" y="-8" width="24" height="14" fill="transparent"/></g>';
+    if(o.n&&o.kind!=='cloud') s+='<text x="'+(x+14).toFixed(1)+'" y="'+(y+3.5).toFixed(1)+'" font-size="9.5" fill="'+(on?'#ffb02e':'#b8c0cc')+'" pointer-events="none">'+esc(o.n.replace(/^the /,''))+'</text>';
+  }
+  return s;
+}
+function showObj(o){ card('In the air', esc(o.n), [['height',km(o.z)],['pressure there',pres(std(o.z).p)],['temperature',Math.round(std(o.z).T-273.15)+' °C']], o.b.replace(/&aacute;/g,'á'), o.s); }
 
 /* ---- made of ---- */
 function made(){
@@ -270,10 +309,11 @@ document.getElementById('marks').innerHTML=MARKS.filter(m=>['everest','airliner'
 document.getElementById('marks').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const m=MARKS.find(x=>x.k===b.dataset.k); hot=m.k; setZ(m.z); });
 let dragging=false;
 const svgPt=e=>{ const svg=document.getElementById('asvg'), b=svg.getBoundingClientRect(); return [(e.clientX-b.left)/b.width*W,(e.clientY-b.top)/b.height*svg.viewBox.baseVal.height]; };
-el.addEventListener('pointerdown',e=>{ if(view!=='up') return; const [x,y]=svgPt(e); if(y>=P.y-6&&y<=P.y+P.h+6&&x>=P.x-10&&!e.target.closest('[data-k]')){ dragging=true; hot=null; setZ(ZY(Math.max(P.y,Math.min(P.y+P.h,y)))); e.preventDefault(); } });
+el.addEventListener('pointerdown',e=>{ if(view!=='up') return; const [x,y]=svgPt(e); if(y>=P.y-6&&y<=P.y+P.h+6&&x>=P.x-10&&!e.target.closest('[data-k]')&&!e.target.closest('[data-o]')){ dragging=true; hot=null; setZ(ZY(Math.max(P.y,Math.min(P.y+P.h,y)))); e.preventDefault(); } });
 el.addEventListener('pointermove',e=>{ if(!dragging) return; const [,y]=svgPt(e); setZ(ZY(Math.max(P.y,Math.min(P.y+P.h,y)))); });
 window.addEventListener('pointerup',()=>{ dragging=false; });
 el.addEventListener('pointerover',e=>{ if(dragging) return; const k=e.target.closest('[data-k]'); if(k){ if(k.getAttribute('data-k')===hot) return; hot=k.getAttribute('data-k'); const m=MARKS.find(x=>x.k===hot); render(); card('A mark on the column', esc(m.n), [['height',km(m.z)],['pressure there',pres(std(m.z).p)],['temperature',Math.round(std(m.z).T-273.15)+' \\u00b0C']], m.b, m.s); return; }
+  const ob=e.target.closest('[data-o]'); if(ob){ if(ob.getAttribute('data-o')===hot) return; hot=ob.getAttribute('data-o'); render(); showObj(OBJECTS.find(x=>x.k===hot)); return; }
   const l=e.target.closest('[data-l]'); if(l){ if(l.getAttribute('data-l')===hot) return; hot=l.getAttribute('data-l'); render(); showLayer(hot); return; }
   const g=e.target.closest('[data-g]'); if(g){ const id=g.getAttribute('data-g'); if('g'+id===hot) return; hot='g'+id; render(); showGas(id==='w'?WATER:GASES[+id]); } });
 
@@ -287,7 +327,7 @@ window.__atm=(q)=>{ const o={view,z,hot,card:document.getElementById('numTxt').i
 """
 
 html = (HTML.replace("__APACSS__", apa.CSS)
-        .replace("__L76__", _js(LAYERS_76)).replace("__UPPER__", _js(UPPER)).replace("__LAYERS__", _js(layers)).replace("__MARKS__", _js(marks))
+        .replace("__L76__", _js(LAYERS_76)).replace("__UPPER__", _js(UPPER)).replace("__LAYERS__", _js(layers)).replace("__MARKS__", _js(marks)).replace("__OBJECTS__", _js(objects))
         .replace("__GASES__", _js(gases)).replace("__WATER__", _js(water)).replace("__COLUMN__", _js(COLUMN))
         .replace("__P0__", str(P0)).replace("__G0__", str(G0)).replace("__RA__", str(R_AIR))
         .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2).replace("__METHOD__", METHOD)

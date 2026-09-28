@@ -45,7 +45,7 @@ OUTSIDE = [
      "described in 1874; Broca's area and this one are joined by a bundle of fibers, the arcuate fasciculus", "Wikipedia, Wernicke's area"),
     ("auditory", "the auditory cortex", "A patch", "On the upper surface of the temporal lobe, mostly hidden inside the lateral fissure. Sound arrives here laid out by pitch, low tones at one end and high at the other, like the keyboard it came from in the ear.",
      "pitch is mapped from about 20 to 20,000 hertz, low at the front", "Wikipedia, Auditory cortex"),
-    ("visual", "the visual cortex", "A patch", "The tip of the occipital lobe, where the optic nerves' signal first reaches the cortex. It holds a map of the visual field, the center of gaze taking up most of it, and is the first of some thirty areas that see.",
+    ("visual", "the visual cortex", "A patch", "Along the calcarine sulcus on the inner face of the occipital lobe, reaching round to its tip, where the optic nerves' signal first reaches the cortex. It holds a map of the visual field, the center of gaze taking up most of it, and is the first of some thirty areas that see.",
      "the central 10 degrees of view take about half of the map", "Wikipedia, Visual cortex"),
 ]
 
@@ -123,6 +123,25 @@ REFS = [
     (apa.article("Maguire, E. A., Gadian, D. G., Johnsrude, I. S., Good, C. D., Ashburner, J., Frackowiak, R. S. J., &amp; Frith, C. D.", 2000, "Navigation-related structural change in the hippocampi of taxi drivers",
                  "Proceedings of the National Academy of Sciences", 97, 8, "4398-4403", "https://doi.org/10.1073/pnas.070039597"),
      "London taxi drivers' posterior hippocampi are larger than controls', and more so with years on the job."),
+]
+REFS += [
+    (apa.article("Fischl, B., Sereno, M. I., Tootell, R. B. H., &amp; Dale, A. M.", 1999, "High-resolution intersubject averaging and a coordinate system for the cortical surface",
+                 "Human Brain Mapping", 8, 4, "272-284", "https://doi.org/10.1002/(SICI)1097-0193(1999)8:4%3C272::AID-HBM10%3E3.0.CO;2-4"),
+     "fsaverage, the average cortical surface the outside view is traced from."),
+    (apa.article("Desikan, R. S., S&eacute;gonne, F., Fischl, B., Quinn, B. T., Dickerson, B. C., Blacker, D., Buckner, R. L., Dale, A. M., Maguire, R. P., Hyman, B. T., Albert, M. S., &amp; Killiany, R. J.", 2006,
+                 "An automated labeling system for subdividing the human cerebral cortex on MRI scans into gyral based regions of interest", "NeuroImage", 31, 3, "968-980", "https://doi.org/10.1016/j.neuroimage.2006.01.021"),
+     "The regions of the cortex grouped here into lobes, strips and patches."),
+    (apa.article("Larivi&egrave;re, S., Paquola, C., Park, B., Royer, J., Wang, Y., Benkarim, O., Vos de Wael, R., Val&eacute;s, S. L., Thomopoulos, S. I., Kirschner, M., Lewis, L. B., Evans, A. C., Sisodiya, S. M., McDonald, C. R., Thompson, P. M., &amp; Bernhardt, B. C.", 2021,
+                 "The ENIGMA Toolbox: Multiscale neural contextualization of multisite neuroimaging datasets", "Nature Methods", 18, 7, "698-700", "https://doi.org/10.1038/s41592-021-01186-4"),
+     "The Desikan-Killiany labels on the fsaverage5 surface."),
+    (apa.article("Fonov, V., Evans, A. C., Botteron, K., Almli, C. R., McKinstry, R. C., Collins, D. L., &amp; Brain Development Cooperative Group", 2011,
+                 "Unbiased average age-appropriate atlases for pediatric studies", "NeuroImage", 54, 1, "313-327", "https://doi.org/10.1016/j.neuroimage.2010.07.033"),
+     "The MNI152 2009c template the inside view is cut from."),
+    (apa.web("Neuromorphometrics, Inc.", "n.d.", "Neuromorphometrics labels, distributed with SPM12", "Neuromorphometrics", "http://www.neuromorphometrics.com/"),
+     "The labels for the thalamus, brainstem, cerebellum, cingulate gyrus and the deep nuclei."),
+    (apa.article("Notter, M. P., Gale, D., Herholz, P., Markello, R., Notter-B&iuml;elmann, M.-L., &amp; Whitaker, K.", 2019,
+                 "AtlasReader: A Python package to generate coordinate tables, region labels, and informative figures from statistical MRI images", "Journal of Open Source Software", 4, 34, "1257", "https://doi.org/10.21105/joss.01257"),
+     "Where the template and the labels were taken from."),
 ]
 REFS += [(apa.wiki(f"https://en.wikipedia.org/wiki/{p}"), a) for p, a in [
     ("Human_brain", "The organ in general: mass, blood flow, the lobes and what they do."),

@@ -68,6 +68,25 @@ MARKS = [
     ("hubble", "the Hubble telescope", 540, "High enough to stay up for decades; low enough that the drag finally brings it down in the 2030s.", "Wikipedia, Hubble Space Telescope"),
 ]
 
+# small things drawn in the column at their heights: k, name, altitude km,
+# where across the column (0 to 1), what to draw, a line, source. The ones
+# whose k is also a mark share that mark's card; the others carry their own.
+OBJECTS = [
+    ("cumulus", "a fair-weather cumulus", 1.2, 0.24, "cloud", "Its flat base is the height where rising warm air has cooled to its dew point and its water vapor condenses, usually a kilometer or two up.", "Wikipedia, Cumulus cloud"),
+    ("cumulonimbus", "a thunderstorm", 11, 0.55, "storm", "A thunderstorm grows until it meets the tropopause, 11 km here and up to 17 at the equator. The stratosphere above is warmer, so the rising air stops there and spreads sideways into the anvil.", "Wikipedia, Cumulonimbus cloud"),
+    ("airliner", None, 11, 0.86, "airliner", None, None),
+    ("concorde", "Concorde", 18, 0.78, "concorde", "Cruised at up to 18 km, 60,000 feet, at twice the speed of sound, higher than any other airliner; it carried passengers from 1976 to 2003.", "Wikipedia, Concorde"),
+    ("u2", "the U-2", 21.3, 0.30, "u2", "A spy plane first flown in 1955 and still flying, above 21 km. Its pilots wear full pressure suits, because they are past the Armstrong limit, where water boils at body temperature.", "Wikipedia, Lockheed U-2"),
+    ("sr71", "the SR-71", 25.929, 0.62, "sr71", "Holds the record for sustained level flight by a jet: 25,929 m, on July 28, 1976, at more than three times the speed of sound.", "Wikipedia, Lockheed SR-71 Blackbird"),
+    ("balloon", None, 35, 0.22, "balloon", None, None),
+    ("noctilucent", None, 83, 0.64, "wisp", None, None),
+    ("meteor", None, 90, 0.80, "meteor", None, None),
+    ("x15", "the X-15", 107.96, 0.62, "x15", "A rocket plane dropped from under a B-52's wing. On August 22, 1963, Joe Walker flew it to 107.96 km, past the K&aacute;rm&aacute;n line: by that measure he reached space in an airplane.", "Wikipedia, North American X-15"),
+    ("aurora", None, 110, 0.30, "aurora", None, None),
+    ("iss", None, 420, 0.55, "station", None, None),
+    ("hubble", None, 540, 0.80, "telescope", None, None),
+]
+
 # dry air by volume, CIPM-2007 with CO2 at the 2024 Mauna Loa mean: name, formula, fraction, a line
 GASES = [
     ("nitrogen", "N₂", 0.78084, "Nearly inert, the bulk of the air, and the reason air is not explosive. Bacteria and lightning are what turn it into something a plant can use."),
@@ -109,4 +128,6 @@ REFS += [(apa.wiki(f"https://en.wikipedia.org/wiki/{p}"), a) for p, a in [
     ("R%C3%BCppell%27s_vulture", None), ("Armstrong_limit", None), ("Ozone_layer", None), ("Weather_balloon", None),
     ("Red_Bull_Stratos", None), ("Noctilucent_cloud", None), ("Meteor", None), ("K%C3%A1rm%C3%A1n_line", None),
     ("Aurora", None), ("International_Space_Station", None), ("Hubble_Space_Telescope", None),
+    ("Cumulus_cloud", None), ("Cumulonimbus_cloud", None), ("Concorde", None), ("Lockheed_U-2", None),
+    ("Lockheed_SR-71_Blackbird", None), ("North_American_X-15", None),
 ]]

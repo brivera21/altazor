@@ -23,6 +23,7 @@ import apa
 from brain_data import WHOLE, OUTSIDE, INSIDE, GROWTH, GROWTH_NOTES, REFS
 
 OUT = Path(__file__).parent.parent / "brain.html"
+SHAPES = (Path(__file__).parent / "brain_shapes.json").read_text(encoding="utf-8").strip()
 
 NOTE1 = ("A kilogram and a half of tissue that is two percent of the body "
          "and takes a fifth of its energy. Seen from the side it is four "
@@ -39,12 +40,22 @@ NOTE2 = ("Cut down the middle, the brain shows what the lobes hide: the "
          "is the same organ over a lifetime: a quarter of its adult mass at "
          "birth, nine tenths by three, and a slow loss after fifty.")
 
-METHOD = ("The drawings are diagrams of a left hemisphere from the side and "
-          "from the midline, not tracings of a particular brain; the lobes "
-          "are divided along the central sulcus, the lateral fissure and the "
-          "line from the parieto-occipital sulcus to the preoccipital notch, "
-          "as anatomy texts do, and the functional patches are placed where "
-          "they usually are, on the left. Cell counts are Azevedo and "
+METHOD = ("The shapes are traced from real brains, not drawn by hand. The "
+          "outside is the left hemisphere of fsaverage, FreeSurfer's average "
+          "of forty adult brains, seen from the left; its lobes are the "
+          "Desikan-Killiany regions grouped the usual way, its folds are the "
+          "places where the surface dips deeper than its surroundings, and "
+          "the motor and touch strips are the precentral and postcentral "
+          "gyri. Broca's area is the pars opercularis and triangularis, and "
+          "Wernicke's area the back of the superior temporal gyrus, as on the "
+          "left in most people. The cerebellum and brainstem are not on that "
+          "surface and come from the MNI152 template's labels, fitted to the "
+          "same frame. The inside is a cut through the MNI152 template 4 mm "
+          "right of the midline, with its outline, folds and white matter "
+          "traced from the image and the deep parts from its labels; the "
+          "brainstem is divided where its front edge bulges into the pons and "
+          "falls back to the medulla. The pituitary is outside the template "
+          "and is placed below the optic chiasm. Cell counts are Azevedo and "
           "colleagues' 2009 isotropic-fractionator figures for four adult "
           "men's brains, with the uncertainties they report, about a tenth. "
           "The masses by age are the means of Dekaban and Sadowsky's 4,736 "
@@ -143,7 +154,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <div class="refs">__REFS__</div>
 </div>
 <script>
-const WHOLE=__WHOLE__, OUTSIDE=__OUTSIDE__, INSIDE=__INSIDE__, GROWTH=__GROWTH__, GNOTES=__GNOTES__;
+const SHAPES=__SHAPES__, WHOLE=__WHOLE__, OUTSIDE=__OUTSIDE__, INSIDE=__INSIDE__, GROWTH=__GROWTH__, GNOTES=__GNOTES__;
 const W=980;
 const el=document.getElementById('diagram');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
@@ -178,89 +189,68 @@ function showAge(a){ const m=interp(a,'m'), f=interp(a,'f'); const pm=Math.max(.
   card('At age', a===0?'birth':a+(a===1?' year':' years'), [['a man\\u2019s brain','about '+fmt(Math.round(m))+' g, '+(m/pm*100).toFixed(0)+'% of its peak'],['a woman\\u2019s','about '+fmt(Math.round(f))+' g, '+(f/pf*100).toFixed(0)+'% of its peak'],['neurons','the same 86 billion or so throughout; what changes is their branches, their insulation and the connections between them']], note.t, 'Dekaban & Sadowsky 1978; Marner et al. 2003'); }
 
 /* ---- the outside ---- */
-const OUTLINE='M160,330 C160,215 265,118 425,110 C585,102 742,150 792,262 C822,332 802,402 742,432 C690,455 630,450 580,466 C500,482 380,470 300,434 C270,420 258,398 268,382 C230,374 178,386 160,330 Z';
-const CS='M515,104 C495,170 475,235 455,300';
-const LF='M268,382 C340,352 430,338 520,322 C570,313 610,300 645,272';
+// every shape is traced from a real brain by tools/brain_geometry.py
+const SO=SHAPES.outside, SI=SHAPES.inside, PO=SHAPES.outside_probes, PI=SHAPES.inside_probes, MK=SHAPES.marks;
 const LOBE_FILL={frontal:'#34517d',parietal:'#51427d',temporal:'#7d5134',occipital:'#346e51',cerebellum:'#6e3451',brainstem:'#5e5e34'};
 const LOBE_HOT={frontal:'#4f79b8',parietal:'#7a64b8',temporal:'#b87a4f',occipital:'#4fa37a',cerebellum:'#a34f7a',brainstem:'#8c8c4f'};
 const hotFill=(k,c)=>hot===k?LOBE_HOT[k]:c;
+const lab=(x,y,t,c,a)=>'<text x="'+(+x).toFixed(1)+'" y="'+(+y).toFixed(1)+'" font-size="11.5" fill="'+(c||'#e6e6e6')+'" text-anchor="'+(a||'middle')+'" pointer-events="none">'+t+'</text>';
+const lead=(x1,y1,x2,y2)=>'<line x1="'+(+x1).toFixed(1)+'" y1="'+(+y1).toFixed(1)+'" x2="'+(+x2).toFixed(1)+'" y2="'+(+y2).toFixed(1)+'" stroke="#9a9a9a" stroke-width="1" pointer-events="none"/>';
 function outsideView(){
-  let s='<defs><clipPath id="cb"><path d="'+OUTLINE+'"/></clipPath></defs>';
-  const r=(k,d)=>'<path data-region="'+k+'" d="'+d+'" fill="'+hotFill(k,LOBE_FILL[k])+'" style="cursor:pointer"/>';
+  let s='';
+  const r=(k,d)=>'<path data-region="'+k+'" d="'+d+'" fill="'+hotFill(k,LOBE_FILL[k])+'" fill-rule="evenodd" style="cursor:pointer"/>';
   // the stalk and the little brain first, so the big one lies over them
-  s+='<path data-region="brainstem" d="M546,430 C542,470 552,520 560,580 L600,580 C608,520 618,470 614,430 Z" fill="'+hotFill('brainstem',LOBE_FILL.brainstem)+'" style="cursor:pointer"/>';
-  s+='<g data-region="cerebellum" style="cursor:pointer"><ellipse cx="688" cy="478" rx="92" ry="52" fill="'+hotFill('cerebellum',LOBE_FILL.cerebellum)+'"/>';
-  for(let i=-3;i<=3;i++){ const y=478+i*13, hw=Math.sqrt(1-(i*13/52)**2)*92-6; s+='<path d="M'+(688-hw).toFixed(1)+','+y+' Q688,'+(y+9)+' '+(688+hw).toFixed(1)+','+y+'" fill="none" stroke="#121212" stroke-width="1.2" opacity="0.6"/>'; }
-  s+='</g>';
-  s+='<g clip-path="url(#cb)">';
-  s+=r('frontal','M0,0 L515,104 C495,170 475,235 455,300 L455,700 L0,700 Z');
-  s+=r('parietal','M515,0 L515,104 C495,170 475,235 455,300 L455,700 L698,700 L712,140 L712,0 Z');
-  s+=r('occipital','M712,0 L712,140 L698,700 L980,700 L980,0 Z');
-  s+=r('temporal','M268,382 C340,352 430,338 520,322 C570,313 610,300 645,272 L704,330 L698,480 L698,700 L268,700 Z');
-  // the sulci
-  s+='<path d="'+CS+'" fill="none" stroke="#121212" stroke-width="3"/><path d="'+LF+'" fill="none" stroke="#121212" stroke-width="3"/>';
-  s+='<path d="M712,140 L700,440" fill="none" stroke="#121212" stroke-width="2" stroke-dasharray="5 4"/><path d="M645,272 L704,330" fill="none" stroke="#121212" stroke-width="2" stroke-dasharray="5 4"/>';
-  s+='</g>';
-  s+='<path d="'+OUTLINE+'" fill="none" stroke="#e6e6e6" stroke-width="1.5" opacity="0.5"/>';
-  // the strips and patches, over the lobes
-  const patch=(k,d,c)=>'<path data-region="'+k+'" d="'+d+'" fill="'+c+'" opacity="'+(hot===k?1:0.85)+'" stroke="'+(hot===k?'#ffffff':'#121212')+'" stroke-width="1.2" style="cursor:pointer"/>';
-  s+='<g clip-path="url(#cb)">';
-  s+=patch('motor','M489,106 C469,172 449,237 429,302 L455,300 C475,235 495,170 515,104 Z','#ff8c6a');
-  s+=patch('sensory','M515,104 C495,170 475,235 455,300 L481,302 C501,237 521,172 541,106 Z','#ffb02e');
-  s+='</g>';
-  const ell=(k,cx,cy,rx,ry,c)=>'<ellipse data-region="'+k+'" cx="'+cx+'" cy="'+cy+'" rx="'+rx+'" ry="'+ry+'" fill="'+c+'" opacity="'+(hot===k?1:0.85)+'" stroke="'+(hot===k?'#ffffff':'#121212')+'" stroke-width="1.2" style="cursor:pointer"/>';
-  s+=ell('broca',355,318,34,20,'#f28cb0')+ell('wernicke',600,340,40,18,'#9be564')+ell('auditory',470,356,42,13,'#6ee7f2')+ell('visual',762,340,34,44,'#c9a6ff');
+  s+=r('brainstem',SO.brainstem);
+  s+='<g data-region="cerebellum" style="cursor:pointer">'+r('cerebellum',SO.cerebellum).replace(' data-region="cerebellum"','')+'<path d="'+SO.folia+'" fill="none" stroke="#121212" stroke-width="1.1" opacity="0.55"/></g>';
+  for(const k of ['frontal','parietal','temporal','occipital']) s+=r(k,SO[k]);
+  // the strips and patches that sit on the surface
+  const patch=(k,c)=>'<path data-region="'+k+'" d="'+SO[k]+'" fill="'+c+'" fill-rule="evenodd" opacity="'+(hot===k?1:0.82)+'" stroke="'+(hot===k?'#ffffff':'none')+'" stroke-width="1.4" style="cursor:pointer"/>';
+  s+=patch('motor','#ff8c6a')+patch('sensory','#ffb02e')+patch('broca','#f28cb0')+patch('wernicke','#9be564');
+  // the folds: wherever the surface dips into a sulcus
+  s+='<path d="'+SO.sulci+'" fill="#0a0e15" fill-rule="evenodd" opacity="0.5" pointer-events="none"/>';
+  // two patches mostly out of sight: hearing inside the lateral fissure, sight on the inner face
+  const hidden=(k,c)=>'<path data-region="'+k+'" d="'+SO[k]+'" fill="'+c+'" fill-opacity="'+(hot===k?0.55:0.2)+'" stroke="'+(hot===k?'#ffffff':c)+'" stroke-width="1.5" stroke-dasharray="5 3" style="cursor:pointer"/>';
+  s+=hidden('auditory','#6ee7f2')+hidden('visual','#c9a6ff');
+  s+='<path d="'+SO.outline+'" fill="none" stroke="#e6e6e6" stroke-width="1.3" opacity="0.5" pointer-events="none"/>';
   // labels
-  const lab=(x,y,t,c,a)=>'<text x="'+x+'" y="'+y+'" font-size="11.5" fill="'+(c||'#e6e6e6')+'" text-anchor="'+(a||'middle')+'" pointer-events="none">'+t+'</text>';
-  s+=lab(300,215,'frontal')+lab(605,175,'parietal')+lab(430,430,'temporal')+lab(770,240,'occipital')+lab(700,555,'cerebellum','#e6e6e6')+lab(580,602,'brainstem')+lab(355,322,'Broca','#121212')+lab(600,344,'Wernicke','#121212')+lab(470,360,'hearing','#121212')+lab(762,344,'sight','#121212');
-  s+=lab(470,92,'motor  |  touch','#9a9a9a')+'<line x1="460" y1="96" x2="470" y2="110" stroke="#9a9a9a" stroke-width="1"/>';
-  s+=lab(125,335,'front','#9a9a9a','end')+lab(840,335,'back','#9a9a9a','start');
-  return {svg:s, h:650};
+  s+=lab(PO.frontal[0],PO.frontal[1]+4,'frontal')+lab(PO.parietal[0],PO.parietal[1]+4,'parietal')+lab(PO.temporal[0],PO.temporal[1]+4,'temporal')+lab(PO.occipital[0],PO.occipital[1]+4,'occipital');
+  s+=lab(PO.cerebellum[0],PO.cerebellum[1]+4,'cerebellum')+lead(MK.stem_end[0],MK.stem_end[1]-40,MK.stem_end[0]+38,MK.stem_end[1]-40)+lab(MK.stem_end[0]+42,MK.stem_end[1]-36,'brainstem','#e6e6e6','start');
+  s+=lab(PO.broca[0],PO.broca[1]+4,'Broca','#121212')+lab(PO.wernicke[0],PO.wernicke[1]+4,'Wernicke','#121212');
+  s+=lead(PO.auditory[0]-6,PO.auditory[1]+6,PO.auditory[0]-34,PO.auditory[1]+36)+lab(PO.auditory[0]-38,PO.auditory[1]+48,'hearing','#6ee7f2')+lab(PO.visual[0],PO.visual[1]-12,'sight','#c9a6ff');
+  const t=MK.strip_top; s+=lab(t[0]-8,t[1]-18,'motor  |  touch','#9a9a9a')+lead(t[0]-8,t[1]-14,t[0]-4,t[1]+2);
+  s+=lab(112,335,'front','#9a9a9a','end')+lab(858,335,'back','#9a9a9a','start');
+  return {svg:s, h:700};
 }
 
 /* ---- the inside ---- */
 const IN_FILL={callosum:'#e6e6e6',thalamus:'#c9a6ff',hypothalamus:'#f28cb0',pituitary:'#ffb02e',cingulate:'#5a4a8a',hippocampus:'#9be564',amygdala:'#ff8c6a',basal:'#6ee7f2',midbrain:'#8a8a4a',pons:'#7a7a3a',medulla:'#6a6a3a',cerebellum:'#7a3a5a',cord:'#5a5a2a'};
 function insideView(){
   let s='';
-  s+='<path d="'+OUTLINE+'" fill="#2a3444" stroke="#e6e6e6" stroke-opacity="0.5" stroke-width="1.5"/>';
   const on=k=>hot===k;
-  const P=(k,d,extra)=>'<path data-region="'+k+'" d="'+d+'" fill="'+(on(k)?'#ffffff':IN_FILL[k])+'" '+(extra||'')+' style="cursor:pointer"/>';
-  // the belt of cingulate cortex above the bridge
-  s+='<path data-region="cingulate" d="M330,338 C315,232 410,178 500,178 C610,178 690,235 682,312" fill="none" stroke="'+(on('cingulate')?'#ffffff':IN_FILL.cingulate)+'" stroke-width="30" stroke-linecap="round" opacity="0.9" style="cursor:pointer"/>';
-  // the corpus callosum
-  s+='<path data-region="callosum" d="M352,318 C345,250 420,212 500,212 C590,212 655,250 650,300" fill="none" stroke="'+(on('callosum')?'#ffffff':IN_FILL.callosum)+'" stroke-width="22" stroke-linecap="round" style="cursor:pointer"/>';
-  // the basal ganglia, dashed, in front of the thalamus
-  s+='<ellipse data-region="basal" cx="436" cy="292" rx="34" ry="46" fill="'+IN_FILL.basal+'" fill-opacity="'+(on('basal')?0.7:0.3)+'" stroke="'+(on('basal')?'#ffffff':IN_FILL.basal)+'" stroke-dasharray="5 4" stroke-width="1.5" style="cursor:pointer"/>';
-  // the thalamus
-  s+='<ellipse data-region="thalamus" cx="515" cy="300" rx="58" ry="36" fill="'+(on('thalamus')?'#ffffff':IN_FILL.thalamus)+'" style="cursor:pointer"/>';
-  // hypothalamus, pituitary
-  s+='<ellipse data-region="hypothalamus" cx="500" cy="352" rx="32" ry="15" fill="'+(on('hypothalamus')?'#ffffff':IN_FILL.hypothalamus)+'" style="cursor:pointer"/>';
-  s+='<g data-region="pituitary" style="cursor:pointer"><line x1="494" y1="366" x2="492" y2="388" stroke="'+IN_FILL.pituitary+'" stroke-width="3"/><circle cx="492" cy="398" r="10" fill="'+(on('pituitary')?'#ffffff':IN_FILL.pituitary)+'"/></g>';
-  // the brainstem in three parts, and the cord
-  s+=P('midbrain','M542,336 L592,336 L596,392 L546,392 Z');
-  s+=P('pons','M546,392 L596,392 C600,420 600,445 598,460 L552,460 C534,440 534,410 546,392 Z');
-  s+=P('medulla','M552,460 L598,460 C600,490 598,520 596,540 L560,540 C556,515 552,490 552,460 Z');
-  s+=P('cord','M560,540 L596,540 L600,630 L566,630 Z');
-  // hippocampus and amygdala, dashed, deep in the temporal lobe
-  s+='<path data-region="hippocampus" d="M582,334 C598,384 570,428 505,430" fill="none" stroke="'+(on('hippocampus')?'#ffffff':IN_FILL.hippocampus)+'" stroke-width="16" stroke-linecap="round" opacity="'+(on('hippocampus')?0.95:0.6)+'" style="cursor:pointer"/>';
-  s+='<circle data-region="amygdala" cx="474" cy="430" r="13" fill="'+IN_FILL.amygdala+'" fill-opacity="'+(on('amygdala')?0.9:0.45)+'" stroke="'+(on('amygdala')?'#ffffff':IN_FILL.amygdala)+'" stroke-dasharray="4 3" stroke-width="1.5" style="cursor:pointer"/>';
-  // the cerebellum, with its tree
-  s+='<g data-region="cerebellum" style="cursor:pointer"><ellipse cx="722" cy="470" rx="70" ry="50" fill="'+(on('cerebellum')?'#ffffff':IN_FILL.cerebellum)+'"/>';
-  const tree=(x,y,ang,len,depth)=>{ if(depth===0||len<6) return ''; const x2=x+Math.cos(ang)*len, y2=y+Math.sin(ang)*len; let t='<line x1="'+x.toFixed(1)+'" y1="'+y.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="#e6e6e6" stroke-width="'+(depth*0.5).toFixed(1)+'" opacity="0.8"/>'; t+=tree(x2,y2,ang-0.6,len*0.62,depth-1)+tree(x2,y2,ang+0.6,len*0.62,depth-1); return t; };
-  s+=tree(668,470,0,30,5)+tree(668,470,-1.1,22,4)+tree(668,470,1.1,22,4)+'</g>';
-  // labels with leaders
-  const lab=(x,y,t,a)=>'<text x="'+x+'" y="'+y+'" font-size="11.5" fill="#e6e6e6" text-anchor="'+(a||'start')+'" pointer-events="none">'+t+'</text>';
-  const lead=(x1,y1,x2,y2)=>'<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#9a9a9a" stroke-width="1" pointer-events="none"/>';
-  s+=lab(500,170,'cingulate cortex','middle')+lab(500,222,'corpus callosum','middle');
-  s+=lab(515,304,'thalamus','middle')+lab(436,296,'basal','middle')+lab(436,310,'ganglia','middle');
-  s+=lead(468,352,400,352)+lab(396,356,'hypothalamus','end');
-  s+=lead(481,398,402,398)+lab(398,402,'pituitary','end');
-  s+=lead(468,440,420,480)+lab(416,484,'amygdala','end');
-  s+=lead(545,434,510,500)+lab(506,504,'hippocampus','end');
-  s+=lab(606,368,'midbrain')+lab(606,432,'pons')+lab(606,505,'medulla')+lab(606,600,'spinal cord');
-  s+=lab(740,545,'cerebellum','middle');
-  s+=lab(125,335,'front','end')+lab(840,335,'back');
-  return {svg:s, h:650};
+  s+='<path d="'+SI.outline+'" fill="#2a3444" fill-rule="evenodd" stroke="#e6e6e6" stroke-opacity="0.5" stroke-width="1.3"/>';
+  s+='<path d="'+SI.sulci+'" fill="#0d1118" fill-rule="evenodd" opacity="0.85" pointer-events="none"/>';
+  const P=(k,extra)=>'<path data-region="'+k+'" d="'+SI[k]+'" fill="'+(on(k)?'#ffffff':IN_FILL[k])+'" fill-rule="evenodd" '+(extra||'')+' style="cursor:pointer"/>';
+  // off the midline, projected onto the cut: drawn dashed and see-through
+  const D=(k,op)=>'<path data-region="'+k+'" d="'+SI[k]+'" fill="'+IN_FILL[k]+'" fill-opacity="'+(on(k)?0.75:op)+'" stroke="'+(on(k)?'#ffffff':IN_FILL[k])+'" stroke-width="1.5" stroke-dasharray="5 4" style="cursor:pointer"/>';
+  s+=P('cingulate','opacity="0.92"')+P('callosum');
+  s+=D('basal',0.16);
+  s+=P('thalamus')+P('hypothalamus');
+  s+='<g data-region="pituitary" style="cursor:pointer"><path d="'+SI.stalk+'" stroke="'+IN_FILL.pituitary+'" stroke-width="3"/><path d="'+SI.pituitary+'" fill="'+(on('pituitary')?'#ffffff':IN_FILL.pituitary)+'"/></g>';
+  s+=P('midbrain')+P('pons')+P('medulla')+P('cord');
+  s+='<g data-region="cerebellum" style="cursor:pointer"><path d="'+SI.cerebellum+'" fill="'+(on('cerebellum')?'#b0668a':IN_FILL.cerebellum)+'" fill-rule="evenodd"/><path d="'+SI.arbor+'" fill="#e6e6e6" fill-rule="evenodd" opacity="0.85"/></g>';
+  s+=D('hippocampus',0.3)+D('amygdala',0.4);
+  // labels
+  const L=(k,t,dx,dy,a)=>lab(PI[k][0]+(dx||0),PI[k][1]+(dy||0)+4,t,'#e6e6e6',a);
+  s+=L('cingulate','cingulate cortex')+lab(MK.callosum_label[0],MK.callosum_label[1]+4,'corpus callosum','#121212');
+  s+=L('thalamus','thalamus')+L('basal','basal ganglia')+L('pons','pons')+lab(690,630,'cerebellum');
+  const side=(k,t,y)=>lead(PI[k][0],PI[k][1],344,y)+lab(340,y+4,t,'#e6e6e6','end');
+  s+=side('hypothalamus','hypothalamus',405)+side('amygdala','amygdala',445)+side('pituitary','pituitary',503)+side('hippocampus','hippocampus',545);
+  const right=(k,t,x,y)=>lead(PI[k][0],PI[k][1],x-4,y-4)+lab(x,y,t,'#e6e6e6','start');
+  s+=right('midbrain','midbrain',600,352);
+  s+=lead(PI.medulla[0],PI.medulla[1],468,600)+lab(464,604,'medulla','#e6e6e6','end');
+  s+=lead(PI.cord[0],PI.cord[1],600,650)+lab(604,654,'spinal cord','#e6e6e6','start');
+  s+=lab(112,335,'front','#e6e6e6','end')+lab(858,335,'back','#e6e6e6','start');
+  return {svg:s, h:700};
 }
 
 /* ---- a lifetime ---- */
@@ -312,7 +302,7 @@ window.__brain=(q)=>{ const o={view,hot,age,card:document.getElementById('numTxt
 """
 
 html = (HTML.replace("__APACSS__", apa.CSS)
-        .replace("__WHOLE__", _js(WHOLE)).replace("__OUTSIDE__", _js(outside)).replace("__INSIDE__", _js(inside)).replace("__GROWTH__", _js(growth)).replace("__GNOTES__", _js(gnotes))
+        .replace("__SHAPES__", SHAPES).replace("__WHOLE__", _js(WHOLE)).replace("__OUTSIDE__", _js(outside)).replace("__INSIDE__", _js(inside)).replace("__GROWTH__", _js(growth)).replace("__GNOTES__", _js(gnotes))
         .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2).replace("__METHOD__", METHOD)
         .replace("__REFS__", apa.render(REFS)))
 OUT.write_text(html, encoding="utf-8")

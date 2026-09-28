@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from atmosphere_data import LAYERS_76, UPPER, LAYERS, MARKS, GASES, WATER, P0, G0, R_AIR
+from atmosphere_data import LAYERS_76, UPPER, LAYERS, MARKS, OBJECTS, GASES, WATER, P0, G0, R_AIR
 
 ROOT = Path(__file__).resolve().parent.parent
 PAGE = ROOT / "atmosphere.html"
@@ -109,6 +109,16 @@ check(abs(dry - 1) < 3e-4, f"dry air sums to {dry:.5f}")
 co2 = next(g for g in GASES if g[0] == "carbon dioxide")
 check(abs(co2[2] - 425e-6) < 1e-6, "carbon dioxide at 425 ppm")
 check(GASES[0][2] > GASES[1][2] > GASES[2][2] > GASES[3][2], "nitrogen, oxygen, argon, carbon dioxide in falling order")
+mk = {m[0]: m[2] for m in MARKS}
+check(all((o[1] is None) == (o[0] in mk) and (o[1] is not None or o[2] == mk[o[0]]) for o in OBJECTS),
+      f"{len(OBJECTS)} things in the air: those shared with a mark sit at the mark's height, the rest carry their own card")
+FT = 0.3048
+ob = {o[0]: o for o in OBJECTS}
+check(abs(ob["concorde"][2] - 60000 * FT / 1000) < 0.4, "Concorde at 18 km is its 60,000 ft ceiling")
+check(abs(ob["u2"][2] - 70000 * FT / 1000) < 0.1 and ob["u2"][2] > 19, "the U-2 at 21.3 km is 70,000 ft, past the 19 km Armstrong limit")
+check(abs(ob["sr71"][2] * 1000 - 85069 * FT) < 1, "the SR-71's record, 85,069 ft, is 25,929 m")
+check(abs(ob["x15"][2] * 1000 - 354200 * FT) < 1 and ob["x15"][2] > 100, "the X-15's 354,200 ft is 107.96 km, past the Karman line")
+check(ob["cumulonimbus"][2] == LAYERS[1][2], "the storm's anvil sits at the tropopause")
 
 print("--- the drawing ---")
 from playwright.sync_api import sync_playwright
@@ -176,6 +186,17 @@ with sync_playwright() as pw:
     pg.evaluate("()=>document.querySelector('#asvg g[data-g=\"w\"]').dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
     pg.wait_for_timeout(100)
     check("water vapor" in st()["name"], "and water vapor answers")
+    pg.click('#views button[data-v="up"]')
+    pg.wait_for_timeout(150)
+    at = pg.evaluate("()=>OBJECTS.filter(o=>o.kind!=='storm'&&o.kind!=='aurora'&&o.kind!=='wisp'&&o.kind!=='meteor').map(o=>{const g=document.querySelector('#asvg [data-k=\"'+o.k+'\"][transform],#asvg [data-o=\"'+o.k+'\"][transform]'); const m=g&&g.getAttribute('transform').match(/translate\\(([-\\d.]+),([-\\d.]+)\\)/); return [o.k, m?+m[2]:null, __atm({YZ:o.z}).yz];})")
+    bad = [k for k, y, want in at if y is None or abs(y - want) > 0.1]
+    check(not bad, f"each of {len(at)} icons sits at its own height on the column", ", ".join(bad))
+    pg.evaluate("()=>document.querySelector('#asvg [data-o=\"concorde\"]').dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
+    pg.wait_for_timeout(100)
+    s = st()
+    check("Concorde" in s["name"] and "18 km" in s["card"] and "hPa" in s["card"], "hovering Concorde: its height and the pressure outside")
+    pg.click('#views button[data-v="made"]')
+    pg.wait_for_timeout(150)
     over = pg.evaluate("()=>{const svg=document.querySelector('#asvg'); let n=0; for(const t of svg.querySelectorAll('text')){ if(t.hasAttribute('transform')) continue; const b=t.getBBox(); if(b.x<0||b.x+b.width>980) n++; } return n;}")
     check(over == 0, "no label runs off the edge", f"{over}")
     check(not errs, "no script errors", "; ".join(errs))
