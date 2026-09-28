@@ -21,3 +21,11 @@ title: Science Fiction
 [The Mars of Red Mars](red-mars.html)
 
 [The Solar System of 2312](solar-system-2312.html)
+
+[The Centuries Before 2312](ksr-2312-timeline.html)
+
+[The Expanse: A Timeline by Milestone Year](expanse-timeline.html)
+
+## Armor of God
+
+[The Solar System of Armor of God](armor-of-god.html)
