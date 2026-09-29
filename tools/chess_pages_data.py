@@ -877,6 +877,119 @@ ENDGAME_ADD = [
 ]
 
 
+# ---------------------------------------------------------------- THE START
+# The first two boards on each piece page: that kind of piece on its starting
+# squares, both colors, first alone and then in the full starting position,
+# with the squares it sees and, in blue, where each most often goes first.
+# "Most often" is counted from the 365chess.com Big Database tree the
+# Openings page draws (3.9 million games, August 2026), over the first three
+# moves each side, which is as deep as that tree goes: of the games in which
+# the piece moves that early, the square it goes to most. Rooks, queens and
+# kings do not move in the tree; castling kingside is marked for rooks and
+# kings, and nothing for queens.
+
+import chess as _chess
+
+_START = _chess.Board()
+_KIND = {"pawn": _chess.PAWN, "knight": _chess.KNIGHT, "bishop": _chess.BISHOP,
+         "rook": _chess.ROOK, "queen": _chess.QUEEN, "king": _chess.KING}
+
+
+def _start_boards(kind):
+    """(fen of the pieces alone, their squares, what they see alone, what they see in the setup)"""
+    pt = _KIND[kind]
+    alone = _chess.Board(None)
+    homes = []
+    for s_ in _START.pieces(pt, _chess.WHITE) | _START.pieces(pt, _chess.BLACK):
+        alone.set_piece_at(s_, _START.piece_at(s_))
+        homes.append(_chess.square_name(s_))
+    seen_alone, seen_full = set(), set()
+    for s_ in _START.pieces(pt, _chess.WHITE) | _START.pieces(pt, _chess.BLACK):
+        seen_alone |= {_chess.square_name(t) for t in alone.attacks(s_)}
+        seen_full |= {_chess.square_name(t) for t in _START.attacks(s_)}
+    return alone.board_fen(), sorted(homes), sorted(seen_alone), sorted(seen_full)
+
+
+_FIRST = {  # where each most often goes first, as described above
+    "pawn": ["e4", "d4", "c4", "g3", "b3", "f4", "e6", "d5", "c5", "g6", "b6", "a6", "f5", "h6"],
+    "knight": ["f3", "c3", "f6", "c6"],
+    "bishop": ["b5", "f4", "g5", "g7", "f5"],
+    "rook": ["f1", "f8"],
+    "queen": [],
+    "king": ["g1", "g8"],
+}
+_NAMES = {"pawn": "pawns", "knight": "knights", "bishop": "bishops", "rook": "rooks",
+          "queen": "queens", "king": "kings"}
+_TEXT = {
+    "pawn": ("The sixteen pawns alone. A pawn sees the two squares diagonally ahead, "
+             "where it captures (one on the rim), so together they cover the whole third and sixth ranks. "
+             "Blue is where each most often goes first: e4, d4 and c4 lead for White, "
+             "e6, d5 and c5 for Black.",
+             "Nothing changes for the pawns in the full setup: they stand in front, so no "
+             "piece blocks them, and with the knights they are the only men that can move "
+             "on the first move."),
+    "knight": ("The four knights alone. Each sees three squares. Blue is where each most "
+               "often goes first: f3 and c3 for White, f6 and c6 for Black, nine times in "
+               "ten or more when it moves in the first three moves.",
+               "The same knights in the full setup. Nothing blocks a knight, so each still "
+               "sees its three squares; the one on the second rank holds its own pawn, "
+               "which it defends. With the pawns, they are the only men that can move at once."),
+    "bishop": ("The four bishops alone. Each sees seven squares along its two diagonals. "
+               "Blue is where each most often goes first: b5 for White's light bishop, f4 "
+               "and g5 about equally for the dark one, g7 and f5 for Black. Bishops seldom "
+               "move this early, so these rest on fewer games.",
+               "The same bishops in the full setup. Each sees only the two pawns in front "
+               "of it, which it defends, and cannot move until one of them does."),
+    "rook": ("The four rooks alone. Each sees fourteen squares, along its rank to the "
+             "other rook and along its file to the enemy rook. Blue is where the h-rooks "
+             "usually land first: castling kingside, the usual choice, sets them on f1 "
+             "and f8.",
+             "The same rooks in the full setup. Each sees two squares, the pawn in front "
+             "and the knight beside it, and none can move. The first three moves of the "
+             "database never move a rook."),
+    "queen": ("The two queens alone. Each sees twenty-one squares: its whole first rank, "
+              "the file up to the other queen, and both diagonals. No blue here: in the "
+              "first three moves the queens almost never move, and no single first square "
+              "stands out.",
+              "The same queens in the full setup. Each sees five squares, the bishop and "
+              "king beside it and the three pawns in front, and cannot move until a pawn "
+              "or a piece gets out of its way."),
+    "king": ("The two kings alone. Each sees five squares. Blue is where each usually "
+             "goes first: castling kingside, the usual choice, moves the king two squares "
+             "at once, to g1 or g8.",
+             "The same kings in the full setup. The five squares a king sees all hold its "
+             "own men. It cannot move until the pieces between it and a rook have gone, "
+             "and then it castles."),
+}
+
+
+def _start_entries(kind):
+    fen, homes, seen_a, seen_f = _start_boards(kind)
+    first = _FIRST[kind]
+    leg = [["subject", f"the {_NAMES[kind]}, where they start"], ["zone", "the squares they see"]]
+    if first:
+        leg.append(["plan", "where each most often goes first"])
+    a = {"name": f"The {_NAMES[kind]} alone",
+         "tagline": "Their starting squares, with nothing else on the board.",
+         "fen": fen, "turn": "",
+         "marks": marks(zone=seen_a, plan=first, subject=homes),
+         "legend": leg, "body": [_TEXT[kind][0]]}
+    f = {"name": f"The {_NAMES[kind]} in the full setup",
+         "tagline": "The same squares with every other piece in place.",
+         "fen": _START.board_fen(), "turn": "",
+         "marks": marks(zone=seen_f, plan=first, subject=homes),
+         "legend": leg, "body": [_TEXT[kind][1]]}
+    return [a, f]
+
+
+PAWN[:0] = _start_entries("pawn")
+KNIGHT_P[:0] = _start_entries("knight")
+BISHOP[:0] = _start_entries("bishop")
+ROOK[:0] = _start_entries("rook")
+QUEEN[:0] = _start_entries("queen")
+KING_P[:0] = _start_entries("king")
+
+
 PAGES = {
     "pawn": PAWN, "knight": KNIGHT_P, "bishop": BISHOP, "rook": ROOK,
     "queen": QUEEN, "king": KING_P, "tactics": TACTICS, "checkmates": CHECKMATES,
