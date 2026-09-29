@@ -7,6 +7,9 @@
                range, and the speed is checked never to pass light
   the page     draws nine forms and nineteen arrows, the card answers, and
                clicking a form dims what does not touch it
+  the controls the decade ticks, the ladder of amounts, Play over the ladder,
+               a packet sent along an arrow, a drag on a form and the arrow
+               keys, and the sources tucked into a closed details
 """
 import math
 import re
@@ -161,7 +164,7 @@ with sync_playwright() as pw:
     if not ok: fails.append(f"kin at 1 J: {kin}")
 
     # the controls
-    btns = pg.evaluate("()=>[...document.querySelectorAll('#presets button')]"
+    btns = pg.evaluate("()=>[...document.querySelectorAll('#presets button .l')]"
                        ".map(b=>b.textContent)")
     ok = btns == [l for l, _ in AMOUNTS]
     print(f"  {'ok  ' if ok else 'FAIL'} {len(btns)} measured amounts offered, "
@@ -189,6 +192,94 @@ with sync_playwright() as pw:
     ok = "E / c" in work and "11.1 fg" in work and "1.00 J" in work
     print(f"  {'ok  ' if ok else 'FAIL'} the card shows the working: '{work}'")
     if not ok: fails.append(f"working: {work}")
+
+    print("--- the controls ---")
+    nt = pg.evaluate("()=>document.querySelectorAll('#ticks span').length")
+    ok = nt == 15 and pg.evaluate("()=>[...document.querySelectorAll('#ticks span')]"
+                                  ".map(s=>s.textContent).join(' ')") \
+        == "zJ eV fJ pJ nJ µJ mJ J kJ MJ GJ TJ PJ EJ ZJ"
+    print(f"  {'ok  ' if ok else 'FAIL'} {nt} decade ticks under the slider, "
+          "from zJ through eV and J to ZJ")
+    if not ok: fails.append(f"ticks {nt}")
+    ok = "of matter" in pg.evaluate("()=>document.querySelector('#ensvg').textContent") \
+        and "11.1 fg" in pg.evaluate("()=>document.querySelector('[data-sol=mass]').textContent")
+    print(f"  {'ok  ' if ok else 'FAIL'} the rest mass node says what its grams are of")
+    if not ok: fails.append("of matter")
+    # a packet along an arrow: gravitational pinned, then a click on kinetic
+    pg.evaluate("()=>{setE(1);sel='grav';render();pick('kin')}")
+    pg.wait_for_timeout(150)
+    mid = pg.evaluate("()=>!!document.querySelector('#ensvg .packet')")
+    pg.wait_for_timeout(1200)
+    st = pg.evaluate("()=>window.__en()")
+    card = pg.evaluate("()=>document.getElementById('kindTxt').textContent+' | '"
+                       "+document.getElementById('nameTxt').textContent+' | '"
+                       "+document.getElementById('solveTxt').textContent")
+    ok = mid and st["sel"] == "kin" and card == \
+        "Gravitational → Kinetic | Falling | 102 mm of height → 1.41 m/s of speed"
+    print(f"  {'ok  ' if ok else 'FAIL'} a click on a lit neighbor sends a packet "
+          f"along the arrow and the card reads both ends: '{card}'")
+    if not ok: fails.append(f"packet {mid} {st} {card}")
+    # a click on the pinned form itself lets go
+    pg.evaluate("()=>pick('kin')")
+    ok = pg.evaluate("()=>window.__en().sel") is None
+    print(f"  {'ok  ' if ok else 'FAIL'} a second click on the pinned form lets go")
+    if not ok: fails.append("unpin")
+    # the arrow keys step a decade when the ring has focus
+    pg.evaluate("()=>{setE(1);document.getElementById('diagram').focus()}")
+    pg.keyboard.press("ArrowRight"); pg.keyboard.press("ArrowRight"); pg.keyboard.press("ArrowDown")
+    e1 = pg.evaluate("()=>E")
+    pg.evaluate("()=>document.getElementById('mag').focus()")
+    pg.keyboard.press("ArrowLeft")
+    e2 = pg.evaluate("()=>E")
+    ok = abs(e1 - 10) < 1e-6 and abs(e2 - 1) < 1e-6
+    print(f"  {'ok  ' if ok else 'FAIL'} arrow keys on the ring and on the slider step "
+          f"by a decade: {e1:g} J then {e2:g} J")
+    if not ok: fails.append(f"keys {e1} {e2}")
+    # a form drags up by 140 px to multiply the amount by ten
+    box = pg.evaluate("()=>{const c=document.querySelector('[data-f=grav] circle')"
+                      ".getBoundingClientRect();return [c.x+c.width/2,c.y+c.height/2]}")
+    pg.mouse.move(box[0], box[1]); pg.mouse.down()
+    pg.mouse.move(box[0], box[1] - 70, steps=4); pg.mouse.move(box[0], box[1] - 140, steps=4)
+    pg.mouse.up()
+    e3 = pg.evaluate("()=>E")
+    ok = abs(math.log10(e3) - 1) < 0.02 and pg.evaluate("()=>window.__en().sel") is None
+    print(f"  {'ok  ' if ok else 'FAIL'} dragging a form up by 140 px gives {e3:.3g} J "
+          "and does not count as a click")
+    if not ok: fails.append(f"drag {e3}")
+    # Play walks the ladder and reads Pause while it runs
+    pg.evaluate("()=>{setE(1.602176634e-19)}")
+    pg.click("#play")
+    pg.wait_for_timeout(1300)
+    lab = pg.evaluate("()=>document.getElementById('play').textContent")
+    e4 = pg.evaluate("()=>E")
+    running = pg.evaluate("()=>window.__en().playing")
+    pg.click("#play")
+    stopped = not pg.evaluate("()=>window.__en().playing")
+    ok = lab == "Pause" and running and e4 > 2e-19 and stopped \
+        and pg.evaluate("()=>document.getElementById('play').textContent") == "Play"
+    print(f"  {'ok  ' if ok else 'FAIL'} Play reads Pause while it walks the amounts "
+          f"({e4:.3g} J after 1.3 s) and a second press stops it")
+    if not ok: fails.append(f"play {lab} {e4} {running} {stopped}")
+    # sources and method are tucked away; one caption shows
+    ok = pg.evaluate("()=>{const d=document.querySelector('details.sources');"
+                     "return d&&!d.open&&d.querySelector('.refs')&&d.querySelector('.method')"
+                     "&&document.querySelectorAll('p.note').length===1}")
+    print(f"  {'ok  ' if ok else 'FAIL'} one caption, and the method and references "
+          "inside a closed Sources details")
+    if not ok: fails.append("sources details")
+    # the phone: the ring scrolls sideways at a readable width, nothing overflows
+    ph = br.new_page(viewport={"width": 390, "height": 844})
+    ph.goto((Path(__file__).parent.parent / "energy.html").resolve().as_uri())
+    ph.wait_for_selector("#ensvg")
+    w = ph.evaluate("()=>[document.querySelector('#ensvg').getBoundingClientRect().width,"
+                    "document.documentElement.scrollWidth-innerWidth,"
+                    "document.querySelector('.card').getBoundingClientRect().top<"
+                    "document.querySelector('#diagram').getBoundingClientRect().top]")
+    ok = w[0] >= 600 and w[1] == 0 and w[2]
+    print(f"  {'ok  ' if ok else 'FAIL'} at 390 px the ring is {w[0]:.0f} px wide inside "
+          f"a sideways scroll, the page does not overflow, the card sits above it")
+    if not ok: fails.append(f"phone {w}")
+    ph.close()
 
     if errs: fails.append(f"js errors: {errs}")
     br.close()

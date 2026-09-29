@@ -24,13 +24,19 @@ from light_data import BANDS, MARKS, WINDOWS, BODIES, REFS
 
 OUT = Path(__file__).parent.parent / "light.html"
 
-NOTE1 = ("Light is one thing across eighteen decades of wavelength, from "
-         "gamma rays shorter than a nucleus to radio waves longer than a "
-         "street, and the eye sees less than one octave of it, the sliver "
-         "where the Sun's output peaks and the air is clear. The line runs "
-         "from short to long; each mark is a photon that turns up somewhere "
-         "in daily life or in the sky, and the strip beneath shows which "
-         "wavelengths make it to the ground.")
+CAPTION = ("Light is one thing across eighteen decades of wavelength, from "
+           "gamma rays shorter than a nucleus to radio waves longer than a "
+           "street, and the eye sees less than an octave of it. The marker "
+           "drags along the line, and the second view draws the glow of a "
+           "hot body at any temperature from the sky's background to a star.")
+
+NOTE1 = ("The eye's octave is the sliver where the Sun's output peaks and "
+         "the air is clear. The line runs from short to long; each mark is "
+         "a photon that turns up somewhere in daily life or in the sky, and "
+         "the strip beneath shows which wavelengths make it to the ground. "
+         "A second, paler marker on the line shows where the hot body of "
+         "the other view peaks, and the card names a body that peaks near "
+         "the marker.")
 
 NOTE2 = ("Everything warm glows, and the second view draws that glow for "
          "any temperature between the sky's background at 2.7 kelvin and a "
@@ -52,7 +58,10 @@ METHOD = ("Frequency is c over wavelength, photon energy is hc over "
           "converted to sRGB with brightness set aside, so the swatch shows "
           "hue only; below the Draper point, about 800 K, a body does not "
           "glow visibly and the swatch is dark. The ground strip is the "
-          "atmosphere's opacity curve reduced to its windows.")
+          "atmosphere's opacity curve reduced to its windows. The eye toggle "
+          "on the hot body view shades the curve between 380 and 750 nm; on "
+          "these log axes the shaded area is not in proportion to the share "
+          "of the power, which the card gives as a number.")
 
 
 def _js(o):
@@ -95,11 +104,18 @@ h1 { margin:0 0 12px; font-size:26px; }
 .controls label { font-size:13px; color:var(--muted); }
 .controls input[type=range] { width:220px; accent-color:var(--accent); }
 .controls output { font-size:13px; color:var(--text); font-variant-numeric:tabular-nums; min-width:70px; }
+.controls .play, .controls .tog { background:var(--panel); color:var(--text); border:1px solid #3d3d3d;
+  border-radius:8px; padding:4px 12px; font-size:12.5px; cursor:pointer; font-family:inherit; min-width:62px; }
+.controls .play:hover, .controls .tog:hover { border-color:var(--accent); }
+.controls .play[aria-pressed=true], .controls .tog[aria-pressed=true] { background:var(--accent); color:#0b1a2b;
+  border-color:var(--accent); font-weight:600; }
 .presets { display:flex; gap:6px; flex-wrap:wrap; }
 .presets button { padding:5px 11px; font-size:12.5px; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
-#diagram { flex:1 1 640px; min-width:0; }
+#diagram { flex:1 1 640px; min-width:0; border-radius:12px; outline:none; }
+#diagram:focus-visible { box-shadow:0 0 0 1px var(--accent); }
 #diagram svg { width:100%; height:auto; display:block; user-select:none; }
+#diagram text.halo { paint-order:stroke; stroke:#121212; stroke-width:3.5px; stroke-linejoin:round; }
 .side { flex:0 0 300px; position:sticky; top:16px; }
 .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; }
 #kindTxt { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
@@ -110,6 +126,10 @@ h1 { margin:0 0 12px; font-size:26px; }
 #srcTxt { color:var(--muted); font-size:12px; margin-top:10px; border-top:1px solid var(--line); padding-top:8px; }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
+details.sources { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+details.sources summary { cursor:pointer; }
+details.sources summary:hover { color:var(--text); }
+details.sources .note { border-top:none; padding-top:0; margin-top:10px; }
 .method { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
@@ -117,7 +137,9 @@ h1 { margin:0 0 12px; font-size:26px; }
 .refs a { color:var(--accent); }
 __APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%; order:-1;}
+  #diagram{width:100%; flex-basis:auto;} }
+@media (max-width:600px){ #diagram{overflow-x:auto; -webkit-overflow-scrolling:touch;} #diagram svg{min-width:680px;} }
 </style>
 </head>
 <body>
@@ -136,10 +158,13 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   <label for="temp">temperature</label>
   <input type="range" id="temp" min="435" max="4700" step="1" value="3761">
   <output id="tempOut">5,772 K</output>
+  <button type="button" class="play" id="play" aria-pressed="false">Play</button>
+  <button type="button" class="tog" id="eye" aria-pressed="false">What the eye sees</button>
+  <label>or a named body</label>
   <span class="presets" id="bodies"></span>
 </div>
 <div class="stage">
-  <div id="diagram"></div>
+  <div id="diagram" tabindex="0" aria-label="the spectrum, or the glow of a hot body"></div>
   <div class="side"><div class="card">
     <div id="kindTxt"></div>
     <div id="nameTxt"></div>
@@ -148,11 +173,14 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
     <div id="srcTxt"></div>
   </div></div>
 </div>
+<p class="note">__CAPTION__</p>
+<details class="sources"><summary>Sources</summary>
 <p class="note">__NOTE1__</p>
-<p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
+<p class="note">__NOTE2__</p>
 <div class="method"><p>__METHOD__</p></div>
 <h2 class="refh">References</h2>
 <div class="refs">__REFS__</div>
+</details>
 </div>
 <script>
 const BANDS=__BANDS__, MARKS=__MARKS__, WIN=__WIN__, BODIES=__BODIES__;
@@ -160,7 +188,9 @@ const c=299792458, h=6.62607015e-34, kB=1.380649e-23, eV=1.602176634e-19, bW=2.8
 const W=980;
 const el=document.getElementById('diagram');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
-let view='spectrum', lam=5.02e-7, T=5772, hot=null;
+let view='spectrum', lam=5.02e-7, T=5772, hot=null, eye=false;
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ease=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
 
 /* ---- numbers ---- */
 function si(v,unit,digits){ // 3 significant figures with a prefix
@@ -203,9 +233,11 @@ function card(kind,name,rows,body,src){
   document.getElementById('bodyTxt').textContent=body;
   document.getElementById('srcTxt').textContent=src;
 }
+// the named body that peaks nearest a wavelength, when one is within a third
+function bodyNear(tW){ let best=null; for(const b of BODIES){ const d=Math.abs(Math.log10(b.T/tW)); if(d<Math.log10(1.34)&&(!best||d<best.d)) best={b,d}; } return best&&best.b; }
 function photonRows(m){
-  const f=c/m, E=h*c/m/eV, tW=bW/m, bd=bandOf(m), w=windowOf(m);
-  return [['wavelength',si(m,'m')],['frequency',si(f,'Hz')],['photon energy',E>=1?si(E,'eV'):si(E,'eV')],['a body peaking here',fmtK(tW)],
+  const f=c/m, E=h*c/m/eV, tW=bW/m, bd=bandOf(m), w=windowOf(m), nb=bodyNear(tW);
+  return [['wavelength',si(m,'m')],['frequency',si(f,'Hz')],['photon energy',E>=1?si(E,'eV'):si(E,'eV')],['a body peaking here',fmtK(tW)+(nb?', close to '+esc(nb.n)+' at '+fmtK(nb.T):'')],
           ['band',bd.n],['reaches the ground',w?'yes, '+w.n:'no, the air absorbs or reflects it']];
 }
 function showPoint(m){ const bd=bandOf(m);
@@ -228,6 +260,8 @@ const VX=nm=>V.L+(nm-V.a)/(V.b-V.a)*(V.R-V.L);
 function lanes(items,minGap){ const rows=[]; const out=[]; for(const it of items){ let r=0; while(rows[r]!==undefined && it.x-rows[r]<minGap) r++; rows[r]=it.x+it.w; out.push({...it,lane:r}); } return out; }
 function spectrum(){
   let s='';
+  // the line itself drags: a strip under everything carries the cursor
+  s+='<rect x="'+(S.L-6)+'" y="'+(S.Y-70)+'" width="'+(S.R-S.L+12)+'" height="142" fill="#fff" fill-opacity="0" style="cursor:ew-resize"/>';
   // the bands, as a strip above the line
   for(const b of BANDS){ const x0=SX(b.a), x1=SX(b.b);
     s+='<g data-b="'+b.k+'" style="cursor:pointer"><rect x="'+x0.toFixed(1)+'" y="'+(S.Y-58)+'" width="'+(x1-x0).toFixed(1)+'" height="26" fill="'+b.c+'" opacity="'+(hot===b.k?0.55:0.28)+'" rx="3"/>';
@@ -240,14 +274,20 @@ function spectrum(){
     s+='<line x1="'+x.toFixed(1)+'" y1="'+(S.Y-(big?7:4))+'" x2="'+x.toFixed(1)+'" y2="'+(S.Y+(big?7:4))+'" stroke="#8a94a6"/>';
     if(big) s+='<text x="'+x.toFixed(1)+'" y="'+(S.Y+22)+'" text-anchor="middle" font-size="11" fill="#9a9a9a">'+(names[String(d)]||('10^'+d+' m'))+'</text>'; }
   // the ground strip: what gets through
-  s+='<text x="'+S.L+'" y="'+(S.Y+48)+'" font-size="10.5" fill="#6b7280">reaches the ground</text>';
+  s+='<text x="'+S.L+'" y="'+(S.Y+48)+'" font-size="10.5" fill="#6b7280">reaches the ground: green where the air lets it through, dark where it is absorbed or reflected</text>';
   s+='<rect x="'+S.L+'" y="'+(S.Y+54)+'" width="'+(S.R-S.L)+'" height="10" fill="#1f1f1f" rx="2"/>';
   for(const w of WIN){ const x0=SX(w.a), x1=SX(w.b); s+='<rect x="'+x0.toFixed(1)+'" y="'+(S.Y+54)+'" width="'+Math.max(1.5,x1-x0).toFixed(1)+'" height="10" fill="#9be564" opacity="0.8" rx="1"><title>'+esc(w.n)+'</title></rect>'; }
   // the marks, in lanes below the strip
-  const items=lanes(MARKS.map(o=>({...o,x:SX(o.m),w:o.n.length*5.6+10})).sort((a,b)=>a.x-b.x),0);
+  // the marks inside the visible band are named in the octave below, so
+  // up here they keep only their dot, which thins the stack near a micron
+  const inVis=o=>o.m>=3.8e-7&&o.m<=7.5e-7;
+  const items=lanes(MARKS.filter(o=>!inVis(o)).map(o=>({...o,x:SX(o.m),w:o.n.length*5.6+10})).sort((a,b)=>a.x-b.x),0);
+  for(const o of MARKS.filter(inVis)){ const x=SX(o.m);
+    s+='<g data-k="'+o.k+'" style="cursor:pointer"><circle cx="'+x.toFixed(1)+'" cy="'+(S.Y+8)+'" r="9" fill="#fff" fill-opacity="0"/><circle cx="'+x.toFixed(1)+'" cy="'+(S.Y+8)+'" r="2.6" fill="'+(hot===o.k?'#ffb02e':bandOf(o.m).c)+'"/></g>'; }
   for(const o of items){ const y=S.Y+84+o.lane*17;
     s+='<g data-k="'+o.k+'" style="cursor:pointer"><line x1="'+o.x.toFixed(1)+'" y1="'+(S.Y+8)+'" x2="'+o.x.toFixed(1)+'" y2="'+(y-4)+'" stroke="'+(hot===o.k?'#ffb02e':'#3d444d')+'" stroke-width="'+(hot===o.k?1.5:1)+'"/>';
-    s+='<circle cx="'+o.x.toFixed(1)+'" cy="'+(S.Y+8)+'" r="2.6" fill="'+(hot===o.k?'#ffb02e':bandOf(o.m).c)+'"/>';
+    s+='<line x1="'+o.x.toFixed(1)+'" y1="'+(S.Y+8)+'" x2="'+o.x.toFixed(1)+'" y2="'+(y-4)+'" stroke="#fff" stroke-opacity="0" stroke-width="10"/>';
+    s+='<circle cx="'+o.x.toFixed(1)+'" cy="'+(S.Y+8)+'" r="9" fill="#fff" fill-opacity="0"/><circle cx="'+o.x.toFixed(1)+'" cy="'+(S.Y+8)+'" r="2.6" fill="'+(hot===o.k?'#ffb02e':bandOf(o.m).c)+'"/>';
     s+='<text x="'+(o.x+4).toFixed(1)+'" y="'+(y+4)+'" font-size="10.5" fill="'+(hot===o.k?'#ffb02e':'#9a9a9a')+'">'+esc(o.n)+'</text></g>'; }
   const lanesN=Math.max(...items.map(i=>i.lane))+1, yV=S.Y+84+lanesN*17+40; V.Y=yV;
   // the visible octave opened out
@@ -259,6 +299,12 @@ function spectrum(){
   s+='<text x="'+VX(380).toFixed(1)+'" y="'+(yV+18)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">380 nm</text>';
   const vis=MARKS.filter(o=>o.m>=3.8e-7&&o.m<=7.5e-7); let vy=yV+36;
   for(const o of vis){ const x=VX(o.m*1e9); s+='<g data-k="'+o.k+'" style="cursor:pointer"><line x1="'+x.toFixed(1)+'" y1="'+(yV-26)+'" x2="'+x.toFixed(1)+'" y2="'+(vy-4)+'" stroke="'+(hot===o.k?'#ffb02e':'#6b7280')+'" stroke-dasharray="2 2"/><text x="'+x.toFixed(1)+'" y="'+(vy+8)+'" text-anchor="middle" font-size="10.5" fill="'+(hot===o.k?'#ffb02e':'#9a9a9a')+'">'+esc(o.n)+'</text></g>'; vy+=0; }
+  // where the hot body of the other view peaks: a paler marker on the same line
+  const bx=SX(bW/T), bcol='#6ee7f2', nb=BODIES.find(b=>Math.abs(b.T-T)/T<0.002);
+  s+='<g id="bodypeak"><path d="M'+(bx-5).toFixed(1)+','+(S.Y-66)+' L'+(bx+5).toFixed(1)+','+(S.Y-66)+' L'+bx.toFixed(1)+','+(S.Y-59)+' Z" fill="'+bcol+'"/>';
+  s+='<line x1="'+bx.toFixed(1)+'" y1="'+(S.Y-58)+'" x2="'+bx.toFixed(1)+'" y2="'+(S.Y+64)+'" stroke="'+bcol+'" stroke-dasharray="3 3" opacity="0.7"/>';
+  const mxx=SX(lam), onRight=mxx<W/2;
+  s+='<text x="'+(onRight?S.R:S.L)+'" y="'+(S.Y-82)+'" text-anchor="'+(onRight?'end':'start')+'" font-size="10.5" fill="'+bcol+'">\u25bc where '+esc(nb?nb.n:'the hot body')+' at '+fmtK(T)+' peaks</text></g>';
   // the marker
   const mx=SX(lam);
   s+='<g id="marker" style="cursor:ew-resize"><line x1="'+mx.toFixed(1)+'" y1="'+(S.Y-64)+'" x2="'+mx.toFixed(1)+'" y2="'+(S.Y+70)+'" stroke="#ffb02e" stroke-width="1.5"/><circle cx="'+mx.toFixed(1)+'" cy="'+S.Y+'" r="6" fill="#ffb02e" stroke="#121212" stroke-width="1.5"/>';
@@ -288,14 +334,35 @@ function body(){
   s+='<text x="'+(PX(8e-4)).toFixed(1)+'" y="'+(P.y+P.h-8)+'" text-anchor="end" font-size="10.5" fill="#6b7280">Wien\\u2019s line, where each curve peaks</text>';
   // the presets as ghosts
   let lastX=-1e9, lastY=0;
-  for(const b of BODIES){ if(Math.abs(b.T-T)/T<0.002) continue; s+='<g data-body="'+b.k+'" style="cursor:pointer"><path d="'+curve(b.T,0.02)+'" fill="none" stroke="#3d444d" stroke-width="1"/>';
-    const pk=bW/b.T, x=PX(pk); let y=PY(planck(pk,b.T))-4; if(x-lastX<70 && Math.abs(y-lastY)<14) y=lastY-13;   // labels of close bodies step upward
-    if(y>P.y+2&&y<P.y+P.h-4) s+='<text x="'+(x+6).toFixed(1)+'" y="'+y.toFixed(1)+'" font-size="10" fill="#6b7280">'+esc(b.n)+'</text>'; lastX=x; lastY=y; s+='</g>'; }
+  for(const b of BODIES){ if(Math.abs(b.T-T)/T<0.002) continue; s+='<g data-body="'+b.k+'" style="cursor:pointer"><path d="'+curve(b.T,0.02)+'" fill="none" stroke="#3d444d" stroke-width="1"/><path d="'+curve(b.T,0.05)+'" fill="none" stroke="#fff" stroke-opacity="0" stroke-width="12"/>';
+    // the label sits under its own peak, inside its own curve, where no
+    // hotter curve passes; labels of close bodies step downward
+    const pk=bW/b.T, x=PX(pk); let y=PY(planck(pk,b.T))+14; if(x-lastX<70 && Math.abs(y-lastY)<14) y=lastY+13;
+    // a ghost's name steps aside when the chosen body's curve or its peak
+    // label would run through it: first lower inside its own curve, then above
+    // its peak, else it is left to the hover card
+    const wl=b.n.length*5.2, py0=PY(planck(pk,b.T));
+    const clash=yy=>{ for(const f of [0,0.5,1]){ const xx=x+6+f*wl, m=Math.pow(10,PL0+(xx-P.x)/P.w*(PL1-PL0)); if(Math.abs(PY(planck(m,T))-(yy-3))<9) return true; }
+      const cx=PX(bW/T), cy=PY(planck(bW/T,T))-12; return Math.abs(yy-cy)<13 && x+6<cx+70 && x+6+wl>cx-70; };
+    // and it stays on its own side of the chosen curve: above it for a hotter body, below for a cooler
+    const side=yy=>{ const m=Math.pow(10,PL0+(x+6+wl/2-P.x)/P.w*(PL1-PL0)), cy=PY(planck(m,T)); return b.T>T?yy<cy:yy>cy; };
+    if(clash(y)||!side(y)) y=[y+13,y+26,y+39,py0-8].find(v=>!clash(v)&&side(v)&&!(x-lastX<70&&Math.abs(v-lastY)<12))??null;
+    if(y!==null&&y>P.y+2&&y<P.y+P.h-4){ s+='<text class="halo" x="'+(x+6).toFixed(1)+'" y="'+y.toFixed(1)+'" font-size="10" fill="#8a94a6">'+esc(b.n)+'</text>'; lastX=x; lastY=y; } s+='</g>'; }
   // the body itself
   const col=bodyColor(T).hex, dark=T<798;
+  if(eye){
+    // what the eye sees: the curve filled between 380 and 750 nm in the
+    // colors of those wavelengths, and the rest of the curve dimmed
+    const floor=P.y+P.h;
+    for(let nm=380; nm<750; nm+=5){ const x0=PX(nm*1e-9), x1=PX((nm+5)*1e-9), y0=PY(planck((nm+2.5)*1e-9,T));
+      if(y0<floor) s+='<rect x="'+x0.toFixed(1)+'" y="'+Math.max(P.y,y0).toFixed(1)+'" width="'+(x1-x0+0.4).toFixed(1)+'" height="'+(floor-Math.max(P.y,y0)).toFixed(1)+'" fill="'+waveColor(nm+2)+'" opacity="0.55"/>'; }
+    s+='<path d="'+curve(T)+'" fill="none" stroke="'+(dark?'#e6e6e6':col)+'" stroke-width="2.5" opacity="0.3"/>';
+    const share=visShare(T), yl=PY(planck(5.5e-7,T));
+    s+='<text class="halo" x="'+PX(5.5e-7).toFixed(1)+'" y="'+(yl<floor-30?floor-14:P.y+P.h/2).toFixed(1)+'" text-anchor="middle" font-size="11.5" font-weight="700" fill="#e6e6e6">'+(share*100).toFixed(share<0.01?3:1)+'% of the power</text>';
+  } else
   s+='<path d="'+curve(T)+'" fill="none" stroke="'+(dark?'#e6e6e6':col)+'" stroke-width="2.5"/>';
   const pk=bW/T, py=PY(planck(pk,T));
-  if(py>P.y&&py<P.y+P.h) s+='<circle cx="'+PX(pk).toFixed(1)+'" cy="'+py.toFixed(1)+'" r="5" fill="#ffb02e" stroke="#121212" stroke-width="1.5"/><text x="'+PX(pk).toFixed(1)+'" y="'+(py-12).toFixed(1)+'" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffb02e">'+fmtK(T)+', peak '+si(pk,'m')+'</text>';
+  if(py>P.y&&py<P.y+P.h) s+='<circle cx="'+PX(pk).toFixed(1)+'" cy="'+py.toFixed(1)+'" r="5" fill="#ffb02e" stroke="#121212" stroke-width="1.5"/><text class="halo" x="'+PX(pk).toFixed(1)+'" y="'+(py-12).toFixed(1)+'" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffb02e">'+fmtK(T)+', peak '+si(pk,'m')+'</text>';
   // the swatch
   s+='<circle cx="'+(P.x+P.w-50)+'" cy="'+(P.y+50)+'" r="30" fill="'+(dark?'#161616':col)+'" stroke="#333"/>';
   s+='<text x="'+(P.x+P.w-50)+'" y="'+(P.y+98)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">'+esc(colourWord(T))+'</text>';
@@ -310,13 +377,37 @@ function render(){
   document.getElementById('specOut').textContent=si(lam,'m')+', '+bandOf(lam).n;
   document.getElementById('tempOut').textContent=fmtK(T);
 }
-function setView(v){ view=v; hot=null; for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render(); if(v==='spectrum') showPoint(lam); else showBody(T); }
+function setView(v){ view=v; hot=null; stopPlay(); for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render(); if(v==='spectrum') showPoint(lam); else showBody(T); }
 function setLam(m){ lam=Math.max(Math.pow(10,S.LOG0),Math.min(Math.pow(10,S.LOG1),m)); render(); showPoint(lam); }
 function setT(t){ T=Math.max(2.7,Math.min(50000,t)); document.getElementById('temp').value=Math.round(Math.log10(T)*1000); render(); showBody(T); }
 document.getElementById('views').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setView(b.dataset.v); });
-document.getElementById('temp').addEventListener('input',e=>{ T=Math.pow(10,+e.target.value/1000); render(); showBody(T); });
+document.getElementById('temp').addEventListener('input',e=>{ stopPlay(); T=Math.pow(10,+e.target.value/1000); render(); showBody(T); });
 document.getElementById('bodies').innerHTML=BODIES.map(b=>'<button type="button" data-t="'+b.T+'">'+esc(b.n)+'</button>').join('');
-document.getElementById('bodies').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setT(+b.dataset.t); });
+document.getElementById('bodies').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ stopPlay(); setT(+b.dataset.t); } });
+document.getElementById('eye').addEventListener('click',e=>{ eye=!eye; e.currentTarget.setAttribute('aria-pressed',String(eye)); render(); });
+// Play sweeps the temperature from the sky's background to the hottest star,
+// evenly in the logarithm, so the swatch runs from dark through ember red and
+// white to blue
+const playBtn=document.getElementById('play');
+let playing=null;
+function stopPlay(){ if(!playing) return; cancelAnimationFrame(playing.raf); clearTimeout(playing.t); playing=null; playBtn.textContent='Play'; playBtn.setAttribute('aria-pressed','false'); }
+playBtn.addEventListener('click',()=>{
+  if(playing){ stopPlay(); return; }
+  const L0=Math.log10(2.72548), L1=Math.log10(50000), from=(T>=49999||T<2.8)?L0:Math.log10(T);
+  playing={raf:0,t:0}; playBtn.textContent='Pause'; playBtn.setAttribute('aria-pressed','true');
+  if(RM){ const stops=BODIES.map(b=>b.T).filter(t=>t>Math.pow(10,from)).concat([50000]);
+    const step=()=>{ if(!stops.length){ stopPlay(); return; } setT(stops.shift()); playing.t=setTimeout(step,800); };
+    setT(Math.pow(10,from)); playing.t=setTimeout(step,800); return; }
+  const D=9000*(L1-from)/(L1-L0), t0=performance.now();
+  const tick=now=>{ const u=Math.min(1,(now-t0)/D); setT(Math.pow(10,from+(L1-from)*u)); if(u<1) playing.raf=requestAnimationFrame(tick); else stopPlay(); };
+  playing.raf=requestAnimationFrame(tick);
+});
+// the arrow keys nudge the marker or the temperature by a twentieth of a
+// decade, page up and down by a whole one, when the drawing or the slider has focus
+function nudge(d){ if(view==='spectrum'){ hot=null; setLam(lam*Math.pow(10,d)); } else { stopPlay(); setT(T*Math.pow(10,d)); } }
+const KEYS={ArrowRight:0.05,ArrowUp:0.05,ArrowLeft:-0.05,ArrowDown:-0.05,PageUp:1,PageDown:-1};
+el.addEventListener('keydown',e=>{ if(e.key in KEYS){ e.preventDefault(); nudge(KEYS[e.key]); } });
+document.getElementById('temp').addEventListener('keydown',e=>{ if(e.key in KEYS){ e.preventDefault(); nudge(KEYS[e.key]); } });
 document.getElementById('jumps').innerHTML=MARKS.filter(m=>['annih','cuka','sunpeak','body','cmb','h21','fm'].includes(m.k)).map(m=>'<button type="button" data-k="'+m.k+'">'+esc(m.n)+'</button>').join('');
 document.getElementById('jumps').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const o=MARKS.find(x=>x.k===b.dataset.k); hot=o.k; setLam(o.m); showMark(o.k); });
 // drag on the line
@@ -326,6 +417,7 @@ el.addEventListener('pointerdown',e=>{ if(view!=='spectrum') return; const x=svg
   if(y>S.Y-70&&y<S.Y+72&&x>=S.L-6&&x<=S.R+6&&!e.target.closest('[data-k]')){ dragging=true; swallow=true; hot=null; setLam(SL(x)); e.preventDefault(); } });
 el.addEventListener('pointermove',e=>{ if(dragging) setLam(SL(Math.max(S.L,Math.min(S.R,svgX(e))))); });
 window.addEventListener('pointerup',()=>{ dragging=false; });
+el.addEventListener('pointerleave',()=>{ if(dragging) return; if(view==='spectrum'){ if(hot&&MARKS.some(m=>m.k===hot)) return; hot=null; render(); showPoint(lam); } else showBody(T); });
 el.addEventListener('pointerover',e=>{ if(dragging) return; const k=e.target.closest('[data-k]'); if(k){ if(k.getAttribute('data-k')===hot) return; hot=k.getAttribute('data-k'); render(); showMark(hot); return; }
   const b=e.target.closest('[data-b]'); if(b){ const bd=BANDS.find(x=>x.k===b.getAttribute('data-b')); if(bd.k===hot) return; hot=bd.k; render(); card('A band',esc(bd.n),[['from',si(bd.a,'m')],['to',si(bd.b,'m')],['photon energy',si(h*c/bd.b/eV,'eV')+' to '+si(h*c/bd.a/eV,'eV')]],bd.t,''); return; }
   const g=e.target.closest('[data-body]'); if(g){ const bd=BODIES.find(x=>x.k===g.getAttribute('data-body')); showBody(bd.T); } });
@@ -333,7 +425,8 @@ el.addEventListener('click',e=>{ if(swallow){ swallow=false; return; } const k=e
   const g=e.target.closest('[data-body]'); if(g){ const bd=BODIES.find(x=>x.k===g.getAttribute('data-body')); setT(bd.T); } });
 
 render(); showPoint(lam);
-window.__light=(q)=>{ const o={view,lam,T,hot,marks:document.querySelectorAll('#lsvg g[data-k]').length,
+window.__light=(q)=>{ const o={view,lam,T,hot,eye,playing:!!playing,marks:document.querySelectorAll('#lsvg g[data-k]').length,
+  bodypeak:(()=>{ const l=document.querySelector('#bodypeak line'); return l?+l.getAttribute('x1'):null; })(),
   planck:(m,t)=>planck(m,t), visShare:t=>visShare(t), color:t=>bodyColor(t), wave:nm=>waveColor(nm),
   cmf:l=>[xbar(l),ybar(l),zbar(l)], SX:m=>SX(m), PX:m=>PX(m), PY:B=>PY(B),
   marker:(()=>{ const c=document.querySelector('#marker circle'); return c?+c.getAttribute('cx'):null; })(),
@@ -348,7 +441,7 @@ window.__light=(q)=>{ const o={view,lam,T,hot,marks:document.querySelectorAll('#
 
 html = (HTML.replace("__APACSS__", apa.CSS)
         .replace("__BANDS__", _js(bands)).replace("__MARKS__", _js(marks)).replace("__WIN__", _js(windows)).replace("__BODIES__", _js(bodies))
-        .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2).replace("__METHOD__", METHOD)
+        .replace("__CAPTION__", CAPTION).replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2).replace("__METHOD__", METHOD)
         .replace("__REFS__", apa.render(REFS)))
 OUT.write_text(html, encoding="utf-8")
 print(f"wrote {OUT} ({len(html):,} B): {len(BANDS)} bands, {len(MARKS)} marks, {len(WINDOWS)} windows, {len(BODIES)} bodies")

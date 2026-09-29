@@ -29,6 +29,17 @@ FOUR = [
      "CODATA 2018"),
 ]
 
+# the pairs the four can be drawn between: k, name, the mass of each in
+# proton masses, whether both feel the strong force, and what electromagnetism
+# does to them. The electron's mass is CODATA 2018: m_e / m_p = 5.44617021487e-4.
+# Electrons are leptons and feel no strong force; the weak curve keeps the
+# same schematic coupling for every pair.
+PAIRS = [
+    ("pp", "two protons", 1.0, 1.0, True, "pushes them apart"),
+    ("ep", "an electron and a proton", 5.44617021487e-4, 1.0, False, "pulls them together"),
+    ("ee", "two electrons", 5.44617021487e-4, 5.44617021487e-4, False, "pushes them apart"),
+]
+
 # places on the distance axis: k, name, meters, a line
 PLACES = [
     ("w", "the W's reach", 2.455e-18, "hbar over the W mass times c: the distance a weak interaction spans"),

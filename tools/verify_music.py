@@ -125,6 +125,112 @@ with sync_playwright() as pw:
     s = st()
     check("2 2 2 2 2 2" in s["card"] and "Debussy" in s["body"], "the whole-tone scale: six whole steps")
     check(overlaps("#msvg text") == 0, "no two labels overlap on the keyboard", f"{overlaps('#msvg text')}")
+    print("--- the sound ---")
+    # nothing sounds on open: no audio context exists until a click asks for one
+    pg2 = br.new_page(viewport={"width": 1340, "height": 1100})
+    pg2.goto(PAGE.as_uri())
+    pg2.wait_for_selector("#msvg")
+    s = pg2.evaluate("()=>window.__music()")
+    check(s["ctx"] is None and not s["tones"] and s["sounding"] is None, "silent on open: no audio context, no tone scheduled")
+    pg2.close()
+    pg.click('#views button[data-v="notes"]')
+    pg.wait_for_timeout(100)
+    # the marker's pitch
+    pg.evaluate("()=>{freq=440; render(); showFreq(freq);}")
+    pg.click("#sPitch")
+    s = st()
+    t = s["tones"]
+    check(s["sounding"] and s["sounding"]["kind"] == "pitch" and len(t) == 1 and t[0]["f"] == 440 and t[0]["dur"] == 0.6 and t[0]["peak"] <= 0.3
+          and pg.inner_text("#sPitch") == "Stop" and pg.evaluate("()=>document.querySelector('#marker .halo')!==null"),
+          f"the pitch: one sine at 440 Hz for 0.6 s at {t[0]['peak'] if t else '?'} peak; the button reads Stop and the marker wears a halo")
+    check(s["ctx"] in ("running", "suspended"), f"the audio context was made by the click ({s['ctx']})")
+    pg.wait_for_function("()=>!window.__music().sounding", timeout=3000)
+    check(pg.inner_text("#sPitch") == "Play the pitch", "and the button reads Play the pitch again when the note ends")
+    # the harmonics as a chord
+    pg.click("#sHarm")
+    t = st()["tones"]
+    fs = [x["f"] for x in t]
+    check(fs == [440 * k for k in range(1, 9)] and sum(x["peak"] for x in t) <= 0.3 + 1e-9 and all(t[i]["at"] < t[i + 1]["at"] for i in range(7))
+          and all(abs(t[i]["at"] + t[i]["dur"] - (t[0]["at"] + t[0]["dur"])) < 1e-6 for i in range(8)),
+          f"the harmonics: 440 to 3,520 Hz entering one by one, ending together, {sum(x['peak'] for x in t):.2f} peak in all")
+    pg.wait_for_timeout(500)
+    s = st()
+    check(s["sounding"]["kind"] == "harm" and s["sounding"]["n"] >= 3 and pg.evaluate("()=>document.querySelectorAll('#msvg line.sounding').length") == s["sounding"]["n"] - 1,
+          f"the harmonic ticks light as they enter ({s['sounding']['n']} sounding)")
+    pg.click("#sHarm")
+    s = st()
+    check(s["sounding"] is None and pg.inner_text("#sHarm") == "Play the harmonics", "a second click stops the chord")
+    # a piano key, clicked, takes the marker and sounds
+    kb = pg.eval_on_selector('#msvg rect[data-key="60"]', "e=>{const b=e.getBoundingClientRect(); return [b.left+b.width/2,b.top+b.height-8]}")
+    pg.mouse.click(kb[0], kb[1])
+    pg.wait_for_timeout(80)
+    s = st()
+    check(abs(s["freq"] - 261.6256) < 0.01 and "C4" in s["name"] and s["sounding"] and s["sounding"]["kind"] == "key" and abs(s["tones"][0]["f"] - 261.6256) < 0.01,
+          f"a click on middle C's key moves the marker to 261.63 Hz and sounds it")
+    pg.wait_for_function("()=>!window.__music().sounding", timeout=3000)
+    # hovering a key names it
+    pg.evaluate("()=>document.querySelector('#msvg rect[data-key=\"69\"]').dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
+    s = st()
+    check(s["name"].startswith("A4, key 49 of 88") and "440" in s["card"], "hovering a key names it: A4, key 49 of 88, 440 Hz")
+    # an instrument's bar: the marker to its lowest note, then its highest
+    bb = pg.eval_on_selector('#msvg g[data-range="violin"] rect', "e=>{const b=e.getBoundingClientRect(); return [b.left+b.width/2,b.top+b.height/2]}")
+    pg.mouse.click(bb[0], bb[1])
+    pg.wait_for_timeout(1000)
+    s = st()
+    check(s["sounding"] and s["sounding"]["kind"] == "range" and abs(s["freq"] - f(55)) < 0.01 and abs(s["tones"][0]["f"] - f(55)) < 0.01,
+          f"a click on the violin's bar glides the marker to G3, {f(55):.1f} Hz, and sounds it")
+    pg.wait_for_function("()=>!window.__music().sounding", timeout=5000)
+    s = st()
+    check(abs(s["freq"] - f(100)) < 0.01 and [round(x["f"], 1) for x in s["tones"]] == [round(f(55), 1), round(f(100), 1)],
+          f"then to E7, {f(100):,.0f} Hz, and sounds that")
+    # the arrow keys step the marker a semitone
+    pg.focus("#diagram")
+    pg.keyboard.press("ArrowLeft")
+    check(abs(st()["freq"] - f(99)) < 0.01, "the left arrow steps the marker down a semitone, to D#7")
+    # the pure fifth, then the tempered one
+    pg.click('#views button[data-v="intervals"]')
+    pg.click('#imodes button[data-m="just"]')
+    pg.wait_for_timeout(100)
+    pg.click("#sFifth")
+    s = st()
+    t = s["tones"]
+    pairs = [(x["at"], round(x["f"], 3)) for x in t]
+    check(pairs[:2] == [(0, 440), (0, 660)] and pairs[2][1] == 440 and abs(t[3]["f"] - 440 * 2 ** (7 / 12)) < 1e-6 and t[2]["at"] == t[3]["at"] > t[0]["at"] + t[0]["dur"]
+          and all(x["rich"] for x in t) and t[0]["peak"] + t[1]["peak"] <= 0.3 + 1e-9,
+          "the fifth: 440 and 660 Hz together, then 440 and 659.26, each pair at 0.3 peak, with overtones so the beat can be heard")
+    check(s["hot"] == "i7" and "pure, 440 and 660.00 Hz" in s["card"], "the ring lights the fifth and the card says what is sounding")
+    pg.wait_for_function("()=>window.__music().sounding&&window.__music().sounding.phase==='tempered'", timeout=4000)
+    s = st()
+    check("1.5 times a second" in s["card"] and "1,320.0 Hz" in s["card"] and "1,318.5 Hz" in s["card"],
+          "then the tempered fifth, and the card names the beat: 1,320 against 1,318.5 Hz, 1.5 times a second")
+    pg.click("#sFifth")
+    check(st()["sounding"] is None, "a second click stops it")
+    # any interval on the ring, clicked, plays the same way
+    dot = pg.eval_on_selector('#msvg g[data-interval="4"] circle', "e=>{const b=e.getBoundingClientRect(); return [b.left+b.width/2,b.top+b.height/2]}")
+    pg.mouse.click(dot[0], dot[1])
+    s = st()
+    t = s["tones"]
+    check(s["sounding"] and s["sounding"]["kind"] == "interval" and round(t[1]["f"], 2) == 550.0 and abs(t[3]["f"] - 440 * 2 ** (4 / 12)) < 1e-6,
+          "a click on the major third plays 5:4 over A 440, 550 Hz, then the piano's 554.37")
+    pg.wait_for_function("()=>window.__music().sounding&&window.__music().sounding.phase==='tempered'", timeout=4000)
+    check("17.5 times a second" in st()["card"] and "roughness" in st()["card"], "and its beat, 17.5 a second, is named as roughness")
+    pg.keyboard.press("Escape")
+    check(st()["sounding"] is None, "Escape stops it")
+    # a scale up the keyboard, the keys lighting
+    pg.click('#views button[data-v="scales"]')
+    pg.click('#scales button[data-s="major"]')
+    pg.wait_for_timeout(100)
+    pg.click("#sScale")
+    s = st()
+    want = [60 + x for x in sc["major"]] + [72 + x for x in sc["major"]] + [84]
+    got = [round(69 + 12 * math.log2(x["f"] / A4)) for x in s["tones"]]
+    check(got == want and all(x["dur"] == 0.6 and x["peak"] <= 0.3 for x in s["tones"]), "the major scale plays up both octaves, C4 to C6, 0.6 s a note")
+    pg.wait_for_timeout(900)
+    s = st()
+    lit = pg.evaluate("()=>[...document.querySelectorAll('#msvg rect.sounding')].map(r=>+r.getAttribute('data-note'))")
+    check(len(lit) == 1 and lit[0] == s["sounding"]["note"] and lit[0] in want[2:6], f"the key sounding is lit ({lit})")
+    pg.click('#scales button[data-s="blues"]')
+    check(st()["sounding"] is None, "choosing another scale stops the one playing")
     check(not errs, "no script errors", "; ".join(errs))
     br.close()
 

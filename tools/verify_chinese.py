@@ -103,7 +103,48 @@ with sync_playwright() as pw:
     errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.goto(PAGE.as_uri())
-    pg.wait_for_timeout(700)
+    pg.wait_for_timeout(300)
+    st = pg.evaluate("()=>window.__chinese()")
+    ck(st["running"] and st["cut"] < 1200 and pg.inner_text("#run") == "Pause",
+       f"on open the mark is running up the curve (at {st['cut']}), the button reads Pause")
+    pg.wait_for_function("()=>!window.__chinese().running", timeout=8000)
+    st = pg.evaluate("()=>window.__chinese()")
+    ck(st["cut"] == 1200 and st["lit"] == 1200 and pg.inner_text("#run") == "Run",
+       "and it stops at 1,200 with the whole grid lit")
+    # the HSK chips
+    pg.click('#hsk button[data-lv="3"]')
+    pg.wait_for_timeout(200)
+    st = pg.evaluate("()=>window.__chinese()")
+    n3 = sum(1 for r in CH if r[7] and r[7] <= 3)
+    c3 = sum(r[3] for r in CH if r[7] and r[7] <= 3)
+    ck(st["level"] == 3 and st["levelN"] == n3 and st["inLevel"] == n3 and st["cut"] == n3 and abs(st["levelCover"] - c3) < 1e-6,
+       f"HSK 1 to 3: {n3} characters lit, the slider at {n3}, covering {c3:.1f} per cent")
+    ck(f"HSK 1 to 3: {n3} of these characters cover {c3:.1f}%" in pg.inner_html("#curve"),
+       "and the level line on the curve says so")
+    pg.click('#hsk button[data-lv="3"]')
+    pg.wait_for_timeout(100)
+    ck(pg.evaluate("()=>window.__chinese().level") == 0 and pg.eval_on_selector_all("#grid .t.out", "es=>es.length") == 0,
+       "a second click on the chip lets the level go")
+    # the word curve over the character curve
+    pg.click("#vCmp")
+    pg.wait_for_timeout(1300)
+    st = pg.evaluate("()=>window.__chinese()")
+    ck(st["cmp"] and st["cmpT"] == 1 and st["curves"] == 2 and "10,000" in pg.inner_html("#curve"),
+       "Words over it draws both curves on one axis, stretched to ten thousand")
+    pg.click("#vCmp")
+    pg.wait_for_timeout(1300)
+    ck(pg.evaluate("()=>window.__chinese().curves") == 1, "and takes the word curve off again")
+    # a click pins; the arrow keys walk the grid
+    pg.click("#grid .t")
+    pg.wait_for_timeout(100)
+    pg.keyboard.press("ArrowRight")
+    pg.keyboard.press("ArrowRight")
+    pg.wait_for_timeout(100)
+    st = pg.evaluate("()=>window.__chinese()")
+    ck(st["pinned"] == 3 and pg.inner_text("#bigTxt") == CH[2][0] and "pinned" in pg.inner_text("#kindTxt").lower(),
+       f"a click pins the first character and two right arrows walk to the third, {CH[2][0]}")
+    pg.keyboard.press("Escape")
+    ck(pg.evaluate("()=>window.__chinese().pinned") is None, "Escape lets go")
     for view, btn, n in (("char", "#vChar", len(CH)), ("word", "#vWord", len(WD))):
         pg.click(btn)
         pg.wait_for_timeout(350)

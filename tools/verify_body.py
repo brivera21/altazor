@@ -175,7 +175,7 @@ with sync_playwright() as pw:
         ck(all(a >= b - .001 for a, b in zip(fs, fs[1:])),
            f"{k}: drawn back to front")
         said = pg.inner_text("#depthTxt")
-        ck(said.startswith(f"{n} of "), f"{k}: the readout matches the figure")
+        ck(f"{n} of " in said, f"{k}: the readout matches the figure")
     ck(counts.get("all") == len(parts),
        f"every part is on the Everything view ({counts.get('all')})")
     ck(sum(v for k, v in counts.items() if k != "all") == len(parts),
@@ -339,6 +339,72 @@ with sync_playwright() as pw:
     d2 = pg.eval_on_selector("#fig svg [data-nv]", "e=>e.getAttribute('d')")
     ck(d0 != d2, "the drawn nerves turn with the body")
     pg.eval_on_selector("#spin", "e=>{e.value=0;e.dispatchEvent(new Event('input'))}")
+
+    # ---- the mass bar, the pin, the play button and the details -----
+    pg.click("#bar button[data-k='skeletal']")
+    pg.wait_for_timeout(250)
+    st = pg.evaluate("()=>window.__body()")
+    ck(st["segs"] == 5 and st["lit"] == ["skeletal"],
+       f"the mass bar has five segments and lights the chosen one {st['lit']}")
+    tot = pg.evaluate("()=>[...document.querySelectorAll('#mass .seg')]"
+                      ".reduce((a,e)=>a+parseFloat(e.style.flexGrow),0)")
+    ck(abs(tot - 73) < 0.05, f"the segments sum to the 73 kg reference body ({tot})")
+    pg.click("#bar button[data-k='all']")
+    pg.wait_for_timeout(250)
+    ck(len(pg.evaluate("()=>window.__body().lit")) == 5,
+       "Everything lights the whole bar")
+    pg.click("#mass .seg[data-sys='muscular']")
+    pg.wait_for_timeout(250)
+    ck(pg.evaluate("()=>window.__body().cur") == "muscular",
+       "a click on a segment picks its system")
+    pg.click("#bar button[data-k='skeletal']")
+    pg.wait_for_timeout(250)
+    pg.fill("#q", "left femur")
+    pg.wait_for_timeout(150)
+    pg.hover("#list div[data-fma]")
+    pg.wait_for_timeout(150)
+    pg.evaluate("()=>{const e=document.querySelector(\"#fig svg path[data-fma='24475']\");"
+                "e.dispatchEvent(new MouseEvent('click',{bubbles:true}));}")
+    pg.wait_for_timeout(150)
+    ck(pg.evaluate("()=>window.__body().pinned") == "24475",
+       "a click on the femur pins it")
+    pg.fill("#q", "")
+    pg.evaluate("()=>document.activeElement.blur()")
+    pg.mouse.move(700, 100)
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(150)
+    ck(pg.evaluate("()=>window.__body().pinned") is None
+       and pg.inner_text("#nameTxt") == "Skeleton", "Escape unpins it")
+    pg.evaluate("()=>{const e=document.querySelector(\"#fig svg path[data-fma='24475']\");"
+                "e.dispatchEvent(new MouseEvent('click',{bubbles:true}));}")
+    pg.wait_for_timeout(100)
+    pg.evaluate("()=>{const s=document.querySelector('#fig svg');"
+                "s.dispatchEvent(new MouseEvent('click',{bubbles:true}));}")
+    pg.wait_for_timeout(100)
+    ck(pg.evaluate("()=>window.__body().pinned") is None,
+       "a click on the empty space unpins it")
+    ck(pg.inner_text("#depthTxt").startswith("nothing cut"),
+       "the cut readout says nothing is cut at the top")
+    pg.eval_on_selector("#depth", "e=>{e.value=40;e.dispatchEvent(new Event('input'))}")
+    pg.wait_for_timeout(150)
+    ck("midway" in pg.inner_text("#depthTxt"),
+       f"the cut readout says how deep in words: {pg.inner_text('#depthTxt')}")
+    pg.eval_on_selector("#depth", "e=>{e.value=100;e.dispatchEvent(new Event('input'))}")
+    pg.click("#spinPlay")
+    pg.wait_for_timeout(300)
+    ck(pg.inner_text("#spinPlay") == "Pause"
+       and pg.evaluate("()=>window.__body().turning"),
+       "the play button turns the body and reads Pause while it does")
+    pg.wait_for_timeout(1400)
+    ck(pg.evaluate("()=>window.__body().spin") >= 2,
+       "the body has turned at least two views in two seconds")
+    pg.wait_for_timeout(4800)
+    ck(pg.inner_text("#spinPlay") == "Play"
+       and pg.evaluate("()=>window.__body().spin") == 0,
+       "one full turn later it stops where it started")
+    ck(pg.evaluate("()=>{const d=document.querySelector('details.sources');"
+                   "return d && !d.open && d.textContent.includes('References');}"),
+       "the notes and references sit in a closed details")
 
     ck(not errs, f"no script errors ({errs[:1]})")
     br.close()

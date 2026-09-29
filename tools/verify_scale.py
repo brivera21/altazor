@@ -63,8 +63,24 @@ with sync_playwright() as pw:
     # the lens opens on a person, and the panel draws what it holds in proportion
     check(st["lensW"] == 3 and abs(st["lensC"] - math.log10(1.7)) < 1e-9 and "human" in st["inside"],
           f"the lens opens three decades wide on a person, holding {st['inside']}")
+    # only the names inside the lens are bright
+    lab = st["labels"]
+    check(all((lab[k] == 1) == (k in st["inside"]) for k in lab if k not in ("human",)),
+          "names inside the lens are bright, the rest dim to 0.3")
     pg.click('#jumps button[data-j="earth"]')
     pg.wait_for_timeout(100)
+    check(pg.evaluate("()=>window.__scale().gliding"), "the jump to the Earth glides rather than cuts")
+    pg.wait_for_function("()=>!window.__scale().gliding", timeout=5000)
+    st = pg.evaluate("()=>window.__scale()")
+    check(st["ghost"] and st["ghost"]["k"] == "whale", f"the lens remembers the whale that filled it ({st['ghost'] and st['ghost']['k']})")
+    pg.focus("#ssvg")
+    pg.keyboard.press("ArrowLeft")
+    pg.wait_for_function("()=>!window.__scale().gliding", timeout=5000)
+    st = pg.evaluate("()=>window.__scale()")
+    check(st["ghost"]["k"] == "moondist" and "as drawn a moment ago" in pg.inner_html("#ssvg"),
+          "a decade down, the Earth-Moon distance that filled the lens stays as a dashed ghost at its old size")
+    pg.click('#jumps button[data-j="earth"]')
+    pg.wait_for_function("()=>!window.__scale().gliding", timeout=5000)
     st = pg.evaluate("()=>window.__scale()")
     want = [k for k, o in by.items() if abs(math.log10(o[2]) - math.log10(by['earth'][2])) <= 1.5]
     check(set(st["inside"]) == set(want), f"around the Earth the lens holds {sorted(st['inside'])}")
@@ -90,6 +106,17 @@ with sync_playwright() as pw:
     st = pg.evaluate("()=>window.__scale()")
     check(abs(st["lensC"] - 15) < 0.3, f"a drag along the line carries the lens to 10^{st['lensC']:.1f} m")
     check("ly" in st["inside"] or "proxima" in st["inside"], f"where it finds {st['inside']}")
+    # the arrow keys step the lens a decade; the wheel widens it
+    pg.focus("#ssvg")
+    c0 = pg.evaluate("()=>window.__scale().lensC")
+    pg.keyboard.press("ArrowRight")
+    pg.wait_for_function("()=>!window.__scale().gliding", timeout=5000)
+    c1 = pg.evaluate("()=>window.__scale().lensC")
+    check(abs(c1 - (round(c0) + 1)) < 1e-9, f"the right arrow steps the lens from 10^{c0:.1f} to 10^{c1:.1f}")
+    pg.evaluate("()=>document.getElementById('diagram').dispatchEvent(new WheelEvent('wheel',{deltaY:100,bubbles:true,cancelable:true}))")
+    st = pg.evaluate("()=>window.__scale()")
+    check(abs(st["lensW"] - 3.1) < 1e-9 and pg.input_value("#lensW") == "31", f"the wheel widens the lens to {st['lensW']} decades and the slider follows")
+    pg.evaluate("()=>{lensW=3; document.getElementById('lensW').value=30; setLens(lensC)}")
     # the card links to the page that draws the thing
     pg.evaluate("()=>{picks=[];showOne(OBJ.find(o=>o.k==='mw'))}")
     link = pg.evaluate("()=>document.querySelector('#srcTxt a')?.getAttribute('href')")

@@ -125,7 +125,7 @@ with sync_playwright() as pw:
     check(s["name"] == "Africa" and "58.4" in s["card"] and "11.5%" in s["card"] and "pulling apart" in s["card"] and "diving under a neighbor" in s["card"], "hovering Africa: 58.4 million km2, 11.5%, edges by kind, some of it diving under Eurasia")
     st_af = s["stats"]["AF"]
     check(abs(st_af["by"][0] + st_af["by"][1] - 20318) < 50, "Africa's pulling-apart edge is 20,318 km, as the card says")
-    pg.mouse.move(mx(-45.1), my(15.3))
+    pg.mouse.move(mx(-45.05), my(14.0))  # the middle of a ridge step, clear of the transform that starts at 15.3 N
     pg.wait_for_timeout(150)
     s = st()
     check(s["hotLine"] >= 0 and "spreading ridge" in s["card"] and "Africa" in s["name"] and "South America" in s["name"] and "pulling apart" in s["card"] and "2.6 cm" in s["card"], "hovering the Mid-Atlantic Ridge at 15 N: Africa and South America, a spreading ridge, pulling apart at 2.6 cm a year")
@@ -150,6 +150,51 @@ with sync_playwright() as pw:
     pg.evaluate("()=>document.querySelector('#psvg g[data-e=\"trench\"]').dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
     pg.wait_for_timeout(100)
     check("subduction zone" in pg.inner_text("#nameTxt") and "700 km" in pg.inner_text("#bodyTxt"), "hovering the trench section: the slab's earthquakes to 700 km")
+    # where the plates are heading: NNR-MORVEL56, checked against what is known
+    pg.click('#views button[data-v="map"]')
+    v = st({"vel": ["PA", -155.6, 19.9]})["v"]
+    check(60 < v["s"] < 80 and 280 < v["az"] < 310, f"the Pacific at Hawaii: {v['s']:.0f} mm a year toward {v['az']:.0f} degrees, west-northwest")
+    v = st({"vel": ["IN", 78, 22]})["v"]
+    check(40 < v["s"] < 65 and 10 < v["az"] < 60, f"India: {v['s']:.0f} mm a year toward {v['az']:.0f} degrees, north-northeast into Asia")
+    v = st({"vel": ["NZ", -90, -20]})["v"]
+    check(60 < v["s"] < 85 and 60 < v["az"] < 100, f"Nazca: {v['s']:.0f} mm a year, east toward South America")
+    # the Atlantic opens as the two sides part: South America and Africa drift apart
+    gap0 = pg.evaluate("()=>{const a=moved('SA',-40,-10), b=moved('AF',10,-10); return b[0]-a[0]}")
+    pg.evaluate("()=>setRun(20)")
+    pg.wait_for_timeout(200)
+    gap1 = pg.evaluate("()=>{const a=moved('SA',-40,-10), b=moved('AF',10,-10); return b[0]-a[0]}")
+    km = (gap1 - gap0) * 111.2 * math.cos(math.radians(10))
+    check(400 < km < 900, f"twenty million years at today's speeds widen the South Atlantic by {km:,.0f} km")
+    g = st({"gap": 1})["gap"]
+    check(0.03 < g < 0.12, f"and open new sea floor over {g:.1%} of the map")
+    check("20.0 million years" in pg.inner_text("#runOut"), "the readout says how far ahead")
+    pg.evaluate("()=>setRun(0)")
+    # a click pins a plate and rings its whole edge; a second click lets go
+    pg.mouse.click(mx(18), my(8))
+    pg.wait_for_timeout(150)
+    s = st()
+    check(s["pinned"] and s["name"] == "Africa" and "heading here" in s["card"], "a click on Africa pins its card, with where it is heading")
+    pg.mouse.move(mx(-100), my(40))
+    pg.wait_for_timeout(120)
+    check(st()["name"] == "Africa", "and the card holds while the pointer wanders")
+    pg.mouse.click(mx(18), my(8))
+    pg.wait_for_timeout(120)
+    check(not st()["pinned"], "a second click lets it go")
+    pg.click("#arrowBtn")
+    check(st()["arrows"], "the arrows switch on")
+    pg.click('#views button[data-v="edges"]')
+    pg.click("#edgePlay")
+    check(pg.evaluate("()=>document.getElementById('psvg').classList.contains('live')"), "the edge sections set moving")
+    vis = pg.evaluate("""()=>[...document.querySelectorAll('p.note')].filter(p=>p.checkVisibility())
+      .map(p=>p.textContent.trim().split(/\s+/).length)""")
+    check(len(vis) == 1 and 40 <= vis[0] <= 80, f"one caption shows ({vis} words)")
+    check(pg.evaluate("()=>{const d=document.querySelector('details.sources'); return !!d&&!d.open&&!!d.querySelector('.refs')}"),
+          "the notes and references sit in a closed Sources")
+    ph = br.new_page(viewport={"width": 390, "height": 844})
+    ph.goto(PAGE.as_uri())
+    ph.wait_for_timeout(600)
+    check(ph.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, "nothing wider than a phone")
+    ph.close()
     check(not errs, "no script errors", "; ".join(errs))
     br.close()
 

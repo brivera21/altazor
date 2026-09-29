@@ -116,6 +116,63 @@ with sync_playwright() as pw:
     txt = pg.evaluate("()=>document.getElementById('nameTxt').textContent+' | '+document.getElementById('numTxt').textContent")
     check(txt.startswith("Betelgeuse") and "M" in txt and "supergiant" in pg.evaluate("()=>document.getElementById('kindTxt').textContent").lower(),
           f"Betelgeuse's card: '{txt[:80]}'")
+    print("--- the controls ---")
+    pg.evaluate("()=>{setMass(1);setLife(0)}")
+    card0 = pg.evaluate("()=>document.getElementById('numTxt').textContent")
+    check("NaN" not in card0 and "age 0 years" in card0, "at birth the card reads an age of 0 years")
+    n0 = pg.evaluate("()=>document.querySelector('#hsvg #track')")
+    check(n0 is None, "at birth no track is drawn yet")
+    pg.evaluate("()=>setLife(0.97)")
+    n1 = pg.evaluate("()=>document.querySelector('#hsvg #track').getAttribute('points').trim().split(/\\s+/).length")
+    pg.evaluate("()=>setLife(1.1)")
+    n2 = pg.evaluate("()=>document.querySelector('#hsvg #track').getAttribute('points').trim().split(/\\s+/).length")
+    check(10 < n1 < n2, f"the track is drawn as far as the life has gone ({n1} points at 97%, {n2} at 110%)")
+    r_ms = pg.evaluate("()=>{setLife(0.5);return +document.querySelector('#hsvg circle[data-now]').getAttribute('r')}")
+    r_tip = pg.evaluate("()=>{setLife(0.97);return +document.querySelector('#hsvg circle[data-now]').getAttribute('r')}")
+    check(r_tip > r_ms * 1.6, f"the star's disc swells with its radius ({r_ms:.1f} px to {r_tip:.1f} px at the tip)")
+    pg.evaluate("()=>setLife(0)")
+    pg.click("#play")
+    pg.wait_for_timeout(3000)
+    s1 = pg.evaluate("()=>window.__stars()")
+    check(s1["playing"] and 0.3 < s1["life"] < 0.6 and pg.inner_text("#play") == "Pause", f"Play runs the life on its own, still on the main sequence after 3 s ({s1['life']:.2f})")
+    pg.click("#play")
+    check(not pg.evaluate("()=>window.__stars().playing") and pg.inner_text("#play") == "Play", "a second press pauses it")
+    pg.evaluate("()=>setLife(1.12)")
+    pg.click("#play"); pg.wait_for_timeout(1200)
+    s2 = pg.evaluate("()=>window.__stars()")
+    check(not s2["playing"] and abs(s2["life"] - 1.15) < 1e-9, "near the end it runs out and stops")
+    # the chosen star drags along the main sequence and sets the mass
+    pg.evaluate("()=>{setMass(1);setLife(0)}")
+    box = pg.eval_on_selector("#hsvg", "e=>{const r=e.getBoundingClientRect(); return {x:r.left,y:r.top,w:r.width,h:r.height}}")
+    sx = lambda px: box["x"] + px / 980 * box["w"]
+    sy = lambda py: box["y"] + py / 720 * box["h"]
+    star = pg.evaluate("()=>{const c=document.querySelector('#hsvg circle[data-now]');return [+c.getAttribute('cx'),+c.getAttribute('cy')]}")
+    target = pg.evaluate("()=>{const z=ms(10);return [X(z.T),Y(z.L)]}")
+    pg.mouse.move(sx(star[0]), sy(star[1])); pg.mouse.down()
+    pg.mouse.move(sx(target[0]), sy(target[1]), steps=6); pg.mouse.up()
+    m = pg.evaluate("()=>mass")
+    check(abs(math.log10(m) - 1) < 0.05, f"dragging the star up the main sequence to ten suns sets the mass to {m:.2f}")
+    # keys
+    pg.evaluate("()=>{setMass(1);setLife(0)}")
+    pg.focus("#mass"); pg.keyboard.press("ArrowRight")
+    pg.focus("#life"); pg.keyboard.press("PageUp")
+    k = pg.evaluate("()=>[mass,life]")
+    check(abs(math.log10(k[0]) - 0.1) < 1e-9 and abs(k[1] - 0.1) < 1e-9, f"the arrows step the mass a tenth of a decade, page up the life a tenth ({k[0]:.3f}, {k[1]:.2f})")
+    # the class letters name their class
+    pg.evaluate("()=>document.querySelector('#hsvg g[data-cls=\"G\"] rect').dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
+    ct = pg.evaluate("()=>document.getElementById('nameTxt').textContent+' | '+document.getElementById('numTxt').textContent")
+    check(ct.startswith("Class G") and "the Sun" in ct, f"hovering the G band names the class and its stars: '{ct[:70]}'")
+    # no two names overlap
+    over = pg.evaluate("""()=>{const t=[...document.querySelectorAll('#hsvg g[data-i] text')].map(e=>e.getBBox()); let n=0;
+      for(let i=0;i<t.length;i++) for(let j=i+1;j<t.length;j++){ const a=t[i], b=t[j];
+        if(a.x<b.x+b.width-1&&b.x<a.x+a.width-1&&a.y<b.y+b.height-2&&b.y<a.y+a.height-2) n++; } return n;}""")
+    check(over == 0, f"no two star names overlap ({over})")
+    check(pg.evaluate("()=>{const d=document.querySelector('details.sources'); return !!d && !d.open && !!d.querySelector('.refs')}"),
+          "one caption shows; the notes, method and references sit in a closed Sources details")
+    ph = br.new_page(viewport={"width": 390, "height": 844})
+    ph.goto(PAGE.as_uri()); ph.wait_for_selector("#hsvg")
+    o = ph.evaluate("()=>({ov:document.documentElement.scrollWidth-innerWidth, w:document.getElementById('hsvg').getBoundingClientRect().width, card:document.querySelector('.card').getBoundingClientRect().top, svg:document.getElementById('hsvg').getBoundingClientRect().top})")
+    check(o["ov"] == 0 and o["w"] >= 660 and o["card"] < o["svg"], f"at 390 px the diagram is {o['w']:.0f} px wide in a sideways scroll, nothing overflows, the card sits above it")
     check(not errs, "no script errors", "; ".join(errs))
     br.close()
 

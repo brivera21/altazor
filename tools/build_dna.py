@@ -24,11 +24,10 @@ from dna_data import HELIX, BASES, CODE, AMINO, GENE, GENE_NOTE, MUTATIONS, CHRO
 OUT = Path(__file__).parent.parent / "dna.html"
 
 NOTE1 = ("Two chains wound round each other, two nanometers across, ten and "
-         "a half steps to a turn, and every step a pair of bases joined by "
-         "hydrogen bonds: adenine with thymine, guanine with cytosine, "
-         "always. That rule is the whole trick. Either chain carries the "
-         "order of the other, so a cell can pull them apart and rebuild "
-         "both, and the sequence of bases along one chain is a text.")
+         "a half steps to a turn, each step a pair of bases: adenine with "
+         "thymine, guanine with cytosine. That rule is the whole trick: "
+         "either chain carries the order of the other, so a cell can pull "
+         "them apart and rebuild both, and one chain's order is a text.")
 
 NOTE2 = ("The text is read three letters at a time, and each triplet names "
          "one of twenty amino acids or says stop; the second view shows "
@@ -112,7 +111,15 @@ h1 { margin:0 0 12px; font-size:26px; }
 .refs a { color:var(--accent); }
 __APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+#diagram { border-radius:8px; }
+#diagram:focus-visible { outline:1px solid var(--accent); outline-offset:4px; }
+.controls .hint { font-size:12px; color:#7d7d7d; }
+details.sources { margin-top:22px; border-top:1px solid var(--line); padding-top:10px; max-width:760px; }
+details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; }
+details.sources > summary:hover { color:var(--accent); }
+details.sources .note { border-top:none; padding-top:0; margin-top:14px; }
+@media (max-width:900px){ .stage{flex-direction:column;} #diagram{width:100%; flex-basis:auto;} .side{position:static; width:100%; flex-basis:auto; order:-1;} }
+@media (max-width:600px){ #diagram{overflow-x:auto; -webkit-overflow-scrolling:touch;} #diagram svg{min-width:660px;} }
 </style>
 </head>
 <body>
@@ -124,11 +131,13 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <h1>DNA</h1>
 <div class="bar" id="views"><button data-v="helix" class="on">The helix</button><button data-v="code">The code</button><button data-v="genome">The genome</button></div>
 <div class="controls" id="helixCtl">
-  <label for="turn">turn</label>
+  <label for="turn">angle</label>
   <input type="range" id="turn" min="0" max="360" step="1" value="0">
-  <label><input type="checkbox" id="spin" checked> turning</label>
+  <label><input type="checkbox" id="spin" checked> spin</label>
+  <span class="hint">the spin pauses while a base pair is under the pointer</span>
 </div>
 <div class="controls" id="codeCtl" hidden>
+  <span class="presets"><button type="button" id="readBtn">Read it &#9654;</button></span>
   <label>a change</label>
   <span class="presets" id="muts"></span>
   <button type="button" class="presets" id="reset" style="padding:5px 11px;font-size:12.5px;border-radius:999px;background:var(--panel);color:var(--muted);border:1px solid var(--line);cursor:pointer;font-family:inherit">as written</button>
@@ -138,7 +147,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   <span class="presets" id="sorts"><button type="button" data-s="number" class="on">number</button><button type="button" data-s="length">length</button><button type="button" data-s="genes">genes</button><button type="button" data-s="density">genes per million bases</button></span>
 </div>
 <div class="stage">
-  <div id="diagram"></div>
+  <div id="diagram" tabindex="0" aria-label="The DNA diagram"></div>
   <div class="side"><div class="card">
     <div id="kindTxt"></div>
     <div id="nameTxt"></div>
@@ -148,10 +157,11 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   </div></div>
 </div>
 <p class="note">__NOTE1__</p>
-<p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
+<details class="sources"><summary>Sources</summary>
+<p class="note">__NOTE2__</p>
 <div class="method"><p>__METHOD__</p></div>
-<h2 class="refh">References</h2>
 <div class="refs">__REFS__</div>
+</details>
 </div>
 <script>
 const HELIX=__HELIX__, BASES=__BASES__, CODE=__CODE__, AMINO=__AMINO__, GENE=__GENE__, GENENOTE=__GENENOTE__, MUTS=__MUTS__, CHR=__CHR__, GENOME=__GENOME__;
@@ -160,6 +170,8 @@ const el=document.getElementById('diagram');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const BASE=Object.fromEntries(BASES.map(b=>[b.b,b]));
 let view='helix', turn=0, spinning=true, hot=null, seq=GENE, mut=null, sortBy='number';
+let readPos=null, reading=false, readRAF=null;   // the ribosome's place, in codons, while it reads
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
 // the helix's own sequence: 40 pairs, chosen once
 const HSEQ='ATGCGTACCGATTAGCCGATAGGCTTACGCAATGGCTCAG';
 
@@ -188,6 +200,7 @@ function showGenome(){ const tot=CHR.reduce((a,x)=>a+x.bp,0), g=CHR.reduce((a,x)
   card('The human genome','One set of chromosomes',[['base pairs',(tot/1e9).toFixed(2)+' billion'],['protein-coding genes',g.toLocaleString('en-US')],['stretched out',(tot*0.34e-9).toFixed(2)+' m, '+(2*tot*0.34e-9).toFixed(1)+' m in a cell with two sets'],['coding for protein','about '+(GENOME.coding_share*100).toFixed(1)+'%']], GENOME.note, 'International Human Genome Sequencing Consortium 2004; Nurk et al. 2022; Sender et al. 2016'); }
 
 /* ---- the helix ---- */
+const HSHIFT=150;     // the helix is drawn about x 300 and shifted to sit mid-stage
 function helix(){
   const cx=300, top=40, n=HSEQ.length, rise=14, R=60, per=HELIX.bp_per_turn;   // 14 px a base pair; a turn is 147 px
   let s=''; const items=[];
@@ -202,30 +215,41 @@ function helix(){
     for(let h=0;h<b.h;h++) s+='<circle cx="'+mid.toFixed(1)+'" cy="'+(it.y-(b.h-1)*2.2+h*4.4).toFixed(1)+'" r="1.3" fill="#e6e6e6"/>';
     s+='</g>'; }
   for(const q of segs.filter(q=>q.front)) s+='<path d="'+q.d+'" stroke="#c9d1dc" stroke-width="'+q.w.toFixed(1)+'" opacity="'+q.o.toFixed(2)+'" fill="none" stroke-linecap="round"/>';
-  // the scale and the labels
-  const H=top+(n-1)*rise;
-  s+='<line x1="'+(cx+110)+'" y1="'+top+'" x2="'+(cx+110)+'" y2="'+(top+per*rise)+'" stroke="#9a9a9a"/><text x="'+(cx+118)+'" y="'+(top+per*rise/2+4)+'" font-size="11" fill="#9a9a9a">one turn: '+HELIX.pitch_nm.toFixed(1)+' nm, '+HELIX.bp_per_turn+' pairs</text>';
-  s+='<line x1="'+(cx-R-8)+'" y1="'+(H+16)+'" x2="'+(cx+R+8)+'" y2="'+(H+16)+'" stroke="#9a9a9a"/><text x="'+cx+'" y="'+(H+32)+'" text-anchor="middle" font-size="11" fill="#9a9a9a">2 nm across</text>';
-  s+='<text x="'+(cx+118)+'" y="'+(top+per*rise+60)+'" font-size="11" fill="#9a9a9a">the wide groove and the narrow one:</text><text x="'+(cx+118)+'" y="'+(top+per*rise+74)+'" font-size="11" fill="#9a9a9a">the two backbones are not opposite each other</text>';
-  let lx=cx+118, ly=top+per*rise+110; for(const b of BASES){ s+='<rect x="'+lx+'" y="'+(ly-9)+'" width="12" height="12" rx="2" fill="'+b.c+'"/><text x="'+(lx+18)+'" y="'+(ly+1)+'" font-size="11" fill="#9a9a9a">'+b.b+' '+b.n+', pairs with '+b.p+', '+b.h+' bonds</text>'; ly+=18; }
-  return {svg:s, h:H+50};
+  // the scale and the labels: the turn and the grooves to the right, the
+  // bases to the left; the whole drawing shifted to the middle of the stage
+  const H=top+(n-1)*rise, L='font-size="12.5" fill="#b8bfcc"';
+  s+='<line x1="'+(cx+110)+'" y1="'+top+'" x2="'+(cx+110)+'" y2="'+(top+per*rise)+'" stroke="#9a9a9a"/><text x="'+(cx+118)+'" y="'+(top+per*rise/2+4)+'" '+L+'>one turn: '+HELIX.pitch_nm.toFixed(1)+' nm, '+HELIX.bp_per_turn+' pairs</text>';
+  s+='<line x1="'+(cx-R-8)+'" y1="'+(H+16)+'" x2="'+(cx+R+8)+'" y2="'+(H+16)+'" stroke="#9a9a9a"/><text x="'+cx+'" y="'+(H+34)+'" text-anchor="middle" '+L+'>2 nm across</text>';
+  s+='<text x="'+(cx+118)+'" y="'+(top+per*rise+60)+'" '+L+'>the wide groove and the narrow one:</text><text x="'+(cx+118)+'" y="'+(top+per*rise+77)+'" '+L+'>the two backbones are not opposite each other</text>';
+  let lx=cx-330, ly=top+30; s+='<text x="'+lx+'" y="'+(ly-14)+'" '+L+'>the four bases</text>';
+  for(const b of BASES){ ly+=8; s+='<rect x="'+lx+'" y="'+(ly-10)+'" width="13" height="13" rx="2" fill="'+b.c+'"/><text x="'+(lx+20)+'" y="'+(ly+1)+'" '+L+'>'+b.b+' '+b.n+', pairs with '+b.p+'</text><text x="'+(lx+20)+'" y="'+(ly+17)+'" font-size="11.5" fill="#8b949e">'+b.k+', '+b.h+' hydrogen bonds</text>'; ly+=34; }
+  return {svg:'<g transform="translate('+HSHIFT+',0)">'+s+'</g>', h:H+50};
 }
 
 /* ---- the code ---- */
 function code(){
-  const n=Math.floor(seq.length/3), perRow=10, cw=88, x0=20, y0=40, rowH=118;
+  const n=Math.floor(seq.length/3), perRow=10, cw=88, x0=20, y0=70, rowH=118;
   let s=''; const pr=protein(seq), ref=protein(GENE);
+  const done=readPos==null?n:Math.floor(readPos);      // codons read so far while the ribosome runs
+  s+='<text x="'+x0+'" y="22" font-size="12.5" fill="#b8bfcc">the bases as written on the coding strand, the messenger RNA beneath, and the amino acid each triplet names; a click on a base cycles it through A, C, G and T</text>';
   for(let i=0;i<n;i++){ const r=Math.floor(i/perRow), c=i%perRow, x=x0+c*cw, y=y0+r*rowH; const codon=seq.slice(i*3,i*3+3), a=CODE[codon], stopped=pr.length<=i, changed=ref[i]&&ref[i].a!==a;
+    const unread=i>=done;
     s+='<g data-c="'+i+'" style="cursor:pointer" opacity="'+(stopped?0.3:1)+'">';
     s+='<text x="'+(x+cw/2-8)+'" y="'+(y-14)+'" text-anchor="middle" font-size="9.5" fill="#6b7280">'+(i+1)+'</text>';
     for(let j=0;j<3;j++){ const b=codon[j], idx=i*3+j; s+='<g data-b="'+idx+'" style="cursor:pointer"><rect x="'+(x+j*24)+'" y="'+y+'" width="22" height="24" rx="4" fill="'+BASE[b].c+'" opacity="'+(GENE[idx]!==b?1:0.75)+'" stroke="'+(GENE[idx]!==b?'#e6e6e6':'none')+'" stroke-width="1.5"/><text x="'+(x+j*24+11)+'" y="'+(y+17)+'" text-anchor="middle" font-size="14" font-weight="700" fill="#0b1a2b">'+b+'</text></g>'; }
     s+='<text x="'+(x+cw/2-8)+'" y="'+(y+42)+'" text-anchor="middle" font-size="9.5" fill="#6b7280">'+codon.replace(/T/g,'U')+'</text>';
     s+='<line x1="'+(x+cw/2-8)+'" y1="'+(y+48)+'" x2="'+(x+cw/2-8)+'" y2="'+(y+58)+'" stroke="#3d444d"/>';
-    s+='<rect x="'+(x+8)+'" y="'+(y+60)+'" width="'+(cw-24)+'" height="26" rx="13" fill="'+(a==='*'?'#3d444d':changed?'#ffb02e':'#1f2a36')+'" stroke="'+(changed?'#ffb02e':'#2b2b2b')+'"/>';
-    s+='<text x="'+(x+cw/2-8)+'" y="'+(y+77)+'" text-anchor="middle" font-size="11.5" font-weight="600" fill="'+(changed?'#0b1a2b':'#e6e6e6')+'">'+AMINO[a].abbr+'</text>';
+    if(unread) s+='<rect x="'+(x+8)+'" y="'+(y+60)+'" width="'+(cw-24)+'" height="26" rx="13" fill="none" stroke="#2b2b2b" stroke-dasharray="3 3"/>';
+    else { s+='<rect x="'+(x+8)+'" y="'+(y+60)+'" width="'+(cw-24)+'" height="26" rx="13" fill="'+(a==='*'?'#3d444d':changed?'#ffb02e':'#1f2a36')+'" stroke="'+(changed?'#ffb02e':'#2b2b2b')+'"/>';
+      s+='<text x="'+(x+cw/2-8)+'" y="'+(y+77)+'" text-anchor="middle" font-size="11.5" font-weight="600" fill="'+(changed?'#0b1a2b':'#e6e6e6')+'">'+AMINO[a].abbr+'</text>'; }
     s+='</g>'; }
+  // the ribosome: two subunits clasping the codon being read, gliding along the row
+  if(readPos!=null && readPos<n){ const i=Math.min(n-1,Math.floor(readPos)), f=readPos-Math.floor(readPos), r=Math.floor(i/perRow), c=i%perRow;
+    const x=x0+c*cw+(c<perRow-1?f*cw:0), y=y0+r*rowH;
+    s+='<g id="ribosome" pointer-events="none"><ellipse cx="'+(x+35)+'" cy="'+(y-4)+'" rx="46" ry="20" fill="#b48cf2" fill-opacity="0.28" stroke="#b48cf2" stroke-width="1.5"/>'+
+       '<ellipse cx="'+(x+35)+'" cy="'+(y+34)+'" rx="40" ry="13" fill="#b48cf2" fill-opacity="0.22" stroke="#b48cf2" stroke-width="1.5"/>'+
+       '<text x="'+(x+35)+'" y="'+(y-10)+'" text-anchor="middle" font-size="11" fill="#e6dcff">ribosome</text></g>'; }
   const H=y0+Math.ceil(n/perRow)*rowH;
-  s+='<text x="'+x0+'" y="'+(H-10)+'" font-size="11" fill="#9a9a9a">the bases as written on the coding strand, the messenger RNA beneath, and the amino acid each triplet names; click a base to change it</text>';
   return {svg:s, h:H+6};
 }
 
@@ -246,30 +270,51 @@ function genome(){
   return {svg:s, h:H};
 }
 
+/* ---- reading: the ribosome walks the codons, adding one amino acid at each ---- */
+const readBtn=document.getElementById('readBtn'), CPS=4;      // codons a second, slowed for the eye
+function readEnd(){ const pr=protein(seq), n=Math.floor(seq.length/3); return pr.length&&pr[pr.length-1].a==='*'?pr.length:n; }
+function showRead(){ const pr=protein(seq), k=Math.min(Math.floor(readPos),readEnd()), got=pr.slice(0,k), end=readEnd(), stopped=pr.length&&pr[pr.length-1].a==='*';
+  const cur=Math.min(Math.floor(readPos),Math.floor(seq.length/3)-1), c=seq.slice(cur*3,cur*3+3);
+  const finished=readPos>=end;
+  card('Reading the gene', finished?(stopped?'Stop: the chain is let go':'Thirty codons read'):'Codon '+(cur+1)+', '+c+', '+AMINO[CODE[c]].name,
+    [['amino acids joined',got.filter(p=>p.a!=='*').length],['the chain so far',got.filter(p=>p.a!=='*').map(p=>AMINO[p.a].abbr).join('-')||'nothing yet']],
+    finished?(stopped?'The ribosome met a stop codon after '+(end-1)+' amino acids and let the chain go.':'No stop yet: the gene runs on past these thirty codons, and the finished protein is 146 amino acids long.')
+      :'The ribosome reads three bases at a time and joins the amino acid each triplet names to the growing chain.', mut?(MUTS.find(x=>x.k===mut)||{}).s||'Wikipedia, Genetic code':'Wikipedia, Genetic code'); }
+function setReadBtn(){ readBtn.innerHTML=reading?'Pause':(readPos!=null&&readPos<readEnd()?'Read on &#9654;':readPos!=null?'Read again &#9654;':'Read it &#9654;'); readBtn.classList.toggle('on',reading); }
+function stopReading(clear){ reading=false; if(readRAF) cancelAnimationFrame(readRAF); readRAF=null; if(clear) readPos=null; setReadBtn(); }
+readBtn.addEventListener('click',()=>{
+  if(reading){ stopReading(false); return; }
+  const end=readEnd(); if(readPos==null||readPos>=end) readPos=0;
+  if(REDUCED){ readPos=end; render(); showRead(); setReadBtn(); return; }
+  reading=true; setReadBtn(); let last=performance.now();
+  const frame=now=>{ readPos=Math.min(end,readPos+(now-last)/1000*CPS); last=now; render(); showRead();
+    if(readPos<end && reading) readRAF=requestAnimationFrame(frame); else { reading=false; readRAF=null; setReadBtn(); } };
+  readRAF=requestAnimationFrame(frame); });
+
 /* ---- render and wiring ---- */
 function render(){
   const q=view==='helix'?helix():view==='code'?code():genome();
   el.innerHTML='<svg viewBox="0 0 '+W+' '+q.h+'" xmlns="http://www.w3.org/2000/svg" id="dsvg"><rect width="'+W+'" height="'+q.h+'" fill="#121212"/>'+q.svg+'</svg>';
   for(const id of ['helixCtl','codeCtl','genomeCtl']) document.getElementById(id).hidden=!id.startsWith(view);
 }
-function setView(v){ view=v; hot=null; for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render(); if(v==='helix') showHelix(); else if(v==='code') showCode(); else showGenome(); }
+function setView(v){ if(v!=='code') stopReading(true); view=v; hot=null; for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render(); if(v==='helix') showHelix(); else if(v==='code') showCode(); else showGenome(); }
 document.getElementById('views').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setView(b.dataset.v); });
 document.getElementById('turn').addEventListener('input',e=>{ turn=+e.target.value; render(); });
 document.getElementById('spin').addEventListener('change',e=>{ spinning=e.target.checked; });
 (function tick(){ if(view==='helix'&&spinning&&hot===null){ turn=(turn+0.4)%360; document.getElementById('turn').value=Math.round(turn); render(); } requestAnimationFrame(tick); })();
 document.getElementById('muts').innerHTML=MUTS.map(m=>'<button type="button" data-m="'+m.k+'">'+esc(m.n)+'</button>').join('');
-function applyMut(k){ const m=MUTS.find(x=>x.k===k); seq=m.b?GENE.slice(0,m.i)+m.b+GENE.slice(m.i+1):GENE.slice(0,m.i)+GENE.slice(m.i+1); mut=k; for(const b of document.querySelectorAll('#muts button')) b.classList.toggle('on',b.dataset.m===k); render(); showCode(); }
+function applyMut(k){ stopReading(true); const m=MUTS.find(x=>x.k===k); seq=m.b?GENE.slice(0,m.i)+m.b+GENE.slice(m.i+1):GENE.slice(0,m.i)+GENE.slice(m.i+1); mut=k; for(const b of document.querySelectorAll('#muts button')) b.classList.toggle('on',b.dataset.m===k); render(); showCode(); }
 document.getElementById('muts').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) applyMut(b.dataset.m); });
-document.getElementById('reset').addEventListener('click',()=>{ seq=GENE; mut=null; for(const b of document.querySelectorAll('#muts button')) b.classList.remove('on'); render(); showCode(); });
+document.getElementById('reset').addEventListener('click',()=>{ stopReading(true); seq=GENE; mut=null; for(const b of document.querySelectorAll('#muts button')) b.classList.remove('on'); render(); showCode(); });
 document.getElementById('sorts').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; sortBy=b.dataset.s; for(const x of document.querySelectorAll('#sorts button')) x.classList.toggle('on',x.dataset.s===sortBy); render(); });
-el.addEventListener('click',e=>{ const g=e.target.closest('[data-b]'); if(g&&view==='code'){ const i=+g.getAttribute('data-b'); const order='ACGT'; const next=order[(order.indexOf(seq[i])+1)%4]; seq=seq.slice(0,i)+next+seq.slice(i+1); mut=null; for(const b of document.querySelectorAll('#muts button')) b.classList.remove('on'); render(); showCode(); } });
+el.addEventListener('click',e=>{ const g=e.target.closest('[data-b]'); if(g&&view==='code'){ stopReading(true); const i=+g.getAttribute('data-b'); const order='ACGT'; const next=order[(order.indexOf(seq[i])+1)%4]; seq=seq.slice(0,i)+next+seq.slice(i+1); mut=null; for(const b of document.querySelectorAll('#muts button')) b.classList.remove('on'); render(); showCode(); } });
 el.addEventListener('pointerover',e=>{ const p=e.target.closest('[data-p]'); if(p){ const i=+p.getAttribute('data-p'); if(i===hot) return; hot=i; render(); showPair(i); return; }
-  const c=e.target.closest('[data-c]'); if(c&&view==='code'){ showCodon(+c.getAttribute('data-c')); return; }
+  const c=e.target.closest('[data-c]'); if(c&&view==='code'&&!reading){ showCodon(+c.getAttribute('data-c')); return; }
   const ch=e.target.closest('[data-ch]'); if(ch){ const n=ch.getAttribute('data-ch'); if(n===hot) return; hot=n; render(); showChr(n); } });
-el.addEventListener('pointerleave',()=>{ if(view==='helix'&&hot!==null){ hot=null; render(); showHelix(); } if(view==='code') showCode(); if(view==='genome'&&hot!==null){ hot=null; render(); showGenome(); } });
+el.addEventListener('pointerleave',()=>{ if(view==='helix'&&hot!==null){ hot=null; render(); showHelix(); } if(view==='code'&&!reading&&readPos==null) showCode(); if(view==='genome'&&hot!==null){ hot=null; render(); showGenome(); } });
 
 render(); showHelix();
-window.__dna=(q)=>{ const o={view,turn,hot,seq,mut,sortBy,card:document.getElementById('numTxt').innerText,name:document.getElementById('nameTxt').innerText,
+window.__dna=(q)=>{ const o={view,turn,hot,seq,mut,sortBy,readPos,reading,card:document.getElementById('numTxt').innerText,name:document.getElementById('nameTxt').innerText,
   pairs:document.querySelectorAll('#dsvg g[data-p]').length, codons:document.querySelectorAll('#dsvg g[data-c]').length, chroms:document.querySelectorAll('#dsvg g[data-ch]').length,
   protein:protein(seq).map(p=>p.a).join('')};
   if(q&&q.translate) o.tr=protein(q.translate).map(p=>p.a).join(''); if(q&&q.code) o.code=CODE; return o; };

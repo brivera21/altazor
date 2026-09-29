@@ -155,16 +155,20 @@ if not ok:
     fails.append(f"altitudes fuera de rango: {min(prof)} a {max(prof)}")
 
 print("--- la línea internacional ---")
-us = pickle.load(open("/home/claude/us/states.pkl", "rb"))
-from shapely.geometry import Point
-nm = us["NM"]
-col = V.STOPS[-1]
-pal = V.STOPS[-2]
-ok = nm.contains(Point(col[3], col[2])) and not nm.contains(Point(pal[3], pal[2]))
-print(f"  {'ok  ' if ok else 'FALLA'} Columbus queda dentro de Nuevo México y "
-      "Puerto Palomas fuera")
-if not ok:
-    fails.append("la frontera no separa Columbus de Puerto Palomas")
+try:
+    us = pickle.load(open("/home/claude/us/states.pkl", "rb"))
+except FileNotFoundError:
+    print("  --   sin /home/claude/us/states.pkl en esta máquina; la prueba de la línea se salta")
+else:
+    from shapely.geometry import Point
+    nm = us["NM"]
+    col = V.STOPS[-1]
+    pal = V.STOPS[-2]
+    ok = nm.contains(Point(col[3], col[2])) and not nm.contains(Point(pal[3], pal[2]))
+    print(f"  {'ok  ' if ok else 'FALLA'} Columbus queda dentro de Nuevo México y "
+          "Puerto Palomas fuera")
+    if not ok:
+        fails.append("la frontera no separa Columbus de Puerto Palomas")
 
 html = PAGE.read_text(encoding="utf-8")
 print("--- la página ---")
@@ -236,6 +240,38 @@ with sync_playwright() as pw:
     print(f"  {'ok  ' if ok else 'FALLA'} 1916 enciende {n} letreros")
     if not ok:
         fails.append(f"la capa de 1916 muestra {n} letreros y display {vis}")
+
+    def chk(ok, msg):
+        print(f"  {'ok  ' if ok else 'FALLA'} {msg}")
+        if not ok:
+            fails.append(msg)
+    # el perfil se recorre con el puntero
+    caja = pg.evaluate("()=>{const r=document.getElementById('perfil').getBoundingClientRect();return [r.x,r.y,r.width,r.height]}")
+    kx = lambda km: caja[0] + (46 + km / st["total"] * (980 - 70)) / 980 * caja[2]
+    pg.mouse.move(kx(100), caja[1] + caja[3] / 2)
+    pg.mouse.down()
+    pg.mouse.move(kx(300), caja[1] + caja[3] / 2, steps=6)
+    pg.mouse.up()
+    s = pg.evaluate("()=>window.__villista()")
+    chk(abs(s["km"] - 300) < 3, f"arrastrar sobre el perfil lleva al jinete al km {s['km']:.0f}")
+    # una parada bajo el puntero dice cuánto sube y baja desde la anterior
+    pg.evaluate("()=>document.querySelectorAll('#paradas circle')[3].dispatchEvent(new MouseEvent('mouseenter'))")
+    sub = pg.evaluate("document.getElementById('rSub').textContent")
+    tr = pg.evaluate("document.getElementById('rTramo').textContent")
+    a, b = V.STOPS[2], V.STOPS[3]
+    chk(("desde " + a[0]) in sub and " sube " in sub and " baja " in sub and b[0] in tr, f"la cuarta parada: {tr!r}, {sub!r}")
+    pg.evaluate("()=>document.querySelectorAll('#paradas circle')[3].dispatchEvent(new MouseEvent('mouseleave'))")
+    chk(pg.evaluate("document.getElementById('rLab').textContent") != "parada", "y al salir vuelve al tramo del jinete")
+    # las lecturas quedan junto al mapa
+    lado = pg.evaluate("()=>{const m=document.getElementById('map').getBoundingClientRect(), r=document.querySelector('.readout').getBoundingClientRect(); return [r.left>m.right, r.top<m.bottom]}")
+    chk(all(lado), "las lecturas van al lado del mapa, no debajo")
+    vis = pg.evaluate("[...document.querySelectorAll('.notes p')].filter(n=>n.checkVisibility()).length")
+    pal = len(pg.inner_text(".notes.cap").split())
+    chk(vis == 1 and pal <= 80 and not pg.evaluate("document.querySelector('details.sources').open"), f"un pie de {pal} palabras; lo demás en Fuentes, cerrado")
+    ph = br.new_page(viewport={"width": 390, "height": 844})
+    ph.goto(PAGE.resolve().as_uri()); ph.wait_for_timeout(500)
+    ov = ph.evaluate("document.documentElement.scrollWidth - innerWidth")
+    chk(ov == 0, f"nada más ancho que un teléfono ({ov} px)")
 
     if errs:
         fails.append(f"errores de javascript: {errs}")

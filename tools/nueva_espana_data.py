@@ -189,6 +189,23 @@ VILLAS = [
      "1782; la misión, en 1786"),
 ]
 
+# En qué estado de hoy queda cada villa, para el letrero bajo el cursor.
+HOY = {
+    "Veracruz": "Veracruz", "Puebla": "Puebla", "Guadalajara": "Jalisco",
+    "Zacatecas": "Zacatecas", "Durango": "Durango", "Saltillo": "Coahuila",
+    "Monterrey": "Nuevo León", "Santa Fe": "Nuevo México, Estados Unidos",
+    "El Paso del Norte": "Chihuahua, como Ciudad Juárez",
+    "Monclova": "Coahuila", "Loreto": "Baja California Sur",
+    "Albuquerque": "Nuevo México, Estados Unidos", "Chihuahua": "Chihuahua",
+    "San Antonio": "Texas, Estados Unidos", "Laredo": "Texas, Estados Unidos",
+    "San Diego": "California, Estados Unidos",
+    "Monterey": "California, Estados Unidos",
+    "Tucson": "Arizona, Estados Unidos",
+    "San Francisco": "California, Estados Unidos",
+    "Los Ángeles": "California, Estados Unidos",
+    "Santa Bárbara de la Alta California": "California, Estados Unidos",
+}
+
 # ------------------------------------------------------------- los sucesos
 # año, título, qué pasó
 SUCESOS = [

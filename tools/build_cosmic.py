@@ -44,6 +44,12 @@ detail_js = json.dumps(detail, separators=(",", ":"), ensure_ascii=False)
 strands_js = json.dumps([{"k": k, "n": n, "c": c} for k, n, c in STRANDS],
                         separators=(",", ":"), ensure_ascii=False)
 
+CAPTION = ("Time runs left to right from the Big Bang to now, on four scales. "
+           "Named milestones sit above the line with their dating and its "
+           "uncertainty; thirteen strands from a Big History notebook run "
+           "beneath. A change of scale slides every mark to its place, and a "
+           "band pulled across the strands rescales the line to that span.")
+
 NOTE1 = ("Time runs left to right from the Big Bang, on four scales. Back "
          "from now counts years before the present, so each step right is a "
          "tenth of the time left. Forward from the Big Bang counts years "
@@ -60,7 +66,9 @@ NOTE2 = ("The named milestones above the line carry their dating and its "
 NOTE3 = ("A name typed into the box rings every mark that carries it, across "
          "the milestones and all the detail, and the return key walks from "
          "one to the next. A band pulled out across the strands rescales the "
-         "line to that span alone, on whichever scale is running.")
+         "line to that span alone, on whichever scale is running; Ctrl or "
+         "Command with the wheel, or a pinch, zooms about the pointer, and "
+         "the left and right arrow keys step through the milestones.")
 
 HTML = """<!DOCTYPE html>
 <html lang="en">
@@ -87,14 +95,19 @@ button { font:inherit; font-size:13.5px; padding:6px 14px; border-radius:999px;
   border:1px solid var(--line); background:#1a1a1a; color:var(--text); cursor:pointer; }
 button:hover { border-color:var(--accent); }
 button.on { background:var(--accent); border-color:var(--accent); color:#0b0b0b; }
-#legend { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:12px; }
+.seg { display:inline-flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; }
+.seg button { border:none; border-radius:0; border-right:1px solid var(--line); }
+.seg button:last-child { border-right:none; }
+.seg button:hover:not(.on) { background:#232323; }
+#legend { display:flex; gap:7px; flex-wrap:wrap; margin-top:10px; }
 #legend button { font-size:11.5px; padding:3px 10px; color:var(--muted);
   display:inline-flex; gap:5px; align-items:center; }
 #legend button i { width:8px; height:8px; border-radius:50%; display:inline-block; }
 #legend button.off { opacity:.38; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
-#chart { flex:1 1 640px; min-width:0; }
+.col { flex:1 1 640px; min-width:0; }
 #chart svg { width:100%; height:auto; display:block; user-select:none; }
+#chart:focus { outline:none; }
 .side { flex:0 0 320px; position:sticky; top:16px; }
 .card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
   padding:16px; }
@@ -109,6 +122,10 @@ button.on { background:var(--accent); border-color:var(--accent); color:#0b0b0b;
 #srcTxt a { color:var(--accent); }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
+details.sources { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+details.sources summary { cursor:pointer; }
+details.sources summary:hover { color:var(--text); }
+details.sources .note { border-top:none; padding-top:0; margin-top:10px; }
 .method { color:var(--muted); font-size:12.5px; margin-top:16px; max-width:760px; }
 .method summary { cursor:pointer; color:var(--accent); }
 .method table { border-collapse:collapse; margin-top:9px; font-size:12px; }
@@ -128,7 +145,11 @@ button.on { background:var(--accent); border-color:var(--accent); color:#0b0b0b;
 #findTxt, #winTxt { color:var(--muted); font-size:12.5px; }
 __APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+#whole[hidden], #fitFind[hidden] { display:none; }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%; order:-1;}
+  .col{width:100%;} }
+@media (max-width:600px){ #chart{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  #chart svg{min-width:760px;} .bar2 input{width:100%;} .bar2 .sep{display:none;} }
 </style>
 </head>
 <body>
@@ -138,23 +159,20 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   <nav class="site"><a href="library.html">&larr; Library &middot; The Universe</a> <a href="universe.html">The Universe</a> <a href="earth-history.html">Geological History</a> <a href="tree-of-life.html">Tree of Life</a></nav>
 </header>
 <h1>The Universe in Time</h1>
-<div class="bar">
-  <button id="bBack" class="on">Back from now</button>
-  <button id="bFwd">Forward from the Big Bang</button>
-  <button id="bSun">Sun at the center</button>
-  <button id="bLin">Even scale</button>
-</div>
+<div class="bar"><div class="seg" role="group" aria-label="scale">
+  <button id="bBack" class="on">Back from now</button><button id="bFwd">Forward from the Big Bang</button><button id="bSun">Sun at the center</button><button id="bLin">Even scale</button>
+</div></div>
 <div class="bar2">
   <input type="search" id="find" placeholder="a moment, by name" aria-label="a moment, by name">
   <span id="findTxt"></span>
-  <button id="fitFind" disabled>Fit the line to them</button>
+  <button id="fitFind" hidden>Fit the line to the matches</button>
   <span class="sep"></span>
-  <span id="winTxt">the whole line</span>
-  <button id="whole" disabled>The whole line</button>
+  <span id="winTxt"></span>
+  <button id="whole" hidden>The whole line</button>
 </div>
-<div id="legend"></div>
 <div class="stage">
-  <div id="chart"></div>
+  <div class="col"><div id="chart" tabindex="0" aria-label="the timeline"></div>
+  <div id="legend"></div></div>
   <div class="side"><div class="card">
     <div id="kindTxt"></div>
     <div id="nameTxt">A mark under the cursor lands here</div>
@@ -164,9 +182,11 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
     <div id="srcTxt"></div>
   </div></div>
 </div>
+<p class="note">__CAPTION__</p>
+<details class="sources"><summary>Sources</summary>
 <p class="note">__NOTE1__</p>
-<p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
-<p class="note" style="border-top:none; padding-top:0;">__NOTE3__</p>
+<p class="note">__NOTE2__</p>
+<p class="note">__NOTE3__</p>
 <div class="method"><p>Every date in the strands was checked against the
 current literature. The ones that had drifted are corrected here and listed
 under the references.</p>
@@ -175,6 +195,7 @@ __FIXED__
 </details></div>
 <h2 class="refh">References</h2>
 <div class="refs">__REFS__</div>
+</details>
 </div>
 <script>
 const EV=__EVENTS__, DET=__DETAIL__, ST=__STRANDS__;
@@ -210,15 +231,25 @@ function whenTxt(t){ return t<13000 ? cal(t)+' \\u00b7 '+ago(t) : ago(t); }
 // numbers still differ: after the first hundred million years it rounds
 // to the full 13.8 billion for everything
 function sinceTxt(t){
-  return t>=1e8 ? ' \\u00b7 '+span(NOW-t)+' after the Big Bang' : '';
+  return t>=1e8 && NOW-t>=1 ? ' \\u00b7 '+span(NOW-t)+' after the Big Bang' : '';
 }
 
-const W=1000, L=112, R=34, TOP=34, LANEH=28, ROWH=22, GAP=48;
+const W=1000, L=112, R=34, TOP=30, LANEH=24, ROWH=22, GAP=48;
 const LMIN=Math.log10(TMIN), LMAX=Math.log10(NOW), LSUN=Math.log10(TSUN);
 let AXIS=200, H=600;
 
-// where a date sits along the whole line, 0 at the Big Bang and 1 at now
+// where a date sits along the whole line, 0 at the Big Bang and 1 at now.
+// While the scale is changing, every mark is part way between its place on
+// the old scale and its place on the new one.
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ease=k=>k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+let modeFrom=null, blend=1, packHold=null;
 function u(t){
+  if(modeFrom===null) return uOf(mode,t);
+  const e=ease(blend);
+  return uOf(modeFrom,t)*(1-e)+uOf(mode,t)*e;
+}
+function uOf(mode,t){
   if(mode==='even') return 1-t/NOW;
   if(mode==='fwd') return Math.log10(Math.max(1,NOW-t))/Math.log10(NOW);
   if(mode==='sun'){
@@ -321,7 +352,7 @@ let MAXLANE=1;
   mode=keep; })();
 
 function render(){
-  const pack=packLanes();
+  const pack=packHold||packLanes();
   AXIS=TOP+MAXLANE*LANEH+10;
   const shown=ST.filter(s=>!off.has(s.k));
   const ROW0=AXIS+GAP;
@@ -358,6 +389,8 @@ function render(){
   for(const tk of ticksNow()){
     const x=X(tk.t);
     if(!inView(x)) continue;
+    // the tick carried down through the strands, so the rows keep the axis
+    s+='<path d="M'+x.toFixed(1)+','+(ROW0-4)+' V'+(H-10)+'" stroke="#ffffff" stroke-opacity="0.06" stroke-width="1"/>';
     s+='<path d="M'+x.toFixed(1)+','+(AXIS-5)+' v10" stroke="#3d444d" stroke-width="1.2"/>'
       +'<text x="'+x.toFixed(1)+'" y="'+(AXIS+21)+'" text-anchor="middle" font-size="10.5" fill="#6b7280">'
       +tk.lab+'</text>';
@@ -458,12 +491,29 @@ legend.addEventListener('click',ev=>{
   if(b) toggle(b.getAttribute('data-k'));
 });
 
+let tweenId=0;
 function setMode(m){
+  const from=mode;
+  // a band on the old scale means nothing on the new one, so it goes
+  const hadWin=win!==null;
   mode=m; curDet=-1; win=null; winTxt();
   for(const [id,v] of [['bBack','back'],['bFwd','fwd'],['bSun','sun'],
                        ['bLin','even']])
     document.getElementById(id).classList.toggle('on',m===v);
-  render();
+  if(RM||from===m||hadWin||document.hidden){ modeFrom=null; packHold=null; render(); return; }
+  // slide every mark from its old place to its new one; the labels keep
+  // their new lanes the whole way so they do not shuffle mid-flight
+  modeFrom=from; blend=0; packHold=null; packHold=(()=>{const k=modeFrom; modeFrom=null;
+    const p=packLanes(); modeFrom=k; return p;})();
+  const id=++tweenId, t0=performance.now(), D=900;
+  const tick=now=>{
+    if(id!==tweenId) return;
+    blend=Math.min(1,(now-t0)/D);
+    if(blend>=1){ modeFrom=null; packHold=null; }
+    render();
+    if(blend<1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
 }
 document.getElementById('bBack').onclick=()=>setMode('back');
 document.getElementById('bFwd').onclick=()=>setMode('fwd');
@@ -485,8 +535,8 @@ function tAt(px){
 }
 function winTxt(){
   document.getElementById('winTxt').textContent = win
-    ? ago(win[0])+' to '+(win[1]<2?'now':ago(win[1])) : 'the whole line';
-  document.getElementById('whole').disabled = !win;
+    ? ago(win[0])+' to '+(win[1]<2?'now':ago(win[1])) : '';
+  document.getElementById('whole').hidden = !win;
 }
 function setWin(w){
   if(w){
@@ -552,7 +602,7 @@ function runFind(q){
   document.getElementById('findTxt').textContent = !finding ? ''
     : hits.length===0 ? 'nothing by that name'
     : hits.length+(hits.length===1?' match':' matches');
-  document.getElementById('fitFind').disabled = hits.length<1;
+  document.getElementById('fitFind').hidden = hits.length<1;
   render();
 }
 function step(){
@@ -585,6 +635,41 @@ document.getElementById('fitFind').onclick=()=>{
 const findBox=document.getElementById('find');
 findBox.addEventListener('input',e=>runFind(e.target.value));
 findBox.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); step(); } });
+
+/* ---- zoom about the pointer, and the arrow keys ---- */
+el.addEventListener('wheel',ev=>{
+  // a plain wheel scrolls the page; with Ctrl or Command (or a pinch,
+  // which arrives as one) it zooms the line about the pointer
+  if(!ev.ctrlKey&&!ev.metaKey) return;
+  ev.preventDefault();
+  const w=W-L-R, px=Math.min(W-R,Math.max(L,svgX(ev)));
+  const a=win?u(win[0]):0, b=win?u(win[1]):1;
+  const at=a+(px-L)/w*(b-a);
+  const f=Math.exp(ev.deltaY*0.0025), half0=(b-a);
+  let na=at-(at-a)*f, nb=at+(b-at)*f;
+  if(nb-na>=1){ setWin(null); return; }
+  if(na<0){ nb-=na; na=0; } if(nb>1){ na-=nb-1; nb=1; }
+  if(nb-na<0.004) return;
+  setWin([tOfU(Math.max(0,na)), tOfU(Math.min(1,nb))]);
+},{passive:false});
+function stepEv(d){
+  const i=Math.max(0,Math.min(EV.length-1,(curDet<0?cur:cur)+d));
+  const t=EV[i].t;
+  if(win && (t>win[0]||t<win[1])){
+    const half=Math.abs(u(win[0])-u(win[1]))/2, p=u(t);
+    let a=p-half, b=p+half;
+    if(a<0){ b-=a; a=0; } if(b>1){ a-=b-1; b=1; }
+    win=[tOfU(Math.max(0,a)), tOfU(Math.min(1,b))]; winTxt();
+  }
+  show(i);
+}
+document.addEventListener('keydown',ev=>{
+  const t=ev.target;
+  if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable)) return;
+  if(ev.key==='ArrowRight'){ ev.preventDefault(); stepEv(1); }
+  else if(ev.key==='ArrowLeft'){ ev.preventDefault(); stepEv(-1); }
+  else if(ev.key==='Escape'&&win){ setWin(null); }
+});
 
 render();
 show(0);
@@ -666,6 +751,7 @@ def main():
             .replace("__DETAIL__", detail_js)
             .replace("__STRANDS__", strands_js)
             .replace("__Y0__", str(Y0))
+            .replace("__CAPTION__", CAPTION)
             .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2)
             .replace("__NOTE3__", NOTE3)
             .replace("__FIXED__", fixed_html())

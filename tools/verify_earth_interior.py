@@ -145,15 +145,70 @@ with sync_playwright() as pw:
     s = st()
     check(abs(s["depth"] - RE * 0.5) < 25, f"dragging across the disc lands the marker at {s['depth']:.0f} km")
 
+    # the ghost Moon, the grip and the keyboard
+    check(s["moon"] is not None and abs(float(s["moon"].split("A")[1].split(",")[0]) - 330 * 1737.4 / RE) < 0.1, "the ghost Moon is drawn at 1,737 km on the section's scale")
+    check(pg.evaluate("()=>document.querySelectorAll('#marker line').length") == 2 and pg.evaluate("()=>getComputedStyle(document.getElementById('marker')).cursor") == "ns-resize", "the marker carries a grip and a resize cursor")
+    pg.click('#places button[data-d="1000"]') if pg.query_selector('#places button[data-d="1000"]') else pg.evaluate("()=>window.__earth&&document.getElementById('depth').value")
+    pg.evaluate("()=>{ const e=document.getElementById('diagram'); e.focus(); }")
+    d0 = st()["depth"]
+    pg.keyboard.press("ArrowDown")
+    pg.keyboard.press("ArrowDown")
+    pg.keyboard.press("ArrowUp")
+    check(abs(st()["depth"] - (d0 + 10)) < 1e-6, "the arrow keys nudge the marker ten kilometers when the diagram has focus")
+    pg.evaluate("()=>document.getElementById('diagram').blur()")
+    pg.evaluate("()=>document.body.focus()")
+    pg.keyboard.press("ArrowDown")
+    check(abs(st()["depth"] - (d0 + 10)) < 1e-6, "and do nothing when it does not")
+    # the earthquake: travel times straight down the depth line
+    tt = 0.0
+    ts = 0.0
+    sstop = None
+    for i in range(N):
+        rm = RE - (i + 0.5) * dr
+        if i * dr < 3:
+            continue          # the earthquake sits at the sea floor, under PREM's 3 km ocean
+        tt += dr / vp(rm)
+        sv = vs(rm)
+        if sv > 0 and sstop is None:
+            ts += dr / sv
+        elif sstop is None:
+            sstop = i * dr
+    q = st()["quake"]
+    check(abs(q["pCenter"] - tt) < 1.0 and 580 < tt < 640, f"a P wave straight down reaches the center after {q['pCenter']:.0f} s (this checker: {tt:.0f} s)")
+    check(abs(q["sCmb"] - ts) < 1.0 and abs(q["sStop"] - 2891) < 1.0, f"the S wave stops at the core-mantle boundary after {q['sCmb']:.0f} s")
+    check(pg.evaluate("()=>document.querySelector('#quakeTxt').textContent").count("after") == 2 and pg.evaluate("()=>document.getElementById('fronts')") is None, "before a run the readout gives both arrival times and no front is drawn")
+    pg.click("#quake")
+    pg.wait_for_timeout(700)
+    q = st()["quake"]
+    lbl = pg.evaluate("()=>document.getElementById('quake').textContent")
+    check(q["running"] and lbl == "Pause" and 20 < q["t"] < 120 and q["dP"] > q["dS"] > 0, f"Send an earthquake runs and shows Pause; after 0.7 s the fronts are at t = {q['t']:.0f} s, P {q['dP']:.0f} km, S {q['dS']:.0f} km")
+    check(pg.evaluate("()=>document.querySelectorAll('#fronts circle').length") == 4, "the two fronts are drawn on the depth line")
+    pg.click("#quake")
+    pg.wait_for_timeout(200)
+    q1 = st()["quake"]
+    pg.wait_for_timeout(300)
+    q2 = st()["quake"]
+    check(not q1["running"] and q1["t"] == q2["t"] and pg.evaluate("()=>document.getElementById('quake').textContent") == "Resume the earthquake", "Pause holds the fronts where they are")
+    pg.click("#quake")
+    pg.wait_for_function("()=>!window.__earth().quake.running", timeout=20000)
+    q = st()["quake"]
+    check(q["done"] and abs(q["t"] - q["pCenter"]) < 1e-6 and abs(q["dP"] - RE) < 1 and pg.evaluate("()=>document.getElementById('quake').textContent") == "Send an earthquake", "the run stops at the center and the button reads Send an earthquake again")
+    txt = pg.evaluate("()=>document.querySelector('#quakeTxt').textContent")
+    check("at the center" in txt and "stopped at the core-mantle boundary" in txt, "the readout: P at the center, S stopped at the core-mantle boundary")
+
     pg.click('#views button[data-v="profiles"]')
-    pg.wait_for_timeout(150)
+    pg.wait_for_timeout(100)
+    check(st()["anim"], "the change of view tweens")
+    pg.wait_for_function("()=>!window.__earth().anim", timeout=5000)
     s = st()
     check(s["view"] == "profiles" and s["marker"] is not None and abs(s["marker"][1] - (40 + s["depth"] / RE * 560)) < 0.6, "the profiles share the marker at the same depth")
     npath = pg.evaluate("()=>document.querySelectorAll('#esvg path').length")
     check(npath == 6, f"six curves: density, P, S, gravity, pressure, temperature ({npath})")
+    check(s["bands"] == 7 and pg.evaluate("()=>document.querySelectorAll('#fronts line').length") == 2, "the seven layers tint the panels, and the earthquake's fronts cross them")
     over = pg.evaluate("()=>{const svg=document.querySelector('#esvg'); let n=0; for(const t of svg.querySelectorAll('text')){ if(t.hasAttribute('transform')) continue; const b=t.getBBox(); if(b.x<0||b.x+b.width>980) n++; } return n;}")
     check(over == 0, "no label runs off the edge", f"{over}")
-    # drag vertically in the profiles
+    # drag vertically in the profiles (the box again: focusing the diagram scrolled the page)
+    box = pg.eval_on_selector("#esvg", "e=>{const r=e.getBoundingClientRect(); return {x:r.left,y:r.top,w:r.width,h:r.height,vh:e.viewBox.baseVal.height}}")
     pg.mouse.move(sx(300), sy(40 + 560 * 0.2))
     pg.mouse.down()
     pg.mouse.move(sx(300), sy(40 + 560 * 0.8), steps=4)
@@ -167,6 +222,11 @@ with sync_playwright() as pw:
 print("--- the copy ---")
 html = PAGE.read_text()
 check("—" not in html, "no em dashes")
+import re
+cap = re.search(r'<p class="note">(.*?)</p>', html, re.S).group(1)
+check(len(cap.split()) <= 80, f"the caption is {len(cap.split())} words")
+check('<details class="sources"><summary>Sources</summary>' in html and html.index('class="refs"') > html.index('<details class="sources">') and 'details open' not in html, "the method and references sit in a closed Sources details")
+check("1,737" in html and "moonfact" in html, "the ghost Moon's radius has its source")
 
 print()
 if fails:

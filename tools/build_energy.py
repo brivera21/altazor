@@ -160,18 +160,27 @@ for a, b, *_ in FLOWS:
 # ordered so that every remaining arrow joins neighbors or near neighbors
 order = ["rad", "chem", "elec", "kin", "grav", "ela", "mass", "nuc"]
 assert set(order) | {"th"} == keys
-CX, CY, R = 430, 385, 305
+# the drawing: a 940 by 700 frame, the ring centered in it as a slightly
+# wide ellipse so it fills the frame, nodes of radius NR
+W, H, NR = 940, 700, 48
+CX, CY, RX, RY = 470, 350, 345, 290
 pos = {"th": (CX, CY)}
+
+# where a flow's label sits along its arrow, as a fraction from the tail, for
+# the chords that cross the middle of the ring where the middle is crowded
+LABEL_AT = {"Muscle": 0.78, "Lamp": 0.62}
 for i, k in enumerate(order):
     a = -math.pi / 2 + i * 2 * math.pi / len(order)
-    pos[k] = (round(CX + R * math.cos(a), 1), round(CY + R * math.sin(a), 1))
+    pos[k] = (round(CX + RX * math.cos(a), 1), round(CY + RY * math.sin(a), 1))
 
 forms_js = json.dumps(
     [{"k": k, "l": l, "c": c, "f": f, "b": b,
       "x": pos[k][0], "y": pos[k][1]}
      for k, l, c, f, b in FORMS], separators=(",", ":"), ensure_ascii=False)
 flows_js = json.dumps(
-    [{"a": a, "b": b, "n": n, "t": t} for a, b, n, t in FLOWS],
+    [dict({"a": a, "b": b, "n": n, "t": t},
+          **({"lt": LABEL_AT[n]} if n in LABEL_AT else {}))
+     for a, b, n, t in FLOWS],
     separators=(",", ":"), ensure_ascii=False)
 const_js = json.dumps(CONST, separators=(",", ":"))
 amounts_js = json.dumps([{"l": l, "j": j} for l, j in AMOUNTS],
@@ -190,17 +199,20 @@ HTML = """<!DOCTYPE html>
 body { margin:0; background:var(--bg); color:var(--text);
   font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
 .wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
-header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:26px;
+header.site { border-top:4px solid var(--accent); padding-top:22px; margin-bottom:18px;
   display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
 .brand { font-weight:700; font-size:20px; letter-spacing:.1em; text-decoration:none; color:var(--text); }
 .brand:hover { color:var(--accent); }
 nav.site a { color:var(--muted); text-decoration:none; font-size:14px; }
 nav.site a:hover { color:var(--accent); }
-h1 { margin:0 0 12px; font-size:26px; }
+h1 { margin:0 0 8px; font-size:26px; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
-#diagram { flex:1 1 640px; min-width:0; }
-#diagram svg { width:100%; height:auto; display:block; user-select:none; }
-.side { flex:0 0 300px; position:sticky; top:16px; }
+#diagram { flex:1 1 640px; min-width:0; border-radius:12px; outline:none; }
+#diagram:focus-visible { box-shadow:0 0 0 1px var(--accent); }
+#diagram svg { width:100%; height:auto; max-height:calc(100vh - 225px); min-height:460px;
+  display:block; user-select:none; }
+#diagram text.fl { paint-order:stroke; stroke:#121212; stroke-width:4px; stroke-linejoin:round; }
+.side { flex:0 0 300px; position:sticky; top:16px; display:flex; flex-direction:column; gap:14px; }
 .card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
   padding:16px; }
 #kindTxt { font-size:12px; letter-spacing:.08em; text-transform:uppercase;
@@ -208,30 +220,60 @@ h1 { margin:0 0 12px; font-size:26px; }
 #nameTxt { font-weight:700; font-size:17px; margin:2px 0 2px; }
 #formTxt { font-size:15px; margin-bottom:8px; }
 #bodyTxt { color:var(--muted); font-size:13.5px; line-height:1.55; }
+#hintTxt { color:#6f6f6f; font-size:11.5px; line-height:1.45; margin-top:12px;
+  border-top:1px solid var(--line); padding-top:8px; }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
 .note a { color:var(--accent); }
+details.sources { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+details.sources summary { cursor:pointer; color:var(--muted); }
+details.sources summary:hover { color:var(--text); }
+details.sources .method { color:var(--muted); font-size:12.5px; margin-top:10px; }
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
 .refs p { margin:0 0 8px; }
 .refs a { color:var(--accent); }
-h2.refh { font-size:15px; margin:26px 0 8px; }
-.controls { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 12px; }
-.controls label { font-size:13px; color:var(--muted); }
+h2.refh { font-size:15px; margin:18px 0 8px; }
+.controls { display:flex; align-items:flex-start; gap:12px; flex-wrap:wrap; margin:0 0 8px; }
+.controls label { font-size:13px; color:var(--muted); padding-top:6px; }
 .controls input[type=number] { background:var(--panel); color:var(--text);
   border:1px solid var(--line); border-radius:8px; padding:6px 9px; width:190px;
   font:inherit; font-size:14px; font-variant-numeric:tabular-nums; }
-.controls input[type=range] { flex:1 1 260px; min-width:200px; accent-color:var(--accent); height:22px; }
-.presets { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 14px; }
-.presets button { background:var(--panel); color:var(--muted); border:1px solid var(--line);
-  border-radius:999px; padding:5px 11px; font-size:12.5px; cursor:pointer; font-family:inherit; }
-.presets button:hover { color:var(--text); border-color:#3d3d3d; }
-.presets button[aria-pressed=true] { color:#0b0b0b; background:var(--accent);
+.sl { flex:1 1 260px; min-width:200px; position:relative; }
+.sl input[type=range] { width:100%; accent-color:var(--accent); height:22px; margin:6px 0 0; display:block; }
+.ticks { position:relative; height:16px; }
+.ticks span { position:absolute; top:0; transform:translateX(-50%); font-size:10.5px;
+  color:var(--muted); white-space:nowrap; line-height:1; padding-top:4px; }
+.ticks span::before { content:""; position:absolute; left:50%; top:-2px; width:1px; height:4px;
+  background:#4a4a4a; }
+.amounts { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px 14px; }
+.amhead { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
+.amhead span { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+#play { background:var(--panel); color:var(--text); border:1px solid #3d3d3d;
+  border-radius:8px; padding:4px 12px; font-size:12.5px; cursor:pointer; font-family:inherit; min-width:64px; }
+#play:hover { border-color:var(--accent); }
+#play[aria-pressed=true] { background:var(--accent); color:#0b0b0b; border-color:var(--accent); font-weight:700; }
+#presets { display:flex; flex-direction:column; gap:3px; }
+#presets button { display:flex; justify-content:space-between; gap:10px; width:100%; text-align:left;
+  background:transparent; color:var(--muted); border:1px solid transparent;
+  border-radius:8px; padding:2px 9px; font-size:12.5px; cursor:pointer; font-family:inherit; }
+#presets button .j { color:#6f6f6f; font-variant-numeric:tabular-nums; white-space:nowrap; }
+#presets button:hover { color:var(--text); border-color:#3d3d3d; }
+#presets button[aria-pressed=true] { color:#0b0b0b; background:var(--accent);
   border-color:var(--accent); font-weight:700; }
+#presets button[aria-pressed=true] .j { color:#0b0b0b; }
 #solveTxt { font-size:14px; margin:8px 0 2px; font-variant-numeric:tabular-nums; }
 #assumeTxt { color:var(--muted); font-size:12px; margin-bottom:8px; }
-.method { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px;
-  border-top:1px solid var(--line); padding-top:12px; }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+.method { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+@media (max-width:900px){
+  .stage{flex-direction:column;} .side{display:contents;}
+  .card{order:-1; width:100%;} .amounts{width:100%;}
+  #diagram{width:100%; flex-basis:auto;} #diagram svg{max-height:none; min-height:0;}
+}
+@media (max-width:600px){
+  #diagram{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  #diagram svg{min-width:680px;}
+  .ticks span.minor{display:none;}
+}
 </style>
 </head>
 <body>
@@ -244,37 +286,47 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <div class="controls">
   <label for="joules">joules</label>
   <input type="number" id="joules" value="1" step="any" min="0">
-  <input type="range" id="mag" min="-2100" max="2100" step="1" value="0"
-    aria-label="joules, by powers of ten">
+  <div class="sl">
+    <input type="range" id="mag" min="-2100" max="2100" step="1" value="0"
+      aria-label="joules, by powers of ten">
+    <div class="ticks" id="ticks"></div>
+  </div>
 </div>
-<div class="presets" id="presets"></div>
 <div class="stage">
-  <div id="diagram"></div>
-  <div class="side"><div class="card">
-    <div id="kindTxt"></div>
-    <div id="nameTxt">Hover a form or an arrow</div>
-    <div id="formTxt"></div>
-    <div id="solveTxt"></div>
-    <div id="assumeTxt"></div>
-    <div id="bodyTxt"></div>
-  </div></div>
+  <div id="diagram" tabindex="0" aria-label="the nine forms of energy and the arrows between them"></div>
+  <div class="side">
+    <div class="card">
+      <div id="kindTxt"></div>
+      <div id="nameTxt"></div>
+      <div id="formTxt"></div>
+      <div id="solveTxt"></div>
+      <div id="assumeTxt"></div>
+      <div id="bodyTxt"></div>
+      <div id="hintTxt">The card follows the pointer. A click pins a form and lights
+      only its arrows, a second click on a lit neighbor sends the amount along the
+      arrow, and a form drags up or down to change the amount.</div>
+    </div>
+    <div class="amounts">
+      <div class="amhead"><span>Measured amounts</span>
+        <button type="button" id="play" aria-pressed="false">Play</button></div>
+      <div id="presets"></div>
+    </div>
+  </div>
 </div>
-<p class="note">The nine forms energy takes, and the arrows physics has found
-between them. A form or an arrow under the cursor fills the card; a click on
-a form keeps only its own arrows lit, and a click on the background lets go.
-The total along any chain of arrows never changes, which is the first law.</p>
-<p class="note">The amount set above the ring runs through all nine formulas
-at once, so the same joules appear as a speed, a height, a stretch of spring,
-a mass of sugar, a charge, a count of photons, a count of fissions, a rest
-mass and a temperature rise. Four arrows point into thermal energy and only
-two lead out, and the one back to motion pays a toll set by the two
-temperatures. That one-way traffic is the second law.</p>
-<div class="method"><p>Each formula is solved on a stated reference case: a
-one kilogram mass for speed and for height, standard gravity at 9.80665
-meters per second squared, a spring of 100 newtons per meter, carbohydrate at
-the Atwater factor of 17 kilojoules per gram, one alkaline cell at 1.5 volts,
-green light at 550 nanometers, 202.5 megaelectronvolts recovered per fission
-of uranium-235, and one mole of a monatomic gas. Speed is worked
+<p class="note">The nine forms energy takes and the arrows physics has found
+between them. One amount runs through all nine formulas at once, so the same
+joules read as a speed, a height, a mass of sugar, a charge, photons and a
+temperature rise. Four arrows lead into thermal energy and two lead out, which
+is the second law.</p>
+<details class="sources"><summary>Sources</summary>
+<div class="method"><p>The total along any chain of arrows never changes, which
+is the first law; the one arrow back from heat to motion pays a toll set by the
+two temperatures, which is the second. Each formula is solved on a stated
+reference case: a one kilogram mass for speed and for height, standard gravity
+at 9.80665 meters per second squared, a spring of 100 newtons per meter,
+carbohydrate at the Atwater factor of 17 kilojoules per gram, one alkaline cell
+at 1.5 volts, green light at 550 nanometers, 202.5 megaelectronvolts recovered
+per fission of uranium-235, and one mole of a monatomic gas. Speed is worked
 relativistically, since above roughly a tenth of the speed of light the
 half-m-v-squared answer would pass the speed of light; below that the two
 agree to better than a percent. The other formulas are given their own
@@ -310,10 +362,13 @@ Meteorological Laboratory. (2023). How much energy does a hurricane release?
 In <i>Hurricane research division frequently asked questions</i>.
 <a href="https://www.aoml.noaa.gov/hrd-faq/">https://www.aoml.noaa.gov/hrd-faq/</a></p>
 </div>
+</details>
 </div>
 <script>
 const FORMS=__FORMS__, FLOWS=__FLOWS__, K=__CONST__, AMOUNTS=__AMOUNTS__;
-const W=980,H=770;
+const W=__W__,H=__H__;
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ease=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
 let E=1;                                  // the amount on the ring, in joules
 
 /* ---- numbers ---- */
@@ -352,23 +407,23 @@ const SOLVE={
     const v=beta*K.c;
     const dp=Math.min(12,Math.max(3,Math.ceil(-Math.log10(gap))+2));
     const asC=beta.toFixed(dp)+'c';
-    return [beta<0.01?si(v,'m/s'):asC, '',
+    return [beta<0.01?si(v,'m/s'):asC, 'of speed',
       beta<0.01 ? 'v = √(2E / m) = '+si(v,'m/s')+', which is '+
           sci(beta*100,2)+'% of the speed of light'
         : 'v = '+asC+', or '+si(v,'m/s')+', short of light by '+sci(gap,2)+' of it',
       'a mass of one kilogram, worked relativistically'];
   },
   grav:e=>{ const h=e/(K.m_ref*K.g);
-    return [si(h,'m'), '', 'h = E / mg = '+si(h,'m'),
+    return [si(h,'m'), 'of height', 'h = E / mg = '+si(h,'m'),
       'a mass of one kilogram, gravity at 9.80665 m/s²']; },
   ela:e=>{ const x=Math.sqrt(2*e/K.k_spring);
-    return [si(x,'m'), '', 'x = √(2E / k) = '+si(x,'m'),
+    return [si(x,'m'), 'of stretch', 'x = √(2E / k) = '+si(x,'m'),
       'a spring of 100 newtons per meter']; },
   chem:e=>{ const m=e/K.sugar;
     return [si(m,'g'), 'of sugar', 'm = E / 17 kJ per gram = '+si(m,'g'),
       'carbohydrate at the Atwater factor']; },
   elec:e=>{ const q=e/K.volt;
-    return [si(q,'C'), '', 'q = E / V = '+si(q,'C')+', or '+si(q/3600,'Ah')+
+    return [si(q,'C'), 'of charge', 'q = E / V = '+si(q,'C')+', or '+si(q/3600,'Ah')+
       ' drawn from the cell', 'one alkaline cell at 1.5 volts']; },
   rad:e=>{ const ph=K.h*K.c/K.green, n=e/ph, lam=K.h*K.c/e;
     return [count(n), 'photons', 'N = E λ / hc = '+count(n)+' photons'+
@@ -380,7 +435,7 @@ const SOLVE={
       ' fissions, which is '+si(n*235/6.02214076e23,'g')+' of uranium-235',
       'uranium-235, 202.5 MeV recovered per fission']; },
   mass:e=>{ const m=e/(K.c*K.c)*1000;   // grams, since E/c² is kilograms
-    return [si(m,'g'), '', 'm = E / c² = '+si(m,'g'),
+    return [si(m,'g'), 'of matter', 'm = E / c² = '+si(m,'g'),
       'the full conversion, at the speed of light squared']; },
   th:e=>{ const dT=2*e/(3*K.R);
     return [si(dT,'K'), 'for a mole', 'ΔT = 2E / 3R = '+si(dT,'K')+' for the mole',
@@ -391,18 +446,24 @@ const byK={}; for(const f of FORMS) byK[f.k]=f;
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
 let sel=null;
 
-function arc(a,b,off){
+function arc(a,b,off,t){
   // a gentle curve from node a to node b, trimmed at the node circles
   const A=byK[a], B=byK[b];
   const dx=B.x-A.x, dy=B.y-A.y, d=Math.hypot(dx,dy);
   const ux=dx/d, uy=dy/d;
-  const r=56;
+  const r=__NR__+6;
   const x1=A.x+ux*r, y1=A.y+uy*r, x2=B.x-ux*r, y2=B.y-uy*r;
   const mx=(x1+x2)/2-uy*off, my=(y1+y2)/2+ux*off;
   // the label rides its own curve, pushed a little further out on the
-  // same side, so paired arrows keep their names apart
+  // same side, so paired arrows keep their names apart; a flow may ask
+  // for its label at a point other than the middle of the arrow
   const lo=off/2+14;
-  const lx=(x1+x2)/2-uy*lo, ly=(y1+y2)/2+ux*lo-4;
+  const tt=t===undefined?0.5:t;
+  const px=(1-tt)*(1-tt)*x1+2*(1-tt)*tt*mx+tt*tt*x2;
+  const py=(1-tt)*(1-tt)*y1+2*(1-tt)*tt*my+tt*tt*y2;
+  const sx=(1-tt)*(1-tt)*x1+2*(1-tt)*tt*(x1+x2)/2+tt*tt*x2;
+  const sy=(1-tt)*(1-tt)*y1+2*(1-tt)*tt*(y1+y2)/2+tt*tt*y2;
+  const lx=sx-uy*lo+(px-sx), ly=sy+ux*lo+(py-sy)-4;
   return {x1,y1,x2,y2,mx,my,lx,ly};
 }
 function render(){
@@ -419,15 +480,15 @@ function render(){
   for(const fl of FLOWS) pair[fl.a+'>'+fl.b]=true;
   FLOWS.forEach((fl,i)=>{
     const two=pair[fl.b+'>'+fl.a];
-    const g=arc(fl.a,fl.b,two?26:14);
+    const g=arc(fl.a,fl.b,two?26:14,fl.lt);
     const c=byK[fl.a].c;
     const lit = sel===null || fl.a===sel || fl.b===sel;
     s+=`<g data-fl="${i}" opacity="${lit?1:0.13}" style="cursor:default">
       <path d="M${g.x1},${g.y1} Q${g.mx},${g.my} ${g.x2},${g.y2}"
         fill="none" stroke="${c}" stroke-width="1.7" marker-end="url(#m-${fl.a})"/>
       <path d="M${g.x1},${g.y1} Q${g.mx},${g.my} ${g.x2},${g.y2}"
-        fill="none" stroke="#fff" stroke-opacity="0" stroke-width="14"/>
-      <text x="${g.lx}" y="${g.ly}"
+        fill="none" stroke="#fff" stroke-opacity="0" stroke-width="18"/>
+      <text class="fl" x="${g.lx}" y="${g.ly}"
         text-anchor="middle" font-size="11" fill="${c}"
         pointer-events="none">${esc(fl.n)}</text></g>`;
   });
@@ -435,8 +496,9 @@ function render(){
   for(const f of FORMS){
     const lit = sel===null || f.k===sel ||
       FLOWS.some(fl=>(fl.a===sel&&fl.b===f.k)||(fl.b===sel&&fl.a===f.k));
-    s+=`<g data-f="${f.k}" opacity="${lit?1:0.2}" style="cursor:default">
-      <circle cx="${f.x}" cy="${f.y}" r="50" fill="${f.c}"
+    const sol=SOLVE[f.k](E);
+    s+=`<g data-f="${f.k}" opacity="${lit?1:0.2}" style="cursor:pointer">
+      <circle cx="${f.x}" cy="${f.y}" r="__NR__" fill="${f.c}"
         fill-opacity="0.16" stroke="${f.c}" stroke-width="${f.k===sel?2.6:1.6}"/>
       <text x="${f.x}" y="${f.y-17}" text-anchor="middle" font-size="12.5"
         font-weight="700" fill="#e6e6e6" pointer-events="none">${esc(f.l)}</text>
@@ -444,9 +506,9 @@ function render(){
         fill="${f.c}" pointer-events="none">${esc(f.f)}</text>
       <text x="${f.x}" y="${f.y+17}" text-anchor="middle" font-size="11.5"
         font-weight="700" fill="#e6e6e6" pointer-events="none"
-        data-sol="${f.k}">${esc(SOLVE[f.k](E)[0])}</text>
+        data-sol="${f.k}">${esc(sol[0])}</text>
       <text x="${f.x}" y="${f.y+30}" text-anchor="middle" font-size="9.5"
-        fill="${f.c}" pointer-events="none">${esc(SOLVE[f.k](E)[1])}</text></g>`;
+        fill="${f.c}" pointer-events="none">${esc(sol[1])}</text></g>`;
   }
   s+='</svg>';
   el.innerHTML=s;
@@ -474,19 +536,89 @@ function showFlow(i){
   document.getElementById('assumeTxt').textContent='';
   document.getElementById('bodyTxt').textContent=fl.t;
 }
+// the card for an amount sent along one arrow: the same joules read at both ends
+function showChain(i){
+  const fl=FLOWS[i], A=SOLVE[fl.a](E), B=SOLVE[fl.b](E);
+  showFlow(i);
+  const sv=document.getElementById('solveTxt');
+  sv.textContent=A[0]+(A[1]?' '+A[1]:'')+' \\u2192 '+B[0]+(B[1]?' '+B[1]:'');
+  sv.style.color=byK[fl.b].c;
+  document.getElementById('assumeTxt').textContent='the same '+si(E,'J')+' at both ends';
+}
+// a packet of energy travels the arrow, then the far form is the pinned one
+let packet=null;
+function travel(i,done){
+  const svg=el.querySelector('#ensvg');
+  const path=svg.querySelector(`[data-fl="${i}"] path`);
+  const L=path.getTotalLength(), c=byK[FLOWS[i].a].c;
+  if(packet) packet.cancel();
+  if(RM){ done(); return; }
+  const NS='http://www.w3.org/2000/svg';
+  const g=document.createElementNS(NS,'g'); g.setAttribute('class','packet');
+  g.innerHTML=`<circle r="13" fill="${c}" fill-opacity="0.25"/><circle r="5.5" fill="#fff"/>`;
+  svg.appendChild(g);
+  const t0=performance.now(), D=900;
+  let raf=0;
+  const me={cancel(){ cancelAnimationFrame(raf); g.remove(); packet=null; }};
+  packet=me;
+  const tick=now=>{
+    if(!g.isConnected){ packet=null; return; }
+    const u=Math.min(1,(now-t0)/D), p=path.getPointAtLength(L*ease(u));
+    g.setAttribute('transform',`translate(${p.x},${p.y})`);
+    if(u<1) raf=requestAnimationFrame(tick);
+    else { g.remove(); packet=null; done(); }
+  };
+  raf=requestAnimationFrame(tick);
+}
+let card='kin', drag=null, moved=false;
 el.addEventListener('pointerover',e=>{
+  if(drag&&moved) return;
   const g=e.target.closest('[data-f]');
-  if(g){ card=g.getAttribute('data-f'); showForm(card); return; }
+  if(g){ showForm(g.getAttribute('data-f')); return; }
   const a=e.target.closest('[data-fl]');
   if(a){ showFlow(+a.getAttribute('data-fl')); }
 });
-el.addEventListener('click',e=>{
+// when the pointer leaves the ring the card returns to the pinned form
+el.addEventListener('pointerleave',()=>{ if(!drag) showForm(card); });
+// a form drags up or down to change the amount, one decade per 140 px
+el.addEventListener('pointerdown',e=>{
   const g=e.target.closest('[data-f]');
-  if(g){ const k=g.getAttribute('data-f');
-    sel = sel===k?null:k; card=k; render(); showForm(k); return; }
-  if(e.target.closest('[data-bg]')){ sel=null; render(); }
+  if(!g||e.pointerType==='touch'||e.button!==0) return;
+  drag={k:g.getAttribute('data-f'),y:e.clientY,E0:E}; moved=false;
+  el.setPointerCapture(e.pointerId);
 });
-let card='kin';
+el.addEventListener('pointermove',e=>{
+  if(!drag) return;
+  const dy=e.clientY-drag.y;
+  if(!moved&&Math.abs(dy)<4) return;
+  moved=true; card=drag.k;
+  setE(drag.E0*Math.pow(10,-dy/140));
+});
+el.addEventListener('pointerup',()=>{ drag=null; });
+el.addEventListener('pointercancel',()=>{ drag=null; moved=false; });
+function pick(k){
+  if(sel&&sel!==k){
+    const i=FLOWS.findIndex(f=>f.a===sel&&f.b===k);
+    if(i>=0){ showChain(i);
+      travel(i,()=>{ sel=k; card=k; render(); showChain(i); }); return; }
+  }
+  sel = sel===k?null:k; card=k; render(); showForm(k);
+}
+el.addEventListener('click',e=>{
+  if(moved){ moved=false; return; }        // the end of a drag, not a click
+  const g=e.target.closest('[data-f]');
+  if(g){ pick(g.getAttribute('data-f')); return; }
+  if(e.target.closest('[data-bg]')){ sel=null; render(); showForm(card); }
+});
+function stepDecade(d){ setE(Math.pow(10,Math.round(Math.log10(E))+d)); }
+const KEYS={ArrowRight:1,ArrowUp:1,ArrowLeft:-1,ArrowDown:-1};
+el.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ sel=null; render(); showForm(card); return; }
+  if(e.key in KEYS){ e.preventDefault(); stepDecade(KEYS[e.key]); }
+});
+document.getElementById('mag').addEventListener('keydown',e=>{
+  if(e.key in KEYS){ e.preventDefault(); stepDecade(KEYS[e.key]); }
+});
 const EMIN=-21, EMAX=21;
 function setE(j,fromBox){
   if(!(j>0)||!isFinite(j)) return;
@@ -502,26 +634,69 @@ function setE(j,fromBox){
   render();
   showForm(card);
 }
+// decade ticks under the slider, at the slider's own positions
+const TICKS=[[-21,'zJ',1],[Math.log10(1.602176634e-19),'eV',0],[-15,'fJ',1],[-12,'pJ',0],
+  [-9,'nJ',1],[-6,'µJ',0],[-3,'mJ',1],[0,'J',0],[3,'kJ',1],[6,'MJ',0],[9,'GJ',1],
+  [12,'TJ',0],[15,'PJ',1],[18,'EJ',0],[21,'ZJ',1]];
+document.getElementById('ticks').innerHTML=TICKS.map(([d,l,minor])=>{
+  const f=(d-EMIN)/(EMAX-EMIN);
+  return `<span class="${minor?'minor':''}" style="left:calc(8px + ${f} * (100% - 16px))">${l}</span>`;
+}).join('');
 document.getElementById('presets').innerHTML=AMOUNTS.map(
-  a=>'<button type="button" data-j="'+a.j+'">'+a.l+'</button>').join('');
+  a=>'<button type="button" data-j="'+a.j+'"><span class="l">'+a.l+'</span><span class="j">'+si(a.j,'J')+'</span></button>').join('');
 document.getElementById('presets').addEventListener('click',e=>{
-  const b=e.target.closest('button'); if(b) setE(+b.dataset.j);
+  const b=e.target.closest('button'); if(b){ stopPlay(); setE(+b.dataset.j); }
 });
 document.getElementById('mag').addEventListener('input',e=>
   setE(Math.pow(10,+e.target.value/100)));
 document.getElementById('joules').addEventListener('input',e=>
   setE(+e.target.value,true));
+// Play walks the measured amounts from the electronvolt to the hurricane,
+// forty decades, with every form's number ticking up on the way
+const playBtn=document.getElementById('play');
+let playing=null;
+function stopPlay(){
+  if(!playing) return;
+  cancelAnimationFrame(playing.raf); clearTimeout(playing.t); playing=null;
+  playBtn.textContent='Play'; playBtn.setAttribute('aria-pressed','false');
+}
+function play(){
+  if(playing){ stopPlay(); return; }
+  const mags=AMOUNTS.map(a=>Math.log10(a.j));
+  let i=Math.max(0,mags.findIndex(m=>Math.abs(m-Math.log10(E))<1e-9));
+  if(i>=mags.length-1) i=0;
+  setE(Math.pow(10,mags[i]));
+  playing={raf:0,t:0};
+  playBtn.textContent='Pause'; playBtn.setAttribute('aria-pressed','true');
+  const step=()=>{
+    if(i>=mags.length-1){ stopPlay(); return; }
+    const a=mags[i], b=mags[i+1]; i++;
+    if(RM){ setE(Math.pow(10,b)); playing.t=setTimeout(step,900); return; }
+    const t0=performance.now(), D=1100;
+    const tick=now=>{
+      const u=Math.min(1,(now-t0)/D);
+      setE(Math.pow(10,a+(b-a)*ease(u)));
+      if(u<1) playing.raf=requestAnimationFrame(tick);
+      else playing.t=setTimeout(step,400);
+    };
+    playing.raf=requestAnimationFrame(tick);
+  };
+  playing.t=setTimeout(step,400);
+}
+playBtn.addEventListener('click',play);
 
 render();
 setE(1);
-window.__en=()=>({sel,E,forms:FORMS.length,flows:FLOWS.length});
+window.__en=()=>({sel,E,forms:FORMS.length,flows:FLOWS.length,playing:!!playing});
 </script>
 </body>
 </html>
 """
 
 html = (HTML.replace("__FORMS__", forms_js).replace("__FLOWS__", flows_js)
-        .replace("__CONST__", const_js).replace("__AMOUNTS__", amounts_js))
+        .replace("__CONST__", const_js).replace("__AMOUNTS__", amounts_js)
+        .replace("__W__", str(W)).replace("__H__", str(H))
+        .replace("__NR__", str(NR)))
 html = apa.css_pass(html)
 OUT.write_text(html, encoding="utf-8")
 into_th = sum(1 for a, b, *_ in FLOWS if b == "th")

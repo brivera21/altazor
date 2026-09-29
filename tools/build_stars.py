@@ -36,6 +36,12 @@ NOTE2 = ("The sliders set a star's mass and carry it through its life. The "
          "star or black hole, off the diagram, if it began with more than "
          "about eight suns.")
 
+CAPTION = ("Every star is a point here: its light against its surface "
+           "temperature, hot on the left as Russell drew it in 1914. Most fall "
+           "on the main sequence, where mass alone sets the place. The sliders "
+           "choose a star's mass and carry it through its life, from the main "
+           "sequence to the giants and on to its end.")
+
 METHOD = ("The named stars carry the temperature, luminosity, mass and "
           "distance their Wikipedia article gives, cited one by one; the "
           "radius on the card is worked from the first two, since luminosity "
@@ -88,6 +94,17 @@ h1 { margin:0 0 12px; font-size:26px; }
   border-radius:999px; padding:5px 11px; font-size:12.5px; cursor:pointer; font-family:inherit; }
 .presets button:hover { color:var(--text); border-color:#3d3d3d; }
 .presets button[aria-pressed=true] { color:#0b0b0b; background:var(--accent); border-color:var(--accent); font-weight:700; }
+.presets #play { color:var(--text); border-color:#3d3d3d; border-radius:8px; min-width:64px; margin-right:8px; }
+.presets #play:hover { border-color:var(--accent); }
+.presets #play[aria-pressed=true] { background:var(--accent); color:#0b0b0b; border-color:var(--accent); }
+.controls output { min-width:17em; }
+#diagram { border-radius:12px; outline:none; }
+#diagram:focus-visible { box-shadow:0 0 0 1px var(--accent); }
+#diagram text.halo { paint-order:stroke; stroke:#121212; stroke-width:3px; stroke-linejoin:round; }
+details.sources { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+details.sources summary { cursor:pointer; }
+details.sources summary:hover { color:var(--text); }
+details.sources .note { border-top:none; padding-top:0; margin-top:10px; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
 #diagram { flex:1 1 640px; min-width:0; }
 #diagram svg { width:100%; height:auto; display:block; user-select:none; }
@@ -108,7 +125,10 @@ h1 { margin:0 0 12px; font-size:26px; }
 .refs a { color:var(--accent); }
 __APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%; order:-1;}
+  #diagram{width:100%; flex-basis:auto;} }
+@media (max-width:600px){ #diagram{overflow-x:auto; -webkit-overflow-scrolling:touch;} #diagram svg{min-width:680px;}
+  .controls{grid-template-columns:auto 1fr;} .controls output{grid-column:1 / -1; min-width:0; margin-top:-6px;} }
 </style>
 </head>
 <body>
@@ -122,22 +142,25 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   <label for="mass">mass</label><input type="range" id="mass" min="-100" max="160" step="1" value="0"><output id="massOut"></output>
   <label for="life">life</label><input type="range" id="life" min="0" max="1150" step="1" value="0"><output id="lifeOut"></output>
 </div>
-<div class="presets" id="presets"></div>
+<div class="presets"><button type="button" id="play" aria-pressed="false">Play</button><span class="presets" id="presets" style="margin:0"></span></div>
 <div class="stage">
-  <div id="diagram"></div>
+  <div id="diagram" tabindex="0" aria-label="the Hertzsprung-Russell diagram, with a chosen star and its life"></div>
   <div class="side"><div class="card">
     <div id="kindTxt"></div>
-    <div id="nameTxt">A star under the cursor lands here</div>
+    <div id="nameTxt"></div>
     <div id="numTxt"></div>
     <div id="bodyTxt"></div>
     <div id="srcTxt"></div>
   </div></div>
 </div>
+<p class="note">__CAPTION__</p>
+<details class="sources"><summary>Sources</summary>
 <p class="note">__NOTE1__</p>
-<p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
+<p class="note">__NOTE2__</p>
 <div class="method"><p>__METHOD__</p></div>
 <h2 class="refh">References</h2>
 <div class="refs">__REFS__</div>
+</details>
 </div>
 <script>
 const STARS=__STARS__, CLASSES=__CLASSES__, MS=__MS__;
@@ -149,12 +172,17 @@ const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const X=T=>P.x+(Math.log10(T)-LT0)/(LT1-LT0)*P.w;
 const Y=L=>P.y+P.h-(Math.log10(L)-LL0)/(LL1-LL0)*P.h;
 const TSUN=5772;
-let mass=1, life=0, hot=null;
+let mass=1, life=0, hot=null, hotCls=null;
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+// the size of a star's disc from its radius in Suns: 12 px for the Sun,
+// about 22 at a hundred, 4 for a white dwarf
+const discR=R=>Math.max(3.5,Math.min(26,3+4.5*Math.log10(R*100+1)));
 
 /* ---- numbers ---- */
 const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
 const sup=n=>String(n).split('').map(c=>SUP[c]||c).join('');
 function num(v){
+  if(v===0) return '0';
   if(v>=1e5||v<0.001){ let e=Math.floor(Math.log10(v)), m=v/Math.pow(10,e); if(m>=9.995){m/=10;e++;} return m.toFixed(1)+'×10'+sup(e); }
   if(v>=100) return Math.round(v).toLocaleString('en-US');
   if(v>=10) return v.toFixed(1);
@@ -240,6 +268,16 @@ function showStar(s){
     ['mass',s.M?num(s.M)+' Suns':'not well known'],['distance',s.d<0.001?'8 light minutes':num(s.d)+' light years']],
     s.b,'Wikipedia, '+s.n.replace(/ A$| B$| Aa$| A\\b/,''));
 }
+function showClass(c){
+  const k=CLASSES.find(q=>q[0]===c); if(!k) return;
+  const hi=Math.min(k[2],120000), lo=Math.max(k[1],2300);
+  const named=STARS.filter(st=>cls(st.T)===c).map(st=>st.n);
+  card('A spectral class','Class '+c,
+    [['surface',lo.toLocaleString('en-US')+' to '+hi.toLocaleString('en-US')+' K'+(k[2]>120000?' and hotter':'')+(k[1]<2300?' and cooler':'')],
+     ['named here',named.length?named.slice(0,6).join(', ')+(named.length>6?', and '+(named.length-6)+' more':''):'none']],
+    'The letters sort stars by the lines in their spectra, and the order O B A F G K M runs from the hottest to the coolest. The band behind each letter spans its temperatures.',
+    'Pecaut and Mamajek 2013');
+}
 function showLife(){
   const a=at(mass,life), tl=lifetime(mass), age=life<=1?life*tl:tl*(1+(life-1)*0.3);
   const fate=mass<8?(mass<0.5?'a helium white dwarf, in a time longer than the universe has existed':'a white dwarf')
@@ -262,7 +300,8 @@ function render(){
   for(const [c,lo,hi,col] of CLASSES){
     const x0=X(Math.min(hi,120000)), x1=X(Math.max(lo,2300));
     s+='<rect x="'+x0.toFixed(1)+'" y="'+P.y+'" width="'+(x1-x0).toFixed(1)+'" height="'+P.h+'" fill="'+col+'" fill-opacity="0.045"/>';
-    s+='<text x="'+((x0+x1)/2).toFixed(1)+'" y="'+(P.y+16)+'" text-anchor="middle" font-size="13" font-weight="700" fill="'+col+'" fill-opacity="0.7">'+c+'</text>';
+    s+='<g data-cls="'+c+'" style="cursor:pointer"><rect x="'+x0.toFixed(1)+'" y="'+P.y+'" width="'+(x1-x0).toFixed(1)+'" height="24" fill="'+col+'" fill-opacity="'+(hotCls===c?0.16:0)+'"/>'+
+       '<text x="'+((x0+x1)/2).toFixed(1)+'" y="'+(P.y+16)+'" text-anchor="middle" font-size="13" font-weight="700" fill="'+col+'" fill-opacity="'+(hotCls===c?1:0.7)+'">'+c+'</text></g>';
   }
   s+='<rect x="'+P.x+'" y="'+P.y+'" width="'+P.w+'" height="'+P.h+'" fill="none" stroke="#2b2b2b"/>';
   // radius lines: log L = 2 log R + 4 log(T/Tsun)
@@ -285,38 +324,75 @@ function render(){
   for(const [x,y,t] of [[X(9000),Y(700),'main sequence'],[X(4200),Y(300)-14,'giants'],[X(6000),Y(1.2e5)-16,'supergiants'],[X(15000),Y(0.003)+22,'white dwarfs']])
     s+='<text x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" text-anchor="middle" font-size="12" fill="#6b7280" font-style="italic">'+t+'</text>';
   // the life track of the chosen mass
+  // drawn only as far as the life has gone, so the path appears as the star takes it
   const k=track(mass), pts=[];
-  for(let f=0; f<=1.15; f+=0.0025){ const a=at(mass,f); if(a.ended) break; pts.push(X(a.T).toFixed(1)+','+Y(a.L).toFixed(1)); }
-  s+='<polyline points="'+pts.join(' ')+'" fill="none" stroke="#58a6ff" stroke-width="2" stroke-opacity="0.85" stroke-linejoin="round"/>';
-  for(const [f,T,L] of k) s+='<circle cx="'+X(T).toFixed(1)+'" cy="'+Y(L).toFixed(1)+'" r="2.2" fill="#58a6ff" fill-opacity="0.6"/>';
-  // the named stars, labels nudged down where two sit on top of each other
-  const placed=[];
-  for(let i=0;i<STARS.length;i++){
-    const st=STARS[i], x=X(st.T), y=Y(st.L), r=Math.max(3,Math.min(9,3+Math.log10(radius(st.T,st.L)+1)*2.2));
-    const isHot=hot===i;
-    let ly=y+3.5;
-    for(const q of placed) if(Math.abs(q.x-x)<70 && Math.abs(q.ly-ly)<11) ly=q.ly+11;
-    placed.push({x,ly});
-    s+='<g data-i="'+i+'" style="cursor:pointer">'+
-       '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+color(st.T)+'" stroke="'+(isHot?'#ffffff':'#121212')+'" stroke-width="'+(isHot?1.8:1)+'"/>'+
-       (st.n==='the Sun'?'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r+4)+'" fill="none" stroke="#ffb02e" stroke-width="1.3"/>':'')+
-       '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r+5)+'" fill="transparent"/>'+
-       '<text x="'+(x+r+4).toFixed(1)+'" y="'+ly.toFixed(1)+'" font-size="10" fill="'+(isHot?'#ffffff':'#8a94a6')+'">'+esc(st.n)+'</text></g>';
-  }
-  // the chosen star now
+  for(let f=0; f<life; f+=0.0025){ const a=at(mass,f); if(a.ended) break; pts.push(X(a.T).toFixed(1)+','+Y(a.L).toFixed(1)); }
+  const an=at(mass,life); if(!an.ended) pts.push(X(an.T).toFixed(1)+','+Y(an.L).toFixed(1));
+  if(pts.length>1) s+='<polyline id="track" points="'+pts.join(' ')+'" fill="none" stroke="#58a6ff" stroke-width="2" stroke-opacity="0.85" stroke-linejoin="round"/>';
+  for(const [f,T,L] of k) if(f<=life) s+='<circle cx="'+X(T).toFixed(1)+'" cy="'+Y(L).toFixed(1)+'" r="2.2" fill="#58a6ff" fill-opacity="0.6"/>';
+  let nowLabel='';
+  // the chosen star now, under the names so they stay legible on it
   const a=at(mass,life);
   if(!a.ended){
-    const x=X(a.T), y=Y(a.L), r=Math.max(4,Math.min(16,4+Math.log10(radius(a.T,a.L)+1)*3));
-    s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r+5)+'" fill="none" stroke="#58a6ff" stroke-width="1.5"/>';
-    s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+color(a.T)+'" stroke="#58a6ff" stroke-width="1.5" data-now="1"/>';
+    const x=X(a.T), y=Y(a.L), r=discR(radius(a.T,a.L));
+    s+='<g id="now" style="cursor:grab"><circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r+5)+'" fill="none" stroke="#58a6ff" stroke-width="1.5"/>';
+    s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+color(a.T)+'" fill-opacity="0.85" stroke="#58a6ff" stroke-width="1.5" data-now="1"/>';
+    s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+Math.max(r+9,16)+'" fill="transparent" data-now="1"/>';
+    // its name goes to the first corner clear of the other names
+    const tw=92, cands=[[x+r+6,y-r+2,'start'],[x-r-6,y-r+2,'end'],[x+r+6,y+r+8,'start'],[x-r-6,y+r+8,'end']];
+    const clear=([cx,cy,an])=>{ const b=an==='start'?[cx,cy-9,cx+tw,cy+2]:[cx-tw,cy-9,cx,cy+2];
+      if(b[0]<P.x||b[2]>P.x+P.w||b[1]<P.y+24||b[3]>P.y+P.h) return false;
+      return LAB.every((q,i)=>{ const w=STARS[i].n.length*5.4, qb=q.a==='start'?[q.x,q.y-8,q.x+w,q.y+2]:[q.x-w,q.y-8,q.x,q.y+2];
+        return !(b[0]<qb[2]&&b[2]>qb[0]&&b[1]<qb[3]&&b[3]>qb[1]); }); };
+    const [cx,cy,an]=cands.find(clear)||cands[0];
+    nowLabel='<text class="halo" x="'+cx.toFixed(1)+'" y="'+cy.toFixed(1)+'" text-anchor="'+an+'" font-size="11" font-weight="700" fill="#58a6ff" pointer-events="none">the chosen star</text>';
+    s+='</g>';
   } else {
     s+='<text x="'+(P.x+P.w-12)+'" y="'+(P.y+P.h-14)+'" text-anchor="end" font-size="12" fill="#58a6ff">the star has gone: a supernova, and a remnant off this diagram</text>';
   }
-  s+='</svg>';
+  // the named stars, labels nudged down where two sit on top of each other
+  for(let i=0;i<STARS.length;i++){
+    const st=STARS[i], x=X(st.T), y=Y(st.L), r=LAB[i].r;
+    const isHot=hot===i, lb=LAB[i];
+    s+='<g data-i="'+i+'" style="cursor:pointer">'+
+       (lb.lead?'<line x1="'+lb.lead[0].toFixed(1)+'" y1="'+lb.lead[1].toFixed(1)+'" x2="'+lb.lead[2].toFixed(1)+'" y2="'+lb.lead[3].toFixed(1)+'" stroke="#3d444d" stroke-width="1"/>':'')+
+       '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+color(st.T)+'" stroke="'+(isHot?'#ffffff':'#121212')+'" stroke-width="'+(isHot?1.8:1)+'"/>'+
+       (st.n==='the Sun'?'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r+4)+'" fill="none" stroke="#ffb02e" stroke-width="1.3"/>':'')+
+       '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r+5)+'" fill="transparent"/>'+
+       '<text class="halo" x="'+lb.x.toFixed(1)+'" y="'+lb.y.toFixed(1)+'" text-anchor="'+lb.a+'" font-size="10" fill="'+(isHot?'#ffffff':'#8a94a6')+'">'+esc(st.n)+'</text></g>';
+  }
+  s+=nowLabel+'</svg>';
   el.innerHTML=s;
   document.getElementById('massOut').textContent=num(mass)+' Suns, main sequence '+years(lifetime(mass));
   document.getElementById('lifeOut').textContent=(life<=1?(life*100).toFixed(0)+'% of the main sequence life':'after: '+((life-1)*100).toFixed(0)+'% more');
 }
+/* ---- the names, placed once: beside the dot where there is room, else
+   above or below it with a short leader, never on another name or dot ---- */
+const LAB=(()=>{
+  const dots=STARS.map(st=>{ const x=X(st.T), y=Y(st.L); return {x,y,r:Math.max(3,Math.min(9,3+Math.log10(radius(st.T,st.L)+1)*2.2))+(st.n==='the Sun'?4:0)}; });
+  const boxes=[], out=[];
+  const hit=(b)=>{ let n=0;
+    for(const q of boxes) if(b[0]<q[2]&&b[2]>q[0]&&b[1]<q[3]&&b[3]>q[1]) n+=10;
+    for(const d of dots){ const cx=Math.max(b[0],Math.min(d.x,b[2])), cy=Math.max(b[1],Math.min(d.y,b[3])); if(Math.hypot(cx-d.x,cy-d.y)<d.r+1) n+=3; }
+    if(b[0]<P.x+2||b[2]>W-2||b[1]<P.y+26||b[3]>P.y+P.h) n+=20;
+    return n; };
+  // the brightest first, so the crowded dwarfs near the Sun give way
+  const order=STARS.map((st,i)=>i).sort((a,b)=>STARS[b].L-STARS[a].L);
+  const res=new Array(STARS.length);
+  for(const i of order){
+    const st=STARS[i], d=dots[i], w=st.n.length*5.4, r=d.r;
+    const C=[[d.x+r+4,d.y+3.5,'start',0],[d.x-r-4,d.y+3.5,'end',0]];
+    for(const dy of [12,-12,23,-23,34,-34]){ C.push([d.x+r+10,d.y+3.5+dy,'start',1]); C.push([d.x-r-10,d.y+3.5+dy,'end',1]); }
+    let best=null, bs=1e9;
+    for(const c of C){ const b=c[2]==='start'?[c[0],c[1]-8,c[0]+w,c[1]+2]:[c[0]-w,c[1]-8,c[0],c[1]+2];
+      const sc=hit(b)+c[3]*0.5+Math.abs(c[1]-d.y)*0.01; if(sc<bs){ bs=sc; best=[c,b]; } if(sc<1) break; }
+    const [c,b]=best; boxes.push(b);
+    res[i]={x:c[0],y:c[1],a:c[2],r:dots[i].r-(st.n==='the Sun'?4:0),
+      lead:c[3]?[d.x+(c[2]==='start'?1:-1)*r*0.7,d.y+(c[1]<d.y?-1:1)*r*0.7,c[0]+(c[2]==='start'?-2:2),c[1]-3]:null};
+  }
+  return res;
+})();
+
 function setMass(m){ mass=m; document.getElementById('mass').value=Math.round(Math.log10(m)*100); render(); showLife();
   for(const b of document.querySelectorAll('#presets button')) b.setAttribute('aria-pressed', Math.abs(+b.dataset.m-m)<1e-9?'true':'false'); }
 function setLife(f){ life=f; document.getElementById('life').value=Math.round(f*1000); render(); showLife(); }
@@ -324,11 +400,68 @@ document.getElementById('mass').addEventListener('input',e=>setMass(Math.pow(10,
 document.getElementById('life').addEventListener('input',e=>setLife(+e.target.value/1000));
 const PRE=[[0.2,'a red dwarf'],[1,'the Sun'],[2,'Sirius A'],[5,'a B star'],[17,'Betelgeuse'],[40,'an O star']];
 document.getElementById('presets').innerHTML=PRE.map(([m,l])=>'<button type="button" data-m="'+m+'">'+l+'</button>').join('');
-document.getElementById('presets').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setMass(+b.dataset.m); });
-el.addEventListener('pointerover',e=>{ const g=e.target.closest('[data-i]'); if(g){ hot=+g.dataset.i; render(); showStar(STARS[hot]); } });
-el.addEventListener('pointerleave',()=>{ hot=null; render(); showLife(); });
+document.getElementById('presets').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ stopPlay(); setMass(+b.dataset.m); } });
+el.addEventListener('pointerover',e=>{ if(drag) return;
+  const g=e.target.closest('[data-i]'); if(g){ if(hot===+g.dataset.i) return; hot=+g.dataset.i; hotCls=null; render(); showStar(STARS[hot]); return; }
+  const c=e.target.closest('[data-cls]'); if(c){ if(hotCls===c.dataset.cls) return; hotCls=c.dataset.cls; hot=null; render(); showClass(hotCls); return; }
+  if(e.target.closest('[data-now]')&&(hot!==null||hotCls!==null)){ hot=null; hotCls=null; render(); showLife(); } });
+el.addEventListener('pointerleave',()=>{ if(drag) return; hot=null; hotCls=null; render(); showLife(); });
+document.getElementById('mass').addEventListener('input',()=>stopPlay());
+document.getElementById('life').addEventListener('input',()=>stopPlay());
+
+/* ---- the chosen star drags along the main sequence, which sets its mass ---- */
+let drag=false;
+const svgPt=e=>{ const svg=document.getElementById('hsvg'), b=svg.getBoundingClientRect(); return [(e.clientX-b.left)/b.width*W,(e.clientY-b.top)/b.height*H]; };
+function massAt(px,py){ let best=mass, bd=1e9;
+  for(let lm=-1; lm<=1.6+1e-9; lm+=0.005){ const M=Math.pow(10,lm), z=ms(M), d=Math.hypot(X(z.T)-px,Y(z.L)-py); if(d<bd){ bd=d; best=M; } }
+  return best; }
+// the grab reaches the chosen star even where a named star's dot lies over it
+function onNow(e){ if(e.target.closest('[data-now]')) return true; const a=at(mass,life); if(a.ended) return false;
+  const [x,y]=svgPt(e); return Math.hypot(x-X(a.T),y-Y(a.L))<=Math.max(discR(radius(a.T,a.L))+4,12); }
+el.addEventListener('pointerdown',e=>{ if(!onNow(e)) return;
+  stopPlay(); drag=true; el.setPointerCapture(e.pointerId); e.preventDefault(); });
+el.addEventListener('pointermove',e=>{ if(!drag) return; const [x,y]=svgPt(e); setMass(massAt(x,y)); });
+el.addEventListener('pointerup',()=>{ drag=false; });
+el.addEventListener('pointercancel',()=>{ drag=false; });
+
+/* ---- Play: the life runs on its own, the main sequence taking most of the time ---- */
+const playBtn=document.getElementById('play');
+let playing=null;
+// seconds of playing time for each stretch of the life: the main sequence,
+// the giant stages in its last tenth, and what comes after
+const LEGS=[[0,0.9,6],[0.9,1.0,4.5],[1.0,1.15,1.5]];
+function stopPlay(){ if(!playing) return; cancelAnimationFrame(playing.raf); clearTimeout(playing.t); playing=null;
+  playBtn.textContent='Play'; playBtn.setAttribute('aria-pressed','false'); }
+function lifeAtTime(t){ for(const [a,b,d] of LEGS){ if(t<=d) return a+(b-a)*t/d; t-=d; } return 1.15; }
+function timeAtLife(f){ let t=0; for(const [a,b,d] of LEGS){ if(f<=b) return t+(f-a)/(b-a)*d; t+=d; } return t; }
+playBtn.addEventListener('click',()=>{
+  if(playing){ stopPlay(); return; }
+  if(life>=1.149) setLife(0);
+  playing={raf:0,t:0}; playBtn.textContent='Pause'; playBtn.setAttribute('aria-pressed','true');
+  if(RM){ const stops=track(mass).map(q=>q[0]).filter(f=>f>life+1e-9);
+    const step=()=>{ if(!stops.length){ stopPlay(); return; } setLife(stops.shift()); playing.t=setTimeout(step,1000); };
+    playing.t=setTimeout(step,300); return; }
+  const T0=performance.now()-timeAtLife(life)*1000, end=LEGS.reduce((t,l)=>t+l[2],0);
+  const tick=now=>{ const t=(now-T0)/1000; setLife(Math.min(1.15,lifeAtTime(t)));
+    if(t<end && !at(mass,life).ended) playing.raf=requestAnimationFrame(tick); else stopPlay(); };
+  playing.raf=requestAnimationFrame(tick);
+});
+
+/* ---- keys: on the sliders, or on the drawing (left and right step the
+   life, up and down the mass) ---- */
+function stepMass(d){ stopPlay(); setMass(Math.pow(10,Math.max(-1,Math.min(1.6,Math.round(Math.log10(mass)*10)/10+d)))); }
+function stepLife(d){ stopPlay(); setLife(Math.max(0,Math.min(1.15,Math.round(life*100)/100+d))); }
+document.getElementById('mass').addEventListener('keydown',e=>{
+  const d={ArrowRight:0.1,ArrowUp:0.1,ArrowLeft:-0.1,ArrowDown:-0.1,PageUp:0.5,PageDown:-0.5}[e.key];
+  if(d!==undefined){ e.preventDefault(); stepMass(d); } });
+document.getElementById('life').addEventListener('keydown',e=>{
+  const d={ArrowRight:0.01,ArrowUp:0.01,ArrowLeft:-0.01,ArrowDown:-0.01,PageUp:0.1,PageDown:-0.1}[e.key];
+  if(d!==undefined){ e.preventDefault(); stepLife(d); } });
+el.addEventListener('keydown',e=>{
+  const m={ArrowRight:['l',0.01],ArrowLeft:['l',-0.01],ArrowUp:['m',0.1],ArrowDown:['m',-0.1],PageUp:['l',0.1],PageDown:['l',-0.1]}[e.key];
+  if(!m) return; e.preventDefault(); if(m[0]==='l') stepLife(m[1]); else stepMass(m[1]); });
 setMass(1);
-window.__stars=()=>({mass,life,n:STARS.length,at:at(mass,life),lifetime:lifetime(mass),ms:ms(mass),track:track(mass)});
+window.__stars=()=>({mass,life,n:STARS.length,at:at(mass,life),lifetime:lifetime(mass),ms:ms(mass),track:track(mass),playing:!!playing,lab:LAB});
 </script>
 </body>
 </html>
@@ -336,7 +469,7 @@ window.__stars=()=>({mass,life,n:STARS.length,at:at(mass,life),lifetime:lifetime
 
 html = (HTML.replace("__APACSS__", apa.CSS)
         .replace("__STARS__", _js(stars)).replace("__CLASSES__", _js(CLASSES)).replace("__MS__", _js(MAIN_SEQUENCE))
-        .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2).replace("__METHOD__", METHOD)
+        .replace("__CAPTION__", CAPTION).replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2).replace("__METHOD__", METHOD)
         .replace("__REFS__", apa.render(REFS)))
 OUT.write_text(html, encoding="utf-8")
 print(f"wrote {OUT} ({len(html):,} B): {len(STARS)} stars, {len(MAIN_SEQUENCE)} main sequence points")

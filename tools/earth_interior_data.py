@@ -121,6 +121,9 @@ REFS = [
                  "Science", 340, 6131, "464-466", "https://doi.org/10.1126/science.1233514"),
      "The inner core boundary at 6230 &plusmn; 500 K."),
 ]
+REFS.append((apa.web("NASA Goddard Space Flight Center", None, "Moon fact sheet", "NSSDCA",
+                     "https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html", retrieved=True),
+             "The Moon's mean radius, 1,737.4 km, for the ghost Moon drawn over the inner core."))
 REFS += [(apa.wiki(f"https://en.wikipedia.org/wiki/{p}"), a) for p, a in [
     ("Structure_of_Earth", "The layers and their states."),
     ("Core%E2%80%93mantle_boundary", "About 4,000 K at the top of the core."),

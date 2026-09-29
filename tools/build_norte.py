@@ -230,23 +230,35 @@ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-ser
 .brand:hover{{color:var(--accent);}}
 nav.site a{{color:var(--ink2);text-decoration:none;font-size:14px;}}
 nav.site a:hover{{color:var(--accent);}}
-h1{{font-size:1.6rem;font-weight:400;margin:2.2rem 0 .9rem}}
+h1{{font-size:1.6rem;font-weight:400;margin:1.2rem 0 .8rem}}
 h2{{font-size:1.05rem;font-weight:400;color:var(--ink);margin:2rem 0 .6rem}}
 .sub{{color:var(--ink2);font-size:.95rem;margin:0 0 1.5rem;max-width:70ch}}
-figure{{margin:0}}
+figure{{margin:0;position:relative}}
 svg#map{{width:100%;height:auto;display:block;background:var(--sea);border-radius:8px;border:1px solid var(--line)}}
+button{{font:inherit;font-size:.85rem;background:none;color:var(--ink);white-space:nowrap;
+border:1px solid var(--line);border-radius:999px;padding:5px 13px;cursor:pointer;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}}
+button:hover{{background:#20242a}}
+button[aria-pressed="true"]{{border-color:var(--accent);color:var(--accent)}}
+.controls label{{white-space:nowrap}}
+.controls .cnt{{color:var(--ink2);font-variant-numeric:tabular-nums;white-space:nowrap}}
+.caption{{color:var(--ink2);font-size:.95rem;max-width:74ch;margin:1.2rem 0 0}}
+details.sources{{margin-top:2.2rem;border-top:1px solid var(--line);padding-top:.8rem}}
+details.sources>summary{{cursor:pointer;color:var(--ink3);font-size:.8rem;letter-spacing:.06em;
+text-transform:uppercase;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}}
+details.sources>summary:hover{{color:var(--accent)}}
 .controls{{display:flex;align-items:center;gap:.85rem;margin:1rem 0 0;flex-wrap:wrap;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;font-size:.9rem}}
 input[type=range]{{flex:1;min-width:200px;accent-color:var(--riv);height:22px}}
-#kmout{{font-variant-numeric:tabular-nums;min-width:6.5em;text-align:right}}
-.readout{{display:flex;gap:.75rem;margin-top:.85rem;flex-wrap:wrap}}
-.box{{background:var(--panel);border-radius:8px;padding:.7rem .95rem;min-width:150px}}
+#kmout{{font-variant-numeric:tabular-nums;display:inline-block;min-width:3.6em;font-weight:400;color:var(--riv)}}
+.readout{{position:absolute;top:10px;right:10px;width:300px;pointer-events:none;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}}
+.box{{background:rgba(26,26,26,.9);border:1px solid var(--line);border-radius:8px;padding:.6rem .85rem;min-width:150px}}
 .box .lab{{font-size:.78rem;color:var(--ink2)}}
 .box .val{{font-size:1.35rem;line-height:1.2;font-variant-numeric:tabular-nums}}
 .box .sub2{{font-size:.8rem;color:var(--ink3)}}
-.wide{{flex:1;min-width:250px}}
-.notes{{margin-top:2.5rem;border-top:1px solid var(--line);padding-top:1.5rem;
-color:var(--ink2);font-size:.95rem}}
+.box .sub2{{line-height:1.4;margin-top:2px}}
+.notes{{margin-top:1rem;color:var(--ink2);font-size:.95rem}}
 .notes h2{{font-size:1.05rem;font-weight:400;color:var(--ink);margin:0 0 .6rem}}
 .notes p{{margin:0 0 1rem}}
 .method{{margin-top:1.5rem;color:var(--ink3);font-size:.88rem}}
@@ -257,13 +269,20 @@ color:var(--ink2);font-size:.95rem}}
 .refs a{{color:var(--accent);word-break:break-word}}
 path.st{{fill:var(--st);stroke:var(--edge);stroke-width:.8;cursor:pointer}}
 path.st.hi{{fill:var(--sthi)}}
+path.st.on{{stroke:var(--accent);stroke-width:1.6}}
+path.st.dim{{fill-opacity:.35}}
+#velo path{{fill:#121212;fill-opacity:.6;pointer-events:none}}
 path.riv{{fill:none;stroke:var(--riv);stroke-linecap:round;stroke-linejoin:round;cursor:pointer}}
 path.riv.ctx{{opacity:.4}}
 path.riv.named{{stroke:var(--acc)}}
+@media (max-width:600px){{
+  .readout{{position:static;width:auto;margin-top:.6rem}}
+  .box{{background:var(--panel)}}
+}}
 path.riv.hi{{stroke-width:3.2}}
 .lbl{{font:400 13px/1 system-ui,sans-serif;fill:#cfd4da;pointer-events:none}}
 .leg{{font:400 12px/1 system-ui,sans-serif;fill:var(--ink2)}}
-.rng{{font:400 11px/1 system-ui,sans-serif;fill:#b9a882;letter-spacing:.13em;
+.rng{{font:400 11px/1 system-ui,sans-serif;fill:#b9a882;fill-opacity:.75;letter-spacing:.13em;
 text-transform:uppercase;pointer-events:none}}
 </style>
 </head>
@@ -292,6 +311,7 @@ text-transform:uppercase;pointer-events:none}}
   <path d="{poly_path(sierra_in, 0.012)}" fill="var(--sra)"/>
   <path d="{poly_path(alta_in, 0.012)}" fill="var(--alt)"/>
 </g>
+<g id="velo"></g>
 <g id="rivers"></g>
 <g id="ranges"></g>
 <g id="labels"></g>
@@ -308,30 +328,35 @@ text-transform:uppercase;pointer-events:none}}
   <text class="leg" x="42" y="{VH-19:.0f}">tierra alrededor</text>
 </g>
 </svg>
-</figure>
-
-<div class="controls">
-  <span>Ríos de al menos</span>
-  <input type="range" id="minkm" min="0" max="300" step="5" value="0" aria-label="Longitud mínima del río">
-  <span id="kmout">0 km</span>
-</div>
-
-<div class="readout">
-  <div class="box"><div class="lab">ríos en el cuadro</div>
-    <div class="val" id="nriv"></div><div class="sub2" id="krivs"></div></div>
-  <div class="box wide"><div class="lab" id="hovlab">nada bajo el cursor</div>
+<div class="readout" aria-live="polite">
+  <div class="box"><div class="lab" id="hovlab">nada bajo el cursor</div>
     <div class="val" id="hovname" style="font-size:1.05rem"></div>
     <div class="sub2" id="hovsub"></div></div>
 </div>
+</figure>
 
+<div class="controls">
+  <button id="bPlay" aria-pressed="false">Adelgazar la red</button>
+  <label for="minkm">Ríos de al menos <b id="kmout">0 km</b></label>
+  <input type="range" id="minkm" min="0" max="300" step="5" value="0" aria-label="Longitud mínima del río">
+  <span class="cnt"><span id="nriv"></span> ríos, <span id="krivs"></span></span>
+</div>
+
+<p class="caption">Los seis estados de la frontera con todos los ríos de la capa. La barra, o el botón que la corre sola, quita los ríos cortos hasta dejar el esqueleto del Bravo, el Conchos y el Colorado. Un río bajo el cursor se enciende y reparte sus kilómetros por estado; un estado, con un clic, se queda con sus ríos.</p>
+
+<details class="sources"><summary>Fuentes</summary>
 <div class="notes">
 <h2>Sobre el mapa</h2>
 <p class="sub">Baja California, Sonora, Chihuahua, Coahuila, Nuevo León y
 Tamaulipas. Instantánea del {SNAPSHOT}.</p>
-<p>La barra va quitando los ríos cortos hasta dejar solo el esqueleto de los
-grandes drenajes. Un estado bajo el cursor muestra su superficie y cuántos
-kilómetros de río lo cruzan; un río, su longitud dentro del cuadro y los
-estados por los que pasa.</p>
+<p>Un estado bajo el cursor muestra su superficie y cuántos kilómetros de
+río lo cruzan; un río, su longitud dentro del cuadro y los estados por los que
+pasa. Los kilómetros de cada estado salen de muestrear el trazo dibujado y
+repartir su longitud según el estado en que cae cada punto, así que son
+aproximados; el Bravo, que corre sobre la raya, se reparte con un margen de
+unos kilómetros. Solo tres ríos llevan nombre, los que el mapa identifica
+sin duda: el Bravo porque corre sobre la frontera, el Conchos y el Colorado
+porque pasan por dos puntos conocidos de su curso.</p>
 <p>La costa es la línea real y no un trazo aproximado, así que el Golfo de
 California, el Pacífico y el Golfo de México quedan donde están.</p>
 <p>El terreno escarpado mide qué tan quebrado está el suelo; no es el límite
@@ -357,6 +382,7 @@ hierarchical, high-resolution shoreline database. <em>Journal of Geophysical
 Research: Solid Earth, 101</em>(B4), 8741-8743.
 <a href="https://doi.org/10.1029/96JB00104">https://doi.org/10.1029/96JB00104</a></p>
 </div>
+</details>
 </main>
 <script>
 var ST={json.dumps(state_js, ensure_ascii=False)};
@@ -370,7 +396,7 @@ RG.forEach(function(r){{
   var t=document.createElementNS(NS,"text");
   t.setAttribute("class","rng"); t.setAttribute("x",r.x); t.setAttribute("y",r.y);
   t.setAttribute("text-anchor","middle");
-  t.setAttribute("style","font-size:"+r.s+"px");
+  t.setAttribute("style","font-size:"+(r.s*0.82).toFixed(1)+"px");
   if (r.r) t.setAttribute("transform","rotate("+r.r+" "+r.x+" "+r.y+")");
   t.textContent=r.n; gg.appendChild(t);
 }});
@@ -378,28 +404,102 @@ var hl=document.getElementById("hovlab"), hn=document.getElementById("hovname"),
     hs=document.getElementById("hovsub");
 function fmt(n){{return n.toLocaleString("es-MX");}}
 function hov(lab,a,b){{hl.textContent=lab;hn.textContent=a;hs.textContent=b;}}
+var REDUCIDO=matchMedia("(prefers-reduced-motion: reduce)").matches;
+var svg=document.getElementById("map");
+var stEls=[].slice.call(document.querySelectorAll("path.st"));
+var fijo=null;     // el estado fijado con un clic, o null
 
 var rEls=[];
 RV.forEach(function(r,i){{
   var p=document.createElementNS(NS,"path");
   p.setAttribute("d",r.d); p.setAttribute("class","riv"+(r.n?" named":"")+(r.s.length?"":" ctx"));
   p.setAttribute("stroke-width", r.k>250?2.0:r.k>100?1.4:r.k>40?1.0:0.7);
-  p.addEventListener("mouseenter",function(){{
-    p.classList.add("hi");
-    hov("río", r.n||"sin nombre en la capa",
-        fmt(r.k)+" km en el cuadro"+(r.s.length?" · "+r.s.join(", "):""));
-  }});
-  p.addEventListener("mouseleave",function(){{p.classList.remove("hi");}});
+  p.addEventListener("mouseenter",function(){{rioSobre(i);}});
+  p.addEventListener("click",function(ev){{ev.stopPropagation();rioSobre(i);}});
+  p.addEventListener("mouseleave",function(){{rioFuera();}});
   rg.appendChild(p); rEls.push(p);
 }});
 
-document.querySelectorAll("path.st").forEach(function(p){{
-  var s=ST[+p.dataset.i];
+// Los kilómetros de un río por estado: el trazo se muestrea cada unidad del
+// cuadro y cada punto va al estado que lo contiene. El Bravo corre sobre la
+// raya, así que lo que cae justo del otro lado se asigna con un borde ancho.
+var reparto={{}};
+function repartir(i){{
+  if(reparto[i]) return reparto[i];
+  var r=RV[i], p=rEls[i], L=p.getTotalLength(), n=Math.max(8,Math.ceil(L)), cuenta={{}};
+  var cands=stEls.filter(function(e){{return r.s.indexOf(ST[+e.dataset.i].n)>=0;}});
+  cands.forEach(function(e){{e.style.strokeWidth="10";}});
+  var pt=svg.createSVGPoint();
+  for(var j=0;j<=n;j++){{
+    var q=p.getPointAtLength(L*j/n); pt.x=q.x; pt.y=q.y;
+    var hit=null, c;
+    for(c=0;c<cands.length&&!hit;c++) if(cands[c].isPointInFill(pt)) hit=cands[c];
+    for(c=0;c<cands.length&&!hit;c++) if(cands[c].isPointInStroke(pt)) hit=cands[c];
+    if(hit){{var nm=ST[+hit.dataset.i].n; cuenta[nm]=(cuenta[nm]||0)+1;}}
+  }}
+  cands.forEach(function(e){{e.style.strokeWidth="";}});
+  var out={{}};
+  r.s.forEach(function(nm){{out[nm]=r.k*(cuenta[nm]||0)/(n+1);}});
+  return reparto[i]=out;
+}}
+// un río con nombre viene en varios tramos: se encienden todos juntos
+function tramos(i){{
+  var r=RV[i];
+  if(!r.n) return [i];
+  var t=[]; RV.forEach(function(x,k){{if(x.n===r.n) t.push(k);}}); return t;
+}}
+function rioSobre(i){{
+  rEls.forEach(function(p){{p.classList.remove("hi");}});
+  var t=tramos(i), km=0, por={{}};
+  t.forEach(function(k){{
+    rEls[k].classList.add("hi"); km+=RV[k].k;
+    var q=repartir(k); for(var nm in q) por[nm]=(por[nm]||0)+q[nm];
+  }});
+  var partes=ST.filter(function(s){{return por[s.n]>=0.5;}})
+    .map(function(s){{return s.n+" "+fmt(Math.round(por[s.n]))+" km";}});
+  var r=RV[i];
+  hov("río", r.n||("un río de "+fmt(r.k)+" km"),
+      (r.n?fmt(km)+" km en el cuadro":"en el cuadro")
+      +(partes.length?"; "+partes.join(", "):"; fuera de los seis estados"));
+}}
+function rioFuera(){{
+  rEls.forEach(function(p){{p.classList.remove("hi");}});
+  reposo();
+}}
+function leeEstado(s,lab){{
+  hov(lab, s.n, fmt(s.a)+" km² · "+fmt(s.rk)+" km de río en "+s.nr+" cauces");
+}}
+function reposo(){{
+  if(fijo!==null) leeEstado(ST[fijo],"estado fijado");
+  else hov("nada bajo el cursor","un estado o un río se leen aquí","");
+}}
+
+stEls.forEach(function(p){{
+  var i=+p.dataset.i, s=ST[i];
   p.addEventListener("mouseenter",function(){{
     p.classList.add("hi");
-    hov("estado", s.n, fmt(s.a)+" km² · "+fmt(s.rk)+" km de río en "+s.nr+" cauces");
+    leeEstado(s, i===fijo?"estado fijado":"estado");
   }});
-  p.addEventListener("mouseleave",function(){{p.classList.remove("hi");}});
+  p.addEventListener("mouseleave",function(){{p.classList.remove("hi");reposo();}});
+  p.addEventListener("click",function(){{fijar(fijo===i?null:i);}});
+}});
+// un clic en un estado lo deja solo con sus ríos; otro clic, o Escape, lo suelta
+function fijar(i){{
+  fijo=i;
+  var velo=document.getElementById("velo");
+  velo.innerHTML="";
+  stEls.forEach(function(p){{
+    var otro=fijo!==null && +p.dataset.i!==fijo;
+    p.classList.toggle("dim", otro);
+    p.classList.toggle("on", +p.dataset.i===fijo);
+    // un velo sobre el relieve de los otros cinco
+    if(otro){{var v=document.createElementNS(NS,"path");
+      v.setAttribute("d",p.getAttribute("d")); velo.appendChild(v);}}
+  }});
+  draw(); reposo();
+}}
+document.addEventListener("keydown",function(e){{
+  if(e.key==="Escape"&&fijo!==null) fijar(null);
 }});
 ST.forEach(function(s){{
   var t=document.createElementNS(NS,"text");
@@ -410,9 +510,9 @@ ST.forEach(function(s){{
 
 var sl=document.getElementById("minkm");
 function draw(){{
-  var m=+sl.value, n=0, tot=0;
+  var m=+sl.value, n=0, tot=0, en=fijo===null?null:ST[fijo].n;
   RV.forEach(function(r,i){{
-    var on=r.k>=m;
+    var on=r.k>=m && (en===null || r.s.indexOf(en)>=0);
     rEls[i].style.display=on?"":"none";
     if(on){{n++; tot+=r.k;}}
   }});
@@ -420,8 +520,34 @@ function draw(){{
   document.getElementById("krivs").textContent=fmt(tot)+" km en total";
   document.getElementById("kmout").textContent=m+" km";
 }}
-sl.addEventListener("input",draw);
-draw();
+sl.addEventListener("input",function(){{parar();draw();}});
+
+// El botón corre la barra de 0 a 300 km en seis segundos: la red se va
+// adelgazando hasta quedar en el Bravo, el Conchos y el Colorado.
+var bPlay=document.getElementById("bPlay"), anim=null;
+function parar(){{
+  if(anim){{cancelAnimationFrame(anim);anim=null;}}
+  bPlay.setAttribute("aria-pressed","false"); bPlay.textContent="Adelgazar la red";
+}}
+bPlay.addEventListener("click",function(){{
+  if(anim){{parar();return;}}
+  var max=+sl.max;
+  if(+sl.value>=max) sl.value=0;
+  if(REDUCIDO){{sl.value=max;draw();return;}}
+  var v0=+sl.value, t0=performance.now(), dur=6000*(max-v0)/max;
+  bPlay.setAttribute("aria-pressed","true"); bPlay.textContent="Pausa";
+  function paso(t){{
+    var f=Math.min(1,(t-t0)/dur);
+    sl.value=Math.round((v0+(max-v0)*f)/5)*5; draw();
+    if(f<1) anim=requestAnimationFrame(paso); else parar();
+  }}
+  anim=requestAnimationFrame(paso);
+}});
+draw(); reposo();
+window.__norte=function(){{return {{fijo:fijo, km:+sl.value, corriendo:!!anim,
+  visibles:rEls.filter(function(p){{return p.style.display!=="none";}}).length,
+  hi:rEls.filter(function(p){{return p.classList.contains("hi");}}).length,
+  lab:hl.textContent, nombre:hn.textContent, sub:hs.textContent}};}};
 </script>
 </body>
 </html>

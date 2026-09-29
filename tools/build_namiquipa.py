@@ -267,7 +267,7 @@ inset_box = dict(x=round(ix(W), 1), y=round(iy(N), 1),
                  w=round((E - W) * np.cos(np.radians(28.5)) * cs, 1),
                  h=round((N - S) * cs, 1))
 
-PW, PH = 1000.0, 190.0
+PW, PH = 1000.0, 150.0
 
 DOC = f"""<!DOCTYPE html>
 <html lang="es">
@@ -291,10 +291,10 @@ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-ser
 .brand:hover{{color:var(--accent);}}
 nav.site a{{color:var(--ink2);text-decoration:none;font-size:14px;}}
 nav.site a:hover{{color:var(--accent);}}
-h1{{font-size:1.6rem;font-weight:400;margin:1.6rem 0 .9rem}}
+h1{{font-size:1.6rem;font-weight:400;margin:1rem 0 .8rem}}
 h2{{font-size:1.05rem;font-weight:400;color:var(--ink);margin:2rem 0 .6rem}}
 .tiles{{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));
-gap:10px;margin:0 0 1.1rem;
+gap:10px;margin:0 0 .8rem;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}}
 .tile{{background:var(--panel);border:1px solid var(--line);border-radius:12px;
 padding:10px 16px}}
@@ -305,13 +305,28 @@ padding:10px 16px}}
 figure{{margin:0}}
 svg#map,svg#perfil{{width:100%;height:auto;display:block;background:#0f1216;
 border-radius:8px;border:1px solid var(--line)}}
-svg#perfil{{margin-top:10px}}
+svg#perfil{{margin-top:8px;cursor:ew-resize;touch-action:none;outline:none}}
+svg#map{{outline:none}}
+svg#map:focus-visible,svg#perfil:focus-visible{{border-color:var(--accent)}}
 .controls{{display:flex;align-items:center;gap:.7rem;margin:1rem 0 0;flex-wrap:wrap;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;font-size:.9rem}}
-button.ctl{{font:inherit;font-size:13px;background:var(--panel);color:var(--ink2);
-border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}}
-button.ctl:hover{{color:var(--ink);border-color:#8d98a4}}
-button.ctl[aria-pressed="true"]{{color:#12161a;background:var(--ink2);border-color:var(--ink2)}}
+button.ctl{{font:inherit;font-size:13px;background:none;color:var(--ink);
+border:1px solid var(--line);border-radius:999px;padding:5px 13px;cursor:pointer;white-space:nowrap}}
+button.ctl:hover{{background:#20242a}}
+button.ctl[aria-pressed="true"]{{border-color:var(--accent);color:var(--accent)}}
+button.ctl.play{{border-color:var(--traza);color:var(--traza)}}
+.controls .sep{{width:1px;height:20px;background:var(--line);margin:0 2px}}
+.controls{{margin:0 0 .8rem}}
+.caption{{color:var(--ink2);font-size:.95rem;max-width:74ch;margin:1.3rem 0 0}}
+details.sources{{margin-top:2.2rem;border-top:1px solid var(--line);padding-top:.8rem}}
+details.sources>summary{{cursor:pointer;color:var(--ink3);font-size:.8rem;letter-spacing:.06em;
+text-transform:uppercase;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}}
+details.sources>summary:hover{{color:var(--accent)}}
+#liga line{{stroke:#7fd4c1;stroke-width:1.4;stroke-dasharray:5 4}}
+#liga text{{font:600 12px/1 system-ui,sans-serif;fill:#cfeee5;paint-order:stroke;stroke:#10141a;stroke-width:3}}
+#pueblos circle{{cursor:pointer}}
+#pueblos circle.on{{stroke:#fff3d6;stroke-width:2}}
+#flecha{{fill:#fff3d6;stroke:#7a4d0d;stroke-width:1}}
 input[type=range]{{flex:1;min-width:220px;accent-color:var(--traza);height:22px}}
 .readout{{display:flex;gap:.75rem;margin-top:.85rem;flex-wrap:wrap;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}}
@@ -320,8 +335,7 @@ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-ser
 .box .val{{font-size:1.35rem;line-height:1.2;font-variant-numeric:tabular-nums}}
 .box .sub2{{font-size:.8rem;color:var(--ink3)}}
 .wide{{flex:1;min-width:230px}}
-.notes{{margin-top:2.5rem;border-top:1px solid var(--line);padding-top:1.5rem;
-color:var(--ink2);font-size:.95rem}}
+.notes{{margin-top:1rem;color:var(--ink2);font-size:.95rem}}
 .notes p{{margin:0 0 1rem;max-width:74ch}}
 .method{{margin-top:1.5rem;color:var(--ink3);font-size:.88rem}}
 .method p{{margin:0 0 .9rem;max-width:74ch}}
@@ -352,6 +366,18 @@ paint-order:stroke;stroke:#10141a;stroke-width:2.6}}
 
 <h1>La Ruta Namiquipa</h1>
 
+<div class="controls">
+  <button class="ctl play" id="bPlay" aria-pressed="false">Recorrer</button>
+  <button class="ctl" id="bReal" aria-pressed="false" title="Al paso que grabó el GPS, trescientas veces más rápido">Al paso grabado</button>
+  <input type="range" id="km" min="0" max="{total_km:.2f}" step="0.02" value="0"
+    aria-label="Kilómetro del recorrido">
+  <span class="sep"></span>
+  <button class="ctl" id="bRel" aria-pressed="true">Relieve</button>
+  <button class="ctl" id="bCur" aria-pressed="true">Curvas</button>
+  <button class="ctl" id="bPue" aria-pressed="true">Pueblos</button>
+  <button class="ctl" id="bMun" aria-pressed="true">Municipios</button>
+</div>
+
 <div class="tiles">
   <div class="tile"><div class="k">kilómetro</div>
     <div class="v" id="rKm">0.0 km</div><div class="g" id="rFalta"></div></div>
@@ -368,7 +394,7 @@ paint-order:stroke;stroke:#10141a;stroke-width:2.6}}
 </div>
 
 <figure>
-<svg id="map" viewBox="0 0 {VW:.0f} {VH:.0f}" role="img"
+<svg id="map" viewBox="0 0 {VW:.0f} {VH:.0f}" role="img" tabindex="0"
   aria-label="Mapa del recorrido sobre el relieve de la sierra de Namiquipa.">
 <title>La Ruta Namiquipa sobre el relieve</title>
 <image id="relieve" href="data:image/png;base64,{png}" x="0" y="0"
@@ -379,7 +405,9 @@ paint-order:stroke;stroke:#10141a;stroke-width:2.6}}
 <g id="raya"><path d="{raya_d}"/></g>
 <path id="traza" d=""/>
 <path id="hecho" d=""/>
+<g id="liga"></g>
 <g id="pueblos"></g>
+<path id="flecha" d="M3,-4.5 L12,0 L3,4.5 Z"/>
 <circle id="marca" r="5.5" fill="#fff3d6" stroke="#7a4d0d" stroke-width="1.5"/>
 <g id="mapachico" transform="translate({VW - cw - 34:.0f},10)">
   <rect x="0" y="0" width="{cw + 24:.0f}" height="{ch + 54:.0f}" rx="8"
@@ -408,7 +436,7 @@ paint-order:stroke;stroke:#10141a;stroke-width:2.6}}
 </g>
 </svg>
 
-<svg id="perfil" viewBox="0 0 {PW:.0f} {PH:.0f}" role="img"
+<svg id="perfil" viewBox="0 0 {PW:.0f} {PH:.0f}" role="img" tabindex="0"
   aria-label="Altitud a lo largo del recorrido.">
 <title>Altitud a lo largo del recorrido</title>
 <path id="perfilArea" d="" fill="#2a2a22"/>
@@ -418,22 +446,14 @@ paint-order:stroke;stroke:#10141a;stroke-width:2.6}}
 </svg>
 </figure>
 
-<div class="controls">
-  <button class="ctl" id="bPlay" aria-pressed="false">Recorrer</button>
-  <input type="range" id="km" min="0" max="{total_km:.2f}" step="0.02" value="0"
-    aria-label="Kilómetro del recorrido">
-  <button class="ctl" id="bRel" aria-pressed="true">Relieve</button>
-  <button class="ctl" id="bCur" aria-pressed="true">Curvas</button>
-  <button class="ctl" id="bPue" aria-pressed="true">Pueblos</button>
-  <button class="ctl" id="bMun" aria-pressed="true">Municipios</button>
-</div>
+<p class="caption">{total_km:.1f} kilómetros grabados el 24 de septiembre de 2016. Se sale
+de la sierra al poniente de Santa Ana de Bavícora, se sube al filo de
+{max(prof):,} metros en el kilómetro {prof.index(max(prof)) * D.PASO_KM:.1f} y de
+ahí se baja {max(prof) - min(prof)} metros hasta el llano. El perfil se arrastra, y un
+pueblo con un clic queda atado al punto por una recta medida.</p>
 
+<details class="sources"><summary>Fuentes</summary>
 <div class="notes">
-<p>{total_km:.1f} kilómetros grabados el 24 de septiembre de 2016. El recorrido
-empieza arriba, en la sierra al poniente de Santa Ana de Bavícora, sube al filo
-de {max(prof):,} metros en el kilómetro
-{prof.index(max(prof)) * D.PASO_KM:.1f} y de ahí se deja ir:
-{max(prof) - min(prof)} metros de bajada hasta el llano.</p>
 <p>Los primeros {KM_EN[CRUZADOS[0]]:.0f} kilómetros van por el municipio de
 {CRUZADOS[0]}; la raya municipal queda en el kilómetro {tramos[1][1]:.1f}, ya
 en la bajada, y los últimos {KM_EN[CRUZADOS[1]]:.0f} van por
@@ -443,6 +463,10 @@ de ninguna edición. El relieve del fondo viene de una malla de trescientos
 metros, y la altitud que marcó el GPS coincide con ella dentro de veinticinco
 metros en cuatro de cada cinco puntos, que para un aparato de mano en la
 sierra está bien.</p>
+<p>Recorrer avanza a 2.4 km por segundo. Al paso grabado sigue las horas del
+archivo trescientas veces más rápido, así que un minuto de la salida pasa en
+un quinto de segundo y las paradas se ven como paradas; la hora de arriba
+corre con él.</p>
 </div>
 
 <div class="method">
@@ -472,6 +496,7 @@ datos]. <a href="https://www.openstreetmap.org/copyright">https://www.openstreet
 geoestadístico, diciembre 2023</em> [Conjunto de datos]. INEGI.
 <a href="https://www.inegi.org.mx/temas/mg/">https://www.inegi.org.mx/temas/mg/</a></p>
 </div>
+</details>
 </main>
 <script>
 const TR={json.dumps(track_js)};
@@ -485,6 +510,8 @@ const ETQ_MUN={json.dumps(etq_mun, ensure_ascii=False)};
 const PASO={D.PASO_KM};
 const TOTAL={total_km:.3f};
 const PW={PW}, PH={PH};
+const KMPX=({(E - W) * 111.32 * np.cos(np.radians(LAT0)):.4f})/{VW:.0f};
+const REDUCIDO=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const el=id=>document.getElementById(id);
 const SVGNS='http://www.w3.org/2000/svg';
 function make(t,a,p){{const e=document.createElementNS(SVGNS,t);
@@ -493,9 +520,13 @@ function make(t,a,p){{const e=document.createElementNS(SVGNS,t);
 el('traza').setAttribute('d','M'+TR.map(p=>p[0]+','+p[1]).join('L'));
 
 const gp=el('pueblos');
-LUG.forEach(l=>{{
-  make('circle',{{cx:l.x,cy:l.y,r:l.t==='pueblo'?5:3.5,fill:'{C_PUEBLO}',
-    stroke:'#10141a','stroke-width':1.2}},gp);
+let atado=null;     // el lugar atado al punto por una recta
+LUG.forEach((l,i)=>{{
+  const c=make('circle',{{cx:l.x,cy:l.y,r:l.t==='pueblo'?5:3.5,fill:'{C_PUEBLO}',
+    stroke:'#10141a','stroke-width':1.2,'data-i':i}},gp);
+  c.addEventListener('click',()=>{{atado=atado===i?null:i;
+    [...gp.querySelectorAll('circle')].forEach(x=>x.classList.toggle('on',+x.dataset.i===atado));
+    ver(+el('km').value);}});
   const der=l.x<{VW * 0.62:.0f};
   const bajo=l.x>{VW * 0.72:.0f};      // por debajo del mapa chico
   const t=make('text',{{class:'lbl',x:l.x+(der?9:-9),y:l.y+(bajo?18:4),
@@ -504,7 +535,7 @@ LUG.forEach(l=>{{
 {{
   const gi=el('mapachico');
   LEJOS.forEach(p=>{{
-    make('circle',{{cx:p.x,cy:p.y,r:2.4,fill:'#dfe4e9'}},gi);
+    make('circle',{{cx:p.x,cy:p.y,r:3.4,fill:'#fff3d6',stroke:'#10141a','stroke-width':1.2}},gi);
   }});
 }}
 function municipioEn(km){{
@@ -557,6 +588,11 @@ function ver(km){{
   km=Math.max(0,Math.min(TOTAL,km));
   const [x,y,i]=puntoEn(km);
   el('marca').setAttribute('cx',x); el('marca').setAttribute('cy',y);
+  // la flecha apunta hacia donde sigue la traza
+  const [xa,ya]=puntoEn(Math.min(TOTAL,km+0.25)), [xb,yb]=puntoEn(Math.max(0,km-0.05));
+  const ang=Math.atan2(ya-yb,xa-xb)*180/Math.PI;
+  el('flecha').setAttribute('transform',`translate(${{x.toFixed(1)}},${{y.toFixed(1)}}) rotate(${{ang.toFixed(0)}})`);
+  el('flecha').style.display=km>=TOTAL-0.01?'none':'';
   let d='M'+TR[0][0]+','+TR[0][1];
   for(let k=1;k<i;k++) d+='L'+TR[k][0]+','+TR[k][1];
   el('hecho').setAttribute('d',d+'L'+x.toFixed(1)+','+y.toFixed(1));
@@ -567,10 +603,12 @@ function ver(km){{
   el('rAlt').textContent=Math.round(alt)+' m';
   const i0=Math.max(0,idx-2), i1=Math.min(PROF.length-1,idx+2);
   const dz=PROF[i1]-PROF[i0], dl=(i1-i0)*PASO*1000;
-  el('rPend').textContent=dl?(dz/dl*100).toFixed(1)+'% de pendiente':'';
+  // en la salida todavía no hay pendiente ni velocidad que leer
+  const salida=km<0.05;
+  el('rPend').textContent=salida?'en la salida':dl?(dz/dl*100).toFixed(1)+'% de pendiente':'';
   el('rTiempo').textContent=reloj(seg);
   const ds=SEC[i1]-SEC[i0];
-  el('rVel').textContent=ds>0?(dl/1000/(ds/3600)).toFixed(0)+' km/h':'parado';
+  el('rVel').textContent=salida?'en la salida':ds>0?(dl/1000/(ds/3600)).toFixed(0)+' km/h':'parado';
   const mun=municipioEn(km);
   marcarMunicipio(mun);
   el('rMun').textContent=mun;
@@ -583,26 +621,74 @@ function ver(km){{
   const kmPorPx=({(E - W) * 111.32 * np.cos(np.radians(LAT0)):.4f})/{VW:.0f};
   el('rCerca').textContent=best[0].n;
   el('rCercaSub').textContent='a '+(best[1]*kmPorPx).toFixed(1)+' km en línea recta';
+  // el lugar atado: una recta del punto al lugar, medida a cada paso
+  const g=el('liga'); while(g.firstChild) g.removeChild(g.firstChild);
+  if(atado!==null){{
+    const l=LUG[atado], dkm=Math.hypot(l.x-x,l.y-y)*KMPX;
+    make('line',{{x1:x,y1:y,x2:l.x,y2:l.y}},g);
+    const t=make('text',{{x:(x+l.x)/2+6,y:(y+l.y)/2-6}},g);
+    t.textContent=dkm.toFixed(1)+' km a '+l.n.replace(/ \\(.*\\)/,'');
+    el('rCerca').textContent=l.n;
+    el('rCercaSub').textContent='atado: a '+dkm.toFixed(1)+' km en línea recta';
+  }}
 }}
 el('km').addEventListener('input',e=>{{parar();ver(+e.target.value);}});
 
-let anim=null;
-function parar(){{if(anim){{cancelAnimationFrame(anim);anim=null;
-  el('bPlay').setAttribute('aria-pressed','false');el('bPlay').textContent='Recorrer';}}}}
+let anim=null, real=false;
+const ESCALA=300;   // al paso grabado: trescientas veces la hora del archivo
+// el kilómetro al que se llegó a los s segundos del archivo
+function kmEnSeg(s){{
+  let i=1; while(i<SEC.length-1&&SEC[i]<s) i++;
+  const a=SEC[i-1], b=SEC[i], f=b>a?Math.max(0,Math.min(1,(s-a)/(b-a))):0;
+  return Math.min(TOTAL,(i-1+f)*PASO);
+}}
+function parar(){{if(anim){{cancelAnimationFrame(anim);anim=null;}}
+  el('bPlay').setAttribute('aria-pressed','false');el('bPlay').textContent='Recorrer';}}
+el('bReal').addEventListener('click',()=>{{
+  real=!real; el('bReal').setAttribute('aria-pressed',real);
+}});
 el('bPlay').addEventListener('click',()=>{{
   if(anim){{parar();return;}}
-  el('bPlay').setAttribute('aria-pressed','true'); el('bPlay').textContent='Alto';
-  let last=null;
   if(+el('km').value>=TOTAL) el('km').value=0;
+  if(REDUCIDO){{el('km').value=TOTAL;ver(TOTAL);return;}}
+  el('bPlay').setAttribute('aria-pressed','true'); el('bPlay').textContent='Pausa';
+  let last=null, s=muestra(+el('km').value)[1];
   const paso=t=>{{
     if(last===null) last=t;
     const dt=Math.min(0.1,(t-last)/1000); last=t;
-    let km=+el('km').value+dt*2.4;
+    let km;
+    if(real){{ s+=dt*ESCALA; km=Math.max(+el('km').value,kmEnSeg(s)); }}
+    else km=+el('km').value+dt*2.4;
     if(km>=TOTAL){{km=TOTAL;el('km').value=km;ver(km);parar();return;}}
-    el('km').value=km; ver(km); anim=requestAnimationFrame(paso);
+    el('km').value=km; ver(km);
+    if(real) el('rTiempo').textContent=reloj(Math.max(s,muestra(km)[1]));
+    anim=requestAnimationFrame(paso);
   }};
   anim=requestAnimationFrame(paso);
 }});
+// el perfil se arrastra y las flechas mueven el punto de cien en cien metros
+const perfil=el('perfil');
+function kmDe(ev){{
+  const pt=perfil.createSVGPoint(); pt.x=ev.clientX; pt.y=ev.clientY;
+  const p=pt.matrixTransform(perfil.getScreenCTM().inverse());
+  return Math.max(0,Math.min(TOTAL,(p.x-46)/(PW-70)*TOTAL));
+}}
+let arrastra=false;
+perfil.addEventListener('pointerdown',ev=>{{parar();arrastra=true;perfil.setPointerCapture(ev.pointerId);
+  const k=kmDe(ev); el('km').value=k; ver(k);}});
+perfil.addEventListener('pointermove',ev=>{{if(!arrastra) return; const k=kmDe(ev); el('km').value=k; ver(k);}});
+perfil.addEventListener('pointerup',()=>{{arrastra=false;}});
+perfil.addEventListener('pointercancel',()=>{{arrastra=false;}});
+function flechas(ev){{
+  if(ev.key!=='ArrowRight'&&ev.key!=='ArrowLeft') return;
+  ev.preventDefault(); parar();
+  const k=Math.max(0,Math.min(TOTAL,+el('km').value+(ev.key==='ArrowRight'?0.1:-0.1)));
+  el('km').value=k; ver(k);
+}}
+el('map').addEventListener('keydown',flechas);
+perfil.addEventListener('keydown',flechas);
+document.addEventListener('keydown',ev=>{{ if(ev.key==='Escape'&&atado!==null){{
+  atado=null; [...gp.querySelectorAll('circle')].forEach(x=>x.classList.remove('on')); ver(+el('km').value);}} }});
 function toggle(id,g){{
   el(id).addEventListener('click',()=>{{
     const v=el(id).getAttribute('aria-pressed')!=='true';
@@ -620,7 +706,9 @@ window.__ruta=()=>({{puntos:TR.length,total:TOTAL,km:+el('km').value,
   alt:el('rAlt').textContent,vel:el('rVel').textContent,tiempo:el('rTiempo').textContent,
   cerca:el('rCerca').textContent,curvas:document.querySelectorAll('#curvas path').length,
   relieve:getComputedStyle(el('relieve')).display,
-  marca:[+el('marca').getAttribute('cx'),+el('marca').getAttribute('cy')]}});
+  marca:[+el('marca').getAttribute('cx'),+el('marca').getAttribute('cy')],
+  corre:!!anim,real,atado,liga:el('liga').textContent,pend:el('rPend').textContent,
+  flecha:el('flecha').getAttribute('transform')}});
 </script>
 </body>
 </html>

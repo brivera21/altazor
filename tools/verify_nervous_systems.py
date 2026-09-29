@@ -113,7 +113,47 @@ with sync_playwright() as pw:
     boxes = pg.evaluate("()=>[...document.querySelectorAll('#nsvg g[data-a] text')].map(t=>{const b=t.getBBox(); return [b.x,b.y,b.width,b.height]})")
     clash = sum(1 for i in range(len(boxes)) for j in range(i + 1, len(boxes)) if boxes[i][0] < boxes[j][0] + boxes[j][2] and boxes[j][0] < boxes[i][0] + boxes[i][2] and boxes[i][1] < boxes[j][1] + boxes[j][3] and boxes[j][1] < boxes[i][1] + boxes[i][3])
     check(clash == 0, "no two animal labels overlap", f"{clash} pairs")
+    # a click holds an animal as a yardstick: a line across at its count, the ratio on every other card
+    pg.click('#groups button[data-g="birds"]')
+    pg.evaluate("()=>document.querySelector('#nsvg g[data-a=\"raven\"] circle').dispatchEvent(new MouseEvent('click',{bubbles:true}))")
+    pg.evaluate("()=>document.querySelector('#nsvg g[data-a=\"dog\"] circle').dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
+    pg.wait_for_timeout(100)
+    s = st()
+    line = pg.evaluate("()=>[...document.querySelectorAll('#nsvg line')].filter(l=>l.getAttribute('stroke-dasharray')==='2 4').map(l=>+l.getAttribute('y1'))")
+    check(s["pinA"] == "raven" and len(line) == 1 and abs(line[0] - py(a["raven"][2])) < 0.6 and "against a raven 1.04 times as many" in s["card"],
+          "a click holds the raven: a line across at 2.17 billion, and the dog's card reads 1.04 times as many")
+    pg.evaluate("()=>document.querySelector('#nsvg g[data-a=\"raven\"] circle').dispatchEvent(new MouseEvent('click',{bubbles:true}))")
+    check(st()["pinA"] is None, "a second click lets it go")
+    check(pg.evaluate("()=>[...document.querySelectorAll('#nsvg text')].some(t=>t.textContent.startsWith('a line fitted through the mammals'))"),
+          "the fitted lines carry a key")
     check(not errs, "no script errors", "; ".join(errs))
+
+    # the pulse: a signal spreads through every plan with nerves, and stops at the end
+    pp = br.new_page(viewport={"width": 1300, "height": 850})
+    pp.on("pageerror", lambda x: errs.append(str(x)))
+    pp.goto(PAGE.as_uri()); pp.wait_for_selector("#nsvg")
+    s = pp.evaluate("()=>window.__ns()")
+    check(s["pp"]["none"] == 0 and all(s["pp"][k] > 10 for k in ("net", "ladder", "cord", "octopus", "dorsal")),
+          f"each plan with nerves has a path for the pulse, the sponge none: {s['pp']}")
+    pp.click("#pulseBtn"); pp.wait_for_timeout(600)
+    s = pp.evaluate("()=>window.__ns()")
+    lit = pp.evaluate("()=>document.querySelectorAll('#nsvg circle[fill=\"#fff4d0\"]').length")
+    check(s["running"] and 0 < s["pulse"]["T"] < 1.25 and lit > 10 and pp.inner_text("#pulseBtn") == "Pause",
+          f"Send a pulse runs a wave through the plans, a Pause while it runs ({lit} points lit)")
+    pp.wait_for_timeout(1700)
+    check(not pp.evaluate("()=>window.__ns().running") and pp.evaluate("()=>window.__ns().pulse") is None, "and it stops at the end")
+    pp.evaluate("()=>document.querySelector('#nsvg g[data-plan=\"octopus\"] rect').dispatchEvent(new MouseEvent('click',{bubbles:true}))")
+    pp.wait_for_timeout(300)
+    s = pp.evaluate("()=>window.__ns()")
+    check(s["pulse"] and s["pulse"]["only"] == "octopus", "a click on a plan sends a pulse through that plan alone")
+    check(pp.evaluate("()=>{const d=document.querySelector('details.sources'); return !!d && !d.open && !!d.querySelector('.refs');}"),
+          "the notes and references sit inside a closed Sources")
+    pp.set_viewport_size({"width": 390, "height": 844}); pp.wait_for_timeout(300)
+    check(pp.evaluate("()=>window.__ns().W") == 346 and pp.evaluate("()=>document.documentElement.scrollWidth - innerWidth") == 0,
+          "on a phone the plans stack in one column and nothing overflows")
+    pp.click('#views button[data-v="counts"]'); pp.wait_for_timeout(150)
+    check(pp.evaluate("()=>document.documentElement.scrollWidth - innerWidth") == 0, "and the counts scroll inside their own box")
+    check(not errs, "no script errors in the pulse", "; ".join(errs))
     br.close()
 
 print("--- the copy ---")

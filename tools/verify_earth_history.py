@@ -202,7 +202,7 @@ with sync_playwright() as pw:
     for v in (0, 8, 16, 24, 32, 40, pasos - 1):
         pg.evaluate("(v)=>{const s=document.getElementById('tage');s.value=v;"
                     "s.dispatchEvent(new Event('input'))}", v)
-        pg.wait_for_timeout(90)
+        pg.wait_for_timeout(600)   # the continents slide to the step
         h = pg.evaluate("()=>window.__hist()")
         visto.append(h["ageSel"])
         formas.append(h["plateD"])
@@ -305,6 +305,75 @@ with sync_playwright() as pw:
     print(f"  {'ok  ' if ok else 'FAIL'} the All of time button puts it back")
     if not ok:
         fails.append("the All of time button does not reset the window")
+
+    print("--- between the steps, and the column as one instrument ---")
+    def chk(ok, msg, extra=""):
+        print(f"  {'ok  ' if ok else 'FAIL'} {msg}")
+        if not ok:
+            fails.append(msg + (f" [{extra}]" if extra else ""))
+    # an interpolated rotation lands between its two steps, and on a step is the step
+    q = pg.evaluate("""()=>{ const ll=[10,20], out={};
+      for (const a of [140,145,150]) { const q=rotAt('701',a); out[a]=qrot(q,ll[0],ll[1]); }
+      const r=poleOf('701',150); out.exact=rotate(ll[0],ll[1],r[1],r[2],r[3]); return out; }""")
+    d = lambda a, b: math.hypot(a[0] - b[0], a[1] - b[1])
+    chk(d(q["150"], q["exact"]) < 1e-6, "on a step the interpolated rotation is the model's own", f"{q}")
+    chk(d(q["140"], q["145"]) < d(q["140"], q["150"]) and d(q["145"], q["150"]) < d(q["140"], q["150"]),
+        "halfway between two steps a point lies between its two positions", f"{q}")
+    pg.evaluate("()=>{const s=document.getElementById('tage');s.value=20;s.dispatchEvent(new Event('input'))}")
+    pg.wait_for_timeout(200)
+    mid = pg.evaluate("()=>window.__hist().paleoAge")
+    pg.wait_for_timeout(500)
+    end = pg.evaluate("()=>window.__hist().paleoAge")
+    chk(mid is not None and end is not None and mid != end, f"a slider step slides the continents ({mid} on the way to {end} Ma)")
+    ghost = pg.evaluate("document.querySelectorAll('#ghost path').length")
+    chk(ghost == 1, "and today's outlines stay dashed underneath")
+    out = pg.evaluate("document.getElementById('ageOut').textContent")
+    chk("million years ago, the " in out, f"the readout names the unit: {out!r}")
+    # the marker drags along the column
+    pg.evaluate("()=>window.__zoom('Mesozoic')")
+    pg.wait_for_timeout(200)
+    pg.evaluate("()=>{document.getElementById('bNow').click()}")
+    pg.evaluate("()=>{const s=document.getElementById('tage');s.value=" + str(len(edades) - 1 - sorted(edades).index(200)) + ";s.dispatchEvent(new Event('input'))}")
+    pg.wait_for_timeout(700)
+    g = pg.evaluate("()=>{const c=document.querySelector('#over circle.nowgrip'); if(!c) return null; const r=c.getBoundingClientRect(); return [r.x+r.width/2, r.y+r.height/2]}")
+    chk(g is not None, "the map's marker on the column has a grip")
+    if g:
+        cb = pg.evaluate("()=>{const r=document.getElementById('col').getBoundingClientRect(); return [r.x, r.width]}")
+        win = pg.evaluate("()=>window.__hist().win")
+        want = 150
+        tx = cb[0] + (54 + (win[0] - want) / (win[0] - win[1]) * (1000 - 108)) / 1000 * cb[1]
+        pg.mouse.move(*g); pg.mouse.down(); pg.mouse.move(tx, g[1], steps=6); pg.mouse.up()
+        pg.wait_for_timeout(100)
+        h = pg.evaluate("()=>window.__hist()")
+        chk(abs(h["ageSel"] - want) < 2 and abs(h["paleoAge"] - want) < 2, f"dragging it to 150 Ma draws the world at {h['paleoAge']}")
+        out = pg.evaluate("document.getElementById('ageOut').textContent")
+        chk("Jurassic" in out, f"and the readout says Jurassic: {out!r}")
+    # the wheel zooms the column
+    pg.evaluate("()=>document.getElementById('bAll').click()")
+    pg.wait_for_timeout(100)
+    cb = pg.evaluate("()=>{const r=document.getElementById('col').getBoundingClientRect(); return [r.x+r.width*0.9, r.y+r.height*0.4]}")
+    pg.mouse.move(*cb)
+    pg.mouse.wheel(0, -600)
+    pg.wait_for_timeout(200)
+    w = pg.evaluate("()=>window.__hist().win")
+    chk(w[0] - w[1] < AGE * 0.6 and not pg.evaluate("document.getElementById('bOut').disabled"), f"the wheel zooms the column in: {w[0]:.0f} to {w[1]:.0f} Ma")
+    pg.click("#bOut")
+    pg.wait_for_timeout(100)
+    w = pg.evaluate("()=>window.__hist().win")
+    chk(w[0] >= AGE and w[1] == 0, "and Zoom out takes it back to the whole")
+    # the labels of the events never collide
+    clash = pg.evaluate("""()=>{const b=[...document.querySelectorAll('#events text')].map(t=>t.getBoundingClientRect()); let n=0;
+      for(let i=0;i<b.length;i++) for(let j=i+1;j<b.length;j++) if(b[i].left<b[j].right&&b[j].left<b[i].right&&b[i].top<b[j].bottom&&b[j].top<b[i].bottom) n++; return n;}""")
+    chk(clash == 0, f"no two event labels overlap ({clash})")
+    vis = pg.evaluate("[...document.querySelectorAll('.notes p')].filter(n=>n.checkVisibility()).length")
+    words = len(pg.inner_text(".notes.cap").split())
+    chk(vis == 1 and words <= 80 and not pg.evaluate("document.querySelector('details.sources').open"), f"one caption of {words} words, the rest in a closed Sources")
+    below = pg.evaluate("document.querySelector('.tiles').getBoundingClientRect().top > document.getElementById('globe').getBoundingClientRect().bottom")
+    chk(below, "the column opens the page and the facts sit below the map")
+    ph = br.new_page(viewport={"width": 390, "height": 844})
+    ph.goto(PAGE.resolve().as_uri()); ph.wait_for_timeout(800)
+    ov = ph.evaluate("document.documentElement.scrollWidth - innerWidth")
+    chk(ov == 0, f"nothing wider than a phone ({ov} px)")
 
     if errs:
         fails.append(f"javascript errors: {errs}")

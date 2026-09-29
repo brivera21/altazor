@@ -48,6 +48,7 @@ LAND = {
     "agri_km2": 48e6, "agri_share_habitable": 44,
     "livestock_pct": 80, "crops_people_pct": 16, "crops_other_pct": 4,
     "animal_calories_pct": 17, "animal_protein_pct": 38,
+    "grazing_pct": 67,   # grazing land is two thirds of the farmland and cropland one third; the feed crops are the rest of the livestock's 80
 }
 # the animals, after Bar-On, Phillips and Milo 2018, gigatonnes of carbon
 BIOMASS = [
@@ -67,7 +68,7 @@ REFS = [
     (apa.article("Poore, J., &amp; Nemecek, T.", 2018, "Reducing food's environmental impacts through producers and consumers", "Science", 360, 6392, "987-992", "https://doi.org/10.1126/science.aaq0216"),
      "Animal foods on most of the farmland for a sixth of the calories and a third of the protein."),
     (apa.web("Ritchie, H., &amp; Roser, M.", 2024, "Half of the world's habitable land is used for agriculture", "Our World in Data", "https://ourworldindata.org/global-land-for-agriculture"),
-     "48 million square kilometers of farmland, 44 percent of the habitable land; four fifths of it for livestock; 17 percent of calories and 38 percent of protein from animals."),
+     "48 million square kilometers of farmland, 44 percent of the habitable land; two thirds of it grazing land and one third cropland; four fifths of it for livestock, grazing and feed together; 17 percent of calories and 38 percent of protein from animals."),
     (apa.web("Food and Agriculture Organization of the United Nations", 2025, "FAOSTAT: Crops and livestock products", "FAO", "https://www.fao.org/faostat/en/#data/QCL"),
      "The harvests, as reported for each crop with its year."),
 ]

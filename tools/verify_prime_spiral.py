@@ -98,6 +98,66 @@ with sync_playwright() as pw:
     ok = t2 == 1000
     print(f"  {'ok  ' if ok else 'FAIL'} keep building raises the walk to {t2}")
     if not ok: fails.append(f"target {t2}")
+    # the walk runs backwards: the slider to 30 takes every later mark off
+    pg.evaluate("()=>{document.getElementById('scrub').value=30;"
+                "document.getElementById('scrub').dispatchEvent(new Event('input'))}")
+    st = pg.evaluate("()=>window.__spiral()")
+    ns = [g["n"] for g in st["groups"]]
+    ok = st["len"] == 30 and max(ns) == 30 and st["marked"] == 10 and st["lastPrime"] == 29 and not st["playing"]
+    print(f"  {'ok  ' if ok else 'FAIL'} scrubbed back to 30: {len(ns)} marks, "
+          f"{st['marked']} primes, the last {st['lastPrime']}, the walk paused")
+    if not ok: fails.append(f"scrub {st['len']} {st['marked']} {st['lastPrime']}")
+    # a prime clicked lights its multiples and dims the rest
+    pg.evaluate("()=>setLit(3)")
+    st = pg.evaluate("()=>window.__spiral()")
+    lit = {g["n"]: g["o"] for g in st["groups"]}
+    ok = st["lit"] == 3 and all((lit[n] == "1") == (n % 3 == 0) for n in lit)
+    print(f"  {'ok  ' if ok else 'FAIL'} 3 lit: every third mark bright, the rest dim")
+    if not ok: fails.append(f"lit {lit}")
+    pg.evaluate("()=>setLit(null)")
+    # the hover card sits at the mark
+    pg.evaluate("()=>document.querySelector('#marks g[data-n=\"12\"] .hit')"
+                ".dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
+    hv = pg.evaluate("()=>{const h=document.getElementById('hov');"
+                     "return {t:h.textContent, on:getComputedStyle(h).display!=='none'}}")
+    ok = hv["on"] and hv["t"] == "12 = 2\u00b2 \u00d7 3"
+    print(f"  {'ok  ' if ok else 'FAIL'} the card at the mark reads '{hv['t']}'")
+    if not ok: fails.append(f"hover card {hv}")
+    # the square spiral: 1 at the center, 2 to its right, 3 above that
+    pg.evaluate("()=>{mix=1; relayout()}")
+    st = pg.evaluate("()=>window.__spiral()")
+    u = st["ulam"]
+    ok = (u["u1"]["x"] == st["cx"] and u["u1"]["y"] == st["cy"] and u["u2"]["x"] > u["u1"]["x"]
+          and u["u3"]["y"] < u["u2"]["y"] and u["u3"]["x"] == u["u2"]["x"]
+          and u["u9"]["x"] > u["u1"]["x"] and u["u9"]["y"] > u["u1"]["y"]
+          and u["u10"]["x"] > u["u9"]["x"] and u["u25"]["x"] > u["u9"]["x"] and u["u25"]["y"] > u["u9"]["y"])
+    print(f"  {'ok  ' if ok else 'FAIL'} Ulam's square: 1 at the center, 2 right, 3 up, "
+          "9 and 25 down the diagonal")
+    if not ok: fails.append(f"ulam {u}")
+    moved = [g for g in st["groups"] if g["n"] == 2][0]["t"]
+    ok = moved == f"translate({u['u2']['x']:.1f},{u['u2']['y']:.1f})"
+    print(f"  {'ok  ' if ok else 'FAIL'} the mark of 2 moved to its square cell ({moved})")
+    if not ok: fails.append(f"moved {moved}")
+    pg.evaluate("()=>{mix=0; relayout()}")
+    # the wheel takes the view over; a double click gives it back
+    pg.evaluate("()=>document.getElementById('psvg').dispatchEvent(new WheelEvent('wheel',{deltaY:-300,clientX:300,clientY:300,bubbles:true,cancelable:true}))")
+    st = pg.evaluate("()=>window.__spiral()")
+    h1 = st["half"]
+    pg.evaluate("()=>document.getElementById('psvg').dispatchEvent(new MouseEvent('dblclick',{bubbles:true}))")
+    st2 = pg.evaluate("()=>window.__spiral()")
+    ok = st["manual"] and not st2["manual"] and st2["half"] > h1
+    print(f"  {'ok  ' if ok else 'FAIL'} the wheel zooms in (half-view {h1:.0f}) and a double click fits again ({st2['half']:.0f})")
+    if not ok: fails.append(f"zoom {st['manual']} {h1} {st2['half']}")
+    # a jump along the path (the slider to its end) is followed until every mark is in view
+    pg.evaluate("()=>{TARGET=CAP; const s=document.getElementById('scrub'); s.max=CAP; s.value=CAP; s.dispatchEvent(new Event('input'))}")
+    pg.wait_for_timeout(2500)
+    fit = pg.evaluate("()=>{const s=window.__spiral(); let m=0; for(const g of s.groups){const t=g.t.match(/[-\\d.]+/g).map(Number);"
+                      " m=Math.max(m,Math.hypot(t[0]-s.cx,t[1]-s.cy));} return [m,s.half]}")
+    ok = fit[1] >= fit[0] * 0.97
+    print(f"  {'ok  ' if ok else 'FAIL'} scrubbed to the end, the view opens to the outer ring (half-view {fit[1]:.0f}, outermost mark {fit[0]:.0f})")
+    if not ok: fails.append(f"fit {fit}")
+    pg.evaluate("()=>{const s=document.getElementById('scrub'); s.value=30; s.dispatchEvent(new Event('input'))}")
+    pg.wait_for_timeout(300)
     if errs: fails.append(f"js errors: {errs}")
     br.close()
 print()

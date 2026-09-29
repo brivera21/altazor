@@ -17,8 +17,8 @@ CLASSES = [
     ("SUB", "a subduction zone", "#58a6ff", "One plate dives beneath another and sinks into the mantle, bending down along a trench. The deepest earthquakes, the biggest ones, and most of the volcanoes on land are here."),
     ("OTF", "an oceanic transform", "#ffb02e", "Two plates sliding past each other, offsetting a ridge. No crust is made or lost; the fault is a strike-slip seam across the sea floor."),
     ("CTF", "a continental transform", "#ffc85e", "Two plates sliding past each other on land: the San Andreas, the Alpine Fault, the North Anatolian. Shallow earthquakes, no volcanoes."),
-    ("CCB", "a continental collision", "#b48cf2", "Two continents meeting. Neither will sink, so the crust crumples and thickens into mountains: the Himalaya, the Alps, the Zagros."),
-    ("OCB", "an oceanic convergence", "#9d7ae0", "Convergence with no clear trench, where the crust shortens and thickens without one plate diving cleanly under the other."),
+    ("CCB", "a continental collision", "#9ec5ff", "Two continents meeting. Neither will sink, so the crust crumples and thickens into mountains: the Himalaya, the Alps, the Zagros."),
+    ("OCB", "an oceanic convergence", "#3d7bd6", "Convergence with no clear trench, where the crust shortens and thickens without one plate diving cleanly under the other."),
 ]
 
 # plates with something to say: code, a line, source
@@ -82,3 +82,41 @@ REFS += [(apa.wiki(f"https://en.wikipedia.org/wiki/{p}"), a) for p, a in [
     ("Mariana_Trench", None), ("San_Andreas_Fault", None), ("Himalayas", None), ("East_African_Rift", None),
     ("Red_Sea_Rift", None), ("Iceland_hotspot", None),
 ]]
+
+# Where each plate is heading: NNR-MORVEL56 angular velocities in the
+# no-net-rotation frame (Argus, Gordon and DeMets 2011, Table S4): pole
+# latitude and longitude in degrees, rate in degrees per million years.
+# MORVEL's Nubia stands for Bird's Africa, Somalia for Somalia and Yangtze
+# for Yangtze; Bird's other plates carry his own poles, as in the table.
+POLES = {
+    "PA": (-63.5756, 114.6975, 0.6509), "AM": (63.1704, -122.8242, 0.2973),
+    "AN": (65.4235, -118.1053, 0.2500), "AR": (48.8807, -8.4909, 0.5588),
+    "AU": (33.8612, 37.9414, 0.6316), "CA": (35.1956, -92.6236, 0.2862),
+    "CO": (26.9346, -124.3074, 1.1978), "EU": (48.8509, -106.5007, 0.2227),
+    "IN": (50.3722, -3.2898, 0.5438), "JF": (-38.3086, 60.0379, 0.9513),
+    "AF": (47.6763, -68.4377, 0.2921), "NA": (-4.8548, -80.6447, 0.2087),
+    "NZ": (46.2348, -101.0564, 0.6957), "PS": (-46.0242, -31.3615, 0.9098),
+    "RI": (20.2450, -107.2861, 4.5359), "SA": (-22.6179, -112.8327, 0.1090),
+    "SC": (22.5244, -106.1485, 0.1464), "SO": (49.9506, -84.5154, 0.3393),
+    "SU": (50.0558, -95.0218, 0.3368), "SW": (-29.9420, -36.8671, 1.3616),
+    "YA": (63.0285, -116.6180, 0.3335), "SL": (50.7058, -143.4675, 0.2677),
+    "BH": (-39.9983, 100.4994, 0.7988), "MO": (14.2480, 92.6656, 0.7742),
+    "SS": (-2.8685, 130.6236, 1.7029), "WL": (0.1050, 128.5186, 1.7444),
+    "CR": (-20.3985, 170.5303, 3.9232), "FT": (-16.3322, 178.0679, 5.1006),
+    "KE": (39.9929, 6.4584, 2.3474), "NI": (-3.2883, -174.4882, 3.3136),
+    "TO": (25.8737, 4.4767, 8.9417), "PM": (31.3510, -113.9038, 0.3171),
+    "AS": (19.4251, 122.8665, 0.1239), "AT": (40.1121, 26.6585, 1.2105),
+    "GP": (2.5287, 81.1806, 5.4868), "EA": (24.9729, 67.5269, 11.3343),
+    "JZ": (34.2507, 70.7429, 22.3676), "OK": (30.3022, -92.2813, 0.2290),
+    "NB": (-45.0406, 127.6370, 0.8563), "SB": (6.8767, -31.8883, 8.1107),
+    "MN": (-3.6699, 150.2676, 51.5690), "NH": (0.5684, -6.6018, 2.4688),
+    "BR": (-63.7420, 142.0636, 0.4898), "CL": (-72.7849, 72.0525, 0.6066),
+    "MA": (11.0533, 137.8404, 1.3061), "ND": (17.7331, -122.6815, 0.1162),
+    "AP": (-6.5763, -83.9776, 0.4881), "BU": (-6.1254, -78.1008, 2.2287),
+    "MS": (2.1477, -56.0916, 3.5655), "BS": (-1.4855, 121.6413, 2.4753),
+    "TI": (-4.4363, 113.4976, 1.8639), "ON": (36.1163, 137.9182, 2.5391),
+}
+POLES_REF = (apa.article("Argus, D. F., Gordon, R. G., &amp; DeMets, C.", 2011,
+                         "Geologically current motion of 56 plates relative to the no-net-rotation reference frame",
+                         "Geochemistry, Geophysics, Geosystems", 12, 11, "Q11001", "https://doi.org/10.1029/2011GC003751"),
+             "Where each plate is heading and how fast: the NNR-MORVEL56 angular velocities, Table S4, behind the arrows and the run forward.")

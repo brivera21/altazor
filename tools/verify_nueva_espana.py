@@ -60,59 +60,71 @@ aprox = [n for n, (_la, _lo, e) in D.LUGARES.items() if not e]
 print(f"  ok   {len(aprox)} lugares van marcados como aproximados, entre ellos "
       f"{', '.join(sorted(aprox)[:3])}")
 
+# cada villa sabe en qué estado de hoy queda
+sin = [v[0] for v in D.VILLAS if v[0] not in D.HOY]
+print(f"  {'ok  ' if not sin else 'FALLA'} cada villa tiene su estado de hoy")
+if sin:
+    fails.append(f"villas sin estado de hoy: {sin}")
+
 print("--- las entidades de 1824 contra los estados de hoy ---")
-mx = pickle.load(open(MX, "rb"))
-us = pickle.load(open(US, "rb"))
-usados = [k for _n, _c, kmx, _ku in D.ENTIDADES_1824 for k in kmx]
-ok = sorted(usados) == sorted(mx)
-print(f"  {'ok  ' if ok else 'FALLA'} las entidades usan los {len(mx)} estados "
-      "mexicanos de hoy, cada uno una vez")
-if not ok:
-    from collections import Counter
-    c = Counter(usados)
-    fails.append(f"estados repetidos o faltantes: "
-                 f"{[k for k, v in c.items() if v > 1]} / "
-                 f"{sorted(set(mx) - set(usados))}")
-usados_us = [k for _n, _c, _k, kus in D.ENTIDADES_1824 for k in kus]
-ok = len(usados_us) == len(set(usados_us)) and all(k in us for k in usados_us)
-print(f"  {'ok  ' if ok else 'FALLA'} y {len(usados_us)} estados de Estados "
-      "Unidos, sin repetir")
-if not ok:
-    fails.append(f"estados de EUA repetidos: {usados_us}")
-
-# ninguna entidad se encima con otra
-formas = {}
-for n, _c, kmx, kus in D.ENTIDADES_1824:
-    formas[n] = unary_union([mx[k].buffer(0) for k in kmx]
-                            + [us[k].buffer(0) for k in kus])
-# Los dos juegos de estados vienen de fuentes distintas, la WDBII y el censo
-# de Estados Unidos, y sus rayas no caen exactamente encima una de otra: donde
-# Sonora toca Arizona quedan unas centenas de kilómetros cuadrados repetidos.
-# Eso se tolera; lo que no se tolera es que dos entidades compartan territorio.
-peor, encimes = 0.0, []
-nombres = list(formas)
-for i, a in enumerate(nombres):
-    for b in nombres[i + 1:]:
-        g = formas[a].intersection(formas[b])
-        peor = max(peor, g.area)
-        if g.area > 0.3:
-            encimes.append(f"{a} y {b}: {g.area:.2f} grados cuadrados")
-print(f"  {'ok  ' if not encimes else 'FALLA'} ninguna entidad se encima con "
-      f"otra; lo más que se repite son {peor * 111.32 * 110.57 * 0.9:,.0f} km2 "
-      "en la costura de las dos fuentes")
-if encimes:
-    fails.append(f"entidades encimadas: {encimes[:3]}")
-
-# lo que se perdió cabe adentro de lo que había
-todo = unary_union(list(formas.values()))
-for año, nombre, kmx, kus, _nota in D.PERDIDO:
-    g = unary_union([mx[k].buffer(0) for k in kmx] + [us[k].buffer(0) for k in kus])
-    afuera = g.difference(todo.buffer(0.01)).area
-    ok = afuera < 0.5
-    print(f"  {'ok  ' if ok else 'FALLA'} {nombre} sale de lo que la federación "
-          f"tenía en 1824 ({afuera:.2f} grados cuadrados de sobra)")
+if MX.exists() and US.exists():
+    mx = pickle.load(open(MX, "rb"))
+    us = pickle.load(open(US, "rb"))
+else:
+    print(f"  ({MX} no está en esta máquina: la geometría se salta y la "
+          "página se comprueba igual)")
+    mx = us = None
+if mx is not None:
+    usados = [k for _n, _c, kmx, _ku in D.ENTIDADES_1824 for k in kmx]
+    ok = sorted(usados) == sorted(mx)
+    print(f"  {'ok  ' if ok else 'FALLA'} las entidades usan los {len(mx)} estados "
+          "mexicanos de hoy, cada uno una vez")
     if not ok:
-        fails.append(f"{nombre} no cabe en el país de 1824")
+        from collections import Counter
+        c = Counter(usados)
+        fails.append(f"estados repetidos o faltantes: "
+                     f"{[k for k, v in c.items() if v > 1]} / "
+                     f"{sorted(set(mx) - set(usados))}")
+    usados_us = [k for _n, _c, _k, kus in D.ENTIDADES_1824 for k in kus]
+    ok = len(usados_us) == len(set(usados_us)) and all(k in us for k in usados_us)
+    print(f"  {'ok  ' if ok else 'FALLA'} y {len(usados_us)} estados de Estados "
+          "Unidos, sin repetir")
+    if not ok:
+        fails.append(f"estados de EUA repetidos: {usados_us}")
+
+    # ninguna entidad se encima con otra
+    formas = {}
+    for n, _c, kmx, kus in D.ENTIDADES_1824:
+        formas[n] = unary_union([mx[k].buffer(0) for k in kmx]
+                                + [us[k].buffer(0) for k in kus])
+    # Los dos juegos de estados vienen de fuentes distintas, la WDBII y el censo
+    # de Estados Unidos, y sus rayas no caen exactamente encima una de otra: donde
+    # Sonora toca Arizona quedan unas centenas de kilómetros cuadrados repetidos.
+    # Eso se tolera; lo que no se tolera es que dos entidades compartan territorio.
+    peor, encimes = 0.0, []
+    nombres = list(formas)
+    for i, a in enumerate(nombres):
+        for b in nombres[i + 1:]:
+            g = formas[a].intersection(formas[b])
+            peor = max(peor, g.area)
+            if g.area > 0.3:
+                encimes.append(f"{a} y {b}: {g.area:.2f} grados cuadrados")
+    print(f"  {'ok  ' if not encimes else 'FALLA'} ninguna entidad se encima con "
+          f"otra; lo más que se repite son {peor * 111.32 * 110.57 * 0.9:,.0f} km2 "
+          "en la costura de las dos fuentes")
+    if encimes:
+        fails.append(f"entidades encimadas: {encimes[:3]}")
+
+    # lo que se perdió cabe adentro de lo que había
+    todo = unary_union(list(formas.values()))
+    for año, nombre, kmx, kus, _nota in D.PERDIDO:
+        g = unary_union([mx[k].buffer(0) for k in kmx] + [us[k].buffer(0) for k in kus])
+        afuera = g.difference(todo.buffer(0.01)).area
+        ok = afuera < 0.5
+        print(f"  {'ok  ' if ok else 'FALLA'} {nombre} sale de lo que la federación "
+              f"tenía en 1824 ({afuera:.2f} grados cuadrados de sobra)")
+        if not ok:
+            fails.append(f"{nombre} no cabe en el país de 1824")
 
 print("--- las rayas ---")
 l19 = D.LINEA_1819
@@ -142,7 +154,8 @@ cuerpo = re.sub(r"<script[\s\S]*?</script>", "", html)
 if "—" in cuerpo.replace("&mdash;", ""):
     fails.append("hay una raya larga en el texto de la página")
 for want in ("La Nueva España", "library.html", "ALTAZOR", "Referencias",
-             "1824", "Adams"):
+             "1824", "Adams", '<details class="sources">', 'id="anos"',
+             'id="ficha"', 'id="relieve"', 'id="bMarco"'):
     ok = want in html
     print(f"  {'ok  ' if ok else 'FALLA'} la página trae {want!r}")
     if not ok:
@@ -240,6 +253,89 @@ with sync_playwright() as pw:
           f"{len({v[1] for v in vistos})} sucesos distintos en cinco años")
     if not ok:
         fails.append(f"el tablero repite: {vistos}")
+
+    print("--- los marcos, la ficha, la leyenda, el relieve y el arrastre ---")
+    s = en(1519)
+    ok = s["dibujadas"]["marcos"] == 8 and s["relieve"] > 50
+    print(f"  {'ok  ' if ok else 'FALLA'} {s['dibujadas']['marcos']} años con "
+          f"marco y {s['relieve']} manchas de relieve")
+    if not ok:
+        fails.append(f"marcos {s['dibujadas']['marcos']}, relieve {s['relieve']}")
+    ok = s["dibujadas"]["leyenda"] == 2
+    print(f"  {'ok  ' if ok else 'FALLA'} en 1519 la leyenda trae "
+          f"{s['dibujadas']['leyenda']} filas, las dos cosas que están en el mapa")
+    if not ok:
+        fails.append(f"la leyenda de 1519 trae {s['dibujadas']['leyenda']} filas")
+    ok = en(1853)["dibujadas"]["leyenda"] == 6
+    print(f"  {'ok  ' if ok else 'FALLA'} y en 1853 las seis")
+    if not ok:
+        fails.append("la leyenda de 1853 no trae seis filas")
+    en(1519)
+    pg.click("#anos button[data-a='1598']")
+    pg.wait_for_timeout(250)
+    medio = pg.evaluate("()=>window.__ne()")
+    pg.wait_for_timeout(1400)
+    fin = pg.evaluate("()=>window.__ne()")
+    ok = 1519 < medio["ano"] < 1598 and fin["ano"] == 1598 and medio["viaje"] \
+        and not fin["viaje"]
+    print(f"  {'ok  ' if ok else 'FALLA'} el marco 1598 lleva el deslizador "
+          f"poco a poco: {medio['ano']} a mitad de camino, {fin['ano']} al final")
+    if not ok:
+        fails.append(f"el marco no viaja: {medio['ano']} luego {fin['ano']}")
+    pg.evaluate("()=>document.querySelectorAll('#rutas path.mano')[2]"
+                ".dispatchEvent(new MouseEvent('click',{bubbles:true}))")
+    pg.wait_for_timeout(150)
+    ficha = pg.inner_text("#ficha")
+    s = pg.evaluate("()=>window.__ne()")
+    ok = s["fija"] == 2 and "Coronado" in ficha and "2,828 km" in ficha \
+        and "Compostela" in ficha
+    print(f"  {'ok  ' if ok else 'FALLA'} la entrada de Coronado se fija en la "
+          f"ficha con jefe, kilómetros y sitios")
+    if not ok:
+        fails.append(f"la ficha dice {ficha[:100]!r}")
+    pg.keyboard.press("Escape")
+    s = pg.evaluate("()=>window.__ne()")
+    if s["fija"] is not None:
+        fails.append("Escape no suelta la entrada")
+    pg.evaluate("()=>document.querySelectorAll('#villas circle.villa')[3]"
+                ".dispatchEvent(new MouseEvent('mouseenter'))")
+    pg.wait_for_timeout(100)
+    s = pg.evaluate("()=>window.__ne()")
+    ok = "1546" in s["sub"] and "Zacatecas" in s["sub"]
+    print(f"  {'ok  ' if ok else 'FALLA'} una villa bajo el cursor dice su año "
+          f"y su estado de hoy: {s['sub'][:60]!r}")
+    if not ok:
+        fails.append(f"la villa bajo el cursor dice {s['sub']!r}")
+    en(1853)
+    antes = pg.evaluate("()=>window.__ne().caja")
+    pg.mouse.move(400, 400)
+    pg.mouse.wheel(0, -500)
+    pg.wait_for_timeout(200)
+    pg.mouse.down()
+    pg.mouse.move(300, 300, steps=4)
+    pg.mouse.up()
+    pg.wait_for_timeout(200)
+    s = pg.evaluate("()=>window.__ne()")
+    ok = s["manual"] and s["caja"]["w"] < antes["w"] * 0.8
+    print(f"  {'ok  ' if ok else 'FALLA'} la rueda acerca y el arrastre mueve: "
+          f"el cuadro pasa de {antes['w']:.0f} a {s['caja']['w']:.0f} de ancho")
+    if not ok:
+        fails.append("la rueda o el arrastre no mueven el cuadro")
+    pg.click("#bMarco")
+    pg.wait_for_timeout(300)
+    s = pg.evaluate("()=>window.__ne()")
+    ok = not s["manual"] and abs(s["caja"]["w"] - antes["w"]) < 1
+    print(f"  {'ok  ' if ok else 'FALLA'} Reencuadrar devuelve el encuadre")
+    if not ok:
+        fails.append("Reencuadrar no devuelve el encuadre")
+    pg.click("#bPlay")
+    pg.wait_for_timeout(400)
+    s = pg.evaluate("()=>window.__ne()")
+    ok = s["corriendo"] and pg.text_content("#bPlay") == "Alto" and s["ano"] > 1519
+    print(f"  {'ok  ' if ok else 'FALLA'} Correr los años corre y el botón dice Alto")
+    if not ok:
+        fails.append("el botón de correr no corre")
+    pg.click("#bPlay")
 
     if errs:
         fails.append(f"errores de javascript: {errs}")

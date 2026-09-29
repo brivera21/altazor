@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 import sapiens_data as S
-from build_migration import CONT_FROM, CONTINENTS
+from build_migration import CONT_FROM, CONTINENTS, MOMENTS
 
 PAGE = Path(__file__).parent.parent / "migration.html"
 fails = []
@@ -185,6 +185,88 @@ with sync_playwright() as pw:
         if not ok:
             fails.append(f"{bid} does not change {key}")
         pg.click("#" + bid)
+
+    print("--- the dots answer the pointer, the chips and the keys ---")
+    pg.evaluate("()=>window.__setYbp(12000)")
+    st = pg.evaluate("()=>window.__mig()")
+    ok = st["moments"] == len(MOMENTS) and st["ticks"] == 7
+    print(f"  {'ok  ' if ok else 'FAIL'} {st['moments']} chips and {st['ticks']} "
+          "tick marks on the slider")
+    if not ok:
+        fails.append(f"{st['moments']} chips, {st['ticks']} ticks")
+    x, y = pg.evaluate("()=>window.__siteXY(5)")
+    pg.mouse.move(x, y)
+    pg.wait_for_timeout(120)
+    hov = pg.evaluate("()=>window.__mig().hov")
+    card = pg.evaluate("()=>document.getElementById('latest').textContent")
+    ok = hov == 5 and live[5][4] in card and "km" in card
+    print(f"  {'ok  ' if ok else 'FAIL'} hovering the dot of {live[5][4]} loads "
+          "its card with its link")
+    if not ok:
+        fails.append(f"hover gives site {hov}, card {card[:60]!r}")
+    pg.mouse.click(x, y)
+    pg.wait_for_timeout(120)
+    sel = pg.evaluate("()=>window.__mig().sel")
+    pg.mouse.move(5, 5)
+    pg.wait_for_timeout(120)
+    card = pg.evaluate("()=>document.getElementById('latest').textContent")
+    ok = sel == 5 and live[5][4] in card and "pinned" in card
+    print(f"  {'ok  ' if ok else 'FAIL'} a click pins it and the card stays "
+          "when the pointer leaves")
+    if not ok:
+        fails.append(f"click pins {sel}, card {card[:60]!r}")
+    pg.keyboard.press("ArrowRight")
+    pg.wait_for_timeout(1300)
+    st = pg.evaluate("()=>window.__mig()")
+    ok = st["sel"] == 6 and abs(st["ybp"] - live[6][3]) < live[6][3] * 0.01
+    print(f"  {'ok  ' if ok else 'FAIL'} the right arrow steps to the next site, "
+          f"{live[6][4]}, and the clock reads {st['ybp']:,.0f}")
+    if not ok:
+        fails.append(f"ArrowRight gives sel {st['sel']} at {st['ybp']}")
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(100)
+    ok = pg.evaluate("()=>window.__mig().sel") == -1
+    print(f"  {'ok  ' if ok else 'FAIL'} Escape unpins")
+    if not ok:
+        fails.append("Escape does not unpin")
+    for k, (label, site) in enumerate(MOMENTS):
+        pg.click(f"#chips button:nth-of-type({k + 1})")
+        pg.wait_for_timeout(1300)
+        st = pg.evaluate("()=>window.__mig()")
+        if site is None:
+            ok = st["p"] >= 0.999 and st["sel"] == -1
+        else:
+            want = next(a for a in live if a[4] == site)
+            ok = live[st["sel"]][4] == site and st["here"] >= 1 \
+                and abs(st["ybp"] - want[3]) < max(2, want[3] * 0.01)
+        print(f"  {'ok  ' if ok else 'FAIL'} the chip {label!r} sets the clock "
+              f"to {st['ybp']:,.0f} and pins {site or 'nothing'}")
+        if not ok:
+            fails.append(f"the chip {label!r} gives {st}")
+    ok = pg.evaluate("()=>{const d=document.querySelector('details.sources');"
+                     "return d && !d.open && d.textContent.includes('References')}")
+    print(f"  {'ok  ' if ok else 'FAIL'} the notes and references sit in a closed "
+          "details")
+    if not ok:
+        fails.append("no closed details.sources with the references")
+    words = pg.evaluate("()=>document.querySelector('p.cap').textContent"
+                        ".split(/\\s+/).filter(Boolean).length")
+    ok = words <= 80
+    print(f"  {'ok  ' if ok else 'FAIL'} the caption is {words} words")
+    if not ok:
+        fails.append(f"the caption is {words} words")
+
+    print("--- the phone ---")
+    ph = br.new_page(viewport={"width": 390, "height": 844})
+    ph.goto(PAGE.resolve().as_uri())
+    ph.wait_for_function("() => !!window.__mig", timeout=15000)
+    over = ph.evaluate("()=>document.documentElement.scrollWidth-innerWidth")
+    ok = over == 0
+    print(f"  {'ok  ' if ok else 'FAIL'} nothing wider than a 390 px screen "
+          f"({over} px over)")
+    if not ok:
+        fails.append(f"the phone overflows by {over} px")
+    ph.close()
 
     if errs:
         fails.append(f"javascript errors: {errs}")

@@ -49,7 +49,7 @@ GENE_NOTE = ("The first thirty codons of the gene for beta-globin, half of the h
 MUTATIONS = [
     ("sickle", "the sickle cell mutation", 19, "T", "One base, an A to a T in the seventh codon, turns glutamic acid into valine. The changed protein sticks to itself when it gives up its oxygen, the red cells bend into sickles, and they jam in small vessels. One copy of the gene protects against malaria, which is why the mutation is common where malaria is.", "Wikipedia, Sickle cell disease"),
     ("silent", "a silent change", 8, "C", "The third base of a codon often does not matter: CAT and CAC both mean histidine, so this change makes no difference to the protein. Most of the code's redundancy sits in the third position.", "Wikipedia, Synonymous substitution"),
-    ("stop", "a stop", 21, "T", "A G to a T in the eighth codon turns glutamic acid into a stop signal, and the protein ends after seven amino acids. A change like this in beta-globin gives a form of thalassaemia.", "Wikipedia, Nonsense mutation"),
+    ("stop", "a stop", 21, "T", "A G to a T in the eighth codon turns glutamic acid into a stop signal, and the protein ends after seven amino acids. A change like this in beta-globin gives a form of thalassemia.", "Wikipedia, Nonsense mutation"),
     ("frame", "a lost base", 4, "", "Take one base out and every codon after it is read in the wrong frame: a different protein altogether, until a stop turns up by chance. This is what makes the code's three-letter rhythm so fragile to insertions and deletions.", "Wikipedia, Frameshift mutation"),
 ]
 

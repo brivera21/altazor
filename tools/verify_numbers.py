@@ -179,6 +179,40 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(100)
     check("more marks" in pg.text_content("#nsvg") and "9,799 more marks" in pg.text_content("#nsvg"), "9999 tallies: 200 drawn and 9,799 more marks")
 
+    print("--- the motion ---")
+    pg.fill("#num", "1999")
+    pg.wait_for_timeout(900)
+    pg.click('#presets button[data-p="2026"]')
+    st = pg.evaluate("()=>window.__num()")
+    check(st["n"] == 2026 and (st["animating"] or pg.evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches")),
+          "from 1,999 to 2,026 the rows move rather than repaint")
+    pg.wait_for_timeout(1000)
+    st = pg.evaluate("()=>window.__num()")
+    lines = pg.evaluate("()=>document.querySelectorAll('#nsvg g[data-k=\"tally\"] line').length")
+    check(not st["animating"] and "MMXXVI" in pg.text_content("#nsvg") and lines == st["marks"]["tally"]["lines"],
+          f"and settle: MMXXVI, {lines} tally lines drawn")
+    eg = pg.evaluate("()=>[...document.querySelectorAll('#nsvg g[data-k=\"egypt\"] text')].map(t=>t.textContent)")
+    check("thousands" in eg and "tens" in eg and "ones" in eg and "hundreds" not in eg,
+          f"the Egyptian groups carry their places, as the Hindu-Arabic digits do ({', '.join(t for t in eg if t in ('thousands','hundreds','tens','ones'))})")
+    pg.focus("#num")
+    pg.keyboard.press("ArrowUp")
+    pg.wait_for_timeout(100)
+    check(pg.evaluate("()=>window.__num().n") == 2027, "the up arrow in the field steps to 2,027")
+    pg.focus("#diagram")
+    pg.keyboard.press("ArrowDown")
+    pg.keyboard.press("ArrowDown")
+    pg.wait_for_timeout(100)
+    check(pg.evaluate("()=>window.__num().n") == 2025, "and with the drawing focused, two down arrows reach 2,025")
+    pg.click("#count")
+    pg.wait_for_timeout(1400)
+    st = pg.evaluate("()=>window.__num()")
+    check(st["counting"] and 2 <= st["n"] < 100 and pg.inner_text("#count") == "Pause",
+          f"Count up starts over from 1 and ticks (at {st['n']}), the button reads Pause")
+    pg.wait_for_function("()=>!window.__num().counting", timeout=40000)
+    st = pg.evaluate("()=>window.__num()")
+    check(st["n"] == 100 and pg.inner_text("#count") == "Count up" and "C" == st["write"]["roman"].split()[0],
+          "and stops at 100, written C")
+
     print("--- the line ---")
     pg.click('#views button[data-v="line"]')
     pg.fill("#num", "10")
@@ -203,6 +237,22 @@ with sync_playwright() as pw:
     check("50% log, 50% linear" in pg.inner_text("#numTxt"), "the card names the blend")
     ticks = pg.evaluate("()=>[...document.querySelectorAll('#nsvg text')].map(t=>t.textContent)")
     check("ten sits 30% of the way along" in ticks, "the tell-tale line reads 30%")
+    # the number drags along the line, its two pure readings trailing as hollow ghosts
+    pg.evaluate("()=>{const s=document.getElementById('blend'); s.value=0; s.dispatchEvent(new Event('input'));}")
+    pg.fill("#num", "30")
+    pg.wait_for_timeout(100)
+    box = pg.eval_on_selector("#nsvg", "e=>{const b=e.getBoundingClientRect(); return [b.left,b.top,b.width,b.height, e.viewBox.baseVal.height]}")
+    sx = box[2] / 980
+    xt = L + 0.5 * (R - L)     # halfway, read logarithmically, is 10
+    pg.mouse.move(box[0] + (L + 0.9 * (R - L)) * sx, box[1] + 300 * box[3] / box[4])
+    pg.mouse.down()
+    pg.mouse.move(box[0] + xt * sx, box[1] + 300 * box[3] / box[4], steps=5)
+    pg.mouse.up()
+    pg.wait_for_timeout(100)
+    st = pg.evaluate("()=>window.__num()")
+    lin = L + 10 / 100 * (R - L)
+    check(st["n"] == 10 and any(abs(g - lin) < 0.6 for g in st["ghosts"]),
+          f"dragging the number to the middle sets 10, with a ghost where 10 reads linearly ({st['ghosts']})")
     pg.fill("#num", "365")
     pg.wait_for_timeout(100)
     check(marker() is None and "off this line" in pg.text_content("#nsvg"), "365 is off a line to 100, and the page says so")

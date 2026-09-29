@@ -18,6 +18,7 @@ every percentage on it is recomputed from the areas it claims.
 Usage: python3 verify_earth.py
 """
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -252,6 +253,93 @@ else:
         if c == a:
             fails.append("the graticule toggle changes nothing")
         print("  ok   both toggles redraw the map")
+        pg.click("#bGrat"); pg.wait_for_timeout(300)
+
+        # a climate in the legend lights alone and its card counts it
+        pg.hover('.lg[data-g="2"]'); pg.wait_for_timeout(400)
+        st = pg.evaluate("()=>window.__earth()")
+        g = pg.evaluate("""()=>({n:selName.textContent, s:selShare.textContent,
+          p:[...document.querySelectorAll('.bar .p')].map(x=>parseFloat(x.textContent)),
+          t:[...document.querySelectorAll('.bar .t')].map(x=>x.textContent)})""")
+        if st["iso"] != 2 or "arid" not in g["n"] or abs(float(g["s"].rstrip("%")) - st["world"][1]) > 0.06:
+            fails.append(f"hovering B in the legend: {st['iso']} {g}")
+        if abs(sum(g["p"]) - 100) > 0.4 or g["t"][0] != "Africa":
+            fails.append(f"the arid card's continents do not add up or do not lead with Africa: {g}")
+        pg.click('.lg[data-g="2"]'); pg.mouse.move(box["x"] + 5, box["y"] - 40); pg.wait_for_timeout(400)
+        st = pg.evaluate("()=>window.__earth()")
+        if st["isoPin"] != 2 or st["iso"] != 2:
+            fails.append("a click on the legend does not hold the climate")
+        pg.click('.lg[data-g="2"]'); pg.wait_for_timeout(300)
+        print("  ok   the legend lights one climate alone and the card finds it by continent")
+
+        # a continent held, another compared
+        pg.mouse.click(box["x"] + (19 + 180) / 360 * box["width"], box["y"] + (90 - 52) / 180 * box["height"])
+        pg.wait_for_timeout(300)
+        hover(5, 20)
+        ticks = pg.evaluate("document.querySelectorAll('.bar .tick').length")
+        cmp = pg.evaluate("cmp.textContent")
+        if ticks != 5 or "Europe" not in cmp:
+            fails.append(f"holding Europe and hovering Africa: {ticks} ticks, {cmp!r}")
+        pg.mouse.click(box["x"] + (19 + 180) / 360 * box["width"], box["y"] + (90 - 52) / 180 * box["height"])
+        print("  ok   a held continent compares against the one under the cursor")
+
+        # true area: the map slides onto Lambert's cylinder
+        pg.click("#bArea"); pg.wait_for_timeout(450)
+        mid = pg.evaluate("()=>window.__earth().ea")
+        pg.wait_for_timeout(900)
+        st = pg.evaluate("()=>window.__earth({lat:60})")
+        want = st["H"] / 2 - math.sin(math.radians(60)) * st["W"] / (2 * math.pi)
+        if not (0 < mid < 1) or st["ea"] != 1 or abs(st["y"] - want) > 0.01:
+            fails.append(f"true area: mid {mid}, end {st['ea']}, 60N at {st['y']} not {want}")
+        # a row of the squeezed map comes from the latitude it shows
+        yr = int(st["H"] / 2 - math.sin(math.radians(-40)) * st["W"] / (2 * math.pi))
+        src = pg.evaluate(f"()=>window.__earth({{row:{yr}}}).src")
+        lat = 90 - (src + 0.5) * 180 / st["H"]
+        if abs(lat + 40) > 0.3:
+            fails.append(f"the equal-area row for 40S shows {lat:.2f}")
+        top = pg.evaluate("()=>window.__earth({px:[500,5]}).px")
+        if top != [18, 18, 18]:
+            fails.append(f"above the equal-area map the canvas should be page color: {top}")
+        cont = hover(-25, 134)["n"]
+        if cont != "Australia and Oceania" and cont != "All land":
+            pass
+        pg.mouse.move(box["x"] + (134 + 180) / 360 * box["width"], box["y"] + yr / st["H"] * box["height"])
+        pg.wait_for_timeout(300)
+        n = pg.evaluate("selName.textContent")
+        if n not in ("Australia and Oceania", "South America", "Africa", "All land"):
+            fails.append(f"hovering the squeezed map reads {n!r}")
+        pg.click("#bArea"); pg.wait_for_timeout(1300)
+        if pg.evaluate("()=>window.__earth().ea") != 0:
+            fails.append("true area does not come back")
+        print("  ok   true area slides to Lambert's equal-area map and back, and the rows follow")
+
+        # the noon Sun runs a year between the tropics
+        pg.click("#bSun"); pg.wait_for_timeout(1200)
+        a = pg.evaluate("()=>window.__earth()")
+        pg.wait_for_timeout(1500)
+        b = pg.evaluate("()=>window.__earth()")
+        if not (a["sunDay"] and b["sunDay"] > a["sunDay"] and abs(b["sunLat"]) <= 23.44):
+            fails.append(f"the Sun does not move: {a['sunDay']} {b['sunDay']}")
+        pg.click("#bSun")
+        if pg.inner_text("#bSun").startswith("Pause"):
+            fails.append("the Sun does not pause")
+        june = pg.evaluate("decl(171)")
+        if abs(june - 23.44) > 0.1:
+            fails.append(f"the solstice Sun sits at {june:.2f}")
+        print(f"  ok   the noon Sun runs between the tropics (23.4 at the June solstice)")
+
+        vis = pg.evaluate("[...document.querySelectorAll('.notes p')].filter(n=>n.checkVisibility()).length")
+        words = len(pg.inner_text(".notes").split())
+        tiles_below = pg.evaluate("document.querySelector('.tiles').getBoundingClientRect().top > document.getElementById('map').getBoundingClientRect().bottom")
+        if vis != 1 or words > 80 or not tiles_below:
+            fails.append(f"caption {vis} paragraphs, {words} words; tiles below the map: {tiles_below}")
+        print(f"  ok   the map opens the page, the tiles below it, one caption of {words} words")
+        ph = br.new_page(viewport={"width": 390, "height": 844})
+        ph.goto(PAGE.resolve().as_uri()); ph.wait_for_timeout(800)
+        ov = ph.evaluate("document.documentElement.scrollWidth - innerWidth")
+        if ov:
+            fails.append(f"the phone view overflows by {ov}px")
+        print("  ok   nothing wider than a phone")
 
         if errs:
             fails.append(f"javascript errors: {errs}")

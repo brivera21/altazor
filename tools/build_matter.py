@@ -38,8 +38,33 @@ FAMILIES = [
     ("noble gas", "Noble gases", "#b48cf2"),
     ("lanthanide", "Lanthanides", "#f28cb0"),
     ("actinide", "Actinides", "#d1548e"),
-    ("unknown", "Not yet measured", "#8b93a7"),
+    ("unknown", "Not yet placed", "#8b93a7"),
 ]
+
+# why each family behaves alike, in a line, for the legend
+WHY = {
+    "alkali metal": "One electron in the outer shell, given up easily, so every "
+                    "one is a soft, reactive metal that makes a +1 ion.",
+    "alkaline earth metal": "Two outer electrons, both given up, so they make +2 "
+                            "ions and are harder and less reactive than the alkalis.",
+    "transition metal": "A partly filled d shell, which lets them take several "
+                        "charges, colors their compounds and makes them conduct well.",
+    "post-transition metal": "Filled d shells and a few p electrons: softer metals "
+                             "with lower melting points and a quieter chemistry.",
+    "metalloid": "On the line between metals and nonmetals, with a conductivity "
+                 "between the two, which is what a semiconductor is.",
+    "nonmetal": "Outer shells a few electrons short of full, so they gain or share "
+                "electrons and bind into molecules.",
+    "noble gas": "A full outer shell, nothing to gain or give away, so they hardly "
+                 "react at all.",
+    "lanthanide": "Filling the 4f shell, buried under the outer electrons, so their "
+                  "chemistry is nearly identical and they are hard to tell apart.",
+    "actinide": "Filling the 5f shell; all radioactive, and the ones past uranium "
+                "were first made in reactors and accelerators.",
+    "unknown": "Made a few atoms at a time and gone in seconds, so their chemistry "
+               "has not been measured and their family is a guess from the column.",
+}
+assert set(WHY) == {f for f, _l, _c in FAMILIES}
 
 
 def family(cat):
@@ -87,7 +112,8 @@ def entry(e):
         att = (img.get("attribution") or "").replace(
             "Hi-Res Images ofChemical Elements",
             "Hi-Res Images of Chemical Elements")
-    summ = (e.get("summary") or "").strip()
+    # the house style has no em dashes: the two in the summaries become commas
+    summ = (e.get("summary") or "").strip().replace("\u2014", ", ")
     if len(summ) > 300:
         summ = summ[:297].rsplit(" ", 1)[0] + "…"
     return {
@@ -110,8 +136,8 @@ def entry(e):
 data = [entry(e) for e in els]
 n_photo = sum(1 for d in data if d["img"])
 els_js = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
-fam_js = json.dumps([{"k": k, "l": l, "c": c} for k, l, c in FAMILIES],
-                    separators=(",", ":"))
+fam_js = json.dumps([{"k": k, "l": l, "c": c, "w": WHY[k]} for k, l, c in FAMILIES],
+                    separators=(",", ":"), ensure_ascii=False)
 
 HTML = """<!DOCTYPE html>
 <html lang="en">
@@ -166,12 +192,32 @@ h1 { margin:0 0 12px; font-size:26px; }
 .bar2[hidden] { display:none; }
 .bar2 label { display:flex; gap:9px; align-items:center; }
 .bar2 input[type=range] { width:300px; accent-color:var(--accent); }
-.bar2 .ticks button { background:none; border:none; color:var(--muted);
-  cursor:pointer; font-size:12.5px; padding:0 6px; }
-.bar2 .ticks button:hover { color:var(--accent); }
+.bar2 .ticks { display:flex; gap:5px; flex-wrap:wrap; }
+.bar2 .ticks button { background:#1a1a1a; border:1px solid var(--line); color:var(--muted);
+  cursor:pointer; font-size:12px; padding:2px 9px; border-radius:999px; font-family:inherit; }
+.bar2 .ticks button:hover { color:var(--text); border-color:var(--accent); }
+.bar2 .ticks button.on { color:#0b0b0b; background:var(--accent); border-color:var(--accent); }
+.play { font:inherit; font-size:12.5px; padding:3px 12px; border-radius:8px; min-width:62px;
+  border:1px solid #3d3d3d; background:#1a1a1a; color:var(--text); cursor:pointer; }
+.play:hover { border-color:var(--accent); }
+.play[aria-pressed=true] { background:var(--accent); border-color:var(--accent); color:#0b0b0b; font-weight:700; }
+#yearTxt { font-variant-numeric:tabular-nums; color:var(--text); }
 #scale { display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-  margin-top:14px; font-size:12.5px; color:var(--muted); }
-#scale .ramp { width:190px; height:11px; border-radius:3px; }
+  margin-top:14px; padding-bottom:14px; font-size:12.5px; color:var(--muted); }
+#scale .ramp { width:220px; height:11px; border-radius:3px; position:relative;
+  cursor:ew-resize; touch-action:none; }
+#scale .ramp .mark { position:absolute; top:-3px; bottom:-3px; width:2px; margin-left:-1px;
+  background:#fff; display:none; pointer-events:none; }
+#scale .ramp .thr { position:absolute; top:-5px; bottom:-5px; width:0; margin-left:-1px;
+  border-left:2px solid #e6e6e6; display:none; pointer-events:none; }
+#scale .ramp .thr::after { content:attr(data-v); position:absolute; top:100%; left:50%;
+  transform:translateX(-50%); white-space:nowrap; font-size:11px; color:var(--text); padding-top:2px; }
+#scale .ramp .thr.hi { border-left-color:#0b0b0b; }
+#scale .ramp .thr.hi::after { color:var(--text); }
+#scale .hint { color:#6f6f6f; }
+#famNote { color:var(--muted); font-size:12.5px; margin-top:6px; min-height:0; max-width:760px; }
+#famNote:empty { display:none; }
+.cell.off { opacity:0.08; }
 #scale .swatch { width:11px; height:11px; border-radius:3px;
   display:inline-block; margin-right:5px; vertical-align:-1px; }
 .legend[hidden], #scale[hidden] { display:none; }
@@ -185,8 +231,15 @@ h1 { margin:0 0 12px; font-size:26px; }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
 .note a { color:var(--accent); }
-@media (max-width:980px){ .stage{flex-direction:column;} .side{position:static; width:100%;}
+details.sources { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+details.sources summary { cursor:pointer; }
+details.sources summary:hover { color:var(--text); }
+details.sources .note { margin-top:10px; border-top:none; padding-top:0; }
+@media (max-width:980px){ .stage{flex-direction:column;} #table{flex-basis:auto;} .side{position:static; width:100%;}
   #photo{max-width:300px;} .cell .sy{font-size:11px;} .cell .z{display:none;} }
+@media (max-width:600px){ .side{order:-1;} .card{display:grid; grid-template-columns:120px 1fr; gap:4px 12px;}
+  #photo{grid-row:1/6; aspect-ratio:1/1; max-width:120px;} #elTxt{margin-top:0;}
+  #sumTxt,#attTxt{grid-column:1/3;} .bar2 input[type=range]{width:100%;} }
 </style>
 </head>
 <body>
@@ -201,13 +254,18 @@ h1 { margin:0 0 12px; font-size:26px; }
   <label>Temperature
     <input type="range" id="temp" min="0" max="6000" step="5" value="293">
     <span id="tempTxt"></span></label>
+  <button type="button" class="play" id="tplay" aria-pressed="false">Play</button>
   <span class="ticks" id="ticks"></span>
+</div>
+<div class="bar2" id="yearbar" hidden>
+  <button type="button" class="play" id="yplay" aria-pressed="false">Play</button>
+  <span id="yearTxt">the year each element was first isolated or identified, from antiquity to 2010</span>
 </div>
 <div class="stage">
   <div id="table"></div>
   <div class="side"><div class="card">
     <img id="photo" alt="">
-    <div id="elTxt">Hover an element</div>
+    <div id="elTxt"></div>
     <div id="famTxt"></div>
     <div id="factTxt"></div>
     <div id="scaleTxt"></div>
@@ -216,13 +274,14 @@ h1 { margin:0 0 12px; font-size:26px; }
   </div></div>
 </div>
 <div class="legend" id="legend"></div>
+<div id="famNote"></div>
 <div id="scale" hidden></div>
-<p class="note">The 118 confirmed elements. The buttons repaint the table by
-a measured property, and periodicity shows itself: density and ionization
-energy rise and fall down the rows in step. The temperature scale colors
-each element by the state it is in at that temperature, so the table melts
-from the bottom up as it rises, and tungsten is the last to go. The element
-under the cursor shows a photograph of the real substance.</p>
+<p class="note">The 118 elements. Each button repaints the table by a
+measured property, and periodicity shows itself: density and ionization
+energy rise and fall down the rows in step. On the temperature scale the
+table melts from the bottom up, tungsten last. The element under the pointer
+shows a photograph of the substance; a click pins it.</p>
+<details class="sources"><summary>Sources</summary>
 <p class="note">Element data comes from the
 <a href="https://github.com/Bowserinator/Periodic-Table-JSON">Periodic-Table-JSON</a>
 dataset (CC BY-SA 3.0), against the
@@ -231,7 +290,12 @@ periodic table</a>. Photographs load at view time from Wikimedia Commons and
 <a href="https://images-of-elements.com/">images-of-elements.com</a> (CC BY
 3.0), each with its own credit under the card; none are stored on this site.
 The heaviest synthetic elements have never existed in visible amounts, so
-they have no photograph.</p>
+they have no photograph. The year an element was found is the year it was
+first isolated or identified; the dataset names discoverers but not dates,
+so the years are written into the page's builder, and elements known since
+antiquity carry no year. A family's line in the legend describes the
+electron shell its members share.</p>
+</details>
 </div>
 <script>
 const ELS=__ELS__, FAMS=__FAMS__;
@@ -239,6 +303,9 @@ const grid=document.getElementById('table');
 const byPos={};
 for(const e of ELS) byPos[e.y*100+e.x]=e;
 let famSel=null, pinned=null, mode='family', temp=293;
+let thr=null;        // a threshold on the ramp, as a fraction of it, or null
+let yearCut=null;    // in the year mode while Play runs: the year reached
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // The scales. Each names the field it reads, how to write a value, and
 // whether the eye should run over the logarithm rather than the number:
@@ -286,16 +353,27 @@ function stateAt(e,t){
   if(e.boil===null||e.boil===undefined) return 'unknown';
   return t<e.boil ? 'liquid' : 'gas';
 }
+// where an element falls along the ramp of the scale showing, 0 to 1, or
+// null where the value was never measured
+function frac(e){
+  const sc=SCALES[mode], v=e[sc.k];
+  if(v===null||v===undefined) return null;
+  const [lo,hi]=range(sc);
+  return sc.log
+    ? (Math.log10(v)-Math.log10(lo))/(Math.log10(hi)-Math.log10(lo))
+    : (v-lo)/(hi-lo);
+}
+// and back: the value at a fraction of the ramp
+function unfrac(t){
+  const sc=SCALES[mode], [lo,hi]=range(sc);
+  return sc.log ? Math.pow(10,Math.log10(lo)+t*(Math.log10(hi)-Math.log10(lo)))
+                : lo+t*(hi-lo);
+}
 function cellColor(e){
   if(mode==='family') return famColor(e.f);
   if(mode==='state') return STATE[stateAt(e,temp)];
-  const sc=SCALES[mode], v=e[sc.k];
-  if(v===null||v===undefined) return '#3a3a3a';
-  const [lo,hi]=range(sc);
-  const t = sc.log
-    ? (Math.log10(v)-Math.log10(lo))/(Math.log10(hi)-Math.log10(lo))
-    : (v-lo)/(hi-lo);
-  return lerpRamp(t);
+  const t=frac(e);
+  return t===null ? '#3a3a3a' : lerpRamp(t);
 }
 
 const famColor=k=>FAMS.find(f=>f.k===k).c;
@@ -321,8 +399,11 @@ function paint(){
   document.querySelectorAll('.cell[data-z]').forEach(c=>{
     const e=ELS.find(x=>x.z==c.dataset.z);
     c.style.background=cellColor(e);
+    const t = (mode==='family'||mode==='state') ? null : frac(e);
     c.classList.toggle('dim',
-      mode==='family' && famSel!==null && e.f!==famSel);
+      (mode==='family' && famSel!==null && e.f!==famSel) ||
+      (thr!==null && t!==null && t<thr));
+    c.classList.toggle('off', mode==='yr' && yearCut!==null && e.yr && e.yr>yearCut);
     c.classList.toggle('sel', pinned!==null && e.z===pinned);
   });
   document.querySelectorAll('.legend button').forEach(b=>{
@@ -332,6 +413,11 @@ function paint(){
     b.classList.toggle('on', b.dataset.m===mode));
   document.getElementById('legend').hidden = mode!=='family';
   document.getElementById('tempbar').hidden = mode!=='state';
+  document.getElementById('yearbar').hidden = mode!=='yr';
+  document.getElementById('famNote').textContent =
+    mode==='family' && famSel!==null ? FAMS.find(f=>f.k===famSel).w : '';
+  document.querySelectorAll('#ticks button').forEach(b=>
+    b.classList.toggle('on', +b.dataset.k===temp));
   legendFor();
   if(pinned!==null) show(pinned);
 }
@@ -339,9 +425,9 @@ function paint(){
 // what the colors mean, rewritten for whichever scale is showing
 function legendFor(){
   const box=document.getElementById('scale');
-  if(mode==='family'){ box.hidden=true; return; }
+  if(mode==='family'){ box.hidden=true; box.dataset.mode=''; return; }
   box.hidden=false;
-  if(mode==='state'){
+  if(mode==='state'){ box.dataset.mode='';
     box.innerHTML=Object.entries({solid:'Solid',liquid:'Liquid',gas:'Gas',
       unknown:'Not measured'}).map(([k,l])=>
       `<span><span class="swatch" style="background:${STATE[k]}"></span>${l}</span>`)
@@ -353,14 +439,60 @@ function legendFor(){
   const stops=RAMP.map((c,i)=>`${c} ${(i/(RAMP.length-1)*100).toFixed(0)}%`)
     .join(',');
   const miss=ELS.filter(e=>e[sc.k]===null||e[sc.k]===undefined).length;
-  box.innerHTML=
-    `<span>${sc.fmt(lo)}</span>`+
-    `<span class="ramp" style="background:linear-gradient(90deg,${stops})"></span>`+
-    `<span>${sc.fmt(hi)}</span>`+
-    (sc.log?'<span>on a log scale</span>':'')+
-    (miss?`<span><span class="swatch" style="background:#3a3a3a"></span>`+
-          `${miss} ${sc.none}</span>`:'');
+  const below=thr===null?0:ELS.filter(e=>{const t=frac(e);return t!==null&&t<thr}).length;
+  // the ramp is built once per scale and then updated in place, so a drag
+  // on it keeps hold of the element it started on
+  if(box.dataset.mode!==mode){
+    box.dataset.mode=mode;
+    box.innerHTML=
+      `<span>${sc.fmt(lo)}</span>`+
+      `<span class="ramp" id="ramp" style="background:linear-gradient(90deg,${stops})">`+
+      `<span class="mark" id="rampMark"></span><span class="thr" id="rampThr"></span></span>`+
+      `<span>${sc.fmt(hi)}</span>`+
+      (sc.log?'<span>on a log scale</span>':'')+
+      (miss?`<span><span class="swatch" style="background:#3a3a3a"></span>`+
+            `${miss} ${sc.none}</span>`:'')+
+      '<span class="hint" id="rampHint"></span>';
+  }
+  document.getElementById('rampHint').textContent = thr===null
+    ? 'the ramp drags as a threshold; the element under the pointer marks its place on it'
+    : `${below} below ${sc.fmt(unfrac(thr))} are dimmed; a click on the ramp clears it`;
+  const h=document.getElementById('rampThr');
+  h.style.display = thr===null ? 'none' : 'block';
+  if(thr!==null){
+    h.style.left=(thr*100)+'%';
+    h.dataset.v=sc.fmt(unfrac(thr)); h.classList.toggle('hi',thr>0.45&&thr<0.8);
+  }
 }
+// the element under the pointer marks its place on the ramp
+function markOn(z){
+  const m=document.getElementById('rampMark');
+  if(!m) return;
+  const e=z===null?null:ELS.find(x=>x.z===z), t=e?frac(e):null;
+  m.style.display = t===null ? 'none' : 'block';
+  if(t!==null) m.style.left=(t*100)+'%';
+}
+// the ramp drags as a threshold: what falls below it dims
+let rampDrag=null;
+document.getElementById('scale').addEventListener('pointerdown',ev=>{
+  const r=ev.target.closest('#ramp'); if(!r) return;
+  rampDrag={x:ev.clientX, moved:false, r};
+  r.setPointerCapture(ev.pointerId); ev.preventDefault();
+});
+document.getElementById('scale').addEventListener('pointermove',ev=>{
+  if(!rampDrag) return;
+  if(!rampDrag.moved && Math.abs(ev.clientX-rampDrag.x)<3) return;
+  rampDrag.moved=true;
+  const b=rampDrag.r.getBoundingClientRect();
+  thr=Math.max(0,Math.min(1,(ev.clientX-b.left)/b.width));
+  paint();
+});
+document.getElementById('scale').addEventListener('pointerup',ev=>{
+  if(!rampDrag) return;
+  if(!rampDrag.moved){ thr=null; paint(); }
+  rampDrag=null;
+});
+document.getElementById('scale').addEventListener('pointercancel',()=>{ rampDrag=null; });
 function show(z){
   const e=ELS.find(x=>x.z===z);
   if(!e) return;
@@ -403,7 +535,11 @@ function show(z){
 }
 grid.addEventListener('pointerover',e=>{
   const c=e.target.closest('.cell[data-z]');
-  if(c && pinned===null) show(+c.dataset.z);
+  if(c){ markOn(+c.dataset.z); if(pinned===null) show(+c.dataset.z); }
+});
+grid.addEventListener('pointerleave',()=>markOn(pinned));
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape' && pinned!==null){ pinned=null; paint(); markOn(null); }
 });
 grid.addEventListener('click',e=>{
   const c=e.target.closest('.cell[data-z]');
@@ -423,9 +559,11 @@ bar.innerHTML=MODES.map(([m,l])=>
 bar.addEventListener('click',ev=>{
   const b=ev.target.closest('button[data-m]');
   if(!b) return;
-  mode=b.dataset.m;
+  stopTemp(); stopYear();
+  mode=b.dataset.m; thr=null; yearCut=null;
   if(mode!=='family') famSel=null;
   paint();
+  markOn(pinned);
 });
 
 const tempIn=document.getElementById('temp');
@@ -436,7 +574,72 @@ function setTemp(v){
     temp+' K, '+(temp-273.15).toFixed(0)+' \u00b0C';
   paint();
 }
-tempIn.addEventListener('input',e=>setTemp(e.target.value));
+tempIn.addEventListener('input',e=>{ stopTemp(); setTemp(e.target.value); });
+// Play on the temperature: 4 K to 4,000 K, the table melting from the bottom up
+const tplay=document.getElementById('tplay');
+let tRun=null;
+function stopTemp(){
+  if(!tRun) return;
+  cancelAnimationFrame(tRun.raf); clearTimeout(tRun.t); tRun=null;
+  tplay.textContent='Play'; tplay.setAttribute('aria-pressed','false');
+}
+tplay.addEventListener('click',()=>{
+  if(tRun){ stopTemp(); return; }
+  const T0=4, T1=4000, D=9000;
+  const from = temp>=T1||temp<T0 ? T0 : temp;
+  tRun={raf:0,t:0};
+  tplay.textContent='Pause'; tplay.setAttribute('aria-pressed','true');
+  if(RM){                       // no sweep: the named temperatures, one at a time
+    const stops=[4,77,273,293,373,1337,3695,4000].filter(k=>k>from);
+    const step=()=>{ if(!stops.length){ stopTemp(); return; }
+      setTemp(stops.shift()); tRun.t=setTimeout(step,700); };
+    setTemp(from); tRun.t=setTimeout(step,700); return;
+  }
+  const t0=performance.now(), span=(T1-from)/(T1-T0)*D;
+  const tick=now=>{
+    const u=Math.min(1,(now-t0)/span);
+    setTemp(Math.round((from+(T1-from)*u)/5)*5);
+    if(u<1) tRun.raf=requestAnimationFrame(tick); else stopTemp();
+  };
+  tRun.raf=requestAnimationFrame(tick);
+});
+// Play on the year found: the elements arrive one year at a time
+const yplay=document.getElementById('yplay');
+const YEARS=ELS.map(e=>e.yr).filter(Boolean);
+const Y0=Math.min(...YEARS)-19, Y1=Math.max(...YEARS);
+let yRun=null;
+function setYear(y){
+  yearCut=y;
+  const known=ELS.filter(e=>!e.yr||e.yr<=y).length;
+  document.getElementById('yearTxt').textContent=
+    y<Math.min(...YEARS) ? `${y}: ${known} elements known since antiquity`
+                         : `${y}: ${known} of 118 elements known`;
+  paint();
+}
+function stopYear(){
+  if(!yRun) return;
+  cancelAnimationFrame(yRun.raf); clearTimeout(yRun.t); yRun=null;
+  yplay.textContent='Play'; yplay.setAttribute('aria-pressed','false');
+}
+yplay.addEventListener('click',()=>{
+  if(yRun){ stopYear(); return; }
+  const from = yearCut===null||yearCut>=Y1 ? Y0 : yearCut;
+  yRun={raf:0,t:0};
+  yplay.textContent='Pause'; yplay.setAttribute('aria-pressed','true');
+  if(RM){
+    let y=from;
+    const step=()=>{ if(y>=Y1){ stopYear(); return; }
+      y=Math.min(Y1,y+20); setYear(y); yRun.t=setTimeout(step,400); };
+    setYear(y); yRun.t=setTimeout(step,400); return;
+  }
+  const D=9000, t0=performance.now(), span=(Y1-from)/(Y1-Y0)*D;
+  const tick=now=>{
+    const u=Math.min(1,(now-t0)/span);
+    setYear(Math.round(from+(Y1-from)*u));
+    if(u<1) yRun.raf=requestAnimationFrame(tick); else stopYear();
+  };
+  yRun.raf=requestAnimationFrame(tick);
+});
 // a few temperatures worth standing at
 document.getElementById('ticks').innerHTML=[
   [4,'liquid helium'],[77,'liquid nitrogen'],[273,'ice'],[293,'a room'],
@@ -444,7 +647,7 @@ document.getElementById('ticks').innerHTML=[
 ].map(([k,l])=>`<button data-k="${k}">${l}</button>`).join('');
 document.getElementById('ticks').addEventListener('click',ev=>{
   const b=ev.target.closest('button[data-k]');
-  if(b) setTemp(+b.dataset.k);
+  if(b){ stopTemp(); setTemp(+b.dataset.k); }
 });
 setTemp(293);
 
@@ -459,6 +662,10 @@ lg.addEventListener('click',e=>{
 });
 build();
 show(79);
+window.__mt=()=>({mode,temp,thr,yearCut,pinned,famSel,
+  off:document.querySelectorAll('.cell.off').length,
+  dim:document.querySelectorAll('.cell.dim').length,
+  tplay:!!tRun, yplay:!!yRun});
 </script>
 </body>
 </html>

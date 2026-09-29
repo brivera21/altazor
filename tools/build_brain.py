@@ -25,12 +25,11 @@ from brain_data import WHOLE, OUTSIDE, INSIDE, GROWTH, GROWTH_NOTES, REFS
 OUT = Path(__file__).parent.parent / "brain.html"
 SHAPES = (Path(__file__).parent / "brain_shapes.json").read_text(encoding="utf-8").strip()
 
-NOTE1 = ("A kilogram and a half of tissue that is two percent of the body "
-         "and takes a fifth of its energy. Seen from the side it is four "
-         "lobes, a little brain tucked under the back, and the stalk that "
-         "joins it to the spinal cord; each answers under the pointer, and "
-         "so do the strips and patches laid over them where one job is done "
-         "in one place: moving, feeling, speech, hearing, sight.")
+NOTE1 = ("A kilogram and a half of tissue, two percent of the body, burning "
+         "a fifth of its energy. From the side it is four lobes, the "
+         "cerebellum tucked under the back, and the stalk to the spinal "
+         "cord; each answers under the pointer, as do the patches where one "
+         "job sits in one place: moving, feeling, speech, hearing, sight.")
 
 NOTE2 = ("Cut down the middle, the brain shows what the lobes hide: the "
          "bridge of two hundred million fibers between the halves, the "
@@ -105,9 +104,17 @@ h1 { margin:0 0 12px; font-size:26px; }
 .controls { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 12px; min-height:34px; }
 .controls label { font-size:13px; color:var(--muted); }
 .controls output { font-size:13px; color:var(--text); font-variant-numeric:tabular-nums; }
+.controls button { background:var(--panel); color:var(--text); border:1px solid var(--line);
+  border-radius:999px; padding:5px 14px; font-size:13px; cursor:pointer; font-family:inherit; }
+.controls button:hover { border-color:var(--accent); }
+.controls button[aria-pressed="true"] { border-color:var(--accent); color:var(--accent); }
 .stage { display:flex; gap:22px; align-items:flex-start; }
-#diagram { flex:1 1 640px; min-width:0; }
+#diagram { flex:1 1 640px; min-width:0; position:relative; outline:none; border-radius:10px; }
+#diagram:focus-visible { box-shadow:0 0 0 2px var(--accent); }
 #diagram svg { width:100%; height:auto; display:block; user-select:none; }
+#old { position:absolute; inset:0; pointer-events:none; }
+.pin { float:right; font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--accent); }
+.hint { font-size:12px; color:var(--muted); margin:6px 0 0; }
 .side { flex:0 0 300px; min-width:0; position:sticky; top:16px; }
 .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; overflow-wrap:anywhere; }
 #kindTxt { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
@@ -125,7 +132,19 @@ h1 { margin:0 0 12px; font-size:26px; }
 .refs a { color:var(--accent); }
 __APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+details.sources { margin-top:22px; border-top:1px solid var(--line); padding-top:10px; max-width:760px; }
+details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px;
+  letter-spacing:.06em; text-transform:uppercase; }
+details.sources > summary:hover { color:var(--accent); }
+details.sources .note, details.sources .method { border-top:none; padding-top:0; margin-top:12px; }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} #diagram{width:100%; flex:none;} }
+@media (max-width:600px){
+  /* the card comes first, and the drawing keeps a readable size and scrolls sideways */
+  .stage{flex-direction:column-reverse;}
+  #diagram{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  #diagram svg{min-width:640px;}
+  #old{display:none;}
+}
 </style>
 </head>
 <body>
@@ -136,9 +155,9 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 </header>
 <h1>The Brain</h1>
 <div class="bar" id="views"><button data-v="outside" class="on">The outside</button><button data-v="inside">The inside</button><button data-v="growth">A lifetime</button></div>
-<div class="controls" id="ageCtl" hidden><label>the marker</label><output id="ageOut"></output></div>
+<div class="controls" id="ageCtl" hidden><button id="agePlay" aria-pressed="false">Play</button><label>the marker at</label><output id="ageOut"></output></div>
 <div class="stage">
-  <div id="diagram"></div>
+  <div id="diagram" tabindex="0" aria-label="The brain"></div>
   <div class="side"><div class="card">
     <div id="kindTxt"></div>
     <div id="nameTxt"></div>
@@ -148,10 +167,12 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   </div></div>
 </div>
 <p class="note">__NOTE1__</p>
-<p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
+<details class="sources"><summary>Sources</summary>
+<p class="note">__NOTE2__</p>
 <div class="method"><p>__METHOD__</p></div>
 <h2 class="refh">References</h2>
 <div class="refs">__REFS__</div>
+</details>
 </div>
 <script>
 const SHAPES=__SHAPES__, WHOLE=__WHOLE__, OUTSIDE=__OUTSIDE__, INSIDE=__INSIDE__, GROWTH=__GROWTH__, GNOTES=__GNOTES__;
@@ -159,7 +180,8 @@ const W=980;
 const el=document.getElementById('diagram');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const fmt=n=>n.toLocaleString('en-US');
-let view='outside', hot=null, age=20;
+let view='outside', hot=null, age=20, pinned=null;
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---- the card ---- */
 function card(kind,name,rows,body,src){
@@ -169,7 +191,7 @@ function card(kind,name,rows,body,src){
   document.getElementById('bodyTxt').textContent=body;
   document.getElementById('srcTxt').textContent=src;
 }
-function showRegion(list,k){ const p=list.find(x=>x.k===k); card(p.kind, esc(p.n), [['one number',esc(p.num)]], p.b, p.s); }
+function showRegion(list,k){ const p=list.find(x=>x.k===k); card(p.kind, (pinned===k?'<span class="pin">pinned</span>':'')+esc(p.n), [['one number',esc(p.num)]], p.b, p.s); }
 function showWhole(){ card('The whole organ','A human brain, from the left',[
   ['mass','about '+fmt(WHOLE.mass_g)+' g, '+WHOLE.body_pct+'% of the body'],
   ['energy','about '+WHOLE.energy_pct+'% of the body\\u2019s at rest, near '+WHOLE.watts+' watts'],
@@ -191,7 +213,7 @@ function showAge(a){ const m=interp(a,'m'), f=interp(a,'f'); const pm=Math.max(.
 /* ---- the outside ---- */
 // every shape is traced from a real brain by tools/brain_geometry.py
 const SO=SHAPES.outside, SI=SHAPES.inside, PO=SHAPES.outside_probes, PI=SHAPES.inside_probes, MK=SHAPES.marks;
-const LOBE_FILL={frontal:'#34517d',parietal:'#51427d',temporal:'#7d5134',occipital:'#346e51',cerebellum:'#6e3451',brainstem:'#5e5e34'};
+const LOBE_FILL={frontal:'#374f70',parietal:'#4d4671',temporal:'#6f503b',occipital:'#3a6450',cerebellum:'#663a52',brainstem:'#5a593a'};
 const LOBE_HOT={frontal:'#4f79b8',parietal:'#7a64b8',temporal:'#b87a4f',occipital:'#4fa37a',cerebellum:'#a34f7a',brainstem:'#8c8c4f'};
 const hotFill=(k,c)=>hot===k?LOBE_HOT[k]:c;
 const lab=(x,y,t,c,a)=>'<text x="'+(+x).toFixed(1)+'" y="'+(+y).toFixed(1)+'" font-size="11.5" fill="'+(c||'#e6e6e6')+'" text-anchor="'+(a||'middle')+'" pointer-events="none">'+t+'</text>';
@@ -205,7 +227,7 @@ function outsideView(){
   for(const k of ['frontal','parietal','temporal','occipital']) s+=r(k,SO[k]);
   // the strips and patches that sit on the surface
   const patch=(k,c)=>'<path data-region="'+k+'" d="'+SO[k]+'" fill="'+c+'" fill-rule="evenodd" opacity="'+(hot===k?1:0.82)+'" stroke="'+(hot===k?'#ffffff':'none')+'" stroke-width="1.4" style="cursor:pointer"/>';
-  s+=patch('motor','#ff8c6a')+patch('sensory','#ffb02e')+patch('broca','#f28cb0')+patch('wernicke','#9be564');
+  s+=patch('motor','#e5876b')+patch('sensory','#dea84f')+patch('broca','#e48fae')+patch('wernicke','#9bd968');
   // the folds: wherever the surface dips into a sulcus
   s+='<path d="'+SO.sulci+'" fill="#0a0e15" fill-rule="evenodd" opacity="0.5" pointer-events="none"/>';
   // two patches mostly out of sight: hearing inside the lateral fissure, sight on the inner face
@@ -216,7 +238,9 @@ function outsideView(){
   s+=lab(PO.frontal[0],PO.frontal[1]+4,'frontal')+lab(PO.parietal[0],PO.parietal[1]+4,'parietal')+lab(PO.temporal[0],PO.temporal[1]+4,'temporal')+lab(PO.occipital[0],PO.occipital[1]+4,'occipital');
   s+=lab(PO.cerebellum[0],PO.cerebellum[1]+4,'cerebellum')+lead(MK.stem_end[0],MK.stem_end[1]-40,MK.stem_end[0]+38,MK.stem_end[1]-40)+lab(MK.stem_end[0]+42,MK.stem_end[1]-36,'brainstem','#e6e6e6','start');
   s+=lab(PO.broca[0],PO.broca[1]+4,'Broca','#121212')+lab(PO.wernicke[0],PO.wernicke[1]+4,'Wernicke','#121212');
-  s+=lead(PO.auditory[0]-6,PO.auditory[1]+6,PO.auditory[0]-34,PO.auditory[1]+36)+lab(PO.auditory[0]-38,PO.auditory[1]+48,'hearing','#6ee7f2')+lab(PO.visual[0],PO.visual[1]-12,'sight','#c9a6ff');
+  // the two hidden patches are named off to the side, clear of Wernicke and of the green
+  s+=lead(PO.auditory[0]-6,PO.auditory[1]+6,PO.auditory[0]-58,PO.auditory[1]+58)+lab(PO.auditory[0]-62,PO.auditory[1]+70,'hearing','#6ee7f2')
+    +lead(PO.visual[0]+18,PO.visual[1]-8,PO.visual[0]+64,PO.visual[1]-66)+lab(PO.visual[0]+68,PO.visual[1]-70,'sight','#c9a6ff','start');
   const t=MK.strip_top; s+=lab(t[0]-8,t[1]-18,'motor  |  touch','#9a9a9a')+lead(t[0]-8,t[1]-14,t[0]-4,t[1]+2);
   s+=lab(112,335,'front','#9a9a9a','end')+lab(858,335,'back','#9a9a9a','start');
   return {svg:s, h:700};
@@ -255,6 +279,22 @@ function insideView(){
 
 /* ---- a lifetime ---- */
 const G={x:90,y:40,w:820,h:480,amax:90,mmax:1600};
+// the outside drawing's box, so it can be shrunk about its own center
+const OBOX=(()=>{ const n=(SO.outline.match(/-?\d+\.?\d*/g)||[]).map(Number); const xs=n.filter((v,i)=>i%2===0), ys=n.filter((v,i)=>i%2===1);
+  return {x:Math.min(...xs), y:Math.min(...ys), w:Math.max(...xs)-Math.min(...xs), h:Math.max(...ys)-Math.min(...ys)}; })();
+// the brain at the marker's age: the outside drawing scaled by the cube root
+// of its mass against the peak, since a mass ratio is a volume ratio
+function brainAt(a){
+  const pk=Math.max(...GROWTH.map(g=>g.m));
+  const k=Math.cbrt(interp(a,'m')/pk), base=0.36;
+  const cx=G.x+G.w*0.74, cy=G.y+G.h*0.62;
+  let s='<g transform="translate('+cx.toFixed(1)+','+cy.toFixed(1)+') scale('+(base*k).toFixed(4)+') translate('+(-(OBOX.x+OBOX.w/2)).toFixed(1)+','+(-(OBOX.y+OBOX.h/2)).toFixed(1)+')" pointer-events="none" opacity="0.9">';
+  s+='<path d="'+SO.brainstem+'" fill="'+LOBE_FILL.brainstem+'"/><path d="'+SO.cerebellum+'" fill="'+LOBE_FILL.cerebellum+'" fill-rule="evenodd"/>';
+  for(const q of ['frontal','parietal','temporal','occipital']) s+='<path d="'+SO[q]+'" fill="'+LOBE_FILL[q]+'" fill-rule="evenodd"/>';
+  s+='<path d="'+SO.sulci+'" fill="#0a0e15" fill-rule="evenodd" opacity="0.5"/><path d="'+SO.outline+'" fill="none" stroke="#e6e6e6" stroke-width="2" opacity="0.5"/></g>';
+  s+='<text x="'+cx.toFixed(1)+'" y="'+(cy-OBOX.h*base/2-14).toFixed(1)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">a man\u2019s brain at this age, scaled by the cube root of its mass</text>';
+  return s;
+}
 const GX=a=>G.x+Math.sqrt(a/G.amax)*G.w;
 const GY=m=>G.y+G.h-m/G.mmax*G.h;
 function growthView(){
@@ -267,6 +307,7 @@ function growthView(){
   for(const [key,c,lbl] of [['m','#58a6ff','men'],['f','#f28cb0','women']]){ let d=''; GROWTH.forEach((g,i)=>{ d+=(i?'L':'M')+GX(g.age).toFixed(1)+','+GY(g[key]).toFixed(1); }); s+='<path d="'+d+'" fill="none" stroke="'+c+'" stroke-width="2.2"/>';
     for(const g of GROWTH) s+='<circle cx="'+GX(g.age).toFixed(1)+'" cy="'+GY(g[key]).toFixed(1)+'" r="4" fill="'+c+'" stroke="#121212" stroke-width="1.2"/>';
     const last=GROWTH[GROWTH.length-1]; s+='<text x="'+(GX(last.age)+10).toFixed(1)+'" y="'+(GY(last[key])+4).toFixed(1)+'" font-size="11.5" fill="'+c+'">'+lbl+'</text>'; }
+  s+=brainAt(age);
   // the marker
   const mx=GX(age);
   s+='<g id="marker" style="cursor:ew-resize"><line x1="'+mx.toFixed(1)+'" y1="'+G.y+'" x2="'+mx.toFixed(1)+'" y2="'+(G.y+G.h)+'" stroke="#ffb02e" stroke-width="1.5"/>';
@@ -278,20 +319,90 @@ function growthView(){
 
 /* ---- render and wiring ---- */
 function render(){ const q=view==='outside'?outsideView():view==='inside'?insideView():growthView(); el.innerHTML='<svg viewBox="0 0 '+W+' '+q.h+'" xmlns="http://www.w3.org/2000/svg" id="bsvg"><rect width="'+W+'" height="'+q.h+'" fill="#121212"/>'+q.svg+'</svg>'; document.getElementById('ageCtl').hidden=view!=='growth'; document.getElementById('ageOut').textContent=age===0?'birth':age+(age===1?' year':' years'); }
-function home(){ if(view==='outside') showWhole(); else if(view==='inside') showInside(); else showAge(age); }
-function setView(v){ view=v; hot=null; for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render(); home(); }
+function home(){ if(pinned&&view!=='growth'){ showRegion(view==='outside'?OUTSIDE:INSIDE,pinned); return; } if(view==='outside') showWhole(); else if(view==='inside') showInside(); else showAge(age); }
+// between the outside and the inside the old view is wiped away front to
+// back over a second, the cut sweeping through the brain
+let wipe=null;
+function sweep(oldSvg){
+  if(reduced||!oldSvg){ return; }
+  const holder=document.getElementById('old')||document.createElement('div');
+  holder.id='old'; holder.innerHTML='';
+  oldSvg.removeAttribute('id'); oldSvg.setAttribute('aria-hidden','true');
+  const h=oldSvg.viewBox.baseVal.height;
+  oldSvg.insertAdjacentHTML('afterbegin','<clipPath id="wipeclip"><rect id="wiperect" x="0" y="0" width="'+W+'" height="'+h+'"/></clipPath>');
+  const g=document.createElementNS('http://www.w3.org/2000/svg','g'); g.setAttribute('clip-path','url(#wipeclip)');
+  while(oldSvg.childNodes.length>1) g.appendChild(oldSvg.childNodes[1]);
+  oldSvg.appendChild(g);
+  el.appendChild(holder); holder.appendChild(oldSvg);
+  const t0=performance.now(), ms=1000;
+  const step=now=>{ if(!wipe) return; const k=Math.min(1,(now-t0)/ms); const e=k<0.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+    const r=holder.querySelector('#wiperect'); if(r){ r.setAttribute('x',(e*W).toFixed(1)); r.setAttribute('width',(W-e*W).toFixed(1)); }
+    // the edge of the cut
+    let ln=holder.querySelector('#wipeline'); if(!ln){ ln=document.createElementNS('http://www.w3.org/2000/svg','line'); ln.id='wipeline'; ln.setAttribute('y1',0); ln.setAttribute('y2',h); ln.setAttribute('stroke','#e6e6e6'); ln.setAttribute('stroke-width','1.5'); ln.setAttribute('opacity','0.8'); oldSvg.appendChild(ln); }
+    ln.setAttribute('x1',(e*W).toFixed(1)); ln.setAttribute('x2',(e*W).toFixed(1));
+    if(k<1) requestAnimationFrame(step); else { wipe=null; holder.remove(); } };
+  wipe={holder}; requestAnimationFrame(step);
+}
+function setView(v){
+  const was=view; view=v; hot=null; pinned=null; stopPlay();
+  for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v);
+  const oldSvg=(was!==v && was!=='growth' && v!=='growth') ? document.getElementById('bsvg') : null;
+  if(wipe){ wipe.holder.remove(); wipe=null; }
+  render(); home();
+  sweep(oldSvg);
+}
+function unpin(){ pinned=null; hot=null; render(); home(); }
+function pinRegion(k){ pinned=k; hot=k; render(); showRegion(view==='outside'?OUTSIDE:INSIDE,k); }
+el.addEventListener('click',e=>{ if(view==='growth') return; const p=e.target.closest('[data-region]');
+  if(!p){ if(pinned) unpin(); return; }
+  const k=p.getAttribute('data-region');
+  // a click pins the region; a second click on it lets go
+  if(pinned===k) unpin(); else pinRegion(k); });
+document.addEventListener('keydown',e=>{
+  const tag=(e.target.tagName||'').toLowerCase();
+  if(tag==='input'||tag==='textarea') return;
+  if(e.key==='Escape'){ if(pinned) unpin(); return; }
+  if(e.target!==el) return;
+  if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight') return;
+  e.preventDefault();
+  if(view==='growth'){ setAgeTo(Math.max(0,Math.min(G.amax,age+(e.key==='ArrowRight'?1:-1)))); return; }
+  // the arrows walk the regions in the order the data lists them
+  const list=view==='outside'?OUTSIDE:INSIDE, n=list.length;
+  const i=list.findIndex(x=>x.k===(pinned||hot));
+  const j=i<0?(e.key==='ArrowRight'?0:n-1):((i+(e.key==='ArrowRight'?1:-1))%n+n)%n;
+  pinRegion(list[j].k); });
+// the marker plays from birth to ninety, steady across the screen, and stops
+let play=null;
+function setAgeTo(a){ age=a; render(); showAge(age); }
+function stopPlay(){ play=null; const b=document.getElementById('agePlay'); b.textContent='Play'; b.setAttribute('aria-pressed','false'); }
+function playFrame(now){
+  if(!play) return;
+  if(reduced){ if(now-play.last>=600){ play.last=now; const nx=GROWTH.find(g=>g.age>age); if(!nx){ stopPlay(); return; } setAgeTo(nx.age); } requestAnimationFrame(playFrame); return; }
+  const k=Math.min(1,(now-play.t0)/play.ms);
+  const from=Math.sqrt(play.from/G.amax), t=from+(1-from)*k;
+  setAgeTo(Math.round(t*t*G.amax));
+  if(k>=1){ stopPlay(); return; }
+  requestAnimationFrame(playFrame);
+}
+document.getElementById('agePlay').addEventListener('click',()=>{
+  if(play){ stopPlay(); return; }
+  if(age>=G.amax) age=0;
+  const b=document.getElementById('agePlay'); b.textContent='Pause'; b.setAttribute('aria-pressed','true');
+  const from=Math.sqrt(age/G.amax);
+  play={t0:performance.now(), ms:8000*(1-from), from:age, last:performance.now()};
+  requestAnimationFrame(playFrame); });
 document.getElementById('views').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setView(b.dataset.v); });
 let dragging=false;
 const svgPt=e=>{ const svg=document.getElementById('bsvg'), b=svg.getBoundingClientRect(); return [(e.clientX-b.left)/b.width*W,(e.clientY-b.top)/b.height*svg.viewBox.baseVal.height]; };
 function setAge(x){ const t=Math.max(0,Math.min(1,(x-G.x)/G.w)); age=Math.round(t*t*G.amax); render(); showAge(age); }
-el.addEventListener('pointerdown',e=>{ if(view!=='growth') return; const [x,y]=svgPt(e); if(y>=G.y-20&&y<=G.y+G.h+30&&x>=G.x-6&&x<=G.x+G.w+6){ dragging=true; setAge(x); e.preventDefault(); } });
+el.addEventListener('pointerdown',e=>{ if(view!=='growth') return; const [x,y]=svgPt(e); if(y>=G.y-20&&y<=G.y+G.h+30&&x>=G.x-6&&x<=G.x+G.w+6){ stopPlay(); dragging=true; setAge(x); e.preventDefault(); } });
 el.addEventListener('pointermove',e=>{ if(!dragging) return; const [x]=svgPt(e); setAge(x); });
 window.addEventListener('pointerup',()=>{ dragging=false; });
 el.addEventListener('pointerover',e=>{ if(dragging||view==='growth') return; const p=e.target.closest('[data-region]'); if(!p){ return; } const k=p.getAttribute('data-region'); if(k===hot) return; hot=k; render(); showRegion(view==='outside'?OUTSIDE:INSIDE,k); });
-el.addEventListener('pointerleave',()=>{ if(hot){ hot=null; render(); home(); } });
+el.addEventListener('pointerleave',()=>{ if(hot&&hot!==pinned){ hot=pinned; render(); home(); } });
 
 render(); showWhole();
-window.__brain=(q)=>{ const o={view,hot,age,card:document.getElementById('numTxt').innerText,name:document.getElementById('nameTxt').innerText,body:document.getElementById('bodyTxt').innerText,regions:[...new Set([...document.querySelectorAll('#bsvg [data-region]')].map(x=>x.getAttribute('data-region')))],
+window.__brain=(q)=>{ const o={view,hot,age,pinned,playing:!!play,wiping:!!wipe,card:document.getElementById('numTxt').innerText,name:document.getElementById('nameTxt').innerText,body:document.getElementById('bodyTxt').innerText,regions:[...new Set([...document.querySelectorAll('#bsvg [data-region]')].map(x=>x.getAttribute('data-region')))],
   marker:(()=>{ const c=document.querySelector('#marker line'); return c?+c.getAttribute('x1'):null; })()};
   if(q&&q.age!=null){ o.m=interp(q.age,'m'); o.f=interp(q.age,'f'); o.gx=GX(q.age); }
   if(q&&q.probe){ const svg=document.getElementById('bsvg'), b=svg.getBoundingClientRect(); const [px,py]=q.probe; const e=document.elementFromPoint(b.left+px/W*b.width, b.top+py/svg.viewBox.baseVal.height*b.height); const r=e&&e.closest?e.closest('[data-region]'):null; o.at=r?r.getAttribute('data-region'):null; }

@@ -68,8 +68,35 @@ with sync_playwright() as pw:
         pg.wait_for_timeout(600)
         print(f"--- {fname} ---")
         st = pg.evaluate("window.__state()")
-        check("starts in 1492 with no settlements yet",
-              st["year"] == 1492 and st["visEvents"] == 0)
+        check("opens in 1492 with the years already running",
+              st["start"] == 1492 and st["playing"] and st["year"] > 1492,
+              f"start {st['start']}, playing {st['playing']}, year {st['year']}")
+        pg.evaluate("window.__goto(1492)"); pg.wait_for_timeout(200)
+        st = pg.evaluate("window.__state()")
+        check("1492 has no settlements yet",
+              st["year"] == 1492 and st["visEvents"] == 0 and not st["playing"])
+        # the city limits are their own chip, on at open
+        check("the limits chip is on at open",
+              st["layers"]["lim"] and pg.evaluate(
+                  "document.getElementById('cLim').classList.contains('on')"))
+        check("the limits are drawn at open",
+              pg.evaluate("document.querySelectorAll('#map [data-lim]').length") == 1)
+        # the author's own campus is on the map from the start
+        if c["mine"]:
+            check("the colleges are on at open", st["layers"]["uni"])
+        else:
+            check("the colleges are off at open", not st["layers"]["uni"])
+        # every nation label is inside the frame
+        inside = pg.evaluate(
+            "[...document.querySelectorAll('#map [data-nat] text')].every(t=>{"
+            "const b=t.getBBox();return b.x>=0&&b.x+b.width<=W&&b.y>=0&&b.y+b.height<=H;})")
+        check("every nation label is inside the frame", inside)
+        nl = pg.evaluate("document.querySelectorAll('#map [data-nat] text').length")
+        check("at least one nation is named at 1492", nl >= 1, str(nl))
+        nbin = pg.evaluate(
+            "[...document.querySelectorAll('#map text[font-style=\"italic\"]')].every(t=>{"
+            "const b=t.getBBox();return b.x>=-1&&b.x+b.width<=W+1&&b.y>=-1&&b.y+b.height<=H+1;})")
+        check("water and neighbor names stay inside the frame", nbin)
         none = pg.evaluate("!document.getElementById('flagNone').hidden")
         check("1492 shows the peoples' ground, no flag", none)
         nat = pg.evaluate("document.querySelectorAll('[data-nat]').length")
@@ -124,7 +151,8 @@ with sync_playwright() as pw:
             "(HIST.mig||[]).every(m=>m.y0<m.y1&&m.p>0&&m.note&&m.src)")
         check("every wave carries a span, a size, a note and a source", okmig)
         # colleges
-        pg.click("#cUni")
+        if not pg.evaluate("layers.uni"):
+            pg.click("#cUni")
         pg.wait_for_timeout(250)
         un = pg.evaluate("document.querySelectorAll('#map [data-uni]').length")
         check("the colleges are on the map in 2020", un >= 2, str(un))
@@ -140,7 +168,8 @@ with sync_playwright() as pw:
         check("no colleges before any were founded", u0 == 0, str(u0))
         pg.eval_on_selector("#yr", "el=>{el.value=2020;"
                             "el.dispatchEvent(new Event('input'))}")
-        pg.click("#cUni")
+        if pg.evaluate("layers.uni"):
+            pg.click("#cUni")
         pg.wait_for_timeout(200)
         # highways
         pg.click("#cHwy")
@@ -205,7 +234,7 @@ with sync_playwright() as pw:
                           f".some(b=>b.textContent==='{c['mark']}')")
         check(f"{c['mark']} is a jump marker", has)
         pg.evaluate("document.querySelector('#ticks button').click()")
-        pg.wait_for_timeout(200)
+        pg.wait_for_timeout(1100)
         jumped = pg.evaluate("window.__state()")["year"]
         first = pg.evaluate(
             "HIST.eras.map(e=>e.y0).filter(y=>y>1492).sort((a,b)=>a-b)[0]")
@@ -218,6 +247,18 @@ with sync_playwright() as pw:
         check("the page links back to its state", up)
         check("no JS errors", not errs, "; ".join(errs)[:120])
         pg.close()
+        ph = br.new_page(viewport={"width": 390, "height": 844})
+        ph.route("**/*", lambda r: r.abort()
+                 if r.request.url.startswith("http") else r.continue_())
+        ph.goto((ROOT / fname).as_uri()); ph.wait_for_timeout(500)
+        ov = ph.evaluate("document.documentElement.scrollWidth - innerWidth")
+        mw = ph.evaluate("document.getElementById('mapwrap').getBoundingClientRect().width")
+        check("a phone has no sideways overflow and a map that scrolls at a readable size",
+              ov == 0 and mw >= 600, f"overflow {ov}, map {mw}")
+        cw = ph.evaluate("[...document.querySelectorAll('.side .card')].filter(c=>c.offsetParent)"
+                         ".map(c=>Math.round(c.getBoundingClientRect().width))")
+        check("on a phone the side cards run the full width", cw and min(cw) >= 340, str(cw))
+        ph.close()
     br.close()
 
 if fails:

@@ -13,6 +13,7 @@ Usage: python3 build_chihuahua.py   (run build_states first)
 """
 
 import json
+import re
 import unicodedata
 from pathlib import Path
 
@@ -199,12 +200,12 @@ REFS_ES = [
 
 NOTE1_ES = ("El mapa es el Chihuahua real en Web Mercator: ríos y lagos de "
             "Natural Earth, límites municipales de CONABIO con la población "
-            "del Censo 2020, y el relieve sombreado al vuelo con las AWS "
-            "Terrain Tiles. Cada botón prende o apaga una capa; la marca "
-            "bajo el cursor llena la tarjeta y un clic la fija. La frontera "
-            "y los nombres vecinos aparecen desde que se trazó el límite "
-            "estatal.")
-NOTE2_ES = ("La línea del tiempo corre desde 1492: primero los pueblos "
+            "del Censo 2020 y el relieve sombreado de las AWS Terrain Tiles. "
+            "Cada botón prende o apaga una capa; la marca bajo el cursor "
+            "llena la tarjeta y un clic la fija.")
+NOTE2_ES = ("La frontera y los nombres vecinos aparecen desde que se "
+            "trazó el límite estatal. "
+            "La línea del tiempo corre desde 1492: primero los pueblos "
             "originarios como manchas de color, territorios aproximados "
             "para orientar, luego villas, presidios, capitales y despojos "
             "año por año, mientras el panel muestra de quién fue la tierra. "
@@ -276,6 +277,183 @@ TR = [
 ]
 
 
+# Chihuahua's own changes to the shared template, applied after TR: the
+# census sparkline in the card, the timeline's gliding era years, the
+# variable play speed, the faint border before 1824 and the tick labels
+# spread apart where the years crowd. They live here so build_states.py
+# stays the template the US pages share.
+EXTRA = [
+    (r'''h2.refh { font-size:15px; margin:26px 0 8px; }''',
+     r'''h2.refh { font-size:15px; margin:26px 0 8px; }
+#sparkTxt svg { display:block; width:100%; height:auto; margin-top:8px; }
+#sparkTxt:empty { display:none; }
+.tlticks { height:44px; }
+.tlticks button::after { display:none; }
+.tlticks svg.lead { position:absolute; left:0; top:0; width:100%; height:100%;
+  overflow:visible; pointer-events:none; }
+.tlticks svg.lead line { stroke:#6b6b6b; stroke-width:1; }
+.tlticks svg.lead line.hi { stroke:var(--accent); }'''),
+    (r'''      <div id="srcTxt"></div>''',
+     r'''      <div id="sparkTxt"></div>
+      <div id="srcTxt"></div>'''),
+    (r'''  document.getElementById('srcTxt').textContent=src||'';
+}''',
+     r'''  document.getElementById('srcTxt').textContent=src||'';
+  document.getElementById('sparkTxt').innerHTML=spark(pp);
+}
+// a place's census series as a small line, the slider's year marked on it
+function spark(pp){
+  if(!pp||pp.length<2) return '';
+  const w=280, h=66, l=4, r=4, t=14, b=15;
+  const y0=pp[0][0], y1=pp[pp.length-1][0], top=Math.max(...pp.map(p=>p[1]));
+  const X=y=>l+(y-y0)/(y1-y0)*(w-l-r), Y=p=>t+(1-p/top)*(h-t-b);
+  let s='<svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Serie censal '+y0+' a '+y1+'">';
+  s+='<line x1="'+l+'" y1="'+(h-b)+'" x2="'+(w-r)+'" y2="'+(h-b)+'" stroke="#3a3a3a" stroke-width="1"/>';
+  s+='<polyline points="'+pp.map(p=>X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ')
+    +'" fill="none" stroke="var(--cap)" stroke-width="1.6" stroke-linejoin="round"/>';
+  for(const p of pp) s+='<circle cx="'+X(p[0]).toFixed(1)+'" cy="'+Y(p[1]).toFixed(1)+'" r="1.9" fill="var(--cap)"/>';
+  if(year>=y0){
+    const yy=Math.min(year,y1), p=interp(pp,yy), x=X(yy).toFixed(1);
+    s+='<line x1="'+x+'" y1="'+t+'" x2="'+x+'" y2="'+(h-b)+'" stroke="#e6e6e6" stroke-opacity="0.45" stroke-dasharray="2 2"/>'
+      +'<circle cx="'+x+'" cy="'+Y(p).toFixed(1)+'" r="3.2" fill="#e6e6e6" stroke="#121212" stroke-width="1"/>';
+  }
+  s+='<text x="'+l+'" y="'+(h-2)+'" font-size="10" fill="#8b949e">'+y0+'</text>'
+    +'<text x="'+(w-r)+'" y="'+(h-2)+'" font-size="10" fill="#8b949e" text-anchor="end">'+y1+'</text>'
+    +'<text x="'+l+'" y="10" font-size="10" fill="#8b949e">'+fmt(top)+' en '+pp.find(p=>p[1]===top)[0]+'</text>';
+  return s+'</svg>';
+}'''),
+    (r'''function show(kind,name,body,src){''', r'''function show(kind,name,body,src,pp){'''),
+    (r'''    return [k,ev.n,body,ev.src]; }''', r'''    return [k,ev.n,body,ev.src,ev.pp]; }'''),
+    (r'''      'Serie censal: art\u00edculo de Wikipedia de la ciudad']; }''',
+     r'''      'Serie censal: art\u00edculo de Wikipedia de la ciudad', c.pp]; }'''),
+    (r'''  if(year>=HIST.border)
+    s+='<path d="'+outlineD+'" fill="none" stroke="#121212" stroke-width="3.4" stroke-opacity="0.75"/>'
+      +'<path d="'+outlineD+'" fill="none" stroke="#e6e6e6" stroke-width="1.7"/>';''',
+     r'''  if(year>=HIST.border)
+    s+='<path d="'+outlineD+'" fill="none" stroke="#121212" stroke-width="3.4" stroke-opacity="0.75"/>'
+      +'<path d="'+outlineD+'" fill="none" stroke="#e6e6e6" stroke-width="1.7"/>';
+  // before it, today's border stays as a faint dashed frame for the blobs
+  else
+    s+='<path class="ghostline" d="'+outlineD+'" fill="none" stroke="#e6e6e6" stroke-opacity="0.3" stroke-width="1.2" stroke-dasharray="5 5"/>';'''),
+    (r'''let timer=null;
+function stop(){ playing=false; document.getElementById('bPlay').textContent='Correr';
+  if(timer){ clearInterval(timer); timer=null; } }
+document.getElementById('bPlay').onclick=()=>{
+  if(playing){ stop(); return; }
+  playing=true; document.getElementById('bPlay').textContent='Pausa';
+  if(year>=2025) setYear(1492);
+  timer=setInterval(()=>{ if(year>=2025){ stop(); return; } setYear(year+1); },130);
+};''',
+     r'''let timer=null, glideT=null;
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+// the quiet colonial centuries run quickly and the years from 1810 slowly;
+// a year that opens an era or carries an event holds a beat longer
+const BEAT=new Set(HIST.eras.map(e=>e.y0).concat((HIST.marks||[]).map(m=>m.y),HIST.events.map(e=>e.y)));
+function msFor(y){ return (y<1810?32:115)+(BEAT.has(y)?260:0); }
+function stop(){ playing=false; document.getElementById('bPlay').textContent='Correr';
+  if(timer){ cancelAnimationFrame(timer); timer=null; }
+  if(glideT){ cancelAnimationFrame(glideT); glideT=null; } }
+document.getElementById('bPlay').onclick=()=>{
+  if(playing){ stop(); return; }
+  stop();
+  playing=true; document.getElementById('bPlay').textContent='Pausa';
+  if(year>=2025) setYear(1492);
+  let last=performance.now();
+  // a slow frame does not slow the clock: the years it owes are caught up
+  // and drawn once
+  const step=t=>{
+    if(!playing) return;
+    let y=year;
+    while(y<2025&&t-last>=msFor(y)){ last+=msFor(y); y++; }
+    if(y!==year) setYear(y);
+    if(y>=2025){ stop(); return; }
+    timer=requestAnimationFrame(step);
+  };
+  timer=requestAnimationFrame(step);
+};
+// an era year above the slider: the slider travels there in about a second
+function glide(to){
+  stop();
+  if(REDUCED||to===year){ setYear(to); return; }
+  const from=year, t0=performance.now(), dur=Math.min(1200,600+Math.abs(to-from)*2);
+  const step=t=>{
+    const f=Math.min(1,(t-t0)/dur), e=f<.5?2*f*f:1-Math.pow(-2*f+2,2)/2;
+    const y=Math.round(from+(to-from)*e);
+    if(y!==year) setYear(y);
+    glideT=f<1?requestAnimationFrame(step):null;
+  };
+  glideT=requestAnimationFrame(step);
+}'''),
+    (r'''(function ticks(){
+  const tk=document.getElementById('ticks'), span=2025-1492;
+  const pts=HIST.eras.map(e=>({y:e.y0,l:e.l}))
+    .concat(HIST.marks||[])
+    .filter(p=>p.y>1492).sort((a,b)=>a.y-b.y);
+  let lastX={1:-99,2:-99};
+  pts.forEach(p=>{
+    const x=(p.y-1492)/span*100;
+    const row=(x-lastX[1]<5.5&&x-lastX[2]>=5.5)?2:1; lastX[row]=x;
+    const b=document.createElement('button');
+    b.className='row'+row;
+    b.style.left=x+'%';
+    b.textContent=p.y;
+    b.title=p.y+' \u00b7 '+p.l;
+    b.onclick=()=>{ stop(); setYear(p.y); };
+    tk.appendChild(b);
+  });
+})();''',
+     r'''// where years crowd (1811, 1821, 1824) the labels spread apart along the
+// row and a thin leader ties each one to its own year on the slider
+(function ticks(){
+  const tk=document.getElementById('ticks'), span=2025-1492;
+  const pts=HIST.eras.map(e=>({y:e.y0,l:e.l}))
+    .concat(HIST.marks||[])
+    .filter(p=>p.y>1492).sort((a,b)=>a.y-b.y);
+  const lead=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  lead.setAttribute('class','lead'); tk.appendChild(lead);
+  const bs=pts.map(p=>{
+    const b=document.createElement('button');
+    b.textContent=p.y;
+    b.title=p.y+' \u00b7 '+p.l;
+    b.onclick=()=>glide(p.y);
+    tk.appendChild(b);
+    return b;
+  });
+  function lay(){
+    const Wd=tk.clientWidth, Ht=tk.clientHeight; if(!Wd) return;
+    const xs=pts.map(p=>(p.y-1492)/span*Wd), wd=bs.map(b=>b.offsetWidth+6);
+    const rows=wd.reduce((a,b)=>a+b,0)>Wd*0.85?2:1;
+    const row=pts.map((p,i)=>rows===2?i%2:0), lx=xs.slice();
+    for(let r=0;r<rows;r++){
+      const ix=pts.map((p,i)=>i).filter(i=>row[i]===r);
+      for(let it=0;it<80;it++){
+        let moved=false;
+        for(let k=1;k<ix.length;k++){
+          const a=ix[k-1], c=ix[k], gap=(wd[a]+wd[c])/2-(lx[c]-lx[a]);
+          if(gap>0.5){ lx[a]-=gap/2; lx[c]+=gap/2; moved=true; }
+        }
+        for(const i of ix) lx[i]=Math.max(wd[i]/2-40,Math.min(Wd+40-wd[i]/2,lx[i]));
+        if(!moved) break;
+      }
+    }
+    let ln='';
+    bs.forEach((b,i)=>{
+      const top=rows===2&&row[i]===1?15:0;
+      b.style.left=lx[i].toFixed(1)+'px'; b.style.top=top+'px';
+      ln+='<line data-i="'+i+'" x1="'+lx[i].toFixed(1)+'" y1="'+(top+b.offsetHeight)+'" x2="'+xs[i].toFixed(1)+'" y2="'+Ht+'"/>';
+    });
+    lead.innerHTML=ln;
+  }
+  bs.forEach((b,i)=>{
+    b.addEventListener('mouseenter',()=>{ const l=lead.querySelector('[data-i="'+i+'"]'); if(l) l.classList.add('hi'); });
+    b.addEventListener('mouseleave',()=>{ const l=lead.querySelector('[data-i="'+i+'"]'); if(l) l.classList.remove('hi'); });
+  });
+  lay(); requestAnimationFrame(lay);
+  addEventListener('resize',lay);
+})();'''),
+]
+
+
 def main():
     data = build_data()
     hist = HIST_CH
@@ -283,6 +461,15 @@ def main():
     for en, es in TR:
         assert en in html, f"missing template string: {en!r}"
         html = html.replace(en, es)
+    # a patch whose anchor is gone has been overtaken by the shared
+    # template (build_states.py also grows gliding jumps, speeds and a tick
+    # layout); it is skipped and named rather than forced
+    for old, new in EXTRA:
+        if html.count(old) == 1:
+            html = html.replace(old, new)
+        else:
+            print(f"skipped a Chihuahua patch, its anchor is not in the "
+                  f"template: {old.strip()[:50]!r}")
     sibs = (' <a href="mexico.html">M&eacute;xico</a>'
             ' <a href="norte-mexico.html">El norte</a>'
             ' <a href="valle-santa-maria.html">El valle del Santa Mar&iacute;a</a>')
@@ -299,6 +486,15 @@ def main():
             .replace("__ROADS__", json.dumps(roads, separators=(",", ":"))))
     html = html.replace("<h2 class=\"refh\">References</h2>",
                         "<h2 class=\"refh\">Referencias</h2>")
+    # one caption; the second note and the references fold under Fuentes
+    html = html.replace("<summary>Sources</summary>", "<summary>Fuentes</summary>")
+    if '<details class="sources">' not in html:
+        m = re.search(r'<p class="note">(La frontera y los nombres.*?)</p>\n<h2 class="refh">Referencias</h2>\n'
+                      r'(<div class="refs">(?:(?!</div>).)*</div>)', html, re.S)
+        if m:
+            html = html.replace(m.group(0), '<details class="sources"><summary>Fuentes</summary>\n'
+                                '<p class="note">' + m.group(1) + '</p>\n<h2 class="refh">Referencias</h2>\n'
+                                + m.group(2) + '\n</details>', 1)
     out = ROOT / "chihuahua.html"
     html = apa.css_pass(html)
     out.write_text(html, encoding="utf-8")

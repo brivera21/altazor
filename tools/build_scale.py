@@ -78,13 +78,15 @@ h1 { margin:0 0 12px; font-size:26px; }
 .controls label { font-size:13px; color:var(--muted); }
 .controls input[type=range] { width:160px; accent-color:var(--accent); }
 .controls output { font-size:13px; color:var(--text); font-variant-numeric:tabular-nums; }
+.controls output small { color:var(--muted); font-size:11.5px; }
 .presets { display:flex; gap:6px; flex-wrap:wrap; }
 .presets button { background:var(--panel); color:var(--muted); border:1px solid var(--line);
   border-radius:999px; padding:5px 11px; font-size:12.5px; cursor:pointer; font-family:inherit; }
 .presets button:hover { color:var(--text); border-color:#3d3d3d; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
 #diagram { flex:1 1 640px; min-width:0; }
-#diagram svg { width:100%; height:auto; display:block; user-select:none; }
+#diagram svg { width:100%; height:auto; display:block; user-select:none; touch-action:pan-y; outline:none; border-radius:10px; }
+#diagram svg:focus-visible { box-shadow:0 0 0 1px var(--accent); }
 .side { flex:0 0 300px; position:sticky; top:16px; }
 .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; }
 #kindTxt { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
@@ -96,14 +98,17 @@ h1 { margin:0 0 12px; font-size:26px; }
 #srcTxt a { color:var(--accent); }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
-.method { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px;
+details.sources { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
+details.sources summary { cursor:pointer; color:var(--accent); }
+details.sources p { margin:9px 0 0; }
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
 .refs p { margin:0 0 8px; overflow-wrap:anywhere; }
 .refs a { color:var(--accent); }
 __APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+@media (max-width:900px){ .stage{flex-direction:column;} #diagram{flex:none; width:100%;} .side{position:static; width:100%; flex:none; order:-1;} }
+@media (max-width:600px){ #diagram{overflow-x:auto;} #diagram svg{min-width:700px;} }
 </style>
 </head>
 <body>
@@ -114,9 +119,9 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 </header>
 <h1>Scale</h1>
 <div class="controls">
-  <label for="lensW">lens width</label>
+  <label for="lensW">the lens spans</label>
   <input type="range" id="lensW" min="10" max="60" step="1" value="30">
-  <output id="lensWOut">3.0 decades</output>
+  <output id="lensWOut">1,000&times;</output>
   <span class="presets" id="jumps"></span>
 </div>
 <div class="stage">
@@ -130,10 +135,11 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   </div></div>
 </div>
 <p class="note">__NOTE1__</p>
-<p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
-<div class="method"><p>__METHOD__</p></div>
-<h2 class="refh">References</h2>
+<details class="sources"><summary>Sources</summary>
+<p>__NOTE2__</p>
+<p>__METHOD__</p>
 <div class="refs">__REFS__</div>
+</details>
 </div>
 <script>
 const OBJ=__OBJ__, REALM=__REALM__, JUMPS=__JUMPS__;
@@ -146,6 +152,10 @@ const X=v=>L+(Math.log10(v)-LOG0)/(LOG1-LOG0)*(R-L);   // meters to pixels
 const XL=lg=>L+(lg-LOG0)/(LOG1-LOG0)*(R-L);            // log10 meters to pixels
 const LX=px=>LOG0+(px-L)/(R-L)*(LOG1-LOG0);            // pixels to log10 meters
 let lensC=Math.log10(1.7), lensW=3.0, picks=[], hot=null;
+let ghost=null;                                        // the last lens's largest thing, at the size it had
+const REDUCED=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ease=t=>t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const inLens=o=>Math.abs(Math.log10(o.m)-lensC)<=lensW/2+1e-9;
 
 /* ---- numbers ---- */
 const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
@@ -225,12 +235,13 @@ function line(){
   // the marks and their labels
   for(const o of OBJ){
     const x=X(o.m), {lane,lx}=LANE[o.k], ly=Y-16-lane*14, c=REALM[o.r][0];
-    const picked=picks.includes(o.k), isHot=hot===o.k;
+    const picked=picks.includes(o.k), isHot=hot===o.k, lit=picked||isHot||inLens(o);
+    // only the names inside the lens are bright; the rest wait for the pointer
     s+='<g data-k="'+o.k+'" style="cursor:pointer">';
-    s+='<line x1="'+x.toFixed(1)+'" y1="'+(ly+3)+'" x2="'+x.toFixed(1)+'" y2="'+(Y-5)+'" stroke="'+c+'" stroke-opacity="0.35" stroke-width="1"/>';
-    s+='<circle cx="'+x.toFixed(1)+'" cy="'+Y+'" r="'+(picked||isHot?5.5:3.8)+'" fill="'+c+'" stroke="#121212" stroke-width="1.2"/>';
+    s+='<line x1="'+x.toFixed(1)+'" y1="'+(ly+3)+'" x2="'+x.toFixed(1)+'" y2="'+(Y-5)+'" stroke="'+c+'" stroke-opacity="'+(lit?0.5:0.18)+'" stroke-width="1"/>';
+    s+='<circle cx="'+x.toFixed(1)+'" cy="'+Y+'" r="'+(picked||isHot?5.5:lit?4:3)+'" fill="'+c+'" fill-opacity="'+(lit?1:0.55)+'" stroke="#121212" stroke-width="1.2"/>';
     if(picked) s+='<circle cx="'+x.toFixed(1)+'" cy="'+Y+'" r="9" fill="none" stroke="#f4efe2" stroke-width="1.2"/>';
-    s+='<text x="'+lx.toFixed(1)+'" y="'+ly+'" text-anchor="middle" font-size="10.5" fill="'+(picked||isHot?'#f4efe2':c)+'">'+esc(o.n)+'</text>';
+    s+='<text x="'+lx.toFixed(1)+'" y="'+ly+'" text-anchor="middle" font-size="10.5" fill="'+(picked||isHot?'#f4efe2':c)+'" opacity="'+(lit?1:0.3)+'">'+esc(o.n)+'</text>';
     s+='<rect x="'+(lx-o.n.length*3.2-4).toFixed(1)+'" y="'+(ly-10)+'" width="'+(o.n.length*6.4+8)+'" height="14" fill="transparent"/>';
     s+='<circle cx="'+x.toFixed(1)+'" cy="'+Y+'" r="9" fill="transparent"/></g>';
   }
@@ -255,12 +266,17 @@ function panel(){
     return s;
   }
   const maxD=Math.min(PANEL.h-110, 330), k=maxD/inside[0].m;    // px per meter
+  lastK=k; lastBig=inside[0];
   // lay them out left to right, biggest first, each in a slot of its width plus room for a name
-  let x=PANEL.x+24; const cy=PANEL.y+34+maxD/2; let tiny=0;
+  let x=PANEL.x+24; const cy=PANEL.y+34+maxD/2; let tiny=0, ghostDrawn=false;
   for(const o of inside){
     const d=o.m*k, r=Math.max(d/2,0.6), slot=Math.max(d+28, o.n.length*6.4+24);
     if(x+slot>PANEL.x+PANEL.w-10) break;
     const cx=x+slot/2, c=REALM[o.r][0], isHot=hot===o.k;
+    // the ghost: the thing that filled the last lens, dashed, at the size it had then
+    if(ghost&&ghost.k===o.k&&Math.abs(ghost.d-d)>2){ const gr=Math.min(ghost.d/2, PANEL.h/2-40);
+      s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+gr.toFixed(1)+'" fill="none" stroke="'+c+'" stroke-opacity="0.45" stroke-dasharray="5 4" stroke-width="1.2"/>';
+      s+='<text x="'+cx.toFixed(1)+'" y="'+(cy-gr-6).toFixed(1)+'" text-anchor="middle" font-size="10" fill="'+c+'" opacity="0.7">as drawn a moment ago, '+nice(ghost.d/d)+'\u00d7 this</text>'; ghostDrawn=true; }
     s+='<g data-k="'+o.k+'" style="cursor:pointer">';
     s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+r.toFixed(2)+'" fill="'+c+'" fill-opacity="'+(isHot?0.95:0.75)+'" stroke="'+(isHot?'#f4efe2':c)+'" stroke-width="1"/>';
     if(d<3){ tiny++; s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="6" fill="none" stroke="'+c+'" stroke-opacity="0.5" stroke-dasharray="2 2"/>'; }
@@ -271,17 +287,24 @@ function panel(){
     s+='</g>';
     x+=slot;
   }
+  if(ghost&&!ghostDrawn&&inside.every(o=>o.k!==ghost.k)&&Math.abs(Math.log10(ghost.m)-lensC)<lensW/2+1.5){ // it has left the lens: the ghost stands at the left edge
+    const gr=Math.min(ghost.d/2, PANEL.h/2-40), gx=PANEL.x+PANEL.w-24-gr, c=REALM[ghost.r][0];
+    s+='<circle cx="'+gx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+gr.toFixed(1)+'" fill="none" stroke="'+c+'" stroke-opacity="0.35" stroke-dasharray="5 4" stroke-width="1.2"/>';
+    s+='<text x="'+gx.toFixed(1)+'" y="'+(cy-gr-6).toFixed(1)+'" text-anchor="middle" font-size="10" fill="'+c+'" opacity="0.6">'+esc(ghost.n)+', as drawn a moment ago; now outside the lens</text>'; }
   if(tiny) s+='<text x="'+(PANEL.x+PANEL.w-14)+'" y="'+(PANEL.y+PANEL.h-12)+'" text-anchor="end" font-size="10.5" fill="#6b7280">a dashed ring marks a thing too small to draw at this proportion</text>';
   return s;
 }
+let lastK=null, lastBig=null;
+function remember(){ if(lastK&&lastBig) ghost={k:lastBig.k, n:lastBig.n, r:lastBig.r, m:lastBig.m, d:lastBig.m*lastK}; }
 
 /* ---- render and events ---- */
 function render(){
-  el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" id="ssvg">'+
+  el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" id="ssvg" tabindex="0" role="img" aria-label="One line from the Planck length to the observable universe">'+
     '<rect width="'+W+'" height="'+H+'" fill="#121212"/>'+
     '<text x="'+L+'" y="30" font-size="14" fill="#9a9a9a">Sixty-two decades, a factor of ten a step. The lens slides.</text>'+
+    '<text x="'+R+'" y="30" text-anchor="end" font-size="11.5" fill="#6b7280">two marks clicked in turn give their ratio</text>'+
     line()+panel()+'</svg>';
-  document.getElementById('lensWOut').textContent=lensW.toFixed(1)+' decades';
+  document.getElementById('lensWOut').innerHTML=Math.round(Math.pow(10,lensW)).toLocaleString('en-US')+'\u00d7 <small>'+lensW.toFixed(1)+' decades</small>';
 }
 function pick(k){
   const o=OBJ.find(x=>x.k===k); if(!o) return;
@@ -299,21 +322,38 @@ el.addEventListener('pointerdown',e=>{
   const y=svgY(e);
   if(e.target.closest('[data-lens]') || (y>Y-20 && y<Y+40 && !e.target.closest('[data-k]'))){
     dragging=true; swallow=true; el.setPointerCapture&&el.setPointerCapture(e.pointerId);
-    setLens(LX(svgX(e))); e.preventDefault();
+    if(glideId){ cancelAnimationFrame(glideId); glideId=null; }
+    remember(); setLens(LX(svgX(e))); e.preventDefault();
   }
 });
 el.addEventListener('pointermove',e=>{ if(dragging) setLens(LX(svgX(e))); });
 window.addEventListener('pointerup',()=>{ dragging=false; });
 el.addEventListener('click',e=>{ if(swallow){ swallow=false; return; } const g=e.target.closest('[data-k]'); if(g) pick(g.getAttribute('data-k')); });
 function setLens(c){ lensC=Math.max(LOG0+lensW/2,Math.min(LOG1-lensW/2,c)); render(); }
+// the lens glides to a new center, the circles beneath growing and shrinking on the way
+let glideId=null;
+function glide(c,done){ const from=lensC, to=Math.max(LOG0+lensW/2,Math.min(LOG1-lensW/2,c));
+  remember();
+  if(glideId) cancelAnimationFrame(glideId);
+  const dur=REDUCED?0:Math.min(1200,400+120*Math.abs(to-from)), t0=performance.now();
+  const run=now=>{ const t=dur?Math.min(1,(now-t0)/dur):1; lensC=from+(to-from)*ease(t); render(); if(t<1) glideId=requestAnimationFrame(run); else { glideId=null; if(done) done(); } };
+  run(t0); }
 document.getElementById('lensW').addEventListener('input',e=>{ lensW=+e.target.value/10; setLens(lensC); });
 document.getElementById('jumps').innerHTML=JUMPS.map(([k,l])=>'<button type="button" data-j="'+k+'">'+l+'</button>').join('');
 document.getElementById('jumps').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return;
-  const o=OBJ.find(x=>x.k===b.dataset.j); setLens(Math.log10(o.m)); hot=o.k; if(picks.length<2) showOne(o); render(); });
+  const o=OBJ.find(x=>x.k===b.dataset.j); hot=o.k; if(picks.length<2) showOne(o); glide(Math.log10(o.m)); document.getElementById('ssvg').focus({preventScroll:true}); });
+// the wheel over the drawing widens or narrows the lens; the arrow keys step it a decade
+el.addEventListener('wheel',e=>{ e.preventDefault(); lensW=Math.max(1,Math.min(6,+(lensW+(e.deltaY>0?0.1:-0.1)).toFixed(1)));
+  document.getElementById('lensW').value=Math.round(lensW*10); setLens(lensC); },{passive:false});
+el.addEventListener('keydown',e=>{ if(e.target.tagName==='INPUT') return;
+  if(e.key==='ArrowLeft'||e.key==='ArrowRight'){ e.preventDefault(); glide(Math.round(lensC)+(e.key==='ArrowRight'?1:-1)); }
+  else if(e.key==='ArrowUp'||e.key==='ArrowDown'){ e.preventDefault(); lensW=Math.max(1,Math.min(6,+(lensW+(e.key==='ArrowUp'?0.5:-0.5)).toFixed(1))); document.getElementById('lensW').value=Math.round(lensW*10); setLens(lensC); }
+  else if(e.key==='Escape'){ picks=[]; ghost=null; render(); showOne(OBJ.find(o=>o.k===(hot||'human'))); } });
 
 render();
 showOne(OBJ.find(o=>o.k==='human'));
-window.__scale=()=>({n:OBJ.length, lensC, lensW, picks, hot,
+window.__scale=()=>({n:OBJ.length, lensC, lensW, picks, hot, ghost, gliding:!!glideId,
+  labels:Object.fromEntries([...document.querySelectorAll('#ssvg g[data-k]')].filter(g=>g.querySelector('line')).map(g=>[g.dataset.k,+g.querySelector('text').getAttribute('opacity')])),
   inside:OBJ.filter(o=>Math.log10(o.m)>=lensC-lensW/2&&Math.log10(o.m)<=lensC+lensW/2).map(o=>o.k),
   marks:document.querySelectorAll('#ssvg g[data-k]').length});
 </script>

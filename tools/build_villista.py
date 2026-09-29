@@ -41,8 +41,8 @@ VH = (N - S) * SCALE
 C_LAND = "#1b1f24"      # tierra de contexto
 C_MX = "#333b44"        # Chihuahua y Sonora
 C_US = "#2a3138"        # el lado de Estados Unidos
-C_EDGE = "#8d98a4"      # límites estatales
-C_LINE = "#c3ccd6"      # la línea internacional
+C_EDGE = "#5f6973"      # límites estatales
+C_LINE = "#9aa4ae"      # la línea internacional
 C_RIV = "#6fb6f5"
 C_SRA = "#414139"       # terreno escarpado
 C_ALT = "#5c5749"       # lo más quebrado
@@ -232,6 +232,23 @@ border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}}
 button.ctl:hover{{color:var(--ink);border-color:var(--edge)}}
 button.ctl[aria-pressed="true"]{{color:#12161a;background:var(--ink2);border-color:var(--ink2)}}
 input[type=range]{{flex:1;min-width:220px;accent-color:var(--ruta);height:22px}}
+.stage{{display:flex;gap:18px;align-items:flex-start}}
+.stage figure{{flex:0 1 660px;min-width:0}}
+.side{{flex:1 1 300px;min-width:0;position:sticky;top:12px}}
+.side .controls{{margin-top:0}}
+.side input[type=range]{{flex:1 1 100%;min-width:0;order:9}}
+.side .readout{{flex-direction:column}}
+.side .box{{min-width:0}}
+.side .hint{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;font-size:12.5px;color:var(--ink3);margin:.8rem 0 0;line-height:1.5}}
+svg#perfil{{cursor:ew-resize;touch-action:none}}
+#frontera{{stroke-dasharray:7 4}}
+details.sources{{margin-top:2rem;border-top:1px solid var(--line);padding-top:.8rem}}
+details.sources>summary{{cursor:pointer;color:var(--ink3);font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}}
+details.sources>summary:hover{{color:var(--accent)}}
+details.sources .notes{{margin-top:1rem;border-top:none;padding-top:0}}
+.notes.cap{{margin-top:1.6rem}}
+.tiles{{margin-top:1.2rem}}
+@media(max-width:860px){{.stage{{flex-direction:column}}.side{{position:static;width:100%;flex-basis:auto}}.stage figure{{width:100%;flex-basis:auto}}}}
 .readout{{display:flex;gap:.75rem;margin-top:.85rem;flex-wrap:wrap;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}}
 .box{{background:var(--panel);border-radius:8px;padding:.7rem .95rem;min-width:150px}}
@@ -269,17 +286,7 @@ circle.stop.on{{fill:var(--ruta)}}
 
 <h1>Cabalgata Binacional Villista</h1>
 
-<div class="tiles">
-  <div class="tile"><div class="k">salida</div><div class="v">Bachíniva</div>
-    <div class="g">de la hacienda de San Gerónimo salió la columna en 1916</div></div>
-  <div class="tile"><div class="k">llegada</div><div class="v">Columbus</div>
-    <div class="g">Nuevo México, cruzando la línea en Puerto Palomas</div></div>
-  <div class="tile"><div class="k">corredor</div><div class="v">{total_km:.0f} km</div>
-    <div class="g">medidos sobre la traza de caminos entre cabeceras</div></div>
-  <div class="tile"><div class="k">primera edición</div><div class="v">1999</div>
-    <div class="g">aquella vez se juntaron más de 125 jinetes</div></div>
-</div>
-
+<div class="stage">
 <figure>
 <svg id="map" viewBox="0 0 {VW:.0f} {VH:.0f}" role="img"
   aria-label="Mapa del noroeste de Chihuahua y el sur de Nuevo México con el corredor de la cabalgata.">
@@ -314,25 +321,16 @@ circle.stop.on{{fill:var(--ruta)}}
 </g>
 </svg>
 
-<svg id="perfil" viewBox="0 0 {PW:.0f} {PH:.0f}" role="img"
-  aria-label="Altitud del corredor, de la sierra al desierto.">
-<title>Altitud del corredor</title>
-<path id="perfilArea" d="" fill="#2a2a22"/>
-<path id="perfilLinea" d="" fill="none" stroke="var(--ruta)" stroke-width="1.6"/>
-<g id="perfilEjes"></g>
-<line id="perfilMarca" x1="0" y1="14" x2="0" y2="{PH-26:.0f}" stroke="#fff3d6" stroke-width="1.4"/>
-</svg>
 </figure>
-
+<div class="side">
 <div class="controls">
   <button class="ctl" id="bPlay" aria-pressed="false">Recorrer</button>
   <input type="range" id="km" min="0" max="{total_km:.1f}" step="0.5" value="0"
     aria-label="Kilómetro del corredor">
   <button class="ctl" id="bRel" aria-pressed="true">Relieve</button>
   <button class="ctl" id="bRio" aria-pressed="true">Ríos</button>
-  <button class="ctl" id="b1916" aria-pressed="false">1916</button>
+  <button class="ctl" id="b1916" aria-pressed="false" title="los pueblos de donde salieron los hombres en 1916, y las dos fechas">Los de 1916</button>
 </div>
-
 <div class="readout">
   <div class="box"><div class="lab">kilómetro</div>
     <div class="val" id="rKm">0</div><div class="sub2" id="rFalta"></div></div>
@@ -343,17 +341,44 @@ circle.stop.on{{fill:var(--ruta)}}
     <div class="sub2" id="rSub"></div></div>
 </div>
 
-<div class="notes">
+<p class="hint">El jinete recorre el corredor; la barra, el perfil y cada parada lo llevan a cualquier kilómetro, y una parada bajo el puntero dice cuánto sube y baja desde la anterior.</p>
+</div>
+</div>
+<svg id="perfil" viewBox="0 0 {PW:.0f} {PH:.0f}" role="img"
+  aria-label="Altitud del corredor, de la sierra al desierto.">
+<title>Altitud del corredor</title>
+<path id="perfilArea" d="" fill="#2a2a22"/>
+<path id="perfilLinea" d="" fill="none" stroke="var(--ruta)" stroke-width="1.6"/>
+<text class="ax" x="46" y="12">altitud a lo largo del corredor; abajo, el kilómetro de las paradas</text>
+<g id="perfilEjes"></g>
+<line id="perfilMarca" x1="0" y1="14" x2="0" y2="{PH-26:.0f}" stroke="#fff3d6" stroke-width="1.4"/>
+</svg>
+
+
+<div class="notes cap">
 <p>La cabalgata sale de Bachíniva a finales de febrero y llega a Columbus el
 sábado más cercano al 9 de marzo, el día del ataque de 1916. La edición de 2026
 se hizo en dieciocho días con más de doscientos jinetes, por los municipios que
 van marcados aquí.</p>
+</div>
+<div class="tiles">
+  <div class="tile"><div class="k">salida</div><div class="v">Bachíniva</div>
+    <div class="g">de la hacienda de San Gerónimo salió la columna en 1916</div></div>
+  <div class="tile"><div class="k">llegada</div><div class="v">Columbus</div>
+    <div class="g">Nuevo México, cruzando la línea en Puerto Palomas</div></div>
+  <div class="tile"><div class="k">corredor</div><div class="v">{total_km:.0f} km</div>
+    <div class="g">medidos sobre la traza de caminos entre cabeceras</div></div>
+  <div class="tile"><div class="k">primera edición</div><div class="v">1999</div>
+    <div class="g">aquella vez se juntaron más de 125 jinetes</div></div>
+</div>
+
+<details class="sources"><summary>Fuentes</summary>
+<div class="notes">
 <p>Nadie publica los campamentos de cada noche, solo los municipios, así que la
 línea une las cabeceras por caminos que existen. El perfil lleva la misma
 cuenta: se sale de la sierra alta y se llega al desierto ochocientos metros
 más abajo, y la parte más pesada queda entre Madera y Ignacio Zaragoza.</p>
 </div>
-
 <div class="method">
 <p>La traza se armó tramo por tramo sobre la red de caminos de OpenStreetMap
 con BRouter, con el perfil de caminos vecinales, salvo tres tramos donde ese
@@ -366,7 +391,6 @@ solamente los dos extremos y los pueblos de donde salieron los hombres, porque
 el camino que siguió la columna entre una fecha y otra no aparece en las
 fuentes consultadas.</p>
 </div>
-
 <h2>Referencias</h2>
 <div class="refs">
 <p>Gobierno del Estado de Chihuahua. (2026, 27 de febrero). <em>Arranca en
@@ -389,6 +413,7 @@ Research: Solid Earth, 101</em>(B4), 8741-8743.
 Information Society.
 <a href="https://www.naturalearthdata.com/downloads/10m-raster-data/10m-natural-earth-2/">https://www.naturalearthdata.com/downloads/10m-raster-data/10m-natural-earth-2/</a></p>
 </div>
+</details>
 </main>
 <script>
 const TRACK={json.dumps(track_js)};
@@ -410,7 +435,8 @@ const gp=el('paradas'), gl=el('etiquetas');
 STOPS.forEach((s,i)=>{{
   const c=make('circle',{{class:'stop',cx:s.x,cy:s.y,r:i===0||i===STOPS.length-1?5.5:4,
     'data-i':i}},gp);
-  c.addEventListener('mouseenter',()=>marcar(i));
+  c.addEventListener('mouseenter',()=>{{marcar(i);parada(i);}});
+  c.addEventListener('mouseleave',()=>ver(+el('km').value));
   c.addEventListener('click',()=>{{el('km').value=s.km;ver(s.km);}});
   const der=s.x<VWmid();
   const L=s.lab||[der?9:-9,4,der?'start':'end'];
@@ -469,6 +495,22 @@ function alturaEn(km){{
   const j=Math.min(PROF.length-1,i+1), f=t-i;
   return PROF[i]+(PROF[j]-PROF[i])*f;
 }}
+// lo que sube y baja el camino entre dos kilómetros, del perfil
+function subeBaja(k0,k1){{
+  let s=0,b=0,prev=alturaEn(k0);
+  for(let k=k0+STEP;k<=k1+1e-9;k+=STEP){{const h=alturaEn(Math.min(k,k1));
+    if(h>prev) s+=h-prev; else b+=prev-h; prev=h;}}
+  return [Math.round(s),Math.round(b)];
+}}
+function parada(i){{
+  const s=STOPS[i];
+  el('rLab').textContent='parada';
+  el('rTramo').textContent=s.n+', km '+s.km.toFixed(0);
+  if(i===0){{el('rSub').textContent='la salida, a '+Math.round(alturaEn(0))+' m';return;}}
+  const p=STOPS[i-1], [su,ba]=subeBaja(p.km,s.km);
+  el('rSub').textContent='desde '+p.n+': '+(s.km-p.km).toFixed(0)+' km, sube '
+    +su.toLocaleString('es-MX')+' m y baja '+ba.toLocaleString('es-MX')+' m';
+}}
 function marcar(i){{
   [...gp.children].forEach((c,k)=>c.classList.toggle('on',k===i));
 }}
@@ -499,9 +541,20 @@ el('km').addEventListener('input',e=>{{parar();ver(+e.target.value);}});
 let anim=null;
 function parar(){{if(anim){{cancelAnimationFrame(anim);anim=null;
   el('bPlay').setAttribute('aria-pressed','false');el('bPlay').textContent='Recorrer';}}}}
+// el perfil también se recorre con el puntero
+{{
+  const pf=el('perfil');
+  const kmDe=ev=>{{const r=pf.getBoundingClientRect();const x=(ev.clientX-r.left)/r.width*PW;
+    return Math.max(0,Math.min(TOTAL,(x-46)/(PW-70)*TOTAL));}};
+  let arr=false;
+  pf.addEventListener('pointerdown',ev=>{{parar();arr=true;try{{pf.setPointerCapture(ev.pointerId);}}catch(e){{}}
+    const k=kmDe(ev);el('km').value=k;ver(k);ev.preventDefault();}});
+  pf.addEventListener('pointermove',ev=>{{if(!arr)return;const k=kmDe(ev);el('km').value=k;ver(k);}});
+  for(const t of ['pointerup','pointercancel']) pf.addEventListener(t,()=>{{arr=false;}});
+}}
 el('bPlay').addEventListener('click',()=>{{
   if(anim){{parar();return;}}
-  el('bPlay').setAttribute('aria-pressed','true'); el('bPlay').textContent='Alto';
+  el('bPlay').setAttribute('aria-pressed','true'); el('bPlay').textContent='Pausa';
   let last=null;
   if(+el('km').value>=TOTAL) el('km').value=0;
   const paso=t=>{{

@@ -91,8 +91,11 @@ with sync_playwright() as pw:
         got = st({"at": [lon, lat]})["near"]
         check(got == want, f"under the pointer at {lat}, {lon}: {cur[got][1] if got else 'nothing'}", want)
     box = pg.eval_on_selector("#map", "e=>{const r=e.getBoundingClientRect(); return [r.left,r.top,r.width,r.height]}")
-    mx = lambda lon: box[0] + (lon + 180) / 360 * box[2]
-    my = lambda lat: box[1] + (90 - lat) / 180 * box[3]
+    H = st()["H"]
+    mx = lambda lon: box[0] + st({"xy": [lon, 0]})["xy"][0] / 980 * box[2]
+    my = lambda lat: box[1] + st({"xy": [0, lat]})["xy"][1] / H * box[3]
+    check(st()["name"].endswith("Gulf Stream") and "150 Sv" in st()["card"], "the page opens with the Gulf Stream and its sverdrups in the card")
+    check(abs(H - round(980 * 163 / 360)) <= 1, f"the map is cut at 85 N and 78 S, {H} px tall")
     pg.mouse.move(mx(-74), my(35.5))
     pg.wait_for_timeout(150)
     s = st()
@@ -108,11 +111,30 @@ with sync_playwright() as pw:
     pg.click('#gyres button[data-g="spac"]')
     pg.wait_for_timeout(100)
     check(st()["gyre"] is None, "pressing it again clears it")
-    pg.click('#views button[data-v="conveyor"]')
+    # the float: dropped off Florida, it rides the Gulf Stream into the North Atlantic Drift
+    pg.mouse.move(box[0] + 5, box[1] + 5)
+    pg.mouse.click(mx(-79.5), my(29))
     pg.wait_for_timeout(200)
     s = st()
-    check(s["view"] == "conveyor" and "thousand years" in s["card"] and "15 Sv" in s["card"], "the conveyor view: a thousand-year lap, 15 Sv of sinking")
-    rgb = st({"pixel": [int((-160 + 180) / 360 * 980), int((90 - 40) / 180 * 490)]})["rgb"]
+    check(s["float"]["on"] and s["float"]["cur"] == "gulf" and "riding the Gulf Stream" in s["name"] and "traveled" in s["card"], "a click off Florida drops a float on the Gulf Stream", str(s["float"]))
+    check(pg.eval_on_selector("#floatBtn", "e=>getComputedStyle(e).display") != "none", "and a button to take it out appears")
+    pg.wait_for_timeout(1200)
+    k1 = st()["float"]["km"]
+    check(k1 > 100, f"the float moves and counts its kilometers ({k1:,.0f} km after about a second)")
+    s = st({"ride": True})
+    check("nad" in s["float"]["ridden"] and s["float"]["done"] in ("lap", "ends"), "riding to the end it passes into the North Atlantic Drift: " + ", ".join(s["float"]["ridden"]))
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(100)
+    check(not st()["float"]["on"], "Escape takes the float out")
+    pg.click('#views button[data-v="conveyor"]')
+    pg.wait_for_timeout(700)
+    s = st()
+    check(0 < s["tv"] < 1 and "year " in pg.evaluate("document.getElementById('map').getAttribute('aria-label')||''") or 0 < s["tv"] < 1, f"the conveyor draws itself in over the change of view (at 0.7 s it is {s['tv']:.2f} of the way)")
+    pg.wait_for_timeout(2200)
+    s = st()
+    check(s["view"] == "conveyor" and s["tv"] == 1 and "thousand years" in s["card"] and "15 Sv" in s["card"], "the conveyor view: a thousand-year lap, 15 Sv of sinking")
+    xy = st({"xy": [-160, 40]})["xy"]
+    rgb = st({"pixel": [int(xy[0]), int(xy[1])]})["rgb"]
     check(rgb[0] > 150 and rgb[0] > rgb[2], f"the rising point in the North Pacific is painted warm ({rgb})")
     check(not errs, "no script errors", "; ".join(errs))
     br.close()
@@ -120,6 +142,12 @@ with sync_playwright() as pw:
 print("--- the copy ---")
 html = PAGE.read_text()
 check("—" not in html, "no em dashes")
+import re
+cap = re.search(r'<p class="note">(.*?)</p>\s*<details class="sources">', html, re.S)
+nw = len(re.sub(r"<[^>]+>", " ", cap.group(1)).split()) if cap else 0
+check(cap and nw <= 80, f"one caption on the page, {nw} words")
+det = re.search(r'<details class="sources">(.*?)</details>', html, re.S)
+check(det and "References" in det.group(1) and "class=\"method\"" in det.group(1) and "<details class=\"sources\" open" not in html, "the second note, the method and the references sit in a closed Sources details")
 
 print()
 if fails:

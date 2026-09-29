@@ -29,127 +29,135 @@ INSIDE = {"Baja California": (-115.5, 30.5), "Sonora": (-110.97, 29.07),
           "Nuevo León": (-99.8, 26.3), "Tamaulipas": (-98.5, 24.5)}
 
 fails = []
-states = pickle.load(open(DATA / "states.pkl", "rb"))
-rivers = pickle.load(open(DATA / "rivers.pkl", "rb"))
-raw = pickle.load(open(DATA / "raw.pkl", "rb"))
-border = unary_union([LineString(s) for s in raw["countries"]])
+def geometry():
+    """The checks that need the pickled geometry the page was built from."""
+    states = pickle.load(open(DATA / "states.pkl", "rb"))
+    rivers = pickle.load(open(DATA / "rivers.pkl", "rb"))
+    raw = pickle.load(open(DATA / "raw.pkl", "rb"))
+    border = unary_union([LineString(s) for s in raw["countries"]])
 
-print("--- state faces ---")
-for nm, pub in PUBLISHED.items():
-    g = states[nm]
-    b = g.bounds
-    lat = (b[1] + b[3]) / 2
-    km2 = g.area * (111.32 ** 2) * np.cos(np.radians(lat))
-    off = abs(km2 - pub) / pub
-    if off > 0.05:
-        fails.append(f"{nm}: area {km2:,.0f} km2 is {off*100:.1f}% off {pub:,}")
-    if not g.contains(Point(*INSIDE[nm])):
-        fails.append(f"{nm}: its own interior point falls outside the face")
-    # nothing may sit more than a hair north of the international boundary
-    north = b[3]
-    if north > 32.8:
-        fails.append(f"{nm}: reaches {north:.2f} N, north of the border")
-    print(f"  {nm:18} {km2:9,.0f} km2 vs {pub:9,}  ({off*100:4.1f}% off)  "
-          f"lat {b[1]:.2f}..{b[3]:.2f}")
+    print("--- state faces ---")
+    for nm, pub in PUBLISHED.items():
+        g = states[nm]
+        b = g.bounds
+        lat = (b[1] + b[3]) / 2
+        km2 = g.area * (111.32 ** 2) * np.cos(np.radians(lat))
+        off = abs(km2 - pub) / pub
+        if off > 0.05:
+            fails.append(f"{nm}: area {km2:,.0f} km2 is {off*100:.1f}% off {pub:,}")
+        if not g.contains(Point(*INSIDE[nm])):
+            fails.append(f"{nm}: its own interior point falls outside the face")
+        # nothing may sit more than a hair north of the international boundary
+        north = b[3]
+        if north > 32.8:
+            fails.append(f"{nm}: reaches {north:.2f} N, north of the border")
+        print(f"  {nm:18} {km2:9,.0f} km2 vs {pub:9,}  ({off*100:4.1f}% off)  "
+              f"lat {b[1]:.2f}..{b[3]:.2f}")
 
-print("--- the three labeled rivers ---")
-
-
-def on_border(g, tol_km=4):
-    c = np.asarray(g.coords)
-    return sum(1 for p in c if border.distance(Point(p)) < tol_km / 111.0) / len(c)
+    print("--- the three labeled rivers ---")
 
 
-def near(g, pt):
-    c = np.asarray(g.coords)
-    return float(np.hypot((c[:, 0] - pt[0]) * 111.32 * np.cos(np.radians(c[:, 1])),
-                          (c[:, 1] - pt[1]) * 110.57).min())
+    def on_border(g, tol_km=4):
+        c = np.asarray(g.coords)
+        return sum(1 for p in c if border.distance(Point(p)) < tol_km / 111.0) / len(c)
 
 
-bravo = [(L, g) for L, g in rivers if on_border(g) > 0.9 and L > 100]
-if not bravo:
-    fails.append("Río Bravo: no line follows the international boundary")
-for L, g in bravo:
-    f = on_border(g)
-    print(f"  Río Bravo   {L:6.0f} km, {f*100:5.1f}% of its points on the boundary")
-    if f < 0.9:
-        fails.append("Río Bravo: a labeled piece leaves the boundary")
+    def near(g, pt):
+        c = np.asarray(g.coords)
+        return float(np.hypot((c[:, 0] - pt[0]) * 111.32 * np.cos(np.radians(c[:, 1])),
+                              (c[:, 1] - pt[1]) * 110.57).min())
 
-conchos = [(L, g) for L, g in rivers if near(g, (-104.42, 29.57)) < 5
-           and near(g, (-105.47, 28.19)) < 20]
-if len(conchos) != 1:
-    fails.append(f"Río Conchos: {len(conchos)} lines match both anchors, expected 1")
-for L, g in conchos:
-    print(f"  Río Conchos {L:6.0f} km, Ojinaga {near(g,(-104.42,29.57)):.1f} km, "
-          f"Delicias {near(g,(-105.47,28.19)):.1f} km")
 
-colorado = [(L, g) for L, g in rivers if L > 30 and near(g, (-115.0, 32.0)) < 10
-            and near(g, (-114.8, 31.9)) < 25]
-if not colorado:
-    fails.append("Río Colorado: the delta reach did not match its anchors")
-for L, g in colorado:
-    print(f"  Río Colorado{L:6.0f} km, delta anchors "
-          f"{near(g,(-115.0,32.0)):.1f} / {near(g,(-114.8,31.9)):.1f} km")
+    bravo = [(L, g) for L, g in rivers if on_border(g) > 0.9 and L > 100]
+    if not bravo:
+        fails.append("Río Bravo: no line follows the international boundary")
+    for L, g in bravo:
+        f = on_border(g)
+        print(f"  Río Bravo   {L:6.0f} km, {f*100:5.1f}% of its points on the boundary")
+        if f < 0.9:
+            fails.append("Río Bravo: a labeled piece leaves the boundary")
 
-print("--- rugged ground ---")
-# The relief layer is a roughness threshold, so the test is whether it agrees
-# with ground truth: known sierras must be inside it, known basins and plains
-# outside. These twenty points were not used to build the layer.
-sierras = pickle.load(open(DATA / "sierras.pkl", "rb"))
-SIERRA, ALTA = sierras["sierra"], sierras["alta"]
-RUGGED = [("Sierra de San Pedro Mártir", -115.40, 30.95),
-          ("Sierra de Juárez, BC", -115.95, 32.05),
-          ("Sierra Madre Occidental, Sonora", -109.30, 29.30),
-          ("Barrancas del Cobre", -107.85, 27.35),
-          ("Cerro Mohinora", -107.05, 25.95),
-          ("Sierra Madre Oriental, Nuevo León", -100.30, 25.30),
-          ("Sierra de Arteaga", -100.60, 25.35),
-          ("Sierra Madre Oriental, Tamaulipas", -99.20, 23.60),
-          ("Serranías del Burro", -102.00, 29.05),
-          ("Sierra del Carmen", -102.55, 29.00)]
-FLAT = [("Desierto de Altar", -113.50, 32.00),
-        ("Llanos de Chihuahua", -106.80, 30.20),
-        ("Cuenca de Casas Grandes", -107.90, 30.40),
-        ("Laguna de Mayrán", -103.00, 25.60),
-        ("Planicie de Tamaulipas", -97.90, 25.50),
-        ("Sabinas, Coahuila", -101.10, 27.85),
-        ("Bolsón de Mapimí", -103.60, 26.60),
-        ("Valle de Juárez", -106.10, 31.45),
-        ("Llanos de Hermosillo", -111.20, 29.20),
-        ("Delta del Colorado", -114.95, 32.20)]
-miss_r = [n for n, lo, la in RUGGED if not SIERRA.contains(Point(lo, la))]
-miss_f = [n for n, lo, la in FLAT if SIERRA.contains(Point(lo, la))]
-print(f"  {len(RUGGED)-len(miss_r)}/{len(RUGGED)} known sierras fall inside the layer")
-print(f"  {len(FLAT)-len(miss_f)}/{len(FLAT)} known basins and plains fall outside it")
-if miss_r:
-    print(f"    sierras missed: {', '.join(miss_r)}")
-if miss_f:
-    print(f"    flats wrongly included: {', '.join(miss_f)}")
-if len(miss_r) > 1:
-    fails.append(f"the rugged layer misses {len(miss_r)} known sierras: {miss_r}")
-if len(miss_f) > 2:
-    fails.append(f"the rugged layer swallows {len(miss_f)} known flats: {miss_f}")
+    conchos = [(L, g) for L, g in rivers if near(g, (-104.42, 29.57)) < 5
+               and near(g, (-105.47, 28.19)) < 20]
+    if len(conchos) != 1:
+        fails.append(f"Río Conchos: {len(conchos)} lines match both anchors, expected 1")
+    for L, g in conchos:
+        print(f"  Río Conchos {L:6.0f} km, Ojinaga {near(g,(-104.42,29.57)):.1f} km, "
+              f"Delicias {near(g,(-105.47,28.19)):.1f} km")
 
-six = unary_union(list(states.values()))
-frac = SIERRA.intersection(six).area / six.area
-if not 0.30 < frac < 0.60:
-    fails.append(f"rugged ground covers {frac*100:.0f}% of the six states")
-print(f"  covers {frac*100:.0f}% of the six states, the high tier "
-      f"{ALTA.intersection(six).area/six.area*100:.0f}%")
+    colorado = [(L, g) for L, g in rivers if L > 30 and near(g, (-115.0, 32.0)) < 10
+                and near(g, (-114.8, 31.9)) < 25]
+    if not colorado:
+        fails.append("Río Colorado: the delta reach did not match its anchors")
+    for L, g in colorado:
+        print(f"  Río Colorado{L:6.0f} km, delta anchors "
+              f"{near(g,(-115.0,32.0)):.1f} / {near(g,(-114.8,31.9)):.1f} km")
 
-# every labeled range must sit on rugged ground, inside the state claimed
-LABELS = {"Sierra de San Pedro Mártir": "Baja California"}
-for nm, st_nm in LABELS.items():
-    p = Point(-115.25, 30.75)
-    if not SIERRA.contains(p):
-        fails.append(f"{nm}: its label does not sit on rugged ground")
-    if not states[st_nm].contains(p):
-        fails.append(f"{nm}: its label is not inside {st_nm}")
-    print(f"  {nm} label: on rugged ground, inside {st_nm}")
+    print("--- rugged ground ---")
+    # The relief layer is a roughness threshold, so the test is whether it agrees
+    # with ground truth: known sierras must be inside it, known basins and plains
+    # outside. These twenty points were not used to build the layer.
+    sierras = pickle.load(open(DATA / "sierras.pkl", "rb"))
+    SIERRA, ALTA = sierras["sierra"], sierras["alta"]
+    RUGGED = [("Sierra de San Pedro Mártir", -115.40, 30.95),
+              ("Sierra de Juárez, BC", -115.95, 32.05),
+              ("Sierra Madre Occidental, Sonora", -109.30, 29.30),
+              ("Barrancas del Cobre", -107.85, 27.35),
+              ("Cerro Mohinora", -107.05, 25.95),
+              ("Sierra Madre Oriental, Nuevo León", -100.30, 25.30),
+              ("Sierra de Arteaga", -100.60, 25.35),
+              ("Sierra Madre Oriental, Tamaulipas", -99.20, 23.60),
+              ("Serranías del Burro", -102.00, 29.05),
+              ("Sierra del Carmen", -102.55, 29.00)]
+    FLAT = [("Desierto de Altar", -113.50, 32.00),
+            ("Llanos de Chihuahua", -106.80, 30.20),
+            ("Cuenca de Casas Grandes", -107.90, 30.40),
+            ("Laguna de Mayrán", -103.00, 25.60),
+            ("Planicie de Tamaulipas", -97.90, 25.50),
+            ("Sabinas, Coahuila", -101.10, 27.85),
+            ("Bolsón de Mapimí", -103.60, 26.60),
+            ("Valle de Juárez", -106.10, 31.45),
+            ("Llanos de Hermosillo", -111.20, 29.20),
+            ("Delta del Colorado", -114.95, 32.20)]
+    miss_r = [n for n, lo, la in RUGGED if not SIERRA.contains(Point(lo, la))]
+    miss_f = [n for n, lo, la in FLAT if SIERRA.contains(Point(lo, la))]
+    print(f"  {len(RUGGED)-len(miss_r)}/{len(RUGGED)} known sierras fall inside the layer")
+    print(f"  {len(FLAT)-len(miss_f)}/{len(FLAT)} known basins and plains fall outside it")
+    if miss_r:
+        print(f"    sierras missed: {', '.join(miss_r)}")
+    if miss_f:
+        print(f"    flats wrongly included: {', '.join(miss_f)}")
+    if len(miss_r) > 1:
+        fails.append(f"the rugged layer misses {len(miss_r)} known sierras: {miss_r}")
+    if len(miss_f) > 2:
+        fails.append(f"the rugged layer swallows {len(miss_f)} known flats: {miss_f}")
+
+    six = unary_union(list(states.values()))
+    frac = SIERRA.intersection(six).area / six.area
+    if not 0.30 < frac < 0.60:
+        fails.append(f"rugged ground covers {frac*100:.0f}% of the six states")
+    print(f"  covers {frac*100:.0f}% of the six states, the high tier "
+          f"{ALTA.intersection(six).area/six.area*100:.0f}%")
+
+    # every labeled range must sit on rugged ground, inside the state claimed
+    LABELS = {"Sierra de San Pedro Mártir": "Baja California"}
+    for nm, st_nm in LABELS.items():
+        p = Point(-115.25, 30.75)
+        if not SIERRA.contains(p):
+            fails.append(f"{nm}: its label does not sit on rugged ground")
+        if not states[st_nm].contains(p):
+            fails.append(f"{nm}: its label is not inside {st_nm}")
+        print(f"  {nm} label: on rugged ground, inside {st_nm}")
+
+
+if DATA.exists():
+    geometry()
+else:
+    print(f"--- geometry skipped: {DATA} is not on this machine ---")
 
 print("--- the page ---")
 html = PAGE.read_text(encoding="utf-8")
-if "—" in html:
+if "\u2014" in html:
     fails.append("the page contains an em dash")
 for want in ["El norte de México", "library.html", "ALTAZOR"]:
     if want not in html:
@@ -206,6 +214,63 @@ try:
         print(f"  {got['states']} states, {got['rivers']} river lines "
               f"({got['named']} labeled, {got['ctx']} outside the six), "
               f"{got['shown']} shown at 0 km and {after} at 200 km")
+        pg.evaluate("()=>{const s=minkm; s.value=0; s.dispatchEvent(new Event('input'));}")
+
+        # the readout sits on the map, so it is on screen while the cursor is
+        pg.set_viewport_size({"width": 1300, "height": 850})
+        pg.evaluate("()=>scrollTo(0,0)")
+        pg.hover('path.st[data-i="2"]')
+        box = pg.evaluate("()=>{const r=document.querySelector('.readout').getBoundingClientRect();"
+                          "const m=map.getBoundingClientRect();return [r.top,r.bottom,m.top,m.bottom]}")
+        if not (box[0] >= box[2] and box[1] <= min(box[3], 850)):
+            fails.append(f"the readout is not on the map in the first screen: {box}")
+
+        # a river with a name lights all its pieces and splits its km by state
+        i = pg.evaluate("()=>RV.findIndex(r=>r.n==='Río Bravo'&&r.k>700)")
+        pg.evaluate(f"()=>document.querySelectorAll('path.riv')[{i}]"
+                    ".dispatchEvent(new MouseEvent('mouseenter'))")
+        st = pg.evaluate("()=>__norte()")
+        if st["hi"] != 3 or "Chihuahua" not in st["sub"] or "Tamaulipas" not in st["sub"]:
+            fails.append(f"the Bravo does not light whole: {st}")
+        kms = [int(x.replace(',', '')) for x in re.findall(r"(?:Chihuahua|Coahuila|Nuevo León|Tamaulipas) ([\d,]+) km", st["sub"])]
+        tot = pg.evaluate("()=>RV.filter(r=>r.n==='Río Bravo').reduce((a,r)=>a+r.k,0)")
+        if not kms or sum(kms) > tot or sum(kms) < 0.8 * tot:
+            fails.append(f"the Bravo's km by state {kms} do not add up to about {tot}")
+        print(f"  the Bravo lights {st['hi']} pieces: {st['sub']}")
+        if "sin nombre" in html:
+            fails.append("a river still reads 'sin nombre'")
+
+        # a click on a state keeps only its rivers; Escape lets go
+        pg.click('path.st[data-i="2"]')
+        st = pg.evaluate("()=>__norte()")
+        only = pg.evaluate("""()=>[...document.querySelectorAll('path.riv')].every((p,i)=>
+            p.style.display==='none' || RV[i].s.includes('Chihuahua'))""")
+        dim = pg.evaluate("()=>document.querySelectorAll('path.st.dim').length")
+        if st["fijo"] != 2 or not only or dim != 5:
+            fails.append(f"the click on Chihuahua did not lock it: {st}, only={only}, dim={dim}")
+        print(f"  a click locks Chihuahua: {st['visibles']} of its rivers shown, 5 states dimmed")
+        pg.keyboard.press("Escape")
+        if pg.evaluate("()=>__norte().fijo") is not None:
+            fails.append("Escape does not let the state go")
+
+        # the play button sweeps the bar to 300 km and stops
+        pg.click("#bPlay")
+        pg.wait_for_timeout(400)
+        mid = pg.evaluate("()=>__norte()")
+        if not mid["corriendo"] or pg.evaluate("()=>bPlay.textContent") != "Pausa":
+            fails.append(f"the play button did not start: {mid}")
+        pg.wait_for_timeout(6200)
+        end = pg.evaluate("()=>__norte()")
+        if end["corriendo"] or end["km"] != 300 or end["visibles"] >= got["shown"]:
+            fails.append(f"the sweep did not end at 300 km: {end}")
+        print(f"  the sweep ran from 0 to {end['km']} km and left {end['visibles']} rivers")
+
+        ph = br.new_page(viewport={"width": 390, "height": 844})
+        ph.goto(PAGE.resolve().as_uri())
+        ph.wait_for_timeout(500)
+        ov = ph.evaluate("document.documentElement.scrollWidth - innerWidth")
+        if ov:
+            fails.append(f"the phone layout overflows by {ov}px")
         if errs:
             fails.append(f"javascript errors: {errs}")
         br.close()

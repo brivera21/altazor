@@ -21,12 +21,11 @@ from cell_data import CELLS, PARTS, EXTRAS, FACTS, REFS
 
 OUT = Path(__file__).parent.parent / "cell.html"
 
-NOTE1 = ("Together sets the three cells on one scale: an animal cell fifteen "
-         "microns across, a plant cell forty by twenty, and a bacterium two "
-         "microns long with a two thousandth of the animal cell's volume, beside a "
-         "red blood cell, a yeast, the edge of a human egg and a virus one "
-         "pixel wide. Everything alive is built of things in this range, and "
-         "a body holds some thirty trillion of them.")
+NOTE1 = ("Together sets the three cells on one scale: an animal cell fifteen"
+         " microns across, a plant cell forty by twenty, a bacterium two "
+         "microns long, beside a red blood cell, a yeast, the edge of a "
+         "human egg and a virus one pixel wide. Everything alive is built of"
+         " cells in this range, and a body holds some thirty trillion.")
 
 NOTE2 = ("The other three views each fill the stage with one cell, its parts "
          "drawn at that scale where they can be and named where they cannot: "
@@ -105,7 +104,16 @@ h1 { margin:0 0 12px; font-size:26px; }
 .refs a { color:var(--accent); }
 __APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+.bar .sep { flex:1 1 auto; }
+.bar button[hidden] { display:none; }
+#diagram { border-radius:8px; }
+#diagram:focus-visible { outline:1px solid var(--accent); outline-offset:4px; }
+details.sources { margin-top:22px; border-top:1px solid var(--line); padding-top:10px; max-width:760px; }
+details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; }
+details.sources > summary:hover { color:var(--accent); }
+details.sources .note { border-top:none; padding-top:0; margin-top:14px; }
+@media (max-width:900px){ .stage{flex-direction:column;} #diagram{width:100%; flex-basis:auto;} .side{position:static; width:100%; flex-basis:auto; order:-1;} }
+@media (max-width:600px){ #diagram{overflow-x:auto; -webkit-overflow-scrolling:touch;} #diagram svg{min-width:640px;} }
 </style>
 </head>
 <body>
@@ -120,9 +128,12 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   <button data-v="animal">An animal cell</button>
   <button data-v="plant">A plant cell</button>
   <button data-v="bacterium">A bacterium</button>
+  <span class="sep"></span>
+  <button id="thinBtn" type="button" hidden>True thickness</button>
+  <button id="stepBtn" type="button">Next part &rsaquo;</button>
 </div>
 <div class="stage">
-  <div id="diagram"></div>
+  <div id="diagram" tabindex="0" aria-label="The cell diagram; the arrow keys step through its parts"></div>
   <div class="side"><div class="card">
     <div id="kindTxt"></div>
     <div id="nameTxt">A part under the cursor lands here</div>
@@ -133,10 +144,11 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 </div>
 <div class="tiles">__FACTS__</div>
 <p class="note">__NOTE1__</p>
-<p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
+<details class="sources"><summary>Sources</summary>
+<p class="note">__NOTE2__</p>
 <div class="method"><p>__METHOD__</p></div>
-<h2 class="refh">References</h2>
 <div class="refs">__REFS__</div>
+</details>
 </div>
 <script>
 const CELLS=__CELLS__, PARTS=__PARTS__, EXTRAS=__EXTRAS__;
@@ -144,6 +156,12 @@ const W=980, H=720;
 const el=document.getElementById('diagram');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 let view='all', hot=null, seed=5;
+let thin=0, thinOn=false;           // 0 the drawn thickness, 1 the true one
+const mix=(a,b,t)=>a+(b-a)*t;
+const ease=t=>t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const KPX={animal:38, plant:20, bacterium:290, all:11};   // px per micron, per view
+const TOG={};                       // where each cell sits in Together, for the zoom
 function rnd(){ seed=(seed*1103515245+12345)&0x7fffffff; return seed/0x7fffffff; }
 const C={membrane:'#cfd6e6', nucleus:'#b48cf2', nucleolus:'#8f5fe0', mito:'#ffb02e', er:'#6ee7f2', golgi:'#f28cb0',
   lyso:'#e0a458', ribo:'#f4efe2', cyto:'#58a6ff', wall:'#9be564', vacuole:'#2f6f8f', chloro:'#31d67a', dna:'#b48cf2', flag:'#cfd6e6'};
@@ -198,12 +216,37 @@ function scalebar(x,y,px,label){
 }
 const hi=k=>hot===k?' filter="url(#glow)"':'';
 
+/* ---- ghosts for scale: faint, hovered by their outline only ---- */
+function ghostColi(x,y,k,g){
+  const L=2*k, D=0.8*k;
+  return '<g data-g="'+g+'" style="cursor:pointer"><rect x="'+(x-L/2)+'" y="'+(y-D/2)+'" width="'+L+'" height="'+D+'" rx="'+(D/2)+'" fill="#f4efe2" fill-opacity="0.06" stroke="#f4efe2" stroke-opacity="0.55" stroke-width="1.2" stroke-dasharray="4 3"/>'+
+    '<rect x="'+(x-L/2-8)+'" y="'+(y-D/2-8)+'" width="'+(L+16)+'" height="'+(D+16)+'" fill="transparent"/>'+
+    '<text x="'+x+'" y="'+(y+D/2+18)+'" text-anchor="middle" font-size="12" fill="#cfd6e6">E. coli, to this scale</text></g>';
+}
+function ghostCircle(x,y,r,g,label,side){
+  // side -1 labels the top of the circle, 1 labels the top of an arc along the bottom
+  const lx=side<0?x:W-24, ly=side<0?y-r+18:y-r-10;
+  return '<g data-g="'+g+'" style="cursor:pointer"><circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="none" stroke="#f4efe2" stroke-opacity="0.5" stroke-width="1.4" stroke-dasharray="6 5"/>'+
+    '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="none" stroke="transparent" stroke-width="16" pointer-events="stroke"/>'+
+    '<text x="'+lx+'" y="'+ly+'" text-anchor="'+(side<0?'middle':'end')+'" font-size="12" fill="#cfd6e6" stroke="#121212" stroke-width="3" paint-order="stroke">'+label+'</text></g>';
+}
+const GHOST={
+  g_coli:()=>card('For scale','E. coli, to this scale',[['size','2 by 0.8 microns'],
+      ['fit',view==='animal'?'about two thousand fill the animal cell\\u2019s volume':'']],
+    'The bacterium of the fourth view, drawn at this view\\u2019s scale.','Milo and Phillips 2015'),
+  g_animal:()=>card('For scale',view==='bacterium'?'The edge of an animal cell':'An animal cell, to this scale',
+    [['size','15 microns across'+(view==='bacterium'?', 4,350 pixels at this scale':'')],
+     ['fit',view==='bacterium'?'about two thousand of this bacterium fill its volume':'']],
+    view==='bacterium'?'The cell of the second view at this view\\u2019s scale: only a sliver of its edge fits on the stage.'
+      :'The cell of the second view at this view\\u2019s scale, laid over the plant cell.','Milo and Phillips 2015'),
+};
+
 /* ---- the animal cell ---- */
 function animal(){
   const k=38, cx=470, cy=360, R=7.5*k;           // px per micron, 15 microns across
   let s='';
   s+='<g data-k="a_cytosol" style="cursor:pointer"><circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="#1b2230"/></g>';
-  s+=ribosomes(cx,cy,R,1400,0.9,'a_ribo',[cx-60,cy-20,3.1*k]);
+  s+=ribosomes(cx,cy,R,1400,mix(0.9,0.0125*k,thin),'a_ribo',[cx-60,cy-20,3.1*k]);
   // cytoskeleton: microtubules from the centrosome
   let cs='<g data-k="a_cyto" style="cursor:pointer">';
   const ccx=cx+70, ccy=cy+30;
@@ -240,7 +283,9 @@ function animal(){
   s+='</g>';
   s+='<g data-k="a_nucleolus" style="cursor:pointer"><circle cx="'+(nx+22)+'" cy="'+(ny+10)+'" r="'+(0.8*k)+'" fill="'+C.nucleolus+'" fill-opacity="0.7"/></g>';
   // the membrane
-  s+='<g data-k="a_membrane" style="cursor:pointer"><circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="'+C.membrane+'" stroke-width="2"/><circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="transparent" stroke-width="14"/></g>';
+  s+='<g data-k="a_membrane" style="cursor:pointer"><circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="'+C.membrane+'" stroke-width="'+mix(2,0.007*k,thin).toFixed(3)+'"/><circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="transparent" stroke-width="14"/></g>';
+  // E. coli at this scale, beside the cell
+  s+=ghostColi(850,300,k,'g_coli');
   s+=scalebar(40,H-30,5*k,'5 microns');
   s+='<text x="'+(W-20)+'" y="'+(H-26)+'" text-anchor="end" font-size="11" fill="#6b7280">a typical animal cell, 15 microns across, in section</text>';
   return s;
@@ -251,10 +296,10 @@ function plant(){
   const k=20, x0=80, y0=140, w=40*k, h=20*k, r=22;
   let s='';
   s+='<g data-k="p_wall" style="cursor:pointer"><rect x="'+(x0-10)+'" y="'+(y0-10)+'" width="'+(w+20)+'" height="'+(h+20)+'" rx="'+(r+8)+'" fill="'+C.wall+'" fill-opacity="0.22" stroke="'+C.wall+'" stroke-width="2"/></g>';
-  s+='<g data-k="p_membrane" style="cursor:pointer"><rect x="'+x0+'" y="'+y0+'" width="'+w+'" height="'+h+'" rx="'+r+'" fill="#1b2a22" stroke="'+C.membrane+'" stroke-width="1.6"/></g>';
+  s+='<g data-k="p_membrane" style="cursor:pointer"><rect x="'+x0+'" y="'+y0+'" width="'+w+'" height="'+h+'" rx="'+r+'" fill="#1b2a22" stroke="'+C.membrane+'" stroke-width="'+mix(1.6,0.007*k,thin).toFixed(3)+'"/></g>';
   // cytoplasm stipple
   seed=21; let st='<g data-k="p_er" style="cursor:pointer">';
-  for(let i=0;i<500;i++){ const x=x0+rnd()*w, y=y0+rnd()*h; if(x>x0+90&&x<x0+w-150&&y>y0+55&&y<y0+h-55) continue; st+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="0.8" fill="'+C.ribo+'" fill-opacity="0.45"/>'; }
+  for(let i=0;i<500;i++){ const x=x0+rnd()*w, y=y0+rnd()*h; if(x>x0+90&&x<x0+w-150&&y>y0+55&&y<y0+h-55) continue; st+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+mix(0.8,0.0125*k,thin).toFixed(3)+'" fill="'+C.ribo+'" fill-opacity="0.45"/>'; }
   for(let i=0;i<3;i++) st+='<path d="M'+(x0+130+i*16)+','+(y0+h-20)+' q30,-20 60,0" fill="none" stroke="'+C.er+'" stroke-width="2" stroke-dasharray="2 3" stroke-opacity="0.8"/>';
   for(let i=0;i<5;i++) st+='<path d="M'+(x0+w-130)+','+(y0+90+i*6)+' q24,-8 48,0" fill="none" stroke="'+C.golgi+'" stroke-width="2.6" stroke-opacity="'+(0.9-i*0.12)+'"/>';
   st+='</g>'; s+=st;
@@ -274,6 +319,9 @@ function plant(){
   let pd='<g data-k="p_plasmo" style="cursor:pointer">';
   for(const x of [x0+200,x0+230,x0+560,x0+590]) pd+='<rect x="'+(x-2)+'" y="'+(y0-12)+'" width="4" height="14" fill="'+C.membrane+'"/><rect x="'+(x-2)+'" y="'+(y0+h-2)+'" width="4" height="14" fill="'+C.membrane+'"/><rect x="'+(x-8)+'" y="'+(y0-16)+'" width="16" height="22" fill="transparent"/><rect x="'+(x-8)+'" y="'+(y0+h-6)+'" width="16" height="22" fill="transparent"/>';
   pd+='</g>'; s+=pd;
+  // an animal cell and E. coli at this scale, laid over and beside it
+  s+=ghostCircle(x0+w/2+170,y0+h/2,7.5*k,'g_animal','an animal cell, to this scale',-1);
+  s+=ghostColi(x0+w-40,y0+h+62,k,'g_coli');
   s+=scalebar(40,H-30,10*k,'10 microns');
   s+='<text x="'+(W-20)+'" y="'+(H-26)+'" text-anchor="end" font-size="11" fill="#6b7280">a leaf mesophyll cell, 40 by 20 microns, in section</text>';
   return s;
@@ -314,6 +362,8 @@ function bacterium(){
      '<path d="'+d+'" fill="none" stroke="'+C.dna+'" stroke-width="2.2" stroke-opacity="0.9"/>'+
      '<path d="M'+(cx-L*0.26)+','+(cy+8)+' q'+(L*0.28)+','+(D*0.3)+' '+(L*0.56)+',-8" fill="none" stroke="'+C.dna+'" stroke-width="2.2" stroke-opacity="0.7"/></g>';
   s+='<g data-k="b_plasmid" style="cursor:pointer"><circle cx="'+(cx+L*0.36)+'" cy="'+(cy-D*0.2)+'" r="9" fill="none" stroke="'+C.dna+'" stroke-width="2"/><circle cx="'+(cx+L*0.36)+'" cy="'+(cy-D*0.2)+'" r="14" fill="transparent"/></g>';
+  // the edge of an animal cell at this scale, a near-flat arc along the bottom
+  s+=ghostCircle(cx,600+7.5*k,7.5*k,'g_animal','the edge of an animal cell, to this scale',1);
   s+=scalebar(40,H-30,0.5*k,'0.5 microns, 500 nm');
   s+='<text x="'+(W-20)+'" y="'+(H-26)+'" text-anchor="end" font-size="11" fill="#6b7280">E. coli, 2 microns by 0.8; the flagella run on for several cell lengths</text>';
   return s;
@@ -323,13 +373,13 @@ function bacterium(){
 function together(){
   const k=11, base=420;                            // px per micron
   let s='';
-  // the egg's edge, a great arc
-  // the egg's edge, a great arc across the top right corner
-  const eggR=60*k, ex=W+eggR-330, ey=-eggR+250;
+  // the egg's edge, a great arc sweeping across the top of the stage
+  const eggR=60*k, ex=W/2+60, ey=-eggR+190;
   s+='<g data-k="egg" style="cursor:pointer"><circle cx="'+ex+'" cy="'+ey+'" r="'+eggR+'" fill="#f4efe2" fill-opacity="0.05" stroke="#f4efe2" stroke-opacity="0.5" stroke-width="2" stroke-dasharray="6 5"/>'+
-     '<text x="'+(W-24)+'" y="'+(ey+eggR-16)+'" text-anchor="end" font-size="11.5" fill="#cfd6e6">a human egg cell, 120 microns: its edge, the rest off the stage</text></g>';
+     '<text x="'+ex+'" y="'+(ey+eggR-34)+'" text-anchor="middle" font-size="12" fill="#cfd6e6" stroke="#121212" stroke-width="3" paint-order="stroke">a human egg cell, 120 microns: its lower edge, the rest above the stage</text></g>';
   // plant cell
   const pw=40*k, ph=20*k, px=30, py=base-ph/2;
+  TOG.plant={x:px, y:py, vx:80, vy:140};
   s+='<g data-k="plant" style="cursor:pointer"><rect x="'+(px-4)+'" y="'+(py-4)+'" width="'+(pw+8)+'" height="'+(ph+8)+'" rx="18" fill="'+C.wall+'" fill-opacity="0.25" stroke="'+C.wall+'" stroke-width="1.5"/>'+
      '<rect x="'+(px+40)+'" y="'+(py+30)+'" width="'+(pw-80)+'" height="'+(ph-60)+'" rx="20" fill="'+C.vacuole+'" fill-opacity="0.35"/>';
   for(let i=0;i<7;i++) s+='<ellipse cx="'+(px+40+i*58)+'" cy="'+(py+16)+'" rx="'+(2.5*k)+'" ry="'+(1.15*k)+'" fill="'+C.chloro+'" fill-opacity="0.5"/><ellipse cx="'+(px+50+i*58)+'" cy="'+(py+ph-16)+'" rx="'+(2.5*k)+'" ry="'+(1.15*k)+'" fill="'+C.chloro+'" fill-opacity="0.5"/>';
@@ -337,6 +387,7 @@ function together(){
   s+='<text x="'+(px+pw/2)+'" y="'+(py+ph+22)+'" text-anchor="middle" font-size="12" fill="#cfd6e6">a plant cell, 40 by 20 microns</text></g>';
   // animal cell
   const ax=px+pw+110, ar=7.5*k;
+  TOG.animal={x:ax, y:base, vx:470, vy:360};
   s+='<g data-k="animal" style="cursor:pointer"><circle cx="'+ax+'" cy="'+base+'" r="'+ar+'" fill="#1b2230" stroke="'+C.membrane+'" stroke-width="1.5"/>'+
      '<circle cx="'+(ax-15)+'" cy="'+(base-8)+'" r="'+(3*k)+'" fill="'+C.nucleus+'" fill-opacity="0.35" stroke="'+C.nucleus+'"/>';
   for(const [dx,dy,ro] of [[45,40,20],[-40,50,-30],[50,-40,60],[-55,-35,10]]) s+='<ellipse cx="'+(ax+dx)+'" cy="'+(base+dy)+'" rx="'+(0.8*k)+'" ry="'+(0.33*k)+'" transform="rotate('+ro+' '+(ax+dx)+' '+(base+dy)+')" fill="'+C.mito+'" fill-opacity="0.6"/>';
@@ -352,32 +403,95 @@ function together(){
      '<text x="'+yx+'" y="'+(base+50)+'" text-anchor="middle" font-size="12" fill="#cfd6e6">a yeast, 4</text></g>';
   // E. coli and the virus
   const bx=yx+70;
+  TOG.bacterium={x:bx, y:base, vx:470, vy:340};
   s+='<g data-k="bacterium" style="cursor:pointer"><rect x="'+(bx-k)+'" y="'+(base-0.4*k)+'" width="'+(2*k)+'" height="'+(0.8*k)+'" rx="'+(0.4*k)+'" fill="'+C.membrane+'" fill-opacity="0.8"/>'+
      '<rect x="'+(bx-20)+'" y="'+(base-16)+'" width="40" height="32" fill="transparent"/>'+
      '<text x="'+bx+'" y="'+(base+74)+'" text-anchor="middle" font-size="12" fill="#cfd6e6">E. coli, 2 by 0.8</text></g>';
   s+='<g data-k="virus" style="cursor:pointer"><rect x="'+(bx+50)+'" y="'+(base-0.5)+'" width="1.1" height="1.1" fill="#f4efe2"/><rect x="'+(bx+38)+'" y="'+(base-12)+'" width="24" height="24" fill="transparent"/>'+
      '<line x1="'+(bx+50)+'" y1="'+(base+6)+'" x2="'+(bx+50)+'" y2="'+(base+26)+'" stroke="#6b7280"/><text x="'+(bx+50)+'" y="'+(base+40)+'" text-anchor="middle" font-size="11" fill="#9a9a9a">a virus, 0.1</text></g>';
   s+=scalebar(40,H-30,10*k,'10 microns');
-  s+='<text x="'+(W-20)+'" y="'+(H-26)+'" text-anchor="end" font-size="11" fill="#6b7280">all on one scale; sizes in microns</text>';
+  s+='<text x="'+(W-20)+'" y="'+(H-26)+'" text-anchor="end" font-size="13" fill="#b8bfcc">all on one scale, 11 pixels a micron; sizes in microns</text>';
   return s;
 }
 
+const FULL=[0,0,W,H];
+let vb=FULL.slice(), anim=null, zooming=false;
 function render(){
   const body= view==='animal'?animal(): view==='plant'?plant(): view==='bacterium'?bacterium(): together();
-  el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" id="csvg"><rect width="'+W+'" height="'+H+'" fill="#121212"/>'+body+'</svg>';
-  if(hot){ const g=el.querySelector('[data-k="'+hot+'"]'); if(g) g.style.filter='drop-shadow(0 0 6px #58a6ff)'; }
+  el.innerHTML='<svg viewBox="'+vb.map(v=>v.toFixed(2)).join(' ')+'" xmlns="http://www.w3.org/2000/svg" id="csvg"><rect x="-4000" y="-4000" width="9000" height="9000" fill="#121212"/>'+body+'</svg>';
+  if(hot){ const g=el.querySelector('[data-k="'+hot+'"],[data-g="'+hot+'"]'); if(g) g.style.filter='drop-shadow(0 0 6px #58a6ff)'; }
 }
-el.addEventListener('pointerover',e=>{ const g=e.target.closest('[data-k]'); if(!g) return; hot=g.getAttribute('data-k');
-  if(PARTS.find(p=>p.k===hot)) showPart(hot); else showCell(hot); render(); });
-el.addEventListener('click',e=>{ const g=e.target.closest('[data-k]'); if(!g) return; const k=g.getAttribute('data-k');
-  if(view==='all' && CELLS.find(c=>c.k===k)) setView(k); });
-function setView(v){ view=v; hot=null; for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render();
+function answer(k){ hot=k; if(GHOST[k]) GHOST[k](); else if(PARTS.find(p=>p.k===k)) showPart(k); else showCell(k); render(); }
+el.addEventListener('pointerover',e=>{ if(zooming) return; const g=e.target.closest('[data-k],[data-g]'); if(!g) return;
+  answer(g.getAttribute('data-k')||g.getAttribute('data-g')); });
+el.addEventListener('click',e=>{ const g=e.target.closest('[data-k]'); if(!g||zooming) return; const k=g.getAttribute('data-k');
+  if(view==='all' && CELLS.find(c=>c.k===k)) goTo(k); });
+
+// the zoom: Together's viewBox closes on a cell until that cell fills the
+// stage at its own view's scale, and the view takes over; back out, the
+// reverse. The width tweens on a log scale, so the zoom feels steady.
+function zoomRect(c){ const t=TOG[c], f=KPX.all/KPX[c]; return [t.x-t.vx*f, t.y-t.vy*f, W*f, H*f]; }
+function tweenVB(a,b,ms,done){
+  if(anim) cancelAnimationFrame(anim);
+  if(REDUCED){ vb=b.slice(); render(); done(); return; }
+  zooming=true; const t0=performance.now();
+  const frame=now=>{ const k=Math.min(1,(now-t0)/ms), e=ease(k);
+    const w=Math.exp(mix(Math.log(a[2]),Math.log(b[2]),e)), u=(w-a[2])/((b[2]-a[2])||1);
+    vb=[mix(a[0],b[0],u), mix(a[1],b[1],u), w, w*H/W]; render();
+    if(k<1) anim=requestAnimationFrame(frame); else { anim=null; zooming=false; vb=b.slice(); done(); } };
+  anim=requestAnimationFrame(frame);
+}
+const zoomMs=c=>c==='bacterium'?1200:900;
+function goTo(v){
+  if(v===view || zooming) return;
+  if(view==='all'){ hot=null; markOn(v); tweenVB(FULL,zoomRect(v),zoomMs(v),()=>setView(v)); return; }
+  const from=view; view='all'; hot=null; markOn(v);
+  vb=zoomRect(from); render();
+  tweenVB(vb,FULL,zoomMs(from),()=>{ if(v==='all') setView('all'); else goTo(v); });
+}
+function markOn(v){ for(const b of document.querySelectorAll('#views button[data-v]')) b.classList.toggle('on',b.dataset.v===v); }
+function setView(v){ view=v; hot=null; vb=FULL.slice(); markOn(v);
+  thinBtn.hidden=!(v==='animal'||v==='plant');
+  stepBtn.innerHTML=(v==='all'?'Next cell':'Next part')+' &rsaquo;';
+  render();
   showCell(v==='all'?'animal':v); if(v==='all') card('Three cells on one scale','Together',[['animal cell','15 microns'],['plant cell','40 by 20 microns'],['bacterium','2 by 0.8 microns']],
-    'The bacterium has about a two thousandth of the animal cell\\u2019s volume; the plant cell about nine times it, most of that the vacuole. A click on a cell opens it.','Milo and Phillips 2015'); }
-document.getElementById('views').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setView(b.dataset.v); });
+    'The bacterium has about a two thousandth of the animal cell\\u2019s volume; the plant cell about nine times it, most of that the vacuole. A click on a cell zooms into it.','Milo and Phillips 2015');
+  if(thinOn && (v==='animal'||v==='plant')) thinCard(); }
+document.getElementById('views').addEventListener('click',e=>{ const b=e.target.closest('button[data-v]'); if(b) goTo(b.dataset.v); });
+
+// true thickness: membrane and ribosomes shrink to their real size at this scale
+const thinBtn=document.getElementById('thinBtn'), stepBtn=document.getElementById('stepBtn');
+function thinCard(){ const k=KPX[view];
+  card('True thickness','Membrane and ribosomes at their real size',
+    [['membrane','7 nm, '+(0.007*k).toFixed(2)+' pixels at this scale'],['ribosome','25 nm, '+(0.025*k).toFixed(2)+' pixels']],
+    'At '+k+' pixels a micron the membrane is a fraction of a pixel wide and each ribosome under a pixel: at true thickness they all but vanish, which is why the drawing thickens them.','Milo and Phillips 2015'); }
+let thinAnim=null;
+thinBtn.addEventListener('click',()=>{ thinOn=!thinOn; thinBtn.classList.toggle('on',thinOn);
+  if(thinOn) thinCard();
+  const a=thin, b=thinOn?1:0; if(thinAnim) cancelAnimationFrame(thinAnim);
+  if(REDUCED){ thin=b; render(); return; }
+  const t0=performance.now(); const frame=now=>{ const k=Math.min(1,(now-t0)/800); thin=mix(a,b,ease(k)); render(); thinAnim=k<1?requestAnimationFrame(frame):null; };
+  thinAnim=requestAnimationFrame(frame); });
+
+// a step through the parts, from the button or the arrow keys on the diagram
+const ORDER_ALL=['animal','plant','bacterium','rbc','yeast','egg','virus'];
+function stepKeys(){ return view==='all'?ORDER_ALL:PARTS.filter(p=>p.cell===view).map(p=>p.k); }
+function step(d){ const ks=stepKeys(), n=ks.length; let i=ks.indexOf(hot);
+  i = i<0 ? (d>0?0:n-1) : (i+d+n)%n; answer(ks[i]); }
+stepBtn.addEventListener('click',()=>{ if(!zooming) step(1); });
+el.addEventListener('keydown',e=>{
+  const tag=(document.activeElement||{}).tagName; if(tag==='INPUT'||tag==='TEXTAREA'||zooming) return;
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') step(1);
+  else if(e.key==='ArrowLeft'||e.key==='ArrowUp') step(-1);
+  else if(e.key==='Enter' && view==='all' && CELLS.find(c=>c.k===hot)) goTo(hot);
+  else if(e.key==='Escape' && view!=='all') goTo('all');
+  else return;
+  e.preventDefault(); });
+
 setView('all');
-window.__cell=()=>({view,hot,parts:PARTS.length,marks:document.querySelectorAll('#csvg [data-k]').length,
-  keys:[...new Set([...document.querySelectorAll('#csvg [data-k]')].map(g=>g.getAttribute('data-k')))]});
+window.__cell=()=>({view,hot,thin,zooming,vb:vb.slice(),parts:PARTS.length,marks:document.querySelectorAll('#csvg [data-k]').length,
+  keys:[...new Set([...document.querySelectorAll('#csvg [data-k]')].map(g=>g.getAttribute('data-k')))],
+  ghosts:[...document.querySelectorAll('#csvg [data-g]')].map(g=>g.getAttribute('data-g'))});
 </script>
 </body>
 </html>

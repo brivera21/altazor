@@ -187,7 +187,7 @@ if fuera:
 html = PAGE.read_text(encoding="utf-8")
 print("--- la página ---")
 cuerpo = re.sub(r"<script[\s\S]*?</script>", "", html)
-if "—" in cuerpo.replace("&mdash;", ""):
+if "\u2014" in cuerpo.replace("&mdash;", ""):
     fails.append("hay una raya larga en el texto de la página")
 for want in ("El valle del Santa María", "library.html", "ALTAZOR", "Referencias",
              "OpenStreetMap", "2020"):
@@ -243,7 +243,10 @@ with sync_playwright() as pw:
         fails.append(f"la malla del cursor se aparta {peor:.0f} m")
 
     # el cursor sobre un pueblo llena el tablero
+    # el perfil viaja pegado al pie de la pantalla, así que el pueblo se
+    # centra antes de poner el cursor encima
     caja = pg.evaluate("()=>{const c=document.querySelector('#lugares circle[data-i]');"
+                       "c.scrollIntoView({block:'center'});"
                        "const r=c.getBoundingClientRect();return [r.x+r.width/2,r.y+r.height/2]}")
     pg.mouse.move(caja[0], caja[1])
     pg.wait_for_timeout(150)
@@ -266,6 +269,88 @@ with sync_playwright() as pw:
         print(f"  {'ok  ' if ok else 'FALLA'} {bid} apaga su capa")
         if not ok:
             fails.append(f"{bid} no apaga {gid}")
+
+    print("--- lo que se añadió ---")
+
+    def ok_(cond, msg):
+        print(f"  {'ok  ' if cond else 'FALLA'} {msg}")
+        if not cond:
+            fails.append(msg)
+
+    # los pueblos sobre el río quedan marcados en el perfil
+    v = pg.evaluate("()=>__valle()")
+    nombres = [x[0] for x in v["pueblosPerfil"]]
+    ok_(all(n in nombres for n in ("El Terrero", "El Molino", "Namiquipa")),
+        f"el perfil marca a {', '.join(nombres)}")
+    kms = dict(v["pueblosPerfil"])
+    ok_(kms.get("El Terrero", 99) < kms.get("El Molino", 0) < kms.get("Namiquipa", 0),
+        "río abajo van El Terrero, El Molino y Namiquipa, en ese orden")
+
+    # el perfil se arrastra: el punto del mapa cae sobre el río en ese km
+    pg.evaluate("()=>document.getElementById('perfil').scrollIntoView({block:'center'})")
+    r = pg.evaluate("()=>{const b=document.getElementById('perfil').getBoundingClientRect();"
+                    "return [b.x,b.y,b.width,b.height]}")
+    x0 = r[0] + r[2] * (46 + 0.5 * (900 - 70)) / 900
+    pg.mouse.move(x0, r[1] + r[3] / 2)
+    pg.mouse.down()
+    pg.mouse.move(x0 + 5, r[1] + r[3] / 2)
+    pg.mouse.up()
+    v = pg.evaluate("()=>__valle()")
+    ok_(v["km"] is not None and abs(v["km"] - 0.5 * v["rio"]["km"]) < 1.5,
+        f"el perfil arrastrado a la mitad pone el punto en el km {v['km']:.1f}")
+    en = pg.evaluate("""()=>{const p=document.getElementById('rioPunto');
+        const x=+p.getAttribute('cx'), y=+p.getAttribute('cy');
+        let m=1e9; for(let i=0;i<RIO.x.length;i++) m=Math.min(m,Math.hypot(RIO.x[i]-x,RIO.y[i]-y));
+        return m;}""")
+    ok_(en < 3, f"el punto del mapa está sobre el río (a {en:.1f} unidades de su trazo)")
+
+    # Río abajo corre y llega al final
+    pg.click("#bRio")
+    pg.wait_for_timeout(500)
+    v1 = pg.evaluate("()=>__valle()")
+    ok_(v1["corre"] and pg.evaluate("()=>bRio.textContent") == "Pausa", "Río abajo corre y el botón dice Pausa")
+    pg.wait_for_timeout(5200)
+    v2 = pg.evaluate("()=>__valle()")
+    ok_(not v2["corre"] and abs(v2["km"] - v2["rio"]["km"]) < 0.01,
+        f"y se detiene al final, en el km {v2['km']:.1f}")
+
+    # un clic fija un lugar y tira su recta a El Terrero
+    i = pg.evaluate("()=>LUG.findIndex(l=>l.n==='Namiquipa')")
+    pg.evaluate(f"()=>document.querySelector('#lugares circle[data-i=\"{i}\"]')"
+                ".dispatchEvent(new MouseEvent('click',{bubbles:true}))")
+    v = pg.evaluate("()=>__valle()")
+    a, b = pg.evaluate("()=>[LUG.find(l=>l.n==='Namiquipa'),LUG.find(l=>l.n==='El Terrero')]"
+                       ".map(l=>[l.la,l.lo])")
+    d = hav(a, b)
+    ok_(v["fijo"] == i and v["recta"] == 1 and f"{d:.1f} km en recta" in v["lugSub"],
+        f"Namiquipa fijada: {v['lugSub']!r} (a mano: {d:.1f} km)")
+    pg.keyboard.press("Escape")
+    ok_(pg.evaluate("()=>__valle().fijo") is None, "Escape suelta el lugar")
+
+    # arriba y abajo recorren los lugares por altitud
+    pg.focus("#map")
+    pg.keyboard.press("ArrowUp")
+    a = pg.evaluate("()=>LUG[__valle().fijo].h")
+    pg.keyboard.press("ArrowUp")
+    b = pg.evaluate("()=>LUG[__valle().fijo].h")
+    ok_(b >= a, f"la flecha arriba sube de {a} m a {b} m")
+    pg.keyboard.press("Escape")
+
+    # los pisos de altura entran poco a poco
+    pg.click("#bPisos")
+    pg.wait_for_timeout(300)
+    mid = pg.evaluate("()=>__valle().pisos")
+    pg.wait_for_timeout(900)
+    fin = pg.evaluate("()=>__valle().pisos")
+    ok_(0 < mid < 1 and fin == 1, f"los pisos de altura entran de {mid:.2f} a {fin:.0f}")
+
+    ph = br.new_page(viewport={"width": 390, "height": 844})
+    ph.goto(PAGE.resolve().as_uri())
+    ph.wait_for_timeout(600)
+    ov = ph.evaluate("document.documentElement.scrollWidth - innerWidth")
+    ok_(ov == 0, f"en un teléfono nada se sale de la pantalla ({ov}px)")
+    w = ph.evaluate("document.getElementById('map').getBoundingClientRect().width")
+    ok_(w >= 600, f"en un teléfono el mapa guarda {w:.0f}px de ancho y se recorre de lado")
 
     if errs:
         fails.append(f"errores de javascript: {errs}")

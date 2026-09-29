@@ -108,6 +108,39 @@ with sync_playwright() as pw:
     s = st()
     check("conifers" in s["name"] and "1,100" in s["card"] and "385 million" in s["card"], "hovering the conifers: 1,100 species, 385 million years")
     check(not errs, "no script errors", "; ".join(errs))
+
+    # the sunlight: water slows with the light, sugar keeps moving, and the card says why
+    pa = br.new_page(viewport={"width": 1300, "height": 850})
+    pa.on("pageerror", lambda x: errs.append(str(x)))
+    pa.goto(PAGE.as_uri()); pa.wait_for_selector("#psvg")
+    def speeds():
+        a0 = pa.evaluate("()=>window.__plants()"); pa.wait_for_timeout(500); a1 = pa.evaluate("()=>window.__plants()")
+        return (a1["xPh"] - a0["xPh"]) % 1, (a1["pPh"] - a0["pPh"]) % 1
+    day = speeds()
+    pa.evaluate("()=>{const s=document.getElementById('sun'); s.value=0; s.dispatchEvent(new Event('input'));}")
+    night = speeds()
+    rd, rn = day[0] / day[1], night[0] / night[1]
+    check(rd > 1.2 and rn < 0.35 and night[1] > 0.1 and "Night" in pa.inner_text("#nameTxt") and "starch" in pa.inner_text("#numTxt"),
+          f"at night the water slows against the sugar ({rd:.2f} to {rn:.2f} times its pace) and the sugar keeps moving, from starch")
+    check("respiration" in pa.evaluate("()=>document.getElementById('psvg').textContent"), "and the gas labels turn to respiration")
+    # through a leaf: a second strip, dark at the chlorophyll peaks, bright in the green
+    pa.click('#views button[data-v="light"]'); pa.click("#leafBtn"); pa.wait_for_timeout(1000)
+    t = {nm: pa.evaluate(f"()=>window.__plants({{nm:{nm}}}).trans") for nm in (430, 550, 662)}
+    check(pa.evaluate("()=>window.__plants().leaf") == 1 and t[430] < 0.15 and t[550] > 0.95 and t[662] < 0.45,
+          f"through a leaf: the lower strip passes {t[550]:.2f} at 550 nm, {t[430]:.2f} at 430 and {t[662]:.2f} at 662")
+    # the arrivals: a line of time sweeps and the bars rise as it passes, then all stand
+    pa.click('#views button[data-v="kinds"]'); pa.click("#growBtn"); pa.wait_for_timeout(1800)
+    mid = pa.evaluate("()=>({g:window.__plants().grow, run:window.__plants().growing, bars:[...document.querySelectorAll('#psvg g[data-kind] rect')].length, btn:document.getElementById('growBtn').textContent})")
+    check(mid["run"] and 200 < mid["g"] < 470 and 0 < mid["bars"] < 4 and mid["btn"] == "Pause",
+          f"Play the arrivals sweeps the line ({mid['g']:.0f} Ma) with only the kinds already arrived standing ({mid['bars']})")
+    pa.wait_for_timeout(4200)
+    check(pa.evaluate("()=>window.__plants().grow") is None and pa.evaluate("()=>document.querySelectorAll('#psvg g[data-kind] rect').length") == 4,
+          "and it stops at today with all four standing")
+    check(pa.evaluate("()=>{const d=document.querySelector('details.sources'); return !!d && !d.open && !!d.querySelector('.refs');}"),
+          "the notes and references sit inside a closed Sources")
+    pa.set_viewport_size({"width": 390, "height": 844}); pa.wait_for_timeout(150)
+    check(pa.evaluate("()=>document.documentElement.scrollWidth - innerWidth") == 0, "nothing overflows a 390px screen")
+    check(not errs, "no script errors in the new controls", "; ".join(errs))
     br.close()
 
 print("--- the copy ---")

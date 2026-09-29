@@ -24,6 +24,12 @@ from calendars_data import SKY, CALENDARS, TZOLKIN, HAAB, HEBREW_MONTHS, ISLAMIC
 
 OUT = Path(__file__).parent.parent / "calendars.html"
 
+CAPTION = ("The sky keeps two clocks that disagree: the year is 365.2422 days,"
+           " and twelve moons come to 354.37, eleven short. The outer ring is "
+           "the Sun's year, clockwise from January first; the inner ring is "
+           "twelve moons, slipping back eleven days a year until a calendar "
+           "adds a thirteenth month to catch up.")
+
 NOTE1 = ("The sky keeps two clocks that do not agree. The year is "
          "365.2422 days, the month 29.5306, and twelve months come to "
          "354.37 days, eleven short of a year; no whole number of either "
@@ -51,7 +57,13 @@ METHOD = ("The year and the month are the mean values for 2000: the "
           "calendars existed, the Gregorian one proleptically, and years "
           "before 1 AD are counted with no year zero. The Maya Long Count "
           "uses the 584,283 correlation, which most Mayanists accept; the "
-          "day names and months are given in their modern orthography.")
+          "day names and months are given in their modern orthography. The "
+          "small moon in the middle is the mean Moon's phase on the first of "
+          "January of the year shown, counted from a lunar new year that "
+          "began with the solar one; it shows how the phase drifts, not any "
+          "real year's moon. The ring turns under a drag round it, the Run "
+          "button turns it a year a second, and the left and right arrow "
+          "keys step it a year, or step the day in the third view.")
 
 
 def _js(o):
@@ -94,6 +106,12 @@ h1 { margin:0 0 12px; font-size:26px; }
 .presets button { background:var(--panel); color:var(--muted); border:1px solid var(--line);
   border-radius:8px; padding:4px 10px; font-size:12.5px; cursor:pointer; font-family:inherit; }
 .presets button.on { color:var(--text); border-color:#58a6ff; }
+.go { background:var(--panel); color:var(--text); border:1px solid var(--line); border-radius:999px; padding:4px 12px; font-size:12.5px; cursor:pointer; font-family:inherit; }
+.go.on { background:var(--accent); color:#0b1a2b; border-color:var(--accent); }
+details.sources { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+details.sources summary { cursor:pointer; }
+details.sources summary:hover { color:var(--text); }
+details.sources .note { border-top:none; padding-top:0; margin-top:10px; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
 #diagram { flex:1 1 640px; min-width:0; }
 #diagram svg { width:100%; height:auto; display:block; user-select:none; }
@@ -114,7 +132,8 @@ h1 { margin:0 0 12px; font-size:26px; }
 .refs a { color:var(--accent); }
 __APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%; order:-1;} #diagram{width:100%;} }
+@media (max-width:600px){ #diagram{overflow-x:auto;} #diagram svg{min-width:600px;} }
 </style>
 </head>
 <body>
@@ -125,8 +144,8 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 </header>
 <h1>Calendars</h1>
 <div class="bar" id="views"><button data-v="sky" class="on">The sky</button><button data-v="cals">The calendars</button><button data-v="day">One day</button></div>
-<div class="controls" id="skyCtl"><div class="presets" id="modes"><button data-m="moon" class="on">the Moon alone</button><button data-m="both">the Moon held to the Sun</button></div><label>years run on</label><output id="yrOut"></output></div>
-<div class="controls" id="dayCtl" hidden><label>the markers</label><output id="dayOut"></output></div>
+<div class="controls" id="skyCtl"><div class="presets" id="modes"><button data-m="moon" class="on">the Moon alone</button><button data-m="both">the Moon held to the Sun</button></div><button class="go" id="runBtn">Run the years</button><label>years run on</label><output id="yrOut"></output></div>
+<div class="controls" id="dayCtl" hidden><button class="go" id="todayBtn">Today</button><label>the markers</label><output id="dayOut"></output></div>
 <div class="stage">
   <div id="diagram"></div>
   <div class="side"><div class="card">
@@ -137,11 +156,14 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
     <div id="srcTxt"></div>
   </div></div>
 </div>
+<p class="note">__CAPTION__</p>
+<details class="sources"><summary>Sources</summary>
 <p class="note">__NOTE1__</p>
-<p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
+<p class="note">__NOTE2__</p>
 <div class="method"><p>__METHOD__</p></div>
 <h2 class="refh">References</h2>
 <div class="refs">__REFS__</div>
+</details>
 </div>
 <script>
 const SKY=__SKY__, CALS=__CALS__, TZOLKIN=__TZOLKIN__, HAAB=__HAAB__, HEB_M=__HEBM__, ISL_M=__ISLM__, MAYA0=__MAYA0__;
@@ -152,7 +174,9 @@ const fmt=n=>n.toLocaleString('en-US');
 const YEAR=SKY.tropical_year, MONTH=SKY.synodic_month, LUNAR=12*MONTH, SHORT=YEAR-LUNAR;
 const GMONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DOW=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-let view='sky', hot=null, years=0, mode='moon';
+let view='sky', hot=null, years=0, mode='moon', slip=0;   // slip: 0 to 1, part way to the next year while the ring turns
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ease=k=>k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
 const today=new Date();
 let year=today.getFullYear(), doy=Math.floor((Date.UTC(today.getFullYear(),today.getMonth(),today.getDate())-Date.UTC(today.getFullYear(),0,1))/86400000)+1;
 
@@ -181,18 +205,30 @@ function skyView(){ let s=''; const G=CALS[0].months; let d=0;
   s+='<path d="'+arc(SC.r1,SC.r2,365,YEAR)+'" fill="#58a6ff"/>';
   for(const [dd,name] of SKY.seasons){ const [x1,y1]=pt(SC.r2,dd),[x2,y2]=pt(SC.r2+14,dd),[tx,ty]=pt(SC.r2+30,dd); s+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="#ffb02e" stroke-width="2"/><text x="'+tx.toFixed(1)+'" y="'+(ty+4).toFixed(1)+'" text-anchor="middle" font-size="10.5" fill="#ffb02e">'+name.split(' ')[0]+'</text><text x="'+tx.toFixed(1)+'" y="'+(ty+16).toFixed(1)+'" text-anchor="middle" font-size="10.5" fill="#ffb02e">'+name.split(' ')[1]+'</text>'; }
   const L=lunarState(years); let dl=L.start;
+  if(slip>0){ const N=lunarState(years+1); let dd=N.raw-L.raw; dl=L.start+dd*ease(slip); }
+  const L0=dl;
   for(let i=0;i<L.months;i++){ const thirteenth=L.months===13&&i===12; s+='<path data-moon="'+i+'" d="'+arc(SC.r3,SC.r4,dl,dl+MONTH)+'" fill="'+(thirteenth?'#c9a6ff':i%2?'#cfcfcf':'#9a9a9a')+'" stroke="#121212" stroke-width="1"/>'; dl+=MONTH; }
   const gap=L.start+YEAR-dl; // days left in the solar year after the lunar one
   if(gap>0) s+='<path data-gap="short" d="'+arc(SC.r3,SC.r4,dl,dl+gap)+'" fill="#ff8c6a" style="cursor:pointer"/>';
   else s+='<path data-gap="long" d="'+arc(SC.r3-6,SC.r4+6,dl+gap,dl)+'" fill="none" stroke="#c9a6ff" stroke-width="1.5" stroke-dasharray="4 3"/>';
-  const [sx,sy]=pt(SC.r3-8,L.start),[sx2,sy2]=pt(SC.r4+8,L.start); s+='<line x1="'+sx.toFixed(1)+'" y1="'+sy.toFixed(1)+'" x2="'+sx2.toFixed(1)+'" y2="'+sy2.toFixed(1)+'" stroke="#ffffff" stroke-width="2"/>';
+  const [sx,sy]=pt(SC.r3-8,L0),[sx2,sy2]=pt(SC.r4+8,L0); s+='<line x1="'+sx.toFixed(1)+'" y1="'+sy.toFixed(1)+'" x2="'+sx2.toFixed(1)+'" y2="'+sy2.toFixed(1)+'" stroke="#ffffff" stroke-width="2"/>';
+  // a grip on the lunar new year: the ring turns from here
+  const [hx,hy]=pt(SC.r3-22,L0); s+='<g style="cursor:grab"><circle cx="'+hx.toFixed(1)+'" cy="'+hy.toFixed(1)+'" r="8" fill="#e6e6e6" stroke="#121212" stroke-width="1.5"/><path d="M'+(hx-3).toFixed(1)+','+(hy-3).toFixed(1)+'v6M'+hx.toFixed(1)+','+(hy-3).toFixed(1)+'v6M'+(hx+3).toFixed(1)+','+(hy-3).toFixed(1)+'v6" stroke="#121212" stroke-width="1.2"/></g>';
   const [nx,ny]=pt(SC.r2+6,0),[nx2,ny2]=pt(SC.r1-6,0); s+='<line x1="'+nx.toFixed(1)+'" y1="'+ny.toFixed(1)+'" x2="'+nx2.toFixed(1)+'" y2="'+ny2.toFixed(1)+'" stroke="#ffffff" stroke-width="2"/>';
+  // the Moon's phase on the first of January of this year
+  { const age=((-L0%MONTH)+MONTH)%MONTH, f=age/MONTH, mx=SC.cx, my=SC.cy-92, r=22;
+    const lit=(1-Math.cos(2*Math.PI*f))/2, waxing=f<0.5, k=Math.cos(2*Math.PI*f);
+    s+='<circle cx="'+mx+'" cy="'+my+'" r="'+r+'" fill="#2b2b2b" stroke="#555" stroke-width="1"/>';
+    // the lit part: a half disc on the lit side, and the terminator an ellipse of half-width r|cos|
+    const side=waxing?1:-1, rx=Math.abs(k)*r;
+    s+='<path d="M'+mx+','+(my-r)+' A'+r+','+r+' 0 0 '+(side>0?1:0)+' '+mx+','+(my+r)+' A'+rx.toFixed(2)+','+r+' 0 0 '+((k>0)===(side>0)?0:1)+' '+mx+','+(my-r)+' Z" fill="#e8e3d0"/>';
+    s+='<text x="'+mx+'" y="'+(my+r+16)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">the Moon on 1 January, '+Math.round(lit*100)+'% lit</text>'; }
   s+='<text x="'+SC.cx+'" y="'+(SC.cy-22)+'" text-anchor="middle" font-size="13" fill="#e6e6e6">the Sun\\u2019s year, '+YEAR.toFixed(4)+' days</text><text x="'+SC.cx+'" y="'+(SC.cy)+'" text-anchor="middle" font-size="13" fill="#e6e6e6">the Moon\\u2019s twelve months, '+LUNAR.toFixed(2)+'</text>';
   s+='<text x="'+SC.cx+'" y="'+(SC.cy+24)+'" text-anchor="middle" font-size="12" fill="#ff8c6a">'+SHORT.toFixed(2)+' days short</text><text x="'+SC.cx+'" y="'+(SC.cy+48)+'" text-anchor="middle" font-size="11" fill="#9a9a9a">'+(years?years+' year'+(years>1?'s':'')+' on':'year one')+'</text>';
-  s+='<text x="'+SC.cx+'" y="'+(SC.cy+SC.r2+70)+'" text-anchor="middle" font-size="11" fill="#9a9a9a">time runs clockwise from the top, the first of January; the white marks are the two new years; dragging round the ring runs the years on</text>';
+  s+='<text x="'+SC.cx+'" y="'+(SC.cy+SC.r2+70)+'" text-anchor="middle" font-size="12.5" fill="#b0b0b0">time runs clockwise from the top, the first of January; the white marks are the two new years, and the ring turns from the grip</text>';
   return {svg:s, h:SC.cy+SC.r2+86}; }
 function showSky(){ const L=lunarState(years); const startDay=Math.round(L.start); let m=0, dd=startDay; while(dd>=CALS[0].months[m][1]&&m<11){ dd-=CALS[0].months[m][1]; m++; }
-  const rows=[['after',years?years+' year'+(years>1?'s':''):'no time'],['the lunar year begins','about '+(dd+1)+' '+GMONTHS[m]+(years?', '+Math.abs(L.raw).toFixed(1)+' days '+(L.raw<0?'earlier':'later')+' than the solar one':'')]];
+  const rows=[['after',years?years+' year'+(years>1?'s':''):'none yet, at the start'],['the lunar year begins','about '+(dd+1)+' '+GMONTHS[m]+(years?', '+Math.abs(L.raw).toFixed(1)+' days '+(L.raw<0?'earlier':'later')+' than the solar one':'')]];
   if(mode==='moon') rows.push(['it comes round','every '+(YEAR/SHORT).toFixed(1)+' years']); else rows.push(['thirteenth months so far',L.leaps+' of 7 in each 19 years'],['after 19 years','235 months miss 19 years by only '+((235*MONTH-19*YEAR)*24).toFixed(1)+' hours']);
   card(mode==='moon'?'The Moon alone':'The Moon held to the Sun', mode==='moon'?'The months go round the seasons':'A thirteenth month now and then', rows,
     mode==='moon'?'Twelve lunar months are '+SHORT.toFixed(2)+' days short of a year, so a purely lunar calendar begins its year eleven days earlier each time, and its months visit every season in a third of a century. This is the Islamic calendar.':'When the lunar year has fallen a month behind, a thirteenth month is added: seven times in nineteen years, after which the Moon and the Sun are back in step to within two hours. This is the Hebrew and Chinese calendars, and it was Babylon\\u2019s and Athens\\u2019.',
@@ -269,12 +305,12 @@ function showDay(){ const J=g2jdn(year,1,1)+doy-1; const c=convert(J);
 function render(){ const q=view==='sky'?skyView():view==='cals'?calsView():dayView(); el.innerHTML='<svg viewBox="0 0 '+W+' '+q.h+'" xmlns="http://www.w3.org/2000/svg" id="csvg"><rect width="'+W+'" height="'+q.h+'" fill="#121212"/>'+q.svg+'</svg>';
   document.getElementById('skyCtl').hidden=view!=='sky'; document.getElementById('dayCtl').hidden=view!=='day'; document.getElementById('yrOut').textContent=years; const J=g2jdn(year,1,1)+doy-1; document.getElementById('dayOut').textContent=convert(J).text.greg; }
 function home(){ if(view==='sky') showSky(); else if(view==='cals') showCals(); else showDay(); }
-function setView(v){ view=v; hot=null; for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render(); home(); }
+function setView(v){ view=v; hot=null; if(runId&&runBtn.classList.contains('on')) stopRun(); for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render(); home(); }
 document.getElementById('views').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setView(b.dataset.v); });
 document.getElementById('modes').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; mode=b.dataset.m; for(const x of document.querySelectorAll('#modes button')) x.classList.toggle('on',x===b); render(); showSky(); });
 let drag=null;
 const svgPt=e=>{ const svg=document.getElementById('csvg'), b=svg.getBoundingClientRect(); return [(e.clientX-b.left)/b.width*W,(e.clientY-b.top)/b.height*svg.viewBox.baseVal.height]; };
-function setYearsFromAngle(x,y){ const a=Math.atan2(y-SC.cy,x-SC.cx)+Math.PI/2; const t=mod(a,2*Math.PI)/(2*Math.PI); years=Math.round(t*(mode==='moon'?YEAR/SHORT:19)); if(mode==='moon'&&years>=Math.round(YEAR/SHORT)) years=0; render(); showSky(); }
+function setYearsFromAngle(x,y){ if(runBtn.classList.contains('on')) stopRun(); const a=Math.atan2(y-SC.cy,x-SC.cx)+Math.PI/2; const t=mod(a,2*Math.PI)/(2*Math.PI); years=Math.round(t*(mode==='moon'?YEAR/SHORT:19)); if(mode==='moon'&&years>=Math.round(YEAR/SHORT)) years=0; render(); showSky(); }
 el.addEventListener('pointerdown',e=>{ const [x,y]=svgPt(e);
   if(view==='sky'){ const r=Math.hypot(x-SC.cx,y-SC.cy); if(r>SC.r3-30&&r<SC.r2+40){ drag='sky'; setYearsFromAngle(x,y); e.preventDefault(); } }
   if(view==='day'){ if(Math.abs(y-DY.y)<26){ drag='year'; setYear(x); e.preventDefault(); } else if(Math.abs(y-DD.y)<26){ drag='day'; setDoy(x); e.preventDefault(); } } });
@@ -287,6 +323,30 @@ el.addEventListener('pointerover',e=>{ if(drag) return; const g=e.target.closest
   const k=g.hasAttribute('data-month')?g.getAttribute('data-month'):g.getAttribute('data-cal'); if(k===hot) return; hot=k; render(); if(g.hasAttribute('data-month')) showMonth(k); else showCal(k); });
 el.addEventListener('pointerleave',()=>{ if(view==='cals'&&hot){ hot=null; render(); showCals(); } if(view==='sky') showSky(); });
 
+/* ---- the years running on, a year a second; today; the arrow keys ---- */
+let runId=0; const runBtn=document.getElementById('runBtn');
+function span(){ return mode==='moon'?Math.round(YEAR/SHORT):19; }
+function stopRun(){ runId++; slip=0; runBtn.classList.remove('on'); runBtn.textContent='Run the years'; }
+function stepYear(d){ years=((years+d)%span()+span())%span(); slip=0; render(); showSky(); }
+runBtn.addEventListener('click',()=>{ if(runBtn.classList.contains('on')){ stopRun(); render(); return; }
+  if(RM){ stepYear(1); return; }
+  const id=++runId; runBtn.classList.add('on'); runBtn.textContent='Pause'; let t0=performance.now();
+  const tick=now=>{ if(id!==runId) return; const k=(now-t0)/1000;
+    if(k>=1){ t0=now; years=(years+1)%span(); slip=0; showSky(); } else slip=Math.min(1,k/0.6);
+    render(); requestAnimationFrame(tick); };
+  requestAnimationFrame(tick); });
+document.getElementById('modes').addEventListener('click',()=>{ if(runBtn.classList.contains('on')) stopRun(); });
+const todayJ=g2jdn(today.getFullYear(),1,1)+doy-1;
+document.getElementById('todayBtn').addEventListener('click',()=>{ const y1=today.getFullYear(), d1=Math.floor((Date.UTC(y1,today.getMonth(),today.getDate())-Date.UTC(y1,0,1))/86400000)+1;
+  if(RM){ year=y1; doy=d1; render(); showDay(); return; }
+  const y0=year, d0=doy, t0=performance.now(), D=900;
+  const tick=now=>{ const k=Math.min(1,(now-t0)/D), e=ease(k); year=Math.round(y0+(y1-y0)*e); doy=Math.max(1,Math.min(gleap(year)?366:365,Math.round(d0+(d1-d0)*e))); render(); showDay(); if(k<1) requestAnimationFrame(tick); };
+  requestAnimationFrame(tick); });
+document.addEventListener('keydown',e=>{ const t=e.target; if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA')) return;
+  if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft') return; const d=e.key==='ArrowRight'?1:-1;
+  if(view==='sky'){ e.preventDefault(); stopRun(); stepYear(d); }
+  else if(view==='day'){ e.preventDefault(); if(e.shiftKey){ year=Math.max(DY.y0,Math.min(DY.y1,year+d)); if(doy===366&&!gleap(year)) doy=365; }
+    else { doy+=d; const n=gleap(year)?366:365; if(doy<1){ year--; doy=gleap(year)?366:365; } else if(doy>n){ year++; doy=1; } } render(); showDay(); } });
 render(); showSky();
 window.__cal=(q)=>{ const o={view,hot,years,mode,year,doy,card:document.getElementById('numTxt').innerText,name:document.getElementById('nameTxt').innerText,body:document.getElementById('bodyTxt').innerText};
   if(q&&q.jdn!=null) o.conv=convert(q.jdn);
@@ -304,7 +364,7 @@ window.__cal=(q)=>{ const o={view,hot,years,mode,year,doy,card:document.getEleme
 
 html = (HTML.replace("__APACSS__", apa.CSS)
         .replace("__SKY__", _js(SKY)).replace("__CALS__", _js(cals)).replace("__TZOLKIN__", _js(TZOLKIN)).replace("__HAAB__", _js(HAAB)).replace("__HEBM__", _js(HEBREW_MONTHS)).replace("__ISLM__", _js(ISLAMIC_MONTHS)).replace("__MAYA0__", str(MAYA_CORRELATION))
-        .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2).replace("__METHOD__", METHOD)
+        .replace("__CAPTION__", CAPTION).replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2).replace("__METHOD__", METHOD)
         .replace("__REFS__", apa.render(REFS)))
 OUT.write_text(html, encoding="utf-8")
 print(f"wrote {OUT} ({len(html):,} B): {len(CALENDARS)} calendars")

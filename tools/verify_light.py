@@ -11,6 +11,10 @@
   the drawing  marks and windows land at their log positions; the marker
                drags; hovering and the presets fill the card; the hot-body
                curve peaks on Wien's line; the visible band is shaded
+  the controls the hot body's peak shows on the spectrum and the card names
+               the body nearest the marker; Play sweeps the temperature; the
+               eye toggle shades the visible band; the arrow keys nudge; the
+               sources sit in a closed details; the phone layout holds
 """
 import math
 import sys
@@ -163,6 +167,55 @@ with sync_playwright() as pw:
     check(r > g_ > b_ and "tungsten" in pg.inner_text("#nameTxt"), f"a tungsten bulb at 2700 K is orange {s['cv']['hex']} and the card names it")
     shaded = pg.evaluate("()=>[...document.querySelectorAll('#lsvg rect[opacity=\"0.13\"]')].length")
     check(shaded == 74, f"the visible band is shaded in {shaded} slices")
+    print("--- the controls ---")
+    pg.click('#bodies button[data-t="5772"]')
+    pg.click('#views button[data-v="spectrum"]')
+    pg.click('#jumps button[data-k="sunpeak"]')
+    pg.wait_for_timeout(100)
+    s = st()
+    check(s["bodypeak"] is not None and abs(s["bodypeak"] - SX(b_w / 5772)) < 0.6, "the Sun's peak from the hot body view is marked on the spectrum at 502 nm")
+    check("close to the Sun at 5,772 K" in s["card"], "and the card names the Sun as the body peaking at the marker")
+    pg.click('#views button[data-v="body"]')
+    pg.click('#bodies button[data-t="2700"]')
+    pg.click('#views button[data-v="spectrum"]')
+    pg.wait_for_timeout(100)
+    s = st()
+    check(abs(s["bodypeak"] - SX(b_w / 2700)) < 0.6 and "tungsten bulb" in pg.evaluate("()=>document.querySelector('#lsvg').textContent"), "a bulb chosen there moves the mark to 1.07 microns and names it")
+    pg.click('#jumps button[data-k="body"]')
+    check("close to a person at 310 K" in st()["card"], "the marker at a person's glow names a person as the body")
+    pg.click('#views button[data-v="body"]')
+    pg.click('#bodies button[data-t="2.72548"]')
+    pg.click("#play"); pg.wait_for_timeout(1200)
+    s = st()
+    check(s["playing"] and 3 < s["T"] < 50000 and pg.inner_text("#play") == "Pause", f"Play sweeps the temperature ({s['T']:.0f} K after 1.2 s) and reads Pause")
+    pg.click("#play")
+    check(not st()["playing"] and pg.inner_text("#play") == "Play", "a second press stops it")
+    pg.click('#bodies button[data-t="5772"]')
+    pg.click("#eye"); pg.wait_for_timeout(100)
+    s = st()
+    fills = pg.evaluate("()=>[...document.querySelectorAll('#lsvg rect[opacity=\"0.55\"]')].length")
+    check(s["eye"] and fills == 74 and "43.8% of the power" in pg.evaluate("()=>document.querySelector('#lsvg').textContent"), f"the eye toggle fills the visible band under the curve in {fills} slices and prints the share")
+    pg.click("#eye")
+    check(not st()["eye"], "and off again")
+    pg.evaluate("()=>document.getElementById('diagram').focus()")
+    pg.keyboard.press("PageUp")
+    t1 = st()["T"]
+    pg.keyboard.press("ArrowDown")
+    t2 = st()["T"]
+    pg.click('#views button[data-v="spectrum"]')
+    pg.click('#jumps button[data-k="sunpeak"]')
+    pg.evaluate("()=>document.getElementById('diagram').focus()")
+    pg.keyboard.press("ArrowRight")
+    l1 = st()["lam"]
+    check(abs(t1 - 50000) < 1 and abs(math.log10(t2 / t1) + 0.05) < 1e-6 and abs(math.log10(l1 / 5.02e-7) - 0.05) < 1e-6,
+          f"the keys: page up to the top ({t1:.0f} K), an arrow down a twentieth of a decade ({t2:.0f} K), an arrow on the spectrum ({l1 * 1e9:.0f} nm)")
+    det = pg.evaluate("()=>{const d=document.querySelector('details.sources'); return d&&!d.open&&!!d.querySelector('.refs')&&!!d.querySelector('.method')&&document.querySelectorAll('p.note').length===3}")
+    check(det, "one caption shows; the notes, the method and the references sit in a closed Sources details")
+    ph = br.new_page(viewport={"width": 390, "height": 844})
+    ph.goto(PAGE.as_uri()); ph.wait_for_selector("#lsvg")
+    w = ph.evaluate("()=>[document.querySelector('#lsvg').getBoundingClientRect().width, document.documentElement.scrollWidth-innerWidth, document.querySelector('.card').getBoundingClientRect().top<document.querySelector('#diagram').getBoundingClientRect().top]")
+    check(w[0] >= 600 and w[1] == 0 and w[2], f"at 390 px the drawing is {w[0]:.0f} px wide in a sideways scroll, nothing overflows, the card sits above it")
+    ph.close()
     check(not errs, "no script errors", "; ".join(errs))
     br.close()
 

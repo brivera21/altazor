@@ -570,6 +570,63 @@ with sync_playwright() as pw:
     else:
         print("  ok   the belt panel gives Ceres two fifths of the belt")
 
+    # the orbits: every planet at its own true period, and back into line
+    import math
+    pg.evaluate("()=>document.querySelector('.chip[data-name=\"\"]').click()")
+    pg.wait_for_timeout(600)
+    pg.click("#orbBtn")
+    pg.wait_for_timeout(1500)
+    o = pg.evaluate("()=>window.__dbg.orbit")
+    P = {"Mercury": 87.969, "Venus": 224.701, "Earth": 365.256, "Mars": 686.980,
+         "Jupiter": 4332.589, "Saturn": 10759.22, "Uranus": 30685.4, "Neptune": 60189}
+    bad = []
+    for a in o["at"]:
+        want = (2 * math.pi * o["days"] / P[a["name"]] + math.pi) % (2 * math.pi) - math.pi
+        if abs(a["th"] - want) > 1e-6:
+            bad.append(a["name"])
+    if not (o["run"] and o["days"] > 30) or bad:
+        fails.append(f"the orbits: {o['days']:.1f} days, wrong angles for {bad}")
+    else:
+        print(f"  ok   Run the orbits turns each planet at its true period ({o['days']:.0f} days in, Mercury at {math.degrees(o['at'][0]['th']):.0f} degrees)")
+    note = pg.evaluate("document.getElementById('modeNote').textContent")
+    if not note.startswith("Day "):
+        fails.append(f"the day counter reads {note!r}")
+    pg.click("#speedBtn")
+    d0 = pg.evaluate("()=>window.__dbg.orbit.days")
+    pg.wait_for_timeout(1000)
+    d1 = pg.evaluate("()=>window.__dbg.orbit.days")
+    if not 250 < d1 - d0 < 480:
+        fails.append(f"a year a second ran {d1 - d0:.0f} days in a second")
+    pg.click("#orbBtn")
+    pg.click("#lineBtn")
+    pg.wait_for_timeout(1400)
+    o = pg.evaluate("()=>window.__dbg.orbit")
+    if o["days"] != 0 or any(a["th"] != 0 for a in o["at"]):
+        fails.append(f"Line them up leaves {o['days']} days")
+    else:
+        print("  ok   the day counter runs, a year a second speeds it, and Line them up puts them back in a row")
+    # the keys walk the chips
+    pg.keyboard.press("ArrowRight")
+    pg.keyboard.press("ArrowRight")
+    pg.wait_for_timeout(300)
+    on = pg.evaluate("document.querySelector('.chip.on').dataset.name")
+    pg.keyboard.press("Escape")
+    if on != "Mercury":
+        fails.append(f"two right arrows from the overview land on {on!r}")
+    else:
+        print("  ok   the arrow keys walk the chips, Escape comes back")
+    # the ghost can be Jupiter
+    pg.click("#ghostBtn")
+    pg.evaluate("()=>document.querySelector('.chip[data-name=\"Saturn\"]').click()")
+    pg.wait_for_timeout(2500)
+    gs = pg.evaluate("()=>window.__dbg")
+    g = gs["ghost"]
+    if gs["ghostBody"] != "Jupiter" or not g or abs(g["r"] / gs["er"] - 69911 / 58232) > 0.01:
+        fails.append(f"the Jupiter ghost beside Saturn: {g}, {gs['er']}")
+    else:
+        print(f"  ok   the ghost turns to Jupiter, {69911 / 58232:.2f} times Saturn's width beside it")
+    pg.click("#ghostBtn")
+
     if errs:
         fails.append(f"javascript errors: {errs}")
     br.close()

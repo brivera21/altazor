@@ -283,6 +283,122 @@ with sync_playwright() as pw:
     pg.click("#uC")
     pg.wait_for_timeout(200)
 
+    # --- the marker on the figure
+    pg.click("#vRange")
+    pg.wait_for_timeout(200)
+    pg.evaluate("(()=>{const b=document.getElementById('tsvg').getBoundingClientRect();"
+                "window.scrollBy(0,b.top+yOf(40)*b.height/RG.bot-innerHeight*0.6);})()")
+    pg.wait_for_timeout(150)
+    y = pg.evaluate("(()=>{const b=document.getElementById('tsvg')"
+                    ".getBoundingClientRect();return [b.left+RG.cx*b.width/SPANW,"
+                    "b.top+yOf(40)*b.height/RG.bot];})()")
+    pg.mouse.move(y[0], y[1] + 30)
+    pg.mouse.down()
+    pg.mouse.move(y[0], y[1], steps=4)
+    pg.mouse.up()
+    pg.wait_for_timeout(150)
+    st = pg.evaluate("window.__temp()")
+    # the card above the figure changes height as it reads out, so what
+    # matters is that the marker ends under the pointer, wherever that is
+    under = pg.evaluate(f"(()=>{{const b=document.getElementById('tsvg')"
+                        f".getBoundingClientRect();"
+                        f"return cOf(({y[1]}-b.top)/b.height*RG.bot);}})()")
+    check("dragging the marker leaves it under the pointer", st["mkOn"]
+          and abs(st["mk"] - under) < 0.15, f"{st['mk']} vs {under:.2f}")
+    check("and the drag carried it up from 37", st["mk"] > 38.5, str(st["mk"]))
+    m0 = st["mk"]
+    name = pg.evaluate("document.getElementById('nameTxt').textContent")
+    when = pg.evaluate("document.getElementById('whenTxt').textContent")
+    check("and the card reads the degree, the metabolic rate and the pulse",
+          name == f"{m0:.1f}°C" and "metabolic rate" in when and "pulse" in when,
+          name + " / " + when)
+    check("and the table lights the row for that degree",
+          st["markRow"] == [f"{int(m0 + 0.5)}°C"], str(st["markRow"]))
+    pg.focus("#chart")
+    pg.keyboard.press("Shift+ArrowUp")
+    pg.wait_for_timeout(100)
+    st = pg.evaluate("window.__temp()")
+    check("Shift and the up arrow raise it a whole degree",
+          abs(st["mk"] - m0 - 1) < 0.05
+          and st["markRow"] == [f"{int(m0 + 1.5)}°C"], str(st["mk"]))
+    pg.keyboard.press("ArrowDown")
+    pg.wait_for_timeout(100)
+    m1 = pg.evaluate("window.__temp().mk")
+    check("and the down arrow lowers it a tenth", abs(m1 - (m0 + 0.9)) < 0.05, str(m1))
+    mcy = pg.evaluate("+document.querySelector('#marker circle').getAttribute('cy')")
+    check("the marker is drawn at its own height",
+          abs(mcy - pg.evaluate(f"yOf({m1})")) < 0.6, str(mcy))
+
+    # --- the day plays
+    pg.click("#vDay")
+    pg.wait_for_timeout(150)
+    check("the clock's controls show only on the day",
+          pg.evaluate("!document.getElementById('dayCtl').hidden"
+                      "&&document.getElementById('heatCtl').hidden"))
+    pg.click("#dayPlay")
+    pg.wait_for_timeout(1500)
+    st = pg.evaluate("window.__temp()")
+    check("Play runs the clock and reads Pause",
+          st["dayPlaying"] and 1 < st["dayH"] < 6
+          and pg.inner_text("#dayPlay") == "Pause", str(st["dayH"]))
+    name, out = pg.evaluate("[document.getElementById('nameTxt').textContent,"
+                            "document.getElementById('dayOut').textContent]")
+    check("and the card follows the clock", name == out, name + " / " + out)
+    pg.wait_for_timeout(11500)
+    st = pg.evaluate("window.__temp()")
+    check("it stops at the end of the day",
+          not st["dayPlaying"] and st["dayH"] == 24
+          and pg.inner_text("#dayPlay") == "Play", str(st["dayH"]))
+    hand = pg.evaluate("document.querySelectorAll('#tsvg circle').length")
+    check("a clock face is drawn", hand > 20, str(hand))
+
+    # --- the heat budget answers its two sliders
+    pg.click("#vHeat")
+    pg.wait_for_timeout(150)
+    pg.eval_on_selector("#actIn", "e=>{e.value=1400;e.dispatchEvent(new Event('input'))}")
+    pg.eval_on_selector("#roomIn", "e=>{e.value=40;e.dispatchEvent(new Event('input'))}")
+    pg.wait_for_timeout(150)
+    name = pg.evaluate("document.getElementById('nameTxt').textContent")
+    when = pg.evaluate("document.getElementById('whenTxt').textContent")
+    want = f"{1400 / D.POWER['evap_w_per_lh']:.1f} L"
+    check("the sliders give the heat made, the room and the sweat it needs",
+          "1,400 W" in name and "40°C" in name and want in when, name + " / " + when)
+    w_hot = pg.evaluate("+document.querySelector('#tsvg [data-x=\"1\"] path')"
+                        ".getAttribute('stroke-width')")
+    pg.eval_on_selector("#roomIn", "e=>{e.value=36;e.dispatchEvent(new Event('input'))}")
+    pg.wait_for_timeout(120)
+    w_near = pg.evaluate("+document.querySelector('#tsvg [data-x=\"1\"] path')"
+                         ".getAttribute('stroke-width')")
+    check("the arrows of the lit case narrow as the room nears the skin",
+          w_hot > w_near, f"{w_hot} then {w_near}")
+    bar = pg.evaluate("+document.querySelector('#tsvg [data-w=\"4\"] rect:nth-child(2)')"
+                      ".getAttribute('width')")
+    peak = pg.evaluate("+document.querySelector('#tsvg [data-w=\"2\"] rect:nth-child(2)')"
+                       ".getAttribute('width')")
+    check("the slider's bar is drawn to the same scale as the others",
+          abs(bar / peak - 1400 / D.POWER["peak"]) < 0.01, f"{bar} of {peak}")
+
+    # --- the units fade rather than repaint
+    pg.click("#uF")
+    pg.wait_for_timeout(60)
+    mid = pg.evaluate("document.getElementById('chart').classList.contains('swap')")
+    pg.wait_for_timeout(400)
+    after = pg.evaluate("document.getElementById('chart').classList.contains('swap')")
+    check("a unit button fades the numbers out and back in", mid and not after)
+    pg.click("#uC")
+    pg.wait_for_timeout(400)
+    check("the sources sit in a closed details",
+          pg.evaluate("(()=>{const d=document.querySelector('details.sources');"
+                      "return d&&!d.open&&d.textContent.includes('References');})()"))
+    ph = br.new_page(viewport={"width": 390, "height": 844})
+    ph.route("**/*", lambda r: r.abort()
+             if r.request.url.startswith("http") else r.continue_())
+    ph.goto(PAGE.as_uri())
+    ph.wait_for_timeout(500)
+    over = ph.evaluate("document.documentElement.scrollWidth-innerWidth")
+    check("nothing is wider than a 390 px screen", over == 0, str(over))
+    ph.close()
+
     html = PAGE.read_text(encoding="utf-8")
     check("no em dashes", "—" not in html)
     check("the page links back to the library", 'href="library.html"' in html)

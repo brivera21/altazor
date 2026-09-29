@@ -24,6 +24,13 @@ COUNTS = {"cones": 4.6e6, "rods": 92e6, "fovea_per_mm2": 199000, "cone_share": (
 # sRGB primaries and the white point, in CIE xy
 SRGB = {"r": (0.64, 0.33), "g": (0.30, 0.60), "b": (0.15, 0.06), "w": (0.3127, 0.3290)}
 
+# three screen standards, in CIE xy: k, name, red, green, blue, a line (all use the D65 white)
+GAMUTS = [
+    ("srgb", "sRGB", (0.64, 0.33), (0.30, 0.60), (0.15, 0.06), "The standard of the web and of most monitors since 1996, and the corner of the map this page can actually paint."),
+    ("p3", "Display P3", (0.680, 0.320), (0.265, 0.690), (0.150, 0.060), "The cinema primaries of DCI-P3 with the D65 white, used by most recent phones and laptops: redder reds and greener greens, the same blue."),
+    ("2020", "Rec. 2020", (0.708, 0.292), (0.170, 0.797), (0.131, 0.046), "The target for ultra-high-definition television, with primaries on the spectrum itself at 630, 532 and 467 nm; few screens reach all of it."),
+]
+
 # named points on the diagram: k, name, x, y, a line
 POINTS = [
     ("d65", "daylight white, D65", 0.3127, 0.3290, "The white a screen aims for: average noon daylight, and the point of no hue at all. Every color is a direction and a distance from here."),
@@ -72,6 +79,8 @@ REFS += [(apa.wiki(f"https://en.wikipedia.org/wiki/{p}"), a) for p, a in [
     ("Rod_cell", "The rods, their sensitivity and their peak at 498 nm."),
     ("CIE_1931_color_space", "The chromaticity diagram, the spectral locus, the white points and the dominant wavelength."),
     ("SRGB", "The primaries at (0.64, 0.33), (0.30, 0.60), (0.15, 0.06) and the D65 white."),
+    ("DCI-P3", "Display P3: the primaries at (0.680, 0.320), (0.265, 0.690), (0.150, 0.060) with the D65 white."),
+    ("Rec._2020", "The primaries at (0.708, 0.292), (0.170, 0.797), (0.131, 0.046), monochromatic at 630, 532 and 467 nm."),
     ("Planckian_locus", "The black-body curve across the diagram."),
     ("Standard_illuminant", "D65 and illuminant A."),
     ("Color_blindness", "About 8 percent of men and 0.5 percent of women with red-green deficiency."),

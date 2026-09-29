@@ -170,6 +170,53 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(400)
     s = st()
     check("Santiago to Sydney" in s["name"] and f"{hav(CITIES['santiago'], CITIES['sydney']):,.0f} km" in s["card"], "Santiago to Sydney answers with its distance")
+    # two aircraft at one speed: the great circle lands first
+    pg.click("#flyBtn")
+    pg.wait_for_timeout(5200)
+    km = pg.evaluate("()=>fly.km")
+    g = hav(CITIES['santiago'], CITIES['sydney'])
+    check(km > g * 0.6 and pg.evaluate("()=>document.getElementById('flyBtn').textContent") in ("Pause", "Fly both"),
+          f"the two aircraft fly, {km:,.0f} km so far")
+    pg.wait_for_timeout(2600)
+    check(pg.evaluate("()=>!fly.on"), "and stop once the compass course arrives")
+
+    # a change of map carries the land across instead of swapping it
+    pg.click('#views button[data-v="maps"]')
+    pg.wait_for_timeout(500)
+    pg.evaluate("()=>setProj('mercator')")
+    pg.wait_for_timeout(1400)
+    before = pg.evaluate("()=>document.getElementById('mcanvas').toDataURL().length")
+    pg.evaluate("()=>{window.__mid=null; setProj('mollweide'); setTimeout(()=>{window.__mid=document.getElementById('mcanvas').toDataURL().length},500)}")
+    pg.wait_for_timeout(1600)
+    mid = pg.evaluate("()=>window.__mid")
+    after = pg.evaluate("()=>document.getElementById('mcanvas').toDataURL().length")
+    check(mid is not None and mid != before and mid != after, "halfway between two maps the picture is neither")
+    pg.focus("body")
+    pg.keyboard.press("ArrowRight")
+    pg.wait_for_timeout(1400)
+    check(pg.evaluate("()=>proj") == "sinusoidal", "the right arrow steps to the next map", pg.evaluate("()=>proj"))
+
+    # the orthographic globe turns under a drag off the white circle
+    pg.evaluate("()=>setProj('ortho')")
+    pg.wait_for_timeout(1500)
+    box = pg.locator("#mcanvas").bounding_box()
+    pg.mouse.move(box["x"] + box["width"] * 0.35, box["y"] + box["height"] * 0.75)
+    pg.mouse.down()
+    pg.mouse.move(box["x"] + box["width"] * 0.5, box["y"] + box["height"] * 0.65, steps=5)
+    pg.mouse.up()
+    c = pg.evaluate("()=>[center, CENTERS.free]")
+    check(c[0] == "free" and abs(c[1][0] - (-30)) > 5, f"a drag off the circle turns the globe to {c[1][0]:.0f}, {c[1][1]:.0f}")
+
+    vis = pg.evaluate("""()=>[...document.querySelectorAll('p.note')].filter(p=>p.checkVisibility())
+      .map(p=>p.textContent.trim().split(/\s+/).length)""")
+    check(len(vis) == 1 and 40 <= vis[0] <= 80, f"one caption shows ({vis} words)")
+    check(pg.evaluate("()=>{const d=document.querySelector('details.sources'); return !!d&&!d.open&&!!d.querySelector('.refs')}"),
+          "the notes and references sit in a closed Sources")
+    ph = br.new_page(viewport={"width": 390, "height": 844})
+    ph.goto(PAGE.as_uri())
+    ph.wait_for_timeout(600)
+    check(ph.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, "nothing wider than a phone")
+    ph.close()
     check(not errs, "no script errors", "; ".join(errs))
     br.close()
 

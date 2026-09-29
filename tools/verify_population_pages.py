@@ -9,7 +9,7 @@ exactly the difference to the row below (the last row compares against the
 named runner-up where the list is a cut of a longer ranking), the totals row
 adds up, and every row carries one inline bar whose color agrees with its sign.
 
-Flags: one per row, from flagcdn or drawn inline, never with loading="lazy" or
+Flags: one per row, from flagcdn, baked in as a PNG, or drawn inline, never with loading="lazy" or
 srcset, which stopped them loading at all in Brian's Chrome.
 
 Usage: python3 verify_population_pages.py
@@ -26,7 +26,7 @@ PAGES = [
          last_lead=True, diverging=True, explainer=True),
     # Earth Right Now lists every country, so nothing follows the last row and
     # Brian dropped its explainer entirely.
-    dict(file="populous-countries.html", title="Earth Right Now",
+    dict(file="populous-countries.html", title="Earth's Population Right Now",
          last_lead=False, diverging=False, explainer=False),
 ]
 fails = []
@@ -65,7 +65,7 @@ def check(page):
         bad(f"{name}: still carries a How to read this block")
 
     # ---- ranked rows ----
-    rows = re.findall(r"<tr>\s*<td class=\"rank\">(\d+)</td>(.*?)</tr>", h, re.S)
+    rows = re.findall(r"<tr(?: [^>]*)?>\s*<td class=\"rank\">(\d+)</td>(.*?)</tr>", h, re.S)
     if not rows:
         bad(f"{name}: no ranked rows found")
         return
@@ -88,8 +88,9 @@ def check(page):
         for f in flags:
             if "loading=" in f or "srcset" in f:
                 bad(f"{name}: row {i} flag uses loading or srcset")
-            if isinstance(f, str) and f.startswith("<img") and "flagcdn.com" not in f:
-                bad(f"{name}: row {i} flag is not from flagcdn")
+            if isinstance(f, str) and f.startswith("<img") and "flagcdn.com" not in f \
+                    and 'src="data:image/png;base64,' not in f:
+                bad(f"{name}: row {i} flag is neither from flagcdn nor baked in")
         if len(re.findall(r"<svg class=\"(?:chg|flow)\"", cells)) != 1:
             bad(f"{name}: row {i} does not have exactly one inline bar")
 

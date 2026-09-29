@@ -78,7 +78,7 @@ with sync_playwright() as pw:
         return pg.evaluate("()=>window.__gal()")
 
     st = view("kinds")
-    check(st["marks"] == 12, f"the fork carries eleven classes and the Milky Way's marker ({st['marks']} marks)")
+    check(st["marks"] == 13, f"the fork carries eleven classes, the Milky Way's marker and the galaxy that slides along it ({st['marks']} marks)")
     card = pg.evaluate("()=>document.getElementById('nameTxt').textContent+' | '+document.getElementById('numTxt').textContent")
     check("SBbc" in card and "between b and c" in card, f"and opens on the Milky Way's place: '{card[:60]}'")
     hover('#gsvg g[data-k="Sb"]')
@@ -127,7 +127,7 @@ with sync_playwright() as pw:
     card = pg.evaluate("()=>document.getElementById('nameTxt').textContent")
     check("Perseus" in card, f"an arm under the cursor names itself: '{card}'")
     pg.click('#sub button[data-s="edge"]')
-    pg.wait_for_timeout(150)
+    pg.wait_for_timeout(1400)
     ry = pg.evaluate("""()=>({thin:+document.querySelector('#gsvg g[data-k="thin"] ellipse').getAttribute('ry'),
       thick:+document.querySelector('#gsvg g[data-k="thick"] ellipse').getAttribute('ry'),
       rx:+document.querySelector('#gsvg g[data-k="thin"] ellipse').getAttribute('rx'),
@@ -155,6 +155,65 @@ with sync_playwright() as pw:
     card = pg.evaluate("()=>document.getElementById('nameTxt').textContent+' | '+document.getElementById('numTxt').textContent")
     check("Triangulum" in card and "840 kpc" in card, f"a member under the cursor gives its distance: '{card[:70]}'")
 
+    print("--- the moving parts ---")
+    # Kinds: one galaxy slides along the fork
+    view("kinds")
+    def morph(v):
+        pg.evaluate("(v)=>{const m=document.getElementById('morph'); m.value=v; m.dispatchEvent(new Event('input',{bubbles:true}))}", v)
+        pg.wait_for_timeout(60)
+        return pg.evaluate("""()=>{const g=document.querySelector('#gsvg g[data-k="morph"]'); const e=g.querySelector('ellipse');
+          return {cls:g.querySelector('text').textContent, rx:+e.getAttribute('rx'), ry:+e.getAttribute('ry'), sel:window.__gal().sel, name:document.getElementById('nameTxt').textContent}}""")
+    e0, e7, sa, sc = morph(0), morph(350 - 1), morph(460), morph(1000)
+    check(e0["cls"] == "E0" and abs(e0["ry"] / e0["rx"] - 1) < 1e-6, "at the left end it is a round E0")
+    check(e7["cls"] == "E7" and abs(e7["ry"] / e7["rx"] - 0.3) < 0.02, f"and flattens to E7, axis ratio {e7['ry'] / e7['rx']:.2f}")
+    check(sa["cls"] == "Sa" and sc["cls"] == "Sc" and sc["sel"] == "Sc", "then opens from Sa to Sc, ringing the nearest class on the fork")
+    pg.click('#sub [data-bar]'); pg.wait_for_timeout(60)
+    check(pg.evaluate("()=>document.querySelector('#gsvg g[data-k=\"morph\"] text').textContent") == "SBc", "with a bar it reads SBc")
+    # Sizes: a ghost Milky Way at the same scale, and every galaxy to one size
+    view("sizes")
+    hover('#gsvg g[data-k="m31"]')
+    ghost = pg.evaluate("""()=>{const c=[...document.querySelectorAll('#gsvg circle')].find(c=>c.getAttribute('stroke-dasharray')==='5 4');
+      const mw=+document.querySelector('#gsvg g[data-k="mw"] ellipse').getAttribute('rx'); return c?{r:+c.getAttribute('r'), mw}:null}""")
+    check(ghost is not None and abs(ghost["r"] - ghost["mw"]) < 0.2, "over Andromeda a ghost of the Milky Way is drawn at its own size")
+    pg.click('#sub [data-same]'); pg.wait_for_timeout(1200)
+    rx2 = pg.evaluate("""()=>['mw','m31','ic1101','smc'].map(k=>+document.querySelector('#gsvg g[data-k="'+k+'"] ellipse').getAttribute('rx'))""")
+    check(max(rx2) - min(rx2) < 0.01 and pg.evaluate("()=>window.__gal().same") == 1, f"all one size sets every disc to {rx2[0]:.0f} px")
+    pg.click('#sub [data-same]'); pg.wait_for_timeout(1200)
+    # The Milky Way: an orbit of the Sun
+    view("ours")
+    pg.click('#sub button[data-s="face"]'); pg.wait_for_timeout(1300)
+    pg.click('#sub [data-play]'); pg.wait_for_timeout(2300)
+    g1 = pg.evaluate("()=>window.__gal()")
+    pg.click('#sub [data-play]')
+    g1["orbitT"] = pg.evaluate("()=>window.__gal().orbitT")
+    sun = pg.evaluate("""()=>{const c=document.querySelector('#gsvg g[data-k="sgra"] circle'); const s=[...document.querySelectorAll('#gsvg g[data-k="sun"] circle')].find(x=>x.getAttribute('fill')==='#ffb02e');
+      return [+s.getAttribute('cx')-(+c.getAttribute('cx')), +s.getAttribute('cy')-(+c.getAttribute('cy'))]}""")
+    ang = (math.degrees(math.atan2(sun[1], sun[0])) - 90) % 360
+    check(g1["playing"] and 40 < g1["orbitT"] < 80 and abs(math.hypot(*sun) / 22 - SUN_R) < 0.02 and abs(ang - g1["orbitT"] / 230 * 360) < 3,
+          f"Play runs the Sun clockwise round its 8.2 kpc orbit: {g1['orbitT']:.0f} million years, {ang:.0f} degrees round")
+    check(not pg.evaluate("()=>window.__gal().playing"), "and a second press pauses it")
+    pg.evaluate("()=>{const t=document.getElementById('tilt'); t.value=450; t.dispatchEvent(new Event('input',{bubbles:true}))}")
+    tr = pg.evaluate("()=>{const g=[...document.querySelectorAll('#gsvg > g')].find(g=>(g.getAttribute('transform')||'').includes('scale(1,')); return g?g.getAttribute('transform'):''}")
+    check("rotate(45.00)" in tr and "scale(1,0.7071)" in tr, f"halfway, the disc has turned 45 degrees and tipped to cos 45 ({tr[:60]})")
+    # Neighbors: the true radius
+    view("near")
+    pg.click('#sub [data-r="1"]'); pg.wait_for_timeout(1300)
+    pos = pg.evaluate("""()=>{const c=k=>{const e=document.querySelector('#gsvg g[data-k="'+k+'"] circle'); return [+e.getAttribute('cx'),+e.getAttribute('cy')];};
+      return {mw:c('mw'), m31:c('m31'), lmc:c('lmc')};}""")
+    rr = lambda k: math.hypot(pos[k][0] - pos["mw"][0], pos[k][1] - pos["mw"][1])
+    check(abs(rr("m31") - 765 * math.cos(math.radians(-21.6)) / 1500 * 300) < 0.5 and rr("lmc") < 12,
+          f"to true scale Andromeda sits {rr('m31'):.0f} px out and the Large Cloud {rr('lmc'):.1f} px, nearly on the Milky Way")
+    pg.click('#sub [data-r="0"]'); pg.wait_for_timeout(1300)
+    names = pg.evaluate("()=>document.querySelectorAll('#gsvg g[data-k] text').length")
+    over = pg.evaluate("""()=>{const t=[...document.querySelectorAll('#gsvg g[data-k] text')].map(e=>e.getBBox()); let n=0;
+      for(let i=0;i<t.length;i++) for(let j=i+1;j<t.length;j++){ const a=t[i], b=t[j]; if(a.x<b.x+b.width-1&&b.x<a.x+a.width-1&&a.y<b.y+b.height-2&&b.y<a.y+a.height-2) n++; } return n;}""")
+    check(names >= 15 and over == 0, f"on the log radius {names} members carry names, none overlapping")
+    check(pg.evaluate("()=>{const d=document.querySelector('details.sources'); return !!d && !d.open && !!d.querySelector('.refs')}"),
+          "one caption shows; the notes, method and references sit in a closed Sources details")
+    ph = br.new_page(viewport={"width": 390, "height": 844})
+    ph.goto(PAGE.as_uri()); ph.wait_for_selector("#gsvg")
+    o = ph.evaluate("()=>({ov:document.documentElement.scrollWidth-innerWidth, w:document.getElementById('gsvg').getBoundingClientRect().width, card:document.querySelector('.card').getBoundingClientRect().top, svg:document.getElementById('gsvg').getBoundingClientRect().top})")
+    check(o["ov"] == 0 and o["w"] >= 660 and o["card"] < o["svg"], f"at 390 px the stage is {o['w']:.0f} px wide in a sideways scroll, nothing overflows, the card sits above it")
     check(not errs, "no script errors", "; ".join(errs))
     br.close()
 

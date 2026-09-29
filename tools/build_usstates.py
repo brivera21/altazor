@@ -155,9 +155,47 @@ def chg_svg(r):
         f'</svg>')
 
 
+# The state flags are baked into the page as small PNGs, so a row never
+# waits on (or loses) a request to a flag server. They were rasterized at
+# 60 x 40 from the SVGs in the us-state-flags package (version 1.0.7, ISC
+# license, npmjs.com/package/us-state-flags), which carries the current
+# Minnesota (2024), Utah (2024) and Mississippi (2021) flags.
+FLAGS = json.loads((Path(__file__).parent / "data" / "state_flags.json").read_text())
+
+US_BASE = sum(r["base"] for r in rows) + dc["base"]   # the 2020 base, 50 states plus DC
+for r in rows + [dc]:
+    r["share0"] = r["base"] / US_BASE * 100
+SHARE_MAX = max(max(r["share"], r["share0"]) for r in rows)
+
+
+# ---- the map is shaded by the change since 2020, in bins ----
+def _mix(a, b, t):
+    a = [int(a[i:i + 2], 16) for i in (1, 3, 5)]
+    b = [int(b[i:i + 2], 16) for i in (1, 3, 5)]
+    return "#" + "".join(f"{round(x + (y - x) * t):02x}" for x, y in zip(a, b))
+
+
+C_NONE = "#262c33"
+BINS = [  # (low, high, label, color): low <= pct < high
+    (-99, -1, "−1% or more", C_DOWN),
+    (-1, 0, "0 to −1%", _mix(C_NONE, C_DOWN, 0.5)),
+    (0, 2, "0 to 2%", _mix(C_NONE, C_UP, 0.28)),
+    (2, 4, "2 to 4%", _mix(C_NONE, C_UP, 0.5)),
+    (4, 6, "4 to 6%", _mix(C_NONE, C_UP, 0.75)),
+    (6, 99, "6% or more", C_UP),
+]
+
+
+def bin_color(pct):
+    for lo, hi, _, c in BINS:
+        if lo <= pct < hi:
+            return c
+    raise ValueError(pct)
+
+
 HEAD = """<thead><tr>
   <th class="l" colspan="2">State</th>
-  <th>Population</th>
+  <th><span class="py">Population</span> <span class="gh">(lead over next)</span></th>
   <th class="l">Share of the U.S.</th>
   <th class="l">Change since 2020</th>
   <th>People</th>
@@ -165,14 +203,15 @@ HEAD = """<thead><tr>
 
 
 def tr(i, r, rank=True):
-    bar_w = r["share"] / max_share * 100
+    bar_w = r["share"] / SHARE_MAX * 100
+    bar_w0 = r["share0"] / SHARE_MAX * 100
     chg_txt = ("+" if r["chg"] > 0 else "−") + commas(abs(r["chg"]))
     gap = (f' <span class="gap">(+{commas(r["gap"])})</span>'
            if r.get("gap") else "")
     flag = (DC_FLAG if r["cc"] == "dc" else
-            f'<img class="flag" src="https://flagcdn.com/w80/us-{r["cc"]}.png"'
-            f' width="30" height="20" alt="Flag of {r["name"]}">')
-    return f"""<tr class="strow" data-cc="{r['cc']}">
+            f'<img class="flag" src="{FLAGS[r["cc"]]}" width="30" height="20" '
+            f'alt="Flag of {r["name"]}">')
+    return f"""<tr class="strow" data-cc="{r['cc']}" data-n="{r['name']}" data-pop="{r['pop']}" data-base="{r['base']}" data-pct="{r['pct']:.3f}" data-chg="{r['chg']}" data-s="{r['share']:.5f}" data-s0="{r['share0']:.5f}" data-w="{bar_w:.2f}" data-w0="{bar_w0:.2f}" tabindex="-1">
   <td class="rank">{i if rank else ""}</td>
   <td class="ct"><span class="cw">{flag}<span>{r['name']}</span></span></td>
   <td class="num pop">{commas(r['pop'])}{gap}</td>
@@ -193,20 +232,27 @@ DATA["dc"] = dict(n=dc["name"], pop=dc["pop"], chg=dc["chg"],
                   pct=round(dc["pct"], 1), share=round(dc["share"], 2),
                   rank=None, gap=None, nxt=None)
 DATA_JS = json.dumps(DATA, separators=(",", ":"))
-MAP_PATHS = "".join(f'<path d="{d}" data-cc="{p.lower()}"/>'
-                    for p, d in USMAP["paths"].items())
+BYCC = {r["cc"]: r for r in rows + [dc]}
+MAP_PATHS = "".join(
+    f'<path d="{d}" data-cc="{c.lower()}" style="--f:{bin_color(BYCC[c.lower()]["pct"])}">'
+    f'<title>{BYCC[c.lower()]["name"]}</title></path>'
+    for c, d in USMAP["paths"].items())
+LEGEND = "".join(f'<span><i style="background:{c}"></i>{lab}</span>'
+                 for _, _, lab, c in BINS)
 
 body = "\n".join(tr(i + 1, r) for i, r in enumerate(rows))
 p = sum(r["pop"] for r in rows)
 b = sum(r["base"] for r in rows)
 c = p - b
 total_row = (f'<tr class="total"><td></td><td>All fifty together</td>'
-             f'<td class="num">{commas(p)}</td>'
-             f'<td>{p / US_POP * 100:.1f}% of the country</td>'
+             f'<td class="num" id="totp" data-pop="{p}" data-base="{b}">{commas(p)}</td>'
+             f'<td id="tots" data-s="{p / US_POP * 100:.1f}" data-s0="{b / US_BASE * 100:.1f}">{p / US_POP * 100:.1f}% of the country</td>'
              f'<td>+{c / b * 100:.1f}% since 2020</td>'
              f'<td class="num">+{commas(c)}</td></tr>')
-table_states = f'<table>\n{HEAD}\n<tbody>\n{body}\n{total_row}\n</tbody>\n</table>'
-table_dc = f'<table>\n{HEAD}\n<tbody>\n{tr(0, dc, rank=False)}\n</tbody>\n</table>'
+table_states = (f'<div class="tscroll" id="tbl" tabindex="0" aria-label="The fifty states; '
+                f'arrow keys walk the ranking when the table has focus"><table>\n{HEAD}\n'
+                f'<tbody id="tb">\n{body}\n{total_row}\n</tbody>\n</table></div>')
+table_dc = f'<div class="tscroll"><table>\n{HEAD}\n<tbody>\n{tr(0, dc, rank=False)}\n</tbody>\n</table></div>'
 
 HTML = f"""<!DOCTYPE html>
 <html lang="en">
@@ -231,34 +277,49 @@ nav.site a {{ color:var(--muted); text-decoration:none; font-size:14px; }}
 nav.site a:hover {{ color:var(--accent); }}
 h1 {{ margin:0 0 6px; font-size:26px; }}
 h2 {{ font-size:16px; margin:34px 0 10px; letter-spacing:.02em; }}
-.lede {{ color:var(--muted); font-size:14.5px; margin:0 0 6px; max-width:730px; }}
-.stamp {{ color:var(--ink-3); font-size:12.5px; margin:0 0 22px; }}
+.stamp {{ color:var(--ink-3); font-size:12.5px; margin:0 0 18px; }}
 
-.dash {{ display:grid; grid-template-columns:minmax(0,1fr) 470px; gap:14px; align-items:stretch; }}
+.dash {{ display:grid; grid-template-columns:minmax(0,1fr) 400px; gap:14px; align-items:stretch; }}
 .mappanel {{ background:var(--panel); border:1px solid var(--line); border-radius:12px;
-  padding:10px 12px 4px; }}
-#usmap {{ display:block; width:100%; height:auto; }}
-#usmap path {{ fill:#262c33; stroke:#121212; stroke-width:0.7; cursor:pointer; transition:fill .12s; }}
-#usmap path:hover {{ fill:#39424d; }}
-#usmap path.sel {{ fill:var(--accent); }}
-.mapcap {{ color:var(--ink-3); font-size:12px; text-align:center; padding:5px 0; }}
-tr.strow {{ cursor:pointer; }}
-tr.strow:hover td {{ background:#1e1e1e; }}
+  padding:10px 12px 8px; }}
+#usmap {{ display:block; width:100%; height:auto; outline:none; }}
+#usmap:focus-visible {{ box-shadow:0 0 0 2px var(--accent); border-radius:6px; }}
+#usmap path {{ fill:var(--f,#262c33); stroke:#121212; stroke-width:0.7; cursor:pointer;
+  transition:opacity .12s; }}
+#usmap #hlo {{ fill:none; stroke:var(--text); stroke-width:1.4; pointer-events:none; }}
+#usmap path.sel {{ stroke:var(--accent); stroke-width:1.8; }}
+#usmap.picked path:not(.sel) {{ opacity:.55; }}
+.mapcap {{ color:var(--ink-2); font-size:12.5px; text-align:center; padding:4px 0 2px; min-height:24px; }}
+.mapkey {{ display:flex; flex-wrap:wrap; justify-content:center; gap:4px 12px; font-size:11.5px;
+  color:var(--ink-3); padding-bottom:2px; }}
+.mapkey b {{ font-weight:600; color:var(--ink-2); margin-right:2px; }}
+.mapkey i {{ display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:5px;
+  vertical-align:-1px; }}
+tr.strow {{ cursor:pointer; outline:none; }}
+tr.strow:hover td, tr.strow.hl td {{ background:#1e1e1e; }}
 tr.strow.sel td {{ background:#20303f; }}
 @media (max-width:900px) {{ .dash {{ grid-template-columns:1fr; }} }}
-.tiles {{ display:grid; grid-template-columns:repeat(2,minmax(150px,1fr)); gap:14px; align-content:start; }}
-.tile {{ background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }}
+.tiles {{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; align-content:start; }}
+.tile {{ background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px; min-width:0; }}
 .tile .lab {{ color:var(--muted); font-size:12.5px; }}
-.tile .val {{ font-size:26px; font-weight:600; margin-top:2px; line-height:1.2; }}
+.tile .val {{ font-size:24px; font-weight:600; margin-top:2px; line-height:1.2; overflow-wrap:anywhere; }}
 .tile .sub {{ color:var(--ink-3); font-size:12px; margin-top:2px; }}
 
-.legend {{ display:flex; gap:18px; font-size:12.5px; color:var(--ink-2); margin:26px 0 0; }}
-.legend .sw {{ width:11px; height:11px; border-radius:3px; display:inline-block; margin-right:6px; }}
+.ctl {{ display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; margin:4px 0 10px; }}
+.ctl .grp {{ display:inline-flex; flex-wrap:wrap; gap:6px; align-items:center; }}
+.ctl .gl {{ color:var(--muted); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; margin-right:4px; }}
+.ctl button {{ font:inherit; font-size:13px; padding:4px 12px; border-radius:999px;
+  border:1px solid var(--line); background:#1a1a1a; color:var(--muted); cursor:pointer; }}
+.ctl button.on {{ color:var(--text); border-color:var(--accent); background:#1c2733; }}
+.ctl button:hover {{ border-color:var(--accent); }}
+.legend {{ display:inline-flex; gap:14px; font-size:12.5px; color:var(--ink-2); margin-left:auto; }}
+.legend .sw {{ width:11px; height:11px; border-radius:3px; display:inline-block; margin-right:6px; vertical-align:-1px; }}
 
 table {{ width:100%; border-collapse:collapse; margin-top:4px; }}
 th {{ text-align:right; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
   color:var(--ink-3); font-weight:600; padding:0 10px 8px; border-bottom:1px solid var(--line); }}
 th.l {{ text-align:left; }}
+th .gh {{ color:{C_GAP}; text-transform:none; letter-spacing:0; font-weight:500; }}
 td {{ padding:8px 10px; border-bottom:1px solid var(--line); font-size:14px; }}
 td.num {{ text-align:right; font-variant-numeric:tabular-nums; color:var(--ink-2); }}
 td.rank {{ color:var(--ink-3); width:26px; font-variant-numeric:tabular-nums; }}
@@ -268,10 +329,12 @@ td.pop {{ white-space:nowrap; }}
 .flag {{ width:30px; height:20px; object-fit:cover; border-radius:2px;
   box-shadow:0 0 0 1px rgba(255,255,255,.14); display:block; flex:none; }}
 .gap {{ color:{C_GAP}; font-size:12.5px; font-variant-numeric:tabular-nums; margin-left:7px; }}
+.y20 .gap, .y20 th .gh {{ display:none; }}
 td.share {{ width:170px; white-space:nowrap; }}
 .track {{ display:inline-block; width:96px; height:9px; background:#242424; border-radius:5px;
   vertical-align:middle; overflow:hidden; }}
-.fill {{ display:block; height:100%; background:var(--share); border-radius:0 4px 4px 0; }}
+.fill {{ display:block; height:100%; background:var(--share); border-radius:0 4px 4px 0;
+  transition:width .9s cubic-bezier(.45,0,.55,1); }}
 .pct {{ display:inline-block; width:46px; text-align:right; font-variant-numeric:tabular-nums;
   color:var(--ink-2); font-size:13px; margin-left:8px; }}
 td.chg {{ width:250px; padding-top:6px; padding-bottom:6px; }}
@@ -279,13 +342,24 @@ svg.chg {{ display:block; width:100%; height:auto; }}
 svg.chg rect {{ transition:opacity .12s; }}
 svg.chg g:hover rect {{ opacity:.72; }}
 tr.total td {{ border-bottom:none; color:var(--muted); font-size:13px; padding-top:12px; }}
+.tscroll {{ outline:none; }}
+.tscroll:focus-visible {{ box-shadow:0 0 0 2px var(--accent); border-radius:6px; }}
 
 .note {{ color:var(--muted); font-size:12.5px; max-width:760px; }}
+details.sources {{ margin-top:30px; border-top:1px solid var(--line); padding-top:10px; max-width:760px; }}
+details.sources > summary {{ cursor:pointer; color:var(--muted); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; }}
+details.sources > summary:hover {{ color:var(--accent); }}
 .refs {{ font-size:13px; color:var(--ink-2); max-width:760px; }}
 .refs p {{ padding-left:2.2em; text-indent:-2.2em; margin:0 0 .8em; }}
 .refs a {{ color:var(--accent); }}
+@media (prefers-reduced-motion: reduce) {{ .fill {{ transition:none; }} }}
 @media (max-width:820px) {{
   td.share, td.chg {{ width:auto; }} .track {{ width:56px; }}
+  .tscroll {{ overflow-x:auto; -webkit-overflow-scrolling:touch; }}
+}}
+@media (max-width:600px) {{
+  .tile .val {{ font-size:20px; }} .tiles {{ gap:10px; }} .tile {{ padding:12px 13px; }}
+  .ctl button {{ padding:4px 10px; font-size:12.5px; }}
 }}
 </style>
 </head>
@@ -302,6 +376,12 @@ tr.total td {{ border-bottom:none; color:var(--muted); font-size:13px; padding-t
 July 1, 2025.</p>
 
 <div class="dash">
+<div class="mappanel">
+  <svg id="usmap" viewBox="0 0 {USMAP['w']} {USMAP['h']}" role="img" tabindex="0"
+    aria-label="Map of the United States shaded by the change in population since 2020">{MAP_PATHS}</svg>
+  <div class="mapcap" id="mapcap">Each state is shaded by its change in population since 2020</div>
+  <div class="mapkey"><b>Change since 2020</b>{LEGEND}</div>
+</div>
 <div class="tiles">
   <div class="tile"><div class="lab" id="l1">U.S. population</div>
     <div class="val" id="v1">{US_POP/1e6:.1f} million</div>
@@ -316,43 +396,47 @@ July 1, 2025.</p>
     <div class="val" id="v4">−{abs(steepest['pct']):.1f}%</div>
     <div class="sub" id="s4">{steepest['name']} since 2020</div></div>
 </div>
-<div class="mappanel">
-  <svg id="usmap" viewBox="0 0 {USMAP['w']} {USMAP['h']}" role="img"
-    aria-label="Map of the United States; the chosen state is highlighted">{MAP_PATHS}</svg>
-  <div class="mapcap" id="mapcap">A state, clicked here or in the table, fills the tiles</div>
-</div>
-</div>
-
-<div class="legend">
-  <span><span class="sw" style="background:var(--up)"></span>Grew since 2020</span>
-  <span><span class="sw" style="background:var(--down)"></span>Shrank since 2020</span>
 </div>
 
 <h2>The fifty states</h2>
+<div class="ctl">
+  <span class="grp" id="sorts"><span class="gl">Order</span>
+    <button data-sort="pop" class="on">Population</button>
+    <button data-sort="pct">Growth rate</button>
+    <button data-sort="chg">People gained</button>
+    <button data-sort="n">A to Z</button></span>
+  <span class="grp" id="years"><span class="gl">Shares in</span>
+    <button data-yr="2020">2020</button>
+    <button data-yr="2025" class="on">2025</button></span>
+  <span class="legend"><span><span class="sw" style="background:var(--up)"></span>Grew since 2020</span>
+  <span><span class="sw" style="background:var(--down)"></span>Shrank since 2020</span></span>
+</div>
 {table_states}
 
 <h2>Not a state</h2>
-<p class="note" style="margin-bottom:6px">The District of Columbia is counted in
-the national total above but has no rank here.</p>
+<p class="note" style="margin-bottom:6px">The District of Columbia counts in the
+total but takes no rank.</p>
 {table_dc}
 
 <h2>How to read this</h2>
 <p class="note">All fifty states from largest to smallest, with each one's share
-of the country and how far it has moved since the 2020 census. Growth runs right
-on the change bars and decline runs left, on one scale for all fifty.
-{len(grew)} states have grown since 2020 and {len(shrank)} have lost people.</p>
+of the country and its change since the 2020 census, shaded on the map and drawn
+as bars, growth right and decline left. {len(grew)} states have
+grown since 2020 and {len(shrank)} have lost people.</p>
+
+<details class="sources"><summary>Sources</summary>
+<h2>Notes</h2>
 <p class="note">The green figure after a population is how many more people that
 state has than the one ranked below it. Wyoming has none because nothing is
-below it.</p>
-
-<h2>Notes</h2>
+below it. The 2020 shares are of the April 1, 2020 estimates base for the fifty
+states and the District together ({commas(US_BASE)}); the ranks stay those of 2025.</p>
 <p class="note">Populations are Census Bureau estimates for July 1, 2025, and the
 comparison year is the April 1, 2020 estimates base, which is why the 2020 figures
 differ slightly from the published census counts. Shares are of the national total
 including the District of Columbia. Texas added {commas(rows[1]['chg'])} people
 since 2020, more than the entire population of any of the twelve smallest states.
-Flags are the state flags, served by
-<a href="https://flagcdn.com" style="color:var(--accent)">FlagCDN</a>.</p>
+The state flags are drawn from the us-state-flags package and baked into the page;
+the District's flag is drawn by hand.</p>
 
 <h2>References</h2>
 <div class="refs">
@@ -362,7 +446,10 @@ for the United States, regions, states, and Puerto Rico: April 1, 2020 to July 1
 from <a href="https://www.census.gov/programs-surveys/popest.html">https://www.census.gov/programs-surveys/popest.html</a></p>
 <p>Map outlines: Natural Earth, 50m states and provinces.
 <a href="https://www.naturalearthdata.com/">https://www.naturalearthdata.com/</a></p>
+<p>State flags: us-state-flags, version 1.0.7 (ISC license), rasterized at 60 by 40 pixels.
+<a href="https://www.npmjs.com/package/us-state-flags">https://www.npmjs.com/package/us-state-flags</a></p>
 </div>
+</details>
 </div>
 <script>
 const DATA={DATA_JS};
@@ -371,35 +458,133 @@ const DEF=[
   ["Largest state","{rows[0]['name']}","{commas(rows[0]['pop'])} people"],
   ["Fastest growth","+{fastest['pct']:.1f}%","{fastest['name']} since 2020"],
   ["Steepest decline","−{abs(steepest['pct']):.1f}%","{steepest['name']} since 2020"]];
-let sel=null;
+const CAP0='Each state is shaded by its change in population since 2020';
+const REDUCED=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let sel=null, sortKey='pop', yr=2025;
 const cap=document.getElementById('mapcap');
+const map=document.getElementById('usmap');
+const tb=document.getElementById('tb');
+const tbl=document.getElementById('tbl');
 const fmtC=n=>n.toLocaleString('en-US');
 const big=n=>n>=1e6?(n/1e6).toFixed(1)+' million':fmtC(n);
+const sg=v=>(v>0?'+':'−');
 function setTiles(a){{ a.forEach((t,i)=>{{
   document.getElementById('l'+(i+1)).textContent=t[0];
   document.getElementById('v'+(i+1)).textContent=t[1];
   document.getElementById('s'+(i+1)).textContent=t[2]; }}); }}
+function capFor(cc){{ const d=DATA[cc];
+  return d.n+' · '+sg(d.chg)+Math.abs(d.pct).toFixed(1)+'% since 2020 · '+fmtC(d.pop)+' people'; }}
 function apply(cc){{
   sel=cc;
+  map.classList.toggle('picked',!!cc);
   document.querySelectorAll('#usmap path').forEach(p=>p.classList.toggle('sel',p.dataset.cc===cc));
   document.querySelectorAll('tr.strow').forEach(t=>t.classList.toggle('sel',t.dataset.cc===cc));
-  if(!cc){{ setTiles(DEF); cap.textContent='A state, clicked here or in the table, fills the tiles'; return; }}
+  if(cc){{ const p=map.querySelector('path[data-cc="'+cc+'"]'); if(p) map.appendChild(p); }}
+  if(!cc){{ setTiles(DEF); cap.textContent=CAP0; return; }}
   const d=DATA[cc];
   setTiles([
     [d.n, big(d.pop), fmtC(d.pop)+(d.rank?' · No. '+d.rank+' of 50':' · not a state')],
     ["Share of the U.S.", d.share.toFixed(2)+'%', 'of {commas(US_POP)} people'],
-    ["Change since 2020", (d.chg>0?'+':'−')+Math.abs(d.pct).toFixed(1)+'%',
-     (d.chg>0?'+':'−')+fmtC(Math.abs(d.chg))+' people'],
+    ["Change since 2020", sg(d.chg)+Math.abs(d.pct).toFixed(1)+'%',
+     sg(d.chg)+fmtC(Math.abs(d.chg))+' people'],
     d.gap!=null?["Lead over next rank",'+'+fmtC(d.gap),'over '+d.nxt]
-      :["Lead over next rank",'—', d.rank?'the smallest state':'listed outside the ranking']]);
-  cap.textContent=d.n;
+      :["Lead over next rank",'none', d.rank?'the smallest state':'listed outside the ranking']]);
+  cap.textContent=capFor(cc);
 }}
-document.querySelectorAll('tr.strow').forEach(t=>t.addEventListener('click',()=>{{
-  apply(sel===t.dataset.cc?null:t.dataset.cc); }}));
-document.querySelectorAll('#usmap path').forEach(p=>p.addEventListener('click',()=>{{
-  if(DATA[p.dataset.cc]) apply(sel===p.dataset.cc?null:p.dataset.cc); }}));
-window.__uss=()=>({{sel, tiles:[1,2,3,4].map(i=>document.getElementById('v'+i).textContent),
-  mapStates:document.querySelectorAll('#usmap path').length}});
+function hl(cc){{
+  document.querySelectorAll('#usmap path.hl').forEach(p=>p.classList.remove('hl'));
+  document.querySelectorAll('tr.strow.hl').forEach(t=>t.classList.remove('hl'));
+  const o0=document.getElementById('hlo'); if(o0) o0.remove();
+  if(!cc) {{ cap.textContent=sel?capFor(sel):CAP0; return; }}
+  const p=map.querySelector('path[data-cc="'+cc+'"]');
+  if(p){{ p.classList.add('hl');
+    // the outline is redrawn on top so no neighbor covers it
+    let o=document.getElementById('hlo');
+    if(!o){{ o=document.createElementNS('http://www.w3.org/2000/svg','path'); o.id='hlo'; }}
+    o.setAttribute('d',p.getAttribute('d')); map.appendChild(o); }}
+  const t=document.querySelector('tr.strow[data-cc="'+cc+'"]'); if(t) t.classList.add('hl');
+  if(DATA[cc]) cap.textContent=capFor(cc);
+}}
+document.querySelectorAll('tr.strow').forEach(t=>{{
+  t.addEventListener('click',()=>apply(sel===t.dataset.cc?null:t.dataset.cc));
+  t.addEventListener('pointerenter',()=>hl(t.dataset.cc));
+  t.addEventListener('pointerleave',()=>hl(null));
+}});
+document.querySelectorAll('#usmap path').forEach(p=>{{
+  p.addEventListener('click',()=>{{ if(DATA[p.dataset.cc]) apply(sel===p.dataset.cc?null:p.dataset.cc); }});
+  p.addEventListener('pointerenter',()=>hl(p.dataset.cc));
+  p.addEventListener('pointerleave',()=>hl(null));
+}});
+
+// ---- order: the rows slide to their new places ----
+function rowsNow(){{ return [...tb.querySelectorAll('tr.strow')]; }}
+function sortBy(key){{
+  sortKey=key;
+  document.querySelectorAll('#sorts button').forEach(b=>b.classList.toggle('on',b.dataset.sort===key));
+  const rs=rowsNow(), total=tb.querySelector('tr.total');
+  const top0=new Map(rs.map(r=>[r,r.getBoundingClientRect().top]));
+  const val=r=>key==='n'?r.dataset.n:+r.dataset[key];
+  rs.sort((a,b)=>key==='n'?val(a).localeCompare(val(b)):val(b)-val(a));
+  rs.forEach(r=>tb.insertBefore(r,total));
+  if(REDUCED) return;
+  rs.forEach(r=>{{
+    const d=top0.get(r)-r.getBoundingClientRect().top;
+    if(!d) return;
+    r.style.transition='none'; r.style.transform='translateY('+d+'px)';
+  }});
+  requestAnimationFrame(()=>requestAnimationFrame(()=>rs.forEach(r=>{{
+    if(!r.style.transform) return;
+    r.style.transition='transform .8s cubic-bezier(.45,0,.55,1)'; r.style.transform='';
+  }})));
+}}
+document.querySelectorAll('#sorts button').forEach(b=>b.onclick=()=>sortBy(b.dataset.sort));
+
+// ---- 2020 or 2025: the shares and populations glide between the two ----
+let yrRaf=null;
+function setYear(y){{
+  if(y===yr) return; yr=y;
+  document.querySelectorAll('#years button').forEach(b=>b.classList.toggle('on',+b.dataset.yr===y));
+  document.body.classList.toggle('y20',y===2020);
+  document.querySelectorAll('th .py').forEach(e=>e.textContent=y===2020?'Population, 2020':'Population');
+  const rs=[...document.querySelectorAll('tr.strow')];
+  rs.forEach(r=>{{ r.querySelector('.fill').style.width=(y===2020?r.dataset.w0:r.dataset.w)+'%'; }});
+  const from=rs.map(r=>y===2020?[+r.dataset.pop,+r.dataset.s]:[+r.dataset.base,+r.dataset.s0]);
+  const to=rs.map(r=>y===2020?[+r.dataset.base,+r.dataset.s0]:[+r.dataset.pop,+r.dataset.s]);
+  const put=u=>rs.forEach((r,i)=>{{
+    const p=Math.round(from[i][0]+(to[i][0]-from[i][0])*u), s=from[i][1]+(to[i][1]-from[i][1])*u;
+    r.querySelector('td.pop').firstChild.nodeValue=fmtC(p);
+    r.querySelector('.pct').textContent=s.toFixed(2)+'%';
+  }});
+  const tp=document.getElementById('totp'), ts=document.getElementById('tots');
+  tp.textContent=fmtC(+(y===2020?tp.dataset.base:tp.dataset.pop));
+  ts.textContent=(y===2020?ts.dataset.s0:ts.dataset.s)+'% of the country';
+  if(yrRaf) cancelAnimationFrame(yrRaf);
+  if(REDUCED){{ put(1); return; }}
+  const t0=performance.now(), dur=900;
+  const step=t=>{{ const u=Math.min(1,(t-t0)/dur), e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+    put(e); yrRaf=u<1?requestAnimationFrame(step):null; }};
+  yrRaf=requestAnimationFrame(step);
+}}
+document.querySelectorAll('#years button').forEach(b=>b.onclick=()=>setYear(+b.dataset.yr));
+
+// ---- arrow keys walk the rows, in the order shown, while the table or map has focus ----
+document.addEventListener('keydown',e=>{{
+  const a=document.activeElement;
+  if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA')) return;
+  if(e.key==='Escape'){{ apply(null); return; }}
+  if(!(a===tbl||a===map||tbl.contains(a))) return;
+  const dn=e.key==='ArrowDown'||e.key==='ArrowRight', up=e.key==='ArrowUp'||e.key==='ArrowLeft';
+  if(!dn&&!up) return;
+  e.preventDefault();
+  const rs=rowsNow();
+  let i=rs.findIndex(r=>r.dataset.cc===sel);
+  i=i<0?(dn?0:rs.length-1):Math.max(0,Math.min(rs.length-1,i+(dn?1:-1)));
+  apply(rs[i].dataset.cc);
+  if(a!==map) rs[i].scrollIntoView({{block:'nearest'}});
+}});
+window.__uss=()=>({{sel, sortKey, yr, tiles:[1,2,3,4].map(i=>document.getElementById('v'+i).textContent),
+  mapStates:document.querySelectorAll('#usmap path').length,
+  order:rowsNow().map(r=>r.dataset.cc)}});
 </script>
 </body>
 </html>

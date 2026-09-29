@@ -136,6 +136,26 @@ with sync_playwright() as pw:
     pg.evaluate("()=>document.querySelector('#dsvg g[data-c=\"0\"]').dispatchEvent(new PointerEvent('pointerover',{bubbles:true}))")
     pg.wait_for_timeout(100)
     check("ATG is methionine" in st()["name"] and "AUG" in st()["card"], "hovering the first codon: ATG is methionine, read as AUG")
+    # reading: the ribosome walks the codons and stops at a stop codon
+    pr = br.new_page(viewport={"width": 1300, "height": 850})
+    pr.on("pageerror", lambda x: errs.append(str(x)))
+    pr.goto(PAGE.as_uri()); pr.wait_for_selector("#dsvg")
+    pr.click('#views button[data-v="code"]'); pr.click('#muts button[data-m="stop"]'); pr.click("#readBtn")
+    pr.wait_for_timeout(700)
+    mid = pr.evaluate("()=>({s:window.__dna(), btn:document.getElementById('readBtn').textContent, rib:!!document.getElementById('ribosome'), read:[...document.querySelectorAll('#dsvg g[data-c]')].filter(g=>g.querySelector('text[font-weight=\"600\"]')).length})")
+    check(mid["s"]["reading"] and mid["btn"] == "Pause" and mid["rib"] and 0 < mid["read"] < 8,
+          f"Read it sets a ribosome walking: a Pause while it runs, {mid['read']} amino acids shown so far")
+    pr.wait_for_timeout(2600)
+    end = pr.evaluate("()=>({s:window.__dna(), btn:document.getElementById('readBtn').textContent, name:document.getElementById('nameTxt').textContent, body:document.getElementById('bodyTxt').textContent})")
+    check(not end["s"]["reading"] and end["s"]["readPos"] == 8 and "Stop" in end["name"] and "after 7 amino acids" in end["body"] and end["btn"].startswith("Read again"),
+          f"on the stop preset it halts at the eighth codon, seven amino acids joined ({end['s']['readPos']})")
+    pr.click('#muts button[data-m="sickle"]')
+    check(pr.evaluate("()=>window.__dna().readPos") is None, "a change to the gene clears the reading")
+    pr.close()
+    check(pg.evaluate("()=>{const d=document.querySelector('details.sources'); return !!d && !d.open && !!d.querySelector('.refs');}"),
+          "the notes and references sit inside a closed Sources")
+    check([t.strip() for t in pg.evaluate("()=>[...document.querySelectorAll('#helixCtl label')].map(l=>l.textContent)")] == ["angle", "spin"],
+          "the helix controls read angle and spin")
     pg.click('#views button[data-v="genome"]')
     pg.wait_for_timeout(150)
     s = st()
@@ -150,6 +170,9 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(100)
     s = st()
     check("chromosome 21" in s["name"] and "46.7 million" in s["card"] and "234" in s["card"] and "Down" in pg.inner_text("#bodyTxt"), "hovering 21: 46.7 million bases, 234 genes, Down syndrome")
+    pg.set_viewport_size({"width": 390, "height": 844}); pg.wait_for_timeout(150)
+    over = pg.evaluate("()=>document.documentElement.scrollWidth - innerWidth")
+    check(over == 0, "nothing overflows a 390px screen", str(over))
     check(not errs, "no script errors", "; ".join(errs))
     br.close()
 

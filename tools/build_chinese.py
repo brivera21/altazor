@@ -26,12 +26,12 @@ import apa
 ROOT = Path(__file__).parent.parent
 D = json.loads((ROOT / "tools" / "data" / "chinese.json").read_text())
 
-NOTE1 = ("Chinese writes with a set rather than an alphabet, and the "
-         "question this asks is how far into the set a reader has to go. "
-         "The curve is cumulative: at each rank it gives the share of "
-         "running text that every character up to there accounts for. The "
-         "first hundred characters carry 41.8 per cent of written Chinese, "
-         "the first thousand carry 89.1, and the first 2,500 carry 98.5.")
+NOTE1 = ("Chinese writes with a set rather than an alphabet; the question "
+         "is how far into it a reader has to go. The curve is "
+         "cumulative: at each rank, the share of running text that every "
+         "character up to there accounts for. The first hundred carry 41.8 "
+         "per cent of written Chinese, the first thousand 89.1, the first "
+         "2,500 carry 98.5.")
 
 NOTE2 = ("Words do not behave that way. The hundred commonest carry about "
          "half of film dialogue, and then the curve flattens: 20,000 words "
@@ -94,14 +94,21 @@ button.on { background:var(--accent); border-color:var(--accent);
   margin-bottom:12px; color:var(--muted); font-size:12.5px; }
 .bar2 label { display:flex; gap:8px; align-items:center; }
 .bar2 label[hidden] { display:none; }
-.bar2 input[type=range] { width:260px; accent-color:var(--accent); }
+#rankLbl { min-width:11.5em; color:var(--text); }
+@media (max-width:600px){ #rankWrap { flex-wrap:wrap; } #rankLbl { min-width:0; width:100%; } }
+.bar2 input[type=range] { width:220px; accent-color:var(--accent); }
+.bar2 button { padding:4px 11px; font-size:12.5px; }
+.bar2 .hsk { display:flex; gap:4px; align-items:center; }
+.bar2 .hsk span { margin-right:4px; }
+.bar2 .hsk button { padding:3px 9px; font-size:12px; min-width:30px; }
 .bar2 input[type=search] { font:inherit; font-size:12.5px; padding:4px 10px;
   border-radius:999px; border:1px solid var(--line); background:#151515;
   color:var(--text); width:170px; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
 .col { flex:1 1 620px; min-width:0; }
 #curve svg { width:100%; height:auto; display:block; }
-#grid { margin-top:14px; display:flex; flex-wrap:wrap; gap:4px; }
+#grid { margin-top:14px; display:flex; flex-wrap:wrap; gap:4px; outline:none; border-radius:8px; }
+#grid:focus-visible { box-shadow:0 0 0 1px var(--accent); }
 #grid .gh { flex:1 0 100%; color:var(--muted); font-size:11.5px;
   letter-spacing:.06em; text-transform:uppercase; margin:8px 0 2px; }
 #grid .gr { flex:1 0 100%; display:flex; flex-wrap:wrap; gap:4px; }
@@ -113,7 +120,9 @@ button.on { background:var(--accent); border-color:var(--accent);
 .t .p { font-size:10px; color:var(--muted); line-height:1.3;
   white-space:nowrap; }
 .t.past { opacity:.22; }
+.t.out { opacity:.12; }
 .t.on { border-color:#fff; background:#222c38; }
+.t.pin { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
 .t.w .h { font-size:17px; }
 .side { flex:0 0 320px; position:sticky; top:16px; }
 .card { background:var(--panel); border:1px solid var(--line);
@@ -134,17 +143,20 @@ button.on { background:var(--accent); border-color:var(--accent);
 .made { color:var(--muted); font-size:11.5px; margin-top:8px; }
 .note { color:var(--muted); font-size:12.5px; margin-top:22px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
-.method { color:var(--muted); font-size:12.5px; margin-top:14px;
-  max-width:760px; }
-.method summary { cursor:pointer; color:var(--accent); }
-.method p { margin:9px 0 0; }
+details.sources { color:var(--muted); font-size:12.5px; margin-top:14px;
+  max-width:760px; border-top:1px solid var(--line); padding-top:12px; }
+details.sources summary { cursor:pointer; color:var(--accent); }
+details.sources p { margin:9px 0 0; }
+details.sources .refs { margin-top:12px; }
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
 .refs p { margin:0 0 8px; overflow-wrap:anywhere; }
 .refs a { color:var(--accent); }
 __APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
 @media (max-width:900px){ .stage{flex-direction:column;}
-  .side{position:static; width:100%; flex:none;} }
+  .col{flex:none; width:100%;}
+  .side{position:static; width:100%; flex:none; order:-1;} }
+@media (max-width:600px){ #curve{overflow-x:auto;} #curve svg{min-width:600px;} }
 """
 
 HTML = """<!doctype html>
@@ -172,8 +184,11 @@ reader has to go, and how much further the vocabulary runs.">
   <button id="vBoth">Written and spoken</button>
 </div>
 <div class="bar2">
-  <label id="rankWrap">First <input type="range" id="rank" min="1" max="1200"
+  <label id="rankWrap"><span id="rankLbl">The first 1,200 characters</span> <input type="range" id="rank" min="1" max="1200"
   value="1200"> <span id="rankTxt"></span></label>
+  <button id="run" type="button" title="the mark runs up the curve from 1">Run</button>
+  <button id="vCmp" type="button" hidden>Words over it</button>
+  <span class="hsk" id="hsk" hidden><span>HSK</span></span>
   <label><input type="search" id="q" placeholder="Find one"></label>
 </div>
 <div class="stage">
@@ -191,17 +206,27 @@ reader has to go, and how much further the vocabulary runs.">
   </div></div>
 </div>
 <p class="note">__NOTE1__</p>
-<p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
-<div class="method"><details><summary>Where the counts come from</summary>
-<p>__METHOD__</p><p>__GAPNOTE__</p></details></div>
-<h2 class="refh">References</h2>
+<details class="sources"><summary>Sources</summary>
+<p>__NOTE2__</p>
+<p>The mark runs up the curve when the page opens and again from Run, the
+grid lighting in order behind it. Words over it draws the word curve on the
+same axis as the character curve, so that the one flattening and the other
+not is one picture. The HSK chips light only the characters of that level
+and below, and set the slider to the same number of characters by rank, so
+the two coverages can be compared; the levels are those of the 1,200
+characters here, and HSK 6 reaches past them. A character clicked stays on
+the card, and the arrow keys then walk the grid by rank; Escape lets go.</p>
+<p>__METHOD__</p><p>__GAPNOTE__</p>
 <div class="refs">__REFS__</div>
+</details>
 </div>
 <script>
 const D=__DATA__;
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const fmt=n=>n.toLocaleString('en-US');
-let view='char', cut=1200, hot=null, firstI=1;
+let view='char', cut=1200, hot=null, firstI=1, pinned=null, level=0, cmp=false, cmpT=0;
+const REDUCED=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ease=t=>t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
 
 // [glyph, pinyin, gloss, share of text, cumulative share, ...]
 const CH=D.chars, WD=D.words;
@@ -211,14 +236,21 @@ function curves(){
   if(view==='both') return [
     {p:D.ccurve,c:'#58a6ff',l:'characters, written'},
     {p:D.scurve,c:'#7ee081',l:'characters, spoken'}];
-  return [{p:D.ccurve,c:'#58a6ff',l:'characters, written'}];
+  const out=[{p:D.ccurve,c:'#58a6ff',l:'characters, written'}];
+  if(cmpT>0) out.push({p:D.wcurve,c:'#e0a458',l:'words, subtitles',o:cmpT});
+  return out;
 }
+// the HSK levels of the characters here: how many at or below each level,
+// and what share of running text they carry between them
+function levelSet(lv){ return CH.map((r,i)=>[r,i+1]).filter(([r])=>r[7]&&r[7]<=lv); }
+function levelCover(lv){ return levelSet(lv).reduce((a,[r])=>a+r[3],0); }
 
 const W=760, H=250, ML=44, MR=14, MT=12, MB=30;
 const lg=Math.log10;
 function drawCurve(){
   const cs=curves();
-  const maxr=Math.max(...cs.map(c=>c.p[c.p.length-1][0]));
+  let maxr=Math.max(...cs.filter(c=>c.o==null).map(c=>c.p[c.p.length-1][0]));
+  if(view==='char'&&cmpT>0){ const a=lg(D.ccurve[D.ccurve.length-1][0]), b=lg(D.wcurve[D.wcurve.length-1][0]); maxr=Math.pow(10,a+(b-a)*cmpT); }
   const X=r=>ML+lg(Math.max(1,r))/lg(maxr)*(W-ML-MR);
   const Y=v=>H-MB-v/100*(H-MT-MB);
   let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Cumulative '
@@ -239,8 +271,8 @@ function drawCurve(){
   s+='<text x="'+((ML+W-MR)/2)+'" y="'+(H-2)+'" text-anchor="middle" '
     +'font-size="11" fill="#7d7d7d">rank, on a log scale</text>';
   for(const c of cs){
-    s+='<path fill="none" stroke="'+c.c+'" stroke-width="2" d="'
-      +c.p.map((q,i)=>(i?'L':'M')+X(q[0]).toFixed(1)+' '+Y(q[1]).toFixed(1))
+    s+='<path fill="none" stroke="'+c.c+'" stroke-width="2"'+(c.o!=null?' opacity="'+c.o.toFixed(2)+'"':'')+' d="'
+      +c.p.filter(q=>q[0]<=maxr*1.0001).map((q,i)=>(i?'L':'M')+X(q[0]).toFixed(1)+' '+Y(q[1]).toFixed(1))
         .join('')+'"/>';
   }
   // the mark ties the curve to the grid: one rank, read two ways. With
@@ -265,9 +297,15 @@ function drawCurve(){
   if(lx>W-190){ lx=X(cut)-8; anc='end'; }
   s+='<text x="'+lx+'" y="'+(Y(cov)-9)+'" text-anchor="'+anc+'" font-size="12.5" '
     +'fill="#fff">'+fmt(cut)+' cover '+cov.toFixed(1)+'%</text>';
+  // an HSK level: its characters' share, as a level line across the curve
+  if(level&&view==='char'){
+    const set=levelSet(level), lc=levelCover(level);
+    s+='<line x1="'+ML+'" y1="'+Y(lc)+'" x2="'+(W-MR)+'" y2="'+Y(lc)+'" stroke="#f2c11a" stroke-dasharray="4 3"/>'
+      +'<text x="'+(W-MR-4)+'" y="'+(Y(lc)+(lc>cov?-6:14))+'" text-anchor="end" font-size="11.5" fill="#f2c11a">HSK 1 to '+level+': '+fmt(set.length)+' of these characters cover '+lc.toFixed(1)+'%</text>';
+  }
   let ly=MT+14;
   for(const c of cs){
-    s+='<text x="'+(ML+10)+'" y="'+ly+'" font-size="11.5" fill="'+c.c+'">'
+    s+='<text x="'+(ML+10)+'" y="'+ly+'" font-size="11.5" fill="'+c.c+'"'+(c.o!=null?' opacity="'+c.o.toFixed(2)+'"':'')+'>'
       +esc(c.l)+'</text>';
     ly+=15;
   }
@@ -291,14 +329,14 @@ function gaps(){
   return out;
 }
 
+let TILES=[];   // the tiles in the grid, by index, so dimming need not rebuild them
 function drawGrid(){
   const g=document.getElementById('grid');
   const q=document.getElementById('q').value.trim().toLowerCase();
   const keep=x=>!q || x.r[0].indexOf(q)>=0
     || x.r[1].toLowerCase().indexOf(q)>=0
     || x.r[2].toLowerCase().indexOf(q)>=0;
-  const tile=x=>'<div class="t'+(view==='word'?' w':'')
-    +(view!=='both'&&x.i>cut?' past':'')+'" data-i="'+x.i+'">'
+  const tile=x=>'<div class="t'+(view==='word'?' w':'')+'" data-i="'+x.i+'">'
     +'<div class="h">'+esc(x.r[0])+'</div>'
     +'<div class="p">'+esc(x.r[1])+'</div></div>';
   let html='';
@@ -319,10 +357,20 @@ function drawGrid(){
     firstI=1;
   }
   g.innerHTML=html;
-  g.querySelectorAll('.t').forEach(e=>{
-    e.addEventListener('pointerenter',()=>sel(+e.dataset.i));
-    e.addEventListener('click',()=>sel(+e.dataset.i));
+  TILES=[...g.querySelectorAll('.t')];
+  TILES.forEach(e=>{
+    e.addEventListener('pointerenter',()=>{ if(!pinned) sel(+e.dataset.i); });
+    e.addEventListener('click',()=>{ pin(pinned===+e.dataset.i?null:+e.dataset.i); });
   });
+  dimGrid();
+}
+// past the mark the grid goes dim; outside an HSK level, dimmer still
+function dimGrid(){
+  if(view==='both') return;
+  const rs=rows();
+  for(const e of TILES){ const i=+e.dataset.i;
+    e.classList.toggle('past', i>cut);
+    e.classList.toggle('out', view==='char'&&level>0&&!(rs[i-1][7]&&rs[i-1][7]<=level)); }
 }
 
 function sel(i){
@@ -333,7 +381,7 @@ function sel(i){
   if(!r) return;
   document.getElementById('kindTxt').textContent = view==='both'
     ? 'Character, written rank '+fmt(i)
-    : (view==='word'?'Word':'Character')+' number '+fmt(i);
+    : (view==='word'?'Word':'Character')+' number '+fmt(i)+(pinned===i?', pinned':'');
   document.getElementById('bigTxt').textContent=r[0];
   document.getElementById('pyTxt').textContent=r[1];
   document.getElementById('glTxt').textContent=r[2];
@@ -359,34 +407,100 @@ function sel(i){
     (view==='word'&&r[5]) ? 'This gloss is composed from the parts. Neither '
       +'dictionary carries the whole word.' : '';
 }
+// a click pins a character to the card; the arrow keys then walk the grid
+function pin(i){
+  pinned=i;
+  document.querySelectorAll('#grid .t').forEach(e=>e.classList.toggle('pin', +e.dataset.i===i));
+  if(i){ sel(i); document.getElementById('grid').focus({preventScroll:true}); }
+  else if(hot) sel(hot);
+}
+document.getElementById('grid').setAttribute('tabindex','0');
+document.getElementById('grid').addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT') return;
+  if(e.key==='Escape'){ pin(null); return; }
+  if(view==='both') return;
+  const step={ArrowRight:1,ArrowLeft:-1,ArrowDown:7,ArrowUp:-7}[e.key]; if(!step) return;
+  e.preventDefault();
+  const i=Math.max(1,Math.min(rows().length,(pinned||hot||1)+step));
+  pin(i);
+  const t=document.querySelector('#grid .t[data-i="'+i+'"]'); if(t) t.scrollIntoView({block:'nearest'});
+});
 
 function setRank(v){
   cut=v;
   const cov=at(curves()[0].p,cut);
+  document.getElementById('rankLbl').textContent =
+    'The first '+fmt(cut)+' '+(view==='word'?'words':'characters');
   document.getElementById('rankTxt').textContent =
-    fmt(cut)+' cover '+cov.toFixed(1)+'% of running '
-      +(view==='word'?'dialogue':'text');
-  drawCurve(); drawGrid(); if(hot) sel(hot);
+    'cover '+cov.toFixed(1)+'% of running '+(view==='word'?'dialogue':'text');
+  document.getElementById('rank').value=cut;
+  drawCurve(); dimGrid();
+}
+// the mark runs up the curve from 1, the grid lighting in order behind it
+let runId=null;
+function run(){
+  const n=rows().length, t0=performance.now(), dur=REDUCED?0:3200;
+  const btn=document.getElementById('run');
+  if(runId){ cancelAnimationFrame(runId); runId=null; btn.textContent='Run'; return; }
+  btn.textContent='Pause';
+  const go=now=>{ const t=dur?Math.min(1,(now-t0)/dur):1;
+    setRank(Math.max(1,Math.round(Math.pow(n,ease(t)))));
+    if(t<1) runId=requestAnimationFrame(go); else { runId=null; btn.textContent='Run'; } };
+  go(t0);
+}
+document.getElementById('run').addEventListener('click',run);
+// the word curve drawn over the character curve, the axis stretching to fit it
+let cmpId=null;
+function setCmp(on){
+  cmp=on; document.getElementById('vCmp').classList.toggle('on',on);
+  const from=cmpT, to=on?1:0, t0=performance.now(), dur=REDUCED?0:900;
+  if(cmpId) cancelAnimationFrame(cmpId);
+  const go=now=>{ const t=dur?Math.min(1,(now-t0)/dur):1; cmpT=from+(to-from)*ease(t); drawCurve(); if(t<1) cmpId=requestAnimationFrame(go); else cmpId=null; };
+  go(t0);
+}
+document.getElementById('vCmp').addEventListener('click',()=>setCmp(!cmp));
+// the HSK chips: the characters of a level and below, against the same count by rank
+(function(){ const box=document.getElementById('hsk');
+  for(let lv=1;lv<=6;lv++){ const b=document.createElement('button'); b.type='button'; b.dataset.lv=lv; b.textContent=lv; box.appendChild(b); }
+  box.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; setLevel(level===+b.dataset.lv?0:+b.dataset.lv); }); })();
+function setLevel(lv){
+  level=lv;
+  document.querySelectorAll('#hsk button').forEach(b=>b.classList.toggle('on',+b.dataset.lv===lv));
+  if(lv) setRank(levelSet(lv).length); else { setRank(cut); }
+  if(hot) sel(hot);
 }
 
 function pick(v){
-  view=v; hot=null;
+  view=v; hot=null; pinned=null;
+  if(runId){ cancelAnimationFrame(runId); runId=null; document.getElementById('run').textContent='Run'; }
   for(const [k,id] of [['char','vChar'],['word','vWord'],['both','vBoth']])
     document.getElementById(id).classList.toggle('on', k===v);
   const sl=document.getElementById('rank');
   document.getElementById('rankWrap').hidden = (v==='both');
+  document.getElementById('run').hidden = (v==='both');
+  document.getElementById('vCmp').hidden = (v!=='char');
+  document.getElementById('hsk').hidden = (v!=='char');
+  if(v!=='char'){ level=0; document.querySelectorAll('#hsk button').forEach(b=>b.classList.remove('on')); }
   sl.max=rows().length; if(cut>rows().length) cut=rows().length;
   sl.value=cut;
+  drawGrid();
   setRank(cut);
   sel(firstI);
 }
 document.getElementById('vChar').addEventListener('click',()=>pick('char'));
 document.getElementById('vWord').addEventListener('click',()=>pick('word'));
 document.getElementById('vBoth').addEventListener('click',()=>pick('both'));
-document.getElementById('rank').addEventListener('input',e=>
-  setRank(+e.target.value));
+document.getElementById('rank').addEventListener('input',e=>{
+  if(runId){ cancelAnimationFrame(runId); runId=null; document.getElementById('run').textContent='Run'; }
+  setRank(+e.target.value); });
 document.getElementById('q').addEventListener('input',drawGrid);
 pick('char');
+run();
+window.__chinese=()=>({view,cut,hot,pinned,level,cmp,cmpT,running:!!runId,
+  lit:document.querySelectorAll('#grid .t:not(.past)').length,
+  inLevel:document.querySelectorAll('#grid .t:not(.out)').length,
+  levelCover:level?levelCover(level):null, levelN:level?levelSet(level).length:null,
+  curves:document.querySelectorAll('#curve svg path').length});
 </script>
 </body>
 </html>

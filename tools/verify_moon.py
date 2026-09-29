@@ -58,6 +58,18 @@ if "—" in re.sub(r"<script[\s\S]*?</script>", "", html):
 for want in ("The Month: The Moon's Cycle", "library.html", "ALTAZOR"):
     if want not in html:
         fails.append(f"the page is missing {want!r}")
+det = re.search(r'<details class="sources"[^>]*>([\s\S]*?)</details>', html)
+if not det or " open" in det.group(0)[:40] or "Astronomical algorithms" not in det.group(1) or 'id="noteLong"' not in det.group(1):
+    fails.append("the long notes and sources are not in a closed Sources details")
+else:
+    print("  ok   the long notes and the sources sit in a closed Sources details")
+for nm in ("CAP_EARTH", "CAP_SUN"):
+    mm = re.search(nm + r"\s*=\s*(?:\(\)\s*=>)?\s*([\s\S]*?);\n", html)
+    words = len(re.sub(r'"\s*\+\s*"|" \+ D\.CUSP \+ "', " ", mm.group(1)).split()) if mm else 999
+    if words > 80:
+        fails.append(f"{nm} runs {words} words")
+    else:
+        print(f"  ok   {nm.lower()}, the caption, is {words} words")
 
 try:
     import ephem
@@ -123,8 +135,7 @@ with sync_playwright() as pw:
     MEASURE = """() => {
       const c = document.getElementById('sky'), x = c.getContext('2d');
       const dpr = c.width/window.innerWidth;
-      const R = Math.min(96, Math.min(innerWidth, innerHeight)*0.12);
-      const bx = innerWidth - R - 46, by = innerHeight - R - 132;
+      const I = window.__moon.inset, R = I.R, bx = I.x, by = I.y;
       const d = x.getImageData((bx-R)*dpr, (by-R)*dpr, 2*R*dpr, 2*R*dpr).data;
       const w = 2*R*dpr;
       // shadow is #0b0e14, so red 11; the darkest sea is about red 120 and
@@ -169,6 +180,87 @@ with sync_playwright() as pw:
             break
     else:
         print("  ok   the month runs through its phases in order")
+
+    print("--- seen from the south ---")
+    pg.evaluate("()=>{const s=document.getElementById('scrub');s.value=5;s.dispatchEvent(new Event('input'));}")
+    pg.wait_for_timeout(300)
+    north = pg.evaluate(MEASURE)
+    pg.click("#southBtn")
+    pg.wait_for_timeout(300)
+    southm = pg.evaluate(MEASURE)
+    m = pg.evaluate("()=>window.__moon")
+    ok = m["south"] and north["left"] < 0.5 and southm["left"] > 0.5 and abs(north["k"] - southm["k"]) < 0.02
+    print(f"  {'ok  ' if ok else 'FAIL'} a waxing crescent lit on the right from the north, on the left from the south, "
+          f"{southm['k']*100:.0f}% lit either way")
+    if not ok:
+        fails.append("the south view does not turn the inset round")
+    pg.click("#southBtn")
+    pg.wait_for_timeout(200)
+
+    print("--- the Moon dragged round its orbit ---")
+    pg.click("#playBtn")
+    pg.wait_for_timeout(100)
+    m = pg.evaluate("()=>window.__moon")
+    mo = m["moonAt"]
+    pg.mouse.move(mo["x"], mo["y"])
+    pg.mouse.down()
+    import math as _m
+    want = (m["lam"] + 120) % 360
+    tx, ty = mo["ex"] + 60 * _m.cos(_m.radians(want)), mo["ey"] - 60 * _m.sin(_m.radians(want))
+    pg.mouse.move(tx, ty, steps=12)
+    for _ in range(4):                      # Earth moves on as the clock does; the Moon follows the pointer
+        pg.wait_for_timeout(60)
+        pg.mouse.move(tx + 0.5, ty, steps=2)
+        pg.mouse.move(tx, ty, steps=2)
+    pg.mouse.up()
+    pg.wait_for_timeout(200)
+    m2 = pg.evaluate("()=>window.__moon")
+    e2 = m2["moonAt"]
+    want = _m.degrees(_m.atan2(-(ty - e2["ey"]), tx - e2["ex"])) % 360
+    err = abs(((m2["lam"] - want + 180) % 360) - 180)
+    ok = (not m2["playing"]) and err < 1.0
+    print(f"  {'ok  ' if ok else 'FAIL'} dragged a third of the way round: the Moon lands within {err:.2f} degrees "
+          f"of the pointer and the clock holds")
+    if not ok:
+        fails.append(f"dragging the Moon lands {err:.1f} degrees off (playing {m2['playing']})")
+
+    print("--- eclipses ---")
+    # the eclipses of 2026 to 2028 as NASA's catalogs list them (Espenak)
+    KNOWN = [("2026-02-17", "solar"), ("2026-03-03", "total lunar"), ("2026-08-12", "solar"),
+             ("2026-08-28", "partial lunar"), ("2027-02-06", "solar"), ("2027-02-20", "penumbral lunar"),
+             ("2027-08-02", "solar"), ("2027-08-17", "penumbral lunar"), ("2028-01-12", "partial lunar"),
+             ("2028-01-26", "solar"), ("2028-07-06", "partial lunar"), ("2028-07-22", "solar")]
+    got = pg.evaluate("""()=>{ const out=[]; let j=2461041.5;
+      for(let i=0;i<14;i++){ const e=eclipseFrom(j); out.push([jdToDate(e.jd).toISOString().slice(0,10), e.kind]); j=e.jd+2; }
+      return out; }""")
+    gotset = {tuple(g) for g in got}
+    missing = [k for k in KNOWN if k not in gotset]
+    ok = not missing
+    print(f"  {'ok  ' if ok else 'FAIL'} the {len(KNOWN)} clear eclipses of 2026 to 2028 all found, with their kinds")
+    if not ok:
+        fails.append(f"eclipses missed or mistyped: {missing}; the page found {got}")
+    # and the page's latitude at those new moons agrees with pyephem's
+    worst_b = 0
+    for day, kind in KNOWN:
+        if kind != "solar":
+            continue
+        d = ephem.Date(day.replace("-", "/"))
+        t = ephem.next_new_moon(ephem.Date(d - 2))
+        mm = ephem.Moon(); mm.compute(t)
+        ecl = ephem.Ecliptic(mm)
+        b = pg.evaluate("(j)=>positions(j).beta", float(t) + 2415020.0)
+        worst_b = max(worst_b, abs(b - _m.degrees(float(ecl.lat))))
+    ok = worst_b < 0.02
+    print(f"  {'ok  ' if ok else 'FAIL'} the Moon's latitude at those new moons within {worst_b*60:.2f} arcminutes of pyephem")
+    if not ok:
+        fails.append(f"the Moon's latitude is {worst_b:.3f} degrees off pyephem")
+    pg.evaluate("()=>{ jd = 2461265.2; }")
+    pg.wait_for_timeout(300)
+    txt = pg.inner_text("#ecl")
+    ok = txt.startswith("solar, now")
+    print(f"  {'ok  ' if ok else 'FAIL'} on 12 August 2026 the panel reads '{txt}'")
+    if not ok:
+        fails.append(f"on the eclipse the panel reads {txt!r}")
 
     print("--- the readouts against the diagram ---")
     # The counters, the wave and the scale caveat share the top left. The page
@@ -219,6 +311,26 @@ with sync_playwright() as pw:
                              f"{-beside:.0f}px into the readout panel")
         print(f"  {'ok  ' if under >= 0 and beside >= 0 else 'FAIL'} {w}x{h}  "
               f"{under:.0f}px above the controls, {beside:.0f}px left of the panel")
+    pg.set_viewport_size({"width": 1440, "height": 900})
+    pg.wait_for_timeout(450)
+
+    print("--- a phone ---")
+    pg.set_viewport_size({"width": 390, "height": 844})
+    pg.wait_for_timeout(500)
+    m = pg.evaluate("()=>window.__moon")
+    rb = pg.evaluate("()=>document.getElementById('readout').getBoundingClientRect().bottom")
+    ct = pg.evaluate("()=>document.getElementById('controls').getBoundingClientRect().top")
+    I = m["inset"]
+    r = m["reach"]
+    ok = (m["narrow"] and m["colTop"] - 20 > rb and m["colInk"] <= 390 and I["x"] + I["R"] < 200 and
+          I["y"] + I["R"] < m["colTop"] - 20 and r["bottom"] <= ct and m["orbitLeft"] >= 0 and r["right"] <= 390)
+    print(f"  {'ok  ' if ok else 'FAIL'} at 390x844 the column sits under the readout ({m['colTop']:.0f} > {rb:.0f}), "
+          f"the inset beside the heading, the orbit between the column and the controls")
+    if not ok:
+        fails.append(f"the phone layout overlaps: {m['colTop']}, {rb}, {I}, {r}, {ct}")
+    ov = pg.evaluate("document.documentElement.scrollWidth - innerWidth")
+    if ov:
+        fails.append(f"the phone page is {ov}px too wide")
     pg.set_viewport_size({"width": 1440, "height": 900})
     pg.wait_for_timeout(450)
 

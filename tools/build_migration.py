@@ -30,13 +30,15 @@ Three layers move with the clock.
 The data is in sapiens_data.py, which carries its sources, its ranges and its
 arguments, and validates its own consistency.
 
-Usage: python3 build_migration.py      (needs /home/claude/earth/*.npy)
+Usage: python3 build_migration.py      (uses /home/claude/earth/*.npy when
+present, otherwise the map already embedded in migration.html)
 """
 
 import base64
 import io
 import json
 import math
+import re
 import apa
 from pathlib import Path
 
@@ -72,6 +74,22 @@ FACTS = [
 ]
 
 
+# The chips: each one sets the clock to a site's own date and pins its card.
+# The secure site for each region, so a chip never lands on a claim the
+# literature still argues about; the contested ones are a hover away.
+MOMENTS = [
+    ("Oldest fossils", "Jebel Irhoud, Morocco"),
+    ("Levant", "Misliya Cave, Israel"),
+    ("Arabia", "Al Wusta, Nefud Desert, Saudi Arabia"),
+    ("Australia", "Lake Mungo, Willandra Lakes, New South Wales"),
+    ("Europe", "Bacho Kiro Cave, Bulgaria"),
+    ("Beringia", "Swan Point, Tanana Valley, Alaska"),
+    ("The Americas", "Blackwater Draw / Clovis, New Mexico"),
+    ("The Pacific", "Teouma, Efate, Vanuatu"),
+    ("Now", None),
+]
+
+
 def as_png(a):
     buf = io.BytesIO()
     Image.fromarray(a, "L").save(buf, "PNG", optimize=True, compress_level=9)
@@ -85,11 +103,25 @@ def great_circle(a, b):
     return 2 * 6371 * math.asin(min(1, math.sqrt(d)))
 
 
+def ground_png():
+    """The land classes as a PNG. From the rasters when this machine has them,
+    otherwise from the copy already embedded in the page, so the builder still
+    runs where /home/claude/earth is missing."""
+    if (DATA / "cid.npy").exists():
+        cid = np.load(DATA / "cid.npy")
+        clim = np.load(DATA / "clim.npy")
+        H, W = cid.shape
+        return as_png(np.where(cid > 0, clim, 0).astype(np.uint8)), W, H
+    m = re.search(r'"png":"([A-Za-z0-9+/=]+)","w":(\d+),"h":(\d+)',
+                  OUT.read_text(encoding="utf-8"))
+    if not m:
+        raise SystemExit(f"no {DATA} and no embedded map in {OUT}")
+    print(f"note: {DATA} is missing, reusing the map embedded in {OUT.name}")
+    return m.group(1), int(m.group(2)), int(m.group(3))
+
+
 def main():
-    cid = np.load(DATA / "cid.npy")
-    clim = np.load(DATA / "clim.npy")
-    H, W = cid.shape
-    ground = np.where(cid > 0, clim, 0).astype(np.uint8)
+    png, W, H = ground_png()
 
     sites = [a for a in ARRIVALS if a[5] != "refuted"]
     sites.sort(key=lambda a: -a[3])
@@ -107,7 +139,7 @@ def main():
                                                (sites[j][1], sites[j][2])))})
 
     js = {
-        "png": as_png(ground), "w": W, "h": H,
+        "png": png, "w": W, "h": H,
         "terrain": TERRAIN, "coast": C_COAST,
         "sites": [{"n": n, "la": la, "lo": lo, "t": t, "s": site,
                    "c": conf, "d": note} for n, la, lo, t, site, conf, note
@@ -121,6 +153,8 @@ def main():
         "ccolour": [CONT_COLOUR[c] for c in CONTINENTS],
         "contFrom": CONT_FROM,
         "argued": {k: v for k, v in CONTESTED.items()},
+        "moments": [[label, next(i for i, x in enumerate(sites) if x[4] == site)
+                     if site else -1] for label, site in MOMENTS],
     }
     blob = json.dumps(js, separators=(",", ":"))
 
@@ -161,7 +195,7 @@ nav.site a:hover{color:var(--accent)}
 h1{font-size:1.7rem;font-weight:600;margin:0 0 1.1rem}
 
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
-gap:10px;margin:0 0 16px}
+gap:10px;margin:18px 0 0}
 .tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 14px}
 .tile .k{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em}
 .tile .v{font-size:1.16rem;font-weight:650;margin-top:3px;font-variant-numeric:tabular-nums}
@@ -170,8 +204,17 @@ gap:10px;margin:0 0 16px}
 .stage{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
 .mapwrap{flex:1 1 640px;min-width:320px}
 #map{width:100%;height:auto;display:block;border-radius:10px;
-border:1px solid var(--line);background:var(--sea);cursor:crosshair}
-.side{flex:1 1 280px;min-width:262px}
+border:1px solid var(--line);background:var(--sea);cursor:crosshair;outline:none}
+#map:focus-visible{border-color:var(--accent)}
+#map.hit{cursor:pointer}
+.legend{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin:7px 2px 0;
+font-size:.76rem;color:var(--ink3)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;
+margin-right:6px;vertical-align:-1px}
+.legend i.ring{box-shadow:0 0 0 2px #121212,0 0 0 3px rgba(255,255,255,.75)}
+.legend i.link{width:22px;height:2px;border-radius:1px;
+background:linear-gradient(90deg,rgba(242,198,107,.14),rgba(242,198,107,.7))}
+.side{flex:0 0 300px;min-width:262px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
 padding:13px 15px}
 .card h2{font-size:1.5rem;font-weight:650;margin:0 0 1px;font-variant-numeric:tabular-nums}
@@ -186,25 +229,43 @@ gap:8px;font-size:.79rem;padding:2px 0}
 .latest{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;
 font-size:.84rem;color:var(--ink2);line-height:1.5}
 .latest b{color:var(--ink)}
+.latest .pin{float:right;font-size:10px;letter-spacing:.07em;text-transform:uppercase;
+color:var(--accent)}
+.latest .chain{margin-top:6px;color:var(--ink3);font-size:.78rem}
 .tag{font-size:10px;letter-spacing:.07em;text-transform:uppercase;
 border:1px solid var(--line);border-radius:999px;padding:1px 7px;margin-left:6px}
 .tag.debated{border-color:#b17600;color:#d8a63c}
-.tag.contested{border-color:#a84e7c;color:#d munch}
 .tag.contested{border-color:#a84e7c;color:#d878a8}
 
 .controls{margin:13px 0 0;display:flex;flex-direction:column;gap:9px}
 .sl{display:grid;grid-template-columns:1fr 190px;align-items:center;gap:12px;
 font-size:.86rem}
 .sl output{font-variant-numeric:tabular-nums;color:var(--ink);text-align:right}
-input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent);margin:0}
+.ticks{position:relative;height:16px;font-size:10.5px;color:var(--ink3);
+font-variant-numeric:tabular-nums;margin:0 7px}
+.ticks span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+.ticks span::before{content:"";position:absolute;left:50%;top:-4px;width:1px;height:4px;
+background:var(--ink3)}
+.ticks span:first-child{transform:none}
+.ticks span:last-child{transform:translateX(-100%)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:.8rem}
+.chips .k{color:var(--ink3);margin-right:4px}
+.chips button{font-size:.78rem;padding:3px 11px}
 .btns{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;font-size:.88rem}
 button{font:inherit;font-size:.85rem;background:none;color:var(--ink);
 border:1px solid var(--line);border-radius:999px;padding:5px 13px;cursor:pointer}
 button:hover{background:#20242a}
 button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.cap{margin:16px 0 0;color:var(--ink2);font-size:.95rem;max-width:74ch}
+details.sources{margin-top:1.6rem;border-top:1px solid var(--line);padding-top:12px;max-width:78ch}
+details.sources>summary{cursor:pointer;color:var(--ink3);font-size:12.5px;
+letter-spacing:.06em;text-transform:uppercase}
+details.sources>summary:hover{color:var(--accent)}
+@media (max-width:600px){.side{flex:1 1 100%}.sl{grid-template-columns:1fr 130px}
+.ticks span.m{display:none}}
 
-.notes{margin-top:2.6rem;border-top:1px solid var(--line);padding-top:1.5rem;
-color:var(--ink2);font-size:.95rem;max-width:74ch}
+.notes{margin-top:1rem;color:var(--ink2);font-size:.95rem;max-width:74ch}
 .notes h2{font-size:1.05rem;font-weight:400;color:var(--ink);margin:0 0 .6rem}
 .notes p{margin:0 0 1rem}
 .refs{margin-top:1.5rem;color:var(--ink3);font-size:.86rem;max-width:78ch}
@@ -221,19 +282,13 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}
 
 <h1>Homo Sapiens Migration</h1>
 
-<div class="tiles">
-  <div class="tile"><div class="k">estimated year</div>
-    <div class="v" id="tWhen">--</div><div class="d" id="tWhenSub"></div></div>
-  <div class="tile"><div class="k">estimated population</div>
-    <div class="v" id="tPop">--</div><div class="d" id="tPopSub"></div></div>
-  <div class="tile"><div class="k">sites reached</div>
-    <div class="v" id="tSites">--</div><div class="d" id="tSitesSub"></div></div>
-  <div class="tile"><div class="k">where most people are</div>
-    <div class="v" id="tCont">--</div><div class="d" id="tContSub"></div></div>
-</div>
-
 <div class="stage">
-  <div class="mapwrap"><canvas id="map"></canvas></div>
+  <div class="mapwrap"><canvas id="map" tabindex="0" aria-label="World map of the sites"></canvas>
+    <div class="legend"><span><i style="background:#f2c66b"></i>secure</span>
+      <span><i class="ring" style="background:#e08b3a"></i>debated</span>
+      <span><i class="ring" style="background:#d878a8"></i>contested</span>
+      <span><i class="link"></i>order of the spread, not a route</span></div>
+  </div>
   <div class="side"><div class="card">
     <h2 id="pop">--</h2>
     <div class="sub" id="popsub">people alive</div>
@@ -245,7 +300,9 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}
 
 <div class="controls">
   <div class="sl">
-    <input type="range" id="t" min="0" max="1000" step="1" value="0">
+    <div><input type="range" id="t" min="0" max="1000" step="1" value="0"
+      aria-label="Years before present, on a logarithmic scale">
+      <div class="ticks" id="ticks"></div></div>
     <output id="tout"></output>
   </div>
   <div class="btns">
@@ -254,15 +311,24 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}
     <button id="bLinks" aria-pressed="true">Order of the spread</button>
     <button id="bLabels" aria-pressed="true">Site names</button>
   </div>
+  <div class="chips" id="chips"><span class="k">Jump to</span></div>
 </div>
 
+<div class="tiles">
+  <div class="tile"><div class="k">estimated year</div>
+    <div class="v" id="tWhen">--</div><div class="d" id="tWhenSub"></div></div>
+  <div class="tile"><div class="k">estimated population</div>
+    <div class="v" id="tPop">--</div><div class="d" id="tPopSub"></div></div>
+  <div class="tile"><div class="k">sites reached</div>
+    <div class="v" id="tSites">--</div><div class="d" id="tSitesSub"></div></div>
+  <div class="tile"><div class="k">where most people are</div>
+    <div class="v" id="tCont">--</div><div class="d" id="tContSub"></div></div>
+</div>
+
+<p class="cap">The clock runs on a logarithmic scale because most of the story fills the last five percent of the span; a linear slider would spend its travel on an empty Africa. Each site appears at the date its evidence gives, and its dot reads that evidence and lights the earlier sites behind it. Argued sites are drawn differently.</p>
+
+<details class="sources"><summary>Sources</summary>
 <div class="notes">
-<h2>About the map</h2>
-<p>The clock runs on a logarithmic scale because the story is not evenly
-spread: most of it happens in the last five per cent of the span, and a linear
-slider would spend nearly all its travel on an empty Africa. Each site appears
-at the date its own evidence gives, and the ones the literature argues about
-are drawn differently and say what the argument is.</p>
 <p>The lines join each site to the nearest one already occupied. That shows the
 order things happened in, not anyone's route: nobody walked those lines, and
 the paths themselves are not known. Sea level was 120 meters lower at the
@@ -292,6 +358,7 @@ Fenerty, B., Connelly, C., Martinez, P. J., Santucci, V. L., &amp; Odess, D.
 (2021). Evidence of humans in North America during the Last Glacial Maximum.
 <i>Science, 373</i>(6562), 1528-1531. <a href="https://doi.org/10.1126/science.abg7586">https://doi.org/10.1126/science.abg7586</a></p>
 </div>
+</details>
 </main>
 <script>
 const D = __DATA__;
@@ -300,13 +367,19 @@ const cv = el('map'), ctx = cv.getContext('2d');
 const W = D.w, H = D.h;
 let ground = null, baseCv = null;
 let playing = true, showLinks = true, showLabels = true;
-let p = 0, last = 0, hover = null;
+let p = 0, last = 0;
+// the site under the pointer, and the one a click has pinned to the card
+let hov = -1, sel = -1;
+// a tween of the clock, for the chips and the arrow keys
+let tw = null;
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // the clock: logarithmic in years before present, with a hundred years added
 // so the scale survives arriving at the present
 const T0 = 300000, T1 = -76;                 // AD 2026 on the 1950 datum
 const U0 = Math.log10(T0 + 100), U1 = Math.log10(T1 + 100);
 const ybpOf = q => Math.pow(10, U0 + (U1 - U0) * q) - 100;
+const pOf = t => (Math.log10(t + 100) - U0) / (U1 - U0);
 const fmt = n => Math.round(n).toLocaleString('en-US');
 function whenLabel(t) {
   if (t >= 12000) return fmt(Math.round(t / 100) * 100) + ' years ago';
@@ -381,7 +454,7 @@ function makeBase() {
     const c = TERRAIN[ground[q]];
     const m = ground[q] ? 0.94 + ((q * 2654435761) >>> 28) / 125 : 1;
     // the land is dimmed, so the sites and their lines carry the picture
-    const f = ground[q] ? 0.62 : 1;
+    const f = ground[q] ? 0.8 : 1;
     o[i] = c[0] * m * f; o[i+1] = c[1] * m * f; o[i+2] = c[2] * m * f;
     o[i+3] = 255;
   }
@@ -401,36 +474,59 @@ function makeBase() {
 const CONF = {secure: '#f2c66b', debated: '#e08b3a', contested: '#d878a8'};
 const px = lo => (lo + 180) * W / 360;
 const py = la => (90 - la) * H / 180;
+// the link that brought each site, by the index of the site it was reached from
+const linkTo = {};
+D.links.forEach(L => { linkTo[L.b] = L; });
+// the chain of links from a site back to the first one
+function chainOf(i) {
+  const out = [];
+  let k = i, guard = 0;
+  while (linkTo[k] && guard++ < 200) { out.push(linkTo[k]); k = linkTo[k].a; }
+  return out;
+}
+
+function strokeLink(L, u, lit) {
+  const a = D.sites[L.a], b = D.sites[L.b];
+  const x1 = px(a.lo), y1 = py(a.la), x2 = px(b.lo), y2 = py(b.la);
+  // the shorter way round, so a link does not cross the whole map
+  const dx = ((x2 - x1 + W * 1.5) % W) - W / 2;
+  const mx = x1 + dx / 2, my = (y1 + y2) / 2 - Math.abs(dx) * 0.12;
+  // a link across the date line runs off one edge and back on the other,
+  // so it is stroked three times and the frame keeps the piece it needs
+  for (const sh of [-W, 0, W]) {
+    const g = ctx.createLinearGradient(x1 + sh, y1, x1 + dx + sh, y2);
+    if (lit) {
+      g.addColorStop(0, 'rgba(255,240,200,0.55)');
+      g.addColorStop(1, 'rgba(255,240,200,1)');
+    } else {
+      g.addColorStop(0, 'rgba(242,198,107,0.14)');
+      g.addColorStop(1, 'rgba(242,198,107,0.62)');
+    }
+    ctx.strokeStyle = g; ctx.lineWidth = (lit ? 3 : 1.7) * u;
+    ctx.beginPath();
+    ctx.moveTo(x1 + sh, y1);
+    ctx.quadraticCurveTo(mx + sh, my, x1 + dx + sh, y2);
+    ctx.stroke();
+  }
+}
 
 function draw() {
   const t = ybpOf(p);
   const u = W / 1000;
   ctx.drawImage(baseCv, 0, 0);
   const here = D.sites.map(s => s.t >= t);
+  const focus = sel >= 0 && here[sel] ? sel : (hov >= 0 && here[hov] ? hov : -1);
+  const chain = focus >= 0 ? chainOf(focus) : [];
 
+  ctx.lineCap = 'round';
   if (showLinks) {
-    ctx.lineCap = 'round';
     for (const L of D.links) {
       if (!here[L.b]) continue;
-      const a = D.sites[L.a], b = D.sites[L.b];
-      const x1 = px(a.lo), y1 = py(a.la), x2 = px(b.lo), y2 = py(b.la);
-      // the shorter way round, so a link does not cross the whole map
-      const dx = ((x2 - x1 + W * 1.5) % W) - W / 2;
-      const mx = x1 + dx / 2, my = (y1 + y2) / 2 - Math.abs(dx) * 0.12;
-      // a link across the date line runs off one edge and back on the other,
-      // so it is stroked three times and the frame keeps the piece it needs
-      for (const sh of [-W, 0, W]) {
-        const g = ctx.createLinearGradient(x1 + sh, y1, x1 + dx + sh, y2);
-        g.addColorStop(0, 'rgba(242,198,107,0.14)');
-        g.addColorStop(1, 'rgba(242,198,107,0.62)');
-        ctx.strokeStyle = g; ctx.lineWidth = 1.7 * u;
-        ctx.beginPath();
-        ctx.moveTo(x1 + sh, y1);
-        ctx.quadraticCurveTo(mx + sh, my, x1 + dx + sh, y2);
-        ctx.stroke();
-      }
+      strokeLink(L, u, false);
     }
   }
+  // the chain behind the chosen site is lit whether or not the links are shown
+  for (const L of chain) strokeLink(L, u, true);
 
   D.sites.forEach((s, i) => {
     if (!here[i]) return;
@@ -448,21 +544,33 @@ function draw() {
       ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 1.1 * u;
       ctx.beginPath(); ctx.arc(x, y, 6.5 * u, 0, 7); ctx.stroke();
     }
+    if (i === focus) {
+      ctx.strokeStyle = i === sel ? '#ffffff' : 'rgba(255,255,255,0.85)';
+      ctx.lineWidth = 1.6 * u;
+      ctx.beginPath(); ctx.arc(x, y, 10 * u, 0, 7); ctx.stroke();
+    }
   });
 
-  if (showLabels) {
-    ctx.font = `${Math.round(12 * u)}px -apple-system, BlinkMacSystemFont, sans-serif`;
+  // on a narrow screen the names would be unreadable, so only the chosen one is drawn
+  const narrow = cv.getBoundingClientRect().width < 500;
+  if (showLabels || focus >= 0) {
+    ctx.font = `${Math.round(14 * u)}px -apple-system, BlinkMacSystemFont, sans-serif`;
     ctx.textBaseline = 'middle';
     // labels are kept off each other by the box each one would actually
     // occupy, measured, rather than by a guess at how wide a name is
     const put = [];
-    D.sites.forEach((s, i) => {
+    // the chosen site's name goes down first, so it is never the one culled
+    const order = D.sites.map((s, i) => i);
+    if (focus >= 0) order.splice(order.indexOf(focus), 1), order.unshift(focus);
+    order.forEach(i => {
+      const s = D.sites[i];
       if (!here[i]) return;
+      if ((narrow || !showLabels) && i !== focus) return;
       const x = px(s.lo), y = py(s.la);
       const right = x < W * 0.72;
       const wpx = ctx.measureText(s.s).width + 16 * u;
       const x0 = right ? x : x - wpx, x1b = x0 + wpx;
-      const y0 = y - 9 * u, y1b = y + 9 * u;
+      const y0 = y - 10 * u, y1b = y + 10 * u;
       if (put.some(q => x0 < q[2] && x1b > q[0] && y0 < q[3] && y1b > q[1]))
         return;
       put.push([x0, y0, x1b, y1b]);
@@ -471,11 +579,86 @@ function draw() {
       ctx.lineWidth = 3.4 * u;
       ctx.strokeStyle = 'rgba(6,12,20,0.85)';
       ctx.strokeText(s.s, tx, y);
-      ctx.fillStyle = '#eef3f8';
+      ctx.fillStyle = i === focus ? '#ffffff' : '#eef3f8';
       ctx.fillText(s.s, tx, y);
     });
   }
 }
+
+// the site under a point of the canvas, in canvas pixels, if one is up
+function hitSite(cx, cy) {
+  const t = ybpOf(p), u = W / 1000;
+  let best = -1, bd = 14 * u;
+  D.sites.forEach((s, i) => {
+    if (s.t < t) return;
+    const d = Math.hypot(px(s.lo) - cx, py(s.la) - cy);
+    if (d < bd) { bd = d; best = i; }
+  });
+  return best;
+}
+function canvasPoint(e) {
+  const r = cv.getBoundingClientRect();
+  return [(e.clientX - r.left) * W / r.width, (e.clientY - r.top) * H / r.height];
+}
+cv.addEventListener('mousemove', e => {
+  if (!baseCv) return;
+  const [x, y] = canvasPoint(e);
+  hov = hitSite(x, y);
+  cv.classList.toggle('hit', hov >= 0);
+});
+cv.addEventListener('mouseleave', () => { hov = -1; cv.classList.remove('hit'); });
+cv.addEventListener('click', e => {
+  if (!baseCv) return;
+  const [x, y] = canvasPoint(e);
+  const i = hitSite(x, y);
+  // a click on a dot pins it, a second click on it or a click on the sea unpins
+  sel = (i >= 0 && i !== sel) ? i : -1;
+  cv.focus({preventScroll: true});
+});
+document.addEventListener('keydown', e => {
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'input' && e.target.type === 'text') return;
+  if (e.key === 'Escape') { sel = -1; return; }
+  // the arrows step the clock one site at a time while the map has focus
+  if (e.target !== cv) return;
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  e.preventDefault();
+  const t = ybpOf(p), right = e.key === 'ArrowRight';
+  let idx;
+  if (sel >= 0) idx = sel + (right ? 1 : -1);
+  else if (right) idx = D.sites.findIndex(s => s.t < t - 1e-6);
+  else { idx = -1; D.sites.forEach((s, i) => { if (s.t > t + 1e-6) idx = i; }); }
+  if (idx >= 0 && idx < D.sites.length) goToSite(idx);
+});
+
+// the clock runs to a date over a second, or jumps when motion is reduced
+function tweenTo(q, done) {
+  pause();
+  if (reduced || Math.abs(q - p) < 0.002) { p = q; tw = null; if (done) done(); return; }
+  tw = {from: p, to: q, t0: performance.now(), ms: 900, done};
+}
+function goToSite(i) {
+  sel = i;
+  tweenTo(pOf(D.sites[i].t - Math.max(1, D.sites[i].t * 0.002)));
+}
+D.moments.forEach(([label, i]) => {
+  const b = document.createElement('button');
+  b.textContent = label;
+  b.addEventListener('click', () => {
+    if (i < 0) { sel = -1; tweenTo(1); } else goToSite(i);
+  });
+  el('chips').appendChild(b);
+});
+
+// tick marks on the slider, so the log scale is visible before it is felt
+(function ticks() {
+  // the minor marks are dropped on a narrow screen
+  const marks = [[300000, '300,000', 0], [100000, '100,000', 1], [30000, '30,000', 1],
+                 [10000, '10,000', 0], [3000, '3,000', 1], [1000, '1,000', 0],
+                 [-76, 'now', 0]];
+  el('ticks').innerHTML = marks.map(([t, l, m]) =>
+    `<span class="${m ? 'm' : ''}" style="left:${(pOf(t) * 100).toFixed(2)}%">${l}</span>`).join('');
+})();
 
 // las casillas de arriba llevan la cuenta del año y de la gente, y cambian
 // con el deslizador igual que el mapa
@@ -535,17 +718,37 @@ function panel() {
       + 'between their published dates.';
   }
   const shown = D.sites.filter(s => s.t >= t);
-  const s = shown[shown.length - 1];
+  const focus = sel >= 0 && D.sites[sel].t >= t ? sel
+              : (hov >= 0 && D.sites[hov].t >= t ? hov : -1);
+  const s = focus >= 0 ? D.sites[focus] : shown[shown.length - 1];
+  let chain = '';
+  if (focus >= 0) {
+    const links = chainOf(focus);
+    const from = linkTo[focus] ? D.sites[linkTo[focus].a] : null;
+    const km = links.reduce((a, L) => a + L.km, 0);
+    chain = from
+      ? `<div class="chain">Reached after ${from.s}, ${fmt(linkTo[focus].km)} km `
+        + `away; ${links.length} step${links.length === 1 ? '' : 's'} and `
+        + `${fmt(km)} km back to Jebel Irhoud.</div>`
+      : '<div class="chain">The first site: every chain leads back here.</div>';
+  }
   el('latest').innerHTML = s
-    ? `<b>${s.s}</b><span class="tag ${s.c}">${s.c}</span><br>${s.n}, `
+    ? (focus === sel && sel >= 0 ? '<span class="pin">pinned</span>' : '')
+      + `<b>${s.s}</b><span class="tag ${s.c}">${s.c}</span><br>${s.n}, `
       + `${whenLabel(s.t)}.<br>${s.d}`
-      + (D.argued[s.n] ? `<br><br>${D.argued[s.n]}` : '')
+      + (D.argued[s.n] ? `<br><br>${D.argued[s.n]}` : '') + chain
     : 'Nothing yet: the oldest fossils are 315,000 years old.';
 }
 
 function frame(now) {
   const dt = last ? Math.min(0.08, (now - last) / 1000) : 0;
   last = now;
+  if (tw) {
+    const k = Math.min(1, (now - tw.t0) / tw.ms);
+    const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    p = tw.from + (tw.to - tw.from) * e;
+    if (k >= 1) { const d = tw.done; tw = null; if (d) d(); }
+  }
   if (playing) {
     p += dt / 46;                       // the whole story in three quarters of a minute
     if (p >= 1) { p = 1; playing = false; el('bPlay').setAttribute('aria-pressed', false);
@@ -557,18 +760,17 @@ function frame(now) {
 
 el('t').addEventListener('input', e => {
   p = (+e.target.value) / 1000;
-  playing = false;
-  el('bPlay').setAttribute('aria-pressed', false);
-  el('bPlay').textContent = 'Play';
+  pause();
 });
 el('bPlay').addEventListener('click', () => {
   if (p >= 1) p = 0;
+  tw = null;
   playing = !playing;
   el('bPlay').setAttribute('aria-pressed', playing);
   el('bPlay').textContent = playing ? 'Pause' : 'Play';
 });
 el('bStart').addEventListener('click', () => {
-  p = 0; playing = true;
+  p = 0; playing = true; tw = null; sel = -1;
   el('bPlay').setAttribute('aria-pressed', true);
   el('bPlay').textContent = 'Pause';
 });
@@ -585,11 +787,20 @@ window.__mig = () => ({p, ybp: ybpOf(p), playing,
   sites: D.sites.length, links: D.links.length,
   here: D.sites.filter(s => s.t >= ybpOf(p)).length,
   world: interp(D.pop, ybpOf(p)), cont: interpCont(ybpOf(p)),
-  showLinks, showLabels});
-window.__setP = q => { p = q; playing = false; draw(); panel(); return ybpOf(p); };
-window.__setYbp = t => {
-  p = (Math.log10(t + 100) - U0) / (U1 - U0);
-  playing = false; draw(); panel(); return p;
+  showLinks, showLabels, sel, hov, tween: !!tw,
+  chain: sel >= 0 ? chainOf(sel).length : -1,
+  moments: D.moments.length, ticks: el('ticks').children.length});
+function pause() {
+  playing = false; tw = null;
+  el('bPlay').setAttribute('aria-pressed', false);
+  el('bPlay').textContent = 'Play';
+}
+window.__setP = q => { p = q; pause(); draw(); panel(); return ybpOf(p); };
+window.__setYbp = t => { p = pOf(t); pause(); draw(); panel(); return p; };
+window.__siteXY = i => {
+  const r = cv.getBoundingClientRect();
+  return [r.left + px(D.sites[i].lo) * r.width / W,
+          r.top + py(D.sites[i].la) * r.height / H];
 };
 </script>
 </body>

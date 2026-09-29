@@ -56,8 +56,15 @@ with sync_playwright() as pw:
         pg.wait_for_timeout(600)
         print(f"--- {fname} ---")
         st = pg.evaluate("window.__state()")
-        check("starts in 1492 with no settlements yet",
-              st["year"] == 1492 and st["visEvents"] == 0)
+        check("opens in 1492 with the years already running",
+              st["start"] == 1492 and st["playing"] and st["year"] > 1492,
+              f"start {st['start']}, playing {st['playing']}, year {st['year']}")
+        check("Play reads Pause while it runs",
+              pg.evaluate("document.getElementById('bPlay').textContent") == "Pause")
+        pg.evaluate("window.__goto(1492)"); pg.wait_for_timeout(200)
+        st = pg.evaluate("window.__state()")
+        check("1492 has no settlements yet",
+              st["year"] == 1492 and st["visEvents"] == 0 and not st["playing"])
         era0 = pg.evaluate("document.getElementById('eraTxt').textContent")
         none = pg.evaluate("!document.getElementById('flagNone').hidden")
         check("1492 shows the nations' land, no flag", none, era0)
@@ -67,6 +74,76 @@ with sync_playwright() as pw:
         nb0 = pg.evaluate("[...document.querySelectorAll('#map text')].filter(t=>t.getAttribute('letter-spacing')).length")
         check("no border or neighbor names before the border", ol == 0 and nb0 == 0,
               f"outline {ol}, names {nb0}")
+        # offline the terrain never paints, so the state carries a fill
+        fillp = pg.evaluate("document.querySelector('#map path').getAttribute('fill')")
+        check("the state is filled while the terrain has not painted",
+              fillp != "none" and not st["terPainted"], fillp)
+        check("a failed terrain load leaves the chip free to retry",
+              not st["terDone"] and not st["wooDone"])
+        # every nation label sits inside the frame, clear of the edges
+        inside = pg.evaluate(
+            "[...document.querySelectorAll('#map [data-nat] text')].every(t=>{"
+            "const b=t.getBBox();return b.x>=0&&b.x+b.width<=W&&b.y>=0&&b.y+b.height<=H;})")
+        check("every nation label is inside the frame", inside)
+        # no two nation labels on the same line overlap
+        clash = pg.evaluate(
+            "(()=>{const bs=[...document.querySelectorAll('#map [data-nat] text')]"
+            ".filter(t=>t.getAttribute('font-size')==='13').map(t=>t.getBBox());"
+            "let n=0;for(let i=0;i<bs.length;i++)for(let j=i+1;j<bs.length;j++){"
+            "const a=bs[i],b=bs[j];if(a.x<b.x+b.width&&b.x<a.x+a.width&&a.y<b.y+b.height&&b.y<a.y+a.height)n++;}return n;})()")
+        check("no two nation labels overlap", clash == 0, str(clash))
+        # the population lines under the slider
+        check("the population sparkline is drawn", st["spark"])
+        dots = pg.evaluate("document.querySelectorAll('#spark polyline').length")
+        check("the counted line and the Native estimate are both drawn", dots == 2, str(dots))
+        # the rail: rows of ticks, none printed over another at this width
+        check("no tick label is culled at desktop width", st["tickHidden"] == 0,
+              str(st["tickHidden"]))
+        overlap = pg.evaluate(
+            "(()=>{const bs=[...document.querySelectorAll('#ticks button')].map(b=>b.getBoundingClientRect());"
+            "let n=0;for(let i=0;i<bs.length;i++)for(let j=i+1;j<bs.length;j++){"
+            "const a=bs[i],b=bs[j];if(a.left<b.right-1&&b.left<a.right-1&&a.top<b.bottom-1&&b.top<a.bottom-1)n++;}return n;})()")
+        check("no two tick labels overlap", overlap == 0, str(overlap))
+        # the ghost of another state fades in at true ground scale
+        pg.click("[data-ghost]")
+        pg.wait_for_function("window.__state().ghostOp===1", timeout=5000)
+        gs = pg.evaluate("window.__state()")
+        ghost = pg.evaluate("document.querySelectorAll('#map path[stroke-dasharray=\"7 5\"]').length")
+        check("a ghost chip draws another state over this one",
+              gs["ghost"] is not None and gs["ghostOp"] == 1 and ghost == 1,
+              f"{gs['ghost']} {gs['ghostOp']} {ghost}")
+        nm = pg.evaluate("document.getElementById('nameTxt').textContent")
+        check("the card compares the two areas", " over " in nm, nm)
+        pg.click("[data-ghost]")
+        pg.wait_for_function("window.__state().ghost===null", timeout=5000)
+        gs = pg.evaluate("window.__state()")
+        check("a second click lifts the ghost", gs["ghost"] is None and gs["ghostOp"] == 0)
+        # a pinned nation holds the stage
+        pg.evaluate("document.querySelector('#map [data-nat=\"0\"] path').dispatchEvent(new MouseEvent('click',{bubbles:true}))")
+        pg.wait_for_timeout(150)
+        fs = pg.evaluate("window.__state()")
+        dimmed = pg.evaluate("document.querySelectorAll('#map [data-nat][opacity]').length")
+        check("clicking a nation pins it and dims the others",
+              fs["pinned"] == "n0" and fs["focusNat"] == 0 and dimmed == st["nations"] - 1,
+              f"{fs['pinned']} {fs['focusNat']} {dimmed}")
+        pg.keyboard.press("Escape"); pg.wait_for_timeout(150)
+        fs = pg.evaluate("window.__state()")
+        check("Escape lifts the pin", fs["pinned"] is None and fs["focusNat"] is None)
+        # Play: animation frames, a speed choice, and the counties coming on
+        pg.evaluate("window.__goto(HIST.border-4)")
+        pg.click("[data-spd='100']"); pg.click("#bPlay"); pg.wait_for_timeout(450)
+        ps = pg.evaluate("window.__state()")
+        check("Play runs on at the chosen speed",
+              ps["playing"] and ps["speed"] == 100 and ps["year"] > st["year"], str(ps["year"]))
+        check("the counties come on by themselves once the border exists",
+              ps["layers"]["cou"] and ps["year"] >= pg.evaluate("HIST.border"))
+        pg.click("#bPlay"); pg.wait_for_timeout(100)
+        check("Pause stops it", not pg.evaluate("window.__state()")["playing"])
+        pg.evaluate("window.__goto(2022)"); pg.click("#bPlay"); pg.wait_for_timeout(600)
+        ps = pg.evaluate("window.__state()")
+        check("Play stops at 2025", not ps["playing"] and ps["year"] == 2025)
+        pg.click("[data-spd='10']"); pg.click("#cCou"); pg.evaluate("window.__goto(1492)")
+        pg.wait_for_timeout(200)
         # counties chip: none exist yet in 1492, all carry data
         pg.click("#cCou"); pg.wait_for_timeout(200)
         n0 = pg.evaluate("document.querySelectorAll('[data-cty]').length")
@@ -188,13 +265,32 @@ with sync_playwright() as pw:
             f"[...document.querySelectorAll('#ticks button')].some(b=>b.textContent==='{sy}')")
         check(f"statehood {sy} is a jump marker", has)
         pg.evaluate("document.querySelector('#ticks button').click()")
-        pg.wait_for_timeout(200)
+        pg.wait_for_timeout(1100)
         jumped = pg.evaluate("window.__state()")["year"]
         first = pg.evaluate("HIST.eras.map(e=>e.y0).filter(y=>y>1492).sort((a,b)=>a-b)[0]")
         check("clicking a marker jumps to its year", jumped == first,
               f"{jumped} vs {first}")
+        # arrow keys move the year only while the map has focus
+        pg.focus("#map"); pg.keyboard.press("ArrowRight"); pg.wait_for_timeout(100)
+        check("an arrow key steps the year when the map has focus",
+              pg.evaluate("window.__state()")["year"] == first + 1)
+        pg.focus("#bPlay"); pg.keyboard.press("ArrowRight"); pg.wait_for_timeout(100)
+        check("and not otherwise",
+              pg.evaluate("window.__state()")["year"] == first + 1)
         check("no JS errors", not errs, "; ".join(errs)[:120])
         pg.close()
+        ph = br.new_page(viewport={"width": 390, "height": 844})
+        ph.route("**/*", lambda r: r.abort()
+                 if r.request.url.startswith("http") else r.continue_())
+        ph.goto((ROOT / fname).as_uri()); ph.wait_for_timeout(500)
+        ov = ph.evaluate("document.documentElement.scrollWidth - innerWidth")
+        mw = ph.evaluate("document.getElementById('mapwrap').getBoundingClientRect().width")
+        check("a phone has no sideways overflow and a map that scrolls at a readable size",
+              ov == 0 and mw >= 600, f"overflow {ov}, map {mw}")
+        cw = ph.evaluate("[...document.querySelectorAll('.side .card')].filter(c=>c.offsetParent)"
+                         ".map(c=>Math.round(c.getBoundingClientRect().width))")
+        check("on a phone the side cards run the full width", cw and min(cw) >= 340, str(cw))
+        ph.close()
     br.close()
 
 
@@ -236,6 +332,10 @@ for st in sorted(HIST):
           str([m["l"] for m in h["marks"]]))
     for n in h["nations"]:
         assert {"n", "src", "poly", "lat", "lon", "note"} <= set(n), n
+    check(f"{st}: Moundville is a site, not a nation" if st == "al" else f"{st}: nation kinds are labels",
+          all(isinstance(n.get("kind", ""), str) for n in h["nations"])
+          and (st != "al" or any(n.get("kind", "").startswith("A Mississippian")
+                                 for n in h["nations"] if n["n"] == "Moundville")))
     check(f"{st}: every nation carries a homeland, a label and a source",
           all(len(n["poly"]) >= 4 and n["note"].strip() for n in h["nations"]))
     sym = SYMBOLS[st]

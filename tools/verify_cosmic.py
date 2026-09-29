@@ -89,14 +89,14 @@ with sync_playwright() as pw:
 
     back = xs()
     pg.click("#bFwd")
-    pg.wait_for_timeout(200)
+    pg.wait_for_timeout(1100)
     fwd = xs()
     pg.click("#bSun")
-    pg.wait_for_timeout(200)
+    pg.wait_for_timeout(1100)
     sun = xs()
     sunst = pg.evaluate("window.__cosmic()")
     pg.click("#bLin")
-    pg.wait_for_timeout(200)
+    pg.wait_for_timeout(1100)
     even = xs()
     check("the four scales place the events differently",
           len({tuple(back), tuple(fwd), tuple(sun), tuple(even)}) == 4)
@@ -129,7 +129,7 @@ with sync_playwright() as pw:
           even[-1] - even[i_hs] < 3, str(even[-1] - even[i_hs]))
     # every strand still reaches the plot on the Sun scale
     pg.click("#bSun")
-    pg.wait_for_timeout(200)
+    pg.wait_for_timeout(1100)
     perrow = pg.evaluate(
         "(()=>{const o={};for(const d of DET){const x=X(d.t);"
         "if(x>=111&&x<=967) o[d.k]=(o[d.k]||0)+1;}return o;})()")
@@ -137,7 +137,7 @@ with sync_playwright() as pw:
           len(perrow) == len(STRANDS) and min(perrow.values()) >= 5,
           str(sorted(perrow.items())))
     pg.click("#bLin")
-    pg.wait_for_timeout(150)
+    pg.wait_for_timeout(1100)
 
     # the even scale is what it says: distance proportional to time
     i_life = names.index("Life")
@@ -149,7 +149,7 @@ with sync_playwright() as pw:
     check("on the even scale everything after the mammals is one place",
           even[-1] - late < 20, str(even[-1] - late))
     pg.click("#bBack")
-    pg.wait_for_timeout(200)
+    pg.wait_for_timeout(1100)
     check("the log scale spreads them out",
           back[-1] - back[names.index("Mammals")] > 200,
           str(back[-1] - back[names.index("Mammals")]))
@@ -282,6 +282,58 @@ with sync_playwright() as pw:
               n >= 3 and mono)
     pg.evaluate("()=>{setMode('back');setWin(null)}")
     check("and the whole line comes back", pg.evaluate("()=>win") is None)
+
+    # --- a change of scale slides the marks rather than jumping them
+    pg.wait_for_timeout(1100)
+    b0 = pg.evaluate("()=>Math.round(X(EV[3].t))")
+    pg.evaluate("()=>setMode('even')")
+    pg.wait_for_timeout(430)
+    mid = pg.evaluate("()=>Math.round(X(EV[3].t))")
+    pg.wait_for_timeout(900)
+    e1 = pg.evaluate("()=>Math.round(X(EV[3].t))")
+    check("a change of scale slides the Sun between its two places",
+          min(b0, e1) < mid < max(b0, e1), f"{b0} {mid} {e1}")
+    pg.evaluate("()=>setMode('back')")
+    pg.wait_for_timeout(1100)
+
+    # --- ctrl and the wheel zoom about the pointer; the arrows step
+    box = pg.evaluate("()=>{const r=document.getElementById('tsvg').getBoundingClientRect();"
+                      "return [r.left+r.width*0.6, r.top+r.height*0.6]}")
+    pg.mouse.move(*box)
+    pg.keyboard.down("Control")
+    pg.mouse.wheel(0, -300)
+    pg.keyboard.up("Control")
+    pg.wait_for_timeout(200)
+    w = pg.evaluate("()=>win")
+    check("Ctrl and the wheel zoom the line into a window", w is not None, str(w))
+    check("and the button back to the whole line appears",
+          pg.evaluate("()=>!document.getElementById('whole').hidden"))
+    pg.evaluate("()=>setWin(null)")
+    pg.evaluate("()=>show(0)")
+    pg.focus("#chart")
+    pg.keyboard.press("ArrowRight")
+    pg.keyboard.press("ArrowRight")
+    check("the right arrow walks forward through the milestones",
+          pg.evaluate("()=>cur") == 2, str(pg.evaluate("()=>cur")))
+    pg.keyboard.press("ArrowLeft")
+    check("and the left arrow walks back", pg.evaluate("()=>cur") == 1)
+
+    # --- one caption on the page, everything else behind Sources
+    vis = pg.evaluate("""()=>[...document.querySelectorAll('p.note')]
+      .filter(p=>p.checkVisibility()).map(p=>p.textContent.trim().split(/\s+/).length)""")
+    check("one caption of about sixty words shows", len(vis) == 1 and 45 <= vis[0] <= 80, str(vis))
+    check("the notes and references sit in a closed Sources",
+          pg.evaluate("()=>{const d=document.querySelector('details.sources');"
+                      "return !!d && !d.open && !!d.querySelector('.refs')}"))
+    ph = br.new_page(viewport={"width": 390, "height": 844})
+    ph.goto(PAGE.as_uri())
+    ph.wait_for_timeout(500)
+    check("nothing wider than a phone",
+          ph.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0)
+    check("on a phone the card comes before the line",
+          ph.evaluate("()=>document.querySelector('.card').getBoundingClientRect().top"
+                      "< document.getElementById('tsvg').getBoundingClientRect().top"))
+    ph.close()
 
     check("no JS errors", not errs, "; ".join(errs)[:140])
     br.close()
