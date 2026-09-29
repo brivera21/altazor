@@ -127,7 +127,11 @@
       Planets, the Sun and Pluto: NASA's <a href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/">planetary
       fact sheets</a>. Ceres, Vesta and the belts: the
       <a href="https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html">JPL Small-Body Database</a> and the Dawn
-      and New Horizons results. A day is sunrise to sunrise; a year is one orbit of the Sun, in Earth time.
+      and New Horizons results. Pallas: VLT/SPHERE (Marsset and others, 2020). Haumea, Makemake, Eris and
+      Sedna: the stellar occultations and moon orbits summarized on Wikipedia (Ortiz and others, 2012 and 2017).
+      Jupiter's Trojans: the Minor Planet Center's count and NASA's Lucy pages. The heliopause: NASA's Voyager
+      pages. Halley's Comet: JPL's orbital elements, its position today worked out from them. The Oort cloud's
+      edges are estimates, from NASA. A day is sunrise to sunrise; a year is one orbit of the Sun, in Earth time.
     </details>
   </div>
 </div>
@@ -260,7 +264,7 @@
     disc: "Kenneth Edgeworth in 1943 and Gerard Kuiper in 1951 argued that the solar system did not simply end at Neptune. Clyde Tombaugh had already found Pluto on February 18, 1930 without knowing what it belonged to. The second member, Albion, was found by David Jewitt and Jane Luu on August 30, 1992",
     probe: "New Horizons passed Pluto on July 14, 2015, then Arrokoth on January 1, 2019 at 44 au, the most distant object a spacecraft has ever reached"
   };
-  const REGIONS = [BELT, KUIPER];
+  const REGIONS = [BELT, KUIPER];   // the Oort cloud joins below, once defined
 
   // The two largest bodies in the main belt, drawn on the line at their real
   // distances inside it. Figures: JPL Small-Body Database; shape, size and
@@ -318,14 +322,186 @@
     disc: "Clyde Tombaugh, February 18, 1930, at Lowell Observatory, comparing two photographs of the sky taken six days apart. It was counted the ninth planet for 76 years",
     probe: "New Horizons, flyby, July 14, 2015, nine and a half years after launch, passing 12,500 km above the surface"
   };
-  VESTA.region = BELT; CERES.region = BELT; PLUTO.region = KUIPER;
+  // Pallas: nearly as wide as Vesta and at almost exactly Ceres's distance,
+  // on an orbit tilted 35 degrees, so it is drawn above the line rather than
+  // on top of Ceres. Figures: JPL Small-Body Database; size, shape and mass
+  // from VLT/SPHERE (Marsset and others, 2020).
+  const PALLAS = {
+    name: "Pallas", type: "Asteroid, the third largest in the belt", au: 2.772, rKm: 256,
+    lenR: 4 * 256 / 469.7, small: true, flat: 0.88, dy: -0.28,
+    labels: { extra: "Why it sits off the line" },
+    day: "7 h 49 min",
+    year: "4.6 Earth years, nearly the same as Ceres, whose orbit it shares in size",
+    diam: "About 512 km across on average, a little wider than Vesta and a little less massive",
+    area: "About 8.3 × 10<sup>5</sup> km², about the area of Mozambique",
+    mass: "2.0 × 10<sup>20</sup> kg, 2.8% of the Moon and about a twelfth of the belt",
+    moons: "0",
+    made: "Rock rich in carbon and water-bearing minerals, never melted and separated the way Vesta was. Its surface is pocked like a golf ball, from the fast, steep collisions its tilted orbit brings",
+    extra: "Its orbit is tilted 35 degrees to the plane the planets share, so it cuts through the belt at a steep angle, crossing it twice a year and spending the rest of the time above or below it. It is drawn above the line for that reason, and to keep it from sitting on top of Ceres",
+    disc: "Heinrich Olbers, March 28, 1802, at Bremen, while he was following Ceres. The second asteroid found",
+    probe: "None. No spacecraft has visited it"
+  };
+  // Haumea and Makemake, the Kuiper belt's two other dwarf planets. Figures:
+  // Wikipedia and the stellar occultations behind them (Ortiz and others,
+  // 2017, for Haumea's shape and ring; Ortiz and others, 2012, for Makemake).
+  const HAUMEA = {
+    name: "Haumea", type: "Dwarf planet, in the Kuiper belt", au: 43.12, rKm: 1061,
+    lenR: 6 * 1061 / 1188.3, small: true, flat: 1036 / 2122,
+    labels: { extra: "Why it is shaped like an egg" },
+    day: "3 h 55 min, the fastest spin of any body this large in the solar system",
+    year: "283 Earth years",
+    diam: "About 2,120 × 1,690 × 1,040 km: nearly as long as Pluto is wide, and half as thick",
+    area: "About 8 × 10<sup>6</sup> km², a little more than Brazil",
+    mass: "3.95 × 10<sup>21</sup> kg, 5% of the Moon and 30% of Pluto",
+    moons: "2: Hiʻiaka, about 370 km across, and Namaka, about 150 km. A thin ring circles it too, found in 2017 when it passed in front of a star, about 2,290 km from its center",
+    made: "Rock under a thin coat of crystalline water ice, which is why it is one of the brightest objects in the Kuiper belt. A family of icy fragments shares its orbit, knocked off in the same collision that set it spinning",
+    extra: "It turns once every four hours, and a body spinning that fast cannot stay round. Its own gravity and the spin balance in a stretched ellipsoid, drawn here side on",
+    disc: "Found in 2004 by Michael Brown's team at Caltech, and in 2003 images by José Luis Ortiz's team in Spain, who announced it first, in July 2005. Which team found it is still argued; the IAU took the name from Brown's team and the discovery site from Ortiz's",
+    probe: "None"
+  };
+  const MAKEMAKE = {
+    name: "Makemake", type: "Dwarf planet, in the Kuiper belt", au: 45.50, rKm: 715,
+    lenR: 6 * 715 / 1188.3, small: true, flat: 1420 / 1434,
+    labels: { extra: "What it does not have" },
+    day: "22.8 hours, or possibly 11.4; the measurements do not yet settle which",
+    year: "307 Earth years",
+    diam: "About 1,430 km, three fifths of Pluto",
+    area: "About 6.4 × 10<sup>6</sup> km², about the area of Australia",
+    mass: "About 2.7 × 10<sup>21</sup> kg, weighed from its moon's orbit: 4% of the Moon",
+    moons: "1, unnamed, about 175 km across and very dark, found by Hubble in 2015 and announced in 2016",
+    made: "Rock under frozen methane, reddened by organics that sunlight has made from it",
+    extra: "When it passed in front of a star in 2011 the starlight cut off sharply, with no fading at the edges: unlike Pluto, it has no atmosphere to speak of",
+    disc: "Michael Brown, Chad Trujillo and David Rabinowitz, March 31, 2005, at Palomar Observatory, three days after Easter; its nickname was Easterbunny",
+    probe: "None"
+  };
+  // Eris and Sedna, past the Kuiper belt, each in a slot of its own on the
+  // lenient line and at its average distance at true scale, as Pluto is.
+  const ERIS = {
+    name: "Eris", type: "Dwarf planet, in the scattered disc", au: 67.69, rKm: 1163,
+    lenR: 6 * 1163 / 1188.3, small: true, flat: 1, span: [38.1, 97.49],
+    labels: { extra: "What it did to Pluto" },
+    dist: "67.7 au on average (10.1 billion km), from 38.1 au at its closest to 97.5 at its farthest. It is near the far end now, about 96 au out, three times as far as Neptune",
+    day: "15.8 Earth days. It turns once for each orbit of its moon, so the two keep the same faces to each other",
+    year: "561 Earth years",
+    diam: "2,326 km, within a few percent of Pluto's 2,377",
+    area: "About 1.7 × 10<sup>7</sup> km², about the area of Russia",
+    mass: "1.64 × 10<sup>22</sup> kg, a quarter more than Pluto: the heaviest dwarf planet known",
+    moons: "1: Dysnomia, about 615 km across, whose orbit gives Eris's mass",
+    made: "Rock under frozen methane and nitrogen, among the most reflective surfaces in the solar system. The ice may be a frozen atmosphere, fallen as frost this far from the Sun",
+    extra: "It was first thought larger than Pluto, and called the tenth planet. Either both were planets or neither was, and in 2006 the International Astronomical Union ruled neither, creating the dwarf planets for them. Its name is the Greek goddess of discord",
+    disc: "Michael Brown, Chad Trujillo and David Rabinowitz, January 5, 2005, in images taken at Palomar on October 21, 2003; announced July 29, 2005",
+    probe: "None"
+  };
+  const SEDNA = {
+    name: "Sedna", type: "Dwarf planet candidate, beyond the Kuiper belt", au: 506, rKm: 500,
+    lenR: 6 * 500 / 1188.3, small: true, flat: 1, span: [76.19, 937],
+    labels: { extra: "Why it matters" },
+    dist: "506 au on average (76 billion km), from 76 au at its closest to about 937 at its farthest. It is about 83 au out now, nearing its closest, which it reaches in 2076",
+    day: "About 10 hours",
+    year: "About 11,400 Earth years. Its last closest pass was in the last ice age",
+    diam: "About 1,000 km, with a wide uncertainty",
+    area: "About 3 × 10<sup>6</sup> km², about the area of India",
+    mass: "Not measured. It has no known moon to weigh it by",
+    moons: "0 known",
+    made: "Among the reddest bodies known. The James Webb Space Telescope found ethane and complex organics on its surface, the products of sunlight and cosmic rays working on ices for billions of years",
+    extra: "Even at its closest it never comes within 76 au, twice Neptune's distance, so Neptune cannot have thrown it out there. Something else did: a star passing close in the Sun's birth cluster is the leading idea, and a large planet not yet found is another",
+    disc: "Michael Brown, Chad Trujillo and David Rabinowitz, November 14, 2003, at Palomar Observatory. Named for the Inuit goddess of the sea, who lives at the bottom of the cold Arctic ocean",
+    probe: "None"
+  };
+  VESTA.region = BELT; CERES.region = BELT; PALLAS.region = BELT; PLUTO.region = KUIPER;
+  HAUMEA.region = KUIPER; MAKEMAKE.region = KUIPER; ERIS.region = null; SEDNA.region = null;
   // Charon, drawn beside Pluto when it is selected, at Pluto's own drawn
   // scale, so its size and its distance are both true relative to Pluto.
   // Radius and distance from New Horizons (Nimmo and others, 2017; Brozović
   // and others, 2015); masses from the NASA fact sheet and Brozović.
   PLUTO.m = 1.303e22;
   PLUTO.partner = { name: "Charon", r: 606, a: 19591, m: 1.586e21 };
-  const SMALL = [VESTA, CERES, PLUTO];           // in order outward
+  const SMALL = [VESTA, CERES, PALLAS, PLUTO, HAUMEA, MAKEMAKE, ERIS, SEDNA];   // in order outward
+
+  // The heliopause, where the Sun's wind gives out and interstellar space
+  // begins. Not a body; a boundary, drawn as one, with the two Voyagers where
+  // they crossed it. Figures: NASA and JPL Voyager mission pages.
+  const HELIO = {
+    name: "Heliopause", type: "The edge of the Sun's wind, not a body", au: 120, noGhost: true, special: true,
+    labels: { diam: "Shape", area: "What crosses it", moons: "Crossed by", made: "Made of",
+              extra: "Visitors from beyond it" },
+    dist: "About 120 au (18 billion km) in the direction the Sun is moving, farther on the trailing side. Sunlight takes about 16 and a half hours to reach it",
+    diam: "Not a sphere but a bubble blown back by the Sun's motion through the galaxy, like the wake of a boat, with a long tail behind",
+    area: "Nearly everything: planets, asteroids and comets are all inside. Only the Oort cloud, if it is there, lies beyond",
+    mass: "None to speak of. The wind here is a few particles per cubic centimeter",
+    moons: "Voyager 1 on August 25, 2012, at 121.6 au, and Voyager 2 on November 5, 2018, at 119 au. Both still send data, from interstellar space",
+    made: "The Sun's wind, a stream of charged particles, slows and piles up against the thin gas between the stars and stops. Inside, the wind first drops below the speed of sound at the termination shock, which Voyager 1 crossed at 94 au in 2004 and Voyager 2 at 84 au in 2007",
+    extra: "Three objects have come in from outside: 'Oumuamua in 2017, the comet Borisov in 2019 and the comet 3I/ATLAS in 2025, each passing through once, too fast to be held by the Sun",
+    disc: "Predicted in the 1950s and 60s once the solar wind was understood; found where it is by Voyager 1 in 2012",
+    probe: "Voyager 1 and Voyager 2, launched in 1977"
+  };
+  // The Oort cloud: a shell of comets, never seen, inferred from the orbits
+  // of long-period comets. Its edges are estimates and vary by a factor of a
+  // few between models; these are NASA's round figures.
+  const OORT = {
+    name: "Oort Cloud", type: "Region of comets, inferred, not observed", isBelt: true, icy: true, faint: true,
+    auIn: 2000, auOut: 100000, short: "Oort cloud (inferred)",
+    labels: { diam: "Width", area: "Why we think it is there", moons: "Known members",
+              extra: "How far that is" },
+    dist: "From somewhere around 2,000 au out to perhaps 100,000 au, a third of the way to the nearest star. The edges are estimates",
+    year: "Millions of years for a comet out there to go round once",
+    diam: "Roughly 100,000 au, or about 1.6 light years; not a disc but a shell, around the whole solar system",
+    area: "Comets that fall in from it arrive from every direction, not along the plane of the planets, on orbits that reach tens of thousands of au. That shell of far aphelia is the cloud; no one has seen an object in it",
+    mass: "Estimates run from a few Earths to a few dozen. The number of comets is guessed at in the hundreds of billions to trillions",
+    moons: "None seen in place. Sedna, whose orbit reaches 937 au, may belong to its inner edge",
+    made: "Ice and dust: the same comets that formed among the giant planets and were thrown outward by them",
+    extra: "Light takes about a year and seven months to cross to the outer edge. Voyager 1, the fastest thing leaving the solar system, will need about 300 years to reach the inner edge and perhaps 30,000 to cross it",
+    disc: "Proposed by Ernst Öpik in 1932 and argued in detail by Jan Oort in 1950, from the orbits of long-period comets",
+    probe: "None. Nothing we have built will get there for centuries"
+  };
+  REGIONS.push(OORT);
+  // Jupiter's Trojans: two swarms that share its orbit, 60 degrees ahead and
+  // 60 degrees behind. Figures: the Minor Planet Center count as given on
+  // Wikipedia, February 2026; the Lucy mission pages at NASA.
+  const TROJANS = {
+    name: "Jupiter Trojans", type: "Asteroids sharing Jupiter's orbit", noGhost: true, special: true, au: 5.204,
+    labels: { diam: "Where they are", area: "Why they stay", moons: "How many", extra: "The two camps" },
+    dist: "5.2 au, Jupiter's own distance. On this line they are drawn above and below Jupiter; with the orbits running they ride 60 degrees ahead of it and 60 behind",
+    year: "11.9 Earth years, Jupiter's year",
+    diam: "Two swarms, each spread over tens of degrees along Jupiter's orbit around a point 60 degrees ahead or behind",
+    area: "At those two points the pulls of the Sun and Jupiter balance with the motion of the orbit, so a body there stays in step with Jupiter, drifting around the point instead of away from it",
+    mass: "A few thousandths of an Earth, less than the main belt; the largest, Hektor, is about 225 km long",
+    moons: "More than 15,300 found as of 2025: 9,738 ahead of Jupiter and 5,931 behind as of February 2026, and perhaps a million larger than a kilometer",
+    made: "Dark, reddish rock and ice, more like the Kuiper belt's bodies than the main belt's. They may have been captured from farther out when the giant planets moved",
+    extra: "The swarm ahead is named for the Greek heroes of the Iliad and the one behind for the Trojans, with two misplaced: Hektor among the Greeks and Patroclus among the Trojans. The swarm ahead holds about 1.6 times as many",
+    disc: "Max Wolf found the first, 588 Achilles, on February 22, 1906, at Heidelberg",
+    probe: "Lucy, launched October 16, 2021, reaches the swarm ahead in 2027 and the one behind in 2033, passing seven Trojans in all"
+  };
+  // Halley's comet: the orbit as a bar from its closest to its farthest, and
+  // the nucleus where it is today, from its orbital elements (JPL).
+  const HALLEY = {
+    name: "Halley's Comet", type: "Periodic comet", isBelt: true, noGhost: true, special: true,
+    auIn: 0.586, auOut: 35.1, a: 17.83, e: 0.9671, periodY: 75.32, tPeri: Date.UTC(1986, 1, 9),
+    labels: { diam: "Nucleus", area: "Its orbit", moons: "Returns", extra: "What it leaves behind" },
+    dist: "",
+    year: "About 76 Earth years; the gap has run from 74 to 79 as the planets tug on it",
+    diam: "About 15 × 8 km, a dark potato of dust and ice, darker than coal. Giotto flew 596 km from it on March 14, 1986",
+    area: "Stretched from 0.59 au, inside Venus's orbit, to 35.1 au, past Neptune's, and tilted so that it goes round the Sun backward. It spends nearly all of its time far out and crosses the inner system in a few months",
+    mass: "About 2 × 10<sup>14</sup> kg, and it loses a little every pass",
+    moons: "Last at the Sun on February 9, 1986; farthest out in December 2023; next at the Sun on July 28, 2061",
+    made: "Water ice with carbon monoxide and dust. Near the Sun the ice boils off and makes the coma and the tail, which point away from the Sun",
+    extra: "Two meteor showers, the Eta Aquariids in May and the Orionids in October, as Earth crosses dust it shed on earlier passes",
+    disc: "Seen since at least 240 BC. Edmond Halley showed in 1705 that the comets of 1531, 1607 and 1682 were one object and predicted its return for 1758; it was seen again on Christmas night 1758, after his death",
+    probe: "Five spacecraft in 1986: Giotto, Vega 1 and 2, Suisei and Sakigake"
+  };
+  // where Halley is today, from Kepler's equation
+  function halleyNow() {
+    const P = HALLEY.periodY * 365.25 * 86400e3, n = 2 * Math.PI / P;
+    let M = ((Date.now() - HALLEY.tPeri) * n) % (2 * Math.PI);
+    let E = M;
+    for (let i = 0; i < 60; i++) E = E - (E - HALLEY.e * Math.sin(E) - M) / (1 - HALLEY.e * Math.cos(E));
+    const r = HALLEY.a * (1 - HALLEY.e * Math.cos(E));
+    return { r, outbound: M < Math.PI };
+  }
+  HALLEY.now = halleyNow();
+  HALLEY.dist = `Today about ${HALLEY.now.r.toFixed(1)} au (${(HALLEY.now.r * AU / 1e9).toFixed(1)} billion km), ` +
+    (HALLEY.now.outbound ? "still heading out" : "past its farthest point in December 2023 and falling back in") +
+    `. Its orbit runs from 0.59 au to 35.1 au, 17.8 au on average`;
 
   // ---------- Layouts (world units u) ----------
   // Lenient: even spacing, exaggerated radii. True: everything ∝ km.
@@ -343,6 +519,13 @@
   BELT.lenHalf = LEN_GAP * 0.40;
   KUIPER.slot = PLANETS.length + 1;            // past Neptune
   KUIPER.lenHalf = LEN_GAP * 0.46;             // it really is the wider one
+  // past the Kuiper belt, each in a slot of its own: Eris, the heliopause,
+  // Sedna, and the Oort cloud, widest of all
+  ERIS.slot = PLANETS.length + 2;
+  HELIO.slot = PLANETS.length + 3;
+  SEDNA.slot = PLANETS.length + 4;
+  OORT.slot = PLANETS.length + 5.6;
+  OORT.lenHalf = LEN_GAP * 0.62;
   REGIONS.forEach(g => {
     const c = LEN_START + g.slot * LEN_GAP;
     g.xLenIn = c - g.lenHalf;
@@ -383,6 +566,9 @@
   // so a peaked prior there would invent a concentration that is not real.
   BELT.prior = rnd => (rnd() + rnd() + rnd()) / 3;
   KUIPER.prior = rnd => rnd();
+  // the Oort cloud: thin everywhere, a little thicker toward its inner part
+  OORT.density = au => 1;
+  OORT.prior = rnd => Math.pow(rnd(), 1.6);
 
   // One deterministic swarm per region, reused every frame so nothing shimmers.
   // u is the position across the belt, v the position up and down it.
@@ -402,6 +588,7 @@
   }
   BELT.rocks = makeSwarm(BELT, 620, 20260101);      // Ceres, January 1, 1801
   KUIPER.rocks = makeSwarm(KUIPER, 1150, 19920830); // Albion, August 30, 1992
+  OORT.rocks = makeSwarm(OORT, 420, 19500101);      // Oort, 1950
   REGIONS.forEach(g => {
     g.edgeIn = () => mix(g.xLenIn + shifted(g.xLenIn), g.xTrueIn, ease(m));
     g.edgeOut = () => mix(g.xLenOut + shifted(g.xLenIn), g.xTrueOut, ease(m));
@@ -411,11 +598,36 @@
   // same fraction of the way across its belt in either one.
   SMALL.forEach(b => {
     const g = b.region;
-    b.fr = (b.au - g.auIn) / (g.auOut - g.auIn);
-    b.xLen = g.xLenIn + b.fr * (g.xLenOut - g.xLenIn);
+    if (g) {
+      b.fr = (b.au - g.auIn) / (g.auOut - g.auIn);
+      b.xLen = g.xLenIn + b.fr * (g.xLenOut - g.xLenIn);
+    } else b.xLen = LEN_START + b.slot * LEN_GAP;
     b.xTrue = b.au * AU * KM2U; b.rTrue = b.rKm * KM2U;
   });
+  HELIO.xLen = LEN_START + HELIO.slot * LEN_GAP; HELIO.xTrue = HELIO.au * AU * KM2U;
+  HELIO.lenR = 1; HELIO.rTrue = 1e-9;
+  // Any distance on the lenient line: straight across inside a belt, and
+  // between two neighbors along it otherwise. Used for the orbits drawn as bars.
+  function auToLen(au) {
+    for (const g of [BELT, KUIPER, OORT])
+      if (au >= g.auIn && au <= g.auOut) return g.xLenIn + (au - g.auIn) / (g.auOut - g.auIn) * (g.xLenOut - g.xLenIn);
+    const pts = [[0, 0], ...PLANETS.map(q => [q.au, q.xLen]),
+      [BELT.auIn, BELT.xLenIn], [BELT.auOut, BELT.xLenOut], [KUIPER.auOut, KUIPER.xLenOut],
+      [ERIS.au, ERIS.xLen], [HELIO.au, HELIO.xLen], [SEDNA.au, SEDNA.xLen],
+      [OORT.auIn, OORT.xLenIn], [OORT.auOut, OORT.xLenOut]].sort((a, b) => a[0] - b[0]);
+    for (let i = 1; i < pts.length; i++)
+      if (au <= pts[i][0]) { const [a0, x0] = pts[i - 1], [a1, x1] = pts[i]; return x0 + (au - a0) / (a1 - a0) * (x1 - x0); }
+    return pts[pts.length - 1][1];
+  }
+  HALLEY.xLenIn = auToLen(HALLEY.auIn); HALLEY.xLenOut = auToLen(HALLEY.auOut);
+  HALLEY.xTrueIn = HALLEY.auIn * AU * KM2U; HALLEY.xTrueOut = HALLEY.auOut * AU * KM2U;
+  HALLEY.edgeIn = () => mix(HALLEY.xLenIn + shifted(HALLEY.xLenIn), HALLEY.xTrueIn, ease(m));
+  HALLEY.edgeOut = () => mix(HALLEY.xLenOut + shifted(HALLEY.xLenIn), HALLEY.xTrueOut, ease(m));
+  HALLEY.xLen = auToLen(HALLEY.now.r); HALLEY.xTrue = HALLEY.now.r * AU * KM2U;
+  HALLEY.lenR = 1; HALLEY.rTrue = 7.5 * KM2U;
   const SUN_R_TRUE = SUN.rKm * KM2U;
+  const JUPITER = PLANETS.find(q => q.name === "Jupiter");
+  TROJANS.xLen = JUPITER.xLen; TROJANS.xTrue = JUPITER.xTrue; TROJANS.lenR = 1; TROJANS.rTrue = 1e-9;
 
   // ---------- State ----------
   const canvas = document.getElementById("space");
@@ -464,7 +676,9 @@
   // Neptune is no longer the outer edge of the picture: the Kuiper belt runs
   // to 50 au, well past it, and the two layouts disagree about how far that is.
   function outerEdge() {
-    return mix(KUIPER.xLenOut, KUIPER.xTrueOut, mTarget);
+    // the lenient line runs out to the Oort cloud; at true scale the overview
+    // stops at the Kuiper belt, and the far things are a chip or a zoom away
+    return mix(OORT.xLenOut, KUIPER.xTrueOut, mTarget);
   }
   function fitAll() {
     const outer = outerEdge();
@@ -475,6 +689,13 @@
   function focusOn(obj) {
     tracking = true;
     if (obj === SUN) { camT.c = 0; camT.z = Math.min(H, W) * 0.28 / sunR(); }
+    else if (obj === TROJANS) {
+      // Jupiter in the middle, both swarms in view
+      camT.c = px(JUPITER); camT.z = Math.min(H, W) * 0.09 / pr(JUPITER);
+    }
+    else if (obj === HELIO) {
+      camT.c = px(HELIO); camT.z = W / mix(LEN_GAP * 2.2, 90 * AU * KM2U, mTarget);
+    }
     else if (obj.isBelt) {
       // frame it so it still stands taller than it is wide, in any window
       const a = obj.edgeIn(), b = obj.edgeOut();
@@ -905,8 +1126,8 @@
   addChip("Overview", null);
   addChip("I. SUN", SUN);
   const ORDER = [...PLANETS.slice(0, BELT_SLOT), BELT,
-                 ...PLANETS.slice(BELT_SLOT), KUIPER];
-  const NUMERALS = ["II","III","IV","V","VI","VII","VIII","IX","X","XI"];
+                 ...PLANETS.slice(BELT_SLOT), KUIPER, HELIO, OORT];
+  const NUMERALS = ["II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII"];
   ORDER.forEach((o, i) => addChip(NUMERALS[i] + ". " + o.name.toUpperCase(), o));
 
   const scaleBtn = document.getElementById("scaleBtn");
@@ -945,10 +1166,17 @@
         if (mx > sx(g.edgeIn()) - 6 && mx < sx(g.edgeOut()) + 6 &&
             Math.abs(e.clientY - y0) < beltHalfHeight()) hit = g;
       }
+      if (Math.abs(sx(px(HELIO)) - mx) < 10 && Math.abs(e.clientY - y0) < beltHalfHeight()) hit = HELIO;
+      { const hy = y0 + halleyY();
+        if (mx > sx(HALLEY.edgeIn()) - 4 && mx < sx(HALLEY.edgeOut()) + 4 && Math.abs(e.clientY - hy) < 6) hit = HALLEY;
+        if (Math.hypot(sx(px(HALLEY)) - mx, e.clientY - hy) < 12) hit = HALLEY; }
+      // the nearest of the small bodies, since two can sit a few pixels apart
+      let bestD = Infinity;
       for (const b of SMALL) {
-        const r = Math.max(pr(b) * cam.z, 9);
-        if (Math.abs(sx(px(b)) - mx) < r && Math.abs(e.clientY - y0) < r + 8) hit = b;
+        const r = Math.max(pr(b) * cam.z, 9), dx = sx(px(b)) - mx, dy = e.clientY - (y0 + smallDy(b));
+        if (Math.abs(dx) < r && Math.abs(dy) < r + 8 && Math.hypot(dx, dy) < bestD) { hit = b; bestD = Math.hypot(dx, dy); }
       }
+      for (const t of trojanSpots()) if (Math.hypot(t.x - mx, t.y - e.clientY) < t.r + 8) hit = TROJANS;
       if (orbDays > 0) hit = null;   // mid-orbit only the planets answer, where they are
       for (const p of PLANETS) {
         const r = Math.max(pr(p) * cam.z, 12), [qx, qy] = ppos(p);
@@ -962,7 +1190,7 @@
     tracking = false;
     const f = Math.exp(-e.deltaY * 0.0015);
     const wx = (e.clientX - W / 2) / cam.z + cam.c;
-    cam.z = Math.min(Math.max(cam.z * f, 0.05), 8e5);
+    cam.z = Math.min(Math.max(cam.z * f, 1e-5), 8e5);   // far enough out for the Oort cloud
     cam.c = wx - (e.clientX - W / 2) / cam.z;
     camT.c = cam.c; camT.z = cam.z;
   }, { passive: false });
@@ -1137,12 +1365,13 @@
     ctx.drawImage(washTile(hot, g.icy), a, top, w, bot - top);
 
     const tone = hot ? "#9fc2f5" : g.icy ? "#a6c3d4" : "#b3a894";
+    if (g.faint) ctx.globalAlpha = 0.6;
     for (const k of g.rocks) {
       const x = a + k.u * w;
       if (x < -4 || x > W + 4) continue;
       const fade = 1 - Math.pow(Math.abs(k.v), 3);   // no hard edge top or bottom
       if (fade <= 0.02) continue;
-      ctx.globalAlpha = k.a * fade * (g.icy ? 0.8 : 1);
+      ctx.globalAlpha = k.a * fade * (g.icy ? 0.8 : 1) * (g.faint ? 0.55 : 1);
       ctx.fillStyle = tone;
       circle(x, y0 + k.v * hh, k.r * (g.icy ? 0.85 : 1)); ctx.fill();
     }
@@ -1154,8 +1383,9 @@
     ctx.fillStyle = hot ? "#58a6ff" : "rgba(190,205,235,0.85)";
     const lx = Math.min(Math.max((a + b) / 2, 62),
                         W - 62 - (selected && selected.isBelt ? 0 : 0));
-    ctx.fillText(g.name === "Kuiper Belt" ? "Kuiper belt" : "Asteroid belt",
-                 lx, top - 8);
+    if (hot || b - a > 24)
+      ctx.fillText(g.short || (g.name === "Kuiper Belt" ? "Kuiper belt" : "Asteroid belt"),
+                   lx, top - 8);
   }
 
   // Ceres and Vesta, on the line inside the belt. Up close Ceres is round and
@@ -1163,54 +1393,105 @@
   // asteroid; both are drawn with their measured pole to pole flattening,
   // north up, and Vesta's south polar basin at the bottom.
   const SMALL_TONE = { Ceres: ["#9a968f", "#34322e"], Vesta: ["#b8ab95", "#433b30"],
-                       Pluto: ["#d8c2a4", "#5a4434"] };
+                       Pluto: ["#d8c2a4", "#5a4434"], Pallas: ["#a3a7ab", "#3a3d40"],
+                       Haumea: ["#eeede9", "#6f6d69"], Makemake: ["#c99d7c", "#5c3b2b"],
+                       Eris: ["#f4f3ef", "#8a8884"], Sedna: ["#b9573d", "#4a1c12"] };
+  // Pallas rides above the line while it is a dot, and settles onto it as
+  // it grows, so a close view is centered like any other
+  function smallDy(b) {
+    if (!b.dy) return 0;
+    const r = pr(b) * cam.z;
+    return b.dy * beltHalfHeight() * Math.max(0, Math.min(1, 1 - (r - 3.5) / 20));
+  }
   function drawSmall(b) {
     const x = sx(px(b)), wr = pr(b) * cam.z, r = Math.max(wr, 1.1);
+    // the orbits that range far, Eris's and Sedna's, as a faint bar beneath
+    if (b.span) {
+      const a1 = sx(mix(auToLen(b.span[0]), b.span[0] * AU * KM2U, ease(m))),
+            a2 = sx(mix(auToLen(b.span[1]), b.span[1] * AU * KM2U, ease(m)));
+      if (a2 > -10 && a1 < W + 10) {
+        ctx.strokeStyle = b === selected ? "rgba(150,195,245,0.6)" : "rgba(190,170,150,0.22)";
+        ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
+        ctx.beginPath(); ctx.moveTo(a1, y0 + 9); ctx.lineTo(a2, y0 + 9); ctx.stroke(); ctx.setLineDash([]);
+        for (const q of [a1, a2]) { ctx.beginPath(); ctx.moveTo(q, y0 + 6); ctx.lineTo(q, y0 + 12); ctx.stroke(); }
+      }
+    }
     if (x + r < -60 || x - r > W + 60) return;
     const hot = b === selected, [base, dark] = SMALL_TONE[b.name];
+    const yb = y0 + smallDy(b);
     if (r < 3.5) {
       // this small it is a dot among the rocks, so a faint halo marks it out
       ctx.strokeStyle = hot ? "rgba(88,166,255,0.9)" : "rgba(214,200,170,0.45)"; ctx.lineWidth = 1;
-      circle(x, y0, r + 3.5); ctx.stroke();
-      ctx.fillStyle = hot ? "#ffffff" : base; circle(x, y0, r); ctx.fill();
+      circle(x, yb, r + 3.5); ctx.stroke();
+      ctx.fillStyle = hot ? "#ffffff" : base; circle(x, yb, r); ctx.fill();
     } else {
       const ry = r * b.flat;
       ctx.save();
-      ctx.beginPath(); ctx.ellipse(x, y0, r, ry, 0, 0, 7); ctx.clip();
-      const g = ctx.createRadialGradient(x - r*0.45, y0 - ry*0.2, r*0.1, x, y0, r*1.25);
+      ctx.beginPath(); ctx.ellipse(x, yb, r, ry, 0, 0, 7); ctx.clip();
+      const g = ctx.createRadialGradient(x - r*0.45, yb - ry*0.2, r*0.1, x, yb, r*1.25);
       g.addColorStop(0, base); g.addColorStop(1, dark);
-      ctx.fillStyle = g; ctx.fillRect(x - r, y0 - ry, 2 * r, 2 * ry);
+      ctx.fillStyle = g; ctx.fillRect(x - r, yb - ry, 2 * r, 2 * ry);
       if (b.name === "Ceres") {
         // the bright salt of Occator, and a few darker craters
         ctx.fillStyle = "rgba(40,38,34,0.35)";
         for (const [cx, cy, cr] of [[-0.3,-0.3,0.16],[0.35,0.25,0.12],[0.05,0.5,0.1],[0.45,-0.35,0.08]]) {
-          circle(x + cx*r, y0 + cy*ry, cr*r); ctx.fill();
+          circle(x + cx*r, yb + cy*ry, cr*r); ctx.fill();
         }
         ctx.fillStyle = "rgba(250,250,245,0.9)";
-        circle(x - 0.12*r, y0 + 0.05*ry, Math.max(0.05*r, 0.8)); ctx.fill();
-        circle(x - 0.06*r, y0 + 0.1*ry, Math.max(0.025*r, 0.6)); ctx.fill();
+        circle(x - 0.12*r, yb + 0.05*ry, Math.max(0.05*r, 0.8)); ctx.fill();
+        circle(x - 0.06*r, yb + 0.1*ry, Math.max(0.025*r, 0.6)); ctx.fill();
       } else if (b.name === "Pluto") {
         // Cthulhu, the dark band along the equator, and the bright heart,
         // Sputnik Planitia on its western lobe
         ctx.fillStyle = "rgba(70,38,26,0.6)";
-        ctx.beginPath(); ctx.ellipse(x - 0.5*r, y0 + 0.2*ry, 0.5*r, 0.2*ry, -0.2, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(x - 0.5*r, yb + 0.2*ry, 0.5*r, 0.2*ry, -0.2, 0, 7); ctx.fill();
         ctx.fillStyle = "rgba(246,238,224,0.88)";
-        ctx.beginPath(); ctx.ellipse(x + 0.12*r, y0 + 0.08*ry, 0.24*r, 0.3*ry, 0.35, 0, 7); ctx.fill();
-        ctx.beginPath(); ctx.ellipse(x + 0.4*r, y0 + 0.02*ry, 0.2*r, 0.26*ry, -0.3, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(x + 0.12*r, yb + 0.08*ry, 0.24*r, 0.3*ry, 0.35, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(x + 0.4*r, yb + 0.02*ry, 0.2*r, 0.26*ry, -0.3, 0, 7); ctx.fill();
+      } else if (b.name === "Haumea") {
+        // bright crystalline ice, and one dark red spot on its long side
+        ctx.fillStyle = "rgba(120,60,50,0.35)";
+        ctx.beginPath(); ctx.ellipse(x + 0.35*r, yb - 0.1*ry, 0.14*r, 0.22*ry, 0, 0, 7); ctx.fill();
+      } else if (b.name === "Makemake" || b.name === "Sedna") {
+        // reddened ices, mottled
+        ctx.fillStyle = b.name === "Sedna" ? "rgba(60,15,8,0.35)" : "rgba(80,50,35,0.3)";
+        for (const [cx, cy, cr] of [[-0.35,-0.2,0.22],[0.3,0.3,0.18],[0.2,-0.45,0.12]]) {
+          circle(x + cx*r, yb + cy*ry, cr*r); ctx.fill();
+        }
+      } else if (b.name === "Eris") {
+        // nearly white all over: frost that may be its atmosphere, fallen
+        ctx.fillStyle = "rgba(255,255,255,0.35)";
+        circle(x - 0.2*r, yb - 0.2*ry, 0.45*r); ctx.fill();
+      } else if (b.name === "Pallas") {
+        // the golf-ball surface: a scatter of small craters
+        ctx.fillStyle = "rgba(40,42,45,0.35)";
+        for (const [cx, cy, cr] of [[-0.4,-0.1,0.12],[0.1,-0.4,0.1],[0.35,0.2,0.13],[-0.1,0.35,0.11],[0.45,-0.25,0.08],[-0.3,0.55,0.07]]) {
+          circle(x + cx*r, yb + cy*ry, cr*r); ctx.fill();
+        }
       } else {
         // Rheasilvia: a broad dark floor across the south pole, its peak in the middle
         ctx.fillStyle = "rgba(45,38,30,0.45)";
-        ctx.beginPath(); ctx.ellipse(x, y0 + ry * 1.02, r * 0.86, ry * 0.42, 0, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(x, yb + ry * 1.02, r * 0.86, ry * 0.42, 0, 0, 7); ctx.fill();
         ctx.fillStyle = "rgba(200,188,165,0.55)";
-        circle(x + 0.05*r, y0 + ry * 0.8, Math.max(0.06*r, 0.8)); ctx.fill();
+        circle(x + 0.05*r, yb + ry * 0.8, Math.max(0.06*r, 0.8)); ctx.fill();
       }
       ctx.restore();
+      if (b.name === "Haumea") {
+        // its ring, about 2,290 km out, seen nearly edge on like Saturn's
+        ctx.strokeStyle = "rgba(220,215,205,0.55)"; ctx.lineWidth = Math.max(0.8, r * 0.03);
+        ctx.beginPath(); ctx.ellipse(x, yb, r * 2287 / 1061, r * 0.35, 0, 0, 7); ctx.stroke();
+      }
       if (hot) { ctx.strokeStyle = "rgba(88,166,255,0.9)"; ctx.lineWidth = 1.2;
-        ctx.beginPath(); ctx.ellipse(x, y0, r + 3, ry + 3, 0, 0, 7); ctx.stroke(); }
+        ctx.beginPath(); ctx.ellipse(x, yb, r + 3, ry + 3, 0, 0, 7); ctx.stroke(); }
     }
-    // named once its belt has room for names on the screen
-    if (hot || sx(b.region.edgeOut()) - sx(b.region.edgeIn()) >= 80)
-      label(b.name, x, y0 - Math.max(r, 3.5) - 10, hot);
+    if (yb !== y0) {
+      // a dotted drop to the line, where its distance from the Sun is
+      ctx.strokeStyle = "rgba(190,205,235,0.25)"; ctx.lineWidth = 1; ctx.setLineDash([1, 3]);
+      ctx.beginPath(); ctx.moveTo(x, yb + r + 2); ctx.lineTo(x, y0); ctx.stroke(); ctx.setLineDash([]);
+    }
+    // named once its belt has room for names on the screen; a body on its own always
+    if (hot || (!crowded() && (!b.region || sx(b.region.edgeOut()) - sx(b.region.edgeIn()) >= 80)))
+      label(b.name, x, yb - Math.max(r, 3.5) - 10, hot);
   }
 
   // Charon, beside Pluto at the same drawn scale, with the point the two
@@ -1287,7 +1568,7 @@
     }
 
     const ly = yy - Math.max(r, p.name === "Uranus" ? r*1.75 : r) - (p.name === "Saturn" ? r*0.7 : 0) - 10;
-    label(p.name, x, ly, p === selected);
+    if (!crowded() || p === selected) label(p.name, x, ly, p === selected);
   }
 
   PLANETS.forEach(p => {
@@ -1300,10 +1581,118 @@
     const min = sec / 60;
     if (min < 60) return min.toFixed(1) + " min";
     const h = Math.floor(min / 60), m2 = Math.round(min % 60);
-    return h + " h " + m2 + " min";
+    if (h < 48) return h + " h " + m2 + " min";
+    const d = h / 24;
+    return d < 365 ? Math.round(d) + " days" : (d / 365.25).toFixed(1) + " years";
   }
 
   let lightState = null;                 // what the pulse is doing, for checks
+  // zoomed so far out that the whole planetary system is a few pixels wide:
+  // its names would stack into a tower, so one label stands for all of them
+  function crowded() { return sx(px(PLANETS[PLANETS.length - 1])) - sx(0) < 90; }
+  function drawCrowdLabel() {
+    if (!crowded()) return;
+    const x = sx(mix(HELIO.xLen, HELIO.xTrue, ease(m)) / 2);
+    if (x < -40 || x > W + 40) return;
+    ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.textAlign = "left"; ctx.fillStyle = "rgba(190,205,235,0.85)";
+    ctx.fillText("the Sun, the planets, both belts and the heliopause, all in here", x + 10, y0 - 26);
+    ctx.strokeStyle = "rgba(190,205,235,0.35)"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x + 8, y0 - 30); ctx.lineTo(x, y0 - 6); ctx.stroke();
+  }
+
+  // ---------- The Trojans, the heliopause, Halley ----------
+  // Two swarms at Jupiter's distance. On the line they sit above and below
+  // Jupiter; with the orbits running, 60 degrees ahead and 60 behind it.
+  const TROJAN_DOTS = (() => {
+    let st = 19060222;                                    // 588 Achilles
+    const rnd = () => (st = (st * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+    const make = n => Array.from({ length: n }, () => {
+      const a = rnd() * 2 * Math.PI, d = Math.sqrt(rnd());
+      return { dx: Math.cos(a) * d * 1.5, dy: Math.sin(a) * d * 0.8, r: 0.5 + rnd() * 0.8, al: 0.35 + rnd() * 0.5 };
+    });
+    return { ahead: make(64), behind: make(40) };        // about 1.6 to 1
+  })();
+  function trojanSpots() {
+    const jx = sx(px(JUPITER)), jr = Math.max(pr(JUPITER) * cam.z, 3);
+    const k = Math.min(1, Math.max(0.45, jr / 30)), R = 13 * k;
+    if (orbDays > 0) {
+      const d = px(JUPITER), th = theta(JUPITER);
+      return [+1, -1].map(sg => ({ x: sx(d * Math.cos(th + sg * Math.PI / 3)),
+        y: y0 + d * Math.sin(th + sg * Math.PI / 3) * cam.z * FLAT, r: R, ahead: sg > 0 }));
+    }
+    const off = jr * (1.35) + 44 * k;
+    return [{ x: jx, y: y0 - off, r: R, ahead: true }, { x: jx, y: y0 + off, r: R, ahead: false }];
+  }
+  function drawTrojans() {
+    const spots = trojanSpots(), hot = selected === TROJANS;
+    if (spots.every(t => t.x < -40 || t.x > W + 40)) return;
+    if (crowded() && !hot) return;
+    for (const t of spots) {
+      ctx.fillStyle = hot ? "#9fc2f5" : "#b8a58a";
+      for (const d of (t.ahead ? TROJAN_DOTS.ahead : TROJAN_DOTS.behind)) {
+        ctx.globalAlpha = d.al; circle(t.x + d.dx * t.r, t.y + d.dy * t.r, d.r); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      if ((t.r >= 9 && !crowded()) || hot) {
+        ctx.font = "10px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillStyle = hot ? "#58a6ff" : "rgba(190,205,235,0.7)";
+        ctx.fillText(t.ahead ? "Trojans, 60° ahead" : "Trojans, 60° behind", t.x + t.r * 1.6 + 4, t.y + 3);
+      }
+    }
+  }
+  // The heliopause, a bowed line across the curtain, with the two Voyagers
+  // where they crossed it
+  function drawHelio() {
+    const x = sx(px(HELIO)), hh = beltHalfHeight();
+    if (x < -80 || x > W + 80) return;
+    if (crowded() && selected !== HELIO) return;
+    const hot = selected === HELIO;
+    ctx.strokeStyle = hot ? "rgba(88,166,255,0.85)" : "rgba(170,200,255,0.4)";
+    ctx.lineWidth = 1.3; ctx.setLineDash([6, 5]);
+    ctx.beginPath(); ctx.moveTo(x + 14, y0 - hh); ctx.quadraticCurveTo(x - 14, y0, x + 14, y0 + hh); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillStyle = hot ? "#58a6ff" : "rgba(190,205,235,0.85)";
+    ctx.fillText("heliopause", x + 14, y0 - hh - 8);
+    // the Voyagers: 121.6 and 119 au, on either side of the line
+    const au2x = au => sx(mix(HELIO.xLen + (au - 120) * 3, au * AU * KM2U, ease(m)));
+    for (const [n, au, dy] of [["Voyager 1, 2012", 121.6, -0.42], ["Voyager 2, 2018", 119.0, 0.42]]) {
+      const vx = au2x(au), vy = y0 + dy * hh;
+      ctx.fillStyle = "rgba(235,235,235,0.9)";
+      ctx.fillRect(vx - 2, vy - 1, 4, 2); ctx.fillRect(vx - 0.5, vy - 4, 1, 8);
+      ctx.font = "10px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.textAlign = "left"; ctx.fillStyle = "rgba(200,210,230,0.75)";
+      ctx.fillText(n, vx + 6, vy + 3);
+    }
+  }
+  // Halley: its orbit as a faint bar well under the line, the nucleus where it
+  // is today, and a short tail pointing away from the Sun
+  function halleyY() { return beltHalfHeight() * 0.62; }
+  function drawHalley() {
+    const a = sx(HALLEY.edgeIn()), b = sx(HALLEY.edgeOut());
+    if (b < -20 || a > W + 20) return;
+    const hot = selected === HALLEY, y = y0 + halleyY();
+    ctx.strokeStyle = hot ? "rgba(150,195,245,0.7)" : "rgba(160,200,230,0.28)";
+    ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
+    ctx.beginPath(); ctx.moveTo(a, y); ctx.lineTo(b, y); ctx.stroke(); ctx.setLineDash([]);
+    for (const q of [a, b]) { ctx.beginPath(); ctx.moveTo(q, y - 3); ctx.lineTo(q, y + 3); ctx.stroke(); }
+    const x = sx(px(HALLEY));
+    const g = ctx.createLinearGradient(x, y, x + 26, y);
+    g.addColorStop(0, "rgba(200,225,255,0.55)"); g.addColorStop(1, "rgba(200,225,255,0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(x, y - 2); ctx.lineTo(x + 26, y - 0.5); ctx.lineTo(x + 26, y + 0.5); ctx.lineTo(x, y + 2); ctx.fill();
+    ctx.fillStyle = hot ? "#ffffff" : "#d8e6f5"; circle(x, y, 2.2); ctx.fill();
+    ctx.font = "10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.textAlign = "center"; ctx.fillStyle = hot ? "#58a6ff" : "rgba(190,205,235,0.75)";
+    if (!crowded() || hot) ctx.fillText("Halley's Comet, today", x, y - 9);
+    if (hot || b - a > 160) {
+      ctx.fillStyle = "rgba(160,190,220,0.6)"; ctx.font = "10px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.textAlign = "left"; ctx.fillText("its orbit, 0.59 to 35.1 au", a + 4, y + 14);
+    }
+  }
+
   function drawLightTimes() {
     // Only meaningful at true scale, where the line IS the distance.
     const a = Math.max(0, (m - 0.5) * 2);
@@ -1312,8 +1701,8 @@
     // travel time of sunlight to each planet, under its dot
     ctx.font = "10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
     ctx.textAlign = "center";
-    const items = PLANETS.map(p => ({ x: sx(px(p)), t: p.au * AU / C_KM_S }))
-      .concat(REGIONS.map(g => ({ x: sx(g.edgeOut()),
+    const items = (crowded() ? [] : PLANETS.map(p => ({ x: sx(px(p)), t: p.au * AU / C_KM_S })))
+      .concat(REGIONS.filter(g => !crowded() || g === OORT).map(g => ({ x: sx(g.edgeOut()),
                                   t: g.auOut * AU / C_KM_S })))
       .filter(it => it.x > -40 && it.x < W + 40)
       .sort((q, r) => q.x - r.x);
@@ -1351,7 +1740,7 @@
     ctx.font = "10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
     ctx.textAlign = "center";
     ctx.fillStyle = "rgba(255,240,200,0.9)";
-    ctx.fillText("light · " + fmtLight(tLight), x, y0 - 12);
+    if (!crowded()) ctx.fillText("light · " + fmtLight(tLight), x, y0 - 12);
   }
 
   let ghostState = null;                 // what the ghost did, for checks
@@ -1360,7 +1749,7 @@
     // A ghost of Earth for size comparison, wherever you are zoomed in.
     // Not on Earth itself, which IS Earth, and not on a region, which has no
     // size of its own. Jupiter gets its own treatment, below.
-    if (!selected || selected.isBelt) return;
+    if (!selected || selected.isBelt || selected.noGhost) return;
     if (selected.name === ghost.name) return;
     if (selected.small) {
       // Earth would be a ring five to twenty-four times wider than these,
@@ -1538,8 +1927,12 @@
     const orbiting = orbDays > 0;
     drawOrbits();
     drawSun();
-    if (!orbiting) { for (const g of REGIONS) drawBelt(g); for (const b of SMALL) drawSmall(b); }
+    if (!orbiting) { for (const g of REGIONS) drawBelt(g); drawHelio();
+      if (!crowded() || selected === HALLEY) drawHalley();
+      for (const b of SMALL) if (!crowded() || b === selected) drawSmall(b); }
+    drawTrojans();
     for (const p of PLANETS) drawPlanet(p);
+    drawCrowdLabel();
     drawMoons();
     flushLabels();
     drawGhostEarth();
@@ -1566,8 +1959,11 @@
                 cliff: KUIPER.cliff },
       small: SMALL.map(b => ({ name: b.name, au: b.au, fr: b.fr,
         x: px(b), sx: sx(px(b)), r: pr(b) * cam.z, trueX: b.xTrue, rTrue: b.rTrue,
-        region: b.region.name, beltIn: b.region.edgeIn(), beltOut: b.region.edgeOut() })),
+        region: b.region ? b.region.name : null, beltIn: b.region ? b.region.edgeIn() : null, beltOut: b.region ? b.region.edgeOut() : null, y: y0 + smallDy(b) })),
       ghost: ghostState, charon: charonState, ghostBody: ghost.name,
+      sunPx: sunR() * cam.z,
+      extra: { trojans: trojanSpots(), helioX: sx(px(HELIO)), halley: { r: HALLEY.now.r, x: sx(px(HALLEY)), y: y0 + halleyY(), a: sx(HALLEY.edgeIn()), b: sx(HALLEY.edgeOut()) },
+               pallasY: y0 + smallDy(PALLAS), oort: { xIn: OORT.edgeIn(), xOut: OORT.edgeOut() } },
       orbit: { days: orbDays, run: orbRun, fade: orbFade, speed: orbSpeed,
                at: PLANETS.map(p => ({ name: p.name, th: theta(p), pos: ppos(p) })) },
       moons: moonState,
