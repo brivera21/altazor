@@ -36,6 +36,22 @@ NOTE2 = ("Sizes sets other galaxies beside ours on one scale, with the Sun "
          "within a hundred thousand parsecs and Andromeda at three quarters "
          "of a million share one map.")
 
+CAPTION = ("Four views of galaxies, drawn from their measurements rather than "
+           "photographed. Kinds is Hubble's fork of shapes, Sizes sets a dozen "
+           "beside ours on one scale, The Milky Way is our own galaxy face-on "
+           "and edge-on, and Neighbors is the Local Group seen from above. The "
+           "Milky Way is marked in each.")
+
+NOTE3 = ("Each view moves. On the fork one galaxy slides along the classes, "
+         "flattening from E0 to E7 and then opening its arms from a to c as "
+         "its bulge shrinks. Sizes can set every galaxy to one diameter and "
+         "back, and a galaxy under the pointer carries a ghost of the Milky "
+         "Way at the same scale. The Milky Way tips from face-on to edge-on, "
+         "and the Sun runs one orbit of about 230 million years; the arms "
+         "and bar are held as they are drawn, since their own pattern speeds "
+         "differ from the Sun's. Neighbors slides between the log radius and "
+         "the true one, where the satellites collapse onto the Milky Way.")
+
 METHOD = ("Every galaxy here is a drawing from its class and its measured "
           "diameter, not a photograph. Diameters are the D25 isophote where "
           "one is published, which is where the light falls to a quarter of "
@@ -87,6 +103,19 @@ h1 { margin:0 0 12px; font-size:26px; }
 .bar2 button:hover { color:var(--text); }
 .bar2 button.on { color:var(--text); border-color:var(--accent); }
 .bar2[hidden] { display:none; }
+.toprow { display:flex; flex-wrap:wrap; align-items:center; gap:8px 22px; margin:0 0 12px; }
+.toprow .bar, .toprow .bar2 { margin:0; }
+.bar2 { align-items:center; }
+.bar2 .lab { font-size:12.5px; color:var(--muted); margin:0 2px 0 4px; }
+.bar2 input[type=range] { width:200px; accent-color:var(--accent); }
+.bar2 button.play { color:var(--text); border-color:#3d3d3d; min-width:64px; }
+.bar2 button.play[aria-pressed=true] { background:var(--accent); color:#0b0b0b; border-color:var(--accent); font-weight:700; }
+#diagram { border-radius:12px; outline:none; }
+#diagram text.halo { paint-order:stroke; stroke:#121212; stroke-width:3.5px; stroke-linejoin:round; }
+details.sources { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+details.sources summary { cursor:pointer; }
+details.sources summary:hover { color:var(--text); }
+details.sources .note { border-top:none; padding-top:0; margin-top:10px; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
 #diagram { flex:1 1 640px; min-width:0; }
 #diagram svg { width:100%; height:auto; display:block; user-select:none; }
@@ -107,7 +136,10 @@ h1 { margin:0 0 12px; font-size:26px; }
 .refs a { color:var(--accent); }
 __APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%; order:-1;}
+  #diagram{width:100%; flex-basis:auto;} }
+@media (max-width:600px){ #diagram{overflow-x:auto; -webkit-overflow-scrolling:touch;} #diagram svg{min-width:680px;}
+  .bar2 input[type=range]{width:150px;} }
 </style>
 </head>
 <body>
@@ -117,28 +149,32 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   <nav class="site"><a href="library.html">&larr; Library &middot; The Universe</a><a href="universe.html">The Universe</a><a href="solar-system.html">The Solar System</a></nav>
 </header>
 <h1>Galaxies</h1>
-<div class="bar" id="views">
+<div class="toprow"><div class="bar" id="views">
   <button data-v="kinds" class="on">Kinds</button>
   <button data-v="sizes">Sizes</button>
   <button data-v="ours">The Milky Way</button>
   <button data-v="near">Neighbors</button>
 </div>
-<div class="bar2" id="sub"></div>
+<div class="bar2" id="sub"></div></div>
 <div class="stage">
-  <div id="diagram"></div>
+  <div id="diagram" tabindex="0" aria-label="galaxies: their kinds, sizes, our own, and our neighbors"></div>
   <div class="side"><div class="card">
     <div id="kindTxt"></div>
-    <div id="nameTxt">A galaxy under the cursor lands here</div>
+    <div id="nameTxt"></div>
     <div id="numTxt"></div>
     <div id="bodyTxt"></div>
     <div id="srcTxt"></div>
   </div></div>
 </div>
+<p class="note">__CAPTION__</p>
+<details class="sources"><summary>Sources</summary>
 <p class="note">__NOTE1__</p>
-<p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
+<p class="note">__NOTE2__</p>
+<p class="note">__NOTE3__</p>
 <div class="method"><p>__METHOD__</p></div>
 <h2 class="refh">References</h2>
 <div class="refs">__REFS__</div>
+</details>
 </div>
 <script>
 const KINDS=__KINDS__, SIZES=__SIZES__, PARTS=__PARTS__, NEAR=__NEAR__, SUN_R=__SUNR__;
@@ -146,6 +182,20 @@ const W=980, H=720;
 const el=document.getElementById('diagram');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 let view='kinds', side='face', sel=null, seed=7;
+// the moving parts: a galaxy sliding along the fork, the sizes set to one,
+// the Milky Way's tilt and the Sun's time on its orbit, and the neighbors' radius
+let morph=0.72, mbar=false, same=0, tilt=0, orbitT=0, rlin=0;
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ease=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+const tws={};
+function tween(name,from,to,D,set,done,frame){
+  if(tws[name]) cancelAnimationFrame(tws[name]);
+  if(RM||from===to){ set(to); render(); tws[name]=0; if(done) done(); return; }
+  const t0=performance.now();
+  const tick=now=>{ const u=Math.min(1,(now-t0)/D); set(from+(to-from)*ease(u));
+    if(u<1){ (frame||render)(); tws[name]=requestAnimationFrame(tick); } else { render(); tws[name]=0; if(done) done(); } };
+  tws[name]=requestAnimationFrame(tick);
+}
 
 /* ---- deterministic noise, so a drawing is the same on every visit ---- */
 function rnd(){ seed=(seed*1103515245+12345)&0x7fffffff; return seed/0x7fffffff; }
@@ -189,7 +239,7 @@ function galaxy(defs,cls,cx,cy,R,opts){
   const q=Math.cos(incl);
   let s='<g transform="translate('+cx+','+cy+') rotate('+tilt+')">';
   if(cls[0]==='E'){
-    const n=+cls[1], ratio=1-n/10;
+    const n=opts.n!==undefined?opts.n:+cls[1], ratio=1-n/10;
     s+='<ellipse cx="0" cy="0" rx="'+R+'" ry="'+(R*ratio).toFixed(1)+'" fill="'+grad(defs,GLOW.E[0],GLOW.E[1],60)+'"/>';
     s+='<ellipse cx="0" cy="0" rx="'+(R*0.35).toFixed(1)+'" ry="'+(R*0.35*ratio).toFixed(1)+'" fill="'+GLOW.E[0]+'" fill-opacity="0.55"/>';
   } else if(cls==='Irr'){
@@ -203,8 +253,8 @@ function galaxy(defs,cls,cx,cy,R,opts){
   } else {
     const barred=cls.startsWith('SB')||cls==='MW';
     const sub=cls==='S0'?'0':cls==='MW'?'bc':cls.slice(barred?2:1);
-    const pitch={ '0':0, a:0.17, b:0.23, bc:0.26, c:0.36 }[sub];
-    const bulge={ '0':0.42, a:0.36, b:0.24, bc:0.19, c:0.12 }[sub];
+    const pitch=opts.pitch!==undefined?opts.pitch:{ '0':0, a:0.17, b:0.23, bc:0.26, c:0.36 }[sub];
+    const bulge=opts.bulge!==undefined?opts.bulge:{ '0':0.42, a:0.36, b:0.24, bc:0.19, c:0.12 }[sub];
     const col=barred?GLOW.SB:GLOW.S;
     // the disc, seen at the inclination asked for
     s+='<ellipse cx="0" cy="0" rx="'+R+'" ry="'+(R*q).toFixed(1)+'" fill="'+grad(defs,col[0],col[1],52)+'" fill-opacity="0.7"/>';
@@ -251,9 +301,14 @@ function drawKinds(defs){
   s+='<path d="M'+(cols[0]-50)+','+y0+' H'+xS0+' M'+xS0+','+y0+' C'+(xS0+50)+','+y0+' '+(xS0+50)+','+yU+' '+(xs[0]-40)+','+yU+
      ' H'+(xs[2]+50)+' M'+xS0+','+y0+' C'+(xS0+50)+','+y0+' '+(xS0+50)+','+yL+' '+(xs[0]-40)+','+yL+' H'+(xs[2]+50)+
      '" fill="none" stroke="#2b2b2b" stroke-width="2"/>';
-  s+='<text x="'+(cols[1])+'" y="'+(y0-78)+'" text-anchor="middle" font-size="12" fill="#6b7280">ellipticals, by how flattened they look</text>';
-  s+='<text x="'+xs[1]+'" y="'+(yU-78)+'" text-anchor="middle" font-size="12" fill="#6b7280">spirals without a bar, arms opening a to c</text>';
-  s+='<text x="'+xs[1]+'" y="'+(yL-78)+'" text-anchor="middle" font-size="12" fill="#6b7280">spirals with a bar</text>';
+  s+='<text x="'+(cols[1])+'" y="'+(y0-78)+'" text-anchor="middle" font-size="13" fill="#8a94a6">ellipticals, by how flattened they look</text>';
+  s+='<text x="'+xs[1]+'" y="'+(yU-78)+'" text-anchor="middle" font-size="13" fill="#8a94a6">spirals without a bar, arms opening a to c</text>';
+  s+='<text x="'+xs[1]+'" y="'+(yL-78)+'" text-anchor="middle" font-size="13" fill="#8a94a6">spirals with a bar</text>';
+  // one galaxy slid along the fork: flattened E0 to E7, then an S0 disc,
+  // then arms opening from a to c while the bulge shrinks
+  const mx0=250;
+  s+='<text x="'+mx0+'" y="42" text-anchor="middle" font-size="13" fill="#8a94a6">one galaxy, slid along the fork</text>';
+  s+='<g data-k="morph" id="morphG" style="cursor:pointer">'+morphSVG()+'</g>';
   const place={E0:[cols[0],y0],E3:[cols[1],y0],E7:[cols[2],y0],S0:[xS0,y0],
     Sa:[xs[0],yU],Sb:[xs[1],yU],Sc:[xs[2],yU],SBa:[xs[0],yL],SBb:[xs[1],yL],SBc:[xs[2],yL],Irr:[xIrr,y0]};
   for(const k of KINDS){
@@ -276,7 +331,37 @@ function drawKinds(defs){
   s+='<circle cx="'+mx+'" cy="'+my+'" r="16" fill="transparent"/></g>';
   return s;
 }
+// the sliding galaxy, with its own gradients, so a move of the slider
+// redraws it alone and not the whole fork
+function morphSVG(){
+  const mx0=250, my0=150, MR=70, mc=morphClass(morph), d=[], keep=gid; gid=100000;
+  let s='';
+  if(morph<0.35) s+=galaxy(d,'E0',mx0,my0,MR,{tilt:-20,n:morph/0.35*7});
+  else if(morph<0.45) s+=galaxy(d,'S0',mx0,my0,MR,{incl:0.35});
+  else { const u=(morph-0.45)/0.55;
+    s+=galaxy(d,mbar?'SBb':'Sb',mx0,my0,MR,{incl:0.35,phase:0.6,barAngle:-25,pitch:0.17+0.19*u,bulge:0.36-0.24*u}); }
+  gid=keep;
+  return '<defs>'+d.join('')+'</defs>'+s+'<circle cx="'+mx0+'" cy="'+my0+'" r="'+(MR+8)+'" fill="transparent"/>'+
+    '<text x="'+mx0+'" y="'+(my0+MR+26)+'" text-anchor="middle" font-size="15" font-weight="700" fill="#58a6ff">'+mc+'</text>';
+}
+function setMorph(v){
+  morph=v; const k=nearestKind(morph), m=document.getElementById('morph'); if(m) m.value=Math.round(morph*1000);
+  showKind('morph');
+  const g=document.getElementById('morphG');
+  if(k!==sel||!g){ sel=k; render(); } else g.innerHTML=morphSVG();
+}
+function morphClass(t){
+  if(t<0.35) return 'E'+Math.round(t/0.35*7);
+  if(t<0.45) return 'S0';
+  return (mbar?'SB':'S')+['a','ab','b','bc','c'][Math.round((t-0.45)/0.55*4)];
+}
+function nearestKind(t){
+  if(t<0.35){ const n=t/0.35*7; return n<1.5?'E0':n<5?'E3':'E7'; }
+  if(t<0.45) return 'S0';
+  const u=(t-0.45)/0.55; return (mbar?'SB':'S')+(u<0.33?'a':u<0.67?'b':'c');
+}
 function showKind(k){
+  if(k==='morph') k=nearestKind(morph);
   const d=KINDS.find(x=>x.k===k);
   if(k==='MW'){ const m=PARTS.find(p=>p.k==='whole');
     card('Our galaxy on the fork','The Milky Way, an SBbc',[['class','barred spiral, arms between b and c'],
@@ -287,43 +372,76 @@ function showKind(k){
 }
 
 /* ---- view: Sizes ---- */
-function drawSizes(defs){
-  // one scale for all: pixels per kiloparsec, so the biggest fits
-  const maxD=Math.max(...SIZES.map(g=>g.d));
-  const k=300/maxD;                          // px per kpc: the largest is 300 across
-  // pack left to right, wrapping into rows, largest first
+// the packing for a given radius per galaxy, largest first, wrapped into rows
+function packSizes(Rof){
   const order=[...SIZES].sort((a,b)=>b.d-a.d);
-  let x=24, rowTop=34, rowMaxR=0, placed=[], row=[];
-  const flush=()=>{ for(const p of row){ p.y=rowTop+rowMaxR+6; p.labY=rowTop+2*rowMaxR+26; }
-    placed.push(...row); row=[]; rowTop+=2*rowMaxR+62; rowMaxR=0; };
+  let x=24, rowTop=34, rowMaxR=0, row=[]; const out={};
+  const flush=()=>{ for(const p of row){ p.y=rowTop+rowMaxR+6; p.labY=rowTop+2*rowMaxR+26; out[p.g.k]=p; }
+    row=[]; rowTop+=2*rowMaxR+62; rowMaxR=0; };
   for(const g of order){
     // a slot as wide as the galaxy or its name, whichever is more
-    const R=Math.max(g.d*k/2,3), w=Math.max(2*R+36, g.n.length*6.6+18);
+    const R=Rof(g), w=Math.max(2*R+36, g.n.length*6.6+18);
     if(x+w>W-10){ flush(); x=24; }
     row.push({g,x:x+w/2,R}); rowMaxR=Math.max(rowMaxR,Math.max(R,10));
     x+=w;
   }
   flush();
+  return out;
+}
+const SIZE_K=300/Math.max(...SIZES.map(g=>g.d));   // px per kpc: the largest is 300 across
+const LAY_SCALE=packSizes(g=>Math.max(g.d*SIZE_K/2,3)), LAY_SAME=packSizes(()=>34);
+// during the tween to one size, the drawn galaxies are moved and scaled in place
+function placeSizes(){
+  const u=same, svg=document.getElementById('gsvg'); if(!svg) return;
+  for(const gh of svg.querySelectorAll('.ghost')) gh.remove();
+  for(const g of SIZES){ const a=LAY_SCALE[g.k], b=LAY_SAME[g.k], grp=svg.querySelector('g[data-k="'+g.k+'"]'); if(!grp) continue;
+    const x=a.x+(b.x-a.x)*u, y=a.y+(b.y-a.y)*u, R=a.R+(b.R-a.R)*u, ly=a.labY+(b.labY-a.labY)*u;
+    const gx=grp.querySelector('g'), R0=+grp.dataset.r, rot=(gx.getAttribute('transform').match(/rotate\(([-\d.]+)\)/)||[0,0])[1];
+    gx.setAttribute('transform','translate('+x.toFixed(1)+','+y.toFixed(1)+') scale('+(Math.max(R,3)/Math.max(R0,3)).toFixed(4)+') rotate('+rot+')');
+    for(const c of grp.querySelectorAll(':scope > circle')){ c.setAttribute('cx',x.toFixed(1)); c.setAttribute('cy',y.toFixed(1)); }
+    const hit=grp.querySelector(':scope > circle[fill="transparent"]'); if(hit) hit.setAttribute('r',Math.max(R+6,14));
+    const t=grp.querySelector(':scope > text.name'); if(t){ t.setAttribute('x',x.toFixed(1)); t.setAttribute('y',ly.toFixed(1)); }
+    if(g.k==='mw'){ const sy=y+SUN_R*SIZE_K*(R/a.R)*Math.cos(0.25);
+      const sc=grp.querySelector(':scope > circle.sun'), st=grp.querySelector(':scope > text.sun');
+      if(sc){ sc.setAttribute('cx',x.toFixed(1)); sc.setAttribute('cy',sy.toFixed(1)); }
+      if(st){ st.setAttribute('x',(x+9).toFixed(1)); st.setAttribute('y',(sy+12).toFixed(1)); } }
+  }
+  const note=svg.querySelector('.samenote'); if(note) note.setAttribute('opacity',u.toFixed(2));
+  const bar=svg.querySelector('.scalebar'); if(bar) bar.setAttribute('opacity',(1-u).toFixed(2));
+}
+function drawSizes(defs){
+  const k=SIZE_K, u=same;
+  const placed=SIZES.map(g=>{ const a=LAY_SCALE[g.k], b=LAY_SAME[g.k];
+    return {g, x:a.x+(b.x-a.x)*u, y:a.y+(b.y-a.y)*u, labY:a.labY+(b.labY-a.labY)*u, R:a.R+(b.R-a.R)*u, R0:a.R}; });
   let s='';
+  s+='<text class="samenote" x="24" y="22" font-size="12" fill="#8a94a6" opacity="'+u.toFixed(2)+'">every galaxy drawn at one diameter; the scale bar no longer applies</text>';
+  const mw=placed.find(p=>p.g.k==='mw');
   for(const p of placed){
     const hot=sel===p.g.k, g=p.g;
-    s+='<g data-k="'+g.k+'" style="cursor:pointer">';
-    if(hot) s+='<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(p.R+8)+'" fill="none" stroke="#58a6ff" stroke-width="1.4"/>';
+    s+='<g data-k="'+g.k+'" data-r="'+p.R.toFixed(3)+'" style="cursor:pointer">';
     s+=galaxy(defs,g.c,p.x,p.y,Math.max(p.R,3),{incl:g.k==='m104'?1.25:0.25,tilt:g.tilt||0,phase:0.4,barAngle:-30,seed:5+g.k.length});
+    if(hot) s+='<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(p.R+8)+'" fill="none" stroke="#58a6ff" stroke-width="1.4"/>';
     if(g.k==='mw'){
       // the Sun, at its measured radius from the center, a little below the plane on this map
-      const sx=p.x, sy=p.y+SUN_R*k*Math.cos(0.25);
-      s+='<circle cx="'+sx.toFixed(1)+'" cy="'+sy.toFixed(1)+'" r="3" fill="#ffb02e" stroke="#121212" stroke-width="1"/>';
-      s+='<text x="'+(sx+9)+'" y="'+(sy+12)+'" font-size="10.5" fill="#ffb02e">the Sun</text>';
+      const sx=p.x, sy=p.y+SUN_R*k*(p.R/p.R0)*Math.cos(0.25);
+      s+='<circle class="sun" cx="'+sx.toFixed(1)+'" cy="'+sy.toFixed(1)+'" r="3" fill="#ffb02e" stroke="#121212" stroke-width="1"/>';
+      s+='<text class="halo sun" x="'+(sx+9)+'" y="'+(sy+12)+'" font-size="10.5" fill="#ffb02e">the Sun</text>';
     }
     s+='<circle cx="'+p.x+'" cy="'+p.y+'" r="'+Math.max(p.R+6,14)+'" fill="transparent"/>';
-    s+='<text x="'+p.x+'" y="'+p.labY+'" text-anchor="middle" font-size="11.5" fill="'+(g.k==='mw'?'#ffb02e':hot?'#58a6ff':'#cfd6e6')+'">'+esc(g.n)+'</text>';
+    s+='<text class="name" x="'+p.x+'" y="'+p.labY+'" text-anchor="middle" font-size="11.5" fill="'+(g.k==='mw'?'#ffb02e':hot?'#58a6ff':'#cfd6e6')+'">'+esc(g.n)+'</text>';
     s+='</g>';
+  }
+  // a ghost of the Milky Way over the galaxy under the pointer, at that galaxy's scale
+  const h=placed.find(p=>p.g.k===sel);
+  if(h&&h.g.k!=='mw'){
+    const gr=mw.R0*(h.R/h.R0);
+    s+='<g class="ghost" pointer-events="none"><circle cx="'+h.x+'" cy="'+h.y+'" r="'+gr.toFixed(1)+'" fill="#ffb02e" fill-opacity="0.05" stroke="#ffb02e" stroke-width="1.3" stroke-dasharray="5 4"/>'+
+       '<text class="halo" x="'+h.x+'" y="'+(h.y-gr-6).toFixed(1)+'" text-anchor="middle" font-size="11" fill="#ffb02e">the Milky Way, at the same scale</text></g>';
   }
   // the scale bar: 100,000 light years
   const ly=30.66;   // kpc in 100,000 ly
-  s+='<line x1="30" y1="'+(H-28)+'" x2="'+(30+ly*k).toFixed(1)+'" y2="'+(H-28)+'" stroke="#9a9a9a" stroke-width="2"/>';
-  s+='<text x="30" y="'+(H-36)+'" font-size="11" fill="#9a9a9a">100,000 light years, '+ly.toFixed(1)+' kpc</text>';
+  s+='<g class="scalebar" opacity="'+(1-u).toFixed(2)+'"><line x1="30" y1="'+(H-28)+'" x2="'+(30+ly*k).toFixed(1)+'" y2="'+(H-28)+'" stroke="#cfd6e6" stroke-width="2"/>';
+  s+='<text x="30" y="'+(H-36)+'" font-size="12.5" fill="#cfd6e6">scale: 100,000 light years, '+ly.toFixed(1)+' kpc</text></g>';
   return s;
 }
 function showSize(k){
@@ -334,9 +452,15 @@ function showSize(k){
 /* ---- view: The Milky Way ---- */
 const K=22;                                 // px per kpc
 function drawOurs(defs){
-  const cx=W/2, cy=H/2-10;
+  const cx=W/2, cy=H/2-10, u=tilt;
   let s='';
-  if(side==='face'){
+  // face-on to edge-on: the disc turns a quarter so the Sun comes to the
+  // left of the center, as the edge-on view has it, and tips over while
+  // the edge-on parts fade in
+  const faceOp=u<0.85?1:Math.max(0,1-(u-0.85)/0.15), edgeOp=u<0.7?0:Math.min(1,(u-0.7)/0.3);
+  if(faceOp>0){
+    let f='';
+    { let s='';
     // the disc, then the bar and arms, the Sun at its radius straight below the center
     s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+(15*K)+'" fill="'+grad(defs,'#dfe8ff','#3b4c80',50)+'" fill-opacity="0.55" data-k="thin"/>';
     s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+(15*K)+'" fill="none" stroke="#3d444d" stroke-dasharray="4 4"/>';
@@ -373,22 +497,35 @@ function drawOurs(defs){
     const hotA=sel==='sgra';
     s+='<g data-k="sgra" style="cursor:pointer"><circle cx="'+cx+'" cy="'+cy+'" r="'+(hotA?5:3)+'" fill="#121212" stroke="#ffb02e" stroke-width="1.4"/><circle cx="'+cx+'" cy="'+cy+'" r="10" fill="transparent"/></g>';
     // the Sun
-    const hotSun=sel==='sun', sy=cy+SUN_R*K;
-    s+='<g data-k="sun" style="cursor:pointer"><line x1="'+cx+'" y1="'+cy+'" x2="'+cx+'" y2="'+sy+'" stroke="#ffb02e" stroke-opacity="0.35" stroke-dasharray="3 4"/>'+
-       '<circle cx="'+cx+'" cy="'+sy+'" r="'+(hotSun?6:4.5)+'" fill="#ffb02e" stroke="#121212" stroke-width="1.5"/>'+
-       '<circle cx="'+cx+'" cy="'+sy+'" r="12" fill="transparent"/>'+
-       '<text x="'+(cx+12)+'" y="'+(sy+18)+'" font-size="12" fill="#ffb02e">the Sun, '+SUN_R+' kpc out</text></g>';
+    // the Sun, on its orbit: straight below the center now, and clockwise
+    // round from there as the orbit plays
+    const hotSun=sel==='sun', sa=Math.PI/2+2*Math.PI*orbitT/230, sx=cx+SUN_R*K*Math.cos(sa), sy=cy+SUN_R*K*Math.sin(sa);
+    if(orbitT>0) s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+(SUN_R*K)+'" fill="none" stroke="#ffb02e" stroke-opacity="0.3" stroke-dasharray="2 5"/>';
+    s+='<g data-k="sun" style="cursor:pointer"><line x1="'+cx+'" y1="'+cy+'" x2="'+sx.toFixed(1)+'" y2="'+sy.toFixed(1)+'" stroke="#ffb02e" stroke-opacity="0.35" stroke-dasharray="3 4"/>'+
+       '<circle cx="'+sx.toFixed(1)+'" cy="'+sy.toFixed(1)+'" r="'+(hotSun?6:4.5)+'" fill="#ffb02e" stroke="#121212" stroke-width="1.5"/>'+
+       '<circle cx="'+sx.toFixed(1)+'" cy="'+sy.toFixed(1)+'" r="12" fill="transparent"/></g>';
+      f=s; }
+    const q=Math.cos(u*Math.PI/2);
+    s+=u===0?f:'<g opacity="'+faceOp.toFixed(2)+'" transform="translate('+cx+','+cy+') scale(1,'+q.toFixed(4)+') rotate('+(90*u).toFixed(2)+') translate('+(-cx)+','+(-cy)+')">'+f+'</g>';
+    if(u===0){
+      const sp=PARTS.find(p=>p.k==='spur'), arms=PARTS.filter(p=>p.arm);
     // arm names, out along each
     for(const a of arms){
       const k=Math.tan(a.pitch*Math.PI/180), t=a.labelT, r=a.rSun*K*Math.exp(k*t), ang=Math.PI/2-t;
-      s+='<text x="'+(cx+r*Math.cos(ang)).toFixed(1)+'" y="'+(cy+r*Math.sin(ang)).toFixed(1)+'" text-anchor="middle" font-size="11" fill="'+a.c+'" pointer-events="none">'+esc(a.n)+'</text>';
+      s+='<text x="'+(cx+r*Math.cos(ang)).toFixed(1)+'" y="'+(cy+r*Math.sin(ang)).toFixed(1)+'" text-anchor="middle" font-size="11.5" fill="'+a.c+'" class="halo" pointer-events="none">'+esc(a.n)+'</text>';
     }
-    s+='<text x="'+(cx-2.6*K)+'" y="'+(cy+SUN_R*K-1.9*K)+'" text-anchor="end" font-size="11" fill="'+sp.c+'" pointer-events="none">'+esc(sp.n)+'</text>';
+    s+='<text class="halo" x="'+(cx-2.8*K)+'" y="'+(cy+SUN_R*K-0.9*K)+'" text-anchor="end" font-size="11.5" fill="'+sp.c+'" pointer-events="none">'+esc(sp.n)+'</text>';
+    { const sa=Math.PI/2+2*Math.PI*orbitT/230, sx=cx+SUN_R*K*Math.cos(sa), sy=cy+SUN_R*K*Math.sin(sa);
+      s+='<text class="halo" x="'+(sx+12).toFixed(1)+'" y="'+(sy+18).toFixed(1)+'" font-size="12" fill="#ffb02e" pointer-events="none">the Sun, '+SUN_R+' kpc out</text>'; }
     // scale and orientation
     s+='<line x1="30" y1="'+(H-28)+'" x2="'+(30+5*K)+'" y2="'+(H-28)+'" stroke="#9a9a9a" stroke-width="2"/>';
     s+='<text x="30" y="'+(H-36)+'" font-size="11" fill="#9a9a9a">5 kpc, 16,300 light years</text>';
     s+='<text x="'+(W-20)+'" y="'+(H-32)+'" text-anchor="end" font-size="11" fill="#6b7280">seen from the north galactic pole, the center above the Sun; the disc turns clockwise</text>';
-  } else {
+    }
+  }
+  if(edgeOp>0){
+    let e='';
+    { let s='';
     // edge-on: everything at its true proportion, which makes the disc a line
     const thin=PARTS.find(p=>p.k==='thin'), thick=PARTS.find(p=>p.k==='thick');
     const hotH=sel==='halo', hotGC=sel==='gcs';
@@ -414,7 +551,7 @@ function drawOurs(defs){
     const hotA=sel==='sgra';
     s+='<g data-k="sgra" style="cursor:pointer"><circle cx="'+cx+'" cy="'+cy+'" r="'+(hotA?5:3)+'" fill="#121212" stroke="#ffb02e" stroke-width="1.4"/><circle cx="'+cx+'" cy="'+cy+'" r="10" fill="transparent"/></g>';
     // the Sun, 8.2 kpc out and 25 pc above the plane, which is half a pixel here
-    const hotSun=sel==='sun', sx=cx-SUN_R*K;
+    const hotSun=sel==='sun', sx=cx-SUN_R*K*Math.sin(Math.PI/2+2*Math.PI*orbitT/230);
     s+='<g data-k="sun" style="cursor:pointer"><circle cx="'+sx+'" cy="'+(cy-0.5)+'" r="'+(hotSun?6:4.5)+'" fill="#ffb02e" stroke="#121212" stroke-width="1.5"/>'+
        '<circle cx="'+sx+'" cy="'+cy+'" r="12" fill="transparent"/>'+
        '<text x="'+sx+'" y="'+(cy-14)+'" text-anchor="middle" font-size="12" fill="#ffb02e">the Sun</text></g>';
@@ -422,7 +559,10 @@ function drawOurs(defs){
     s+='<text x="'+(cx)+'" y="'+(cy-15*K+22)+'" text-anchor="middle" font-size="11" fill="#6b7280">the stellar halo, with about 150 globular clusters</text>';
     s+='<line x1="30" y1="'+(H-28)+'" x2="'+(30+5*K)+'" y2="'+(H-28)+'" stroke="#9a9a9a" stroke-width="2"/>';
     s+='<text x="30" y="'+(H-36)+'" font-size="11" fill="#9a9a9a">5 kpc, 16,300 light years</text>';
+      e=s; }
+    s+=edgeOp>=1?e:'<g opacity="'+edgeOp.toFixed(2)+'">'+e+'</g>';
   }
+  if(orbitT>0) s+='<text x="30" y="30" font-size="13" fill="#ffb02e">'+Math.round(orbitT)+' million years on, '+(orbitT>=229.5?'one full orbit':Math.round(orbitT/230*100)+'% of an orbit')+'</text>';
   return s;
 }
 function showPart(k){
@@ -434,11 +574,14 @@ function showPart(k){
 const LOG0=Math.log10(15), LOG1=Math.log10(1500);
 function drawNear(defs){
   const cx=W/2, cy=H/2-6, Rmax=300;
-  const R=d=>(Math.log10(d)-LOG0)/(LOG1-LOG0)*Rmax;
+  // the log radius, or the true one, where 1,500 kpc is the same outer circle
+  const RL=d=>Math.max(0,(Math.log10(d)-LOG0)/(LOG1-LOG0)*Rmax), RT=d=>d/1500*Rmax;
+  const R=d=>RL(d)*(1-rlin)+RT(d)*rlin;
   let s='';
+  let lastR=-1e9;
   for(const d of [30,100,300,1000]){
     s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R(d).toFixed(1)+'" fill="none" stroke="#2b2b2b"/>';
-    s+='<text x="'+(cx+4)+'" y="'+(cy-R(d)-4).toFixed(1)+'" font-size="10.5" fill="#6b7280">'+d.toLocaleString('en-US')+' kpc</text>';
+    if(R(d)-lastR>13){ s+='<text x="'+(cx+4)+'" y="'+(cy-R(d)-4).toFixed(1)+'" font-size="10.5" fill="#6b7280">'+d.toLocaleString('en-US')+' kpc</text>'; lastR=R(d); }
   }
   // the Milky Way at the center, and the direction of its center marked
   s+='<line x1="'+cx+'" y1="'+cy+'" x2="'+cx+'" y2="'+(cy-Rmax-14)+'" stroke="#3d444d" stroke-dasharray="3 4"/>';
@@ -455,15 +598,27 @@ function drawNear(defs){
     // from the north pole, with the center up, longitude runs to the left
     return {g, x:cx-r*Math.sin(l), y:cy-r*Math.cos(l), rr:3+8*Math.log10(Math.max(g.size,0.5)/0.5)};
   });
+  // names: the big ones first, then every member whose name finds a clear
+  // place beside its dot, clear of the other names, dots and the center
+  const boxes=[[cx-50,cy-12,cx+50,cy+30]], names={};
+  const dots=pts.map(p=>[p.x,p.y,p.rr]).concat([[cx,cy,12]]);
+  const free=b=>boxes.every(q=>!(b[0]<q[2]&&b[2]>q[0]&&b[1]<q[3]&&b[3]>q[1]))&&
+    dots.every(([x,y,r])=>{ const qx=Math.max(b[0],Math.min(x,b[2])), qy=Math.max(b[1],Math.min(y,b[3])); return Math.hypot(qx-x,qy-y)>r+1; })&&b[0]>4&&b[2]<W-4;
+  for(const p of [...pts].sort((a,b)=>(b.g.big?1:0)-(a.g.big?1:0)||b.rr-a.rr)){
+    const fs=p.g.big?11.5:10.5, w=p.g.n.length*fs*0.53, left=p.x<cx;
+    const C=left?[['end',p.x-p.rr-5,p.y+4],['start',p.x+p.rr+5,p.y+4]]:[['start',p.x+p.rr+5,p.y+4],['end',p.x-p.rr-5,p.y+4]];
+    C.push(['middle',p.x,p.y-p.rr-5],['middle',p.x,p.y+p.rr+13],[C[0][0],C[0][1]+(C[0][0]==='end'?-2:2),p.y-8],[C[0][0],C[0][1]+(C[0][0]==='end'?-2:2),p.y+16]);
+    for(const [a,x,y] of C){ const x0=a==='end'?x-w:a==='middle'?x-w/2:x, b=[x0,y-fs+1,x0+w,y+2];
+      if(free(b)){ boxes.push(b); names[p.g.k]=[a,x,y,fs]; break; } }
+  }
   for(const p of pts){
     const hot=sel===p.g.k, c=COL[p.g.type];
     s+='<g data-k="'+p.g.k+'" style="cursor:pointer">';
     if(hot) s+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+(p.rr+6)+'" fill="none" stroke="#58a6ff" stroke-width="1.4"/>';
     s+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+p.rr.toFixed(1)+'" fill="'+c+'" fill-opacity="0.85" stroke="#121212" stroke-width="1"/>';
     s+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+Math.max(p.rr+4,9)+'" fill="transparent"/>';
-    if(p.g.big){ const left=p.x<cx;
-      s+='<text x="'+(left?p.x-p.rr-5:p.x+p.rr+5).toFixed(1)+'" y="'+(p.y+4).toFixed(1)+'" text-anchor="'+(left?'end':'start')+
-         '" font-size="11.5" fill="'+c+'">'+esc(p.g.n)+'</text>'; }
+    const nm=names[p.g.k];
+    if(nm) s+='<text class="halo" x="'+nm[1].toFixed(1)+'" y="'+nm[2].toFixed(1)+'" text-anchor="'+nm[0]+'" font-size="'+nm[3]+'" fill="'+(hot?'#58a6ff':c)+'"'+(p.g.big?'':' fill-opacity="0.85"')+'>'+esc(p.g.n)+'</text>';
     s+='</g>';
   }
   // legend
@@ -472,7 +627,7 @@ function drawNear(defs){
     s+='<circle cx="'+lx+'" cy="'+ly+'" r="4.5" fill="'+COL[k]+'"/><text x="'+(lx+10)+'" y="'+(ly+4)+'" font-size="11" fill="#9a9a9a">'+lab+'</text>';
     lx+=lab.length*6.4+34;
   }
-  s+='<text x="'+(W-20)+'" y="'+(H-26)+'" text-anchor="end" font-size="11" fill="#6b7280">seen from above the north galactic pole; radius on a log scale</text>';
+  s+='<text x="'+(W-20)+'" y="'+(H-26)+'" text-anchor="end" font-size="11" fill="#6b7280">seen from above the north galactic pole; radius '+(rlin>0.5?'to true scale':'on a log scale')+'</text>';
   return s;
 }
 function showNear(k){
@@ -501,22 +656,60 @@ function show(k){
 el.addEventListener('pointerover',e=>{ const g=e.target.closest('[data-k]'); if(g) show(g.getAttribute('data-k')); });
 el.addEventListener('click',e=>{ const g=e.target.closest('[data-k]'); if(g) show(g.getAttribute('data-k')); });
 
-const SUB={ours:[['face','Face-on'],['edge','Edge-on']]};
+function subHTML(v){
+  if(v==='kinds') return '<span class="lab">one galaxy along the fork</span><input type="range" id="morph" min="0" max="1000" value="'+Math.round(morph*1000)+'" aria-label="one galaxy slid along the fork, E0 to Sc">'+
+    '<button type="button" data-bar'+(mbar?' class="on"':'')+'>with a bar</button>';
+  if(v==='sizes') return '<button type="button" data-same'+(same>0.5?' class="on"':'')+'>all one size</button>';
+  if(v==='ours') return '<button type="button" data-s="face"'+(tilt<0.5?' class="on"':'')+'>Face-on</button><button type="button" data-s="edge"'+(tilt>=0.5?' class="on"':'')+'>Edge-on</button>'+
+    '<span class="lab">tilt</span><input type="range" id="tilt" min="0" max="900" value="'+Math.round(tilt*900)+'" aria-label="tilt, face-on to edge-on">'+
+    '<button type="button" class="play" data-play aria-pressed="false">Play an orbit</button>';
+  return '<button type="button" data-r="0"'+(rlin<0.5?' class="on"':'')+'>log radius</button><button type="button" data-r="1"'+(rlin>=0.5?' class="on"':'')+'>true radius</button>';
+}
 function setView(v){
   view=v; sel=null;
   for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v);
+  stopOrbit();
   const sub=document.getElementById('sub');
-  if(SUB[v]){ sub.hidden=false; sub.innerHTML=SUB[v].map(([k,l])=>'<button data-s="'+k+'"'+(side===k?' class="on"':'')+'>'+l+'</button>').join(''); }
-  else { sub.hidden=true; sub.innerHTML=''; }
+  sub.hidden=false; sub.innerHTML=subHTML(v);
   render();
   // each view opens on the Milky Way
   show(v==='kinds'?'MW':v==='sizes'?'mw':v==='ours'?'whole':'mw');
 }
 document.getElementById('views').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setView(b.dataset.v); });
+function onSub(b,on){ for(const x of document.querySelectorAll('#sub button:not(.play)')) x.classList.toggle('on',x===b||(on&&x.matches(on))); }
 document.getElementById('sub').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return;
-  side=b.dataset.s; for(const x of document.querySelectorAll('#sub button')) x.classList.toggle('on',x===b); render(); });
+  if(b.dataset.s!==undefined){ side=b.dataset.s; onSub(b); const to=side==='edge'?1:0;
+    tween('tilt',tilt,to,1100,v=>{ tilt=v; const t=document.getElementById('tilt'); if(t) t.value=Math.round(v*900); }); return; }
+  if(b.hasAttribute('data-bar')){ mbar=!mbar; b.classList.toggle('on',mbar); sel=null; setMorph(morph); return; }
+  if(b.hasAttribute('data-same')){ const to=same>0.5?0:1; b.classList.toggle('on',to===1); render(); tween('same',same,to,1000,v=>{ same=v; },null,placeSizes); return; }
+  if(b.dataset.r!==undefined){ onSub(b); tween('rlin',rlin,+b.dataset.r,1100,v=>{ rlin=v; }); return; }
+  if(b.hasAttribute('data-play')) playOrbit(b);
+});
+document.getElementById('sub').addEventListener('input',e=>{
+  if(e.target.id==='morph') setMorph(+e.target.value/1000);
+  if(e.target.id==='tilt'){ if(tws.tilt) cancelAnimationFrame(tws.tilt); tilt=+e.target.value/900; side=tilt>=0.5?'edge':'face';
+    onSub(null, side==='edge'?'[data-s=edge]':'[data-s=face]'); render(); }
+});
+/* ---- one orbit of the Sun, 230 million years in about nine seconds ---- */
+let orbit=null;
+function stopOrbit(){ if(!orbit) return; cancelAnimationFrame(orbit.raf); clearTimeout(orbit.t); orbit=null;
+  const b=document.querySelector('#sub [data-play]'); if(b){ b.textContent='Play an orbit'; b.setAttribute('aria-pressed','false'); } }
+function playOrbit(b){
+  if(orbit){ stopOrbit(); return; }
+  if(orbitT>=229.5) orbitT=0;
+  orbit={raf:0,t:0}; b.textContent='Pause'; b.setAttribute('aria-pressed','true');
+  if(RM){ const step=()=>{ orbitT=Math.min(230,Math.floor(orbitT/57.5+1e-9)*57.5+57.5); render(); if(orbitT>=230) stopOrbit(); else orbit.t=setTimeout(step,900); }; orbit.t=setTimeout(step,300); return; }
+  const T0=performance.now()-orbitT/230*9000;
+  const tick=now=>{ orbitT=Math.min(230,(now-T0)/9000*230); render(); if(orbitT<230) orbit.raf=requestAnimationFrame(tick); else stopOrbit(); };
+  orbit.raf=requestAnimationFrame(tick);
+}
+el.addEventListener('keydown',e=>{
+  const d={ArrowRight:1,ArrowUp:1,ArrowLeft:-1,ArrowDown:-1}[e.key]; if(d===undefined) return;
+  if(view==='kinds'){ e.preventDefault(); setMorph(Math.max(0,Math.min(1,morph+d*0.05))); }
+  else if(view==='ours'){ e.preventDefault(); if(tws.tilt) cancelAnimationFrame(tws.tilt); tilt=Math.max(0,Math.min(1,tilt+d/18)); const t=document.getElementById('tilt'); if(t) t.value=Math.round(tilt*900); side=tilt>=0.5?'edge':'face'; render(); }
+});
 setView('kinds');
-window.__gal=()=>({view,side,sel,kinds:KINDS.length,sizes:SIZES.length,parts:PARTS.length,near:NEAR.length,
+window.__gal=()=>({view,side,sel,morph,mbar,same,tilt,orbitT,rlin,playing:!!orbit,kinds:KINDS.length,sizes:SIZES.length,parts:PARTS.length,near:NEAR.length,
   marks:document.querySelectorAll('#gsvg [data-k]').length});
 </script>
 </body>
@@ -527,7 +720,7 @@ html = (HTML.replace("__APACSS__", apa.CSS)
         .replace("__KINDS__", _js(KINDS)).replace("__SIZES__", _js(SIZES))
         .replace("__PARTS__", _js(PARTS)).replace("__NEAR__", _js(NEIGHBORS))
         .replace("__SUNR__", str(SUN_R))
-        .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2)
+        .replace("__CAPTION__", CAPTION).replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2).replace("__NOTE3__", NOTE3)
         .replace("__METHOD__", METHOD)
         .replace("__REFS__", apa.render(REFS)))
 OUT.write_text(html, encoding="utf-8")

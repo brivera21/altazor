@@ -5,6 +5,7 @@ La geometría del fondo:
   gshhs_f.dat   la costa, de Panamá a Oregón, a resolución completa
   states.pkl    los treinta y dos estados de México, de make_mx_data.py
   states.pkl    los estados de Estados Unidos, de make_us_data.py
+  sierras.pkl   el terreno quebrado de México, de make_sierras.py
 
 Con esos dos juegos de estados se arman las entidades de 1824 y lo que se
 perdió en 1836, 1848 y 1853: son moldes de hoy puestos sobre líneas de ayer,
@@ -32,6 +33,7 @@ OUT = Path(__file__).parent.parent / "nueva-espana.html"
 LAND = Path("/home/claude/ne_land.pkl")
 MX = Path("/home/claude/mx/states.pkl")
 US = Path("/home/claude/us/states.pkl")
+SIERRAS = Path("/home/claude/mx/sierras.pkl")   # de make_sierras.py, en grados
 
 W, E, S, N = -128.5, -76.5, 6.0, 50.5
 VW = 1000.0
@@ -162,7 +164,21 @@ def camino(nombres):
             for n in nombres]
 
 
+def gran_circulo(a, b):
+    """Kilómetros entre dos lugares, sobre la esfera."""
+    la1, lo1 = map(math.radians, D.LUGARES[a][:2])
+    la2, lo2 = map(math.radians, D.LUGARES[b][:2])
+    h = (math.sin((la2 - la1) / 2) ** 2
+         + math.cos(la1) * math.cos(la2) * math.sin((lo2 - lo1) / 2) ** 2)
+    return 2 * 6371.0 * math.asin(math.sqrt(h))
+
+
+def largo(ruta):
+    return round(sum(gran_circulo(a, b) for a, b in zip(ruta, ruta[1:])))
+
+
 entradas = [dict(n=n, q=quien, a=a0, b=a1, p=camino(ruta), nota=nota,
+                 km=largo(ruta),
                  sitios=[dict(n=x, e=D.LUGARES[x][2]) for x in ruta])
             for n, quien, a0, a1, ruta, nota in D.ENTRADAS]
 llegada = dict(p=camino([n for n, _ in D.LLEGADA]),
@@ -170,8 +186,20 @@ llegada = dict(p=camino([n for n, _ in D.LLEGADA]),
 villas = [dict(n=n, a=a, nota=nota,
                x=round(T(D.LUGARES[n][1], D.LUGARES[n][0])[0], 1),
                y=round(T(D.LUGARES[n][1], D.LUGARES[n][0])[1], 1),
-               e=D.LUGARES[n][2])
+               e=D.LUGARES[n][2], h=D.HOY[n])
           for n, a, nota in D.VILLAS]
+
+# ---- el relieve: las mismas manchas de terreno quebrado de la página de
+# México (make_sierras.py sobre la imagen de Natural Earth), recortadas al
+# México de hoy y proyectadas a este cuadro
+mxu = unary_union([mx[k].buffer(0) for k in mx])
+relieve = []
+for tier, polys in pickle.load(open(SIERRAS, "rb")).items():
+    for p in polys:
+        d = path_of(p.intersection(mxu), 0.02)
+        if d:
+            relieve.append(dict(d=d, t=tier))
+print(f"relieve: {len(relieve)} manchas")
 
 imperio = unary_union([mexico_1821, cen])
 js = dict(
@@ -183,6 +211,7 @@ js = dict(
     l1853=line_of(D.LINEA_1853),
     nota1819=D.LINEA_1819_NOTA,
     llegada=llegada, entradas=entradas, villas=villas, corto=D.CORTO,
+    relieve=relieve,
     tenoch=[round(T(D.LUGARES["México-Tenochtitlan"][1],
                     D.LUGARES["México-Tenochtitlan"][0])[0], 1),
             round(T(D.LUGARES["México-Tenochtitlan"][1],
@@ -220,10 +249,11 @@ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-ser
 .brand:hover{{color:var(--accent);}}
 nav.site a{{color:var(--ink2);text-decoration:none;font-size:14px;}}
 nav.site a:hover{{color:var(--accent);}}
-h1{{font-size:1.6rem;font-weight:400;margin:1.6rem 0 .9rem}}
+h1{{font-size:1.6rem;font-weight:400;margin:1rem 0 .8rem}}
 h2{{font-size:1.05rem;font-weight:400;color:var(--ink);margin:2rem 0 .6rem}}
-.tiles{{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-gap:10px;margin:0 0 1.1rem;
+.stage{{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}}
+.mapwrap{{flex:1 1 620px;min-width:300px}}
+.side{{flex:0 1 300px;min-width:240px;display:flex;flex-direction:column;gap:10px;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}}
 .tile{{background:var(--panel);border:1px solid var(--line);border-radius:12px;
 padding:10px 16px}}
@@ -231,18 +261,41 @@ padding:10px 16px}}
 .tile .v{{font-size:21px;font-weight:650;margin-top:3px;font-variant-numeric:tabular-nums}}
 .tile .g{{font-size:12.5px;color:var(--ink3);margin-top:3px;line-height:1.45}}
 figure{{margin:0}}
-svg#mapa{{width:100%;height:auto;display:block;background:var(--mar);
-border-radius:10px;border:1px solid var(--line)}}
-.controls{{display:flex;align-items:center;gap:.7rem;margin:1rem 0 0;flex-wrap:wrap;
+svg#mapa{{width:100%;height:auto;aspect-ratio:1000/700;display:block;background:var(--mar);
+border-radius:10px;border:1px solid var(--line);cursor:grab;touch-action:none;outline:none}}
+svg#mapa.arrastra{{cursor:grabbing}}
+svg#mapa:focus-visible{{border-color:var(--accent)}}
+.controls{{display:flex;align-items:center;gap:.7rem;margin:.8rem 0 0;flex-wrap:wrap;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;font-size:.9rem}}
+.chips{{display:flex;align-items:center;gap:.45rem;margin:.6rem 0 0;flex-wrap:wrap;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}}
+.chips .sep{{width:1px;height:20px;background:var(--line);margin:0 4px}}
 button{{font:inherit;font-size:.85rem;background:none;color:var(--ink);
 border:1px solid var(--line);border-radius:999px;padding:5px 13px;cursor:pointer}}
 button:hover{{background:#20242a}}
 button[aria-pressed="true"]{{border-color:var(--accent);color:var(--accent)}}
-input[type=range]{{flex:1;min-width:240px;accent-color:var(--ruta);height:22px}}
-#anoOut{{font-variant-numeric:tabular-nums;color:var(--ink2);min-width:4.5em}}
-.notes{{margin-top:2.5rem;border-top:1px solid var(--line);padding-top:1.5rem;
-color:var(--ink2);font-size:.95rem}}
+button.ano{{padding:4px 10px;font-size:.8rem;font-variant-numeric:tabular-nums;color:var(--ink2)}}
+button.ano.on{{border-color:var(--ruta);color:var(--ruta)}}
+input[type=range]{{flex:1;min-width:200px;accent-color:var(--ruta);height:22px}}
+#anoOut{{font-variant-numeric:tabular-nums;color:var(--ink2);min-width:3.2em}}
+.ficha{{background:var(--panel);border:1px solid var(--ruta);border-radius:12px;padding:10px 16px;
+font-size:13px;line-height:1.45}}
+.ficha[hidden]{{display:none}}
+.ficha h3{{margin:0;font-size:15px;font-weight:650;color:var(--ruta);display:flex;
+justify-content:space-between;align-items:baseline;gap:8px}}
+.ficha h3 button{{padding:0 7px;font-size:12px;line-height:1.5;color:var(--ink3)}}
+.ficha .sub{{color:var(--ink2);margin:2px 0 6px}}
+.ficha .row{{display:flex;justify-content:space-between;gap:10px;padding:2px 0;
+border-top:1px solid var(--line)}}
+.ficha .row span:first-child{{color:var(--ink3);white-space:nowrap}}
+.ficha .row span:last-child{{text-align:right;color:var(--ink)}}
+.ficha .nota{{color:var(--ink3);margin:6px 0 0;font-size:12px}}
+.caption{{color:var(--ink2);font-size:.95rem;max-width:74ch;margin:1.1rem 0 0}}
+details.sources{{margin-top:2.2rem;border-top:1px solid var(--line);padding-top:.8rem;max-width:78ch}}
+details.sources>summary{{cursor:pointer;color:var(--ink3);font-size:.8rem;letter-spacing:.06em;
+text-transform:uppercase;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}}
+details.sources>summary:hover{{color:var(--accent)}}
+.notes{{margin-top:1rem;color:var(--ink2);font-size:.95rem}}
 .notes p{{margin:0 0 1rem;max-width:74ch}}
 .method{{margin-top:1.5rem;color:var(--ink3);font-size:.88rem}}
 .method p{{margin:0 0 .9rem;max-width:74ch}}
@@ -251,6 +304,8 @@ color:var(--ink2);font-size:.95rem}}
 .refs a{{color:var(--accent);word-break:break-word}}
 path.tierra{{fill:var(--tierra)}}
 path.fuera{{fill:var(--fuera)}}
+#relieve path{{fill:#6f6a5c;fill-opacity:.42;pointer-events:none}}
+#relieve path.alta{{fill:#8a8069;fill-opacity:.5}}
 #imperio{{fill:var(--estado);fill-opacity:.55;stroke:#0f1216;stroke-width:.8}}
 #entidades path{{stroke:#0f1216;stroke-width:.7;cursor:pointer}}
 #entidades path.estado{{fill:var(--estado);fill-opacity:.62}}
@@ -261,16 +316,25 @@ path.fuera{{fill:var(--fuera)}}
 #rutas path{{fill:none;stroke:var(--ruta);vector-effect:non-scaling-stroke;stroke-width:1.8;stroke-linejoin:round;
 stroke-linecap:round}}
 #rutas path.llegada{{stroke:var(--llegada);stroke-width:2.6}}
+#rutas path.on{{stroke-width:3.2}}
+#rutas path.fija{{stroke-width:3.4;stroke:#ffd27a}}
+#rutas.conFija path:not(.fija):not(.mano):not(.llegada){{stroke-opacity:.35}}
+#rutas path.mano{{stroke:transparent;stroke-width:14;cursor:pointer;pointer-events:stroke}}
 #entidades path,#perdido path,#imperio,path.tierra{{vector-effect:non-scaling-stroke}}
 #lineas path{{fill:none;stroke:var(--linea);stroke-width:1.8;
 vector-effect:non-scaling-stroke;stroke-dasharray:7 5}}
-circle.villa{{fill:var(--villa);stroke:#0f1216;stroke-width:1.1}}
+circle.villa{{fill:var(--villa);stroke:#0f1216;stroke-width:1.1;cursor:pointer}}
+circle.villa.on{{fill:#fff;stroke:var(--villa)}}
 circle.punta{{fill:#fff3d6;stroke:#7a4d0d;stroke-width:1.4}}
 .lbl{{font:400 11.5px/1 system-ui,sans-serif;fill:#e4e9ee;pointer-events:none;
 paint-order:stroke;stroke:#0d1a26;stroke-width:2.6}}
 .lbl.ent{{font-size:11px;fill:#dcd3e6;letter-spacing:.04em}}
 .lbl.villa{{font-size:10.5px;fill:#cfeee5}}
 .leg{{font:400 12px/1 system-ui,sans-serif;fill:#c3ccd6}}
+@media (max-width:600px){{
+  .side{{flex-basis:100%}}
+  .chips button.ano{{padding:3px 8px}}
+}}
 </style>
 </head>
 <body>
@@ -282,23 +346,13 @@ paint-order:stroke;stroke:#0d1a26;stroke-width:2.6}}
 
 <h1>La Nueva España</h1>
 
-<div class="tiles">
-  <div class="tile"><div class="k">año</div>
-    <div class="v" id="tAno">1519</div><div class="g" id="tAnoSub"></div></div>
-  <div class="tile"><div class="k">lo que pasa</div>
-    <div class="v" id="tSuceso" style="font-size:15px"></div>
-    <div class="g" id="tSucesoSub"></div></div>
-  <div class="tile"><div class="k">en camino</div>
-    <div class="v" id="tEntradas"></div><div class="g" id="tEntradasSub"></div></div>
-  <div class="tile"><div class="k">villas fundadas</div>
-    <div class="v" id="tVillas"></div><div class="g" id="tVillasSub"></div></div>
-</div>
-
-<figure>
-<svg id="mapa" viewBox="0 0 {VW:.0f} {VH:.0f}" role="img"
+<div class="stage">
+<figure class="mapwrap">
+<svg id="mapa" viewBox="0 0 {VW:.0f} {VH:.0f}" role="img" tabindex="0"
   aria-label="Mapa de la Nueva España, de Panamá a Oregón, con las entradas, las villas y las fronteras.">
 <title>La Nueva España de 1519 a 1853</title>
 <path class="tierra" d="{js['land']}"/>
+<g id="relieve"></g>
 <path id="imperio" d="{js['imperio']}" style="display:none"/>
 <g id="entidades"></g>
 <g id="perdido"></g>
@@ -310,26 +364,46 @@ paint-order:stroke;stroke:#0d1a26;stroke-width:2.6}}
 <g id="etiquetas"></g>
 <g id="leyenda"></g>
 </svg>
-</figure>
 
 <div class="controls">
   <button id="bPlay">Correr los años</button>
   <input type="range" id="ano" min="{D.AÑO_INICIO}" max="{D.AÑO_FIN}" step="1"
     value="{D.AÑO_INICIO}" aria-label="Año">
   <output id="anoOut"></output>
+  <button id="bMarco" title="Vuelve al encuadre que sigue a los años">Reencuadrar</button>
+</div>
+<div class="chips" id="anos">
   <button id="bRutas" aria-pressed="true">Entradas</button>
   <button id="bVillas" aria-pressed="true">Villas</button>
   <button id="bEnt" aria-pressed="true">Entidades</button>
+  <span class="sep"></span>
+</div>
+</figure>
+
+<aside class="side">
+  <div class="ficha" id="ficha" hidden></div>
+  <div class="tile"><div class="k">año</div>
+    <div class="v" id="tAno">1519</div><div class="g" id="tAnoSub"></div></div>
+  <div class="tile"><div class="k">lo que pasa</div>
+    <div class="v" id="tSuceso" style="font-size:15px"></div>
+    <div class="g" id="tSucesoSub"></div></div>
+  <div class="tile"><div class="k">en camino</div>
+    <div class="v" id="tEntradas"></div><div class="g" id="tEntradasSub"></div></div>
+  <div class="tile"><div class="k">villas fundadas</div>
+    <div class="v" id="tVillas"></div><div class="g" id="tVillasSub"></div></div>
+</aside>
 </div>
 
+<p class="caption">El mapa empieza en 1519 con la armada de Cortés frente a Chalchihuecan y termina en 1853 con la venta de La Mesilla. En medio suben las entradas al norte, se fundan villas a su paso, y al final todo se reparte en estados. Un año con marco lleva ahí; una entrada tocada se queda en la ficha.</p>
+
+<details class="sources"><summary>Fuentes</summary>
 <div class="notes">
-<p>El mapa empieza en 1519 con la armada de Cortés frente a Chalchihuecan y
-termina en 1853 con la venta de La Mesilla. En medio suben las entradas al
-norte, se van fundando las villas por donde pasan, y al final se reparte todo
-en estados y se dibujan las rayas que quedaron.</p>
 <p>Las entidades de 1824 están armadas con los estados de hoy, así que sus
 orillas son aproximadas: sirven para ver el reparto, no para medir. Un nombre
-bajo el cursor dice qué era y de qué estados de hoy se compone.</p>
+bajo el cursor dice qué era y de qué estados de hoy se compone; una villa bajo
+el cursor dice cuándo se fundó y en qué estado queda hoy. El mapa se arrastra
+y se acerca con la rueda; Reencuadrar devuelve el encuadre que sigue a los
+años.</p>
 </div>
 
 <div class="method">
@@ -341,7 +415,12 @@ lugares que todavía existen llevan la coordenada de GeoNames; los sitios sin
 pueblo encima van puestos a mano y la página los marca como aproximados. La
 línea de Adams y Onís es el artículo tercero del tratado de 1819, tramo por
 tramo; las de 1848 y 1853 van simplificadas, siguiendo el Bravo y el Gila. La
-costa es la de la base GSHHG, a resolución completa.</p>
+costa es la de la base GSHHG, a resolución completa. Los kilómetros de cada
+entrada son la suma de las distancias de círculo máximo entre sus sitios, en
+el orden en que van, así que quedan cortos frente al camino andado. El relieve
+es el de la página de México: la aspereza de la imagen de Natural Earth, que
+marca terreno quebrado y no una sierra con nombre, y solo cubre el México de
+hoy.</p>
 </div>
 
 <h2>Referencias</h2>
@@ -352,6 +431,7 @@ hierarchical, high-resolution shoreline database. <em>Journal of Geophysical
 Research: Solid Earth, 101</em>(B4), 8741-8743.
 <a href="https://doi.org/10.1029/96JB00104">https://doi.org/10.1029/96JB00104</a></p>
 </div>
+</details>
 </main>
 <script>
 const D={blob};
@@ -360,18 +440,43 @@ const NS='http://www.w3.org/2000/svg';
 function make(t,a,p){{const e=document.createElementNS(NS,t);
   for(const k in a) e.setAttribute(k,a[k]); if(p) p.appendChild(e); return e;}}
 function clear(g){{while(g.firstChild) g.removeChild(g.firstChild);}}
+const REDUCIDO=matchMedia('(prefers-reduced-motion: reduce)').matches;
+// el cuadro que se ve: más ancho que alto, para que quepa sobre el doblez
+const FW=D.vw, FH=700;
 
-let ano=D.a0, corriendo=null, verRutas=true, verVillas=true, verEnt=true;
-let sobre=null;
+let ano=D.a0, corriendo=null, viaje=null, verRutas=true, verVillas=true, verEnt=true;
+let sobre=null, sobreVilla=null, sobreRuta=null, fija=null, manual=false;
+
+D.relieve.forEach(r=>make('path',{{d:r.d,class:r.t==='alta'?'alta':''}},el('relieve')));
 
 // El cuadro sigue a la historia: en 1519 cabe el camino de Veracruz a
 // Tenochtitlan y nada más, y se va abriendo conforme las entradas suben al
 // norte, hasta que en el siglo XIX cabe todo. Lo que se ve manda el encuadre.
 const MIN_ANCHO = D.vw * 0.20;
 let caja = null;
+function marco(x0,y0,x1,y1){{
+  let w=Math.max(MIN_ANCHO, x1-x0, (y1-y0)*FW/FH);
+  w=Math.min(w,D.vw);
+  let h=w*FH/FW;
+  if(h>D.vh){{h=D.vh; w=h*FW/FH;}}
+  let cx=(x0+x1)/2, cy=(y0+y1)/2;
+  cx=Math.max(w/2,Math.min(D.vw-w/2,cx));
+  cy=Math.max(h/2,Math.min(D.vh-h/2,cy));
+  return {{x:cx-w/2, y:cy-h/2, w, h}};
+}}
+// desde 1821 cabe todo lo que fue del país: las entidades, lo perdido y las rayas
+const TODO=(()=>{{
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  const mira=d=>{{ for(const m of d.matchAll(/(-?[\d.]+),(-?[\d.]+)/g)){{
+    const x=+m[1], y=+m[2]; if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; }} }};
+  D.ent.forEach(e=>mira(e.d)); D.perd.forEach(p=>mira(p.d));
+  [D.l1819,D.l1848,D.l1853].forEach(mira);
+  return marco(x0-24,y0-24,x1+24,y1+24);
+}})();
 function encuadre(){{
+  if(manual) return caja;
+  if(ano>=1821) return TODO;
   const pts=[D.tenoch.slice()];
-  const f0 = ano>=1521 ? 1 : (ano-1519+1)/3;
   if(ano>=1519) D.llegada.p.forEach(p=>pts.push(p));
   D.entradas.forEach(e=>{{
     if(ano<e.a) return;
@@ -380,30 +485,34 @@ function encuadre(){{
     for(let i=0;i<=hasta;i++) pts.push(e.p[i]);
   }});
   D.villas.forEach(v=>{{ if(ano>=v.a) pts.push([v.x,v.y]); }});
-  if(ano>=1821) return {{x:0,y:0,w:D.vw,h:D.vh}};
   let x0=Math.min(...pts.map(p=>p[0])), x1=Math.max(...pts.map(p=>p[0]));
   let y0=Math.min(...pts.map(p=>p[1])), y1=Math.max(...pts.map(p=>p[1]));
   const pad=Math.max(40,(x1-x0)*0.14);
-  x0-=pad; x1+=pad; y0-=pad; y1+=pad;
-  let w=Math.max(MIN_ANCHO, x1-x0, (y1-y0)*D.vw/D.vh);
-  let h=w*D.vh/D.vw;
-  let cx=(x0+x1)/2, cy=(y0+y1)/2;
-  w=Math.min(w,D.vw); h=Math.min(h,D.vh);
-  cx=Math.max(w/2,Math.min(D.vw-w/2,cx));
-  cy=Math.max(h/2,Math.min(D.vh-h/2,cy));
-  return {{x:cx-w/2, y:cy-h/2, w, h}};
+  return marco(x0-pad,y0-pad,x1+pad,y1+pad);
 }}
+let quieta=true;
 function acercar(){{
   const t=encuadre();
-  if(!caja) caja=t;
+  if(!caja||manual) caja=t;
   else{{  // se mueve poco a poco, para que al correr los años no dé brincos
-    const m=corriendo?0.14:1;
+    const m=(corriendo||viaje)&&!REDUCIDO?0.14:1;
     caja={{x:caja.x+(t.x-caja.x)*m, y:caja.y+(t.y-caja.y)*m,
           w:caja.w+(t.w-caja.w)*m, h:caja.h+(t.h-caja.h)*m}};
   }}
+  quieta = Math.abs(caja.x-t.x)+Math.abs(caja.y-t.y)+Math.abs(caja.w-t.w)<0.4;
   el('mapa').setAttribute('viewBox',
     `${{caja.x.toFixed(1)}} ${{caja.y.toFixed(1)}} ${{caja.w.toFixed(1)}} ${{caja.h.toFixed(1)}}`);
   return caja.w/D.vw;   // cuánto se agrandó todo
+}}
+// cuando un viaje termina, la cámara sigue hasta asentarse
+let asentando=null;
+function asentar(){{
+  if(asentando||quieta||manual) return;
+  asentando=requestAnimationFrame(()=>{{ asentando=null;
+    const m=0.14; const t=encuadre();
+    caja={{x:caja.x+(t.x-caja.x)*m, y:caja.y+(t.y-caja.y)*m,
+          w:caja.w+(t.w-caja.w)*m, h:caja.h+(t.h-caja.h)*m}};
+    pinta(); asentar(); }});
 }}
 
 function sucesoDe(a){{
@@ -427,6 +536,11 @@ function tramo(p, f){{
 // entidades, que se saltan si ya no cabe el nombre.
 let cajas=[];
 let K=1;                       // escala del encuadre
+// en una pantalla angosta el mapa se dibuja chico, así que los letreros y
+// los puntos crecen para leerse igual
+function escala(){{ const w=el('mapa').clientWidth||1000; return Math.max(1, Math.min(2.2, 640/w)); }}
+let E=escala();
+addEventListener('resize',()=>{{ const e=escala(); if(Math.abs(e-E)>0.05){{E=e;pinta();}} }});
 function pon(g, texto, x, y, clase, r){{
   const ancho=texto.length*(clase.includes('ent')?5.6:5.4)*K, alto=13*K;
   const ops=[[x+r+5*K,y+4*K,'start'],[x-r-5*K,y+4*K,'end'],
@@ -445,7 +559,7 @@ function pon(g, texto, x, y, clase, r){{
 function nombre(n){{ return D.corto[n]||n; }}
 
 function pinta(){{
-  K=acercar();
+  K=acercar()*E;
   const gEnt=el('entidades'), gPer=el('perdido'), gLin=el('lineas'),
         gRut=el('rutas'), gVil=el('villas'), gEti=el('etiquetas'),
         gCen=el('centroLbl');
@@ -473,16 +587,21 @@ function pinta(){{
   if(ano>=1848 && ano<1853) make('path',{{d:D.l1848}},gLin);
   if(ano>=1853) make('path',{{d:D.l1853}},gLin);
 
+  gRut.classList.toggle('conFija', fija!==null);
   if(verRutas){{
     // la llegada, en su propio color
-    const f0=(ano-1519+1)/1;
     if(ano>=1519) make('path',{{d:tramo(D.llegada.p, ano>=1519?1:0),class:'llegada'}},gRut);
-    D.entradas.forEach(e=>{{
+    D.entradas.forEach((e,i)=>{{
       if(ano<e.a) return;
       const f=e.b>e.a ? Math.min(1,(ano-e.a+1)/(e.b-e.a+1)) : 1;
-      make('path',{{d:tramo(e.p,f)}},gRut);
-      const i=Math.min(e.p.length-1, Math.floor(f*(e.p.length-1)));
-      if(f<1) make('circle',{{class:'punta',cx:e.p[i][0],cy:e.p[i][1],r:3.4*K,
+      const d=tramo(e.p,f);
+      make('path',{{d,class:(sobreRuta===i?'on ':'')+(fija===i?'fija':'')}},gRut);
+      const m=make('path',{{d,class:'mano'}},gRut);   // el trazo ancho que se toca
+      m.addEventListener('mouseenter',()=>{{sobreRuta=i;marcaRutas();tablero();}});
+      m.addEventListener('mouseleave',()=>{{sobreRuta=null;marcaRutas();tablero();}});
+      m.addEventListener('click',ev=>{{ev.stopPropagation();fijar(fija===i?null:i);}});
+      const k=Math.min(e.p.length-1, Math.floor(f*(e.p.length-1)));
+      if(f<1) make('circle',{{class:'punta',cx:e.p[k][0],cy:e.p[k][1],r:3.4*K,
         style:`stroke-width:${{1.4*K}}px`}},gRut);
     }});
   }}
@@ -497,9 +616,11 @@ function pinta(){{
   if(verVillas){{
     const vistas=D.villas.filter(v=>ano>=v.a);
     vistas.forEach(v=>{{
-      const nueva=ano-v.a<6;
-      make('circle',{{class:'villa',cx:v.x,cy:v.y,r:(nueva?4.8:3.4)*K,
+      const nueva=ano-v.a<6, i=D.villas.indexOf(v);
+      const c=make('circle',{{class:'villa'+(sobreVilla===i?' on':''),cx:v.x,cy:v.y,r:(nueva?4.8:3.4)*K,
         style:`stroke-width:${{1.1*K}}px`}},gVil);
+      c.addEventListener('mouseenter',()=>{{sobreVilla=i;c.classList.add('on');tablero();}});
+      c.addEventListener('mouseleave',()=>{{sobreVilla=null;c.classList.remove('on');tablero();}});
       cajas.push([v.x-5*K,v.y-5*K,v.x+5*K,v.y+5*K]);
     }});
     // las recién fundadas se rotulan primero: son las que cuentan el año
@@ -518,6 +639,33 @@ function pinta(){{
         {(lambda t: t)(0) or 0} + {round(T(-86.5, 13.0)[0], 1)},
         {round(T(-86.5, 13.0)[1], 1)}, 'lbl', 2);
   }}
+}}
+// las clases de las entradas se cambian sin volver a dibujar, para que el
+// trazo bajo el cursor no se reemplace debajo de él
+function marcaRutas(){{
+  const ps=[...document.querySelectorAll('#rutas path:not(.mano):not(.llegada)')];
+  const vivas=D.entradas.map((e,i)=>i).filter(i=>ano>=D.entradas[i].a);
+  ps.forEach((p,j)=>{{ const i=vivas[j];
+    p.classList.toggle('on', sobreRuta===i); p.classList.toggle('fija', fija===i); }});
+  el('rutas').classList.toggle('conFija', fija!==null);
+}}
+
+function km(n){{ return Math.round(n).toLocaleString('es-MX'); }}
+function fijar(i){{
+  fija=i; marcaRutas();
+  const f=el('ficha');
+  if(i===null){{ f.hidden=true; f.innerHTML=''; return; }}
+  const e=D.entradas[i];
+  const villas=e.sitios.map(s=>D.villas.find(v=>v.n===s.n)).filter(Boolean)
+    .map(v=>v.n+(v.a>e.b?' (fundada después, en '+v.a+')':' ('+v.a+')'));
+  f.hidden=false;
+  f.innerHTML=`<h3><span>${{e.n}}</span><button type="button" id="bSuelta" aria-label="Soltar">&times;</button></h3>`
+    +`<div class="sub">${{e.q}}, ${{e.a===e.b?e.a:e.a+' a '+e.b}}</div>`
+    +`<div class="row"><span>Camino</span><span>${{km(e.km)}} km entre sus sitios</span></div>`
+    +`<div class="row"><span>Sitios</span><span>${{e.sitios.map(s=>s.n+(s.e?'':'*')).join(', ')}}</span></div>`
+    +`<div class="row"><span>Villas que tocó</span><span>${{villas.length?villas.join(', '):'ninguna de las del mapa'}}</span></div>`
+    +`<p class="nota">${{e.nota}}.${{e.sitios.some(s=>!s.e)?' * sitio aproximado.':''}}</p>`;
+  el('bSuelta').addEventListener('click',()=>fijar(null));
 }}
 
 function tablero(){{
@@ -545,21 +693,67 @@ function tablero(){{
       : e.k==='territorio' ? 'territorio de la federación de 1824'
       : 'el distrito federal, creado en noviembre de 1824';
   }}
+  if(sobreRuta!==null){{
+    const e=D.entradas[sobreRuta];
+    el('tSuceso').textContent=e.n;
+    el('tSucesoSub').textContent=e.q+', '+(e.a===e.b?e.a:e.a+' a '+e.b)+', '+km(e.km)+' km entre sus sitios';
+  }}
+  if(sobreVilla!==null){{
+    const w=D.villas[sobreVilla];
+    el('tSuceso').textContent=w.n;
+    el('tSucesoSub').textContent='villa fundada en '+w.a+'; hoy en '+w.h+'. '+w.nota;
+  }}
+  document.querySelectorAll('#anos button.ano').forEach(b=>
+    b.classList.toggle('on', +b.dataset.a===ano));
 }}
 
 el('ano').addEventListener('input',e=>{{parar();ano=+e.target.value;pinta();tablero();}});
-function parar(){{if(corriendo){{clearInterval(corriendo);corriendo=null;
-  el('bPlay').setAttribute('aria-pressed','false');
-  el('bPlay').textContent='Correr los años';}}}}
+function parar(){{
+  if(corriendo){{cancelAnimationFrame(corriendo);corriendo=null;
+    el('bPlay').setAttribute('aria-pressed','false');
+    el('bPlay').textContent='Correr los años';}}
+  if(viaje){{cancelAnimationFrame(viaje);viaje=null;}}
+}}
+const MS_ANO=55;
 el('bPlay').addEventListener('click',()=>{{
-  if(corriendo){{parar();return;}}
+  if(corriendo){{parar();asentar();return;}}
+  parar();
   el('bPlay').setAttribute('aria-pressed','true');
   el('bPlay').textContent='Alto';
-  if(ano>=D.a1) ano=D.a0;
-  corriendo=setInterval(()=>{{
-    ano+=1; if(ano>=D.a1){{ano=D.a1;pinta();tablero();parar();return;}}
+  if(ano>=D.a1){{ano=D.a0;manual=false;}}
+  let ult=performance.now();
+  function paso(t){{
+    let cambio=false;
+    while(t-ult>=MS_ANO && ano<D.a1){{ ano+=1; ult+=MS_ANO; cambio=true; }}
+    if(cambio||!quieta){{ pinta(); tablero(); }}
+    if(ano>=D.a1){{ corriendo=null; parar(); asentar(); return; }}
+    corriendo=requestAnimationFrame(paso);
+  }}
+  corriendo=requestAnimationFrame(paso);
+}});
+// un año con marco: el deslizador viaja hasta ahí en un segundo
+function irA(destino){{
+  parar();
+  if(REDUCIDO||destino===ano){{ ano=destino; pinta(); tablero(); asentar(); return; }}
+  const a0=ano, t0=performance.now(), dur=900;
+  function paso(t){{
+    const f=Math.min(1,(t-t0)/dur);
+    const e=f<.5 ? 2*f*f : 1-Math.pow(-2*f+2,2)/2;
+    ano=Math.round(a0+(destino-a0)*e);
     pinta(); tablero();
-  }}, 55);
+    if(f<1) viaje=requestAnimationFrame(paso);
+    else {{ viaje=null; asentar(); }}
+  }}
+  viaje=requestAnimationFrame(paso);
+}}
+const MARCOS=[[1519,'llega la armada'],[1540,'Coronado sale a Cíbola'],[1598,'Oñate al Nuevo México'],
+  [1821,'la independencia'],[1824,'la federación'],[1836,'Texas se separa'],
+  [1848,'Guadalupe Hidalgo'],[1853,'La Mesilla']];
+MARCOS.forEach(([a,t])=>{{
+  const b=document.createElement('button');
+  b.type='button'; b.className='ano'; b.dataset.a=a; b.textContent=a; b.title=t;
+  b.addEventListener('click',()=>irA(a));
+  el('anos').appendChild(b);
 }});
 function bota(id,f){{
   el(id).addEventListener('click',()=>{{
@@ -569,18 +763,64 @@ function bota(id,f){{
 }}
 bota('bRutas',v=>verRutas=v); bota('bVillas',v=>verVillas=v);
 bota('bEnt',v=>verEnt=v);
+el('bMarco').addEventListener('click',()=>{{manual=false;pinta();asentar();}});
 
-const FILAS=[['{C_LLEGADA}','la llegada de 1519'],['{C_RUTA}','las entradas al norte'],
-  ['{C_VILLA}','villa fundada'],['{C_ESTADO}','el imperio, luego los estados'],
-  ['{C_TERR}','territorio de 1824'],['{C_PERDIDO}','lo que se perdió']];
+// el mapa se arrastra y se acerca con la rueda; desde entonces el encuadre
+// es del visitante hasta que pide Reencuadrar
+const mapa=el('mapa');
+let arrastre=null, pendiente=false;
+function repinta(){{ if(pendiente) return; pendiente=true;
+  requestAnimationFrame(()=>{{pendiente=false;pinta();}}); }}
+function aMapa(ev){{
+  const r=mapa.getBoundingClientRect();
+  return [caja.x+(ev.clientX-r.left)/r.width*caja.w, caja.y+(ev.clientY-r.top)/r.height*caja.h];
+}}
+mapa.addEventListener('pointerdown',ev=>{{
+  if(ev.button!==0) return;
+  arrastre={{x:ev.clientX,y:ev.clientY,cx:caja.x,cy:caja.y,movio:false}};
+  mapa.setPointerCapture(ev.pointerId);
+}});
+mapa.addEventListener('pointermove',ev=>{{
+  if(!arrastre) return;
+  const r=mapa.getBoundingClientRect();
+  const dx=(ev.clientX-arrastre.x)/r.width*caja.w, dy=(ev.clientY-arrastre.y)/r.height*caja.h;
+  if(Math.abs(ev.clientX-arrastre.x)+Math.abs(ev.clientY-arrastre.y)<3) return;
+  arrastre.movio=true; manual=true; mapa.classList.add('arrastra');
+  caja={{x:Math.max(0,Math.min(D.vw-caja.w,arrastre.cx-dx)), y:Math.max(0,Math.min(D.vh-caja.h,arrastre.cy-dy)), w:caja.w, h:caja.h}};
+  repinta();
+}});
+function suelta(){{ if(arrastre){{arrastre=null; mapa.classList.remove('arrastra');}} }}
+mapa.addEventListener('pointerup',suelta); mapa.addEventListener('pointercancel',suelta);
+mapa.addEventListener('wheel',ev=>{{
+  ev.preventDefault();
+  const [px,py]=aMapa(ev);
+  const z=Math.exp(-ev.deltaY*0.0012);
+  let w=Math.max(D.vw*0.05, Math.min(D.vw, caja.w/z));
+  let h=w*FH/FW; if(h>D.vh){{h=D.vh; w=h*FW/FH;}}
+  const fx=(px-caja.x)/caja.w, fy=(py-caja.y)/caja.h;
+  let x=px-fx*w, y=py-fy*h;
+  x=Math.max(0,Math.min(D.vw-w,x)); y=Math.max(0,Math.min(D.vh-h,y));
+  caja={{x,y,w,h}}; manual=true; repinta();
+}},{{passive:false}});
+mapa.addEventListener('keydown',ev=>{{
+  if(ev.key==='ArrowRight'||ev.key==='ArrowUp'){{ev.preventDefault();parar();ano=Math.min(D.a1,ano+1);pinta();tablero();}}
+  else if(ev.key==='ArrowLeft'||ev.key==='ArrowDown'){{ev.preventDefault();parar();ano=Math.max(D.a0,ano-1);pinta();tablero();}}
+  else if(ev.key==='Escape'&&fija!==null) fijar(null);
+}});
+document.addEventListener('keydown',ev=>{{ if(ev.key==='Escape'&&fija!==null) fijar(null); }});
+
+const FILAS=[['{C_LLEGADA}','la llegada de 1519',1519],['{C_RUTA}','las entradas al norte',1528],
+  ['{C_VILLA}','villa fundada',1519],['{C_ESTADO}','el imperio, luego los estados',1821],
+  ['{C_TERR}','territorio de 1824',1824],['{C_PERDIDO}','lo que se perdió',1836]];
 function leyenda(){{
   const g=el('leyenda');
   clear(g);
-  const w=238, h=132;
+  const filas=FILAS.filter(f=>ano>=f[2]);   // solo lo que ya está en el mapa
+  const w=238, h=filas.length*21+11;
   const x0=caja.x+8*K, y0=caja.y+caja.h-(h+8)*K;
   g.setAttribute('transform', `translate(${{x0}},${{y0}}) scale(${{K}})`);
   make('rect',{{x:0,y:0,width:w,height:h,rx:8,fill:'#0f1216','fill-opacity':.78}},g);
-  FILAS.forEach((f,i)=>{{
+  filas.forEach((f,i)=>{{
     make('rect',{{x:10,y:14+i*21,width:16,height:8,rx:2,fill:f[0]}},g);
     const t=make('text',{{class:'leg',x:34,y:22+i*21}},g);
     t.textContent=f[1];
@@ -590,13 +830,17 @@ function leyenda(){{
 
 pinta(); tablero();
 window.__ne=()=>({{ano, entradas:D.entradas.length, villas:D.villas.length,
-  entidades:D.ent.length, dibujadas:{{
-    rutas:document.querySelectorAll('#rutas path').length,
+  entidades:D.ent.length, relieve:D.relieve.length, fija, manual, caja:{{...caja}},
+  dibujadas:{{
+    rutas:document.querySelectorAll('#rutas path:not(.mano)').length,
     villas:document.querySelectorAll('#villas circle').length,
     entidades:document.querySelectorAll('#entidades path').length,
     perdido:document.querySelectorAll('#perdido path').length,
-    lineas:document.querySelectorAll('#lineas path').length}},
-  suceso:el('tSuceso').textContent}});
+    lineas:document.querySelectorAll('#lineas path').length,
+    leyenda:document.querySelectorAll('#leyenda text').length,
+    marcos:document.querySelectorAll('#anos button.ano').length}},
+  suceso:el('tSuceso').textContent, sub:el('tSucesoSub').textContent,
+  corriendo:!!corriendo, viaje:!!viaje}});
 </script>
 </body>
 </html>

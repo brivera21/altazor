@@ -62,12 +62,10 @@ js = dict(
 
 
 NOTE1 = ("Seven views on one column of degrees. The span is everything a "
-         "person has been brought back from, at either end. The day is the "
-         "half degree the body moves through, and the sites disagree by more "
-         "than that. Fever sets a target the body chases, so the chill comes "
-         "first. In hyperthermia no target moves and control loses to heat. "
-         "The last two views run degree by degree, and then ask what the "
-         "number does not settle.")
+         "person has been brought back from. The day is the half degree the "
+         "body moves through, and the sites disagree by more. Fever sets a "
+         "target the body chases, so the chill comes first; in hyperthermia "
+         "control loses to heat. The last two views run degree by degree.")
 
 NOTE2 = ("The buttons set the scale, and the ladder, the marks, the table and "
          "the temperatures inside the sentences all move with it. A point on "
@@ -153,6 +151,25 @@ nav.site a:hover { color:var(--accent); }
 h1 { margin:0 0 10px; font-size:26px; }
 .bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
 .bar .sp { flex:0 0 18px; }
+.bar .lbl { color:var(--muted); font-size:12.5px; margin-right:2px; }
+.bar.units { margin-top:-2px; }
+.controls { display:flex; gap:14px; align-items:center; flex-wrap:wrap; margin:0 0 10px;
+  color:var(--muted); font-size:12.5px; }
+.controls label { display:flex; gap:8px; align-items:center; }
+.controls input[type=range] { width:150px; accent-color:var(--accent); }
+.controls output { color:var(--text); font-variant-numeric:tabular-nums; min-width:5.5em; }
+.controls button[aria-pressed="true"] { border-color:var(--accent); color:var(--accent); }
+.figkey { color:var(--muted); font-size:11.5px; margin:0 0 8px; display:flex; gap:14px; flex-wrap:wrap; }
+.figkey i { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; vertical-align:-0.5px; }
+.figkey .d { display:inline-block; width:18px; border-top:2px dashed currentColor; vertical-align:3px; margin-right:5px; }
+#chart:focus { outline:none; }
+.controls[hidden], .figkey[hidden] { display:none; }
+#chart.mk svg { cursor:ns-resize; touch-action:none; }
+/* the unit buttons fade the numbers out and back in, rather than repaint */
+#chart text, #degrees td.c, #degrees td.w .cw { transition:opacity .18s ease-in-out; }
+.swap text, .swap td.c, .swap td.w .cw { opacity:.08; }
+#chart.mk { border-radius:8px; }
+#chart.mk:focus-visible { box-shadow:0 0 0 2px var(--accent); }
 button { font:inherit; font-size:13.5px; padding:6px 14px; border-radius:999px;
   border:1px solid var(--line); background:#1a1a1a; color:var(--text); cursor:pointer; }
 button:hover { border-color:var(--accent); }
@@ -188,8 +205,8 @@ button.unit { padding:6px 12px; font-variant-numeric:tabular-nums; }
 #degrees tbody tr { height:var(--row,32px); }
 #degrees thead tr { height:34px; }
 #degrees td { padding:1px 10px 1px 0; border-top:1px solid #1e1e1e;
-  vertical-align:middle; color:#b9bec6; line-height:1.25; font-size:11.5px; }
-#degrees td.w { font-size:11.5px; line-height:1.25; }
+  vertical-align:middle; color:#cdd2d8; line-height:1.25; font-size:12px; }
+#degrees td.w { font-size:12px; line-height:1.25; }
 #degrees td.w .cw { display:block; }
 #degrees td.c { width:78px; }
 #degrees td.z { width:124px; font-size:11.5px; }
@@ -202,7 +219,8 @@ button.unit { padding:6px 12px; font-variant-numeric:tabular-nums; }
   margin-right:6px; }
 #degrees td.w { line-height:1.45; }
 #degrees td.n.m { color:var(--text); }
-#degrees td.n.b, #degrees td.n.n { color:#6b7280; }
+#degrees td.n.b, #degrees td.n.n { color:#7d8590; }
+#degrees tr.mk td { background:#1c2027; }
 #degrees tr:hover td { background:#191919; }
 .tkey { color:var(--muted); font-size:11.5px; line-height:1.5; margin:10px 0 0;
   max-width:900px; }
@@ -225,7 +243,12 @@ button.unit { padding:6px 12px; font-variant-numeric:tabular-nums; }
 .refs a { color:var(--accent); }
 __APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+details.sources { margin-top:22px; border-top:1px solid var(--line); padding-top:10px; max-width:760px; }
+details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px;
+  letter-spacing:.06em; text-transform:uppercase; }
+details.sources > summary:hover { color:var(--accent); }
+details.sources .note { border-top:none; padding-top:0; margin-top:12px; }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} #spanpair #degwrap{min-width:0;} .chartcol{flex-basis:auto; width:100%;} }
 </style>
 </head>
 <body>
@@ -241,16 +264,31 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   <button id="vSite">Where it is taken</button>
   <button id="vFever">Fever</button>
   <button id="vHeat">Heat in, heat out</button>
-  <button id="vFine">Degree by degree</button>
+  <button id="vFine">The top seven degrees</button>
   <button id="vHelp">If someone collapses</button>
-  <span class="sp"></span>
+</div>
+<div class="bar units">
+  <span class="lbl">Scale</span>
   <button id="uC" class="unit on">&deg;C</button>
   <button id="uF" class="unit">&deg;F</button>
   <button id="uK" class="unit">K</button>
 </div>
+<div class="controls" id="dayCtl" hidden>
+  <button id="dayPlay" aria-pressed="false">Play</button>
+  <span>the clock at</span><output id="dayOut">06:00</output>
+</div>
+<div class="controls" id="heatCtl" hidden>
+  <label>Activity <input type="range" id="actIn" min="100" max="2500" step="10" value="100"
+    aria-label="Heat produced, in watts"><output id="actOut"></output></label>
+  <label>Room <input type="range" id="roomIn" min="10" max="45" step="1" value="22"
+    aria-label="Room temperature"><output id="roomOut"></output></label>
+</div>
+<div class="figkey" id="figkey"><span><i style="background:#e6e6e6"></i>a record or a landmark, named in its row</span>
+  <span><span class="d" style="color:#d0d0d0"></span>a threshold, named on the top seven degrees</span>
+  <span><i style="background:#58a6ff"></i>the marker, which drags to any height</span></div>
 <div class="stage">
   <div class="chartcol">
-  <div id="spanpair"><div id="chart"></div><div id="degwrap"></div></div>
+  <div id="spanpair"><div id="chart" tabindex="0" aria-label="The diagram"></div><div id="degwrap"></div></div>
   </div>
   <div class="side"><div class="card">
     <div id="kindTxt"></div>
@@ -260,19 +298,27 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   </div></div>
 </div>
 <p class="note cv">__NOTE1__</p>
-<p class="note cv" style="border-top:none; padding-top:0;">__NOTE2__</p>
+<details class="sources"><summary>Sources</summary>
+<p class="note cv">__NOTE2__</p>
 <div class="method"><details><summary>Where the metabolic column comes from</summary>
 <p class="cv">__MEASURED__</p></details></div>
 <div class="method"><details><summary>How good the cooling evidence is</summary>
 <p class="cv">__METHOD__</p></details></div>
 <h2 class="refh">References</h2>
 <div class="refs">__REFS__</div>
+</details>
 </div>
 <script>
 const D=__DATA__;
 const el=document.getElementById('chart');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 let view='range', U='C', hot=null;
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+// the marker on the figure, the clock on the day, the two sliders on the heat
+// budget; each card shows the live state once it has been touched
+let mk=37, mkOn=false, dragMk=false;
+let dayH=null, dayPlay=null;
+let act=100, room=22, heatOn=false, hotKey='';
 
 // a point on the scale, and a gap between two points, convert differently
 function toU(c){ return U==='F'?c*9/5+32 : U==='K'?c+273.15 : c; }
@@ -347,6 +393,10 @@ function setAxis(){
 }
 setAxis();
 function yOf(c){ return RG.bot-(c-RG.lo)/(RG.hi-RG.lo)*RG.h; }
+function cOf(y){ return RG.lo+(RG.bot-y)/RG.h*(RG.hi-RG.lo); }
+function zoneAt(c){
+  return D.zones.find(z=>c>=z.lo&&c<z.hi)||(c<D.zones[0].lo?D.zones[0]:D.zones[D.zones.length-1]);
+}
 
 function halfProfile(){
   const H=RG.h, cx=RG.cx;
@@ -406,7 +456,13 @@ function drawRange(){
       +'" stroke-opacity="'+(on?0.95:(it.k==='L'?0.4:0.5))+'"'
       +(it.k==='L'?' stroke-dasharray="4 3"':'')+'/>';
   });
+  // above the marker the figure dims, so it reads like a thermometer filled
+  // to that height
+  const ym=yOf(mk);
+  s+='<rect x="'+W0+'" y="'+RG.top+'" width="'+(W1-W0)+'" height="'
+    +Math.max(0,ym-RG.top).toFixed(1)+'" fill="#121212" fill-opacity="0.38"/>';
   s+='</g>'+bodyOutline('#e6e6e6',1.6);
+  s+='<g opacity="0.9" pointer-events="none">'+bodyOutline(zoneAt(mk).c,1.2)+'</g>';
   // one hoverable slice of the figure per row of the table, so both halves
   // of the drawing answer to the same pointer
   s+='<g clip-path="url(#bodyClip)">';
@@ -441,6 +497,16 @@ function drawRange(){
       +'<rect x="'+(W0-12)+'" y="'+(yOf(it.t)-11)+'" width="24" height="22"'
       +' fill="transparent"/></g>';
   });
+  // the marker, a line across the figure and a handle on its center line
+  s+='<g id="marker" pointer-events="none">'
+    +'<path d="M'+RG.ladder+','+ym.toFixed(1)+' H'+(SPANW-2)+'" stroke="#58a6ff"'
+    +' stroke-width="2"/>'
+    +'<circle cx="'+RG.cx.toFixed(1)+'" cy="'+ym.toFixed(1)+'" r="7" fill="#58a6ff"'
+    +' stroke="#121212" stroke-width="2"/>'
+    +'<rect x="0" y="'+(ym-14).toFixed(1)+'" width="'+(RG.ladder-4)+'" height="28" rx="4"'
+    +' fill="#121212"/>'
+    +txt(RG.ladder-8,ym+4,fmt(mk,U==='K'?2:1),{anchor:'end',fs:11,fill:'#58a6ff',w:600})
+    +'</g>';
   el.innerHTML='<svg viewBox="0 0 '+SPANW+' '+RG.bot
     +'" xmlns="http://www.w3.org/2000/svg" id="tsvg" '
     +'preserveAspectRatio="xMinYMin meet">'
@@ -523,6 +589,31 @@ function drawDay(){
   }
   s+=txt(80,DY.top-24,'one day, in oral readings from healthy young adults',
          {fs:11.5,fill:'#8b93a0'});
+  // the hour the clock is at, riding the curve
+  const h0=dayH===null?D.day.nadir:dayH, hx=dx(h0), hy=dy(dayT(h0%24));
+  s+='<g pointer-events="none"><path d="M'+hx.toFixed(1)+','+DY.top+' V'+DY.bot
+    +'" stroke="#58a6ff" stroke-width="1.2" stroke-opacity="0.55"/>'
+    +'<circle cx="'+hx.toFixed(1)+'" cy="'+hy.toFixed(1)+'" r="6.5" fill="#58a6ff"'
+    +' stroke="#121212" stroke-width="2"/></g>';
+  // a twenty-four hour clock, midnight at the top and running clockwise
+  const CX=236, CY=150, CR=44;
+  s+='<g pointer-events="none"><circle cx="'+CX+'" cy="'+CY+'" r="'+CR
+    +'" fill="#161616" stroke="#3d444d" stroke-width="1.2"/>';
+  for(let k=0;k<24;k++){
+    const a=k/24*2*Math.PI-Math.PI/2, r0=k%6?CR-4:CR-8;
+    s+='<path d="M'+(CX+Math.cos(a)*r0).toFixed(1)+','+(CY+Math.sin(a)*r0).toFixed(1)
+      +' L'+(CX+Math.cos(a)*CR).toFixed(1)+','+(CY+Math.sin(a)*CR).toFixed(1)
+      +'" stroke="#3d444d" stroke-width="1"/>';
+  }
+  [[0,'0'],[6,'6'],[12,'12'],[18,'18']].forEach(([k,l])=>{
+    const a=k/24*2*Math.PI-Math.PI/2;
+    s+=txt((CX+Math.cos(a)*(CR-17)).toFixed(1),(CY+Math.sin(a)*(CR-17)+3.5).toFixed(1),
+           l,{anchor:'middle',fs:9.5,fill:'#6b7280'});
+  });
+  const ha=h0/24*2*Math.PI-Math.PI/2;
+  s+='<path d="M'+CX+','+CY+' L'+(CX+Math.cos(ha)*(CR-6)).toFixed(1)+','
+    +(CY+Math.sin(ha)*(CR-6)).toFixed(1)+'" stroke="#58a6ff" stroke-width="2.4"'
+    +' stroke-linecap="round"/><circle cx="'+CX+'" cy="'+CY+'" r="3" fill="#58a6ff"/></g>';
   el.innerHTML=svg(520,s);
 }
 
@@ -697,7 +788,8 @@ function drawHeat(){
    ['hard','Up a mountain on a bike',P.hard,'#e0673f'],
    ['peak','At the highest effort ever measured',P.peak,'#c02f2f'],
    ['evap','What two liters of sweat an hour can carry off',
-    Math.round(2*P.evap_w_per_lh),'#58a6ff']]
+    Math.round(2*P.evap_w_per_lh),'#58a6ff'],
+   ['live','Set by the activity slider',act,'#d0d0d0']]
    .forEach(([k,lab,w,c],i)=>{
     const yy=sy+i*54, on=hot&&hot.t==='w'&&hot.i===i;
     s+='<g data-w="'+i+'" style="cursor:pointer">'
@@ -710,10 +802,15 @@ function drawHeat(){
       +txt(x0,yy-6,esc(lab),{fs:11,fill:on?'#e6e6e6':'#8b93a0'})+'</g>';
   });
   // and the direction the dry routes run, which depends on the room
-  const hy=sy+4*54+34;
+  const hy=sy+5*54+34;
+  // which of the two the room slider puts the body in, and how hard
+  const dT=P.skin-room, lit=Math.abs(dT)<0.5?-1:(dT>0?0:1);
+  const flow=Math.min(1,Math.abs(dT)/15);
   [[false,'Cooler than the skin','#4a87d6','out'],
    [true,'Hotter than the skin','#e0673f','in']].forEach(([warm,lab,c,dir],i)=>{
-    const cx=x0+140+i*380, on=hot&&hot.t==='x'&&hot.i===i;
+    const cx=x0+140+i*380, on=(hot&&hot.t==='x'&&hot.i===i)||(heatOn&&lit===i);
+    // the arrows of the lit case widen with the gap between skin and room
+    const sw=heatOn?(lit===i?1+3.4*flow:0.9):1.6, so=heatOn&&lit!==i?0.35:0.85;
     s+='<g data-x="'+i+'" style="cursor:pointer">'
       +'<rect x="'+(cx-150)+'" y="'+(hy-14)+'" width="300" height="132" fill="#ffffff" fill-opacity="'
       +(on?0.045:0.02)+'" rx="8"/>'
@@ -726,18 +823,26 @@ function drawHeat(){
       const ux=(X1-X0)/Math.hypot(X1-X0,Y1-Y0), uy=(Y1-Y0)/Math.hypot(X1-X0,Y1-Y0);
       const px=-uy*3.4, py=ux*3.4;
       s+='<path d="M'+X0.toFixed(1)+','+Y0.toFixed(1)+' L'+X1.toFixed(1)+','+Y1.toFixed(1)
-        +'" stroke="'+c+'" stroke-width="1.6" stroke-opacity="0.85"/>'
+        +'" stroke="'+c+'" stroke-width="'+sw.toFixed(2)+'" stroke-opacity="'+so+'"/>'
         +'<path d="M'+X1.toFixed(1)+','+Y1.toFixed(1)
         +' L'+(X1-ux*7+px).toFixed(1)+','+(Y1-uy*7+py).toFixed(1)
         +' L'+(X1-ux*7-px).toFixed(1)+','+(Y1-uy*7-py).toFixed(1)
-        +'Z" fill="'+c+'" fill-opacity="0.85"/>';
+        +'Z" fill="'+c+'" fill-opacity="'+so+'"/>';
     }
     s+=txt(cx,hy+92,esc(lab),{anchor:'middle',fs:11.5,fill:on?'#e6e6e6':'#8b93a0'})
       +txt(cx,hy+108,dir==='out'?'heat leaves':'heat arrives',
            {anchor:'middle',fs:10.5,fill:c})+'</g>';
   });
   s+=txt(x0,hy-24,'Which way radiation and convection run',{fs:11.5,fill:'#c8ccd2'});
-  el.innerHTML=svg(hy+140,s);
+  // the balance the two sliders set
+  const L=act/P.evap_w_per_lh;
+  s+=txt(x0,hy+150,'In a room at '+fmt(room,U==='K'?2:0)+', '
+      +act.toLocaleString('en-US')+' W made. Sweat alone would have to evaporate '
+      +L.toFixed(1)+' L an hour to carry it'
+      +(lit===1?', and the room adds more.':lit===0?'; radiation and convection take part of it.':
+        '; with the room at skin temperature, radiation and convection carry nothing.'),
+      {fs:11.5,fill:'#c8ccd2'});
+  el.innerHTML=svg(hy+170,s);
 }
 
 
@@ -962,10 +1067,13 @@ const DRAW={range:drawRange, day:drawDay, site:drawSites, fever:drawFever,
 const INTRO={
   range:['The whole span','The figure and the table are one drawing on one '
     +'axis. A row is a degree, and a degree is a slice of a person at the '
-    +'same height. The band the body holds is the green sliver at the ribs.'],
+    +'same height. The band the body holds is the green sliver at the ribs. '
+    +'The blue marker drags to any height, and the card reads the degree it '
+    +'sits at.'],
   day:['A day','Core temperature is lowest a couple of hours before waking '
     +'and highest in the late afternoon. The whole swing is about half a '
-    +'degree, so the hour matters when a reading is judged.'],
+    +'degree, so the hour matters when a reading is judged. Play runs the '
+    +'clock through the day with the marker riding the curve.'],
   site:['Where it is taken','Four everyday sites, from a meta-analysis of '
     +'7,636 healthy adults. They disagree by more than a degree Celsius '
     +'between the '
@@ -976,8 +1084,9 @@ const INTRO={
     +'underneath.'],
   heat:['Heat in, heat out','About a hundred watts at rest, and fourteen '
     +'times that climbing a mountain on a bicycle. Sweat is the only route '
-    +'that still works once the room is hotter than the skin.'],
-  fine:['Degree by degree','From an ordinary morning to the top of what a '
+    +'that still works once the room is hotter than the skin. The two '
+    +'sliders set the heat made and the room, and the arrows follow.'],
+  fine:['The top seven degrees','From an ordinary morning to the top of what a '
     +'body survives, a quarter degree at a time, with what each step costs '
     +'the metabolism and the heart.'],
   help:['If someone collapses','The temperature does not decide this. '
@@ -1020,11 +1129,152 @@ function fitRows(){
 }
 function render(){
   DRAW[view]();
-  if(!hot){ const [n,b]=INTRO[view]; card('',n,'',b); }
-  alignAxis(); fitRows();
+  if(!hot){
+    if(view==='range'&&mkOn) mkCard();
+    else if(view==='day'&&dayH!==null) dayCard(dayH);
+    else if(view==='heat'&&heatOn) heatCard();
+    else { const [n,b]=INTRO[view]; card('',n,'',b); }
+  }
+  alignAxis(); fitRows(); markRow();
 }
+
+/* ------------------------------------------------------------ the marker */
+function mkCard(){
+  const d=Math.max(DLO,Math.min(DHI,Math.round(mk)));
+  const r=D.table.find(x=>x.t===d), z=zoneAt(mk);
+  card(z.n,fmt(mk,U==='K'?2:1),
+    'metabolic rate '+r.mv+(r.mk==='n'?'':' of resting')+' · pulse '+r.pv
+      +(r.pk==='n'?'':' a minute')+(Math.abs(mk-d)>0.01?' · the row for '+fmt(d,U==='C'?0:U==='K'?2:1):''),
+    r.w);
+  tint(z.c);
+}
+function markRow(){
+  const rows=document.querySelectorAll('#degrees tbody tr');
+  const d=Math.round(mk);
+  rows.forEach((r,i)=>r.classList.toggle('mk',mkOn&&view==='range'&&D.table[i].t===d));
+}
+function setMk(c){
+  mk=Math.round(Math.max(DLO-0.5,Math.min(DHI+0.5,c))*10)/10;
+  mkOn=true; hot=null;
+  // the card above the figure changes height with what it says; the page is
+  // scrolled by the same amount so the figure stays still under the pointer
+  const top=()=>{ const t=document.getElementById('tsvg');
+    return t?t.getBoundingClientRect().top:0; };
+  const t0=top(); render(); const d=top()-t0;
+  if(Math.abs(d)>0.5) window.scrollBy(0,d);
+}
+function mkFromEvent(e){
+  const svg=document.getElementById('tsvg'); if(!svg) return;
+  const b=svg.getBoundingClientRect();
+  setMk(cOf((e.clientY-b.top)/b.height*RG.bot));
+}
+el.addEventListener('pointerdown',e=>{
+  if(view!=='range'||!e.target.closest('#tsvg')) return;
+  // the drawing is redrawn under the pointer as it moves, so the pointer is
+  // captured by the box that holds it, which is never replaced
+  dragMk=true; try{ el.setPointerCapture(e.pointerId); }catch(_){}
+  mkFromEvent(e); e.preventDefault();
+});
+el.addEventListener('pointermove',e=>{ if(dragMk) mkFromEvent(e); });
+el.addEventListener('pointerup',()=>{ dragMk=false; });
+el.addEventListener('pointercancel',()=>{ dragMk=false; });
+window.addEventListener('pointerup',()=>{ dragMk=false; });
+el.addEventListener('pointerleave',e=>{
+  // a mouse leaving the drawing gives the card back to the live state
+  if(e.pointerType!=='mouse'||dragMk||!hot) return;
+  if((view==='range'&&mkOn)||(view==='day'&&dayH!==null)||(view==='heat'&&heatOn)){
+    hot=null; render(); }
+});
+
+/* ------------------------------------------------------------- the clock */
+function hhmm(h){ const m=Math.round(h*60), H=Math.floor(m/60), M=m%60;
+  return (H<10?'0':'')+H+':'+(M<10?'0':'')+M; }
+function dayCard(h){
+  const t=dayT(h%24);
+  card('The clock',hhmm(h),fmt(t),
+    'The curve is a half-degree swing around a mean of '+fmt(D.day.mean)
+    +'. Judged against the morning cut-off of '+fmt(D.day.cut_am)
+    +' this hour reads '+(t>D.day.cut_am?'high':'normal')
+    +'; against the afternoon cut-off of '+fmt(D.day.cut_pm)+' it reads normal.');
+}
+function setDay(h){
+  dayH=h; hot=null;
+  document.getElementById('dayOut').textContent=hhmm(h);
+  render();
+}
+function stopDay(){
+  dayPlay=null;
+  const b=document.getElementById('dayPlay');
+  b.textContent='Play'; b.setAttribute('aria-pressed','false');
+}
+// the day runs through in twelve seconds, or an hour at a time when motion
+// is reduced, and stops at midnight
+function dayFrame(now){
+  if(!dayPlay) return;
+  if(reduced){
+    if(now-dayPlay.last>=450){ dayPlay.last=now; setDay(Math.min(24,Math.floor(dayH)+1)); }
+  } else {
+    setDay(Math.min(24,dayPlay.from+(now-dayPlay.t0)/12000*24));
+  }
+  if(dayH>=24){ stopDay(); return; }
+  requestAnimationFrame(dayFrame);
+}
+document.getElementById('dayPlay').addEventListener('click',()=>{
+  if(dayPlay){ stopDay(); return; }
+  const from=(dayH===null||dayH>=24)?0:dayH;
+  setDay(from);
+  dayPlay={from:from, t0:performance.now(), last:performance.now()};
+  const b=document.getElementById('dayPlay');
+  b.textContent='Pause'; b.setAttribute('aria-pressed','true');
+  requestAnimationFrame(dayFrame);
+});
+
+/* ------------------------------------------------------- the heat budget */
+function heatOuts(){
+  document.getElementById('actOut').textContent=act.toLocaleString('en-US')+' W';
+  document.getElementById('roomOut').textContent=fmt(room,U==='K'?2:0);
+}
+function heatCard(){
+  const P=D.power, L=act/P.evap_w_per_lh, dT=P.skin-room;
+  card('The balance',act.toLocaleString('en-US')+' W, in a room at '+fmt(room,U==='K'?2:0),
+    'sweat alone: '+L.toFixed(1)+' L an hour, at '+P.evap_w_per_lh+' W a liter',
+    Math.abs(dT)<0.5
+      ? 'The room is at skin temperature, so radiation and convection carry '
+        +'nothing either way and all of it has to leave as evaporated sweat.'
+      : dT>0
+      ? 'The room is cooler than the skin, so radiation and convection carry '
+        +'heat out, more the wider the gap. What they cannot carry has to '
+        +'leave as evaporated sweat.'
+      : 'The room is hotter than the skin, so radiation and convection bring '
+        +'heat in. Evaporated sweat is the only way out, and it has to carry '
+        +'the room\u2019s heat as well as the body\u2019s.');
+  tint(dT>0?'#4a87d6':'#e0673f');
+}
+document.getElementById('actIn').addEventListener('input',e=>{
+  act=+e.target.value; heatOn=true; hot=null; heatOuts(); render(); });
+document.getElementById('roomIn').addEventListener('input',e=>{
+  room=+e.target.value; heatOn=true; hot=null; heatOuts(); render(); });
+
+/* ------------------------------------------------------------- the keys */
+document.addEventListener('keydown',e=>{
+  const t=e.target, tag=(t.tagName||'').toLowerCase();
+  if(tag==='input'&&(t.type==='text'||t.type==='search')) return;
+  if(t!==el) return;
+  if(view==='range'&&(e.key==='ArrowUp'||e.key==='ArrowDown')){
+    e.preventDefault();
+    setMk(mk+(e.key==='ArrowUp'?1:-1)*(e.shiftKey?1:0.1));
+  } else if(view==='day'&&(e.key==='ArrowLeft'||e.key==='ArrowRight')){
+    e.preventDefault(); stopDay();
+    const h=dayH===null?D.day.nadir:dayH;
+    setDay(Math.max(0,Math.min(24,Math.round(h)+(e.key==='ArrowRight'?1:-1))));
+  }
+});
 function setView(v){
-  view=v; hot=null;
+  view=v; hot=null; stopDay();
+  document.getElementById('dayCtl').hidden = v!=='day';
+  document.getElementById('heatCtl').hidden = v!=='heat';
+  document.getElementById('figkey').hidden = v!=='range';
+  el.classList.toggle('mk', v==='range');
   const span = v==='range';
   document.getElementById('degwrap').hidden = !span;
   document.querySelector('.stage').classList.toggle('span',span);
@@ -1036,10 +1286,22 @@ function setView(v){
   for(const [id,k] of VBTN) document.getElementById(id).classList.toggle('on',v===k);
   render();
 }
-function setUnit(u){
-  U=u; hot=null;
+let swapT=null;
+function setUnit(u,now){
   for(const [id,k] of [['uC','C'],['uF','F'],['uK','K']])
     document.getElementById(id).classList.toggle('on',u===k);
+  // the numbers fade out, change scale, and fade back in
+  const box=[el,document.getElementById('degwrap')];
+  if(now||reduced){ applyUnit(u); return; }
+  box.forEach(x=>x.classList.add('swap'));
+  clearTimeout(swapT);
+  swapT=setTimeout(()=>{ applyUnit(u);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>
+      box.forEach(x=>x.classList.remove('swap')))); },180);
+}
+function applyUnit(u){
+  U=u; hot=null;
+  heatOuts();
   DRAW[view]();
   renderTable();
   alignAxis(); fitRows();
@@ -1052,6 +1314,7 @@ function setUnit(u){
   // 37 converts to a terminating figure in each of the three
   card('The scale',sc.n,'body: '+fmt(37,u==='K'?2:1)
     +' · a rise of one degree Celsius: '+gap(1),sc.b);
+  markRow();
 }
 for(const [id,k] of VBTN) document.getElementById(id).onclick=()=>setView(k);
 for(const [id,k] of [['uC','C'],['uF','F'],['uK','K']])
@@ -1062,7 +1325,13 @@ el.addEventListener('pointerover',ev=>{
     +'[data-f],[data-i],[data-r],[data-w],[data-x],[data-c],[data-key],'
     +'[data-b],[data-u],[data-k],[data-a],[data-t],[data-n],[data-q],'
     +'[data-pt],[data-g]');
-  if(!g) return;
+  if(!g||dragMk) return;
+  // redrawing puts a new element under a still pointer, which fires this
+  // again; the same thing twice is not redrawn, or the loop never ends
+  const ga=[...g.attributes].find(a=>a.name.startsWith('data-'));
+  const key=ga?ga.name+'='+ga.value:'';
+  if(hot&&key===hotKey) return;
+  hotKey=key;
   const P=D.power;
   const pick=(a,t)=>{ hot={t:t,i:+g.getAttribute(a)}; };
   if(g.hasAttribute('data-z')){
@@ -1118,7 +1387,10 @@ el.addEventListener('pointerover',ev=>{
         +'two liters an hour carries off around '+Math.round(2*P.evap_w_per_lh)
         +' watts. Only evaporated sweat counts. Sweat that drips off has cost '
         +'the body water and bought it nothing. Humid heat is more dangerous '
-        +'than dry heat at the same temperature.']][hot.i];
+        +'than dry heat at the same temperature.'],
+      ['Set by the activity slider',act,'The heat the body is making at the '
+        +'setting of the slider, from the hundred watts of rest to the highest '
+        +'effort on record.']][hot.i];
     card('Watts',B[0],B[1].toLocaleString('en-US')+' W',B[2]);
   } else if(g.hasAttribute('data-q')){
     pick('data-q','q');
@@ -1213,8 +1485,9 @@ el.addEventListener('pointerover',ev=>{
   render();
 });
 
-setUnit('C'); setView('range');
-window.__temp=()=>({view, unit:U,
+setUnit('C',true); setView('range');
+window.__temp=()=>({view, unit:U, mk, mkOn, dayH, dayPlaying:!!dayPlay, act, room, heatOn,
+  markRow:[...document.querySelectorAll('#degrees tbody tr.mk')].map(r=>r.children[0].textContent),
   zones:D.zones.length, marks:D.marks.length, sites:D.sites.length,
   routes:D.routes.length, routeSum:D.routes.reduce((a,r)=>a+r.p,0),
   zonesJoin:D.zones.every((z,i)=>!i||Math.abs(z.lo-D.zones[i-1].hi)<1e-9),

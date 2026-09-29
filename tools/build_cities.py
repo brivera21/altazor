@@ -490,6 +490,11 @@ HIST["nyc"] = {
     ],
 }
 
+# where the map has no peak to name, the high point is a note on the
+# high ground, drawn as a dot rather than a summit
+for _k in ("tuscaloosa", "omaha", "northfield"):
+    HIST[_k]["geo"]["hp"]["soft"] = True
+
 # the event that stands for the city itself: its circle carries the
 # census series, so the subject of the page grows on its own map
 SEAT = {"la": "El Pueblo de Los Ángeles",
@@ -581,7 +586,7 @@ of</summary><p>__METHOD__</p></details></div>
 ]
 
 
-def city_template(html):
+def city_template(html, mine):
     for cut in CITY_CUTS:
         if cut not in html:
             raise SystemExit("the state template changed; update CITY_CUTS")
@@ -590,6 +595,21 @@ def city_template(html):
     if guard not in html:
         raise SystemExit("the state template changed; update the symbols guard")
     html = html.replace(guard, guard + "  if(!box) return;\n")
+    # no ghost of another state at city scale
+    html = html.replace("__GHOSTCHIPS__", "").replace("GHOST=__GHOST__", "GHOST={}")
+    # the city limits are a chip of their own here, on from the start
+    cou = '  <button id="cCou">Counties</button>\n'
+    if cou not in html or "mig:true,lim:false}" not in html:
+        raise SystemExit("the state template changed; update the limits chip")
+    html = html.replace(cou, cou + '  <button id="cLim" class="on">Limits</button>\n')
+    html = html.replace("mig:true,lim:false}", "mig:true,lim:true}")
+    # where the author's own campus is on the map, the colleges start on
+    if mine:
+        uni = '  <button id="cUni">Colleges</button>\n'
+        if uni not in html or "uni:false," not in html:
+            raise SystemExit("the state template changed; update the colleges chip")
+        html = html.replace(uni, '  <button id="cUni" class="on">Colleges</button>\n')
+        html = html.replace("uni:false,", "uni:true,")
     return html.replace("SYM=__SYM__", "SYM=[]")
 
 
@@ -624,7 +644,7 @@ def main():
         # one county can fill a city view, so its gold is lighter here
         data["homeFill"] = 0.07
         # a homeland can cover a whole city view, so it is lighter here
-        data["natFill"] = 0.17
+        data["natFill"] = 0.10
         data["migGap"] = 24
         hist["nations"] = [dict(n, poly=densify(n["poly"]))
                            for n in hist["nations"]]
@@ -639,7 +659,7 @@ def main():
         sibs = (f' <a href="{up_href}">{up_name}</a>'
                 + "".join(f' <a href="{f}">{n}</a>'
                           for f, n in sibs_all if f != fname))
-        html = (city_template(HTML).replace("__APACSS__", apa.CSS)
+        html = (city_template(HTML, mine).replace("__APACSS__", apa.CSS)
                 .replace("__TITLE__", title)
                 .replace("&larr; Library &middot; USA",
                          "&larr; Library &middot; USA &middot; Cities")

@@ -206,8 +206,23 @@ h1 { margin:0 0 6px; font-size:26px; }
 h2.refh { font-size:15px; margin:26px 0 8px; }
 .controls { display:flex; align-items:center; gap:14px; flex-wrap:wrap;
   margin:0 0 14px; }
-.controls input[type=range] { flex:1 1 300px; min-width:220px; accent-color:var(--accent);
+.controls input[type=range] { flex:1 1 260px; min-width:200px; accent-color:var(--accent);
   height:22px; }
+.controls label { font-size:13px; color:var(--muted); }
+#play { background:var(--panel); color:var(--text); border:1px solid #3d3d3d; border-radius:8px;
+  padding:4px 12px; font-size:12.5px; cursor:pointer; font-family:inherit; min-width:62px; }
+#play:hover { border-color:var(--accent); }
+#play[aria-pressed=true] { background:var(--accent); color:#0b0b0b; border-color:var(--accent); font-weight:700; }
+.row { display:flex; gap:10px 22px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin:0 0 14px; }
+.row .presets { margin:0; }
+#axis { align-items:center; }
+#axis span { font-size:12.5px; color:var(--muted); margin-right:2px; }
+#diagram { border-radius:12px; outline:none; }
+#diagram:focus-visible { box-shadow:0 0 0 1px var(--accent); }
+details.sources { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+details.sources summary { cursor:pointer; }
+details.sources summary:hover { color:var(--text); }
+details.sources .note { border-top:none; padding-top:0; margin-top:10px; }
 .rd { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--muted);
   font-variant-numeric:tabular-nums; }
 .rd b { color:var(--text); font-weight:700; }
@@ -221,7 +236,10 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 #atTxt { color:var(--muted); font-size:12.5px; margin-top:8px; }
 .method { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%; order:-1;}
+  #diagram{width:100%; flex-basis:auto;} }
+@media (max-width:600px){ #diagram{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  #diagram svg{min-width:680px;} .rd{gap:4px 14px;} }
 </style>
 </head>
 <body>
@@ -232,8 +250,10 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 </header>
 <h1>The Universe</h1>
 <div class="controls">
+  <label for="scale">size of the universe</label>
   <input type="range" id="scale" min="-600" max="100" step="1" value="0"
-    aria-label="scale factor">
+    aria-label="size of the universe, as a power of ten of its present size">
+  <button type="button" id="play" aria-pressed="false">Play</button>
   <div class="rd">
     <span>size <b id="rdA"></b></span>
     <span>redshift <b id="rdZ"></b></span>
@@ -241,9 +261,12 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
     <span>age <b id="rdAge"></b></span>
   </div>
 </div>
-<div class="presets" id="presets"></div>
+<div class="row">
+  <div class="presets" id="presets"></div>
+  <div class="presets" id="axis"><span>curves against</span><button type="button" data-ax="0" aria-pressed="true">size</button><button type="button" data-ax="1" aria-pressed="false">age</button></div>
+</div>
 <div class="stage">
-  <div id="diagram"></div>
+  <div id="diagram" tabindex="0" aria-label="the energy budget of the universe across its life, and what ordinary matter is made of"></div>
   <div class="side"><div class="card">
     <div id="pct"></div>
     <div id="segTxt">Hover a segment</div>
@@ -252,17 +275,17 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
     <div id="srcTxt"></div>
   </div></div>
 </div>
-<p class="note">The curves hold the share of all the energy in the universe
-carried by radiation, by matter and by dark energy, against the size of the
-universe. Radiation thins fastest and lost the lead first; dark energy does
-not thin at all, so it takes the lead last. The two crossings are where the
-lines meet, and the bar under them is the budget at the moment the marker
-sits on.</p>
-<p class="note">Below it, the thin amber sliver of ordinary matter opens into
-where its atoms actually sit, and the galaxies segment opens in turn into
-what one large galaxy is made of, with the Milky Way as the exemplar. Those
-two are censuses of the universe as it is now, so they fade when the marker
-leaves the present.</p>
+<p class="note">The share of the universe's energy held by radiation, matter and dark energy, against its size. Radiation thins fastest and lost the lead first; dark energy does not thin at all and took the lead last. The bar below is the budget at the marker, and its thin amber sliver of ordinary matter opens into where those atoms sit today.</p>
+<details class="sources"><summary>Sources</summary>
+<p class="note">The galaxies segment opens in turn into what one large galaxy
+is made of, with the Milky Way as the exemplar. Those two bars are censuses of
+the universe as it is now, so they fade when the marker leaves the present; a
+click on the amber sliver, or on the galaxies segment, folds the bar below it
+away and a second click opens it again. Anything past today, out to ten times
+the present size, is the model run forward, a projection rather than a
+measurement. The age view draws the same curves against time since the Big
+Bang, where the first fifty thousand years of radiation shrink to the left
+edge and dark energy's lead is seen to be recent.</p>
 <div class="method"><p>Densities follow the flat baseline of Planck 2018 VI:
 dark energy 0.685 of the critical density, dark matter 0.266, ordinary matter
 0.049, radiation about one part in eleven thousand, with radiation diluting
@@ -318,6 +341,7 @@ based on interferometric astrometry of multiple stellar orbits.
 <i>Astronomy &amp; Astrophysics, 657</i>, L12.
 <a href="https://doi.org/10.1051/0004-6361/202142465">https://doi.org/10.1051/0004-6361/202142465</a></p>
 </div>
+</details>
 </div>
 <script>
 const TOP=__TOP__, BAR=__BAR__, GAL=__GAL__;
@@ -334,6 +358,10 @@ const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const byKey=Object.fromEntries(TOP.map(d=>[d.k,d]));
 const OM_M=byKey.dm.om+byKey.ob.om, OM_R=byKey.rad.om, OM_L=byKey.de.om;
 let sel=null, la=0;                 // la is log10 of the scale factor
+let m=0;                            // 0 draws the curves against size, 1 against age
+let openB=1, openG=1;               // how far the two lower bars are open
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ease=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
 
 /* ---- the model: a flat three component universe ---- */
 function dens(d,a){ return d.om*Math.pow(a,-d.n); }
@@ -357,6 +385,10 @@ function age(a){                    // billions of years, integral of dlna/H
 }
 const A_RM=OM_R/OM_M;                       // radiation equals matter
 const A_ML=Math.cbrt(OM_M/OM_L);            // matter equals dark energy
+// ages along the drawn curves, worked once, for the view against age
+const NPT=700, LV=[], AG=[];
+for(let i=0;i<=NPT;i++){ const v=LOGMIN+(LOGMAX-LOGMIN)*i/NPT; LV.push(v); AG.push(age(Math.pow(10,v))); }
+const AGEMAX=AG[NPT];
 
 /* ---- formatting ---- */
 const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³',
@@ -412,7 +444,7 @@ function fmtZ(z){
 function seg(row,d,x,w,p){
   const dash=d.h?' stroke-dasharray="5 4"':'';
   const op=(sel===null||sel===d.k)?1:0.35;
-  let s='<g data-k="'+d.k+'" style="cursor:default" opacity="'+op+'">'+
+  let s='<g data-k="'+d.k+'" style="cursor:pointer" opacity="'+op+'">'+
     '<rect x="'+x+'" y="'+row.y+'" width="'+Math.max(w,1.2)+'" height="'+row.h+'" rx="4"'+
     ' fill="'+d.c+'" fill-opacity="'+(d.h?0.35:0.85)+'" stroke="'+d.c+'" stroke-width="1.4"'+dash+'/>';
   const lab=typeof p==='number'?pct(p):p+'%';
@@ -426,25 +458,27 @@ function seg(row,d,x,w,p){
   return s;
 }
 function lanes(row,list,widths){
-  // labels under a bar for its narrow segments, each dropped to the first
-  // lane where it fits
-  let s='', x=row.x; const ends=[];
+  // names under a bar for its narrow segments, on one line in the order of
+  // the segments, pushed apart left to right and pulled back inside the
+  // bar, so the leaders fan out and never cross
+  const items=[]; let x=row.x;
   for(let i=0;i<list.length;i++){
-    const d=list[i], w=widths[i];
-    if(w<=90){
-      const tw=d.l.length*6.4+10;
-      const lx=Math.min(row.x+row.w-tw/2,Math.max(row.x+tw/2,x+w/2));
-      let lane=0;
-      while(lane<ends.length && ends[lane]>lx-tw/2) lane++;
-      ends[lane]=lx+tw/2+10;
-      const ly=row.y+row.h+22+lane*19;
-      s+='<g data-k="'+d.k+'" style="cursor:default">'+
-        '<line x1="'+(x+w/2)+'" y1="'+(row.y+row.h+2)+'" x2="'+lx+'" y2="'+(ly-11)+
-        '" stroke="'+d.c+'" stroke-width="1" opacity="0.7"/>'+
-        '<text x="'+lx+'" y="'+ly+'" text-anchor="middle" font-size="12" fill="'+d.c+'">'+
-        esc(d.l)+'</text></g>';
-    }
-    x+=w;
+    if(widths[i]<=90) items.push({d:list[i], cx:x+widths[i]/2, tw:list[i].l.length*6.4+10});
+    x+=widths[i];
+  }
+  let end=row.x-8;
+  for(const it of items){ it.lx=Math.max(it.cx, end+8+it.tw/2); end=it.lx+it.tw/2; }
+  let lim=row.x+row.w+8;
+  for(let i=items.length-1;i>=0;i--){ const it=items[i];
+    it.lx=Math.min(it.lx, lim-8-it.tw/2); lim=it.lx-it.tw/2; }
+  let s='';
+  const y0=row.y+row.h+2, ly=row.y+row.h+28;
+  for(const it of items){ const d=it.d;
+    s+='<g data-k="'+d.k+'" style="cursor:pointer">'+
+      '<path class="lead" d="M'+it.cx.toFixed(1)+','+y0+' L'+it.cx.toFixed(1)+','+(y0+5)+' L'+it.lx.toFixed(1)+','+(ly-12)+
+      '" fill="none" stroke="'+d.c+'" stroke-width="1" opacity="0.7"/>'+
+      '<text x="'+it.lx.toFixed(1)+'" y="'+ly+'" text-anchor="middle" font-size="12" fill="'+d.c+'">'+
+      esc(d.l)+'</text></g>';
   }
   return s;
 }
@@ -453,6 +487,17 @@ function lanes(row,list,widths){
 const CX=v=>C.x+(v-LOGMIN)/(LOGMAX-LOGMIN)*C.w;     // log10 a to pixels
 const CY=f=>C.y+C.h-f/100*C.h;                       // percent to pixels
 const XC=px=>LOGMIN+(px-C.x)/C.w*(LOGMAX-LOGMIN);
+const XA=g=>C.x+g/AGEMAX*C.w;                        // billions of years to pixels
+// the x of a moment, between the view against size and the view against age
+function X(v,g){ if(m===0) return CX(v); return CX(v)*(1-m)+XA(g===undefined?age(Math.pow(10,v)):g)*m; }
+// and back, from pixels to log10 a, through the table of ages
+function XM(px){
+  if(m===0) return XC(px);
+  let prev=X(LV[0],AG[0]); if(px<=prev) return LOGMIN;
+  for(let i=1;i<=NPT;i++){ const x=X(LV[i],AG[i]);
+    if(x>=px){ const f=(px-prev)/((x-prev)||1); return LV[i-1]+f*(LV[i]-LV[i-1]); } prev=x; }
+  return LOGMAX;
+}
 const CURVES=[['rad','Radiation','#e0564f'],
               ['mat','Matter','#58a6ff'],
               ['de','Dark energy','#b48cf2']];
@@ -471,42 +516,60 @@ function panel(){
        '<text x="'+(C.x-8)+'" y="'+(CY(f)+4)+'" text-anchor="end" font-size="11" fill="#6f6f6f">'+
        f+'%</text>';
   }
-  // decades of the scale factor, labeled underneath by redshift
-  for(let e=LOGMIN;e<=LOGMAX;e++){
-    const x=CX(e), a=Math.pow(10,e), z=1/a-1;
-    s+='<line x1="'+x+'" y1="'+C.y+'" x2="'+x+'" y2="'+(C.y+C.h)+
-       '" stroke="#232323" stroke-width="1"/>'+
-       '<text x="'+x+'" y="'+(C.y+C.h+16)+'" text-anchor="middle" font-size="11" fill="#6f6f6f">'+
-       (e===0?'1':'10'+sup(e))+'</text>'+
-       '<text x="'+x+'" y="'+(C.y+C.h+31)+'" text-anchor="middle" font-size="10.5" fill="#565656">'+
-       fmtZ(z)+'</text>';
+  // decades of the scale factor, labeled underneath by redshift; against
+  // age they give way to ticks every ten billion years
+  if(m<1){
+    s+='<g opacity="'+(1-m).toFixed(3)+'">';
+    for(let e=LOGMIN;e<=LOGMAX;e++){
+      const x=X(e), a=Math.pow(10,e), z=1/a-1;
+      s+='<line x1="'+x+'" y1="'+C.y+'" x2="'+x+'" y2="'+(C.y+C.h)+
+         '" stroke="#232323" stroke-width="1"/>'+
+         '<text x="'+x+'" y="'+(C.y+C.h+16)+'" text-anchor="middle" font-size="11" fill="#8a8a8a">'+
+         (e===0?'1':'10'+sup(e))+'</text>'+
+         '<text x="'+x+'" y="'+(C.y+C.h+31)+'" text-anchor="middle" font-size="11" fill="#7a7a7a">'+
+         fmtZ(z)+'</text>';
+    }
+    s+='<text x="'+(C.x+C.w+20)+'" y="'+(C.y+C.h+16)+'" font-size="11" fill="#8a8a8a">size</text>'+
+       '<text x="'+(C.x+C.w+20)+'" y="'+(C.y+C.h+31)+'" font-size="11" fill="#7a7a7a">redshift</text></g>';
   }
-  s+='<text x="'+(C.x+C.w+20)+'" y="'+(C.y+C.h+16)+'" font-size="11" fill="#6f6f6f">size</text>'+
-     '<text x="'+(C.x+C.w+20)+'" y="'+(C.y+C.h+31)+'" font-size="10.5" fill="#565656">redshift</text>';
+  if(m>0){
+    s+='<g opacity="'+m.toFixed(3)+'">';
+    for(let t=0;t<=AGEMAX;t+=10){
+      const x=XA(t);
+      s+='<line x1="'+x+'" y1="'+C.y+'" x2="'+x+'" y2="'+(C.y+C.h)+
+         '" stroke="#232323" stroke-width="1"/>'+
+         '<text x="'+x+'" y="'+(C.y+C.h+16)+'" text-anchor="middle" font-size="11" fill="#8a8a8a">'+t+'</text>';
+    }
+    const xn=XA(age(1));
+    s+='<line x1="'+xn+'" y1="'+(C.y+C.h-26)+'" x2="'+xn+'" y2="'+(C.y+C.h)+'" stroke="#8a8a8a" stroke-dasharray="2 3"/>'+
+       '<text x="'+(xn+5)+'" y="'+(C.y+C.h-16)+'" font-size="11" fill="#a9a9a9">today, 13.79</text>';
+    s+='<text x="'+(C.x+C.w+20)+'" y="'+(C.y+C.h+16)+'" font-size="11" fill="#8a8a8a">age</text>'+
+       '<text x="'+(C.x+C.w+20)+'" y="'+(C.y+C.h+31)+'" font-size="11" fill="#7a7a7a">billion years</text></g>';
+  }
   // the two crossings
   for(const [av,txt] of [[A_RM,'radiation = matter'],[A_ML,'matter = dark energy']]){
-    const x=CX(Math.log10(av)), anchor=x>C.x+C.w-150?'end':'start';
+    const x=X(Math.log10(av)), anchor=x>C.x+C.w-150?'end':'start';
     s+='<line x1="'+x+'" y1="'+C.y+'" x2="'+x+'" y2="'+(C.y+C.h)+
        '" stroke="#8a8a8a" stroke-width="1" stroke-dasharray="4 4"/>'+
        '<text x="'+(x+(anchor==='end'?-6:6))+'" y="'+(C.y+14)+'" text-anchor="'+anchor+
        '" font-size="11" fill="#a9a9a9">'+txt+'</text>';
   }
   // the three curves
-  const N=700;
+  const N=NPT;
   for(const [k,lab,col] of CURVES){
     let pts='';
     for(let i=0;i<=N;i++){
-      const lv=LOGMIN+(LOGMAX-LOGMIN)*i/N;
-      pts+=CX(lv).toFixed(2)+','+CY(curveShare(k,Math.pow(10,lv))).toFixed(2)+' ';
+      const lv=LV[i];
+      pts+=X(lv,AG[i]).toFixed(2)+','+CY(curveShare(k,Math.pow(10,lv))).toFixed(2)+' ';
     }
     const kk=(k==='mat')?'dm':k;
     const op=(sel===null||sel===kk||(k==='mat'&&sel==='ob'))?1:0.3;
-    s+='<g data-k="'+kk+'" opacity="'+op+'"><polyline points="'+pts+
+    s+='<g data-k="'+kk+'" opacity="'+op+'" style="cursor:pointer"><polyline points="'+pts+
        '" fill="none" stroke="'+col+'" stroke-width="2.4" stroke-linejoin="round"/>'+
        '<polyline points="'+pts+'" fill="none" stroke="transparent" stroke-width="14"/></g>';
   }
   // the marker
-  const mx=CX(la);
+  const mx=X(la);
   s+='<line x1="'+mx+'" y1="'+(C.y-8)+'" x2="'+mx+'" y2="'+(C.y+C.h+4)+
      '" stroke="#f4efe2" stroke-width="1.6"/>';
   for(const [k,lab,col] of CURVES){
@@ -526,43 +589,58 @@ function panel(){
 }
 
 /* ---- the whole drawing ---- */
+const HT=572, HB=912;                // where the drawing ends with both, or one, lower bars folded
+function hNow(){ return HT+(HB-HT)*openB+(H-HB)*openB*openG; }
 function render(){
   const a=Math.pow(10,la), sh=shares(a), now=Math.abs(la)<1e-9;
-  const faded=now?1:0.32;
-  let s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" id="uvsvg">';
-  s+='<rect width="'+W+'" height="'+H+'" fill="#121212"/>';
+  const faded=now?1:0.32, hh=hNow();
+  let s='<svg viewBox="0 0 '+W+' '+hh.toFixed(1)+'" xmlns="http://www.w3.org/2000/svg" id="uvsvg">';
+  s+='<rect width="'+W+'" height="'+hh.toFixed(1)+'" fill="#121212"/>';
   s+='<text x="'+C.x+'" y="'+(C.y-18)+'" font-size="14" fill="#9a9a9a">'+
      'The share of all the energy, across the life of the universe</text>';
   s+='<text x="'+T.x+'" y="'+(T.y-18)+'" font-size="14" fill="#9a9a9a">'+
-     'Everything, by energy content '+(now?'today':'when the universe was '+
+     'Everything, by energy content '+(now?'today':la>0?'when the universe is '+
+     num(a)+' times its present size, a projection':'when the universe was '+
      num(a)+' times its present size')+'</text>';
   s+='<g opacity="'+faded+'">';
-  s+='<text x="'+B.x+'" y="'+(B.y-18)+'" font-size="14" fill="#9a9a9a">'+
-     'The ordinary matter alone, atom by atom, as counted today</text>';
-  s+='<text x="'+G.x+'" y="'+(G.y-18)+'" font-size="14" fill="#9a9a9a">'+
-     'The ordinary matter of one large galaxy, the Milky Way</text>';
   // widths of the top bar at this moment, so the wedge can find the sliver
   const tw=TOP.map(d=>sh[d.k]/100*T.w);
   let obx=T.x; for(let i=0;i<TOP.length;i++){ if(TOP[i].k==='ob') break; obx+=tw[i]; }
   const obw=tw[TOP.findIndex(d=>d.k==='ob')];
-  // the wedge from the sliver to the second bar
-  s+='<path d="M'+obx+','+(T.y+T.h)+' L'+(obx+obw)+','+(T.y+T.h)+' L'+(B.x+B.w)+','+B.y+
-     ' L'+B.x+','+B.y+' Z" fill="#ffb02e" fill-opacity="0.07" stroke="#ffb02e"'+
-     ' stroke-opacity="0.35" stroke-width="1"/>';
-  // the wedge from the galaxies segment, at the right end, to the third bar
+  if(openB>0.001){
+    s+='<g opacity="'+openB.toFixed(3)+'"'+(openB<0.5?' pointer-events="none"':'')+'>';
+    s+='<text x="'+B.x+'" y="'+(B.y-18)+'" font-size="14" fill="#9a9a9a">'+
+       'The ordinary matter alone, atom by atom, as counted today'+(now?'':': a census of the present, not of this moment')+'</text>';
+    // the wedge from the sliver to the second bar
+    s+='<path d="M'+obx+','+(T.y+T.h)+' L'+(obx+obw)+','+(T.y+T.h)+' L'+(B.x+B.w)+','+B.y+
+       ' L'+B.x+','+B.y+' Z" fill="#ffb02e" fill-opacity="0.07" stroke="#ffb02e"'+
+       ' stroke-opacity="0.35" stroke-width="1"/>';
+  }
   const btot=BAR.reduce((x,d)=>x+d.p,0);
   const bw=BAR.map(d=>d.p/btot*B.w);
   const gw=bw[bw.length-1], gx=B.x+B.w-gw;
-  s+='<path d="M'+gx+','+(B.y+B.h)+' L'+(gx+gw)+','+(B.y+B.h)+' L'+(G.x+G.w)+','+G.y+
-     ' L'+G.x+','+G.y+' Z" fill="#31d67a" fill-opacity="0.07" stroke="#31d67a"'+
-     ' stroke-opacity="0.35" stroke-width="1"/>';
   let x=B.x;
-  for(let i=0;i<BAR.length;i++){ s+=seg(B,BAR[i],x,bw[i],BAR[i].p); x+=bw[i]; }
-  const gtot=GAL.reduce((x2,d)=>x2+d.p,0);
-  const gws=GAL.map(d=>d.p/gtot*G.w);
-  x=G.x;
-  for(let i=0;i<GAL.length;i++){ s+=seg(G,GAL[i],x,gws[i],GAL[i].p); x+=gws[i]; }
-  s+=lanes(B,BAR,bw)+lanes(G,GAL,gws);
+  if(openB>0.001){
+    for(let i=0;i<BAR.length;i++){ s+=seg(B,BAR[i],x,bw[i],BAR[i].p); x+=bw[i]; }
+    s+=lanes(B,BAR,bw);
+    const og=openB*openG;
+    if(og>0.001){
+      s+='<g opacity="'+(openG).toFixed(3)+'"'+(og<0.5?' pointer-events="none"':'')+'>';
+      s+='<text x="'+G.x+'" y="'+(G.y-18)+'" font-size="14" fill="#9a9a9a">'+
+         'The ordinary matter of one large galaxy, the Milky Way</text>';
+      // the wedge from the galaxies segment, at the right end, to the third bar
+      s+='<path d="M'+gx+','+(B.y+B.h)+' L'+(gx+gw)+','+(B.y+B.h)+' L'+(G.x+G.w)+','+G.y+
+         ' L'+G.x+','+G.y+' Z" fill="#31d67a" fill-opacity="0.07" stroke="#31d67a"'+
+         ' stroke-opacity="0.35" stroke-width="1"/>';
+      const gtot=GAL.reduce((x2,d)=>x2+d.p,0);
+      const gws=GAL.map(d=>d.p/gtot*G.w);
+      x=G.x;
+      for(let i=0;i<GAL.length;i++){ s+=seg(G,GAL[i],x,gws[i],GAL[i].p); x+=gws[i]; }
+      s+=lanes(G,GAL,gws);
+      s+='</g>';
+    }
+    s+='</g>';
+  }
   s+='</g>';
   x=T.x;
   for(let i=0;i<TOP.length;i++){ s+=seg(T,TOP[i],x,tw[i],sh[TOP[i].k]); x+=tw[i]; }
@@ -578,6 +656,7 @@ function show(k){
   if(!d) return;
   const inTop=TOP.indexOf(d)>=0;
   const sh=shares(Math.pow(10,la));
+  card=k;
   const p=inTop?sh[d.k]:d.p;
   const P=document.getElementById('pct');
   P.textContent=inTop?pct(p):d.p+'%';
@@ -590,7 +669,13 @@ function show(k){
     at.textContent=Math.abs(la)<1e-9 ? 'share of everything today'
       : 'share of everything when the universe was '+num(Math.pow(10,la))+
         ' times its present size. Today it is '+pct(nowsh)+'.';
+    if(la>1e-9) at.textContent+=' Past today this is the model run forward, a projection.';
   } else at.textContent='';
+  if(d.k==='ob'||d.k==='gal'){
+    const o=d.k==='ob'?openB:openG;
+    const t0=at.textContent;
+    at.textContent=(t0?t0.replace(/\.?$/,'. '):'')+'A click here '+(o>0.5?'folds the bar below away.':'opens the bar below again.');
+  }
   document.getElementById('srcTxt').textContent=
     d.s+(inTop?'':BAR.includes(d)?' · share of the ordinary matter'
         :' · share of the galaxy’s ordinary matter');
@@ -621,14 +706,14 @@ const MOMENTS=[
   [Math.log10(1/21),'the first stars'],
   [Math.log10(A_ML),'matter and dark energy equal'],
   [0,'today'],
-  [LOGMAX,'ten times this size'],
+  [LOGMAX,'ten times this size, projected'],
 ];
 document.getElementById('presets').innerHTML=MOMENTS.map(
   m=>'<button type="button" data-la="'+m[0]+'">'+m[1]+'</button>').join('');
 document.getElementById('presets').addEventListener('click',e=>{
-  const b=e.target.closest('button'); if(b) setLa(+b.dataset.la);
+  const b=e.target.closest('button'); if(b){ stopPlay(); setLa(+b.dataset.la); }
 });
-document.getElementById('scale').addEventListener('input',e=>setLa(+e.target.value/100));
+document.getElementById('scale').addEventListener('input',e=>{ stopPlay(); setLa(+e.target.value/100); });
 
 /* ---- pointing at the drawing ---- */
 el.addEventListener('pointerover',e=>{
@@ -638,22 +723,75 @@ el.addEventListener('pointerover',e=>{
 el.addEventListener('click',e=>{
   if(swallow){ swallow=false; return; }
   const g=e.target.closest('[data-k]');
-  sel = g ? (sel===g.getAttribute('data-k')?null:g.getAttribute('data-k')) : null;
-  if(g) card=g.getAttribute('data-k');
-  refresh();
+  const k=g?g.getAttribute('data-k'):null;
+  sel = g ? (sel===k?null:k) : null;
+  if(g) card=k;
+  // the amber sliver and the galaxies segment fold the bar below them
+  if(k==='ob') fold('B'); else if(k==='gal') fold('G'); else refresh();
 });
+/* ---- tweens ---- */
+let tws={};
+function tween(name,from,to,D,set,done){
+  if(tws[name]) cancelAnimationFrame(tws[name]);
+  if(RM||from===to){ set(to); refresh(); tws[name]=0; if(done) done(); return; }
+  const t0=performance.now();
+  const tick=now=>{ const u=Math.min(1,(now-t0)/D); set(from+(to-from)*ease(u)); refresh();
+    if(u<1) tws[name]=requestAnimationFrame(tick); else { tws[name]=0; if(done) done(); } };
+  tws[name]=requestAnimationFrame(tick);
+}
+function fold(which){
+  if(which==='B') tween('B',openB,openB>0.5?0:1,700,v=>{openB=v;});
+  else tween('G',openG,openG>0.5?0:1,700,v=>{openG=v;});
+}
+// the curves slide between the view against size and the view against age
+function setAxis(t){
+  for(const b of document.querySelectorAll('#axis button')) b.setAttribute('aria-pressed',String(+b.dataset.ax===t));
+  tween('ax',m,t,1000,v=>{m=v;});
+}
+document.getElementById('axis').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(b) setAxis(+b.dataset.ax);
+});
+/* ---- Play: the marker runs from the earliest moment to today ---- */
+const playBtn=document.getElementById('play');
+let playing=null;
+function stopPlay(){ if(!playing) return; cancelAnimationFrame(playing.raf); clearTimeout(playing.t); playing=null;
+  playBtn.textContent='Play'; playBtn.setAttribute('aria-pressed','false'); }
+playBtn.addEventListener('click',()=>{
+  if(playing){ stopPlay(); return; }
+  const from = la<-0.01 ? la : LOGMIN;
+  playing={raf:0,t:0}; playBtn.textContent='Pause'; playBtn.setAttribute('aria-pressed','true');
+  if(RM){ const stops=MOMENTS.map(x=>x[0]).filter(v=>v>from+1e-9&&v<=0); let i=0;
+    const step=()=>{ if(i>=stops.length){ stopPlay(); return; } setLa(stops[i++]); playing.t=setTimeout(step,900); };
+    setLa(from); playing.t=setTimeout(step,900); return; }
+  // a decade of size every 1.1 seconds
+  const D=(0-from)*1100, t0=performance.now();
+  const tick=now=>{ const u=Math.min(1,(now-t0)/D); setLa(from+(0-from)*u);
+    if(u<1) playing.raf=requestAnimationFrame(tick); else stopPlay(); };
+  playing.raf=requestAnimationFrame(tick);
+});
+/* ---- keys: a decade per arrow, a tenth with shift, on the slider or the drawing ---- */
+function keys(e){
+  const d={ArrowRight:1,ArrowUp:1,ArrowLeft:-1,ArrowDown:-1,PageUp:1,PageDown:-1}[e.key];
+  if(e.key==='Home'){ e.preventDefault(); stopPlay(); setLa(LOGMIN); return; }
+  if(e.key==='End'){ e.preventDefault(); stopPlay(); setLa(LOGMAX); return; }
+  if(d===undefined) return;
+  e.preventDefault(); stopPlay();
+  setLa(e.shiftKey ? la+d*0.1 : (Math.abs(la-Math.round(la))<1e-6 ? Math.round(la)+d : (d>0?Math.ceil(la):Math.floor(la))));
+}
+document.getElementById('scale').addEventListener('keydown',keys);
+el.addEventListener('keydown',keys);
 // dragging across the history panel moves the moment
 function fromEvent(e){
   const svg=document.getElementById('uvsvg'), r=svg.getBoundingClientRect();
-  const px=(e.clientX-r.left)/r.width*W, py=(e.clientY-r.top)/r.height*H;
+  const px=(e.clientX-r.left)/r.width*W, py=(e.clientY-r.top)/r.height*svg.viewBox.baseVal.height;
   if(py<C.y-16||py>C.y+C.h+8) return null;
-  return XC(px);
+  return XM(px);
 }
 let dragging=false, swallow=false;
 el.addEventListener('pointerdown',e=>{
   const v=fromEvent(e);
   if(v===null) return;
-  dragging=true; swallow=true; el.setPointerCapture&&el.setPointerCapture(e.pointerId);
+  stopPlay(); dragging=true; swallow=true; el.setPointerCapture&&el.setPointerCapture(e.pointerId);
   setLa(v); e.preventDefault();
 });
 el.addEventListener('pointermove',e=>{ if(dragging){ const v=fromEvent(e); if(v!==null) setLa(v); } });

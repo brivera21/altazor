@@ -29,12 +29,20 @@ ROOT = Path(__file__).parent.parent
 # (highlight as a familiar group), kids, and w: Wikipedia article titles
 # to try, in order, for a representative photo (the first with a summary
 # thumbnail wins; no thumbnail anywhere means no photo, never a stand-in).
-def N(name, blurb, source, count=None, hl=False, kids=None, w=None):
+# href names the diagram a click on that tip opens, p gives a plain name
+# to print beside a Latin one, and t is a fossil span in Ma for the time
+# layout (hominins). The branching points of the mammals and primates get
+# their divergence ages from DIVERGE below.
+def N(name, blurb, source, count=None, hl=False, kids=None, w=None,
+      href=None, p=None, t=None):
     d = {"n": name, "b": blurb, "s": source}
     if count: d["c"] = count
     if hl: d["hl"] = True
     if kids: d["k"] = kids
     if w: d["w"] = w
+    if href: d["href"] = href      # the diagram a click on this tip opens
+    if p: d["p"] = p               # a plain name beside a Latin one
+    if t: d["t"] = t               # fossil span, oldest to youngest, in Ma
     return d
 
 
@@ -75,11 +83,12 @@ TREE_OF_LIFE = N(
                   "Burki and others 2020", w=["Eukaryote"], kids=[
                     N("Amorphea", "The supergroup holding animals, fungi and "
                       "the amoebae.", "Burki and others 2020",
-                      w=["Amorphea"], kids=[
+                      w=["Amorphea"], p="animals, fungi, amoebae", kids=[
                         N("Animals", "Multicellular eaters, from sponges to "
                           "vertebrates: one branch of the opisthokonts. The "
                           "Animals diagram opens this tip.",
-                          "Burki and others 2020", hl=True, w=["Animal"]),
+                          "Burki and others 2020", hl=True, w=["Animal"],
+                          href="animals.html"),
                         N("Fungi", "The other great opisthokont branch: "
                           "molds, yeasts and mushrooms, closer to animals "
                           "than to plants.", "Burki and others 2020",
@@ -89,7 +98,7 @@ TREE_OF_LIFE = N(
                       ]),
                     N("Diaphoretickes", "The supergroup holding the plants "
                       "and most of the algae.", "Burki and others 2020",
-                      w=["Diaphoretickes"], kids=[
+                      w=["Diaphoretickes"], p="plants and most algae", kids=[
                         N("Land plants and green algae",
                           "The green lineage of the Archaeplastida, whose "
                           "chloroplasts descend from one ancient captured "
@@ -210,7 +219,8 @@ ANIMALS = N(
                                 N("Mammalia", "Hair and milk; the Mammals "
                                   "diagram opens this tip.",
                                   "Mammal Diversity Database 2025", hl=True,
-                                  count="~6,800 species", w=["Mammal"]),
+                                  count="~6,800 species", w=["Mammal"],
+                                  href="mammals.html"),
                               ]),
                           ]),
                       ]),
@@ -255,10 +265,12 @@ MAMMALS = N(
                 N("Afrotheria", "The African root stock: elephants, "
                   "manatees, hyraxes, aardvark, sengis and tenrecs.",
                   "Murphy and others 2001",
-                  w=["Afrotheria", "African bush elephant"]),
+                  w=["Afrotheria", "African bush elephant"],
+                  p="elephants, manatees, tenrecs"),
                 N("Xenarthra", "The South American originals: armadillos, "
                   "sloths and anteaters.", "Murphy and others 2001",
-                  w=["Xenarthra", "Nine-banded armadillo"]),
+                  w=["Xenarthra", "Nine-banded armadillo"],
+                  p="armadillos, sloths, anteaters"),
                 N("Euarchontoglires", "The rodents, rabbits, treeshrews, "
                   "colugos and primates, humankind included.",
                   "Murphy and others 2001", hl=True,
@@ -268,11 +280,13 @@ MAMMALS = N(
                       count="~2,750 species", w=["Rodent"]),
                     N("Primates", "Lemurs to humans; the Primates diagram "
                       "opens this branch.", "Mammal Diversity Database 2025",
-                      count="~520 species", hl=True, w=["Primate"]),
+                      count="~520 species", hl=True, w=["Primate"],
+                      href="primates.html"),
                     N("Lagomorpha and others", "Rabbits and hares, plus the "
                       "treeshrews and colugos nearest the primates.",
                       "Mammal Diversity Database 2025",
-                      w=["Lagomorpha", "European rabbit"]),
+                      w=["Lagomorpha", "European rabbit"],
+                      p="rabbits, treeshrews, colugos"),
                   ]),
                 N("Laurasiatheria", "The northern radiation: shrews, bats, "
                   "carnivorans, pangolins, horses, and the even-toed "
@@ -291,7 +305,8 @@ MAMMALS = N(
                     N("Eulipotyphla and others", "Shrews, moles and "
                       "hedgehogs, plus pangolins and the horses, rhinos and "
                       "tapirs.", "Mammal Diversity Database 2025",
-                      w=["Eulipotyphla", "European hedgehog"]),
+                      w=["Eulipotyphla", "European hedgehog"],
+                      p="shrews, pangolins, horses"),
                   ]),
               ]),
           ]),
@@ -304,12 +319,14 @@ PRIMATES = N(
     "Murphy and others 2001", w=["Euarchontoglires"],
     kids=[
         N("Glires", "Rodents and lagomorphs: the sister group to everything "
-          "below.", "Murphy and others 2001", w=["Glires", "Rodent"]),
+          "below.", "Murphy and others 2001", w=["Glires", "Rodent"],
+          p="rodents and rabbits"),
         N("Primatomorpha", "Primates plus their closest living relatives.",
-          "Janecka and others 2007", w=["Primatomorpha"], kids=[
-            N("Dermoptera", "The colugos of Southeast Asia, gliding leaf "
+          "Janecka and others 2007", w=["Primatomorpha"],
+          p="primates and colugos", kids=[
+            N("Dermoptera", "The two colugos of Southeast Asia, gliding leaf "
               "eaters and the primates' nearest kin.",
-              "Janecka and others 2007", count="2 species",
+              "Janecka and others 2007", p="colugos",
               w=["Colugo"]),
             N("Primates", "Grasping hands, forward eyes and big brains: "
               "about 520 living species.",
@@ -318,34 +335,41 @@ PRIMATES = N(
                 N("Strepsirrhini", "The wet-nosed primates: the lemurs of "
                   "Madagascar and the lorises and galagos of Africa and "
                   "Asia.", "Perelman and others 2011",
-                  w=["Strepsirrhini", "Ring-tailed lemur"]),
+                  w=["Strepsirrhini", "Ring-tailed lemur"],
+                  p="lemurs and lorises"),
                 N("Haplorhini", "The dry-nosed primates.",
-                  "Perelman and others 2011", w=["Haplorhini"], kids=[
+                  "Perelman and others 2011", w=["Haplorhini"],
+                  p="dry-nosed primates", kids=[
                     N("Tarsiers", "Tiny nocturnal leapers of island "
                       "Southeast Asia, the monkeys' deepest cousins.",
                       "Perelman and others 2011", w=["Tarsier"]),
                     N("Simiiformes", "The monkeys and apes.",
-                      "Perelman and others 2011", w=["Simian"], kids=[
+                      "Perelman and others 2011", w=["Simian"],
+                      p="monkeys and apes", kids=[
                         N("Platyrrhini", "The New World monkeys: capuchins, "
                           "howlers, marmosets and spider monkeys, many with "
                           "grasping tails.", "Perelman and others 2011",
-                          w=["New World monkey", "Capuchin monkey"]),
+                          w=["New World monkey", "Capuchin monkey"],
+                          p="New World monkeys"),
                         N("Catarrhini", "The Old World monkeys and the "
                           "apes.", "Perelman and others 2011",
-                          w=["Catarrhini"], kids=[
+                          w=["Catarrhini"], p="Old World monkeys and apes",
+                          kids=[
                             N("Cercopithecidae", "The Old World monkeys: "
                               "macaques, baboons, langurs and colobus "
                               "monkeys.", "Perelman and others 2011",
-                              w=["Old World monkey", "Rhesus macaque"]),
+                              w=["Old World monkey", "Rhesus macaque"],
+                              p="Old World monkeys"),
                             N("Hominoidea", "The tailless apes.",
-                              "Perelman and others 2011", w=["Ape"], kids=[
+                              "Perelman and others 2011", w=["Ape"],
+                              p="apes", kids=[
                                 N("Hylobatidae", "The gibbons, small "
                                   "brachiating apes of Asian forests.",
                                   "Perelman and others 2011",
-                                  w=["Gibbon"]),
+                                  w=["Gibbon"], p="gibbons"),
                                 N("Hominidae", "The great apes.",
                                   "Perelman and others 2011",
-                                  w=["Hominidae"], kids=[
+                                  w=["Hominidae"], p="great apes", kids=[
                                     N("Orangutans", "The Asian great apes, "
                                       "genus Pongo.",
                                       "Perelman and others 2011",
@@ -361,9 +385,10 @@ PRIMATES = N(
                                       "Langergraber and others 2012",
                                       w=["Chimpanzee"]),
                                     N("Humans", "Homo sapiens, the one "
-                                      "surviving species of its genus.",
+                                      "surviving species of its genus; the "
+                                      "Hominins diagram opens its tribe.",
                                       "Perelman and others 2011", hl=True,
-                                      w=["Human"]),
+                                      w=["Human"], href="hominins.html"),
                                   ]),
                               ]),
                           ]),
@@ -378,7 +403,8 @@ HOMININS = N(
     "Hominini",
     "The human tribe: every species closer to us than to the chimpanzees, "
     "from the split with the Pan line roughly seven million years ago. "
-    "Polytomies mark relationships the fossils leave unresolved.",
+    "Where several branches leave one point, the fossils leave their "
+    "order unresolved.",
     "Smithsonian Human Origins; Wood and Boyle 2016",
     w=["Hominini"],
     kids=[
@@ -387,12 +413,12 @@ HOMININS = N(
           "forward-placed foramen magnum hinting at upright posture: the "
           "oldest candidate hominin, and a contested one.",
           "Brunet and others 2002", count="~7 to 6 Ma",
-          w=["Sahelanthropus"]),
+          w=["Sahelanthropus"], t=(7, 6)),
         N("Ardipithecus ramidus",
           "Ardi: a woodland biped that still gripped branches with an "
           "opposable big toe, described from a remarkable partial skeleton.",
           "White and others 2009", count="~4.4 Ma",
-          w=["Ardipithecus"]),
+          w=["Ardipithecus"], t=(4.4, 4.4)),
         N("Australopithecus",
           "The small-brained committed bipeds of Africa, the grade from "
           "which both Paranthropus and Homo arise; which species is our "
@@ -401,23 +427,23 @@ HOMININS = N(
             N("Australopithecus anamensis",
               "The earliest australopith, shin bones built for walking.",
               "Smithsonian Human Origins", count="~4.2 to 3.8 Ma",
-              w=["Australopithecus anamensis"]),
+              w=["Australopithecus anamensis"], t=(4.2, 3.8)),
             N("Australopithecus afarensis",
               "Lucy's species, walking upright at Laetoli while keeping a "
               "chimp-sized brain.",
               "Smithsonian Human Origins", count="~3.85 to 2.95 Ma",
-              w=["Australopithecus afarensis", "Lucy (Australopithecus)"]),
+              w=["Australopithecus afarensis", "Lucy (Australopithecus)"], t=(3.85, 2.95)),
             N("Australopithecus africanus",
               "The Taung Child's species, southern Africa's gracile "
               "australopith.",
               "Smithsonian Human Origins", count="~3.3 to 2.1 Ma",
-              w=["Australopithecus africanus"]),
+              w=["Australopithecus africanus"], t=(3.3, 2.1)),
             N("Australopithecus sediba",
               "A late South African species mixing australopith and "
               "Homo-like traits, proposed and disputed as close to our "
               "genus's root.",
               "Berger and others 2010", count="~1.98 Ma",
-              w=["Australopithecus sediba"]),
+              w=["Australopithecus sediba"], t=(1.98, 1.98)),
             N("Paranthropus",
               "The robust side branch: massive jaws and grinding teeth for "
               "hard and fibrous food. A long-lived experiment that left no "
@@ -426,15 +452,15 @@ HOMININS = N(
                 N("Paranthropus aethiopicus",
                   "The earliest robust form, known best from the Black "
                   "Skull.", "Smithsonian Human Origins",
-                  count="~2.7 to 2.3 Ma", w=["Paranthropus aethiopicus"]),
+                  count="~2.7 to 2.3 Ma", w=["Paranthropus aethiopicus"], t=(2.7, 2.3)),
                 N("Paranthropus boisei",
                   "Nutcracker Man of East Africa, the most extreme chewing "
                   "apparatus of any hominin.", "Smithsonian Human Origins",
-                  count="~2.3 to 1.2 Ma", w=["Paranthropus boisei"]),
+                  count="~2.3 to 1.2 Ma", w=["Paranthropus boisei"], t=(2.3, 1.2)),
                 N("Paranthropus robustus",
                   "The South African robust species.",
                   "Smithsonian Human Origins", count="~1.8 to 1.2 Ma",
-                  w=["Paranthropus robustus"]),
+                  w=["Paranthropus robustus"], t=(1.8, 1.2)),
               ]),
             N("Homo",
               "The large-brained, tool-dependent genus. Its root among the "
@@ -444,12 +470,12 @@ HOMININS = N(
                   "Handy Man, named for the Oldowan tools found with it; "
                   "small-bodied, and by some accounts still an "
                   "australopith.", "Smithsonian Human Origins",
-                  count="~2.4 to 1.4 Ma", w=["Homo habilis"]),
+                  count="~2.4 to 1.4 Ma", w=["Homo habilis"], t=(2.4, 1.4)),
                 N("Homo rudolfensis",
                   "A larger, flatter-faced early Homo known from Lake "
                   "Turkana; one skull, many arguments.",
                   "Smithsonian Human Origins", count="~1.9 to 1.8 Ma",
-                  w=["Homo rudolfensis"]),
+                  w=["Homo rudolfensis"], t=(1.9, 1.8)),
                 N("Later Homo",
                   "The long-legged striders that left Africa.",
                   "Smithsonian Human Origins", kids=[
@@ -457,23 +483,23 @@ HOMININS = N(
                       "The first world traveler: modern body proportions, "
                       "fire and handaxes, from Africa to Java over nearly "
                       "two million years.", "Smithsonian Human Origins",
-                      count="~1.89 Ma to 110 ka", w=["Homo erectus"]),
+                      count="~1.89 Ma to 110 ka", w=["Homo erectus"], t=(1.89, 0.11)),
                     N("Homo floresiensis",
                       "The hobbit of Flores, a meter tall with a tiny "
                       "brain, likely an isolated dwarfed offshoot of early "
                       "Homo.", "Brown and others 2004",
-                      count="~100 to 50 ka", w=["Homo floresiensis"]),
+                      count="~100 to 50 ka", w=["Homo floresiensis"], t=(0.1, 0.05)),
                     N("Homo luzonensis",
                       "A second island species, from Callao Cave in the "
                       "Philippines, mixing modern and australopith-like "
                       "traits.", "Detroit and others 2019",
-                      count="~67 to 50 ka", w=["Homo luzonensis"]),
+                      count="~67 to 50 ka", w=["Homo luzonensis"], t=(0.067, 0.05)),
                     N("Homo naledi",
                       "A small-brained species from the Rising Star cave "
                       "system, surprisingly young for its anatomy.",
                       "Berger and others 2015; Dirks and others 2017",
-                      count="~335 to 236 ka", w=["Homo naledi"]),
-                    N("The heidelbergensis grade",
+                      count="~335 to 236 ka", w=["Homo naledi"], t=(0.335, 0.236)),
+                    N("Heidelbergensis grade",
                       "The big-brained middle Pleistocene humans from whom "
                       "the last three species descend.",
                       "Smithsonian Human Origins", kids=[
@@ -482,14 +508,14 @@ HOMININS = N(
                           "surprisingly modern face; close to the last "
                           "common ancestor of the final three.",
                           "Smithsonian Human Origins",
-                          count="~1.2 to 0.8 Ma", w=["Homo antecessor"]),
+                          count="~1.2 to 0.8 Ma", w=["Homo antecessor"], t=(1.2, 0.8)),
                         N("Homo heidelbergensis",
                           "The likely ancestor grade of Neanderthals, "
                           "Denisovans and us: hearths, wooden spears and "
                           "big-game hunting.", "Smithsonian Human Origins",
                           count="~700 to 200 ka",
-                          w=["Homo heidelbergensis"]),
-                        N("Us and our closest kin",
+                          w=["Homo heidelbergensis"], t=(0.7, 0.2)),
+                        N("Sapiens and kin",
                           "Three species so close they interbred; a tree "
                           "cannot draw those crossings, but living human "
                           "genomes record them.",
@@ -504,13 +530,13 @@ HOMININS = N(
                                   "to two percent of most living genomes "
                                   "outside Africa is theirs.",
                                   "Green and others 2010",
-                                  count="~400 to 40 ka", w=["Neanderthal"]),
+                                  count="~400 to 40 ka", w=["Neanderthal"], t=(0.4, 0.04)),
                                 N("Denisovans",
                                   "Known mostly from DNA in a Siberian "
                                   "cave and a Tibetan jaw; their genes "
                                   "help Tibetans live at altitude.",
                                   "Reich and others 2010",
-                                  count="~200 to 30 ka", w=["Denisovan"]),
+                                  count="~200 to 30 ka", w=["Denisovan"], t=(0.2, 0.03)),
                               ]),
                             N("Homo sapiens",
                               "The one survivor, in Africa by about "
@@ -518,7 +544,7 @@ HOMININS = N(
                               "everywhere since.",
                               "Hublin and others 2017", hl=True,
                               count="~300 ka to now",
-                              w=["Homo sapiens", "Human"]),
+                              w=["Homo sapiens", "Human"], t=(0.3, 0)),
                           ]),
                       ]),
                   ]),
@@ -583,8 +609,9 @@ PAGES = [
        "view time; each is credited on its article page.",
        "https://en.wikipedia.org/")]),
     ("mammals.html", "Mammals", MAMMALS,
-     "From the deepest split at the left to orders at the right; branch "
-     "lengths carry no time, and species counts are the Mammal Diversity "
+     "From the deepest split at the left to orders at the right. Branch "
+     "lengths carry no time until To time moves each branching point to "
+     "its median divergence age; species counts are the Mammal Diversity "
      "Database's, rounded. The four placental superorders leave from one "
      "point, since the genomes still allow three ways to root them.",
      [("Burgin, C. J., Colella, J. P., Kahn, P. L., & Upham, N. S. (2018). "
@@ -601,6 +628,12 @@ PAGES = [
        "e3000494.", "https://doi.org/10.1371/journal.pbio.3000494"),
       ("Mammal Diversity Database, American Society of Mammalogists. "
        "(2025).", "https://www.mammaldiversity.org/"),
+      ("Kumar, S., Suleski, M., Craig, J. M., Kasprowicz, A. E., Sanderford, "
+       "M., Li, M., Stecher, G., & Hedges, S. B. (2022). TimeTree 5: An "
+       "expanded resource for species divergence times. <i>Molecular Biology "
+       "and Evolution, 39</i>(8), msac174. Divergence ages read from "
+       "timetree.org, data version 20260820, on 29 September 2026.",
+       "https://doi.org/10.1093/molbev/msac174"),
       ("Foley, N. M., et al. (2023). A genomic timescale for placental "
        "mammal evolution. <i>Science, 380</i>(6643), eabl8189.",
        "https://doi.org/10.1126/science.abl8189"),
@@ -609,7 +642,8 @@ PAGES = [
        "https://en.wikipedia.org/")]),
     ("primates.html", "Primates", PRIMATES,
      "From the mammal superorder at the left to the living great apes at "
-     "the right; branch lengths carry no time. The human line sits beside "
+     "the right. Branch lengths carry no time until To time moves each "
+     "branching point to its median divergence age. The human line sits beside "
      "the chimpanzees and bonobos, from whom it parted roughly six to eight "
      "million years ago.",
      [("Perelman, P., Johnson, W. E., Roos, C., Seuanez, H. N., Horvath, "
@@ -628,6 +662,12 @@ PAGES = [
        "great ape and human evolution. <i>Proceedings of the National "
        "Academy of Sciences, 109</i>(39), 15716-15721.",
        "https://doi.org/10.1073/pnas.1211740109"),
+      ("Kumar, S., Suleski, M., Craig, J. M., Kasprowicz, A. E., Sanderford, "
+       "M., Li, M., Stecher, G., & Hedges, S. B. (2022). TimeTree 5: An "
+       "expanded resource for species divergence times. <i>Molecular Biology "
+       "and Evolution, 39</i>(8), msac174. Divergence ages read from "
+       "timetree.org, data version 20260820, on 29 September 2026.",
+       "https://doi.org/10.1093/molbev/msac174"),
       ("Mammal Diversity Database, American Society of Mammalogists. "
        "(2025).", "https://www.mammaldiversity.org/"),
       ("Images: the linked group's Wikipedia article thumbnail, fetched at "
@@ -636,9 +676,10 @@ PAGES = [
     ("hominins.html", "Hominins", HOMININS,
      "The human tribe from the chimpanzee split to the present: the "
      "australopiths, the robust Paranthropus side branch and every named "
-     "branch of Homo, with fossil date ranges beside each species (Ma, "
-     "millions of years ago; ka, thousands). Where several branches leave "
-     "one point, the fossils leave their order unresolved.",
+     "branch of Homo, with fossil dates beside each species (Ma, millions "
+     "of years ago; ka, thousands). To time lays each species out as a bar "
+     "from first to last fossil; a date on the slider lights the species "
+     "alive then.",
      [("Smithsonian National Museum of Natural History. (n.d.). Human "
        "origins: Species. Human Origins Program.",
        "https://humanorigins.si.edu/evidence/human-fossils/species"),
@@ -697,6 +738,7 @@ HTML = """<!DOCTYPE html>
 :root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
         --line:#2b2b2b; --accent:#58a6ff; --hl:#31d67a; }
 * { box-sizing:border-box; }
+[hidden] { display:none !important; }
 body { margin:0; background:var(--bg); color:var(--text);
   font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
 .wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
@@ -707,8 +749,19 @@ header.site { border-top:4px solid var(--accent); padding-top:22px; margin-botto
 nav.site a { color:var(--muted); text-decoration:none; font-size:14px; margin-right:14px; }
 nav.site a:hover { color:var(--accent); }
 h1 { margin:0 0 6px; font-size:26px; }
+.bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:0 0 8px; min-height:32px; }
+.bar button { background:var(--panel); color:var(--muted); border:1px solid var(--line);
+  border-radius:999px; padding:6px 14px; font-size:13px; cursor:pointer; font-family:inherit; }
+.bar button:hover { color:var(--text); border-color:#3d3d3d; }
+.bar button.on { background:var(--accent); color:#0b1a2b; border-color:var(--accent); font-weight:600; }
+.bar button.on:hover { color:#0b1a2b; }
+.bar label { font-size:13px; color:var(--muted); display:flex; align-items:center; gap:8px; }
+.bar input[type=range] { width:200px; accent-color:var(--accent); direction:rtl; }
+.bar output { font-size:13px; color:var(--text); font-variant-numeric:tabular-nums; min-width:70px; }
+.bar .hint { font-size:12px; color:#7d7d7d; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
-#diagram { flex:1 1 640px; min-width:0; }
+#diagram { flex:1 1 640px; min-width:0; border-radius:8px; }
+#diagram:focus-visible { outline:1px solid var(--accent); outline-offset:4px; }
 #diagram svg { width:100%; height:auto; display:block; user-select:none; }
 .side { flex:0 0 300px; position:sticky; top:16px; }
 .card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
@@ -722,6 +775,7 @@ h1 { margin:0 0 6px; font-size:26px; }
   border-top:1px solid var(--line); padding-top:8px; }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
+.method { color:var(--muted); font-size:12.5px; margin:0 0 12px; max-width:760px; }
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
 .refs p { margin:0 0 8px; overflow-wrap:anywhere; }
 .refs a { color:var(--accent); }
@@ -730,7 +784,8 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 details.sources { margin-top:22px; border-top:1px solid var(--line); padding-top:10px; max-width:760px; }
 details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; }
 details.sources > summary:hover { color:var(--accent); }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+@media (max-width:900px){ .stage{flex-direction:column;} #diagram{width:100%; flex-basis:auto;} .side{position:static; width:100%; flex-basis:auto; order:-1;} }
+@media (max-width:600px){ #diagram{overflow-x:auto; -webkit-overflow-scrolling:touch;} #diagram svg{min-width:680px;} }
 </style>
 </head>
 <body>
@@ -740,8 +795,16 @@ details.sources > summary:hover { color:var(--accent); }
   <nav class="site"><a href="library.html">&larr; Library &middot; Life</a>__XNAV__</nav>
 </header>
 <h1>__TITLE__</h1>
+<div class="bar" id="ctl">
+  <button type="button" id="timeBtn" hidden>Make to time</button>
+  <label id="scrubLab" hidden>at <input type="range" id="scrub" min="0" max="__SCRUBMAX__" step="10" value="__SCRUBMAX__"><output id="scrubOut">any date</output></label>
+  <button type="button" id="scrubOff" hidden>any date</button>
+  <button type="button" id="sizeBtn" hidden>Size by species</button>
+  <button type="button" id="unfoldBtn" hidden>Unfold all</button>
+  <span class="hint">a branch point folds with a click; the arrow keys travel the tree</span>
+</div>
 <div class="stage">
-  <div id="diagram"></div>
+  <div id="diagram" tabindex="0" aria-label="__TITLE__, a tree; the arrow keys travel it"></div>
   <div class="side"><div class="card">
     <img id="cardImg" alt="">
     <div id="nameTxt">A group under the cursor lands here</div>
@@ -752,101 +815,226 @@ details.sources > summary:hover { color:var(--accent); }
 </div>
 <p class="note">__NOTE__</p>
 <details class="sources"><summary>Sources</summary>
-<div class="refs">__REFS__</div>
+__METHOD__<div class="refs">__REFS__</div>
 </details>
 </div>
 <script>
-const ROOT=__DATA__, UP=__UP__;
+const ROOT=__DATA__, UP=__UP__, TIME=__TIME__, SIZED=__SIZED__, START=__START__;
+// two kinds of time layout: fossil spans (each tip a bar from first to last
+// fossil) and divergence ages (each branching point at its split, living
+// tips at the present)
+const FOSSIL=!!TIME && TIME.kind==='fossil', DIV=!!TIME && TIME.kind==='div';
 const el=document.getElementById('diagram');
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ease=t=>t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const mix=(a,b,t)=>a+(b-a)*t;
+
+// every node gets an id and its parent; tips are counted once for the size scale
+let idc=0; const byId={}, allTips=[];
+(function walk(n,p){ n.id='n'+(idc++); byId[n.id]=n; n.parent=p;
+  if(n.k) n.k.forEach(c=>walk(c,n)); else allTips.push(n); })(ROOT,null);
+// the species count as a number, read off the count string ("~1.2 million
+// species", "~9,000 species"); a count with no figure gives null
+function countNum(s){ if(!s) return null; const m=s.match(/(\\d[\\d,]*(?:\\.\\d+)?)\\s*(million)?/);
+  if(!m) return null; let v=parseFloat(m[1].replace(/,/g,'')); if(m[2]) v*=1e6; return v; }
+const CTOT=countNum(ROOT.c), CMAX=Math.max(...allTips.map(t=>countNum(t.c)||0));
+// the fossil span of a node: a tip's own, or the oldest to youngest of its
+// clade; with divergence ages, a branching point's age and a living tip's now
+function span(n){ if(n.t) return n.t;
+  if(DIV){ if(n.d!=null) return [n.d,n.d]; if(!n.k) return [0,0]; }
+  if(!n.k) return null; let a=-1, b=1e9;
+  for(const c of n.k){ const s=span(c); if(s){ a=Math.max(a,s[0]); b=Math.min(b,s[1]); } }
+  return a<0?null:[a,b]; }
+function alive(n,d){ if(n.k && !folded.has(n.id)) return n.k.some(c=>alive(c,d));
+  const s=span(n); return !!s && s[0]>=d && s[1]<=d; }
+const fmtMa=d=>d===0?'now':d>=1?(Math.round(d*100)/100)+' Ma':Math.round(d*1000)+' ka';
+
+// state
+const folded=new Set();
+let mTarget=0, mCur=0;      // 0 a cladogram, 1 the time layout
+let sized=false;            // tip dots scaled by species count
+let scrub=null;             // a date in Ma, time layout only
+let current='n0', pinned=null;
 
 // layout: tips evenly spaced down the right, parents at the mean of their
-// children, x by depth
+// children, x by depth; in the time layout x is the fossil date, each tip a
+// bar from its oldest to its youngest fossil and a clade at its oldest
+const RS=allTips.length>16?36:42, PADT=UP?62:28, PADB=TIME?34:16, PADL=16, PADR=300, TH=34;
+const W=1010; let H=0, hCur=0;
 const tips=[]; let maxd=0;
-(function walk(n,d){ n.depth=d; maxd=Math.max(maxd,d);
-  if(n.k) n.k.forEach(c=>walk(c,d+1)); else tips.push(n); })(ROOT,0);
-const RS=42, PADT=UP?62:28, PADB=16, PADL=16, PADR=300, TH=34;
-const W=1010, H=PADT+PADB+RS*tips.length;
-tips.forEach((t,i)=>{ t.y=PADT+RS*(i+0.5); });
-(function place(n){ if(n.k){ n.k.forEach(place);
-  n.y=n.k.reduce((a,c)=>a+c.y,0)/n.k.length; } })(ROOT);
-const X=d=>PADL+ (W-PADL-PADR) * d/maxd;
+const XT=ma=>PADL+(W-PADL-PADR)*(1-ma/TIME.max);
+function layout(){
+  tips.length=0; maxd=0;
+  (function walk(n,d){ n.depth=d; n.vis=true; maxd=Math.max(maxd,d);
+    if(n.k && !folded.has(n.id)) n.k.forEach(c=>walk(c,d+1));
+    else { tips.push(n); (function hide(m){ if(m.k) m.k.forEach(c=>{ c.vis=false; hide(c); }); })(n); } })(ROOT,0);
+  H=PADT+PADB+RS*tips.length;
+  tips.forEach((t,i)=>{ t.ty=PADT+RS*(i+0.5); });
+  (function place(n){ if(n.k && !folded.has(n.id)){ n.k.forEach(place);
+    n.ty=n.k.reduce((a,c)=>a+c.ty,0)/n.k.length; } })(ROOT);
+  const XC=d=>PADL+(W-PADL-PADR)*d/Math.max(1,maxd);
+  for(const id in byId){ const n=byId[id]; if(!n.vis) continue;
+    const xc=XC(n.depth); n.tx=[xc,xc,xc];
+    if(TIME){ const s=span(n), leaf=!n.k||folded.has(n.id);
+      const x0=s?XT(s[0]):xc, x1=s?XT(s[1]):xc;
+      n.tt=[x0,x0,leaf?(DIV?XT(0):x1):x0]; }
+    else n.tt=n.tx; }
+}
+const rad=n=>{ const leaf=!n.k||folded.has(n.id); if(!leaf) return 4;
+  if(!sized||!SIZED) return 4.5; const c=countNum(n.c); if(!c) return 2;
+  return Math.max(2, 2+12*(Math.log10(c)-1)/(Math.log10(CMAX)-1)); };
+const target=n=>({x:mix(n.tx[0],n.tt[0],mTarget), b:mix(n.tx[1],n.tt[1],mTarget),
+  e:mix(n.tx[2],n.tt[2],mTarget), y:n.ty, r:rad(n)});
+
+// every change of layout tweens from where things are to where they go
+let anim=null, t0=0; const DUR=700;
+function retarget(){
+  const wasVis={}; for(const id in byId) wasVis[id]=!!byId[id].vis;
+  for(const id in byId){ const n=byId[id]; n.sx=n.px; n.sy=n.py; n.sb=n.pb; n.se=n.pe; n.sr=n.pr; }
+  const hSnap=hCur, mSnap=mCur;
+  layout();
+  for(const id in byId){ const n=byId[id]; if(!n.vis||wasVis[id]) continue;
+    let a=n.parent; while(a && !wasVis[a.id]) a=a.parent;   // a node just unfolded grows out of its ancestor
+    if(a){ n.sx=a.sx; n.sy=a.sy; n.sb=a.sb; n.se=a.se; n.sr=a.sr; }
+    else { const g=target(n); n.sx=g.x; n.sy=g.y; n.sb=g.b; n.se=g.e; n.sr=g.r; } }
+  const step=k=>{ const e=ease(k);
+    for(const id in byId){ const n=byId[id]; if(!n.vis) continue; const g=target(n);
+      n.px=mix(n.sx,g.x,e); n.py=mix(n.sy,g.y,e); n.pb=mix(n.sb,g.b,e); n.pe=mix(n.se,g.e,e); n.pr=mix(n.sr,g.r,e); }
+    hCur=mix(hSnap,H,e); mCur=mix(mSnap,mTarget,e); render(); };
+  if(REDUCED){ anim=null; step(1); return; }
+  t0=performance.now();
+  const frame=now=>{ const k=Math.min(1,(now-t0)/DUR); step(k); if(k<1) anim=requestAnimationFrame(frame); else anim=null; };
+  if(anim) cancelAnimationFrame(anim); anim=requestAnimationFrame(frame);
+}
 
 const IMG={};      // node name -> thumbnail url, filled at view time
-let idc=0; const byId={};
 function draw(n){
-  if(!n.id){ n.id='n'+(idc++); byId[n.id]=n; }
-  const x=X(n.depth), col=n.hl?'var(--hl)':'#c9d1d9';
+  const leaf=!n.k||folded.has(n.id);
+  const x=n.px, y=n.py, col=n.hl?'var(--hl)':'#c9d1d9';
+  const dim=scrub!=null && mCur>0.5 && !alive(n,scrub);
   let s='';
-  if(n.k){
-    const x1=X(n.depth+1);
+  if(!leaf){
     for(const c of n.k)
-      s+=`<path d="M${x},${n.y} V${c.y} H${x1}" fill="none"
+      s+=`<path d="M${x.toFixed(1)},${y.toFixed(1)} V${c.py.toFixed(1)} H${c.pb.toFixed(1)}" fill="none"
         stroke="#3d444d" stroke-width="1.6"/>`;
     for(const c of n.k) s+=draw(c);
   }
+  const plain=n.p?` <tspan fill="#8b949e" font-size="11.5" font-weight="400">${esc(n.p)}</tspan>`:'';
   let lab;
-  if(n.k){
-    lab = n.depth===0
-      ? `<text x="${x+7}" y="${n.y-7}" font-size="12.5"
-          fill="${n.hl?'var(--hl)':'#9a9a9a'}">${esc(n.n)}</text>`
-      : `<text x="${x-8}" y="${n.y+4}" text-anchor="end" font-size="12.5"
+  if(!leaf){
+    const lw=Math.max(n.n.length*7, n.p?n.p.length*6.2:0);
+    // no room to the left: the label sits above the node, or below it when
+    // a branch leaves just above
+    const ly=n.k.some(c=>c.py<y-0.5 && y-c.py<16)?y+16:y-7;
+    lab = (n.depth===0 || x-9-lw<2)
+      ? `<text x="${x+7}" y="${ly}" font-size="12.5"
           fill="${n.hl?'var(--hl)':'#9a9a9a'}" stroke="#121212"
-          stroke-width="3" paint-order="stroke">${esc(n.n)}</text>`;
+          stroke-width="3" paint-order="stroke">${esc(n.n)}${plain}</text>`
+      : `<text x="${x-9}" y="${y+(n.p?-1:4)}" text-anchor="end" font-size="12.5"
+          fill="${n.hl?'var(--hl)':'#9a9a9a'}" stroke="#121212"
+          stroke-width="3" paint-order="stroke">${esc(n.n)}</text>`
+        +(n.p?`<text x="${x-9}" y="${y+12}" text-anchor="end" font-size="11" fill="#8b949e"
+          stroke="#121212" stroke-width="3" paint-order="stroke">${esc(n.p)}</text>`:'');
   } else {
-    const u=IMG[n.n], tx=u?x+16+TH:x+9;
-    lab=(u?`<image href="${u}" x="${x+10}" y="${n.y-TH/2}" width="${TH}"
+    const u=IMG[n.n], bar=n.pe-n.pb, x1=n.pe, tx=u?x1+16+TH:x1+9+(n.pr>4.5?n.pr-4.5:0);
+    const cnt=n.k?`${countTips(n)} tips folded`:n.c;
+    lab=(bar>1||(FOSSIL&&mCur>0.02)?`<rect x="${n.pb.toFixed(1)}" y="${(y-5).toFixed(1)}" width="${Math.max(4,bar).toFixed(1)}" height="10" rx="3"
+        fill="${n.hl?'var(--hl)':'#58a6ff'}" opacity="0.55"/>`:'')
+      +(u?`<image href="${u}" x="${x1+10}" y="${y-TH/2}" width="${TH}"
         height="${TH}" preserveAspectRatio="xMidYMin slice"/>
-      <rect x="${x+10}" y="${n.y-TH/2}" width="${TH}" height="${TH}"
+      <rect x="${x1+10}" y="${y-TH/2}" width="${TH}" height="${TH}"
         fill="none" stroke="#2b2b2b" stroke-width="1"/>`:'')
-      +`<text x="${tx}" y="${n.y+4.5}" font-size="13.5" font-weight="${n.hl?700:400}"
-      fill="${col}">${esc(n.n)}${n.c?` <tspan fill="#6b7280" font-size="11.5" font-weight="400">${esc(n.c)}</tspan>`:''}</text>`;
+      +`<text x="${tx.toFixed(1)}" y="${y+4.5}" font-size="13.5" font-weight="${n.hl?700:400}"
+      fill="${col}" stroke="#121212" stroke-width="3" paint-order="stroke">${esc(n.n)}${plain}${cnt?` <tspan fill="#8b949e" font-size="11.5" font-weight="400">${esc(cnt)}</tspan>`:''}${n.href?` <tspan fill="var(--accent)" font-weight="400">→</tspan>`:''}</text>`;
   }
-  s+=`<g data-id="${n.id}" style="cursor:pointer">
-    ${n.id===pinned?`<circle cx="${x}" cy="${n.y}" r="9.5" fill="none"
+  const hit=!leaf?Math.min(200,n.n.length*7+24):290;
+  s+=`<g data-id="${n.id}"${n.href?` data-href="${n.href}"`:''} style="cursor:pointer"${dim?' opacity="0.28"':''}>
+    ${n.id===pinned?`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(n.pr+5).toFixed(1)}" fill="none"
       stroke="${n.hl?'var(--hl)':'var(--accent)'}" stroke-width="1.6"
       opacity="0.9"/>`:''}
-    <circle cx="${x}" cy="${n.y}" r="${n.k?4:4.5}"
-      fill="${n.hl?'var(--hl)':(n.k?'#121212':'#58a6ff')}"
-      stroke="${n.hl?'var(--hl)':'#58a6ff'}" stroke-width="1.6"/>
-    <rect x="${x-10}" y="${n.y-Math.max(12,TH/2)}" width="${n.k?Math.min(200,n.n.length*7+24):290}" height="${n.k?24:TH}" fill="transparent"/>
-    ${lab}</g>`;
+    <rect x="${x-10}" y="${y-Math.max(12,TH/2)}" width="${hit}" height="${!leaf?24:TH}" fill="transparent"/>
+    ${lab}
+    ${n.k?`<g data-fold="${n.id}"><title>${folded.has(n.id)?'unfolds':'folds'} ${esc(n.n)}</title>
+      <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="10" fill="transparent"/>
+      <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5.5"
+        fill="${n.hl?'var(--hl)':'#121212'}" stroke="${n.hl?'var(--hl)':'#58a6ff'}" stroke-width="1.6"/>
+      <path d="M${(x-2.8).toFixed(1)},${y.toFixed(1)} h5.6${folded.has(n.id)?` M${x.toFixed(1)},${(y-2.8).toFixed(1)} v5.6`:''}"
+        stroke="${n.hl?'#0b1a2b':'#c9d1d9'}" stroke-width="1.4"/></g>`
+      :`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${n.pr.toFixed(1)}"
+      fill="${n.hl?'var(--hl)':'#58a6ff'}" stroke="${n.hl?'var(--hl)':'#58a6ff'}" stroke-width="1.6"/>`}</g>`;
   return s;
 }
+function countTips(n){ return n.k?n.k.reduce((a,c)=>a+countTips(c),0):1; }
 function upNode(){
   if(!UP) return '';
-  const x=X(0), y=20;
-  return `<path d="M${x},${ROOT.y} L${x},${y+8}" fill="none" stroke="#3d444d"
+  const x=ROOT.px, y=20;
+  return `<path d="M${x},${ROOT.py.toFixed(1)} L${x},${y+8}" fill="none" stroke="#3d444d"
       stroke-width="1.6" stroke-dasharray="4 4"/>
     <g data-href="${UP.href}" style="cursor:pointer">
       <rect x="${x-10}" y="${y-11}" width="${UP.label.length*8+40}" height="24"
         fill="transparent"/>
       <circle cx="${x}" cy="${y}" r="4.5" fill="var(--accent)"/>
       <text x="${x+10}" y="${y+4.5}" font-size="13" fill="var(--accent)"
-        >\u2191 ${UP.label}</text></g>`;
+        >↑ ${UP.label}</text></g>`;
+}
+function axis(){
+  if(!TIME || mCur<0.02) return '';
+  const y=hCur-12; let s=`<g opacity="${mCur.toFixed(2)}">`;
+  for(let ma=0; ma<=TIME.max; ma+=TIME.step){ const x=XT(ma);
+    s+=`<line x1="${x.toFixed(1)}" y1="${PADT-4}" x2="${x.toFixed(1)}" y2="${(y-8).toFixed(1)}" stroke="#2b2b2b"/>
+      <text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="middle" font-size="11" fill="#9a9a9a">${ma?ma+' Ma':'now'}</text>`; }
+  s+=`<line x1="${XT(TIME.max)}" y1="${(y-8).toFixed(1)}" x2="${XT(0)}" y2="${(y-8).toFixed(1)}" stroke="#8a94a6"/>`;
+  if(scrub!=null){ const x=XT(scrub);
+    s+=`<g data-scrub="1" style="cursor:ew-resize"><line x1="${x.toFixed(1)}" y1="${PADT-8}" x2="${x.toFixed(1)}" y2="${(y-8).toFixed(1)}" stroke="#ffb02e" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <circle cx="${x.toFixed(1)}" cy="${(y-8).toFixed(1)}" r="6" fill="#ffb02e" stroke="#121212" stroke-width="1.5"/>
+      <rect x="${(x-14).toFixed(1)}" y="${PADT-8}" width="28" height="${(y-PADT+8).toFixed(1)}" fill="transparent"/>
+      <text x="${x.toFixed(1)}" y="${PADT-12}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffb02e">${fmtMa(scrub)}</text></g>`; }
+  return s+'</g>';
 }
 function render(){
-  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
-    id="treesvg">`+draw(ROOT)+upNode()+'</svg>';
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${hCur.toFixed(1)}" xmlns="http://www.w3.org/2000/svg"
+    id="treesvg">`+axis()+draw(ROOT)+upNode()+'</svg>';
+  document.getElementById('unfoldBtn').hidden=folded.size===0;
 }
-let current='n0', pinned=null;
 function show(id){
   const n=byId[id]; if(!n) return;
   current=id;
-  document.getElementById('nameTxt').textContent=n.n;
-  document.getElementById('cntTxt').textContent=n.c||'';
-  document.getElementById('bodyTxt').textContent=n.b;
-  document.getElementById('srcTxt').textContent=n.s;
+  document.getElementById('nameTxt').textContent=n.n+(n.p?', '+n.p:'');
+  let cnt=n.c||'';
+  if(SIZED && CTOT && !n.k && countNum(n.c)) cnt+=', '+share(countNum(n.c)/CTOT)+' of described animal species';
+  if(n.k && folded.has(n.id)) cnt=(cnt?cnt+'; ':'')+countTips(n)+' tips folded in';
+  if(n.d!=null) cnt=(cnt?cnt+'; ':'')+'its branches split ~'+n.d+' Ma';
+  document.getElementById('cntTxt').textContent=cnt;
+  document.getElementById('bodyTxt').textContent=n.b+(n.href?' A click opens it.':'');
+  document.getElementById('srcTxt').textContent=n.s+(n.d!=null?'; age: TimeTree median, '+n.dp:'');
   const img=document.getElementById('cardImg');
   if(IMG[n.n]){ img.src=IMG[n.n]; img.style.display='block'; }
   else img.style.display='none';
 }
+const share=f=>f>=0.1?Math.round(f*100)+'%':f>=0.01?(f*100).toFixed(1)+'%':f>=0.001?(f*100).toFixed(2)+'%':'under a tenth of a percent';
+function showScrub(){
+  const list=allTips.filter(t=>t.t && t.t[0]>=scrub && t.t[1]<=scrub).map(t=>t.n);
+  document.getElementById('nameTxt').textContent='At '+fmtMa(scrub);
+  document.getElementById('cntTxt').textContent=list.length+(list.length===1?' species':' species')+' known from then';
+  document.getElementById('bodyTxt').textContent=list.length?list.join('; ')+'.':'No named hominin fossil falls on this date.';
+  document.getElementById('srcTxt').textContent='The fossil ranges beside each species';
+  document.getElementById('cardImg').style.display='none';
+}
+function fold(id){ if(folded.has(id)) folded.delete(id); else folded.add(id);
+  if(pinned && !byId[pinned].vis) pinned=null; if(!byId[current].vis) current=id;
+  retarget(); show(current); }
+
 el.addEventListener('pointerover',e=>{
   if(pinned) return;
   const g=e.target.closest('[data-id]');
   if(g) show(g.getAttribute('data-id'));
 });
 el.addEventListener('click',e=>{
+  if(dragged){ dragged=false; return; }
+  const f=e.target.closest('[data-fold]');
+  if(f){ fold(f.getAttribute('data-fold')); return; }
+  if(e.target.closest('[data-scrub]')) return;
   const up=e.target.closest('[data-href]');
   if(up){ location.href=up.getAttribute('data-href'); return; }
   const g=e.target.closest('[data-id]');
@@ -856,6 +1044,60 @@ el.addEventListener('click',e=>{
     show(id);
   } else pinned=null;
   render();
+});
+// a drag on the date marker, or along the axis, moves the date
+let dragging=false, dragged=false;
+const svgX=e=>{ const b=el.querySelector('svg').getBoundingClientRect(); return (e.clientX-b.left)/b.width*W; };
+const svgY=e=>{ const b=el.querySelector('svg').getBoundingClientRect(); return (e.clientY-b.top)/b.height*hCur; };
+function setScrub(d,fromInput){ scrub=d==null?null:Math.max(0,Math.min(TIME.max,d));
+  const inp=document.getElementById('scrub'), out=document.getElementById('scrubOut');
+  if(!fromInput) inp.value=scrub==null?TIME.max*1000:Math.round(scrub*1000);
+  out.textContent=scrub==null?'any date':fmtMa(scrub);
+  document.getElementById('scrubOff').hidden=scrub==null;
+  render(); if(!pinned){ if(scrub==null) show(current); else showScrub(); } }
+el.addEventListener('pointerdown',e=>{
+  if(!FOSSIL || mTarget!==1) return;
+  const onMarker=e.target.closest('[data-scrub]'), y=svgY(e);
+  if(!onMarker && y<hCur-30) return;
+  dragging=true; el.setPointerCapture(e.pointerId); e.preventDefault();
+  setScrub(TIME.max*(1-(svgX(e)-PADL)/(W-PADL-PADR)));
+});
+el.addEventListener('pointermove',e=>{ if(!dragging) return; dragged=true;
+  setScrub(TIME.max*(1-(svgX(e)-PADL)/(W-PADL-PADR))); });
+window.addEventListener('pointerup',()=>{ dragging=false; });
+
+// the controls
+const timeBtn=document.getElementById('timeBtn'), sizeBtn=document.getElementById('sizeBtn');
+if(TIME){ timeBtn.hidden=false;
+  timeBtn.addEventListener('click',()=>{ mTarget=mTarget?0:1;
+    timeBtn.classList.toggle('on',mTarget===1); timeBtn.textContent=mTarget?'To time \\u2713':'Make to time';
+    document.getElementById('scrubLab').hidden=!(mTarget&&FOSSIL);
+    if(!mTarget) setScrub(null); retarget(); });
+  document.getElementById('scrub').addEventListener('input',e=>setScrub(+e.target.value/1000,true));
+  document.getElementById('scrubOff').addEventListener('click',()=>setScrub(null)); }
+if(SIZED){ sizeBtn.hidden=false;
+  sizeBtn.addEventListener('click',()=>{ sized=!sized; sizeBtn.classList.toggle('on',sized);
+    sizeBtn.textContent=sized?'By species \\u2713':'Size by species'; retarget(); }); }
+document.getElementById('unfoldBtn').addEventListener('click',()=>{ folded.clear(); retarget(); show(current); });
+
+// the arrow keys travel the tree while the diagram has focus: up and down
+// along the rows, right into a branch, left out to its parent; Enter folds
+// a branch or opens a linked tip, space pins, Escape lets go
+el.addEventListener('keydown',e=>{
+  const tag=(document.activeElement||{}).tagName; if(tag==='INPUT'||tag==='TEXTAREA') return;
+  const n=byId[current]; if(!n) return;
+  const vis=Object.values(byId).filter(m=>m.vis).sort((a,b)=>a.ty-b.ty||a.depth-b.depth);
+  let next=null;
+  if(e.key==='ArrowDown'){ next=vis.filter(m=>m.ty>n.ty+0.5)[0]||null; }
+  else if(e.key==='ArrowUp'){ const above=vis.filter(m=>m.ty<n.ty-0.5); next=above[above.length-1]||null; }
+  else if(e.key==='ArrowRight'){ if(n.k){ if(folded.has(n.id)) fold(n.id); next=n.k[0]; } }
+  else if(e.key==='ArrowLeft'){ next=n.parent; }
+  else if(e.key==='Enter'){ if(n.href) location.href=n.href; else if(n.k) fold(n.id); }
+  else if(e.key===' '){ pinned=pinned===n.id?null:n.id; render(); }
+  else if(e.key==='Escape'){ pinned=null; render(); }
+  else return;
+  e.preventDefault();
+  if(next){ pinned=next.id; show(next.id); render(); }
 });
 
 // photos: each node's Wikipedia article summary thumbnail, first
@@ -881,15 +1123,21 @@ async function loadImages(){
     if(u) IMG[n.n]=u;
   }));
   render();
-  show(current);
+  if(!(TIME && scrub!=null && !pinned)) show(current);
 }
 
+layout();
+for(const id in byId){ const n=byId[id]; if(!n.vis) continue; const g=target(n);
+  n.px=g.x; n.py=g.y; n.pb=g.b; n.pe=g.e; n.pr=g.r; }
+hCur=H;
 render();
-show('n0');
+{ const s=START?Object.values(byId).find(m=>m.n===START):null; show(s?s.id:'n0'); }
 loadImages();
 window.__tree=()=>({tips:tips.length, depth:maxd,
   nodes:Object.keys(byId).length, h:H, imgs:Object.keys(IMG).length,
-  tipImgs:tips.filter(t=>IMG[t.n]).length, pinned, current});
+  tipImgs:tips.filter(t=>IMG[t.n]).length, pinned, current, folded:[...folded],
+  mode:mTarget, sized, scrub, anim:!!anim,
+  pos:Object.fromEntries(Object.values(byId).filter(n=>n.vis).map(n=>[n.n,{x:n.px,y:n.py,b:n.pb,e:n.pe,r:n.pr}]))});
 </script>
 </body>
 </html>
@@ -899,6 +1147,82 @@ window.__tree=()=>({tips:tips.length, depth:maxd,
 def refs_html(refs):
     return apa.render([apa.entry(t, u) for t, u in refs])
 
+
+# the time layout. The hominins carry fossil spans ("fossil": each species a
+# bar from first to last fossil, a date slider). The mammals and primates
+# carry divergence ages ("div": each branching point at the TimeTree median
+# for its split, the living tips at now). The tree of life and the animals
+# stay undated: TimeTree's medians for the earliest animal splits run
+# against the order drawn here (sponge and human 750 Ma, comb jelly and
+# human 721 Ma, though the comb jellies branch first), and it has no age
+# for the Asgard archaea and the eukaryotes.
+TIMEAXIS = {"hominins.html": {"max": 7, "step": 1, "kind": "fossil"},
+            "mammals.html": {"max": 190, "step": 20, "kind": "div"},
+            "primates.html": {"max": 90, "step": 10, "kind": "div"}}
+
+# Divergence ages, Ma: the TimeTree median (precomputed age) for a pair of
+# living species whose last common ancestor is the branching point, read
+# from the TimeTree 5 pairwise and MRCA service (data version 20260820) on
+# 29 September 2026. Name: (age, species pair).
+DIVERGE = {
+    "mammals.html": {
+        "Mammalia": (181.2, "platypus and human"),
+        "Theria": (159.2, "gray short-tailed opossum and human"),
+        "Marsupialia": (73.8, "gray short-tailed opossum and Tasmanian devil"),
+        "Placentalia": (97.0, "elephant, armadillo, cow and human"),
+        "Euarchontoglires": (83.5, "house mouse and human"),
+        "Laurasiatheria": (82.1, "European hedgehog and cow"),
+    },
+    "primates.html": {
+        "Euarchontoglires": (83.5, "house mouse and human"),
+        "Primatomorpha": (72.8, "Sunda colugo and human"),
+        "Primates": (71.6, "ring-tailed lemur and human"),
+        "Haplorhini": (64.9, "Philippine tarsier and human"),
+        "Simiiformes": (42.4, "common marmoset and human"),
+        "Catarrhini": (28.9, "rhesus macaque and human"),
+        "Hominoidea": (19.6, "white-cheeked gibbon and human"),
+        "Hominidae": (15.6, "Sumatran orangutan and human"),
+    },
+}
+
+
+def put_dates(tree, ages):
+    """Copy each branching point's age into its node as d (Ma) and dp
+    (the species pair it was read from)."""
+    if tree["n"] in ages:
+        a, pair = ages[tree["n"]]
+        tree["d"], tree["dp"] = a, pair
+    for k in tree.get("k", []):
+        put_dates(k, ages)
+
+
+def div_method(fname):
+    rows = "; ".join(f"{n}, {a:g} Ma ({pair})"
+                     for n, (a, pair) in DIVERGE[fname].items())
+    return ("In the time layout each branching point moves to the median "
+            "age TimeTree gives for the split, read from a pair of living "
+            "species whose last common ancestor it is, and every living "
+            "group ends at the present: " + rows + ". A median across "
+            "published studies, not a single study's estimate; the ranges "
+            "behind them run several million years either way.")
+# the pages whose tips can be sized by species count (every tip needs a count)
+SIZED = {"animals.html"}
+# the node the card opens on, where it is not the root
+START = {"primates.html": "Primates"}
+# method notes that go inside the details, under the summary
+METHOD = {
+    "hominins.html": (
+        "Where several branches leave one point, the fossils leave their "
+        "order unresolved. In the time layout each species is a bar from its "
+        "oldest to its youngest fossil, the dates given beside it; a "
+        "branching point sits at the oldest fossil of its clade, which is a "
+        "minimum age for that clade and not a divergence date. The mammals "
+        "and primates trees move their branching points to TimeTree "
+        "divergence ages instead; the tree of life and the animals keep "
+        "their branch lengths equal."),
+}
+for _f in DIVERGE:
+    METHOD[_f] = div_method(_f)
 
 # the tree each page's root grows out of, drawn as a clickable node
 UPLINK = {
@@ -921,12 +1245,20 @@ XNAV = {
 }
 
 for fname, title, data, note, refs in PAGES:
+    if fname in DIVERGE:
+        put_dates(data, DIVERGE[fname])
     html = (HTML.replace("__APACSS__", apa.CSS)
             .replace("__TITLE__", title)
             .replace("__XNAV__", XNAV[fname])
             .replace("__NOTE__", note)
             .replace("__REFS__", refs_html(refs))
+            .replace("__METHOD__", (f'<p class="method">{METHOD[fname]}</p>\n'
+                                    if fname in METHOD else ""))
             .replace("__DATA__", json.dumps(data, separators=(",", ":")))
-            .replace("__UP__", json.dumps(UPLINK[fname])))
+            .replace("__UP__", json.dumps(UPLINK[fname]))
+            .replace("__TIME__", json.dumps(TIMEAXIS.get(fname)))
+            .replace("__SCRUBMAX__", str(TIMEAXIS.get(fname, {}).get("max", 7) * 1000))
+            .replace("__SIZED__", json.dumps(fname in SIZED))
+            .replace("__START__", json.dumps(START.get(fname))))
     (ROOT / fname).write_text(html, encoding="utf-8")
     print(f"wrote {ROOT / fname} ({len(html):,} bytes)")

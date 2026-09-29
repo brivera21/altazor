@@ -170,7 +170,7 @@ gap:10px;margin:0 0 16px}
 .tile .d{font-size:.78rem;color:var(--ink3);margin-top:2px;line-height:1.45}
 
 .stage{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
-.colwrap{flex:1 1 660px;min-width:320px}
+.colwrap{flex:1 1 700px;min-width:0}
 svg{width:100%;height:auto;display:block;border-radius:10px;
 border:1px solid var(--line);background:#0f1216}
 .side{flex:1 1 260px;min-width:250px}
@@ -183,8 +183,8 @@ border:1px solid var(--line);background:#0f1216}
 .src{margin-top:6px;font-size:.75rem;color:var(--ink3);line-height:1.45}
 
 .controls.timeline{align-items:center;gap:.6rem}
-.controls.timeline input[type=range]{flex:1;min-width:220px;accent-color:#8fd0ff;height:22px}
-#ageOut{font-variant-numeric:tabular-nums;color:var(--ink2);font-size:.85rem;min-width:15em}
+.controls.timeline input[type=range]{flex:1;min-width:120px;accent-color:#8fd0ff;height:22px}
+#ageOut{font-variant-numeric:tabular-nums;color:var(--ink2);font-size:.85rem;min-width:9em}
 #over line.now{stroke:#fff3d6;stroke-width:1.6}
 #over text.nowlbl{fill:#fff3d6;font-size:10px}
 .controls{margin:13px 0 0;display:flex;gap:.55rem;flex-wrap:wrap;align-items:center;
@@ -214,15 +214,25 @@ stroke:#0b0f14;stroke-width:3;pointer-events:none}
 .unit{cursor:pointer}
 .unit rect{stroke:#0f1216;stroke-width:.8}
 .unit:hover rect{stroke:#e6e6e6;stroke-width:1.4}
-.unit text{fill:#0c0f12;font-size:11px;font-weight:600;pointer-events:none}
+.unit text{fill:#0c0f12;font-size:12.5px;font-weight:600;pointer-events:none}
 .unit text.pale{fill:#f0f3f6}
-.lane{fill:#9aa3ad;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.lane{fill:#9aa3ad;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
 .tick{stroke:#39414a;stroke-width:1}
-.ticklbl{fill:#7d848c;font-size:10px;font-variant-numeric:tabular-nums}
+.ticklbl{fill:#8a929b;font-size:11.5px;font-variant-numeric:tabular-nums}
 .ev{cursor:pointer}
 .ev circle{fill:#f2c66b;stroke:#0f1216;stroke-width:1}
 .ev:hover circle{fill:#fff}
-.ev text{fill:#c7ceda;font-size:10px;pointer-events:none}
+.ev text{fill:#c7ceda;font-size:11.5px;pointer-events:none}
+#over circle.nowgrip{fill:#fff3d6;stroke:#0f1216;stroke-width:1.5;cursor:ew-resize}
+#over rect.nowgrab{fill:transparent;cursor:ew-resize}
+#ghost path{fill:none;stroke:rgba(230,230,230,.3);stroke-width:.8;stroke-dasharray:3 3}
+#bRun[aria-pressed="true"]{background:var(--accent);color:#0b1a2b;border-color:var(--accent);font-weight:600}
+.tiles{margin-top:22px}
+details.sources{margin-top:1.4rem;border-top:1px solid var(--line);padding-top:.7rem;max-width:78ch}
+details.sources>summary{cursor:pointer;color:var(--ink3);font-size:.8rem;letter-spacing:.06em;text-transform:uppercase}
+details.sources>summary:hover{color:var(--accent)}
+details.sources .notes{margin-top:1rem;border-top:none;padding-top:0}
+@media(max-width:600px){.colwrap{overflow-x:auto}#col{min-width:720px}.globewrap{overflow-x:auto}#globe{min-width:620px}}
 #over rect.all{fill:#1b2027;stroke:#2b2f34}
 #over rect.win{fill:rgba(88,166,255,.28);stroke:#58a6ff;stroke-width:1}
 #over text{fill:#7d848c;font-size:10px;pointer-events:none}
@@ -234,7 +244,7 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}
 .notes p{margin:0 0 1rem}
 .refs{margin-top:1.5rem;color:var(--ink3);font-size:.86rem;max-width:78ch}
 .refs h2{font-size:.95rem;font-weight:400;color:var(--ink2);margin:0 0 .6rem}
-.refs p{margin:0 0 .7rem;padding-left:2.2em;text-indent:-2.2em}
+.refs p{margin:0 0 .7rem;padding-left:2.2em;text-indent:-2.2em;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -246,7 +256,6 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}
 
 <h1>The History of Earth</h1>
 
-<div class="tiles">__FACTS__</div>
 
 <div class="stage">
   <div class="colwrap"><svg id="col" viewBox="0 0 1000 560"
@@ -268,15 +277,11 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}
   </div></div>
 </div>
 
-<div class="globewrap">
-  <svg id="globe" viewBox="0 0 1000 470" preserveAspectRatio="xMidYMid meet">
-    <g id="grat"></g>
-    <g id="plates"></g>
-    <g id="plabels"></g>
-    <g id="gcap"></g>
-  </svg>
+<div class="controls">
+  <button id="bOut" disabled>Zoom out</button>
+  <button id="bAll">All of time</button>
+  <span id="crumb"></span>
 </div>
-
 <div class="controls timeline">
   <button id="bRun">Run time</button>
   <input type="range" id="tage" min="0" max="1" step="1" value="0"
@@ -284,19 +289,27 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}
   <output id="ageOut"></output>
   <button id="bNow">The world today</button>
 </div>
-
-<div class="controls">
-  <button id="bOut" disabled>Zoom out</button>
-  <button id="bAll">All of time</button>
-  <span id="crumb"></span>
+<div class="globewrap">
+  <svg id="globe" viewBox="0 0 1000 470" preserveAspectRatio="xMidYMid meet">
+    <g id="grat"></g>
+    <g id="ghost"></g>
+    <g id="plates"></g>
+    <g id="plabels"></g>
+    <g id="gcap"></g>
+  </svg>
 </div>
 
-<div class="notes">
-<h2>About the chart</h2>
+
+
+<div class="notes cap">
 <p>Deep time will not sit on one scale. The Phanerozoic, the part with shells
 and bones, is the last eighth of the planet's life and holds nearly every named
 unit. So the column zooms: any band clicked becomes the whole width, and the
 bar along the top keeps all 4,567 million years in view.</p>
+</div>
+<div class="tiles">__FACTS__</div>
+<details class="sources"><summary>Sources</summary>
+<div class="notes">
 <p>Boundaries carry the uncertainty the chart prints, and a tilde marks the
 ones it estimates. The events are dated from the literature and each names its
 source; several are disputed, and say so.</p>
@@ -307,6 +320,7 @@ fifth of the record. Latitudes are meaningful; longitudes before about two
 hundred million years are not, because the model is tied to old magnetism,
 which fixes how far from the equator a rock formed and nothing about how far
 round.</p>
+<p>Between the plate model’s steps, every ten million years to three hundred and every fifty beyond, the map interpolates each plate’s rotation along the shortest path between the two it has; a band clicked in the column still shows the nearest step. The dashed outlines are the same pieces where they sit today.</p>
 </div>
 
 <div class="refs">
@@ -328,6 +342,7 @@ platform for geological data integration and deep-time Earth crust research.
 <i>Geochemistry, Geophysics, Geosystems, 19</i>(4), 1393-1409.
 <a href="https://doi.org/10.1029/2018GC007467">https://doi.org/10.1029/2018GC007467</a></p>
 </div>
+</details>
 </main>
 <script>
 const D = __DATA__;
@@ -397,7 +412,7 @@ function draw() {
   make('rect', {x: wx, y: 9, width: ww, height: 18, rx: 3, class: 'win'}, over);
   const t = make('text', {x: PAD, y: 38}, over);
   t.textContent = 'all 4,567 million years: the window shown, and a point on '
-    + 'the bar opens the world of that time';
+    + 'the bar opens the world of that time; the wheel zooms the column';
   // last, so nothing drawn over the bar swallows the pointer
   const grab = make('rect', {x: PAD, y: 6, width: ow, height: 24,
     fill: 'transparent', class: 'grab'}, over);
@@ -466,28 +481,30 @@ function draw() {
   // bury the column. What will not fit keeps its tick and loses its label,
   // and gets one back as soon as the window is narrow enough.
   const ey = ry + 48, ROWS = 6;
-  const rows = new Array(ROWS).fill(null);
+  const rows = Array.from({length: ROWS}, () => []);
   let used = 0, hidden = 0;
   for (const e of D.events) {
     if (e.a > win[0] || e.a < win[1]) continue;
     const px = x(e.a);
-    const flip = px > W - PAD - 150;
+    const lab = e.n.length > 34 ? e.n.slice(0, 33) + '…' : e.n;
+    const lw = lab.length * 6.3 + 12;
+    const flip = px > W - PAD - lw;
+    const ext = flip ? [px - lw, px + 4] : [px - 4, px + lw];
     let row = -1;
     for (let i = 0; i < ROWS; i++) {
-      const r = rows[i];
-      if (r == null || (flip ? r - px > 150 : px - r > 150)) { row = i; break; }
+      if (rows[i].every(([a, b]) => ext[1] < a || ext[0] > b)) { row = i; break; }
     }
     const g = make('g', {class: 'ev'}, evg);
     const yy = ey + (row < 0 ? 0 : row) * 15;
     make('line', {x1: px, y1: ry, x2: px, y2: row < 0 ? ry + 7 : yy,
       stroke: '#3a4450', 'stroke-width': 1}, g);
-    make('circle', {cx: px, cy: row < 0 ? ry + 7 : yy, r: row < 0 ? 2 : 3.2}, g);
+    make('circle', {cx: px, cy: row < 0 ? ry + 7 : yy, r: row < 0 ? 2.4 : 3.6}, g);
     if (row >= 0) {
-      rows[row] = px;
+      rows[row].push(ext);
       used = Math.max(used, row + 1);
       const tx = make('text', {x: px + (flip ? -6 : 6), y: yy + 3.5,
         'text-anchor': flip ? 'end' : 'start'}, g);
-      tx.textContent = e.n.length > 34 ? e.n.slice(0, 33) + '…' : e.n;
+      tx.textContent = lab;
     } else {
       hidden++;
     }
@@ -503,6 +520,21 @@ function draw() {
   el('col').setAttribute('viewBox',
     `0 0 ${W} ${Math.max(300, ey + used * 15 + (hidden ? 26 : 14))}`);
 }
+// the wheel zooms the column about the time under the pointer
+el('col').addEventListener('wheel', ev => {
+  ev.preventDefault();
+  const box = el('col').getBoundingClientRect();
+  const px = (ev.clientX - box.left) / box.width * W;
+  const f = Math.max(0, Math.min(1, (px - PAD) / (W - 2 * PAD)));
+  const at = win[0] - f * (win[0] - win[1]);
+  const dur = Math.max(0.005, Math.min(D.span, (win[0] - win[1]) * Math.exp(ev.deltaY * 0.0015)));
+  let a = at + f * dur, b = a - dur;
+  if (a > D.span) { a = D.span; b = a - dur; }
+  if (b < 0) { b = 0; a = dur; }
+  win = [a, b];
+  el('bOut').disabled = win[0] >= D.span && win[1] <= 0;
+  draw(); globe(); syncAge();
+}, {passive: false});
 
 function niceStep(raw) {
   const p = Math.pow(10, Math.floor(Math.log10(raw)));
@@ -511,7 +543,7 @@ function niceStep(raw) {
 }
 
 function zoom(u) {
-  ageSel = null;               // the column takes the map back
+  stopRun(); ageSel = null;    // the column takes the map back
   stack.push(win.slice());
   const pad = (u.a - u.b) * 0.04;
   win = [u.a + pad, Math.max(0, u.b - pad)];
@@ -598,6 +630,38 @@ function poleOf(pid, age) {
   if (!rows) return null;
   for (const r of rows) if (r[0] === age) return r;
   return null;
+}
+// between two steps the rotation is interpolated along the shortest path
+// between them (a slerp of the two rotations as quaternions), which is how
+// GPlates itself fills the gaps between a model's stages
+function quat(plat, plon, ang) {
+  const k = toXYZ(plat, plon), h = ang * D2R / 2, s = Math.sin(h);
+  return [Math.cos(h), k[0] * s, k[1] * s, k[2] * s];
+}
+function slerp(a, b, t) {
+  let d = a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
+  if (d < 0) { b = b.map(v => -v); d = -d; }
+  if (d > 0.9995) { const r = a.map((v, i) => v + (b[i] - v) * t), n = Math.hypot(...r); return r.map(v => v / n); }
+  const th = Math.acos(d), s = Math.sin(th);
+  return a.map((v, i) => (Math.sin((1 - t) * th) * v + Math.sin(t * th) * b[i]) / s);
+}
+function qrot(q, lat, lon) {
+  const [w, x, y, z] = q, v = toXYZ(lat, lon);
+  const tx = 2 * (y * v[2] - z * v[1]), ty = 2 * (z * v[0] - x * v[2]), tz = 2 * (x * v[1] - y * v[0]);
+  return toLL([v[0] + w * tx + (y * tz - z * ty), v[1] + w * ty + (z * tx - x * tz), v[2] + w * tz + (x * ty - y * tx)]);
+}
+function rotAt(pid, ma) {
+  const rows = D.rot[String(pid)];
+  if (!rows) return null;
+  let lo = null, hi = null;
+  for (const r of rows) {
+    if (r[0] <= ma && (!lo || r[0] > lo[0])) lo = r;
+    if (r[0] >= ma && (!hi || r[0] < hi[0])) hi = r;
+  }
+  if (!lo || !hi) return null;
+  const q0 = quat(lo[1], lo[2], lo[3]);
+  if (hi[0] === lo[0]) return q0;
+  return slerp(q0, quat(hi[1], hi[2], hi[3]), (ma - lo[0]) / (hi[0] - lo[0]));
 }
 function toXYZ(lat, lon) {
   const p = lat * D2R, l = lon * D2R;
@@ -701,15 +765,24 @@ function globe() {
     return;
   }
 
-  const age = nearestAge(mid);
+  // the slider, the bar, the marker and Run time give any age, and the map
+  // interpolates; a band in the column snaps to the model's nearest step
+  const age = ageSel !== null ? Math.round(mid * 10) / 10 : nearestAge(mid);
   lastAge = age;
+  const gh = el('ghost'); clear(gh);
+  if (age > 0) {
+    let gd = '';
+    for (const pid in D.outlines) for (const ring of D.outlines[pid])
+      gd += ringPath(ring.map(([lo, la]) => [la, lo]));
+    make('path', {d: gd}, gh);
+  }
   for (const pid in D.outlines) {
-    const r = poleOf(pid, age);
-    if (!r) continue;
+    const q = rotAt(pid, age);
+    if (!q) continue;
     const doubt = pid === '301' && age > D.eurasiaBreaks;
     let dd = '', big = null;
     for (const ring of D.outlines[pid]) {
-      const moved = ring.map(([lo, la]) => rotate(la, lo, r[1], r[2], r[3]));
+      const moved = ring.map(([lo, la]) => qrot(q, la, lo));
       dd += ringPath(moved);
       if (!big || ring.length > big.n) {
         let sx = 0, sy = 0;
@@ -728,11 +801,13 @@ function globe() {
   }
 
   const c1 = make('text', {x: 22, y: 28, class: 'big'}, gc);
+  const onStep = AGES.includes(age);
   c1.textContent = age === 0 ? 'the world today'
-    : 'the world at ' + age.toLocaleString('en-US') + ' million years ago';
+    : 'the world at ' + (onStep ? '' : 'about ') + Math.round(age).toLocaleString('en-US') + ' million years ago';
   const c2 = make('text', {x: 22, y: 48}, gc);
   c2.textContent = ageSel !== null
-    ? 'a step of the plate model'
+    ? (onStep ? 'a step of the plate model' : 'between two steps of the plate model, its rotations interpolated')
+      + (age > 0 ? '; dashed, the same outlines where they sit today' : '')
     : (!sel && !stack.length)
       ? 'the slider below runs the map back, and a band in the column opens '
         + 'the world at that time'
@@ -760,15 +835,24 @@ const AGES_BACK = AGES.slice().sort((a, b) => b - a);
 }
 function ageLabel(a) {
   return a === 0 ? 'the world today'
-    : a.toLocaleString('en-US') + ' million years ago';
+    : Math.round(a).toLocaleString('en-US') + ' million years ago';
+}
+// the finest unit of the chart that holds an age
+function unitAt(a) {
+  let best = null;
+  for (const u of D.units) if (u.a >= a && u.b < a && (!best || u.r > best.r)) best = u;
+  return best;
 }
 function syncAge() {
   const a = lastAge === null ? 0 : lastAge;
-  const i = AGES_BACK.indexOf(a);
-  if (i >= 0) el('tage').value = i;
+  let i = 0;
+  AGES_BACK.forEach((s, k) => { if (Math.abs(s - a) < Math.abs(AGES_BACK[i] - a)) i = k; });
+  el('tage').value = i;
+  const un = lastAge ? unitAt(lastAge) : null;
+  let per = un; while (per && per.r > 2 && per.p && BY[per.p]) per = BY[per.p];
   el('ageOut').textContent = lastAge === null
     ? 'older than the plate model reaches'
-    : ageLabel(a);
+    : ageLabel(a) + (un ? ', the ' + un.n + (per && per !== un ? ' (' + per.n + ')' : '') : '');
   // where that age falls in the column, when it falls inside the window
   const over = el('over');
   [...over.querySelectorAll('.now,.nowlbl')].forEach(e => e.remove());
@@ -776,47 +860,87 @@ function syncAge() {
   const px = x(lastAge);
   make('line', {x1: px, y1: TOP + 4, x2: px, y2: TOP + 12
     + D.ranks.length * (LANE + GAP), class: 'now'}, over);
-  const t = make('text', {x: px + 4, y: TOP + 14, class: 'nowlbl'}, over);
+  const t = make('text', {x: px + 9, y: TOP + 14, class: 'nowlbl'}, over);
   t.textContent = 'the map';
+  // the marker drags along the column and the map follows it
+  const grab = make('rect', {x: px - 7, y: TOP - 6, width: 14, height: 22, class: 'nowgrab'}, over);
+  const grip = make('circle', {cx: px, cy: TOP + 4, r: 6, class: 'nowgrip'}, over);
+  for (const g of [grab, grip]) g.addEventListener('pointerdown', ev => {
+    stopRun(); ev.preventDefault(); ev.stopPropagation();
+    const box = el('col').getBoundingClientRect();
+    const mv = e2 => {
+      const q = (e2.clientX - box.left) / box.width * W;
+      const f = Math.max(0, Math.min(1, (q - PAD) / (W - 2 * PAD)));
+      ageSel = Math.max(0, win[0] - f * (win[0] - win[1]));
+      globe(); syncAge();
+    };
+    const up = () => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); };
+    window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up);
+  });
+}
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ease = k => k < .5 ? 2*k*k : 1 - Math.pow(-2*k + 2, 2)/2;
+let tweenId = 0, slideGoal = null;
+// a step of the slider slides the continents there instead of jumping
+function slideTo(a1) {
+  const a0 = lastAge === null ? a1 : lastAge, id = ++tweenId;
+  if (RM || a0 === a1) { ageSel = a1; globe(); syncAge(); return; }
+  slideGoal = a1;
+  const t0 = performance.now();
+  const f = now => { if (id !== tweenId) return; const k = Math.min(1, (now - t0) / 450);
+    ageSel = k < 1 ? a0 + (a1 - a0) * ease(k) : a1; globe(); syncAge();
+    if (k < 1) requestAnimationFrame(f); else slideGoal = null; };
+  requestAnimationFrame(f);
 }
 el('tage').addEventListener('input', e => {
   stopRun();
-  ageSel = AGES_BACK[+e.target.value];
-  globe(); syncAge();
+  slideTo(AGES_BACK[+e.target.value]);
 });
 el('bNow').addEventListener('click', () => {
   stopRun();
   ageSel = 0;
   globe(); syncAge();
 });
+// the arrow keys step the slider when it has focus, which the range does
+// itself; on the column they step the map a step of the model at a time
+el('col').setAttribute('tabindex', '0');
+el('col').addEventListener('keydown', ev => {
+  if (ev.key !== 'ArrowLeft' && ev.key !== 'ArrowRight') return;
+  ev.preventDefault(); stopRun();
+  const i = Math.max(0, Math.min(AGES_BACK.length - 1, +el('tage').value + (ev.key === 'ArrowRight' ? 1 : -1)));
+  el('tage').value = i; slideTo(AGES_BACK[i]);
+});
 
+// Run time sweeps the map forward smoothly, sixty million years a second
 let runner = null;
 function stopRun() {
+  tweenId++;
   if (!runner) return;
-  clearInterval(runner); runner = null;
+  runner = null;
   el('bRun').setAttribute('aria-pressed', 'false');
   el('bRun').textContent = 'Run time';
 }
 el('bRun').addEventListener('click', () => {
   if (runner) { stopRun(); return; }
+  const goal = slideGoal; tweenId++; slideGoal = null;
   el('bRun').setAttribute('aria-pressed', 'true');
-  el('bRun').textContent = 'Stop';
-  let i = +el('tage').value;
-  if (i >= AGES_BACK.length - 1) i = 0;      // from the oldest step forward
-  runner = setInterval(() => {
-    ageSel = AGES_BACK[i];
-    globe(); syncAge();
-    if (i >= AGES_BACK.length - 1) { stopRun(); return; }
-    i++;
-  }, 420);
+  el('bRun').textContent = 'Pause';
+  let a0 = goal !== null ? goal : lastAge === null || lastAge <= 0 ? D.paleoLimit : lastAge;
+  if (ageSel === null && lastAge === 0) a0 = D.paleoLimit;
+  const id = runner = {}, t0 = performance.now();
+  if (RM) { ageSel = 0; globe(); syncAge(); stopRun(); return; }
+  const f = now => { if (runner !== id) return;
+    ageSel = Math.max(0, a0 - (now - t0) / 1000 * 60); globe(); syncAge();
+    if (ageSel > 0) requestAnimationFrame(f); else stopRun(); };
+  requestAnimationFrame(f);
 });
 
 el('bOut').addEventListener('click', () => {
-  if (!stack.length) return;
+  if (!stack.length) { if (win[0] >= D.span && win[1] <= 0) return; stack.push([D.span, 0]); }
   win = stack.pop();
   sel = sel && BY[sel] ? BY[sel].p : null;
   ageSel = null;
-  el('bOut').disabled = !stack.length;
+  el('bOut').disabled = !stack.length && win[0] >= D.span && win[1] <= 0;
   draw(); show(); globe(); syncAge();
 });
 el('bAll').addEventListener('click', () => {

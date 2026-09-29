@@ -139,7 +139,7 @@ def main():
   html, body { margin:0; height:100%; background:var(--bg); color:var(--text);
     font:400 14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
     overflow:hidden; }
-  canvas { position:fixed; inset:0; width:100%; height:100%; display:block; }
+  canvas { position:fixed; inset:0; width:100%; height:100%; display:block; touch-action:none; }
   #hud { position:fixed; top:0; left:0; right:0; padding:18px 22px;
     display:flex; justify-content:space-between; align-items:flex-start;
     gap:18px; pointer-events:none; }
@@ -167,10 +167,28 @@ def main():
   button:hover { background:#1c2a48; }
   button[aria-pressed="true"] { border-color:var(--accent); color:var(--accent); }
   #note { margin-top:9px; font-size:11.5px; color:var(--dim); line-height:1.45; max-width:118ch; }
+  details.sources { margin-top:7px; font-size:11.5px; color:var(--dim); max-width:118ch; }
+  details.sources > summary { cursor:pointer; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
+  details.sources > summary:hover { color:var(--accent); }
+  details.sources .more { max-height:30vh; overflow:auto; padding-right:8px; }
+  details.sources p { margin:7px 0; line-height:1.45; }
+  details.sources a { color:var(--accent); }
+  canvas.grab { cursor:grab; } canvas.grabbing { cursor:grabbing; }
   @media (max-width: 760px) {
     #note { display:none; }
     label { min-width:104px; }
     #readout { min-width:0; }
+  }
+  @media (max-width: 599px) {
+    #hud { padding:14px 16px; }
+    h1 { font-size:16px; line-height:1.3; max-width:190px; }
+    #readout { padding:8px 11px; max-width:184px; }
+    .big { font-size:15.5px; }
+    .rr { font-size:11px; gap:8px; white-space:nowrap; }
+    #controls { padding:10px 16px 12px; }
+    label { min-width:92px; }
+    .val { min-width:64px; }
+    button { padding:4px 10px; }
   }
 </style>
 </head>
@@ -187,6 +205,7 @@ def main():
     <div class="big" id="phaseName">Full Moon</div>
     <div class="rr"><span>Lit</span><span id="lit"></span></div>
     <div class="rr"><span>Age of the moon</span><span id="age"></span></div>
+    <div class="rr"><span>Next eclipse</span><span id="ecl"></span></div>
   </div>
 </div>
 
@@ -203,6 +222,7 @@ def main():
     <input type="range" id="scrub" min="0" max="29.530589" step="0.01" value="0">
     <div class="val" id="scrubVal">0.00 d</div>
     <button id="viewBtn" aria-pressed="false">Around the Sun</button>
+    <button id="southBtn" aria-pressed="false">Seen from the south</button>
   </div>
   <div class="row" id="exagRow" style="display:none">
     <label for="exag">Moon's distance, exaggerated</label>
@@ -211,27 +231,45 @@ def main():
     <span id="cuspNote" style="font-size:11.5px;color:var(--dim)"></span>
   </div>
   <div id="note" data-view="earth"></div>
-  <div id="srcline" style="margin-top:7px;font-size:11px;color:var(--dim)">
+  <details class="sources" id="sources"><summary>Sources</summary>
+  <div class="more">
+  <p id="noteLong"></p>
+  <p>The Moon on its orbit drags round by hand, which moves the clock to the moment it stands there. The eclipse count tests each new and full Moon in turn with the standard geometric condition: at new Moon, the Moon's ecliptic latitude has to be smaller than the Moon's horizontal parallax, less the Sun's, plus the two apparent radii, for its shadow to touch the Earth somewhere; at full Moon, smaller than the radius of the Earth's shadow, enlarged by the customary 2 percent for the atmosphere, plus the Moon's radius. The parallaxes and radii come from the distances the page already computes (Meeus, chapters 47 and 55: the Moon's parallax from its sine, 6,378.14 km over its distance; its radius as 358,473,400 over its distance in kilometers, in arcseconds; the Sun's radius as 959.63 arcseconds and its parallax as 8.794 arcseconds at 1 au). The test uses the latitude at the instant of new or full Moon rather than at closest approach, so an eclipse that only just grazes may be missed or added.</p>
+  <p id="srcline">
     Month lengths and orbital elements follow Meeus,
-    <a href="https://openlibrary.org/books/OL22573836M/Astronomical_algorithms"
-    style="color:var(--accent)">Astronomical algorithms</a> (2nd ed., 1998);
+    <a href="https://openlibrary.org/books/OL22573836M/Astronomical_algorithms">Astronomical algorithms</a> (2nd ed., 1998);
     the two months are also stated on NASA's
-    <a href="https://science.nasa.gov/moon/moon-phases/"
-    style="color:var(--accent)">Moon phases</a> page.
+    <a href="https://science.nasa.gov/moon/moon-phases/">Moon phases</a> page.
+  </p>
   </div>
+  </details>
 </div>
 
 <script>
 const D = __DATA__;
 const D2R = Math.PI / 180, R2D = 180 / Math.PI;
+const CAP_EARTH =
+  "The pale arc closes after 27.32 days, when the Moon is back at the same star. Earth has moved along its "
+  + "orbit by then, so the line to the Sun has swung about 27 degrees, and the Moon needs 2.21 days more to "
+  + "catch it: the amber arc, and the month everyone counts, 29.53 days.";
+const CAP_SUN = () =>
+  "The path the Moon takes through space. At true scale it sits on Earth's own path and never loops backward, "
+  + "because the Moon's 1.02 km/s around Earth is small against Earth's 29.78 km/s around the Sun. Exaggerated "
+  + "past " + D.CUSP + ", the ratio of those two speeds, the path cusps and then loops.";
+const NOTE_SUN = () =>
+  "This is the path the Moon takes through space, not around the Earth. At true scale it sits on Earth's own "
+  + "path and cannot be told apart from it. It never loops backward and never even straightens: the Moon moves "
+  + "1.02 km/s around the Earth against Earth's 29.78 km/s around the Sun, so the Sun always wins. The slider "
+  + "exaggerates the Moon's distance, and the curve holds until the exaggeration reaches " + D.CUSP
+  + ", the ratio of those two speeds, where cusps appear. Past that it loops.";
 const NOTE_EARTH =
   "The Sun holds still, Earth goes round it once a year, and the Moon goes round Earth. "
   + "The pale arc closes after 27.32 days, when the Moon is back at the same star. Earth has moved along its "
   + "orbit by then, so the line to the Sun has swung about 27 degrees, and the Moon needs 2.21 days more to "
   + "catch it. That is the amber arc, and the month everyone counts: 29.53 days. The inset is lit on the right "
   + "while the Moon waxes and on the left while it wanes, which is how it hangs in a northern sky; from the south "
-  + "it is the other way round. Its face never turns away, so the markings stay put while the light moves across "
-  + "them.";
+  + "it is the other way round, and the Moon hangs upside down besides, which is what Seen from the south shows. "
+  + "Its face never turns away, so the markings stay put while the light moves across them.";
 
 // ---------- the Moon and the Sun, from Meeus chapters 25, 47 and 48 ----------
 function positions(jd) {
@@ -300,6 +338,42 @@ function nextPhase(jd, target) {
   return (a + b)/2;
 }
 
+// ---------- eclipses ----------
+// At new Moon the shadow touches the Earth somewhere when the Moon's ecliptic
+// latitude is under the Moon's parallax less the Sun's, plus both radii. At full
+// Moon the Moon meets the Earth's shadow, whose radii are the parallaxes plus or
+// minus the Sun's radius, enlarged 2 percent for the atmosphere.
+function syzygyKind(t, target) {
+  const p = positions(t), au = p.R/149597870.7;
+  const pm = Math.asin(6378.14/p.dist)*R2D, ps = 8.794/3600/au, ss = 959.63/3600/au;
+  const sm = 358473400/p.dist/3600, b = Math.abs(p.beta);
+  if (target === 0) return b < pm - ps + ss + sm ? 'solar' : null;
+  const umbra = 1.02*(pm + ps - ss), pen = 1.02*(pm + ps + ss);
+  if (b < umbra - sm) return 'total lunar';
+  if (b < umbra + sm) return 'partial lunar';
+  if (b < pen + sm) return 'penumbral lunar';
+  return null;
+}
+// the next eclipse from a moment, counting one still under way (within a day
+// and a half) as the next; kept until the clock passes it or runs back before
+// the moment it was searched from
+let eclCache = null;
+function eclipseFrom(j) {
+  let t = j - 1.5;
+  for (let n = 0; n < 30; n++) {
+    const a = nextPhase(t, 0), b = nextPhase(t, 180);
+    const [tt, tg] = a < b ? [a, 0] : [b, 180];
+    const kind = syzygyKind(tt, tg);
+    if (kind) return {jd: tt, kind, from: j};
+    t = tt + 1;
+  }
+  return null;
+}
+function eclipse() {
+  if (!eclCache || jd < eclCache.from || jd > eclCache.jd + 1.5) eclCache = eclipseFrom(jd);
+  return eclCache;
+}
+
 const jdNow = () => Date.now()/86400000 + 2440587.5;
 const jdToDate = jd => new Date((jd - 2440587.5)*86400000);
 const fmtDate = jd => jdToDate(jd).toISOString().slice(0,16).replace('T',' ') + ' UT';
@@ -312,7 +386,8 @@ let jd0 = jd;                    // the clock's start, for the star ray
 let at0 = null;                  // and its positions, which only change with it
 const start = () => (at0 && at0.jd === jd0) ? at0
   : (at0 = Object.assign({jd: jd0}, positions(jd0)));
-let playing = true, speed = 1.2, view = 'earth', exag = 1;
+let playing = true, speed = 1.2, view = 'earth', exag = 1, south = false, dragging = false;
+const RM = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 let stars = [];
 
 function resize() {
@@ -469,10 +544,44 @@ function moonDisc(cx, cy, R, k, sunAng, plain) {
 // the bottom and changes height when the view changes, so it is measured rather
 // than assumed; a diagram sized off the window alone runs its orbit straight
 // through the sliders.
+// Below 600px the column moves under the heading and runs the full width, the
+// orbit goes under the column, and the inset shrinks into the corner beside
+// the readout, so nothing is printed over anything else on a phone.
+let L = null;
+function layout() {
+  const r = document.getElementById('readout').getBoundingClientRect();
+  const hb = document.querySelector('h1').getBoundingClientRect().bottom;
+  const narrow = W < 600;
+  if (!narrow) {
+    const R = Math.min(96, Math.min(W, H)*0.12);
+    return L = {narrow, x0: 46, waveY: 150, rowsY: 236, noteY: 292, rowGap: 20,
+                bandTop: 104, right: r.left - 16,
+                inset: {x: W - R - 46, y: H - R - 132, R}};
+  }
+  const R = 28, ix = 18 + R, iy = hb + 12 + R;
+  const waveY = Math.max(r.bottom, iy + R) + 34;
+  const rowsY = waveY + 64, noteY = rowsY + 42;
+  ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  const n = Math.ceil(ctx.measureText(scaleNote()).width/(W - 44 - 30)) || 1;
+  return L = {narrow, x0: 22, waveY, rowsY, noteY, rowGap: 18,
+              bandTop: noteY + (n - 1)*15 + 18, right: W - 10,
+              inset: {x: ix, y: iy, R}};
+}
+const scaleNote = () => "Earth's orbit is to scale; the Moon's is drawn " + D.EXAG
+  + " times too wide so it can be seen at all";
 function fitBand() {
   const c = document.getElementById('controls').getBoundingClientRect();
-  const r = document.getElementById('readout').getBoundingClientRect();
-  return {top: 104, bot: Math.max(240, c.top - 14), right: r.left - 16};
+  if (!L) layout();
+  return {top: L.bandTop, bot: Math.max(L.narrow ? L.bandTop + 150 : 240, c.top - 14), right: L.right};
+}
+// keep a label inside the window
+function labelFit(t, x, y, c, align) {
+  ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  const w = ctx.measureText(t).width;
+  if (align === 'left' && x + w > W - 8) x = W - 8 - w;
+  if (align === 'right' && x - w < 8) x = 8 + w;
+  if (align === 'center') x = Math.max(8 + w/2, Math.min(W - 8 - w/2, x));
+  label(t, x, y, c, align);
 }
 
 function drawEarthView(p) {
@@ -526,8 +635,12 @@ function drawEarthView(p) {
   ctx.beginPath(); ctx.moveTo(ex, ey);
   ctx.lineTo(ex + Math.cos(star0)*rMoon*2.1, ey - Math.sin(star0)*rMoon*2.1);
   ctx.stroke(); ctx.setLineDash([]);
-  label('a fixed star', ex + Math.cos(star0)*rMoon*2.2, ey - Math.sin(star0)*rMoon*2.2 - 5,
-        'rgba(190,205,235,0.8)', Math.cos(star0) < 0 ? 'right' : 'left');
+  {
+    const sx = ex + Math.cos(star0)*rMoon*2.2, sy = ey - Math.sin(star0)*rMoon*2.2 - 5;
+    const al = Math.cos(star0) < 0 ? 'right' : 'left';
+    labelFit('a fixed star', sx, sy, 'rgba(190,205,235,0.8)', al);
+    if (!L.narrow) labelFit('where the Moon stood at the start', sx, sy + 14, 'rgba(140,155,180,0.8)', al);
+  }
 
   // the Moon's orbit, and the two cycles measured round it
   ctx.strokeStyle = 'rgba(200,214,240,0.22)'; ctx.lineWidth = 1;
@@ -546,9 +659,37 @@ function drawEarthView(p) {
   ctx.beginPath(); ctx.arc(ex, ey, 9, 0, 7); ctx.stroke();
   label('Earth', ex, ey + 24, 'rgba(180,205,240,0.92)', 'center');
   moonDisc(mx, my, 6.5, p.k, -(eAng + Math.PI), true);
+  drawEarthView.moon = {x: mx, y: my, ex, ey};
+  // a ring that says the Moon can be taken hold of
+  ctx.strokeStyle = dragging ? 'rgba(242,198,107,0.9)' : 'rgba(200,214,240,0.35)';
+  ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
+  ctx.beginPath(); ctx.arc(mx, my, 11, 0, 7); ctx.stroke(); ctx.setLineDash([]);
+
+  // the two arcs named where they run, just outside the Moon's orbit
+  if (rMoon >= 28) {
+    const mid = (a, b) => { let d = ((b - a) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI); return a + d/2; };
+    const aS = mid(star0, mAng), aP = mid(eAng + Math.PI, mAng);
+    const put = (ang, t, c, dr) => {
+      const x = ex + Math.cos(ang)*(rMoon + dr), y = ey - Math.sin(ang)*(rMoon + dr) + 4;
+      labelFit(t, x, y, c, Math.abs(Math.cos(ang)) < 0.3 ? 'center' : Math.cos(ang) < 0 ? 'right' : 'left');
+    };
+    if (sinceStar > 25) put(aS, 'to the same star', 'rgba(190,205,235,0.85)', 12);
+    if (p.elong > 25) put(aP, 'to the same phase', 'rgba(242,198,107,0.9)', Math.abs(aP - aS) < 0.5 ? 28 : 12);
+  }
+
+  // an eclipse near at hand
+  const E = eclipse();
+  if (E && Math.abs(E.jd - jd) < 1.2) {
+    const pulse = RM ? 1 : 0.6 + 0.4*Math.sin(performance.now()/180);
+    ctx.strokeStyle = 'rgba(255,120,90,' + (0.85*pulse).toFixed(2) + ')'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(mx, my, 15, 0, 7); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,120,90,0.5)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(mx, my); ctx.stroke();
+    labelFit('a ' + E.kind + ' eclipse', mx, my - 20, 'rgba(255,150,120,0.95)', 'center');
+  }
 
   // the two months, counted out where they happen
-  colR = Math.max(140, Math.min(466, cx - Rorb - rMoon - 42));
+  colR = L.narrow ? W - 22 : Math.max(140, Math.min(466, cx - Rorb - rMoon - 42));
   const lines = [
     ['rgba(190,205,235,0.9)', 'round to the same star',
      (sinceStar/360*D.SID).toFixed(2) + ' of ' + D.SID.toFixed(2) + ' days'],
@@ -556,30 +697,36 @@ function drawEarthView(p) {
      (p.elong/360*D.SYN).toFixed(2) + ' of ' + D.SYN.toFixed(2) + ' days'],
   ];
   lines.forEach(([c, a, b2], i) => {
-    const y = 236 + i*20;
+    const y = L.rowsY + i*L.rowGap;
     ctx.fillStyle = c;
-    ctx.beginPath(); ctx.arc(52, y - 4, 4, 0, 7); ctx.fill();
-    label(a, 64, y, 'rgba(160,175,200,0.85)', 'left');
+    ctx.beginPath(); ctx.arc(L.x0 + 6, y - 4, 4, 0, 7); ctx.fill();
+    label(a, L.x0 + 18, y, 'rgba(160,175,200,0.85)', 'left');
     label(b2, colR, y, c, 'right');
     colInk = Math.max(colInk, colR);
   });
-  wrapLabel("Earth's orbit is to scale; the Moon's is drawn " + D.EXAG
-            + " times too wide so it can be seen at all",
-            46, 292, 'rgba(120,133,155,0.85)', colR - 46, 15);
+  wrapLabel(scaleNote(), L.x0, L.noteY, 'rgba(120,133,155,0.85)', colR - L.x0, 15);
 
   wave(p);
 
   // the same Moon, drawn large enough to have a face
-  const bigR = Math.min(96, Math.min(W, H)*0.12);
-  const bx = W - bigR - 46, by = H - bigR - 132;
+  const bigR = L.inset.R, bx = L.inset.x, by = L.inset.y;
   // Waxing is lit on the right, waning on the left, which is the northern
-  // hemisphere's view. The real tilt depends on where you stand.
-  moonDisc(bx, by, bigR, p.k, p.elong < 180 ? 0 : Math.PI);
-  label('as it looks from Earth', bx, by + bigR + 17, 'rgba(160,175,200,0.8)', 'center');
+  // hemisphere's view. From the south the whole disc is turned half round:
+  // the Moon hangs upside down and the light comes from the other side.
+  if (south) {
+    ctx.save(); ctx.translate(bx, by); ctx.rotate(Math.PI);
+    moonDisc(0, 0, bigR, p.k, p.elong < 180 ? 0 : Math.PI);
+    ctx.restore();
+  } else moonDisc(bx, by, bigR, p.k, p.elong < 180 ? 0 : Math.PI);
+  const from = south ? 'from the south' : 'from the north';
+  if (L.narrow) {
+    label('as it looks', bx + bigR + 10, by - 2, 'rgba(160,175,200,0.8)', 'left');
+    label(from, bx + bigR + 10, by + 13, 'rgba(160,175,200,0.8)', 'left');
+  } else label('as it looks ' + from, bx, by + bigR + 17, 'rgba(160,175,200,0.8)', 'center');
 }
 
 function wave(p) {
-  const x0 = 46, x1 = Math.max(x0 + 120, Math.min(W - 46, colR)), y = 150, h = 34;
+  const x0 = L.x0, x1 = Math.max(x0 + 120, Math.min(W - x0, colR)), y = L.waveY, h = 34;
   colInk = Math.max(colInk, x1 + 22);   // 'new' is centered on the far end
   ctx.strokeStyle = 'rgba(120,150,200,0.25)'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(x0, y + h); ctx.lineTo(x1, y + h); ctx.stroke();
@@ -604,19 +751,28 @@ function wave(p) {
   }
 }
 
+const days_ = 110;
 function drawSunView(p) {
   // Earth's path and the Moon's, seen from above the ecliptic. Sixty days of
   // orbit is too flat an arc to read, so the window is nearer four months and
   // the arc is sized to fill the frame rather than to any fixed scale.
   colR = Math.min(W - 46, 466);
   const band = fitBand();
-  const days = 110, span = 360*days/D.YEAR, half = span/2*D2R;
+  let top0 = 158;
+  if (L.narrow) {
+    const r = document.getElementById('readout').getBoundingClientRect();
+    const n = wrapLabel(days_ + ' days of both paths, seen from above the ecliptic. Earth in blue, the Moon in white.',
+                        22, r.bottom + 26, 'rgba(160,175,200,0.75)', W - 44, 15);
+    top0 = r.bottom + 26 + n*15 + 10;
+    band.bot = Math.max(band.bot, top0 + 150);
+  }
+  const days = days_, span = 360*days/D.YEAR, half = span/2*D2R;
   const Rpx = Math.max(200, Math.min(W*0.82/(2*Math.sin(half)),
-    (band.bot - 158 - 110)/(1 - Math.cos(half))));   // 110 for the Sun arrow
+    (band.bot - top0 - 110)/(1 - Math.cos(half))));   // 110 for the Sun arrow
   // the arc is usually limited by the width, so it is centered in the band
   // rather than hung from the top, which would leave the space all at the foot
   const drop = Rpx*(1 - Math.cos(half)) + 110;
-  const apex = Math.max(158, band.top + (band.bot - band.top - drop)/2);
+  const apex = Math.max(top0, (L.narrow ? top0 : band.top) + (band.bot - (L.narrow ? top0 : band.top) - drop)/2);
   const cx = W*0.5, cy = apex + Rpx;
   const center = -Math.PI/2;
 
@@ -675,8 +831,9 @@ function drawSunView(p) {
   document.getElementById('cuspNote').textContent = cusping
     ? 'past ' + D.CUSP + ', the path cusps and then loops'
     : 'still curving away from the Sun the whole way round';
-  label(days + ' days of both paths, seen from above the ecliptic. Earth in blue, the Moon in white.',
-        46, 140, 'rgba(160,175,200,0.75)', 'left');
+  if (!L.narrow)
+    label(days + ' days of both paths, seen from above the ecliptic. Earth in blue, the Moon in white.',
+          46, 140, 'rgba(160,175,200,0.75)', 'left');
 }
 
 // Everything in the top left shares one column. Its right edge is set to
@@ -720,6 +877,13 @@ function readout(p) {
   el('age').textContent = (p.elong/360*D.SYN).toFixed(2) + ' d';
   el('scrub').value = (p.elong/360*D.SYN).toFixed(2);
   el('scrubVal').textContent = (p.elong/360*D.SYN).toFixed(2) + ' d';
+  const E = eclipse();
+  if (E) {
+    const dd = E.jd - jd;
+    el('ecl').textContent = Math.abs(dd) < 1.2 ? E.kind.split(' ')[0] + ', now'
+      : (E.kind === 'solar' ? 'solar' : 'lunar') + ', ' + dd.toFixed(1) + ' d';
+    el('ecl').title = 'a ' + E.kind + ' eclipse, ' + fmtDate(E.jd);
+  }
 }
 
 let last = performance.now();
@@ -733,6 +897,7 @@ function frame(t) {
   }
   ctx.globalAlpha = 1;
   colInk = 0;
+  layout();
   const p = positions(jd);
   if (view === 'earth') drawEarthView(p); else drawSunView(p);
   readout(p);
@@ -746,7 +911,11 @@ function frame(t) {
                     slon: p.slon, phase: phaseName(p.elong),
                     colR: colR, colInk: colInk,
                     orbitLeft: view === 'earth' && drawEarthView.reach
-                      ? drawEarthView.reach.left : null };
+                      ? drawEarthView.reach.left : null,
+                    south, narrow: L.narrow, inset: L.inset, beta: p.beta,
+                    moonAt: view === 'earth' ? drawEarthView.moon : null,
+                    eclipse: eclCache ? {jd: eclCache.jd, kind: eclCache.kind} : null,
+                    colTop: L.waveY, bandTop: L.bandTop };
   requestAnimationFrame(frame);
 }
 
@@ -754,11 +923,12 @@ el('speed').addEventListener('input', e => {
   speed = +e.target.value;
   el('speedVal').textContent = speed.toFixed(2) + ' days/s';
 });
-el('playBtn').addEventListener('click', () => {
-  playing = !playing;
+function setPlaying(on) {
+  playing = on;
   el('playBtn').textContent = playing ? 'Pause' : 'Play';
   el('playBtn').setAttribute('aria-pressed', playing);
-});
+}
+el('playBtn').addEventListener('click', () => setPlaying(!playing));
 el('nowBtn').addEventListener('click', () => { jd = jdNow(); jd0 = jd; });
 el('scrub').addEventListener('input', e => {
   // move to the requested age within the month the clock is in
@@ -768,28 +938,53 @@ el('scrub').addEventListener('input', e => {
     const now = positions(jd).elong;
     jd += (((want - now + 180) % 360 + 360) % 360 - 180)/360*D.SYN;
   }
-  playing = false;
-  el('playBtn').textContent = 'Play';
-  el('playBtn').setAttribute('aria-pressed', false);
+  setPlaying(false);
 });
+function notes() {
+  el('note').textContent = view === 'sun' ? CAP_SUN() : CAP_EARTH;
+  el('noteLong').textContent = view === 'sun' ? NOTE_SUN() : NOTE_EARTH;
+}
 el('viewBtn').addEventListener('click', () => {
   view = view === 'earth' ? 'sun' : 'earth';
   el('viewBtn').textContent = view === 'earth' ? 'Around the Sun' : 'Around the Earth';
   el('viewBtn').setAttribute('aria-pressed', view === 'sun');
   el('exagRow').style.display = view === 'sun' ? 'flex' : 'none';
-  el('note').textContent = view === 'sun'
-    ? "This is the path the Moon takes through space, not around the Earth. At true scale it sits on Earth's own "
-      + "path and cannot be told apart from it. It never loops backward and never even straightens: the Moon moves "
-      + "1.02 km/s around the Earth against Earth's 29.78 km/s around the Sun, so the Sun always wins. The slider "
-      + "exaggerates the Moon's distance, and the curve holds until the exaggeration reaches " + D.CUSP
-      + ", the ratio of those two speeds, where cusps appear. Past that it loops."
-    : NOTE_EARTH;
+  el('southBtn').style.display = view === 'sun' ? 'none' : '';
+  notes();
 });
+el('southBtn').addEventListener('click', () => {
+  south = !south;
+  el('southBtn').setAttribute('aria-pressed', south);
+});
+
+// the Moon drags round its orbit; the clock follows to the moment it stands there
+const nearMoon = e => {
+  const m = drawEarthView.moon;
+  return view === 'earth' && m && Math.hypot(e.clientX - m.x, e.clientY - m.y) <= 18;
+};
+cv.addEventListener('pointerdown', e => {
+  if (!nearMoon(e)) return;
+  dragging = true; setPlaying(false);
+  cv.setPointerCapture(e.pointerId); cv.className = 'grabbing';
+  e.preventDefault();
+});
+cv.addEventListener('pointermove', e => {
+  if (!dragging) { cv.className = nearMoon(e) ? 'grab' : ''; return; }
+  const m = drawEarthView.moon;
+  const want = Math.atan2(-(e.clientY - m.ey), e.clientX - m.ex)*R2D;
+  for (let n = 0; n < 3; n++) {
+    const now = positions(jd).lam;
+    jd += (((want - now + 180) % 360 + 360) % 360 - 180)/360*D.SID;
+  }
+});
+const endDrag = () => { if (dragging) { dragging = false; cv.className = ''; } };
+cv.addEventListener('pointerup', endDrag);
+cv.addEventListener('pointercancel', endDrag);
 el('exag').addEventListener('input', e => {
   exag = +e.target.value;
   el('exagVal').textContent = exag === 1 ? '\\u00d71, true scale' : '\\u00d7' + exag.toFixed(1);
 });
-el('note').textContent = NOTE_EARTH;
+notes();
 resize();
 requestAnimationFrame(frame);
 </script>

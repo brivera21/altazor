@@ -169,9 +169,14 @@ nav.site a:hover{{color:var(--accent)}}
 h1{{font-size:1.7rem;font-weight:600;margin:0 0 1.1rem}}
 
 .stage{{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}}
-.mapwrap{{flex:1 1 620px;min-width:300px;position:relative}}
-#map{{width:100%;height:auto;display:block;border-radius:10px;
-border:1px solid var(--line);background:var(--sea);cursor:crosshair}}
+.mapwrap{{flex:1 1 620px;min-width:300px;position:relative;overflow:hidden;
+border-radius:10px;border:1px solid var(--line);background:var(--sea)}}
+#map{{width:100%;height:auto;display:block;background:var(--sea);cursor:crosshair;
+transform-origin:0 0;touch-action:pan-y}}
+#map.zoomed{{touch-action:none}}
+.zoom{{position:absolute;right:8px;top:8px;display:flex;gap:6px}}
+.zoom button{{background:rgba(18,18,18,.78);min-width:30px;padding:3px 10px}}
+.zoom button[hidden]{{display:none}}
 .curvewrap{{flex:0 0 132px;position:relative}}
 #curve{{width:132px;display:block;border-radius:10px;
 border:1px solid var(--line);background:var(--panel)}}
@@ -189,6 +194,7 @@ padding:13px 15px}}
 .controls{{margin:14px 0 0;display:flex;flex-direction:column;gap:9px}}
 .sl{{display:grid;grid-template-columns:118px 1fr 150px;align-items:center;
 gap:11px;font-size:.86rem}}
+@media (max-width:520px){{ .sl{{grid-template-columns:1fr auto;}} .sl input{{grid-column:1 / -1;}} }}
 .sl label{{color:var(--ink2)}}
 .sl output{{font-variant-numeric:tabular-nums;color:var(--ink)}}
 input[type=range]{{width:100%;accent-color:var(--accent)}}
@@ -209,9 +215,14 @@ gap:10px;margin:16px 0 0}}
 color:var(--ink2);font-size:.95rem;max-width:74ch}}
 .notes h2{{font-size:1.05rem;font-weight:400;color:var(--ink);margin:0 0 .6rem}}
 .notes p{{margin:0 0 1rem}}
+details.sources{{margin-top:1.4rem;max-width:78ch}}
+details.sources>summary{{cursor:pointer;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}}
+details.sources>summary:hover{{color:var(--accent)}}
+details.sources .notes{{margin-top:1rem;border-top:none;padding-top:0}}
+.caption{{margin:1.2rem 0 0;color:var(--ink2);font-size:.95rem;max-width:74ch}}
 .refs{{margin-top:1.5rem;color:var(--ink3);font-size:.86rem;max-width:78ch}}
 .refs h2{{font-size:.95rem;font-weight:400;color:var(--ink2);margin:0 0 .6rem}}
-.refs p{{margin:0 0 .7rem;padding-left:2.2em;text-indent:-2.2em}}
+.refs p{{margin:0 0 .7rem;padding-left:2.2em;text-indent:-2.2em;overflow-wrap:anywhere}}
 </style>
 </head>
 <body>
@@ -224,7 +235,8 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}}
 <h1>The Day: Earth's Night and Day Cycle</h1>
 
 <div class="stage">
-  <div class="mapwrap"><canvas id="map"></canvas></div>
+  <div class="mapwrap"><canvas id="map" aria-label="the world with the night side shaded; the Sun drags across it, and a click pins a place"></canvas>
+    <div class="zoom"><button type="button" id="zIn" aria-label="zoom in">+</button><button type="button" id="zOut" aria-label="zoom out">&minus;</button><button type="button" id="zAll" hidden>Whole map</button></div></div>
   <div class="curvewrap"><canvas id="curve"></canvas></div>
 </div>
 
@@ -237,8 +249,9 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}}
     <div class="row"><span>Sun's height</span><span id="pAlt"></span></div>
     <div class="row"><span>Solar time there</span><span id="pSolar"></span></div>
     <div class="row"><span>Daylight today</span><span id="pDay"></span></div>
-    <div class="row"><span>Sunrise, UTC</span><span id="pRise"></span></div>
-    <div class="row"><span>Sunset, UTC</span><span id="pSet"></span></div>
+    <div class="row"><span>Sunrise</span><span id="pRise"></span></div>
+    <div class="row"><span>Sunset</span><span id="pSet"></span></div>
+    <div class="row"><span>The year's range</span><span id="pRange"></span></div>
   </div></div>
 
   <div class="controls">
@@ -259,6 +272,9 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}}
   </div>
 </div>
 
+<p class="caption">The lit half is always a half: the shadow's edge is a great circle, sliding west fifteen degrees an hour, and the date changes its lean because the axis tilts 23.44 degrees. Running the year holds the clock still while the Sun draws a figure eight: its height the tilt, its width the minutes a sundial strays from a clock.</p>
+
+<details class="sources"><summary>Sources</summary>
 <div class="tiles">{facts}</div>
 
 <div class="notes">
@@ -277,6 +293,13 @@ limits.</p>
 <p>The ground wears the colors those climates show from orbit, and the lights
 that come up behind the terminator are cities, placed and sized by how many
 people live in them.</p>
+<p>The Sun on the map drags: sideways it sets the hour, up and down the date,
+taking the nearest day on which the Sun stands over that latitude. A click pins
+a place, so the card holds it while the day or the year runs and the daylight
+curve marks it at every step; the year's range is its day length at the two
+solstices. Sunrise and sunset are given in apparent solar time there, the time
+a sundial would read, and in UTC. The map zooms with the wheel or the buttons
+and pans with a drag once zoomed.</p>
 </div>
 
 <div class="refs">
@@ -294,6 +317,7 @@ hierarchical, high-resolution shoreline database. <i>Journal of Geophysical
 Research: Solid Earth, 101</i>(B4), 8741-8743.
 <a href="https://doi.org/10.1029/96JB00104">https://doi.org/10.1029/96JB00104</a></p>
 </div>
+</details>
 </main>
 <script>
 const D = {json.dumps(js)};
@@ -306,7 +330,10 @@ const cv = el('map'), ctx = cv.getContext('2d');
 const cu = el('curve'), cx2 = cu.getContext('2d');
 let ground = null, glow = null, baseCv = null;
 let showGrat = true, bands = false, showLights = true;
-let runDay = false, runYear = false, hover = null;
+let runDay = false, runYear = false, hover = null, pinned = null;
+let zoom = 1, panX = 0, panY = 0, dragSun = false, downAt = null, zoomTw = null;
+const RM = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const place = () => pinned || hover;
 // Running the year at any watchable speed spins the planet dozens of times a
 // second, and the shadow just flickers. So the year run holds the clock at one
 // time of day and steps whole days: the terminator stops sliding and only its
@@ -545,6 +572,16 @@ function drawYear(s) {{
       ctx.beginPath(); ctx.arc(x + shift, y, 2.4*u, 0, 7); ctx.fill();
     }}
   }}
+  // named beside its top, where it is widest apart from the tropics' labels
+  let top = analemma[0];
+  for (const q of analemma) if (q[1] < top[1]) top = q;
+  const t1 = 'the Sun at ' + hm(solar(jd).ut) + ' UTC, day after day', t2 = 'height: the tilt; width: the equation of time';
+  ctx.font = Math.round(11*u) + 'px -apple-system, BlinkMacSystemFont, sans-serif';
+  const tw = Math.max(ctx.measureText(t1).width, ctx.measureText(t2).width);
+  let lx = top[0] + 16*u; if (lx + tw > W - 6*u) lx = top[0] - 16*u - tw;
+  ctx.fillStyle = 'rgba(10,14,20,0.62)'; ctx.fillRect(lx - 4*u, top[1] - 26*u, tw + 8*u, 32*u);
+  ctx.fillStyle = 'rgba(242,198,107,0.95)'; ctx.fillText(t1, lx, top[1] - 12*u);
+  ctx.fillStyle = 'rgba(242,198,107,0.7)'; ctx.fillText(t2, lx, top[1] + 2*u);
   ctx.restore();
 }}
 
@@ -574,6 +611,11 @@ function draw() {{
                                [-66.5634, 'Antarctic Circle']]) {{
       const y = (90 - lat)*H/180;
       ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      // a dark backing, so the name reads over ice and desert alike
+      const tw = ctx.measureText(name).width;
+      ctx.fillStyle = 'rgba(10,14,20,0.62)';
+      ctx.fillRect(7*u, y - 17*u, tw + 6*u, 14*u);
+      ctx.fillStyle = 'rgba(255,255,255,0.78)';
       ctx.fillText(name, 10*u, y - 6*u);
     }}
     ctx.restore();
@@ -590,14 +632,25 @@ function draw() {{
   ctx.beginPath(); ctx.arc(sx, sy, 34*u, 0, 7); ctx.fill();
   ctx.fillStyle = '#ffd257';
   ctx.beginPath(); ctx.arc(sx, sy, 5.5*u, 0, 7); ctx.fill();
+  // a dashed ring that says the Sun can be taken hold of
+  ctx.strokeStyle = dragSun ? 'rgba(255,226,150,0.95)' : 'rgba(255,226,150,0.55)';
+  ctx.lineWidth = 1.3*u; ctx.setLineDash([3*u, 3*u]);
+  ctx.beginPath(); ctx.arc(sx, sy, 11*u, 0, 7); ctx.stroke(); ctx.setLineDash([]);
   const ax = ((s.slon + 360) % 360)*W/360, ay = (90 + s.dec)*H/180;
   ctx.strokeStyle = 'rgba(200,214,240,0.5)'; ctx.lineWidth = 1.4*u;
   ctx.beginPath(); ctx.arc(ax, ay, 4.5*u, 0, 7); ctx.stroke();
 
-  if (hover) {{
+  if (hover && hover !== pinned) {{
     const hx = (hover.lon + 180)*W/360, hy = (90 - hover.lat)*H/180;
     ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1.6*u;
     ctx.beginPath(); ctx.arc(hx, hy, 6*u, 0, 7); ctx.stroke();
+  }}
+  if (pinned) {{
+    const hx = (pinned.lon + 180)*W/360, hy = (90 - pinned.lat)*H/180;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(hx, hy, 3*u, 0, 7); ctx.fill();
+    ctx.strokeStyle = '#58a6ff'; ctx.lineWidth = 2*u;
+    ctx.beginPath(); ctx.arc(hx, hy, 8*u, 0, 7); ctx.stroke();
   }}
   return s;
 }}
@@ -612,24 +665,37 @@ function sizeCurve() {{
 }}
 window.addEventListener('resize', () => {{ sizeCurve(); frameOnce(); }});
 
+// the curve's frame: a title on top, hours across, latitude down the left
+const CT = 40, CL = 25, CR = 6, CB = 4;
 function curve(s) {{
   const w = 132, h = cu.height/(cu.width/132);
+  const X = t => CL + t/24*(w - CL - CR), Y = lat => CT + (90 - lat)/180*(h - CT - CB);
   cx2.clearRect(0, 0, w, h);
+  cx2.font = '9.5px -apple-system, BlinkMacSystemFont, sans-serif';
+  cx2.fillStyle = 'rgba(210,218,230,0.9)';
+  cx2.textAlign = 'left';
+  cx2.fillText('hours of daylight', 7, 12);
+  cx2.fillText('by latitude', 7, 23);
   cx2.font = '9px -apple-system, BlinkMacSystemFont, sans-serif';
   cx2.strokeStyle = 'rgba(255,255,255,0.10)'; cx2.lineWidth = 1;
   for (const t of [0, 6, 12, 18, 24]) {{
-    const x = 8 + t/24*(w - 16);
-    cx2.beginPath(); cx2.moveTo(x, 12); cx2.lineTo(x, h - 4); cx2.stroke();
+    cx2.beginPath(); cx2.moveTo(X(t), CT); cx2.lineTo(X(t), h - CB); cx2.stroke();
+  }}
+  for (const lat of [60, 30, 0, -30, -60]) {{
+    cx2.beginPath(); cx2.moveTo(CL - 3, Y(lat)); cx2.lineTo(CL, Y(lat)); cx2.stroke();
   }}
   cx2.fillStyle = 'rgba(160,175,200,0.75)';
   cx2.textAlign = 'center';
-  for (const t of [0, 12, 24]) cx2.fillText(t + 'h', 8 + t/24*(w - 16), 9);
+  for (const t of [0, 12, 24]) cx2.fillText(t + 'h', X(t), CT - 5);
+  cx2.textAlign = 'right';
+  for (const [lat, t] of [[60, '60N'], [30, '30N'], [0, '0'], [-30, '30S'], [-60, '60S']])
+    cx2.fillText(t, CL - 4, Y(lat) + 3);
   const trace = dec => {{
     cx2.beginPath();
-    for (let y = 12; y <= h - 4; y++) {{
-      const lat = 90 - (y - 12)/(h - 16)*180;
-      const x = 8 + daylight(lat, dec)/24*(w - 16);
-      y === 12 ? cx2.moveTo(x, y) : cx2.lineTo(x, y);
+    for (let y = CT; y <= h - CB; y++) {{
+      const lat = 90 - (y - CT)/(h - CT - CB)*180;
+      const x = X(daylight(lat, dec));
+      y === CT ? cx2.moveTo(x, y) : cx2.lineTo(x, y);
     }}
     cx2.stroke();
   }};
@@ -640,25 +706,34 @@ function curve(s) {{
     for (const d of ghosts) trace(d);
   }}
   cx2.strokeStyle = '#f2c66b'; cx2.lineWidth = 1.8; trace(s.dec);
-  if (hover) {{
-    const y = 12 + (90 - hover.lat)/180*(h - 16);
-    const x = 8 + daylight(hover.lat, s.dec)/24*(w - 16);
+  const P = place();
+  if (P) {{
+    const y = Y(P.lat);
     cx2.strokeStyle = 'rgba(255,255,255,0.45)'; cx2.lineWidth = 1;
-    cx2.beginPath(); cx2.moveTo(8, y); cx2.lineTo(w - 8, y); cx2.stroke();
-    cx2.fillStyle = '#fff';
-    cx2.beginPath(); cx2.arc(x, y, 3, 0, 7); cx2.fill();
+    cx2.beginPath(); cx2.moveTo(CL, y); cx2.lineTo(w - CR, y); cx2.stroke();
+    // a pinned place keeps a mark for every day the year has run through,
+    // so its day length sweeps out between the solstices
+    if (pinned && yearMode) {{
+      cx2.fillStyle = 'rgba(88,166,255,0.55)';
+      for (const d of ghosts) {{
+        cx2.beginPath(); cx2.arc(X(daylight(P.lat, d)), y, 1.8, 0, 7); cx2.fill();
+      }}
+    }}
+    cx2.fillStyle = pinned ? '#58a6ff' : '#fff';
+    cx2.beginPath(); cx2.arc(X(daylight(P.lat, s.dec)), y, 3, 0, 7); cx2.fill();
   }}
 }}
 
 // ---------- the panel ----------
 function panel(s) {{
-  const p = hover || {{lat: s.dec, lon: s.slon}};
+  const p = place() || {{lat: s.dec, lon: s.slon}};
   const alt = altitude(p.lat, p.lon, s);
   const len = daylight(p.lat, s.dec);
   const noon = 12 - p.lon/15 - s.eqt/60;
-  el('pName').textContent = hover ? 'Under the cursor' : 'The sub-solar point';
-  el('pSub').textContent = hover ? 'a place on the map'
-                                 : 'where the Sun is straight overhead';
+  el('pName').textContent = pinned ? 'A pinned place' : hover ? 'Under the cursor' : 'The sub-solar point';
+  el('pSub').textContent = pinned ? 'held while the clock runs; a second click lets it go'
+                         : hover ? 'a place on the map; a click pins it'
+                         : 'where the Sun is straight overhead';
   el('pLat').textContent = Math.abs(p.lat).toFixed(2) + DEG
     + (p.lat >= 0 ? ' N' : ' S');
   el('pLon').textContent = Math.abs(p.lon).toFixed(2) + DEG
@@ -667,8 +742,15 @@ function panel(s) {{
     + (alt >= 0 ? ' above the horizon' : ' below the horizon');
   el('pSolar').textContent = hm(s.ut + s.eqt/60 + p.lon/15);
   el('pDay').textContent = dur(len);
-  el('pRise').textContent = (len <= 0 || len >= 24) ? '--' : hm(noon - len/2);
-  el('pSet').textContent = (len <= 0 || len >= 24) ? '--' : hm(noon + len/2);
+  // in apparent solar time there, which is what a sundial reads, and in UTC
+  const local = u => hm(u + s.eqt/60 + p.lon/15);
+  el('pRise').textContent = (len <= 0 || len >= 24) ? '--'
+    : local(noon - len/2) + ' solar, ' + hm(noon - len/2) + ' UTC';
+  el('pSet').textContent = (len <= 0 || len >= 24) ? '--'
+    : local(noon + len/2) + ' solar, ' + hm(noon + len/2) + ' UTC';
+  const lo = daylight(p.lat, p.lat >= 0 ? -D.obl : D.obl), hi = daylight(p.lat, p.lat >= 0 ? D.obl : -D.obl);
+  const short = h => h <= 0 ? 'none' : h >= 24 ? '24 h' : Math.floor(h) + ' h ' + pad(Math.round((h % 1)*60)) + ' m';
+  el('pRange').textContent = short(lo) + ' to ' + short(hi);
 
   const d = jdToDate(jd);
   el('hourOut').textContent = hm(s.ut) + ' UTC';
@@ -700,7 +782,8 @@ function frameOnce() {{
   window.__day = {{jd, ut: s.ut, dec: s.dec, eqt: s.eqt, slon: s.slon,
                   runDay, runYear, yearMode, ghosts: ghosts.length,
                   analemma: analemma ? analemma.length : 0,
-                  bands, showGrat, showLights, hover}};
+                  bands, showGrat, showLights, hover, pinned, zoom, panX, panY,
+                  sun: sunScreen(s)}};
 }}
 
 // The share of the surface the shadow leaves alone, read off the overlay that
@@ -780,8 +863,110 @@ function at(ev) {{
   if (lat > 90 || lat < -90) return null;
   return {{lat, lon}};
 }}
-cv.addEventListener('mousemove', e => {{ hover = at(e); frameOnce(); }});
+// ---------- the Sun dragged, a place pinned, the map zoomed ----------
+function sunScreen(s) {{
+  const r = cv.getBoundingClientRect();
+  return {{x: r.left + (s.slon + 180)/360*r.width, y: r.top + (90 - s.dec)/180*r.height}};
+}}
+const nearSun = e => {{ const q = sunScreen(solar(jd)); return Math.hypot(e.clientX - q.x, e.clientY - q.y) < 16; }};
+// Sideways the Sun sets the hour; up and down it sets the date, taking the
+// nearest day on which it stands over that latitude
+function moveSunTo(p) {{
+  if (!p) return;
+  const lat = Math.max(-D.obl + 0.05, Math.min(D.obl - 0.05, p.lat));
+  let best = 0, bv = 1e9;
+  for (let n = -183; n <= 183; n++) {{
+    const v = Math.abs(solar(jd + n).dec - lat) + 0.0015*Math.abs(n);
+    if (v < bv) {{ bv = v; best = n; }}
+  }}
+  let j = jd + best;
+  for (let k = 0; k < 2; k++) {{
+    const s = solar(j), want = 12 - p.lon/15 - s.eqt/60;
+    j = midnight(j) + (((want % 24) + 24) % 24)/24;
+  }}
+  jd = j;
+}}
+const wrap = cv.parentElement;
+function clampPan() {{
+  const w = wrap.clientWidth, h = cv.offsetHeight;
+  panX = Math.min(0, Math.max(w - w*zoom, panX));
+  panY = Math.min(0, Math.max(h - h*zoom, panY));
+}}
+function applyView() {{
+  clampPan();
+  cv.style.transform = zoom === 1 ? '' : 'translate(' + panX + 'px,' + panY + 'px) scale(' + zoom + ')';
+  cv.classList.toggle('zoomed', zoom > 1);
+  el('zAll').hidden = zoom <= 1.001;
+}}
+function zoomAt(z, px, py) {{
+  z = Math.max(1, Math.min(8, z));
+  panX = px - (px - panX)*z/zoom; panY = py - (py - panY)*z/zoom;
+  zoom = z; applyView();
+}}
+function zoomTo(z, px, py) {{
+  if (RM) {{ zoomAt(z, px, py); frameOnce(); return; }}
+  zoomTw = {{a: zoom, b: Math.max(1, Math.min(8, z)), px, py, t0: performance.now()}};
+  const step = t => {{
+    if (!zoomTw) return;
+    const u = Math.min(1, (t - zoomTw.t0)/700), e = u < 0.5 ? 2*u*u : 1 - Math.pow(-2*u + 2, 2)/2;
+    zoomAt(zoomTw.a*Math.pow(zoomTw.b/zoomTw.a, e), zoomTw.px, zoomTw.py);
+    if (u < 1) requestAnimationFrame(step); else zoomTw = null;
+  }};
+  requestAnimationFrame(step);
+}}
+wrap.addEventListener('wheel', e => {{
+  e.preventDefault(); zoomTw = null;
+  const r = wrap.getBoundingClientRect();
+  zoomAt(zoom*Math.exp(-e.deltaY*0.0015), e.clientX - r.left, e.clientY - r.top);
+}}, {{passive: false}});
+el('zIn').addEventListener('click', () => zoomTo(zoom*2, wrap.clientWidth/2, cv.offsetHeight/2));
+el('zOut').addEventListener('click', () => zoomTo(zoom/2, wrap.clientWidth/2, cv.offsetHeight/2));
+el('zAll').addEventListener('click', () => zoomTo(1, wrap.clientWidth/2, cv.offsetHeight/2));
+
+function stopRuns() {{
+  runDay = runYear = false; press('bDay', false); press('bYear', false);
+  if (yearMode) leaveYear();
+}}
+cv.addEventListener('pointerdown', e => {{
+  if (nearSun(e)) {{
+    dragSun = true; stopRuns(); cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing';
+    e.preventDefault(); return;
+  }}
+  downAt = {{x: e.clientX, y: e.clientY, panX, panY, moved: false}};
+  if (zoom > 1) cv.setPointerCapture(e.pointerId);
+}});
+cv.addEventListener('pointermove', e => {{
+  if (dragSun) {{ moveSunTo(at(e)); frameOnce(); return; }}
+  if (downAt && zoom > 1 && (downAt.moved || Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) > 4)) {{
+    downAt.moved = true;
+    panX = downAt.panX + e.clientX - downAt.x; panY = downAt.panY + e.clientY - downAt.y;
+    applyView(); return;
+  }}
+  if (e.pointerType === 'mouse') {{
+    hover = at(e);
+    cv.style.cursor = nearSun(e) ? 'grab' : zoom > 1 ? 'move' : 'crosshair';
+    frameOnce();
+  }}
+}});
+cv.addEventListener('pointerup', e => {{
+  if (dragSun) {{ dragSun = false; cv.style.cursor = 'grab'; frameOnce(); return; }}
+  if (downAt && !downAt.moved) {{
+    const p = at(e);
+    if (pinned && p) {{
+      const r = cv.getBoundingClientRect();
+      const dx = (p.lon - pinned.lon)/360*r.width, dy = (p.lat - pinned.lat)/180*r.height;
+      pinned = Math.hypot(dx, dy) < 12 ? null : p;
+    }} else pinned = p;
+    frameOnce();
+  }}
+  downAt = null;
+}});
+cv.addEventListener('pointercancel', () => {{ dragSun = false; downAt = null; }});
 cv.addEventListener('mouseleave', () => {{ hover = null; frameOnce(); }});
+document.addEventListener('keydown', e => {{
+  if (e.key === 'Escape' && pinned && !(e.target instanceof HTMLInputElement)) {{ pinned = null; frameOnce(); }}
+}});
+window.addEventListener('resize', applyView);
 window.__setTime = (y, mo, d, h) => {{
   jd = jdOf(y, mo - 1, d, h); runDay = runYear = false; leaveYear();
   frameOnce(); return jd;

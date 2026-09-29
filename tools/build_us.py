@@ -317,7 +317,8 @@ gap:10px;margin:0 0 16px}
 .tile .d{font-size:.78rem;color:var(--ink3);margin-top:2px;line-height:1.45}
 
 .stage{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
-.mapwrap{flex:1 1 660px;min-width:320px}
+.mapcol{flex:1 1 660px;min-width:320px}
+.mapwrap{min-width:0}
 svg{width:100%;height:auto;display:block;border-radius:10px;
 border:1px solid var(--line);background:var(--sea)}
 .side{flex:1 1 250px;min-width:236px}
@@ -369,8 +370,45 @@ text-transform:uppercase;text-anchor:middle;pointer-events:none;
 paint-order:stroke;stroke:#0d1a26;stroke-width:3;fill:#e8eef5}
 .lg .sw{width:22px;height:3px;border-radius:2px;display:inline-block}
 .lg.fill .sw{height:11px;border-radius:3px}
-.inset{fill:none;stroke:var(--line);stroke-width:1;stroke-dasharray:3 4}
-.ilbl{fill:var(--ink3);font-size:11px;font-family:inherit}
+.inset{fill:none;stroke:#2c3640;stroke-width:1.2}
+.ilbl{fill:var(--ink2);font-size:13.5px;font-family:inherit;
+paint-order:stroke;stroke:#0d1a26;stroke-width:3}
+#map{outline:none}
+#map:focus-visible{box-shadow:0 0 0 2px var(--accent)}
+#lines path{vector-effect:non-scaling-stroke}
+.state{transition:opacity .35s}
+.state.dim{opacity:.22}
+#lines path.dim{opacity:.25}
+#areas text{pointer-events:auto;cursor:pointer}
+#areas text:hover,#areas text.on{fill:#fff;text-decoration:underline}
+#ghost path{fill:#e6eef5;fill-opacity:.14;stroke:#fff;stroke-width:1.6;
+stroke-dasharray:6 4;vector-effect:non-scaling-stroke;pointer-events:none}
+#rugged,#rivers,#labels,#areas,#capital,#regions{transition:opacity .5s}
+svg.pop #rugged,svg.pop #rivers,svg.pop #labels,svg.pop #areas,
+svg.pop #capital,svg.pop #regions{opacity:0;pointer-events:none}
+.side .tiles{grid-template-columns:1fr;margin:12px 0 0;gap:8px}
+.side .tile{padding:9px 13px}
+.side .tile .v{font-size:1.02rem}
+.cmp{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:4px}
+.cmp th{font-weight:600;text-align:right;padding:2px 0 4px 8px;color:var(--ink)}
+.cmp th:first-child,.cmp td:first-child{text-align:left;padding-left:0;color:var(--ink2);font-weight:400}
+.cmp td{text-align:right;padding:2.5px 0 2.5px 8px;font-variant-numeric:tabular-nums;color:var(--ink2)}
+.cmp .g{border-bottom:2px dashed #fff}
+.hint{color:var(--ink2);font-size:.86rem;margin:10px 0 0;max-width:80ch;min-height:1.4em}
+.cap{color:var(--ink2);font-size:.95rem;max-width:74ch;margin:1.6rem 0 0}
+details.sources{margin-top:1.6rem;border-top:1px solid var(--line);padding-top:10px;max-width:80ch}
+details.sources>summary{cursor:pointer;color:var(--ink2);font-size:12.5px;letter-spacing:.06em;text-transform:uppercase}
+details.sources>summary:hover{color:var(--accent)}
+details.sources .notes{margin-top:1rem;border-top:none;padding-top:0}
+@media (max-width:600px){
+.stage{flex-direction:column;flex-wrap:nowrap}
+.side{display:contents}
+.side .card{order:-1;width:100%}
+.mapcol{flex:none;width:100%;min-width:0}
+.mapwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+#map{min-width:640px}
+.side .tiles{order:1;width:100%;margin:0}
+}
 
 .notes{margin-top:2.6rem;border-top:1px solid var(--line);padding-top:1.5rem;
 color:var(--ink2);font-size:.95rem;max-width:74ch}
@@ -390,31 +428,22 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}
 
 <h1>The United States</h1>
 
-<div class="tiles">__FACTS__</div>
 
 <div class="stage">
-  <div class="mapwrap"><svg id="map" viewBox="0 0 1000 744"
-       preserveAspectRatio="xMidYMid meet">
+  <div class="mapcol"><div class="mapwrap"><svg id="map" viewBox="0 0 1000 744"
+       preserveAspectRatio="xMidYMid meet" tabindex="0"
+       aria-label="Map of the United States; arrow keys step through the states by population when it has focus">
     <g id="fills"></g>
     <g id="rugged"></g>
     <g id="rivers"></g>
     <g id="lines"></g>
+    <g id="ghost"></g>
     <g id="labels"></g>
     <g id="regions"></g>
     <g id="areas"></g>
     <g id="capital"></g>
     <g id="frames"></g>
   </svg></div>
-  <div class="side"><div class="card">
-    <h2 id="selName">The lower 48, Alaska and Hawaii</h2>
-    <div class="sub" id="selSub">a state under the cursor fills this panel</div>
-    <div class="row"><span>Area</span><span id="selArea"></span></div>
-    <div class="row"><span>Population</span><span id="selPop"></span></div>
-    <div class="row"><span>Share of the country</span><span id="selShare"></span></div>
-    <div class="inreg" id="selRegions"></div>
-  </div></div>
-</div>
-
 <div class="controls">
   <button id="mReg" aria-pressed="true">Census regions</button>
   <button id="mDiv" aria-pressed="false">Census divisions</button>
@@ -423,10 +452,36 @@ color:var(--ink2);font-size:.95rem;max-width:74ch}
   <button id="bRiv" aria-pressed="true">Rivers</button>
   <button id="bMtn" aria-pressed="true">Rugged ground</button>
   <button id="bLine" aria-pressed="true">State lines</button>
+  <span class="sep"></span>
+  <button id="bPop" aria-pressed="false">Sized by people</button>
 </div>
 
 <div class="controls" id="legend"></div>
+<p class="hint" id="hint"></p>
+  </div>
+  <div class="side"><div class="card">
+    <h2 id="selName">The lower 48, Alaska and Hawaii</h2>
+    <div class="sub" id="selSub">a state under the cursor fills this panel</div>
+    <div id="selRows">
+    <div class="row"><span>Area</span><span id="selArea"></span></div>
+    <div class="row"><span>Population</span><span id="selPop"></span></div>
+    <div class="row"><span>Share of the country</span><span id="selShare"></span></div>
+    <div class="row"><span>By population</span><span id="selRank"></span></div>
+    </div>
+    <div id="cmpBox"></div>
+    <div class="inreg" id="selRegions"></div>
+  </div>
+  <div class="tiles">__FACTS__</div></div>
+</div>
 
+
+<p class="cap">The Census Bureau sorts every state and the district into one of four
+regions and one of nine divisions inside them, so both are drawn as fills:
+color for the region, lightness for the division, the name written across the
+states. East Coast, West Coast and the Northwest have no official line and
+stay as outlines.</p>
+
+<details class="sources"><summary>Sources</summary>
 <div class="notes">
 <h2>About the map</h2>
 <p>The projection is Albers equal area, the one the country is usually drawn
@@ -434,15 +489,20 @@ on, so a state covers the share of the page it covers of the ground. Alaska and
 Hawaii sit in the corners on cones of their own and at their own scales: Alaska
 is a fifth of the country and reaches further west than Hawaii, and drawing all
 three to one scale leaves the lower 48 too small to read.</p>
-<p>The Census Bureau sorts every state and the district into one of four
-regions and one of nine divisions inside them, so both are drawn as fills:
-color for the region, lightness for the division, the name written across the
-states. East Coast, West Coast and the Northwest have no official line and
-stay as outlines.</p>
 <p>Rugged ground comes from a relief image, not an elevation grid, so it marks
 broken country rather than any named range, and a river is named only where one
 course passes a town on it and nothing else is near. With the lines off, what
 is left is the ground.</p>
+<p>Sized by people scales every state about its own center until its area on
+the page is its share of the people, at the density of the lower 48 as a
+whole, so a crowded state swells and an empty one shrinks. The shapes are
+kept, so the states overlap where they swell. Alaska and Hawaii are scaled
+to the same people-per-area as the main map, not to their insets.
+Populations are the Census Bureau's estimates for July 1, 2025, the figures
+on the <a href="us-states.html" style="color:var(--accent)">states page</a>.
+Two states clicked in turn are compared: the second is drawn over the first
+at the first one's scale, centered on it, the insets corrected to the scale
+of the main map.</p>
 </div>
 
 <div class="refs">
@@ -463,6 +523,7 @@ hierarchical, high-resolution shoreline database. <i>Journal of Geophysical
 Research: Solid Earth, 101</i>(B4), 8741-8743.
 <a href="https://doi.org/10.1029/96JB00104">https://doi.org/10.1029/96JB00104</a></p>
 </div>
+</details>
 </main>
 <script>
 const D = __DATA__;
@@ -474,7 +535,7 @@ D.meta.forEach(m => META[m.c] = m);
 const TOTAL_KM2 = D.meta.reduce((a, m) => a + (m.km2 || 0), 0);
 const TOTAL_POP = D.meta.reduce((a, m) => a + (m.pop || 0), 0);
 
-let hover = null, sel = null;
+let hover = null, sel = null, cmp = null, focusReg = null;
 const GRUPOS = {reg: D.regions, div: D.divisions, vern: D.vern};
 let modo = 'reg';
 let on = GRUPOS[modo].map(() => true);
@@ -489,10 +550,10 @@ function make(tag, attrs, parent) {
 const gs = el('fills'), gl = el('lines');
 for (const c in D.states) {
   const p = make('path', {d: D.states[c], class: 'state', 'data-c': c}, gs);
-  make('path', {d: D.states[c]}, gl);
+  make('path', {d: D.states[c], 'data-c': c}, gl);
   p.addEventListener('mouseenter', () => { hover = c; show(); });
   p.addEventListener('mouseleave', () => { hover = null; show(); });
-  p.addEventListener('click', () => { sel = sel === c ? null : c; legend(); paint(); show(); });
+  p.addEventListener('click', () => pick(c));
 }
 const gm = el('rugged');
 D.rugged.forEach(m => make('path', {d: m.d, class: m.t === 'high' ? 'high' : ''}, gm));
@@ -514,9 +575,8 @@ const ga = el('areas');
 for (const [x, y, w, h, t] of [[6, 514, 338, 226, 'Alaska'],
                                [726, 606, 214, 116, 'Hawaii']]) {
   make('rect', {x, y, width: w, height: h, rx: 6, class: 'inset'}, el('frames'));
-  const l = make('text', {x: x + 6, y: y + 14, class: 'ilbl'}, el('frames'));
-  l.textContent = t + (t === 'Hawaii' ? ', the eight main islands, ' : ', ')
-    + 'not to the same scale';
+  const l = make('text', {x: x + 8, y: t === 'Hawaii' ? y + h - 9 : y + 19, class: 'ilbl'}, el('frames'));
+  l.textContent = t + ', own scale';
 }
 
 // Every state carries the color of the group it belongs to, and the name of
@@ -526,20 +586,29 @@ function paint() {
   const grupo = GRUPOS[modo];
   const color = {};
   grupo.forEach((r, i) => { if (on[i]) r.codes.forEach(c => color[c] = r.c); });
+  const fr = focusReg != null ? grupo[focusReg] : null;
   for (const p of gs.children) {
-    p.classList.toggle('on', p.getAttribute('data-c') === sel);
-    const c = color[p.getAttribute('data-c')];
+    const code = p.getAttribute('data-c');
+    p.classList.toggle('on', code === sel || code === cmp);
+    p.classList.toggle('dim', !!fr && !fr.codes.includes(code));
+    const c = color[code];
     if (c && modo !== 'vern' && lines) p.style.setProperty('--tint', c);
     else p.style.removeProperty('--tint');
   }
+  for (const p of gl.children)
+    p.classList.toggle('dim', !!fr && !fr.codes.includes(p.getAttribute('data-c')));
   vernEls.forEach((e, i) =>
     e.style.display = (modo === 'vern' && on[i] && lines) ? '' : 'none');
   while (ga.firstChild) ga.removeChild(ga.firstChild);
   if (modo === 'vern' || !lines) return;
   grupo.forEach((r, i) => {
     if (!on[i] || !r.lab) return;
-    const t = make('text', {x: r.lab[0], y: r.lab[1]}, ga);
+    const at = LABEL_AT[r.n] || r.lab;
+    const t = make('text', {x: at[0], y: at[1], 'data-g': i,
+      class: focusReg === i ? 'on' : ''}, ga);
     t.textContent = r.n;
+    // a region's name lifts it: the rest dim and the panel sums it up
+    t.addEventListener('click', e => { e.stopPropagation(); focusRegion(i); });
   });
 }
 
@@ -564,6 +633,7 @@ function legend() {
 
 function setModo(m) {
   modo = m;
+  focusReg = null;
   on = GRUPOS[m].map(() => true);
   for (const [id, k] of [['mReg', 'reg'], ['mDiv', 'div'], ['mVer', 'vern']])
     el(id).setAttribute('aria-pressed', k === m);
@@ -571,6 +641,7 @@ function setModo(m) {
   legend();
   paint();
   show();
+  hint();
 }
 el('mReg').addEventListener('click', () => setModo('reg'));
 el('mDiv').addEventListener('click', () => setModo('div'));
@@ -588,9 +659,13 @@ function markCapital(m) {
 }
 
 function show() {
-  const c = hover || sel;
+  const c = cmp ? null : (hover || sel);
   const m = c ? META[c] : null;
-  markCapital(m);
+  markCapital(popOn ? null : (cmp ? null : m));
+  el('selRows').style.display = cmp ? 'none' : '';
+  el('cmpBox').innerHTML = '';
+  if (cmp && sel) { showCompare(); return; }
+  if (!m && focusReg != null) { showRegion(); return; }
   el('selName').textContent = m ? m.n : 'The lower 48, Alaska and Hawaii';
   el('selSub').textContent = m
     ? (m.c === 'DC' ? 'the national capital' : 'capital: ' + m.cap)
@@ -598,17 +673,26 @@ function show() {
   el('selArea').textContent = (m ? fmt(m.km2) : fmt(TOTAL_KM2)) + ' km²';
   el('selPop').textContent = m ? fmt(m.pop) : fmt(TOTAL_POP);
   el('selShare').textContent = m
-    ? (m.km2 / TOTAL_KM2 * 100).toFixed(1) + '% of the area'
+    ? (popOn ? (m.pop / TOTAL_POP * 100).toFixed(1) + '% of the people'
+             : (m.km2 / TOTAL_KM2 * 100).toFixed(1) + '% of the area')
     : 'the fifty states and the district';
+  el('selRank').textContent = m
+    ? (m.c === 'DC' ? 'not a state' : 'No. ' + (ORDER.indexOf(m.c) + 1) + ' of 50')
+    : '';
+  el('selRank').parentNode.style.display = m ? '' : 'none';
   if (!m) {
     el('selRegions').innerHTML = GRUPOS[modo].map(r =>
       `<b>${r.n}</b>: ${r.note}`).join('<br>');
     return;
   }
   const vern = D.vern.filter(r => r.codes.includes(c)).map(r => r.n);
+  const k2 = popOn ? GEO[c].k * GEO[c].k : null;
   el('selRegions').innerHTML =
     `Census region <b>${m.reg}</b>, division <b>${m.div}</b>`
-    + (vern.length ? '<br>Also called ' + vern.join(', ') : '');
+    + (vern.length ? '<br>Also called ' + vern.join(', ') : '')
+    + (popOn ? '<br>Sized by people: drawn at <b>' + (k2 >= 1 ? k2.toFixed(1) + ' times'
+        : Math.round(k2 * 100) + '%') + '</b> of its area on the ground' : '')
+    + (sel === c && !popOn ? '<br>A second state, clicked, is compared with this one' : '');
 }
 
 el('bRiv').addEventListener('click', () => {
@@ -636,7 +720,174 @@ function setLines(v) {
 }
 el('bLine').addEventListener('click', () => setLines(!lines));
 
-legend(); paint(); show();
+// ---- the drawn geometry of each state: its area on the page and its center ----
+const LABEL_AT = {Northeast: [928, 262]};   // the Northeast name sits offshore, clear of New Jersey
+const GEO = {};
+for (const c in D.states) {
+  let A = 0, X = 0, Y = 0;
+  for (const ring of D.states[c].split('M').filter(Boolean)) {
+    const r = ring.replace(/Z/g, '').split('L').map(p => p.split(',').map(Number));
+    let a = 0, x = 0, y = 0;
+    for (let i = 0; i < r.length; i++) {
+      const p = r[i], q = r[(i + 1) % r.length], f = p[0] * q[1] - q[0] * p[1];
+      a += f; x += (p[0] + q[0]) * f; y += (p[1] + q[1]) * f;
+    }
+    if (!a) continue;
+    const s = Math.abs(a) / 2;
+    A += s; X += x / (3 * a) * s; Y += y / (3 * a) * s;
+  }
+  GEO[c] = {A, cx: X / A, cy: Y / A,
+    g: Math.sqrt((META[c].km2 || 1) / A)};    // kilometers per unit of the page
+}
+// people per unit of page area across the lower 48 and the district
+const L48 = Object.keys(GEO).filter(c => c !== 'AK' && c !== 'HI');
+const PER = L48.reduce((a, c) => a + GEO[c].A, 0) / L48.reduce((a, c) => a + (META[c].pop || 0), 0);
+// a state with no population on the page (the district) keeps its size
+for (const c in GEO) GEO[c].k = META[c].pop ? Math.sqrt(META[c].pop * PER / GEO[c].A) : 1;
+const ORDER = D.meta.filter(m => m.c !== 'DC' && m.pop).sort((a, b) => b.pop - a.pop).map(m => m.c);
+const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ease = u => u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+function tween(dur, f, done) {
+  if (REDUCED) { f(1); if (done) done(); return null; }
+  const t0 = performance.now();
+  let id = null;
+  const step = t => { const u = Math.min(1, (t - t0) / dur); f(ease(u));
+    if (u < 1) id = requestAnimationFrame(step); else if (done) done(); };
+  id = requestAnimationFrame(step);
+  return () => cancelAnimationFrame(id);
+}
+
+// ---- sized by people: every state scaled about its center until its area
+// on the page is its share of the people ----
+let popOn = false, popT = 0, popStop = null;
+const ORIG = [...gs.children].map(p => p.getAttribute('data-c'));
+function popFrame(t) {
+  popT = t;
+  for (const g of [gs, gl]) for (const p of g.children) {
+    const G = GEO[p.getAttribute('data-c')], k = 1 + (G.k - 1) * t;
+    if (t === 0) p.removeAttribute('transform');
+    else p.setAttribute('transform', `matrix(${k} 0 0 ${k} ${G.cx * (1 - k)} ${G.cy * (1 - k)})`);
+  }
+}
+function reorder(codes) {
+  for (const g of [gs, gl]) {
+    const by = {};
+    for (const p of g.children) by[p.getAttribute('data-c')] = p;
+    codes.forEach(c => g.appendChild(by[c]));
+  }
+}
+function setPop(v) {
+  if (v === popOn) return;
+  popOn = v;
+  el('bPop').setAttribute('aria-pressed', v);
+  cmp = null; drawGhost(false);
+  // the swollen small states go on top, so none disappears under a neighbor
+  if (v) reorder(ORIG.slice().sort((a, b) => GEO[b].A * GEO[b].k ** 2 - GEO[a].A * GEO[a].k ** 2));
+  el('map').classList.toggle('pop', v);
+  if (popStop) popStop();
+  const from = popT, to = v ? 1 : 0;
+  popStop = tween(1100, e => popFrame(from + (to - from) * e),
+    () => { popStop = null; if (!v) reorder(ORIG); });
+  paint(); show(); hint();
+}
+el('bPop').addEventListener('click', () => setPop(!popOn));
+
+// ---- two states compared: the second drawn over the first, at its scale ----
+let ghostStop = null;
+const gh = el('ghost');
+function drawGhost(animate) {
+  if (ghostStop) { ghostStop(); ghostStop = null; }
+  gh.innerHTML = '';
+  if (!cmp || !sel) return;
+  const A = GEO[sel], B = GEO[cmp], s = B.g / A.g;
+  const p = make('path', {d: D.states[cmp]}, gh);
+  const put = e => {
+    const S = 1 + (s - 1) * e, cx = B.cx + (A.cx - B.cx) * e, cy = B.cy + (A.cy - B.cy) * e;
+    p.setAttribute('transform', `matrix(${S} 0 0 ${S} ${cx - S * B.cx} ${cy - S * B.cy})`);
+  };
+  if (animate) { put(0); ghostStop = tween(900, put, () => { ghostStop = null; }); }
+  else put(1);
+}
+function pick(c) {
+  focusReg = null;
+  if (popOn) { sel = sel === c ? null : c; cmp = null; }
+  else if (sel == null) sel = c;
+  else if (c === sel) { sel = null; cmp = null; }
+  else if (c === cmp) cmp = null;
+  else cmp = c;
+  legend(); paint(); show(); drawGhost(true);
+}
+function showCompare() {
+  const a = META[sel], b = META[cmp];
+  el('selName').textContent = a.n + ' and ' + b.n;
+  el('selSub').textContent = b.n + ' drawn over ' + a.n + ', at the same scale';
+  const dens = m => m.km2 ? (m.pop / m.km2 >= 100 ? Math.round(m.pop / m.km2) : (m.pop / m.km2).toFixed(1)) : '--';
+  const r = b.km2 / a.km2, rp = b.pop / a.pop;
+  const times = (x, what) => x >= 1 ? (x >= 10 ? Math.round(x) : x.toFixed(1)) + ' times ' + what
+    : (x * 100 >= 10 ? Math.round(x * 100) : (x * 100).toFixed(1)) + '% of ' + what;
+  el('cmpBox').innerHTML = '<table class="cmp"><tr><th></th><th>' + a.n + '</th><th><span class="g">' + b.n + '</span></th></tr>'
+    + '<tr><td>Area, km²</td><td>' + fmt(a.km2) + '</td><td>' + fmt(b.km2) + '</td></tr>'
+    + '<tr><td>Population</td><td>' + fmt(a.pop) + '</td><td>' + fmt(b.pop) + '</td></tr>'
+    + '<tr><td>People per km²</td><td>' + dens(a) + '</td><td>' + dens(b) + '</td></tr></table>';
+  el('selRegions').innerHTML = b.n + ' covers ' + times(r, 'the ground') + ' of ' + a.n
+    + ' and holds ' + times(rp, 'the people') + '.';
+}
+
+// ---- a region lifted: the rest dim and the panel carries its totals ----
+function focusRegion(i) {
+  focusReg = focusReg === i ? null : i;
+  sel = null; cmp = null; hover = null;
+  paint(); show(); drawGhost(false);
+}
+function showRegion() {
+  const r = GRUPOS[modo][focusReg];
+  const ms = r.codes.map(c => META[c]).filter(Boolean);
+  const km = ms.reduce((a, m) => a + (m.km2 || 0), 0), pp = ms.reduce((a, m) => a + (m.pop || 0), 0);
+  el('selName').textContent = r.n;
+  el('selSub').textContent = r.note;
+  el('selArea').textContent = fmt(km) + ' km²';
+  el('selPop').textContent = fmt(pp);
+  el('selShare').textContent = (pp / TOTAL_POP * 100).toFixed(1) + '% of the people, '
+    + (km / TOTAL_KM2 * 100).toFixed(1) + '% of the area';
+  el('selRank').parentNode.style.display = '';
+  el('selRank').textContent = ms.filter(m => m.c !== 'DC').length + ' states'
+    + (r.codes.includes('DC') ? ' and the district' : '');
+  el('selRegions').innerHTML = ms.slice().sort((x, y) => y.pop - x.pop).map(m => m.n).join(', ')
+    + '<br>Its name on the map, clicked again, lets it go';
+}
+
+// ---- what the chosen view means, in one line ----
+function hint() {
+  const t = popOn
+    ? 'Sized by people: each state is scaled about its center so its area is its share of the population; where states swell they overlap.'
+    : modo === 'reg' ? 'Census regions: the four the Census Bureau uses for its statistics, each state in exactly one. A region’s name on the map lifts it.'
+    : modo === 'div' ? 'Census divisions: the nine subdivisions of the four regions. A division’s name on the map lifts it.'
+    : 'Vernacular: regions in common use with no official line. They overlap, so they are drawn as outlines rather than fills.';
+  const mtn = el('bMtn').getAttribute('aria-pressed') === 'true' && !popOn
+    ? ' The brown texture is rugged ground: broken country read from a relief image, not a named range.' : '';
+  el('hint').textContent = t + mtn;
+}
+el('bMtn').addEventListener('click', hint);
+
+// ---- the keyboard: arrows walk the states by population while the map has focus ----
+document.addEventListener('keydown', e => {
+  const a = document.activeElement;
+  if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA')) return;
+  if (e.key === 'Escape') {
+    sel = null; cmp = null; focusReg = null; paint(); show(); drawGhost(false); return;
+  }
+  if (a !== el('map')) return;
+  const dn = e.key === 'ArrowRight' || e.key === 'ArrowDown';
+  const up = e.key === 'ArrowLeft' || e.key === 'ArrowUp';
+  if (!dn && !up) return;
+  e.preventDefault();
+  let i = ORDER.indexOf(sel);
+  i = i < 0 ? (dn ? 0 : ORDER.length - 1) : Math.max(0, Math.min(ORDER.length - 1, i + (dn ? 1 : -1)));
+  sel = ORDER[i]; cmp = null; focusReg = null; hover = null;
+  paint(); show(); drawGhost(false);
+});
+
+legend(); paint(); show(); hint();
 window.__us = () => ({states: Object.keys(D.states).length, lines,
   capital: gcap.querySelector('text') ? gcap.querySelector('text').textContent : null,
   rivers: D.rivers.length, named: D.rivers.filter(r => r.n).length,
@@ -645,7 +896,11 @@ window.__us = () => ({states: Object.keys(D.states).length, lines,
   areas: document.querySelectorAll('#areas text').length,
   tinte: (c) => {const p = gs.querySelector(`path[data-c="${c}"]`);
     return p ? p.style.getPropertyValue('--tint') : null;},
-  totalKm2: TOTAL_KM2, hover, sel, on: on.slice()});
+  totalKm2: TOTAL_KM2, hover, sel, on: on.slice(),
+  cmp, focusReg, popOn, popT, ghost: gh.children.length,
+  k: c => GEO[c].k, g: c => GEO[c].g, order: ORDER.slice(),
+  dim: document.querySelectorAll('#fills .dim').length,
+  hint: el('hint').textContent});
 </script>
 </body>
 </html>

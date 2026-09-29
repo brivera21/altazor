@@ -28,6 +28,13 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "projections.html"
 GEO = json.loads((ROOT / "tools" / "data" / "plates.json").read_text())
 
+CAPTION = ("A sphere will not lie flat, so every world map stretches "
+           "something. Mercator keeps angles and swells Greenland to the size "
+           "of Africa; equal-area maps keep areas and bend shapes. A change of"
+           " projection carries the land from one map to the next, and the "
+           "white circle, a true 1,000 km on the globe, shows what each map "
+           "does there.")
+
 NOTE1 = ("A sphere will not lie flat. Every map of the world stretches "
          "something, and the choice of what to stretch is the whole art: "
          "Mercator kept every angle and let Greenland swell to the size of "
@@ -55,7 +62,12 @@ METHOD = ("The maps are drawn by inverting each projection at every pixel "
           "true circles on the sphere projected point by point; the area "
           "ratio in the card is the projected polygon's area against the "
           "cap's true area. Distances are on the sphere; the ellipsoid "
-          "changes them by a few tenths of a percent.")
+          "changes them by a few tenths of a percent. Between two maps the "
+          "land is carried point by point on a one-degree grid from its place "
+          "on the first to its place on the second, so the in-between frames "
+          "are not projections of their own. Dragging the orthographic globe "
+          "anywhere but on the white circle turns it; the left and right arrow "
+          "keys step through the nine maps.")
 
 
 def _js(o):
@@ -99,10 +111,20 @@ h1 { margin:0 0 12px; font-size:26px; }
 .presets button { background:var(--panel); color:var(--muted); border:1px solid var(--line);
   border-radius:8px; padding:4px 10px; font-size:12.5px; cursor:pointer; font-family:inherit; }
 .presets button.on { color:var(--text); border-color:#58a6ff; }
+.presets button small { display:block; font-size:10.5px; color:#7d7d7d; line-height:1.2; }
+.presets button.on small { color:#9fc6f2; }
+#projs button { text-align:left; padding:4px 10px 5px; }
+details.sources { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+details.sources summary { cursor:pointer; }
+details.sources summary:hover { color:var(--text); }
+details.sources .note { border-top:none; padding-top:0; margin-top:10px; }
+#flyBtn { background:var(--panel); color:var(--text); border:1px solid var(--line);
+  border-radius:999px; padding:4px 12px; font-size:12.5px; cursor:pointer; font-family:inherit; }
+#flyBtn.on { background:var(--accent); color:#0b1a2b; border-color:var(--accent); }
 .stage { display:flex; gap:22px; align-items:flex-start; }
 #diagram { flex:1 1 640px; min-width:0; }
 #diagram svg, #diagram canvas { width:100%; height:auto; display:block; user-select:none; touch-action:none; }
-.side { flex:0 0 300px; min-width:0; position:sticky; top:16px; }
+.side { flex:0 0 280px; min-width:0; position:sticky; top:16px; }
 .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; overflow-wrap:anywhere; }
 #kindTxt { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
 #nameTxt { font-weight:700; font-size:17px; margin:2px 0 6px; }
@@ -119,7 +141,7 @@ h1 { margin:0 0 12px; font-size:26px; }
 .refs a { color:var(--accent); }
 __APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%; order:-1;} #diagram{width:100%;} }
 </style>
 </head>
 <body>
@@ -133,7 +155,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <div class="controls" id="mapCtl"><div class="presets" id="projs"></div></div>
 <div class="controls" id="centreCtl" hidden><label>the globe faces</label><div class="presets" id="centers"><button data-c="atl" class="on">the Atlantic</button><button data-c="pac">the Pacific</button><button data-c="np">the North Pole</button><button data-c="sp">the South Pole</button></div></div>
 <div class="controls" id="stretchCtl" hidden><label>the marker</label><output id="latOut"></output></div>
-<div class="controls" id="routeCtl" hidden><div class="presets" id="routes"></div></div>
+<div class="controls" id="routeCtl" hidden><div class="presets" id="routes"></div><button id="flyBtn">Fly both</button></div>
 <div class="stage">
   <div id="diagram"></div>
   <div class="side"><div class="card">
@@ -144,11 +166,14 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
     <div id="srcTxt"></div>
   </div></div>
 </div>
+<p class="note">__CAPTION__</p>
+<details class="sources"><summary>Sources</summary>
 <p class="note">__NOTE1__</p>
-<p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
+<p class="note">__NOTE2__</p>
 <div class="method"><p>__METHOD__</p></div>
 <h2 class="refh">References</h2>
 <div class="refs">__REFS__</div>
+</details>
 </div>
 <script>
 const PROJS=__PROJS__, ROB=__ROB__, PLACES=__PLACES__, GA=__GA__, CITIES=__CITIES__, ROUTES=__ROUTES__, LAND=__LAND__, LW=__LW__, LH=__LH__, RE=__RE__;
@@ -158,7 +183,9 @@ const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const fmt=(n,d)=>n.toLocaleString('en-US',{maximumFractionDigits:d==null?0:d,minimumFractionDigits:d==null?0:d});
 const D2R=Math.PI/180, R2D=180/Math.PI;
 let view='maps', proj='mercator', center='atl', hot=null, cap={lon:-40,lat:60}, capR=1000, lat=51.5, route=0, land=null;
-const CENTERS={atl:[-30,30],pac:[-160,10],np:[0,90],sp:[0,-90]};
+const CENTERS={atl:[-30,30],pac:[-160,10],np:[0,90],sp:[0,-90],free:[-30,30]};
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ease=k=>k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
 
 /* ---- the projections: forward and inverse, in units of the Earth's radius; lon, lat in radians ---- */
 const sinc=a=>a===0?1:Math.sin(a)/a;
@@ -189,11 +216,11 @@ const toPx=r=>r?[M.ox+(r[0]-M.cx)*M.s, M.oy-(r[1]-M.cy)*M.s]:null;
 const fromPx=(px,py)=>[(px-M.ox)/M.s+M.cx, M.cy-(py-M.oy)/M.s];
 const isLand=(lon,lat)=>{ if(!land) return false; let lx=Math.floor(((lon*R2D+540)%360)/360*LW), ly=Math.floor((90-lat*R2D)/180*LH); lx=Math.max(0,Math.min(LW-1,lx)); ly=Math.max(0,Math.min(LH-1,ly)); return land[ly*LW+lx]>0; };
 let cache={};
-function paintMap(ctx){ const key=proj+':'+center; if(land&&cache[key]){ ctx.putImageData(cache[key],0,0); return; } const im=ctx.createImageData(W,M.H), d=im.data; const q=P[proj];
+function paintMap(ctx){ const key=proj+':'+center; if(land&&center!=='free'&&cache[key]){ ctx.putImageData(cache[key],0,0); return; } const im=ctx.createImageData(W,M.H), d=im.data; const q=P[proj];
   for(let py=0;py<M.H;py++) for(let px=0;px<W;px++){ const [x,y]=fromPx(px+0.5,py+0.5); const r=q.inv(x,y); const i=(py*W+px)*4; let c=[18,18,18];
     if(r&&Math.abs(r[1])<=Math.PI/2+1e-9&&Math.abs(r[0])<=Math.PI+1e-9&&!(q.latMax&&Math.abs(r[1])>q.latMax)) c=isLand(r[0],r[1])?[70,74,78]:[16,28,46];
     d[i]=c[0]; d[i+1]=c[1]; d[i+2]=c[2]; d[i+3]=255; }
-  if(land) cache[key]=im; ctx.putImageData(im,0,0); }
+  if(land&&center!=='free') cache[key]=im; ctx.putImageData(im,0,0); }
 function line(ctx,pts){ let up=true, last=null; ctx.beginPath(); for(const p of pts){ const q=toPx(p); if(!q){ up=true; continue; } if(last&&Math.hypot(q[0]-last[0],q[1]-last[1])>60) up=true; if(up){ ctx.moveTo(q[0],q[1]); up=false; } else ctx.lineTo(q[0],q[1]); last=q; } ctx.stroke(); }
 function graticule(ctx){ ctx.strokeStyle='rgba(230,230,230,0.22)'; ctx.lineWidth=1; const lm=P[proj].latMax||Math.PI/2;
   for(let l=-180;l<=180;l+=30){ const pts=[]; for(let p=-90;p<=90;p+=1){ const pp=Math.max(-lm,Math.min(lm,p*D2R)); pts.push(fwd(l*D2R,pp)); } line(ctx,pts); }
@@ -206,10 +233,12 @@ function capRatio(lon,lat,rkm){ const pts=capPts(lon,lat,rkm,72).map(p=>fwd(p[0]
 function drawCap(ctx,lon,lat,rkm,fill,stroke,w){ const pts=capPts(lon,lat,rkm,72).map(p=>toPx(fwd(p[0],p[1]))); if(pts.some(p=>!p)) return false; for(let i=0;i<pts.length-1;i++) if(Math.hypot(pts[i][0]-pts[i+1][0],pts[i][1]-pts[i+1][1])>120) return false;
   ctx.beginPath(); pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath(); ctx.fillStyle=fill; ctx.fill(); ctx.strokeStyle=stroke; ctx.lineWidth=w; ctx.stroke(); return true; }
 function mapsView(){ const cv=document.createElement('canvas'); fitMap(); cv.width=W; cv.height=M.H; cv.id='mcanvas'; const ctx=cv.getContext('2d'); paintMap(ctx); graticule(ctx);
-  for(let l=-150;l<=150;l+=30) for(let p=-60;p<=60;p+=30) drawCap(ctx,l*D2R,p*D2R,500,'rgba(255,176,46,0.28)','rgba(255,176,46,0.8)',1);
+  for(let l=-150;l<=150;l+=30) for(let p=-60;p<=60;p+=30) drawCap(ctx,l*D2R,p*D2R,500,'rgba(255,176,46,0.42)','rgba(255,196,90,1)',1.2);
   drawCap(ctx,cap.lon*D2R,cap.lat*D2R,capR,'rgba(255,140,106,0.45)','#ffffff',2);
-  const c=toPx(fwd(cap.lon*D2R,cap.lat*D2R)); if(c){ ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.arc(c[0],c[1],3,0,7); ctx.fill(); }
-  ctx.fillStyle='#9a9a9a'; ctx.font='11px sans-serif'; ctx.textAlign='left'; ctx.fillText(PROJS.find(p=>p.k===proj).n+': the small circles are 500 km in radius on the globe, the white one 1,000 km, and it drags',12,M.H-10);
+  const c=toPx(fwd(cap.lon*D2R,cap.lat*D2R)); if(c){ // a grip at the center, so the circle reads as a thing to hold
+    ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.arc(c[0],c[1],5,0,7); ctx.fill();
+    ctx.strokeStyle='#121212'; ctx.lineWidth=1.2; for(const d of [-2,0,2]){ ctx.beginPath(); ctx.moveTo(c[0]+d,c[1]-2.5); ctx.lineTo(c[0]+d,c[1]+2.5); ctx.stroke(); } }
+  ctx.fillStyle='#b0b0b0'; ctx.font='12px sans-serif'; ctx.textAlign='left'; ctx.fillText(PROJS.find(p=>p.k===proj).n+': orange circles 500 km in radius on the globe, the white one 1,000 km and movable',12,M.H-10);
   return cv; }
 
 /* ---- the card ---- */
@@ -270,24 +299,84 @@ function routesView(){ const cv=document.createElement('canvas'); cv.width=W; cv
   drawPath(rhumbPts(a,b,200),gp,'#ffb02e',2.2,[6,4]); drawPath(gcPts(a,b,100),gp,'#ff8c6a',2.6);
   ctx.font='11px sans-serif'; for(const [c,map] of [[a,mp],[b,mp],[a,gp],[b,gp]]){ const q=map(c.lon*D2R,c.lat*D2R); if(!q) continue; ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.arc(q[0],q[1],3.5,0,7); ctx.fill(); ctx.textAlign='left'; ctx.fillStyle='#e6e6e6'; ctx.fillText(c.n,q[0]+7,q[1]-6); }
   ctx.fillStyle='#9a9a9a'; ctx.textAlign='left'; ctx.fillText('Mercator: the compass course is the straight dashed line; the great circle bows poleward',mx0,my0+mh+18); ctx.textAlign='center'; ctx.fillText('the globe, turned to the route: the great circle is the straight one',gx,gy+gr+22);
-  proj=save.proj; center=save.center; return cv; }
+  proj=save.proj; center=save.center;
+  RT={cv,ctx,base:ctx.getImageData(0,0,cv.width,cv.height),mp,gp,a,b,g:hav(a,b),r:rhumb(a,b).d};
+  if(fly.on) drawFlight(); return cv; }
+let RT=null;
+/* ---- two aircraft at one speed: one on the great circle, one on the compass course ---- */
+const fly={on:false,km:0,t0:0,id:0};
+function along(pts,f){ const i=Math.min(pts.length-2,Math.floor(f*(pts.length-1))), t=f*(pts.length-1)-i; const A=pts[i], B=pts[i+1]; let dl=B[0]-A[0]; if(Math.abs(dl)>Math.PI) dl-=Math.sign(dl)*2*Math.PI; let l=A[0]+dl*t; if(l>Math.PI) l-=2*Math.PI; if(l<-Math.PI) l+=2*Math.PI; return [l, A[1]+(B[1]-A[1])*t]; }
+function drawFlight(){ if(!RT) return; const {ctx,base,mp,gp,a,b,g,r}=RT; ctx.putImageData(base,0,0);
+  const gc=gcPts(a,b,400), rh=rhumbPts(a,b,400); const fg=Math.min(1,fly.km/g), fr=Math.min(1,fly.km/r);
+  for(const [pts,f,col] of [[gc,fg,'#ff8c6a'],[rh,fr,'#ffb02e']]){ const q=along(pts,f); for(const map of [mp,gp]){ const x=map(q[0],q[1]); if(!x) continue; ctx.fillStyle=col; ctx.strokeStyle='#121212'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(x[0],x[1],6,0,7); ctx.fill(); ctx.stroke(); } }
+  ctx.font='12px sans-serif'; ctx.textAlign='left'; ctx.fillStyle='#e6e6e6';
+  ctx.fillText(fmt(Math.min(fly.km,r))+' km flown'+(fly.km>=g?', the great circle landed '+fmt(Math.min(fly.km,r)-g)+' km ago':''),20,20); }
+function flyStart(){ if(!RT) return; fly.on=true; fly.km=0; document.getElementById('flyBtn').classList.add('on'); document.getElementById('flyBtn').textContent='Pause';
+  const id=++fly.id, D=RM?1:7000, total=RT.r*1.04; let last=performance.now();
+  const tick=now=>{ if(id!==fly.id||!fly.on) return; fly.km=Math.min(total,fly.km+(now-last)/D*total); last=now; drawFlight();
+    if(fly.km<total) requestAnimationFrame(tick); else flyStop(); };
+  requestAnimationFrame(tick); }
+function flyStop(){ fly.on=false; fly.id++; const b=document.getElementById('flyBtn'); b.classList.remove('on'); b.textContent='Fly both'; }
+document.getElementById('flyBtn').addEventListener('click',()=>{ fly.on?flyStop():flyStart(); });
 
 /* ---- render and wiring ---- */
 function render(){ el.innerHTML=''; if(view==='maps') el.appendChild(mapsView()); else if(view==='routes') el.appendChild(routesView()); else { const q=stretchView(); el.innerHTML='<svg viewBox="0 0 '+W+' '+q.h+'" xmlns="http://www.w3.org/2000/svg" id="psvg"><rect width="'+W+'" height="'+q.h+'" fill="#121212"/>'+q.svg+'</svg>'; fixLabels(); }
   document.getElementById('mapCtl').hidden=view!=='maps'; document.getElementById('centreCtl').hidden=!(view==='maps'&&proj==='ortho'); document.getElementById('stretchCtl').hidden=view!=='stretch'; document.getElementById('routeCtl').hidden=view!=='routes'; document.getElementById('latOut').textContent=Math.abs(lat).toFixed(1)+'\\u00b0'; }
 function home(){ if(view==='maps') showMap(); else if(view==='stretch') showStretch(); else showRoute(); }
-function setView(v){ view=v; hot=null; for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render(); home(); }
+function setView(v){ view=v; hot=null; flyStop(); morphId++; for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render(); home(); }
 document.getElementById('views').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setView(b.dataset.v); });
-(function(){ const box=document.getElementById('projs'); box.innerHTML=PROJS.map(p=>'<button data-p="'+p.k+'"'+(p.k===proj?' class="on"':'')+'>'+esc(p.n)+'</button>').join(''); box.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; proj=b.dataset.p; for(const x of box.querySelectorAll('button')) x.classList.toggle('on',x===b); render(); showMap(); });
-  const rb=document.getElementById('routes'); rb.innerHTML=ROUTES.map((r,i)=>'<button data-r="'+i+'"'+(i===route?' class="on"':'')+'>'+esc(CITIES[r[0]].n)+' to '+esc(CITIES[r[1]].n)+'</button>').join(''); rb.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; route=+b.dataset.r; for(const x of rb.querySelectorAll('button')) x.classList.toggle('on',x===b); render(); showRoute(); });
-  document.getElementById('centers').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; center=b.dataset.c; for(const x of document.querySelectorAll('#centers button')) x.classList.toggle('on',x===b); render(); showMap(); }); })();
-let dragging=false;
+(function(){ const box=document.getElementById('projs'); box.innerHTML=PROJS.map(p=>'<button data-p="'+p.k+'"'+(p.k===proj?' class="on"':'')+'>'+esc(p.n)+'<small>'+esc(p.kind)+'</small></button>').join(''); box.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; setProj(b.dataset.p); });
+  const rb=document.getElementById('routes'); rb.innerHTML=ROUTES.map((r,i)=>'<button data-r="'+i+'"'+(i===route?' class="on"':'')+'>'+esc(CITIES[r[0]].n)+' to '+esc(CITIES[r[1]].n)+'</button>').join(''); rb.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; route=+b.dataset.r; flyStop(); for(const x of rb.querySelectorAll('button')) x.classList.toggle('on',x===b); render(); showRoute(); });
+  document.getElementById('centers').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; center=b.dataset.c; CENTERS.free=CENTERS[center].slice(); for(const x of document.querySelectorAll('#centers button')) x.classList.toggle('on',x===b); render(); showMap(); }); })();
+/* ---- from one projection to the next: the land carried point by point ---- */
+function fitFor(k){ const keep=proj; proj=k; fitMap(); const m=M; proj=keep; return m; }
+let morphId=0;
+function morph(from,to,done){
+  const MA=fitFor(from), MB=fitFor(to); M=MB;
+  const pos=(k,m,l,p)=>{ const q=P[k]; if(q.latMax&&Math.abs(p)>q.latMax) return null; const r=q.fwd(l,p); if(!r) return null; return [m.ox+(r[0]-m.cx)*m.s, m.oy-(r[1]-m.cy)*m.s]; };
+  const N=[]; for(let la=-89.5;la<90;la+=1) for(let lo=-179.5;lo<180;lo+=1){ const l=lo*D2R, p=la*D2R;
+    const a=pos(from,MA,l,p), b=pos(to,MB,l,p); if(!a&&!b) continue;
+    // each grid cell's size on each map, so the stretched cells still tile
+    const sz=(k,m,x)=>{ if(!x) return [3,3]; const e=pos(k,m,l+D2R,p), n=pos(k,m,l,Math.min(Math.PI/2-1e-6,p+D2R)); return [e?Math.min(40,Math.abs(e[0]-x[0])+1.2):3, n?Math.min(40,Math.abs(n[1]-x[1])+1.2):3]; };
+    N.push([a,b,sz(from,MA,a),sz(to,MB,b),isLand(l,p)]); }
+  const cv=document.getElementById('mcanvas'); if(!cv){ done(); return; }
+  const ctx=cv.getContext('2d'), Wc=cv.width, Hc=cv.height, id=++morphId, t0=performance.now(), D=950;
+  const im=ctx.createImageData(Wc,Hc), d=im.data;
+  const tick=now=>{ if(id!==morphId) return; const k=Math.min(1,(now-t0)/D), e=ease(k);
+    for(let i=0;i<d.length;i+=4){ d[i]=18; d[i+1]=18; d[i+2]=18; d[i+3]=255; }
+    for(const [a,b,sa,sb,ld] of N){ let x,y,w,h,al;
+      if(a&&b){ x=a[0]+(b[0]-a[0])*e; y=a[1]+(b[1]-a[1])*e; w=sa[0]+(sb[0]-sa[0])*e; h=sa[1]+(sb[1]-sa[1])*e; al=1; }
+      else if(a){ [x,y]=a; [w,h]=sa; al=1-e; } else { [x,y]=b; [w,h]=sb; al=e; }
+      const c=ld?[70,74,78]:[16,28,46];
+      const x0=Math.max(0,Math.floor(x-w/2)), x1=Math.min(Wc-1,Math.ceil(x+w/2)), y0=Math.max(0,Math.floor(y-h/2)), y1=Math.min(Hc-1,Math.ceil(y+h/2));
+      for(let yy=y0;yy<=y1;yy++) for(let xx=x0;xx<=x1;xx++){ const j=(yy*Wc+xx)*4; d[j]=d[j]+(c[0]-d[j])*al; d[j+1]=d[j+1]+(c[1]-d[j+1])*al; d[j+2]=d[j+2]+(c[2]-d[j+2])*al; } }
+    ctx.putImageData(im,0,0);
+    if(k<1) requestAnimationFrame(tick); else done(); };
+  requestAnimationFrame(tick);
+}
+function setProj(k){ if(k===proj) return; const from=proj; proj=k;
+  for(const x of document.querySelectorAll('#projs button')) x.classList.toggle('on',x.dataset.p===k);
+  showMap();
+  if(RM||view!=='maps'||!land||document.hidden){ render(); return; }
+  document.getElementById('centreCtl').hidden=k!=='ortho';
+  morph(from,k,()=>{ render(); showMap(); }); }
+document.addEventListener('keydown',e=>{ const t=e.target; if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA')) return;
+  if(view!=='maps'||(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')) return; e.preventDefault();
+  const i=PROJS.findIndex(p=>p.k===proj), j=(i+(e.key==='ArrowRight'?1:-1)+PROJS.length)%PROJS.length; setProj(PROJS[j].k); });
+
+let dragging=false, spinning=null;
 const pt=e=>{ const c=el.firstElementChild, b=c.getBoundingClientRect(); const vh=c.tagName==='CANVAS'?c.height:c.viewBox.baseVal.height; return [(e.clientX-b.left)/b.width*W,(e.clientY-b.top)/b.height*vh]; };
 function setCap(px,py){ const [x,y]=fromPx(px,py); const r=P[proj].inv(x,y); if(!r||Math.abs(r[1])>Math.PI/2||Math.abs(r[0])>Math.PI) return; if(P[proj].latMax&&Math.abs(r[1])>P[proj].latMax) return; cap={lon:r[0]*R2D,lat:r[1]*R2D}; render(); showMap(); }
 function setLat(x){ lat=Math.round(Math.max(0,Math.min(89.9,(x-S.x)/S.w*90))*10)/10; render(); showStretch(); }
-el.addEventListener('pointerdown',e=>{ const [x,y]=pt(e); if(view==='maps'){ dragging=true; setCap(x,y); e.preventDefault(); } if(view==='stretch'&&x>=S.x-10&&x<=S.x+S.w+10){ dragging=true; setLat(x); e.preventDefault(); } });
-el.addEventListener('pointermove',e=>{ if(!dragging) return; const [x,y]=pt(e); if(view==='maps') setCap(x,y); else if(view==='stretch') setLat(x); });
-window.addEventListener('pointerup',()=>{ dragging=false; });
+el.addEventListener('pointerdown',e=>{ const [x,y]=pt(e);
+  if(view==='maps'&&proj==='ortho'){ // on the white circle it moves the circle; anywhere else it turns the globe
+    const c=toPx(fwd(cap.lon*D2R,cap.lat*D2R)); const rpx=capR/RE*M.s;
+    if(!c||Math.hypot(x-c[0],y-c[1])>rpx+8){ if(center!=='free'){ CENTERS.free=CENTERS[center].slice(); center='free'; for(const b of document.querySelectorAll('#centers button')) b.classList.remove('on'); }
+      spinning={x,y,c0:CENTERS.free.slice()}; e.preventDefault(); return; } }
+  if(view==='maps'){ dragging=true; setCap(x,y); e.preventDefault(); } if(view==='stretch'&&x>=S.x-10&&x<=S.x+S.w+10){ dragging=true; setLat(x); e.preventDefault(); } });
+el.addEventListener('pointermove',e=>{ if(spinning){ const [x,y]=pt(e); const k=180/Math.PI/M.s; CENTERS.free=[((spinning.c0[0]-(x-spinning.x)*k+540)%360)-180, Math.max(-90,Math.min(90,spinning.c0[1]+(y-spinning.y)*k))]; render(); return; }
+  if(!dragging) return; const [x,y]=pt(e); if(view==='maps') setCap(x,y); else if(view==='stretch') setLat(x); });
+window.addEventListener('pointerup',()=>{ dragging=false; if(spinning){ spinning=null; showMap(); } });
 el.addEventListener('pointerover',e=>{ if(dragging||view!=='stretch') return; const g=e.target.closest('[data-proj]'); if(!g) return; const k=g.getAttribute('data-proj'); if(k===hot) return; hot=k; render(); const p=PROJS.find(x=>x.k===k); card(p.kind+', '+yr(p.year), esc(p.n), [['at '+Math.abs(lat).toFixed(1)+'\\u00b0',fmt(areaScale(k,lat)||0,2)+' times the true area'],['at 60\\u00b0',fmt(areaScale(k,60),2)+'\\u00d7'],['at 80\\u00b0',(areaScale(k,80)||0)>0?fmt(areaScale(k,80),1)+'\\u00d7':'off the map']], p.b, 'Snyder 1987'); });
 el.addEventListener('pointerleave',()=>{ if(hot){ hot=null; render(); home(); } });
 
@@ -311,7 +400,7 @@ window.__proj=(q)=>{ const o={view,proj,center,cap,lat,route,land:!!land,card:do
 html = (HTML.replace("__APACSS__", apa.CSS)
         .replace("__PROJS__", _js(projs)).replace("__ROB__", _js(ROBINSON)).replace("__PLACES__", _js(PLACES)).replace("__GA__", _js(GREENLAND_AFRICA)).replace("__CITIES__", _js(cities)).replace("__ROUTES__", _js(ROUTES))
         .replace("__LAND__", _js(GEO["land"])).replace("__LW__", str(GEO["landW"])).replace("__LH__", str(GEO["landH"])).replace("__RE__", str(R_EARTH))
-        .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2).replace("__METHOD__", METHOD)
+        .replace("__CAPTION__", CAPTION).replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2).replace("__METHOD__", METHOD)
         .replace("__REFS__", apa.render(REFS)))
 OUT.write_text(html, encoding="utf-8")
 print(f"wrote {OUT} ({len(html):,} B): {len(PROJECTIONS)} projections, {len(ROUTES)} routes")

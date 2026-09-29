@@ -144,6 +144,37 @@ def curvas(fine, step=100):
     return out
 
 
+# Los pisos de altura: la misma malla en bandas de color, con el sombreado
+# encima, para que el piso del valle y la sierra se separen de un vistazo.
+PISOS = [(1800, "#2f5d4a", "menos de 1,800 m"), (1850, "#4f7a4c", "1,800 a 1,850"),
+         (1900, "#7c8f52", "1,850 a 1,900"), (2000, "#a39a5c", "1,900 a 2,000"),
+         (2200, "#a67f4f", "2,000 a 2,200"), (2500, "#8f6a55", "2,200 a 2,500"),
+         (99999, "#b9b0a6", "más de 2,500 m")]
+
+
+def pisos(fine):
+    h, w = fine.shape
+    dy_m = (N - S) * 110570.0 / h
+    dx_m = (E - W) * 111320.0 * np.cos(np.radians(LAT0)) / w
+    gy, gx = np.gradient(fine, dy_m, dx_m)
+    slope = np.arctan(np.hypot(gx, gy))
+    aspect = np.arctan2(-gx, gy)
+    az, alt = np.radians(315.0), np.radians(45.0)
+    shade = np.clip(np.sin(alt) * np.cos(slope)
+                    + np.cos(alt) * np.sin(slope) * np.cos(az - aspect), 0, 1)
+    col = np.zeros(fine.shape + (3,))
+    piso = -1e9
+    for tope, hexc, _ in PISOS:
+        m = (fine >= piso) & (fine < tope)
+        col[m] = [int(hexc[i:i + 2], 16) for i in (1, 3, 5)]
+        piso = tope
+    rgb = col * (0.55 + 0.6 * shade[..., None])
+    im = Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8), "RGB")
+    buf = io.BytesIO()
+    im.save(buf, format="JPEG", quality=80, optimize=True, progressive=True)
+    return base64.b64encode(buf.getvalue()).decode()
+
+
 def hav(a, b):
     R = 6371.0088
     r = math.radians
@@ -154,6 +185,7 @@ def hav(a, b):
 
 g = malla()
 png, fine = relieve(g)
+png_pisos = pisos(fine)
 cur = curvas(fine)
 lugares, caminos, aguas = leer_osm()
 print(f"malla {g.shape}, de {g.min():.0f} a {g.max():.0f} m; "
@@ -280,7 +312,10 @@ malla_b64 = base64.b64encode(chica.tobytes()).decode()
 CNX, CNY = chica.shape[1], chica.shape[0]
 print(f"malla del cursor: {CNX} por {CNY}, {len(malla_b64):,} caracteres")
 
-PW, PH = 900.0, 170.0
+PW, PH = 900.0, 124.0
+KMPX = (E - W) * 111.32 * np.cos(np.radians(LAT0)) / VW   # km por unidad del cuadro
+pisos_html = "".join(
+    f'<span><i style="background:{c}"></i>{t}</span>' for _, c, t in PISOS)
 alto_max = int(g.max())
 bajo_min = int(g.min())
 
@@ -333,8 +368,7 @@ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-ser
 .box .val{{font-size:1.35rem;line-height:1.2;font-variant-numeric:tabular-nums}}
 .box .sub2{{font-size:.8rem;color:var(--ink3)}}
 .wide{{flex:1;min-width:240px}}
-.notes{{margin-top:2.5rem;border-top:1px solid var(--line);padding-top:1.5rem;
-color:var(--ink2);font-size:.95rem}}
+.notes{{margin-top:1rem;color:var(--ink2);font-size:.95rem}}
 .notes p{{margin:0 0 1rem;max-width:74ch}}
 .method{{margin-top:1.5rem;color:var(--ink3);font-size:.88rem}}
 .method p{{margin:0 0 .9rem;max-width:74ch}}
@@ -358,6 +392,42 @@ paint-order:stroke;stroke:#10141a;stroke-width:2.6}}
 .lbl.arr{{font-size:10.5px;fill:#9dc0dd;font-style:italic}}
 .leg{{font:400 12px/1 system-ui,sans-serif;fill:#c3ccd6}}
 .ax{{font:400 11px/1 system-ui,sans-serif;fill:var(--ink3)}}
+.ax.pue{{fill:#cfeee5;font-size:10.5px}}
+svg#map{{outline:none}}
+svg#map:focus-visible{{border-color:var(--accent)}}
+.mapfig{{position:relative}}
+.hud{{position:sticky;top:10px;height:0;z-index:3}}
+.hud .readout{{position:absolute;right:10px;top:10px;width:264px;flex-direction:column;
+gap:5px;margin:0;pointer-events:none;opacity:0;transition:opacity .25s}}
+.mapfig.vivo .hud .readout{{opacity:1}}
+.hud .box{{background:rgba(18,21,25,.9);border:1px solid var(--line);padding:.4rem .7rem;min-width:0}}
+.hud .box .lab{{font-size:.72rem}}
+.hud .box .val{{font-size:1rem}}
+.hud .box .sub2{{font-size:.75rem}}
+.perfilwrap{{position:sticky;bottom:0;z-index:2;background:rgba(18,18,18,.94);padding:6px 0 4px}}
+.perfilwrap svg#perfil{{margin-top:0;cursor:ew-resize;touch-action:none}}
+.perfilwrap .controls{{margin:.5rem 0 0}}
+#kmOut{{font-variant-numeric:tabular-nums;color:var(--ink2)}}
+.pisosley{{display:none;flex-wrap:wrap;gap:4px 14px;margin:.5rem 0 0;font-size:12px;color:var(--ink2);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}}
+.pisosley.on{{display:flex}}
+.pisosley i{{display:inline-block;width:12px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}}
+.caption{{color:var(--ink2);font-size:.95rem;max-width:74ch;margin:1.3rem 0 0}}
+.tiles{{margin:1.2rem 0 0}}
+details.sources{{margin-top:2.2rem;border-top:1px solid var(--line);padding-top:.8rem}}
+details.sources>summary{{cursor:pointer;color:var(--ink3);font-size:.8rem;letter-spacing:.06em;
+text-transform:uppercase;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}}
+details.sources>summary:hover{{color:var(--accent)}}
+#recta line{{stroke:#fff3d6;stroke-width:1.6;stroke-dasharray:6 4}}
+#recta text{{font:600 12px/1 system-ui,sans-serif;fill:#fff3d6;paint-order:stroke;stroke:#10141a;stroke-width:3}}
+@media (max-width:600px){{
+  .hud{{position:static;height:auto}}
+  .hud .readout{{position:static;width:auto;flex-direction:row;margin-bottom:8px;opacity:1}}
+  .hud .box{{flex:1 1 150px}}
+  .scroller{{overflow-x:auto;-webkit-overflow-scrolling:touch}}
+  .scroller svg#map{{min-width:680px}}
+  .perfilwrap{{position:static}}
+}}
 </style>
 </head>
 <body>
@@ -369,23 +439,39 @@ paint-order:stroke;stroke:#10141a;stroke-width:2.6}}
 
 <h1>El valle del Santa María</h1>
 
-<div class="tiles">
-  <div class="tile"><div class="k">el río</div><div class="v">{acc:.0f} km en el cuadro</div>
-    <div class="g">corre al norte, de {rio_alt[0]:,} a {rio_alt[-1]:,} m</div></div>
-  <div class="tile"><div class="k">El Terrero</div><div class="v">{POB2020["El Terrero"]:,}</div>
-    <div class="g">habitantes en 2020, más que la cabecera</div></div>
-  <div class="tile"><div class="k">Namiquipa</div><div class="v">{POB2020["Namiquipa"]:,}</div>
-    <div class="g">la cabecera del municipio, censo de 2020</div></div>
-  <div class="tile"><div class="k">del río a la sierra</div><div class="v">{alto_max - bajo_min:,} m</div>
-    <div class="g">del punto más bajo del cuadro al más alto</div></div>
+<div class="controls">
+  <button class="ctl" id="bRel" aria-pressed="true">Relieve</button>
+  <button class="ctl" id="bCur" aria-pressed="true">Curvas</button>
+  <button class="ctl" id="bCam" aria-pressed="true">Caminos</button>
+  <button class="ctl" id="bAgua" aria-pressed="true">Agua</button>
+  <button class="ctl" id="bLug" aria-pressed="true">Pueblos</button>
+  <button class="ctl" id="bPisos" aria-pressed="false">Pisos de altura</button>
+  <span style="flex:1"></span>
+  <button class="ctl" id="bRio" aria-pressed="false">Río abajo</button>
+  <span id="kmOut">el perfil de abajo se arrastra</span>
 </div>
+<div class="pisosley" id="pisosLey">{pisos_html}</div>
 
-<figure>
-<svg id="map" viewBox="0 0 {VW:.0f} {VH:.0f}" role="img"
+<figure class="mapfig" id="mapfig">
+<div class="hud">
+<div class="readout">
+  <div class="box"><div class="lab">altitud bajo el cursor</div>
+    <div class="val" id="rAlt">&middot;</div><div class="sub2" id="rCoord"></div></div>
+  <div class="box wide"><div class="lab" id="rLab">el lugar más cercano</div>
+    <div class="val" id="rLug" style="font-size:1.05rem">&middot;</div>
+    <div class="sub2" id="rLugSub"></div></div>
+  <div class="box"><div class="lab">el río</div>
+    <div class="val" id="rRio">&middot;</div><div class="sub2" id="rRioSub"></div></div>
+</div>
+</div>
+<div class="scroller">
+<svg id="map" viewBox="0 0 {VW:.0f} {VH:.0f}" role="img" tabindex="0"
   aria-label="Mapa del valle del río Santa María en Namiquipa, con el relieve, los caminos y los pueblos.">
 <title>El valle del Santa María</title>
 <image id="relieve" href="data:image/jpeg;base64,{png}" x="0" y="0"
   width="{VW:.0f}" height="{VH:.0f}" preserveAspectRatio="none"/>
+<image id="pisos" href="data:image/jpeg;base64,{png_pisos}" x="0" y="0"
+  width="{VW:.0f}" height="{VH:.0f}" preserveAspectRatio="none" opacity="0"/>
 <g id="curvas">
 {cur_html}
 </g>
@@ -396,8 +482,10 @@ paint-order:stroke;stroke:#10141a;stroke-width:2.6}}
 {cam_html}
 </g>
 <g id="arroyos"></g>
+<g id="recta"></g>
 <g id="lugares"></g>
 <circle id="marca" r="6.5" fill="none" stroke="#fff3d6" stroke-width="2" style="display:none"/>
+<circle id="rioPunto" r="6" fill="#fff3d6" stroke="#10141a" stroke-width="2" style="display:none"/>
 <g id="legend">
   <rect x="8" y="8" width="224" height="126" rx="8" fill="#0f1216" fill-opacity=".78"/>
   <line x1="18" y1="28" x2="34" y2="28" stroke="{C_RIO}" stroke-width="2.6"/>
@@ -414,7 +502,8 @@ paint-order:stroke;stroke:#10141a;stroke-width:2.6}}
   <text class="leg" x="42" y="130">curva de nivel, cada 100 m</text>
 </g>
 </svg>
-
+</div>
+<div class="perfilwrap">
 <svg id="perfil" viewBox="0 0 {PW:.0f} {PH:.0f}" role="img"
   aria-label="Altitud del río a lo largo del valle.">
 <title>El río, de sur a norte</title>
@@ -423,36 +512,36 @@ paint-order:stroke;stroke:#10141a;stroke-width:2.6}}
 <g id="perfilEjes"></g>
 <line id="perfilMarca" x1="0" y1="14" x2="0" y2="{PH - 26:.0f}" stroke="#fff3d6"
   stroke-width="1.4" style="display:none"/>
+<circle id="perfilPunto" r="4.5" fill="#fff3d6" stroke="#10141a" stroke-width="1.5" style="display:none"/>
 </svg>
+</div>
 </figure>
 
-<div class="controls">
-  <button class="ctl" id="bRel" aria-pressed="true">Relieve</button>
-  <button class="ctl" id="bCur" aria-pressed="true">Curvas</button>
-  <button class="ctl" id="bCam" aria-pressed="true">Caminos</button>
-  <button class="ctl" id="bAgua" aria-pressed="true">Agua</button>
-  <button class="ctl" id="bLug" aria-pressed="true">Pueblos</button>
+<p class="caption">El río Santa María baja de la sierra y da vuelta al norte por
+el valle; sobre él quedan la cabecera, El Molino y El Terrero, y en las lomas
+los ranchos. El cursor lee el terreno, el perfil se arrastra o corre río abajo,
+y un lugar con un clic mide su recta hasta El Terrero.</p>
+
+<div class="tiles">
+  <div class="tile"><div class="k">el río</div><div class="v">{acc:.0f} km en el cuadro</div>
+    <div class="g">corre al norte, de {rio_alt[0]:,} a {rio_alt[-1]:,} m</div></div>
+  <div class="tile"><div class="k">El Terrero</div><div class="v">{POB2020["El Terrero"]:,}</div>
+    <div class="g">habitantes en 2020, más que la cabecera</div></div>
+  <div class="tile"><div class="k">Namiquipa</div><div class="v">{POB2020["Namiquipa"]:,}</div>
+    <div class="g">la cabecera del municipio, censo de 2020</div></div>
+  <div class="tile"><div class="k">del río a la sierra</div><div class="v">{alto_max - bajo_min:,} m</div>
+    <div class="g">del punto más bajo del cuadro al más alto</div></div>
 </div>
 
-<div class="readout">
-  <div class="box"><div class="lab">altitud bajo el cursor</div>
-    <div class="val" id="rAlt">&mdash;</div><div class="sub2" id="rCoord"></div></div>
-  <div class="box wide"><div class="lab" id="rLab">el lugar más cercano</div>
-    <div class="val" id="rLug" style="font-size:1.05rem">&mdash;</div>
-    <div class="sub2" id="rLugSub"></div></div>
-  <div class="box"><div class="lab">el río</div>
-    <div class="val" id="rRio">&mdash;</div><div class="sub2" id="rRioSub"></div></div>
-</div>
-
+<details class="sources"><summary>Fuentes</summary>
 <div class="notes">
-<p>El río Santa María baja de la sierra y da vuelta al norte por el valle;
-sobre él están la cabecera, El Molino y El Terrero, uno tras otro, y en las
-lomas de los lados quedan los ranchos. El agua va perdiendo altura hacia el
-norte, y el perfil de abajo lleva esa cuenta.</p>
 <p>Las cifras de población son del censo de 2020 y solo las hay para cuatro de
 estos lugares; los demás salen en el mapa por su nombre y por lo que
-OpenStreetMap dice que son. El cursor sobre el mapa da la altitud del terreno
-y el lugar más cercano.</p>
+OpenStreetMap dice que son. La recta hasta El Terrero es de círculo máximo; la
+distancia por camino no se calcula aquí porque los caminos de OpenStreetMap,
+simplificados, pierden los cruces donde se unen. Las marcas de los pueblos
+sobre el perfil van en el punto del río más cercano a cada uno. Los pisos de
+altura pintan la misma malla del relieve en bandas.</p>
 </div>
 
 <div class="method">
@@ -480,6 +569,7 @@ Data on AWS. Recuperado en agosto de 2026, de
 <p>OpenStreetMap contributors. (2026). <em>OpenStreetMap</em> [Conjunto de
 datos]. <a href="https://www.openstreetmap.org/copyright">https://www.openstreetmap.org/copyright</a></p>
 </div>
+</details>
 </main>
 <script>
 const LUG={json.dumps(lug_js, ensure_ascii=False)};
@@ -488,7 +578,9 @@ const RIO={json.dumps(rio_js)};
 const MALLA="{malla_b64}";
 const CNX={CNX}, CNY={CNY}, CDX={DX * 2};
 const W={W}, E={E}, S={S}, N={N}, VW={VW}, VH={VH:.0f};
-const PW={PW}, PH={PH};
+const PW={PW}, PH={PH}, KMPX={KMPX:.6f};
+const REDUCIDO=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmt=n=>Math.round(n).toLocaleString('es-MX');
 const el=id=>document.getElementById(id);
 const SVGNS='http://www.w3.org/2000/svg';
 function make(t,a,p){{const e=document.createElementNS(SVGNS,t);
@@ -507,7 +599,8 @@ function alturaEn(la,lo){{
 const gl=el('lugares');
 LUG.forEach((l,i)=>{{
   const c=make('circle',{{class:'lug',cx:l.x,cy:l.y,r:l.r,'data-i':i}},gl);
-  c.addEventListener('mouseenter',()=>mostrar(i));
+  c.addEventListener('mouseenter',()=>{{if(fijo===null) mostrar(i);}});
+  c.addEventListener('click',ev=>{{ev.stopPropagation();fijar(fijo===i?null:i);}});
   const t=make('text',{{class:'lbl'+(l.tam<12?' chico':''),x:l.lx,y:l.ly,
     'text-anchor':l.anc}},gl);
   t.textContent=l.n;
@@ -523,7 +616,7 @@ el('perfilLinea').setAttribute('d','');
 const rMin=Math.min(...RIO.alt), rMax=Math.max(...RIO.alt);
 const total=RIO.km[RIO.km.length-1];
 const pxKm=k=>46+(k/total)*(PW-70);
-const pyEl=e=>PH-26-((e-rMin)/(rMax-rMin))*(PH-52);
+const pyEl=e=>PH-24-((e-rMin)/(rMax-rMin))*(PH-50);
 {{
   let d='';
   RIO.km.forEach((k,i)=>{{d+=(i?'L':'M')+pxKm(k).toFixed(1)+','+pyEl(RIO.alt[i]).toFixed(1);}});
@@ -537,20 +630,64 @@ const pyEl=e=>PH-26-((e-rMin)/(rMax-rMin))*(PH-52);
     make('line',{{x1:pxKm(k),y1:PH-26,x2:pxKm(k),y2:PH-20,stroke:'#4d5359','stroke-width':1}},ax);
     const t=make('text',{{class:'ax',x:pxKm(k),y:PH-8,'text-anchor':'middle'}},ax);
     t.textContent=k+' km';}}
-  const t=make('text',{{class:'ax',x:PW-24,y:14,'text-anchor':'end'}},ax);
+  const t=make('text',{{class:'ax',x:PW-24,y:12,'text-anchor':'end'}},ax);
   t.textContent='aguas abajo, hacia el norte';
+  // los pueblos que están sobre el río, en el punto del río más cercano
+  LUG.forEach(l=>{{
+    if(!l.p) return;
+    let br=null;
+    for(let i=0;i<RIO.x.length;i++){{const d=Math.hypot(RIO.x[i]-l.x,RIO.y[i]-l.y);
+      if(!br||d<br[1]) br=[i,d];}}
+    if(br[1]*KMPX>1.2) return;
+    const x=pxKm(RIO.km[br[0]]), y=pyEl(RIO.alt[br[0]]);
+    make('line',{{x1:x,y1:y-4,x2:x,y2:y-12,stroke:'#cfeee5','stroke-width':1}},ax);
+    make('circle',{{cx:x,cy:y,r:2.6,fill:'#7fd4c1'}},ax);
+    const tt=make('text',{{class:'ax pue',x:x,y:y-15,'text-anchor':'middle'}},ax);
+    tt.textContent=l.n;
+    tt.dataset.km=RIO.km[br[0]].toFixed(1);
+  }});
+  // si dos nombres se enciman, el de la derecha sube
+  const pues=[...ax.querySelectorAll('text.pue')].sort((a,b)=>a.getAttribute('x')-b.getAttribute('x'));
+  for(let i=1;i<pues.length;i++){{
+    const a=pues[i-1].getBBox(), b=pues[i].getBBox();
+    if(b.x<a.x+a.width+4&&Math.abs(b.y-a.y)<a.height)
+      pues[i].setAttribute('x',a.x+a.width+4+b.width/2);
+  }}
 }}
 
+let fijo=null;
 function mostrar(i){{
   [...gl.children].forEach(c=>{{if(c.tagName==='circle') c.classList.remove('on')}});
   const l=LUG[i];
   const c=gl.querySelector(`circle[data-i="${{i}}"]`);
   if(c) c.classList.add('on');
-  el('rLab').textContent='el lugar';
+  el('rLab').textContent=fijo===i?'el lugar fijado':'el lugar';
   el('rLug').textContent=l.n;
   el('rLugSub').textContent=(l.p?l.p.toLocaleString('es-MX')+' habitantes en 2020, ':'')
-    +l.h+' m de altitud';
+    +l.h+' m de altitud'+(fijo===i&&l.n!=='El Terrero'?', '+recta(l).toFixed(1)+' km en recta a El Terrero':'');
 }}
+// un lugar fijado tira su recta hasta El Terrero, de círculo máximo
+const TERRERO=LUG.find(l=>l.n==='El Terrero');
+function recta(l){{
+  const r=Math.PI/180, R=6371.0088;
+  const q=Math.sin((TERRERO.la-l.la)*r/2)**2+Math.cos(l.la*r)*Math.cos(TERRERO.la*r)*Math.sin((TERRERO.lo-l.lo)*r/2)**2;
+  return 2*R*Math.asin(Math.sqrt(q));
+}}
+function fijar(i){{
+  fijo=i;
+  const g=el('recta'); while(g.firstChild) g.removeChild(g.firstChild);
+  [...gl.children].forEach(c=>{{if(c.tagName==='circle') c.classList.remove('on')}});
+  if(i===null){{ el('rLab').textContent='el lugar más cercano'; return; }}
+  el('mapfig').classList.add('vivo');
+  const l=LUG[i];
+  if(l!==TERRERO){{
+    make('line',{{x1:l.x,y1:l.y,x2:TERRERO.x,y2:TERRERO.y}},g);
+    const t=make('text',{{x:(l.x+TERRERO.x)/2+8,y:(l.y+TERRERO.y)/2-6}},g);
+    t.textContent=recta(l).toFixed(1)+' km';
+  }}
+  mostrar(i);
+}}
+document.addEventListener('keydown',ev=>{{ if(ev.key==='Escape'&&fijo!==null) fijar(null); }});
 
 const svg=el('map');
 function alCursor(ev){{
@@ -558,16 +695,19 @@ function alCursor(ev){{
   const p=pt.matrixTransform(svg.getScreenCTM().inverse());
   const lo=W+(p.x/VW)*(E-W), la=N-(p.y/VH)*(N-S);
   if(lo<W||lo>E||la<S||la>N) return;
+  el('mapfig').classList.add('vivo');
   el('rAlt').textContent=alturaEn(la,lo)+' m';
   el('rCoord').textContent=la.toFixed(4)+', '+lo.toFixed(4);
   let mejor=null;
   LUG.forEach((l,i)=>{{const d=Math.hypot(l.x-p.x,l.y-p.y); if(!mejor||d<mejor[1]) mejor=[i,d];}});
-  const kmPorPx=({(E - W) * 111.32 * np.cos(np.radians(LAT0)):.4f})/VW;
+  const kmPorPx=KMPX;
   const l=LUG[mejor[0]];
-  el('rLab').textContent='el lugar más cercano';
-  el('rLug').textContent=l.n;
-  el('rLugSub').textContent=(l.p?l.p.toLocaleString('es-MX')+' habitantes en 2020, ':'')
-    +'a '+(mejor[1]*kmPorPx).toFixed(1)+' km';
+  if(fijo===null){{
+    el('rLab').textContent='el lugar más cercano';
+    el('rLug').textContent=l.n;
+    el('rLugSub').textContent=(l.p?l.p.toLocaleString('es-MX')+' habitantes en 2020, ':'')
+      +'a '+(mejor[1]*kmPorPx).toFixed(1)+' km';
+  }}
   // el punto del río más cercano
   let br=null;
   for(let i=0;i<RIO.x.length;i++){{const d=Math.hypot(RIO.x[i]-p.x,RIO.y[i]-p.y);
@@ -585,6 +725,80 @@ function alCursor(ev){{
 svg.addEventListener('mousemove',alCursor);
 svg.addEventListener('mouseleave',()=>{{
   el('perfilMarca').style.display='none'; el('marca').style.display='none';
+  if(kmSel!==null) ponKm(kmSel);
+}});
+svg.addEventListener('click',()=>{{ if(fijo!==null) fijar(null); }});
+
+// el río recorrido: el perfil se arrastra y un punto baja por el mapa
+let kmSel=null, corre=null;
+function enKm(k){{
+  let i=1; while(i<RIO.km.length-1&&RIO.km[i]<k) i++;
+  const k0=RIO.km[i-1], k1=RIO.km[i], f=k1>k0?Math.max(0,Math.min(1,(k-k0)/(k1-k0))):0;
+  return {{x:RIO.x[i-1]+(RIO.x[i]-RIO.x[i-1])*f, y:RIO.y[i-1]+(RIO.y[i]-RIO.y[i-1])*f,
+          alt:RIO.alt[i-1]+(RIO.alt[i]-RIO.alt[i-1])*f}};
+}}
+function ponKm(k){{
+  kmSel=Math.max(0,Math.min(total,k));
+  el('mapfig').classList.add('vivo');
+  const q=enKm(kmSel), x=pxKm(kmSel);
+  const rp=el('rioPunto'); rp.style.display=''; rp.setAttribute('cx',q.x); rp.setAttribute('cy',q.y);
+  const pm=el('perfilMarca'); pm.style.display=''; pm.setAttribute('x1',x); pm.setAttribute('x2',x);
+  const pp=el('perfilPunto'); pp.style.display=''; pp.setAttribute('cx',x); pp.setAttribute('cy',pyEl(q.alt));
+  el('rRio').textContent=fmt(q.alt)+' m';
+  el('rRioSub').textContent='km '+kmSel.toFixed(1)+' de '+total.toFixed(0)+', '
+    +fmt(RIO.alt[0]-q.alt)+' m abajo de donde entra';
+  el('kmOut').textContent='km '+kmSel.toFixed(1)+' · '+fmt(q.alt)+' m';
+  if(corre||arrastra) seguir(rp);
+}}
+// mientras corre o se arrastra, la página se mueve lo necesario para que el
+// punto no quede bajo el perfil ni arriba de la pantalla
+function seguir(rp){{
+  const pw=document.querySelector('.perfilwrap');
+  if(getComputedStyle(pw).position!=='sticky') return;
+  const r=rp.getBoundingClientRect(), y=r.top+r.height/2;
+  const alto=pw.getBoundingClientRect().top-50, bajo=90;
+  if(y>alto) scrollBy(0,Math.min(40,y-alto));
+  else if(y<bajo) scrollBy(0,Math.max(-40,y-bajo));
+}}
+const perfil=el('perfil');
+function kmDe(ev){{
+  const pt=perfil.createSVGPoint(); pt.x=ev.clientX; pt.y=ev.clientY;
+  const p=pt.matrixTransform(perfil.getScreenCTM().inverse());
+  return (p.x-46)/(PW-70)*total;
+}}
+let arrastra=false;
+perfil.addEventListener('pointerdown',ev=>{{ parar(); arrastra=true; perfil.setPointerCapture(ev.pointerId); ponKm(kmDe(ev)); }});
+perfil.addEventListener('pointermove',ev=>{{ if(arrastra) ponKm(kmDe(ev)); }});
+perfil.addEventListener('pointerup',()=>{{ arrastra=false; }});
+perfil.addEventListener('pointercancel',()=>{{ arrastra=false; }});
+// Río abajo: el punto flota del km 0 al final en unos nueve segundos
+const bRio=el('bRio');
+function parar(){{
+  if(corre){{ cancelAnimationFrame(corre); corre=null; }}
+  bRio.setAttribute('aria-pressed','false'); bRio.textContent='Río abajo';
+}}
+bRio.addEventListener('click',()=>{{
+  if(corre){{ parar(); return; }}
+  let k0=kmSel===null||kmSel>=total-0.05?0:kmSel;
+  if(REDUCIDO){{ ponKm(total); return; }}
+  const t0=performance.now(), dur=9000*(total-k0)/total;
+  bRio.setAttribute('aria-pressed','true'); bRio.textContent='Pausa';
+  const paso=t=>{{
+    const f=Math.min(1,(t-t0)/dur);
+    ponKm(k0+(total-k0)*f);
+    if(f<1) corre=requestAnimationFrame(paso); else parar();
+  }};
+  corre=requestAnimationFrame(paso);
+}});
+
+// con el mapa enfocado, arriba y abajo recorren los lugares por altitud
+const PORALT=LUG.map((l,i)=>i).sort((a,b)=>LUG[a].h-LUG[b].h);
+svg.addEventListener('keydown',ev=>{{
+  if(ev.key!=='ArrowUp'&&ev.key!=='ArrowDown') return;
+  ev.preventDefault();
+  const cur=fijo===null?PORALT.indexOf(LUG.indexOf(TERRERO)):PORALT.indexOf(fijo);
+  const j=Math.max(0,Math.min(PORALT.length-1,cur+(ev.key==='ArrowUp'?1:-1)));
+  fijar(PORALT[j]);
 }});
 
 function toggle(id,gid){{
@@ -598,10 +812,37 @@ function toggle(id,gid){{
 toggle('bRel','relieve'); toggle('bCur','curvas'); toggle('bCam','caminos');
 toggle('bAgua','agua'); toggle('bLug','lugares');
 
+// los pisos de altura entran sobre el relieve y las curvas se apagan un poco
+let pisosV=0;
+el('bPisos').addEventListener('click',()=>{{
+  const on=el('bPisos').getAttribute('aria-pressed')!=='true';
+  el('bPisos').setAttribute('aria-pressed',on);
+  el('pisosLey').classList.toggle('on',on);
+  const a=pisosV, b=on?1:0, t0=performance.now(), dur=REDUCIDO?0:900;
+  const paso=t=>{{
+    const f=dur?Math.min(1,(t-t0)/dur):1, e=f<.5?2*f*f:1-Math.pow(-2*f+2,2)/2;
+    pisosV=a+(b-a)*e;
+    el('pisos').setAttribute('opacity',pisosV.toFixed(3));
+    el('curvas').style.opacity=(1-0.6*pisosV).toFixed(3);
+    if(f<1) requestAnimationFrame(paso);
+  }};
+  requestAnimationFrame(paso);
+}});
+
+// en un teléfono el mapa se recorre de lado; empieza con el río al centro
+{{
+  const sc=document.querySelector('.scroller');
+  if(sc.scrollWidth>sc.clientWidth+2)
+    sc.scrollLeft=TERRERO.x/VW*sc.scrollWidth-sc.clientWidth/2;
+}}
+
 window.__valle=()=>({{lugares:LUG.length,caminos:document.querySelectorAll('#caminos path').length,
   agua:document.querySelectorAll('#agua path').length,curvas:document.querySelectorAll('#curvas path').length,
   rio:{{km:RIO.km[RIO.km.length-1],alto:Math.max(...RIO.alt),bajo:Math.min(...RIO.alt),n:RIO.alt.length}},
   alt:el('rAlt').textContent,lugar:el('rLug').textContent,
+  km:kmSel,corre:!!corre,fijo,pisos:pisosV,rioSub:el('rRioSub').textContent,
+  lugSub:el('rLugSub').textContent,recta:document.querySelectorAll('#recta line').length,
+  pueblosPerfil:[...document.querySelectorAll('#perfilEjes text.pue')].map(t=>[t.textContent,+t.dataset.km]),
   altura:(la,lo)=>alturaEn(la,lo)}});
 </script>
 </body>

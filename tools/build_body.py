@@ -95,6 +95,24 @@ NERVENOTE = (
 GAPNOTE = ("What the model does not hold. " +
            "; ".join(g[0].upper() + g[1:] for g in D.GAPS) + ".")
 
+# The stacked bar beside the figure. The masses are the ones the cards
+# already carry, from the ICRP 89 reference adult male, whose whole body is
+# 73 kg; what the page has no mass for is one gray remainder.
+BODY_KG = 73
+MASS = [
+    ("muscular", "skeletal muscle", 29),
+    ("skeletal", "skeleton", 10.5),
+    ("integumentary", "skin", 3.3),
+    ("digestive", "liver", 1.8),
+]
+
+MASSNOTE = ("The bar beside the figure stacks the masses the cards carry, "
+            "all from the ICRP reference adult male of 73 kg: 29 kg of "
+            "skeletal muscle, a 10.5 kg skeleton, 3.3 kg of skin and a 1.8 "
+            "kg liver, the liver standing in for a gut whose other organs "
+            "the cards do not weigh. Everything else, blood, brain, fat and "
+            "the rest of the organs, is the gray remainder.")
+
 LICENSE = ("BodyParts3D, copyright The Database Center for Life Science, "
            "licensed under CC Attribution-Share Alike 2.1 Japan. The "
            "outlines on this page are a derived work and carry the same "
@@ -126,7 +144,9 @@ button:hover { border-color:var(--accent); }
 button.on { background:var(--accent); border-color:var(--accent);
   color:#0b0b0b; }
 .bar2 { display:flex; gap:14px; align-items:center; flex-wrap:wrap;
-  margin-bottom:12px; color:var(--muted); font-size:12.5px; }
+  margin:10px 0 0; color:var(--muted); font-size:12.5px; }
+.bar2 .sp { flex:1 1 auto; }
+.bar2 .zoom { display:flex; gap:8px; align-items:center; }
 .bar2 label { display:flex; gap:8px; align-items:center; }
 .bar2 label[hidden] { display:none; }
 button.step { padding:2px 9px; font-size:14px; line-height:1.1; }
@@ -139,9 +159,28 @@ button.step { padding:2px 9px; font-size:14px; line-height:1.1; }
   color:var(--text); width:190px; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
 .figcol { flex:1 1 520px; min-width:0; }
-#fig { width:100%; }
-#fig svg { width:100%; height:auto; max-height:min(1150px, calc(100vh - 190px));
+.figrow { display:flex; gap:12px; align-items:stretch; }
+#fig { flex:1 1 auto; min-width:0; position:relative; }
+#fig svg { width:100%; height:auto; max-height:min(1150px, calc(100vh - 300px));
   display:block; touch-action:pan-y; cursor:grab; }
+#ghost { position:absolute; inset:0; pointer-events:none; }
+#ghost svg { width:100%; height:auto; max-height:min(1150px, calc(100vh - 300px));
+  display:block; transition:opacity .18s ease-in-out; }
+/* the mass bar: one column, each system's share of the reference body */
+.mass { flex:0 0 168px; display:flex; flex-direction:column; font-size:11.5px;
+  color:var(--muted); }
+.mass .mt { margin-bottom:6px; line-height:1.35; }
+.mass .mt b { color:var(--text); font-size:13px; display:block; }
+.mbar { flex:1 1 auto; display:flex; flex-direction:column; gap:2px; min-height:200px; }
+.seg { position:relative; flex-grow:1; flex-basis:0; min-height:6px; }
+.seg i { position:absolute; left:0; top:0; bottom:0; width:26px; border-radius:4px;
+  background:var(--c); opacity:.28; transition:opacity .3s ease-in-out; }
+.seg.on i { opacity:1; }
+.seg.on span { color:var(--text); }
+.seg span { position:absolute; left:34px; top:50%; transform:translateY(-50%);
+  white-space:nowrap; line-height:1.2; transition:color .3s; }
+.seg span b { font-size:12.5px; font-variant-numeric:tabular-nums; margin-right:5px; }
+.mass .mk { display:none; }
 #fig svg.drag { cursor:grabbing; }
 #fig svg path { cursor:pointer; }
 #fig svg path#hl { fill:none; stroke:#fff; stroke-width:2.4px;
@@ -180,8 +219,28 @@ button.step { padding:2px 9px; font-size:14px; line-height:1.1; }
 .refs a { color:var(--accent); }
 __APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
+details.sources { margin-top:22px; border-top:1px solid var(--line);
+  padding-top:10px; max-width:760px; }
+details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px;
+  letter-spacing:.06em; text-transform:uppercase; }
+details.sources > summary:hover { color:var(--accent); }
+details.sources .note { margin-top:12px; border-top:none; padding-top:0; }
+details.sources .method { margin-top:12px; }
+details.sources h2.refh { margin-top:18px; }
 @media (max-width:900px){ .stage{flex-direction:column;}
   .side{position:static; width:100%; flex:none;} }
+@media (max-width:600px){
+  .figrow{flex-direction:column-reverse;}
+  .mass{flex:none; margin-top:10px;}
+  .mbar{flex-direction:row; min-height:0; height:22px;}
+  .seg{min-height:0; min-width:4px;}
+  .seg i{width:auto; right:0;}
+  .seg span{display:none;}
+  .mass .mk{display:block; margin-top:6px; line-height:1.5;}
+  .mass .mk b{color:var(--text);}
+  .bar2 input[type=range]{width:120px;}
+  .bar2 input[type=search]{width:140px;}
+}
 """
 
 HTML = """<!doctype html>
@@ -206,19 +265,31 @@ outline traced from the BodyParts3D meshes of one segmented adult.">
 <h1>The Human Body</h1>
 <div class="bar" id="bar"></div>
 <div class="bar" id="subbar" hidden></div>
-<div class="bar2">
-  <label>Turn <button id="spinL" class="step">&#8592;</button>
-  <input type="range" id="spin" min="0" max="7" value="0">
-  <button id="spinR" class="step">&#8594;</button>
-  <span id="spinTxt"></span></label>
-  <label id="cutWrap">Cut from the front <input type="range" id="depth"
-  min="0" max="100" value="100"> <span id="depthTxt"></span></label>
-  <label><input type="checkbox" id="outline" checked> Body outline</label>
-  <label><input type="search" id="q" placeholder="Find a part"></label>
-  <button id="home">Whole body</button><span id="zoomTxt"></span>
-</div>
 <div class="stage">
-  <div class="figcol"><div id="fig"></div></div>
+  <div class="figcol">
+    <div class="figrow">
+      <div class="mass" id="mass"></div>
+      <div id="fig"></div>
+    </div>
+    <div class="bar2">
+      <label>Turn <button id="spinL" class="step">&#8592;</button>
+      <input type="range" id="spin" min="0" max="7" value="0"
+        aria-label="Turn the body">
+      <button id="spinR" class="step">&#8594;</button>
+      <button id="spinPlay" aria-pressed="false">Play</button>
+      <span id="spinTxt"></span></label>
+    </div>
+    <div class="bar2">
+      <label id="cutWrap">Cut from the front <input type="range" id="depth"
+      min="0" max="100" value="100" aria-label="Depth of the cut"> <span id="depthTxt"></span></label>
+    </div>
+    <div class="bar2">
+      <label><input type="checkbox" id="outline" checked> Body outline</label>
+      <label><input type="search" id="q" placeholder="Find a part"></label>
+      <span class="sp"></span>
+      <span class="zoom"><span id="zoomTxt"></span><button id="home">Whole body</button></span>
+    </div>
+  </div>
   <div class="side"><div class="card">
     <div id="kindTxt"></div>
     <div id="nameTxt"></div>
@@ -228,17 +299,22 @@ outline traced from the BodyParts3D meshes of one segmented adult.">
   </div></div>
 </div>
 <p class="note">__NOTE1__</p>
-<p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
+<details class="sources"><summary>Sources</summary>
+<p class="note">__NOTE2__</p>
+<p class="note">__MASSNOTE__</p>
 <div class="method"><details><summary>How the outlines were made</summary>
 <p>__METHOD__</p><p>__GAPNOTE__</p><p>__LICENSE__</p></details></div>
 <div class="method"><details><summary>How the nerves were made</summary>
 <p>__NERVENOTE__</p></details></div>
 <h2 class="refh">References</h2>
 <div class="refs">__REFS__</div>
+</details>
 </div>
 <script>
 const P=__PATHS__, S=__SYS__, F=__FACTS__, N=__NOTES__, W=__WHOLE__;
 const LOOK=__LOOK__, NERVES=__NERVES__, NGROUPS=__NGROUPS__, NBLURB=__NBLURB__;
+const MASS=__MASS__, BODY_KG=__BODYKG__;
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const SC=P.scale, BOX=P.box;
 const NS='http://www.w3.org/2000/svg';
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
@@ -491,17 +567,54 @@ function draw(){
   svg.appendChild(hl);
   svg.addEventListener('pointerleave',()=>{ hot=null; show(pinned); mark(
     pinned&&pinned.fma); });
+  // a click on the space around the parts lets go of the pinned one
+  svg.addEventListener('click',ev=>{ if(ev.target===svg) unpin(); });
   wheelpan(svg);
   const fig=document.getElementById('fig');
   fig.textContent=''; fig.appendChild(svg);
   const line=lo+(hi-lo)*(1-cut);
   document.getElementById('spinTxt').textContent=TURN[spin];
   document.getElementById('cutWrap').hidden = !all.length;
+  // the readout says how deep the plane is in words as well as centimeters
+  const deep = cut>=1 ? '' : cut>0.75 ? 'just under the surface'
+             : cut>0.5 ? 'shallow' : cut>0.25 ? 'midway' : 'deep';
   document.getElementById('depthTxt').textContent =
-    cut>=1 ? ps.length+' of '+all.length+' parts'
-           : ((line-lo)/10).toFixed(1)+' cm in, '+ps.length+' of '+
+    cut>=1 ? 'nothing cut, '+ps.length+' of '+all.length+' parts'
+           : ((line-lo)/10).toFixed(1)+' cm in, '+deep+': '+ps.length+' of '+
              all.length+' parts left';
   list(ps, nv);
+}
+
+function unpin(){ pinned=null; hot=null; show(null); mark(null); }
+document.addEventListener('keydown',ev=>{
+  const t=ev.target, tag=(t.tagName||'').toLowerCase();
+  if(tag==='input' && (t.type==='search'||t.type==='text')) return;
+  if(ev.key==='Escape') unpin();
+});
+
+// the bar beside the figure: each system's mass as a share of the 73 kg
+// reference body, the chosen system lit
+function massBar(){
+  const box=document.getElementById('mass');
+  const rest=BODY_KG-MASS.reduce((a,m)=>a+m[2],0);
+  const rows=MASS.map(m=>[m[0],m[1],m[2],hsv(LOOK[m[0]][0],LOOK[m[0]][1],0.85)])
+    .concat([['rest','everything else',+rest.toFixed(1),'#4a4a4a']]);
+  box.innerHTML='<div class="mt"><b>'+BODY_KG+' kg</b>reference adult male, '
+    +'by mass</div><div class="mbar">'
+    +rows.map(r=>'<div class="seg" data-sys="'+r[0]+'" style="flex-grow:'+r[2]
+      +';--c:'+r[3]+'"><i></i><span><b>'+r[2]+' kg</b>'+esc(r[1])+'</span></div>')
+      .join('')
+    +'</div><div class="mk">'+rows.map(r=>'<b>'+r[2]+' kg</b> '+esc(r[1]))
+      .join(' &middot; ')+'</div>';
+  box.querySelectorAll('.seg[data-sys]').forEach(e=>{
+    if(e.dataset.sys==='rest') return;
+    e.style.cursor='pointer';
+    e.addEventListener('click',()=>pick(e.dataset.sys));
+  });
+}
+function lightMass(){
+  document.querySelectorAll('#mass .seg').forEach(e=>
+    e.classList.toggle('on', cur==='all' || e.dataset.sys===cur));
 }
 
 function markN(i){
@@ -645,7 +758,7 @@ function list(ps, nv){
 }
 
 function pick(k){
-  cur=k; cut=1; pinned=null;
+  cur=k; cut=1; pinned=null; lightMass();
   if(k!=='nervous') sub='all';
   document.getElementById('depth').value=100;
   document.querySelectorAll('#bar button').forEach(b=>
@@ -673,8 +786,45 @@ function subButtons(){
 function setSpin(v){
   spin=((v%NVIEW)+NVIEW)%NVIEW;
   document.getElementById('spin').value=spin;
+  // the view before this one fades out over the new one, so the turn
+  // reads as one body moving and not as eight slides
+  const old=document.querySelector('#fig > svg');
   draw(); if(pinned) { show(pinned); mark(pinned.fma); }
+  if(old && !reduced){
+    let g=document.getElementById('ghost');
+    if(!g){ g=document.createElement('div'); g.id='ghost';
+      document.getElementById('fig').appendChild(g); }
+    g.textContent=''; g.appendChild(old);
+    old.style.opacity='1';
+    requestAnimationFrame(()=>{ old.style.opacity='0'; });
+    setTimeout(()=>{ if(old.parentNode===g) g.removeChild(old); }, 220);
+  }
 }
+
+// the play button turns the body once round, a view every two thirds of a
+// second, and stops where it started
+let turning=null;
+function turnFrame(now){
+  if(!turning) return;
+  if(now-turning.last>=650){
+    turning.last=now; turning.steps++;
+    setSpin(spin+1);
+    if(turning.steps>=NVIEW){ stopTurn(); return; }
+  }
+  requestAnimationFrame(turnFrame);
+}
+function stopTurn(){
+  turning=null;
+  const b=document.getElementById('spinPlay');
+  b.textContent='Play'; b.setAttribute('aria-pressed','false');
+}
+document.getElementById('spinPlay').addEventListener('click',()=>{
+  if(turning){ stopTurn(); return; }
+  turning={last:performance.now(), steps:0};
+  const b=document.getElementById('spinPlay');
+  b.textContent='Pause'; b.setAttribute('aria-pressed','true');
+  requestAnimationFrame(turnFrame);
+});
 
 const bar=document.getElementById('bar');
 for(const [k,label] of S.map(s=>[s[0],s[1]])){
@@ -684,10 +834,10 @@ for(const [k,label] of S.map(s=>[s[0],s[1]])){
   bar.appendChild(b);
 }
 document.getElementById('spin').max=NVIEW-1;
-document.getElementById('spin').addEventListener('input',e=>
-  setSpin(+e.target.value));
-document.getElementById('spinL').addEventListener('click',()=>setSpin(spin-1));
-document.getElementById('spinR').addEventListener('click',()=>setSpin(spin+1));
+document.getElementById('spin').addEventListener('input',e=>{
+  stopTurn(); setSpin(+e.target.value); });
+document.getElementById('spinL').addEventListener('click',()=>{ stopTurn(); setSpin(spin-1); });
+document.getElementById('spinR').addEventListener('click',()=>{ stopTurn(); setSpin(spin+1); });
 document.getElementById('depth').addEventListener('input',e=>{
   cut=e.target.value/100; draw(); });
 document.getElementById('outline').addEventListener('change',draw);
@@ -695,7 +845,11 @@ document.getElementById('home').addEventListener('click',()=>{
   VB=HOME.slice(); draw(); zoomTxt(); });
 document.getElementById('q').addEventListener('input',()=>
   list(visible(), nervesNow()));
+massBar();
 pick(S[0][0]);
+window.__body=()=>({cur, spin, cut, pinned:pinned&&pinned.fma, turning:!!turning,
+  lit:[...document.querySelectorAll('#mass .seg.on')].map(e=>e.dataset.sys),
+  segs:document.querySelectorAll('#mass .seg').length});
 </script>
 </body>
 </html>
@@ -721,6 +875,9 @@ def main():
             .replace("__CSS__", CSS.replace("__APACSS__", apa.CSS))
             .replace("__NOTE1__", NOTE1)
             .replace("__NOTE2__", NOTE2)
+            .replace("__MASSNOTE__", MASSNOTE)
+            .replace("__MASS__", json.dumps(MASS, separators=(",", ":")))
+            .replace("__BODYKG__", str(BODY_KG))
             .replace("__METHOD__", METHOD)
             .replace("__GAPNOTE__", GAPNOTE)
             .replace("__NERVENOTE__", NERVENOTE)

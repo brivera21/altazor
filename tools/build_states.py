@@ -334,7 +334,7 @@ HIST["al"] = {
         {"n": "Choctaw", "src": "encyclopediaofalabama.org/article/choctaws-in-alabama/", "poly": [[-88.5, 31.0], [-87.4, 31.2], [-87.6, 32.8], [-88.4, 32.7]], "lat": 31.9, "lon": -88.2, "note": "Southwest Alabama, Tombigbee basin.", "after": {"y": 1831, "t": "removed 1831-33 under Dancing Rabbit Creek"}},
         {"n": "Chickasaw", "src": "encyclopediaofalabama.org/article/chickasaws-in-alabama/", "poly": [[-88.2, 33.9], [-87.0, 34.0], [-87.2, 35.0], [-88.2, 34.95]], "lat": 34.7, "lon": -88.0, "note": "Northwest Alabama.", "after": {"y": 1837, "t": "removed 1837"}},
         {"n": "Alabama-Coushatta", "src": "encyclopediaofalabama.org/article/alabama-coushattas-in-alabama/", "poly": [[-87.0, 32.0], [-86.2, 32.1], [-86.3, 32.9], [-87.0, 32.8]], "lat": 32.5, "lon": -86.4, "note": "Upper Alabama River."},
-        {"n": "Moundville", "src": "en.wikipedia.org/wiki/Moundville_Archaeological_Site", "poly": [[-87.8, 32.85], [-87.4, 32.85], [-87.45, 33.15], [-87.8, 33.1]], "lat": 33.0, "lon": -87.63, "note": "Mississippian mound center, about 1000 to 1450 CE."},
+        {"n": "Moundville", "kind": "A Mississippian center", "src": "en.wikipedia.org/wiki/Moundville_Archaeological_Site", "poly": [[-87.8, 32.85], [-87.4, 32.85], [-87.45, 33.15], [-87.8, 33.1]], "lat": 33.0, "lon": -87.63, "note": "Mississippian mound center, about 1000 to 1450 CE."},
         {"n": "Yuchi (Euchee)", "src": "en.wikipedia.org/wiki/Yuchi", "poly": [[-85.4, 32.7], [-84.92, 32.62], [-84.95, 31.95], [-85.35, 31.98], [-85.45, 32.35]], "lat": 32.35, "lon": -85.15, "note": "Yuchi Town on the Chattahoochee was the principal settlement from the mid 1700s until removal, with other Yuchis living among the Upper Creek towns."},
         {"n": "Shawnee", "src": "en.wikipedia.org/wiki/Shawnee", "poly": [[-86.5, 33.6], [-85.9, 33.3], [-85.5, 32.5], [-86.0, 32.2], [-86.5, 32.8]], "lat": 32.9, "lon": -86.1, "note": "Peter Chartier led more than 400 Shawnee to the Coosa valley in 1748 and founded Chalakagay; others lived at Sawanogi on the Tallapoosa."},
         {"n": "Apalachee", "src": "en.wikipedia.org/wiki/Apalachee", "poly": [[-88.15, 31.2], [-87.8, 31.15], [-87.75, 30.65], [-88.05, 30.6], [-88.2, 30.9]], "lat": 30.95, "lon": -87.95, "note": "Survivors of the 1704 massacre in Florida settled near French Mobile. A refugee community from 1704 to 1763 rather than a long homeland; the nation is seated in Louisiana today."},
@@ -534,7 +534,7 @@ SYMBOLS = {
  {"k": "Flower", "n": "California poppy", "b": "Eschscholzia californica",
   "y": 1903, "a": "Eschscholzia californica",
   "t": "A separate section of the penal code makes picking one on state "
-       "or private land an offence."},
+       "or private land an offense."},
  {"k": "Tree", "n": "California redwood", "b": "Sequoia sempervirens and "
   "Sequoiadendron giganteum", "s": "Sequoia sempervirens, Sequoia gigantea",
   "y": 1937, "a": "Sequoia sempervirens",
@@ -588,7 +588,7 @@ SYMBOLS = {
        "hippocampal neurons each autumn to keep track of them."},
  {"k": "Flower", "n": "Mayflower, or trailing arbutus", "b": "Epigaea repens",
   "y": 1918, "a": "Epigaea repens",
-  "t": "The same statute makes digging one up an offence, at fifty dollars, "
+  "t": "The same statute makes digging one up an offense, at fifty dollars, "
        "doubled for doing it at night or in disguise."},
  {"k": "Tree", "n": "American elm", "b": "Ulmus americana", "y": 1941,
   "a": "Ulmus americana",
@@ -678,6 +678,40 @@ SIBLINGS = [("california.html", "California"), ("arizona.html", "Arizona"),
             ("massachusetts.html", "Massachusetts"), ("alabama.html", "Alabama"),
             ("nebraska.html", "Nebraska"), ("minnesota.html", "Minnesota")]
 
+# Total area, land and water, km2: US Census Bureau, 2020 gazetteer files.
+# The ghost of another state is drawn from these, and from that state's
+# own outline in tools/data/states.
+AREA_KM2 = {"ca": 423967, "az": 295234, "pa": 119280, "ma": 27336,
+            "al": 135767, "ne": 200330, "mn": 225163}
+
+
+def ghosts(me):
+    """The other states' outlines, thinned, for the Compare chips."""
+    out = {}
+    for st in PAGES:
+        if st == me:
+            continue
+        d = json.loads((DATA / f"{st}.json").read_text())
+        rings = []
+        for r in d["outline"]:
+            if len(r) < 12:
+                continue
+            step = 1 if len(r) < 80 else 2
+            rings.append([[round(x, 1), round(y, 1)] for x, y in r[::step]])
+        out[st] = {"n": d["name"], "km2": AREA_KM2[st], "W": d["W"],
+                   "H": d["H"], "m": d["m"], "o": rings}
+    return out
+
+
+def ghost_chips(me):
+    return ('<span class="sep"></span><span class="grp">'
+            '<span class="gl">Ghost of</span>'
+            + "".join(f'<button data-ghost="{st}">{n}</button>'
+                      for st, n in [(k, json.loads((DATA / f"{k}.json").read_text())["name"])
+                                    for k in PAGES] if st != me)
+            + '</span>')
+
+
 # each state's city page, built by build_cities.py
 CITY_PAGE = {"ca": ("los-angeles.html", "Los Angeles"),
              "pa": ("lancaster.html", "Lancaster"),
@@ -685,6 +719,10 @@ CITY_PAGE = {"ca": ("los-angeles.html", "Los Angeles"),
              "al": ("tuscaloosa.html", "Tuscaloosa"),
              "ne": ("omaha.html", "Omaha"),
              "mn": ("northfield.html", "Northfield")}
+# the data file behind each city page, for the middle of its frame
+CITY_FILE = {"los-angeles.html": "la.json", "lancaster.html": "lancaster.json",
+             "amherst.html": "amherst.json", "tuscaloosa.html": "tuscaloosa.json",
+             "omaha.html": "omaha.json", "northfield.html": "northfield.json"}
 
 HTML = """<!DOCTYPE html>
 <html lang="en">
@@ -712,14 +750,45 @@ h1 { margin:0 0 10px; font-size:26px; }
   border:1px solid var(--line); background:#1a1a1a; color:var(--muted); cursor:pointer; }
 .chips button.on { color:var(--text); border-color:var(--accent); background:#1c2733; }
 .chips button:hover { border-color:var(--accent); }
+/* the chips sit in three groups: the ground, the lines drawn on it, and
+   the layers that move with the year */
+.chips .grp { display:inline-flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.chips .gl { color:var(--muted); font-size:10.5px; letter-spacing:.09em;
+  text-transform:uppercase; margin-right:2px; }
+.chips .sep { width:1px; height:22px; background:var(--line); margin:0 4px; }
 .stage { display:flex; gap:20px; align-items:flex-start; }
-#mapwrap { flex:1 1 640px; min-width:0; position:relative; background:#151719;
+.mapcol { flex:1 1 640px; min-width:0; }
+#mapwrap { position:relative; background:#151719;
   border:1px solid var(--line); border-radius:12px; overflow:hidden; }
 #mapwrap canvas, #mapwrap svg { position:absolute; inset:0; width:100%; height:100%; display:block; }
-#mapwrap svg { position:relative; }
+#mapwrap svg { position:relative; outline:none; }
+#mapwrap svg:focus-visible { box-shadow:inset 0 0 0 2px var(--accent); }
+#loadTxt { position:absolute; right:10px; top:8px; z-index:2; pointer-events:none;
+  color:var(--muted); font-size:11.5px; padding:2px 9px; border-radius:999px;
+  background:rgba(18,18,18,.72); }
+#loadTxt:empty { display:none; }
+/* zoom: two buttons in the corner, the wheel, a drag to pan; lines keep
+   their width on screen and marks and names keep their size */
+#map path, #map line, #map circle, #map rect, #map polyline { vector-effect:non-scaling-stroke; }
+#map [data-mig] path { vector-effect:none; }
+#map.zoomed { cursor:grab; touch-action:none; }
+#map.zoomed.panning { cursor:grabbing; }
+#mapwrap canvas { transform-origin:0 0; }
+.zoomctl { position:absolute; left:10px; top:10px; z-index:2; display:flex; flex-direction:column; gap:4px; }
+.zoomctl button { width:28px; height:28px; border-radius:8px; border:1px solid var(--line);
+  background:rgba(18,18,18,.82); color:var(--text); font:inherit; font-size:16px; line-height:1;
+  cursor:pointer; padding:0; }
+.zoomctl button:hover { border-color:var(--accent); }
+.zoomctl button:disabled { opacity:.35; cursor:default; border-color:var(--line); }
+.zcity { position:absolute; right:10px; bottom:10px; z-index:2; font-size:12.5px; padding:4px 11px;
+  border-radius:999px; border:1px solid var(--accent); background:rgba(18,18,18,.86);
+  color:var(--text); text-decoration:none; }
+.zcity:hover { color:var(--accent); }
+.zcity[hidden] { display:none; }
 .side { flex:0 0 320px; position:sticky; top:16px; display:flex;
-  flex-direction:column; gap:14px; }
-.card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+  flex-direction:column; gap:14px; max-height:calc(100vh - 32px);
+  overflow-y:auto; scrollbar-width:thin; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px; flex:none; }
 .symh { color:var(--muted); font-size:11px; letter-spacing:.09em;
   text-transform:uppercase; margin-bottom:8px; }
 .sym { display:flex; gap:10px; align-items:flex-start; padding:7px 0;
@@ -727,8 +796,8 @@ h1 { margin:0 0 10px; font-size:26px; }
 .sym:first-child { border-top:none; padding-top:0; }
 .sym img { width:54px; height:54px; object-fit:cover; border-radius:7px;
   background:#0d0d0d; flex:0 0 54px; }
-.sym .noimg { width:54px; height:54px; border-radius:7px; background:#0d0d0d;
-  flex:0 0 54px; }
+.sym .noimg { width:54px; height:54px; border-radius:7px; background:#202020;
+  border:1px solid var(--line); flex:0 0 54px; }
 .sym .b { min-width:0; }
 .sym .k { color:var(--muted); font-size:10.5px; letter-spacing:.07em;
   text-transform:uppercase; }
@@ -748,9 +817,11 @@ h1 { margin:0 0 10px; font-size:26px; }
 #popTxt .totG { color:#0ca30c; }
 #kindTxt { color:var(--muted); font-size:11.5px; letter-spacing:.09em; text-transform:uppercase; }
 #nameTxt { font-weight:700; font-size:16px; margin:2px 0 6px; }
+#nameTxt.empty { font-weight:400; font-size:13px; color:var(--muted); }
 #bodyTxt { color:var(--muted); font-size:13px; line-height:1.5; }
 #srcTxt { color:var(--muted); font-size:11.5px; margin-top:8px; border-top:1px solid var(--line);
   padding-top:6px; overflow-wrap:anywhere; }
+#srcTxt:empty { display:none; }
 .tl { margin-top:14px; }
 .tlticks { position:relative; height:40px; margin:0 62px 2px 84px; }
 .tlticks button { position:absolute; transform:translateX(-50%); font:inherit; font-size:11px;
@@ -761,17 +832,34 @@ h1 { margin:0 0 10px; font-size:26px; }
   border-top:5px solid var(--muted); }
 .tlticks button:hover, .tlticks button.here { color:var(--accent); }
 .tlticks button:hover::after, .tlticks button.here::after { border-top-color:var(--accent); }
-.tlticks button.row2 { top:0; } .tlticks button.row1 { top:21px; }
+/* a year that cannot find room on any row keeps its arrow and its title */
+.tlticks button.hid { color:transparent; }
+.tlticks button.hid:hover { color:var(--accent); background:var(--bg); z-index:2; }
 .tlrow { display:flex; gap:10px; align-items:center; }
 .tlrow button { font:inherit; font-size:13.5px; padding:6px 14px; border-radius:999px;
   border:1px solid var(--line); background:#1a1a1a; color:var(--text); cursor:pointer; }
 .tlrow button:hover { border-color:var(--accent); }
 .tlrow input[type=range] { flex:1; accent-color:var(--accent); }
+#bPlay { width:74px; }
 #yearTxt { font-family:ui-monospace,Menlo,monospace; font-size:15px; width:52px; text-align:right; }
 .eraband { position:relative; height:14px; margin:6px 62px 0 84px; border-radius:4px;
   overflow:hidden; border:1px solid var(--line); }
 .eraband div { position:absolute; top:0; bottom:0; }
 .eraband span { position:absolute; top:-2px; width:2px; bottom:-2px; }
+/* the population under the slider: the counted line and the Native
+   estimate on one log scale, with a dot riding the year */
+.spark { position:relative; height:62px; margin:6px 62px 0 84px; }
+.spark svg { position:absolute; inset:0; width:100%; height:100%; display:block; overflow:visible; }
+.spark text { font-size:9.5px; fill:var(--muted); }
+.tlkey { display:flex; gap:6px 16px; flex-wrap:wrap; align-items:center;
+  font-size:11.5px; color:var(--muted); margin:8px 0 0 84px; }
+.tlkey i { display:inline-block; width:9px; height:9px; border-radius:2px;
+  margin-right:5px; vertical-align:-1px; }
+.tlkey i.ln { height:2px; width:14px; border-radius:1px; vertical-align:2px; }
+.tlkey .spd { margin-left:auto; display:inline-flex; gap:6px; align-items:center; }
+.tlkey .spd button { font:inherit; font-size:11px; padding:2px 9px; border-radius:999px;
+  border:1px solid var(--line); background:#1a1a1a; color:var(--muted); cursor:pointer; }
+.tlkey .spd button.on { color:var(--text); border-color:var(--accent); }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
 .method { color:var(--muted); font-size:12.5px; margin-top:14px;
@@ -786,8 +874,21 @@ details.sources > summary:hover { color:var(--accent); }
 .refs a { color:var(--accent); }
 __APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;
+@media (max-width:900px){ .stage{flex-direction:column;} .mapcol{flex-basis:auto; width:100%;} #mapwrap{width:100%;}
+  .side{position:static; width:100%; max-height:none; overflow:visible;
   flex-direction:row; flex-wrap:wrap;} .side .card{flex:1 1 260px;} }
+/* a phone: the map scrolls sideways at a readable size, the chips lose
+   their dividers, and the card that answers a tap sits above the map */
+@media (max-width:600px){ .tlticks, .eraband, .spark{ margin-left:0; margin-right:0; }
+  .tlkey{ margin-left:0; } .tlrow{ flex-wrap:wrap; } .tlrow input[type=range]{ flex:1 1 100%; order:3; }
+  .tlkey .spd{ margin-left:0; }
+  .chips{ gap:6px; } .chips .sep{ display:none; } .chips .grp{ gap:6px; }
+  .chips button{ padding:4px 10px; font-size:12.5px; }
+  .mapscroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:12px; }
+  #mapwrap{ min-width:640px; }
+  .side{ display:contents; } .stage{ gap:14px; align-items:stretch; }
+  .side .card{ flex:none; }
+  .side .card.hover{ order:-1; } .side .card.hover:has(#nameTxt.empty){ display:none; } }
 </style>
 </head>
 <body>
@@ -798,24 +899,43 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 </header>
 <h1>__TITLE__</h1>
 <div class="chips">
+  <span class="grp"><span class="gl">Ground</span>
   <button id="cTer" class="on">Terrain</button>
   <button id="cWoo" class="on">Woods</button>
   <button id="cRiv" class="on">Rivers</button>
   <button id="cLak" class="on">Lakes</button>
+  </span><span class="sep"></span><span class="grp"><span class="gl">Lines</span>
   <button id="cCou">Counties</button>
+  <button id="cHwy">Highways</button>
+  </span><span class="sep"></span><span class="grp"><span class="gl">By the year</span>
   <button id="cNat" class="on">Nations</button>
   <button id="cTow" class="on">Towns</button>
   <button id="cUni">Colleges</button>
-  <button id="cHwy">Highways</button>
   <button id="cMig" class="on">Migrations</button>
-  <span id="loadTxt" style="color:var(--muted);font-size:12px"></span>
+  </span>__GHOSTCHIPS__
 </div>
 <div class="stage">
-  <div id="mapwrap">
+  <div class="mapcol">
+  <div class="mapscroll"><div id="mapwrap">
     <canvas id="terC"></canvas>
     <canvas id="wooC"></canvas>
     <canvas id="watC"></canvas>
-    <svg id="map"></svg>
+    <svg id="map" tabindex="0" aria-label="The map; arrow keys move the year when it has focus"></svg>
+    <span id="loadTxt"></span>
+    <div class="zoomctl"><button id="zIn" aria-label="Closer">+</button><button id="zOut" aria-label="Farther" disabled>&minus;</button></div>
+    <a id="zCity" class="zcity" hidden></a>
+  </div></div>
+  <div class="tl">
+    <div class="tlticks" id="ticks"></div>
+    <div class="tlrow">
+      <button id="bPlay">Play</button>
+      <input type="range" id="yr" min="1492" max="2025" value="1492" step="1" aria-label="Year">
+      <div id="yearTxt"></div>
+    </div>
+    <div class="eraband" id="eband"></div>
+    <div class="spark" id="spark"></div>
+    <div class="tlkey" id="tlkey"></div>
+  </div>
   </div>
   <div class="side">
     <div class="card">
@@ -827,9 +947,9 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
       <div id="yearBig"></div>
       <div id="popTxt"></div>
     </div>
-    <div class="card">
+    <div class="card hover">
       <div id="kindTxt"></div>
-      <div id="nameTxt">A mark under the cursor lands here</div>
+      <div id="nameTxt" class="empty">A mark under the cursor lands here</div>
       <div id="bodyTxt"></div>
       <div id="srcTxt"></div>
     </div>
@@ -838,15 +958,6 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
       <div id="symList"></div>
     </div>
   </div>
-</div>
-<div class="tl">
-  <div class="tlticks" id="ticks"></div>
-  <div class="tlrow">
-    <button id="bPlay">Play</button>
-    <input type="range" id="yr" min="1492" max="2025" value="1492" step="1">
-    <div id="yearTxt"></div>
-  </div>
-  <div class="eraband" id="eband"></div>
 </div>
 <p class="note">__NOTE1__</p>
 <details class="sources"><summary>Sources</summary>
@@ -858,21 +969,27 @@ of</summary><p>__METHOD__</p></details></div>
 </details>
 </div>
 <script>
-const ST=__ST__, HIST=__HIST__, ROADS=__ROADS__, SYM=__SYM__;
+const ST=__ST__, HIST=__HIST__, ROADS=__ROADS__, SYM=__SYM__, GHOST=__GHOST__;
+// the city page inside this map, if there is one; the zoom hands off to it
+const CITY=null;
 const W=ST.W, H=ST.H;
 const [MX0,MY0,MX1,MY1]=ST.m;
 const R=6378137, RAD=Math.PI/180;
+function MXY(mx,my){ return [ (mx-MX0)/(MX1-MX0)*W, (MY1-my)/(MY1-MY0)*H ]; }
 function XY(lat,lon){
   const mx=R*lon*RAD, my=R*Math.log(Math.tan(Math.PI/4+lat*RAD/2));
-  return [ (mx-MX0)/(MX1-MX0)*W, (MY1-my)/(MY1-MY0)*H ];
+  return MXY(mx,my);
 }
+const REDUCED=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wrap=document.getElementById('mapwrap');
 wrap.style.aspectRatio=W+' / '+H;
 const svg=document.getElementById('map');
 svg.setAttribute('viewBox','0 0 '+W+' '+H);
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
-const layers={ter:true,woo:true,riv:true,lak:true,cou:false,nat:true,tow:true,uni:false,hwy:false,mig:true};
-let year=1492, playing=false, pinned=null;
+const layers={ter:true,woo:true,riv:true,lak:true,cou:false,nat:true,tow:true,uni:false,hwy:false,mig:true,lim:false};
+let year=1492, playing=false, pinned=null, focusNat=null, ghostSel=null, ghostOp=0;
+// the year everything opens on; the rail then runs on its own
+const START=1492;
 
 function ringsPath(rr){ return rr.map(r=>'M'+r.map(p=>p[0]+','+p[1]).join('L')+'Z').join(''); }
 const outlineD=ringsPath(ST.outline);
@@ -892,24 +1009,77 @@ const RDN={i:'Interstate', us:'US route', sr:'State route'};
 // labels crowd at city scale, so each one is nudged clear of those
 // already placed
 let LBL=[];
-function lblY(x,y,n){
-  const w=n*5.6; let ty=y;
-  for(let k=0;k<26;k++){
-    let hit=false;
-    for(const b of LBL){
-      if(Math.abs(b[0]-x)<(b[2]+w)/2 && Math.abs(b[1]-ty)<11){ hit=true; break; } }
-    if(!hit) break;
-    ty-=12;
+function lblY(x,y,n,pw,lh){
+  // lh, when given, is the line height of a larger label: it is then tried
+  // above and below its anchor in turn and kept inside the frame
+  const w=n*(pw||5.6), L=lh||13;
+  const free=ty=>!LBL.some(b=>Math.abs(b[0]-x)<(b[2]+w)/2+4 && Math.abs(b[1]-ty)<Math.max(b[3]||13,L));
+  let ty=y;
+  if(lh){
+    for(let k=0;k<40;k++){
+      const c=y+(k%2?1:-1)*Math.ceil(k/2)*L;
+      if(c<L||c>H-6) continue;
+      if(free(c)){ ty=c; break; }
+    }
+  } else {
+    for(let k=0;k<26;k++){ if(free(ty)) break; ty-=13; }
   }
-  LBL.push([x,ty,w]);
+  LBL.push([x,ty,w,L]);
   return ty;
+}
+// a polygon cut to the frame (Sutherland-Hodgman), for the part of a
+// homeland that is actually in view
+function clipToFrame(P){
+  const edges=[[0,0,1],[W,0,-1],[0,1,1],[H,1,-1]];
+  let out=P.slice();
+  for(const [v,ax,sg] of edges){
+    const inp=out; out=[];
+    if(!inp.length) break;
+    const inside=p=>sg>0?p[ax]>=v:p[ax]<=v;
+    for(let i=0;i<inp.length;i++){
+      const a=inp[i], b=inp[(i+1)%inp.length], ia=inside(a), ib=inside(b);
+      if(ia) out.push(a);
+      if(ia!==ib){
+        const t=(v-a[ax])/(b[ax]-a[ax]);
+        out.push([a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t]);
+      }
+    }
+  }
+  return out;
+}
+function centroid(P){
+  let A=0,cx=0,cy=0;
+  for(let i=0;i<P.length;i++){
+    const a=P[i], b=P[(i+1)%P.length], f=a[0]*b[1]-b[0]*a[1];
+    A+=f; cx+=(a[0]+b[0])*f; cy+=(a[1]+b[1])*f;
+  }
+  if(Math.abs(A)<1e-6) return null;
+  return [cx/(3*A), cy/(3*A), Math.abs(A)/2];
+}
+// where a nation's name goes: its own anchor when that is in the frame,
+// otherwise the middle of the part of the patch that is in view; then
+// held clear of the edges and of the names already placed
+function natLabel(n){
+  let [x,y]=XY(n.lat,n.lon);
+  const w=n.n.length*7.2;
+  if(!(x>=0&&x<=W&&y>=0&&y<=H)){
+    if(!n.poly) return null;
+    const c=centroid(clipToFrame(n.poly.map(([lon,lat])=>XY(lat,lon))));
+    if(!c||c[2]<400) return null;
+    x=c[0]; y=c[1];
+  }
+  x=Math.max(w/2+6, Math.min(W-w/2-6, x));
+  y=Math.max(16, Math.min(H-8, y));
+  return [x, lblY(x,y,n.n.length,7.2,17)];
 }
 function render(){
   let s=''; LBL=[];
   s+='<defs><clipPath id="stclip"><path d="'+outlineD+'"/></clipPath>'
     +'<marker id="migArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="3.6" markerHeight="3.6" orient="auto-start-reverse">'
     +'<path d="M0,1 L9,5 L0,9 z" fill="#ffc247"/></marker></defs>';
-  s+='<path d="'+outlineD+'" fill="'+(layers.ter||layers.woo?'none':'#1d2126')+'" stroke="none"/>';
+  // the ground is painted by the terrain canvas; until it has painted,
+  // or if it never does, the state carries a flat fill of its own
+  s+='<path d="'+outlineD+'" fill="'+((layers.ter&&terPainted)||(layers.woo&&wooPainted)?'none':'#1d2126')+'" stroke="none"/>';
   if(layers.cou){
     // each county joins the map in its founding year; the one the author
     // lived in is drawn in gold
@@ -920,7 +1090,7 @@ function render(){
     });
   }
   // the city limits, where the map is a city rather than a state
-  if(layers.cou&&ST.limits&&ST.limits.length){
+  if(layers.lim&&ST.limits&&ST.limits.length){
     const d=ringsPath(ST.limits);
     s+='<g data-lim="1" style="cursor:pointer">'
       +'<path d="'+d+'" fill="none" stroke="#121212" stroke-width="3.6" stroke-opacity="0.6"/>'
@@ -961,33 +1131,53 @@ function render(){
   if(year>=HIST.border)
     s+='<path d="'+outlineD+'" fill="none" stroke="#121212" stroke-width="3.4" stroke-opacity="0.75"/>'
       +'<path d="'+outlineD+'" fill="none" stroke="#e6e6e6" stroke-width="1.7"/>';
+  // another state's outline, at true ground scale, centered on this one
+  if(ghostSel&&GHOST[ghostSel]&&ghostOp>0){
+    s+='<path d="'+ghostPath(ghostSel)+'" fill="#e6e6e6" fill-opacity="'+(0.10*ghostOp).toFixed(3)+'" stroke="#ffffff" stroke-opacity="'+(0.9*ghostOp).toFixed(3)+'" stroke-width="1.6" stroke-dasharray="7 5" pointer-events="none"/>';
+  }
   for(const nb of (HIST.nb||[])){
     if(!nb.sea&&year<HIST.border) continue;
-    const [x,y]=XY(nb.lat,nb.lon);
+    // a neighbor's name is held inside the frame, whichever way it runs
+    let [x,y]=XY(nb.lat,nb.lon);
+    const nw=nb.n.length*(nb.sea?7:9.5)/2+6;
+    if(nb.v){ x=Math.max(12,Math.min(W-6,x)); y=Math.max(nw,Math.min(H-nw,y)); }
+    else { x=Math.max(nw,Math.min(W-nw,x)); y=Math.max(16,Math.min(H-8,y)); }
     const rot=nb.v?' transform="rotate(-90 '+x.toFixed(1)+' '+y.toFixed(1)+')"':'';
+    if(nb.sea) LBL.push([x,y,nb.n.length*7]);
     s+= nb.sea
       ?'<text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="12.5" font-style="italic" fill="var(--water)" fill-opacity="0.9" stroke="#121212" stroke-width="2.6" paint-order="stroke">'+esc(nb.n)+'</text>'
       :'<text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="11.5" letter-spacing="2"'+rot+' fill="#9aa4ad" stroke="#121212" stroke-width="2.6" paint-order="stroke">'+esc(nb.n.toUpperCase())+'</text>';
   }
-  if(layers.ter&&HIST.geo&&HIST.geo.hp){
-    const hp=HIST.geo.hp, [x,y]=XY(hp.lat,hp.lon);
-    s+='<g data-hp="1"><path d="M'+x+','+(y-7)+' L'+(x-6)+','+(y+4)+' L'+(x+6)+','+(y+4)+' Z" fill="#e6e6e6" stroke="#121212" stroke-width="1"/>'
-      +'<text x="'+(x+9)+'" y="'+lblY(x+9,y+4,(hp.n+hp.el).length)+'" font-size="11" fill="#c9d1d9" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+esc(hp.n)+' '+esc(hp.el)+'</text></g>';
-  }
   if(layers.nat) HIST.nations.forEach((n,i)=>{
     const gone=n.after&&year>=n.after.y;
-    const hue=(i*137.508+40)%360;
-    const [x,y]=XY(n.lat,n.lon);
-    s+='<g data-nat="'+i+'" style="cursor:pointer">';
+    // one hue for every homeland: the outline says where each one is,
+    // and the ground shows through
+    const dim=focusNat!=null&&focusNat!==i;
+    const lab=natLabel(n);
+    s+='<g data-nat="'+i+'" style="cursor:pointer"'+(dim?' opacity="0.22"':'')+'>';
     if(n.poly)
       s+='<path d="'+blob(n.poly)+'"'
-        +' fill="hsl('+hue+',62%,55%)" fill-opacity="'+(gone?0.10:(ST.natFill||0.30))+'"'
-        +' stroke="hsl('+hue+',62%,62%)" stroke-opacity="'+(gone?0.3:0.8)+'" stroke-width="1.3"/>';
-    s+='<g opacity="'+(gone?0.5:1)+'">'
-      +'<text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="13" font-style="italic" fill="var(--nation)" stroke="#121212" stroke-width="3" paint-order="stroke">'+esc(n.n)+'</text>'
-      +(gone?'<text x="'+x+'" y="'+(y+13)+'" text-anchor="middle" font-size="9.5" fill="var(--rem)" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+n.after.y+'</text>':'')
-      +'</g></g>';
+        +' fill="var(--nation)" fill-opacity="'+(gone?0.04:(ST.natFill||0.16))+'"'
+        +' stroke="var(--nation)" stroke-opacity="'+(gone?0.3:(focusNat===i?1:0.75))+'" stroke-width="'+(focusNat===i?2:1.3)+'"/>';
+    if(lab){
+      const [x,y]=lab;
+      s+='<g opacity="'+(gone?0.5:1)+'">'
+        +'<text x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" text-anchor="middle" font-size="13" font-style="italic" fill="var(--nation)" stroke="#121212" stroke-width="3" paint-order="stroke">'+esc(n.n)+'</text>'
+        +(gone?'<text x="'+x.toFixed(1)+'" y="'+(y+13).toFixed(1)+'" text-anchor="middle" font-size="9.5" fill="var(--rem)" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+n.after.y+'</text>':'')
+        +'</g>';
+    }
+    s+='</g>';
   });
+  if(layers.ter&&HIST.geo&&HIST.geo.hp){
+    // the highest point, drawn over the homelands so it is never lost
+    // in one; on a city map it is a note on the high ground, not a peak
+    const hp=HIST.geo.hp, [x,y]=XY(hp.lat,hp.lon);
+    const soft=!!hp.soft;
+    s+='<g data-hp="1">'
+      +(soft?'<circle cx="'+x+'" cy="'+y+'" r="2.6" fill="#c9d1d9" stroke="#121212" stroke-width="1"/>'
+            :'<path d="M'+x+','+(y-7)+' L'+(x-6)+','+(y+4)+' L'+(x+6)+','+(y+4)+' Z" fill="#e6e6e6" stroke="#121212" stroke-width="1"/>')
+      +'<text x="'+(x+(soft?6:9))+'" y="'+lblY(x+9,y+4,(hp.n+hp.el).length)+'" font-size="'+(soft?10:11)+'" fill="'+(soft?'#9aa4ad':'#c9d1d9')+'"'+(soft?' font-style="italic"':'')+' stroke="#121212" stroke-width="2.4" paint-order="stroke">'+esc(hp.n)+' '+esc(hp.el)+'</text></g>';
+  }
   if(layers.mig) (HIST.mig||[]).forEach((m,i)=>{
     // a wave rises over its span, then stays as a faded record
     if(m.y0>year) return;
@@ -1019,10 +1209,12 @@ function render(){
       +'<text x="'+x1.toFixed(1)+'" y="'+lblY(x1,y1-7,m.n.length)+'" text-anchor="middle" font-size="9.5" fill="#ffc247" fill-opacity="'+(live?1:0.55)+'" stroke="#121212" stroke-width="2.6" paint-order="stroke">'+esc(m.n)+'</text>'
       +'</g>';
   });
+  let anyCity=false;
   if(layers.tow) (HIST.cities||[]).forEach((c,i)=>{
     // bulk cities surface once the census finds 10,000 people
     const p=interp(c.pp,year); const R=cityR(p);
     if(!R) return;
+    anyCity=true;
     const [x,y]=XY(c.lat,c.lon); const C=cityC(p);
     s+='<g data-ct="'+i+'" style="cursor:pointer">'
       +'<circle cx="'+x+'" cy="'+y+'" r="'+R.toFixed(1)+'" fill="'+C+'" fill-opacity="0.62" stroke="'+C+'" stroke-opacity="0.95" stroke-width="1"/>'
@@ -1039,6 +1231,7 @@ function render(){
       const cap=e.t==='cap';
       const p=e.pp?interp(e.pp,year):null;
       const R=cityR(p), C=cityC(p);
+      if(R) anyCity=true;
       s+='<g data-ev="'+i+'" style="cursor:pointer">'
         +(R?'<circle cx="'+x+'" cy="'+y+'" r="'+R.toFixed(1)+'" fill="'+C+'" fill-opacity="0.62" stroke="'+C+'" stroke-opacity="0.95" stroke-width="1.2"/>':'')
         +(cap?'<path d="'+star(x,y,6)+'" fill="var(--cap)" stroke="#121212" stroke-width="1"/>'
@@ -1057,10 +1250,11 @@ function render(){
       +(u.mine?'<text x="'+x+'" y="'+lblY(x,y-9,u.mine.length)+'" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffd24d" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+esc(u.mine)+'</text>':'')
       +'</g>';
   });
-  if(layers.tow){
+  // the key to the circles, once there is a circle to read
+  if(layers.tow&&anyCity){
     const tiers=[[1e4,'10,000'],[1e5,'100,000'],[1e6,'1,000,000'],[1e7,'10,000,000']];
     const Rmax=cityR(1e7), cx=16+Rmax, by=H-14;
-    s+='<g pointer-events="none">';
+    s+='<g pointer-events="none" data-fixed="1">';
     s+='<text x="16" y="'+(by-2*Rmax-10)+'" font-size="10" fill="#8b949e" stroke="#121212" stroke-width="2.4" paint-order="stroke">City population</text>';
     // filled disks, largest painted first so each tier stays visible
     for(const [p] of [...tiers].reverse()){
@@ -1084,6 +1278,7 @@ function render(){
     s+='</g>';
   }
   svg.innerHTML=s;
+  fixZoom();
 }
 // a smooth closed blob through lon/lat vertices (Catmull-Rom to bezier)
 function segLen(seg){
@@ -1111,6 +1306,135 @@ function star(x,y,r){
   }
   return d+'Z';
 }
+
+// ---- zoom: the wheel, the two buttons or the + and - keys close in on a
+// point; a drag pans. The ground canvases scale with the view, while the
+// names and the marks keep their size on screen. ----
+let Z=1, VX=0, VY=0, zoomRaf=null, drag=null, dragged=false;
+function fixZoom(){
+  svg.classList.toggle('zoomed',Z>1);
+  if(Z===1) return;
+  const k=1/Z;
+  // a point mark and its name shrink back together about the mark
+  svg.querySelectorAll('[data-ev],[data-uni],[data-ct],[data-hp]').forEach(g=>{
+    const m=g.firstElementChild; if(!m) return;
+    const b=m.getBBox(), cx=b.x+b.width/2, cy=b.y+b.height/2;
+    g.setAttribute('transform','matrix('+k+' 0 0 '+k+' '+(cx*(1-k)).toFixed(2)+' '+(cy*(1-k)).toFixed(2)+')');
+  });
+  // every other name keeps its type size
+  svg.querySelectorAll('text').forEach(t=>{
+    if(t.closest('[data-ev],[data-uni],[data-ct],[data-hp],[data-fixed]')) return;
+    for(const a of ['font-size','stroke-width','letter-spacing']){
+      const v=parseFloat(t.getAttribute(a)); if(v) t.setAttribute(a,(v*k).toFixed(2));
+    }
+  });
+  // the keys stay where they are on the screen
+  svg.querySelectorAll('[data-fixed]').forEach(g=>
+    g.setAttribute('transform','translate('+VX.toFixed(1)+' '+VY.toFixed(1)+') scale('+k+')'));
+}
+function applyView(){
+  const vw=W/Z, vh=H/Z;
+  VX=Math.max(0,Math.min(W-vw,VX)); VY=Math.max(0,Math.min(H-vh,VY));
+  svg.setAttribute('viewBox',VX+' '+VY+' '+vw+' '+vh);
+  const tf=Z===1?'':'scale('+Z+') translate('+(-VX/W*100)+'%,'+(-VY/H*100)+'%)';
+  for(const id of ['terC','wooC','watC']){ const c=document.getElementById(id); if(c) c.style.transform=tf; }
+  render();
+  document.getElementById('zOut').disabled=Z<=1.0001;
+  document.getElementById('zIn').disabled=Z>=5.999;
+  const a=document.getElementById('zCity');
+  let near=false;
+  if(CITY&&Z>=2.5){ const [x,y]=MXY(CITY.mx,CITY.my); near=x>=VX&&x<=VX+vw&&y>=VY&&y<=VY+vh; }
+  if(CITY){ a.href=CITY.href; a.textContent=CITY.n+', up close →'; }
+  a.hidden=!near;
+}
+// fx, fy: where in the view (0 to 1) the zoom is centered
+function zoomTo(nz,fx,fy,glide){
+  nz=Math.max(1,Math.min(6,nz));
+  if(zoomRaf){ cancelAnimationFrame(zoomRaf); zoomRaf=null; }
+  const px=VX+fx*W/Z, py=VY+fy*H/Z, z0=Z;
+  const set=z=>{ Z=z; VX=px-fx*W/Z; VY=py-fy*H/Z; applyView(); };
+  if(!glide||REDUCED){ set(nz); return; }
+  const t0=performance.now(), dur=650;
+  const step=t=>{ const u=Math.min(1,(t-t0)/dur), e=u<0.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+    set(z0*Math.pow(nz/z0,e)); zoomRaf=u<1?requestAnimationFrame(step):null; };
+  zoomRaf=requestAnimationFrame(step);
+}
+document.getElementById('zIn').onclick=()=>zoomTo(Z*2,0.5,0.5,true);
+document.getElementById('zOut').onclick=()=>zoomTo(Z/2,0.5,0.5,true);
+svg.addEventListener('wheel',e=>{
+  // at the widest view, a scroll down belongs to the page
+  if(Z<=1&&e.deltaY>0) return;
+  e.preventDefault();
+  const r=svg.getBoundingClientRect();
+  zoomTo(Z*Math.exp(-e.deltaY*0.0015),(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height,false);
+},{passive:false});
+svg.addEventListener('pointerdown',e=>{
+  if(Z<=1||e.button!==0) return;
+  drag={x:e.clientX,y:e.clientY,vx:VX,vy:VY}; dragged=false;
+});
+window.addEventListener('pointermove',e=>{
+  if(!drag) return;
+  const dx=e.clientX-drag.x, dy=e.clientY-drag.y;
+  if(!dragged&&Math.hypot(dx,dy)<4) return;
+  dragged=true; svg.classList.add('panning');
+  const r=svg.getBoundingClientRect();
+  VX=drag.vx-dx/r.width*W/Z; VY=drag.vy-dy/r.height*H/Z; applyView();
+});
+window.addEventListener('pointerup',()=>{ drag=null; svg.classList.remove('panning'); });
+// a drag is not a click on whatever it ended over
+svg.addEventListener('click',e=>{ if(dragged){ e.stopPropagation(); dragged=false; } },true);
+document.addEventListener('keydown',e=>{
+  if(document.activeElement!==svg) return;
+  if(e.key==='+'||e.key==='='){ zoomTo(Z*2,0.5,0.5,true); e.preventDefault(); }
+  if(e.key==='-'||e.key==='_'){ zoomTo(Z/2,0.5,0.5,true); e.preventDefault(); }
+  if(e.key==='0'){ zoomTo(1,0.5,0.5,true); e.preventDefault(); }
+});
+
+// ---- the ghost of another state ----
+// Its outline comes in that page's own frame. It goes back to Mercator
+// meters, is scaled by the ratio of the cosines of the two latitudes so
+// that a kilometer there is a kilometer here, and is centered on this
+// state. Latitude is taken at the middle of each state's frame.
+const ghostCache={};
+function ghostPath(code){
+  if(ghostCache[code]) return ghostCache[code];
+  const g=GHOST[code], [bx0,by0,bx1,by1]=g.m;
+  const toM=([x,y])=>[bx0+x/g.W*(bx1-bx0), by1-y/g.H*(by1-by0)];
+  const latOf=my=>(2*Math.atan(Math.exp(my/R))-Math.PI/2)/RAD;
+  const k=Math.cos(latOf((by0+by1)/2)*RAD)/Math.cos(latOf((MY0+MY1)/2)*RAD);
+  const bcx=(bx0+bx1)/2, bcy=(by0+by1)/2, acx=(MX0+MX1)/2, acy=(MY0+MY1)/2;
+  const d=g.o.map(r=>'M'+r.map(p=>{ const [mx,my]=toM(p);
+    const [x,y]=MXY(acx+(mx-bcx)*k, acy+(my-bcy)*k);
+    return x.toFixed(1)+','+y.toFixed(1); }).join('L')+'Z').join('');
+  ghostCache[code]=d; return d;
+}
+let ghostAnim=null;
+function setGhost(code){
+  const same=ghostSel===code;
+  const from=ghostOp, to=same?0:1, next=same?null:code;
+  if(!same) ghostSel=code;
+  document.querySelectorAll('[data-ghost]').forEach(b=>b.classList.toggle('on',b.dataset.ghost===next));
+  if(next){
+    const g=GHOST[next];
+    show('Another state, at the same ground scale', g.n+' over '+ST.name,
+      g.n+' covers '+fmt(g.km2)+' km² against '+fmt(ST.km2||0)+' km² for '+ST.name
+      +(ST.km2?', '+(g.km2/ST.km2*100).toFixed(g.km2/ST.km2<0.1?1:0)+'% of it.':'.')
+      +' The outline is drawn to the same kilometer scale and centered here.',
+      'Areas: US Census Bureau, 2020 gazetteer files (land and water)');
+  }
+  if(ghostAnim) cancelAnimationFrame(ghostAnim);
+  if(REDUCED){ ghostOp=to; if(!next) ghostSel=null; render(); return; }
+  const t0=performance.now(), dur=700;
+  const step=t=>{
+    const u=Math.min(1,(t-t0)/dur), e=u<0.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+    ghostOp=from+(to-from)*e;
+    render();
+    if(u<1) ghostAnim=requestAnimationFrame(step);
+    else { ghostAnim=null; if(!next) ghostSel=null; }
+  };
+  ghostAnim=requestAnimationFrame(step);
+}
+document.querySelectorAll('[data-ghost]').forEach(b=>b.onclick=()=>setGhost(b.dataset.ghost));
 
 // ---- population and era readouts ----
 const CEN=(HIST.early||[]).map(r=>[r[0],r[1],r[2]])
@@ -1169,19 +1493,15 @@ async function symbols(){
   }
 }
 
-async function setYear(y){
+// the map and the readouts first; the flag arrives when the network does
+let curEra=null;
+function setYear(y){
   year=y;
   document.getElementById('yr').value=y;
   document.getElementById('yearTxt').textContent=y;
   document.getElementById('yearBig').textContent=y;
   const era=HIST.eras.find(e=>y>=e.y0&&y<e.y1)||HIST.eras[HIST.eras.length-1];
   document.getElementById('eraTxt').textContent=era.l;
-  const img=document.getElementById('flagImg'), none=document.getElementById('flagNone');
-  const u=await flagUrl(era.f);
-  if(y!==year) return;
-  if(u){ img.src=u; img.style.display='block'; none.hidden=true; }
-  else{ img.style.display='none'; none.hidden=false;
-    none.textContent=era.f?'flag unavailable':'No flag: the nations\\u2019 own land'; }
   const cen=interp(CEN,y);
   const natLast=HIST.native.length?HIST.native[HIST.native.length-1][0]:0;
   const nat=y<=natLast?interp(HIST.native,y):null;
@@ -1191,79 +1511,204 @@ async function setYear(y){
   else t.push(esc('Before the counts: '+HIST.pre));
   if(nat!=null) t.push(esc('Native population (estimate): '+fmt(nat)));
   document.getElementById('popTxt').innerHTML=t.join('<br>');
+  document.querySelectorAll('#ticks button').forEach(b=>b.classList.toggle('here',+b.textContent===y));
   render();
+  sparkDot(y);
+  if(era!==curEra){ curEra=era; flag(era); }
+}
+async function flag(era){
+  const img=document.getElementById('flagImg'), none=document.getElementById('flagNone');
+  const u=await flagUrl(era.f);
+  if(era!==curEra) return;
+  if(u){ img.src=u; img.style.display='block'; none.hidden=true; }
+  else{ img.style.display='none'; none.hidden=false;
+    none.textContent=era.f?'flag unavailable':'No flag: the nations’ own land'; }
+}
+
+// ---- the population under the slider ----
+const SPAN=2025-1492;
+function sparkSeries(){
+  const cen=CEN.map(r=>[r[0],r[1]]).filter(r=>r[1]>0);
+  const nat=(HIST.native||[]).map(r=>[r[0],r[1]]).filter(r=>r[1]>0);
+  return {cen,nat};
+}
+let sparkY=null;
+(function spark(){
+  const box=document.getElementById('spark'); if(!box) return;
+  const {cen,nat}=sparkSeries();
+  const all=cen.concat(nat);
+  if(all.length<2){ box.style.display='none'; return; }
+  const vals=all.map(r=>Math.log10(r[1]));
+  let lo=Math.floor(Math.min(...vals)), hi=Math.ceil(Math.max(...vals));
+  if(hi-lo<1) hi=lo+1;
+  const w=1000, h=62, pad=6;
+  const X=y=>(y-1492)/SPAN*w, Y=v=>pad+(h-2*pad)*(1-(Math.log10(v)-lo)/(hi-lo));
+  sparkY=Y;
+  let s='<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">';
+  const lab=p=>p>=6?(p===6?'1M':Math.pow(10,p-6)+'M'):p>=3?Math.pow(10,p-3)+'k':String(Math.pow(10,p));
+  for(let p=lo;p<=hi;p++){
+    const y=Y(Math.pow(10,p));
+    s+='<line x1="0" y1="'+y.toFixed(1)+'" x2="'+w+'" y2="'+y.toFixed(1)+'" stroke="#2b2b2b" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+  }
+  s+='</svg><svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">';
+  const line=(pts,color,dash)=>{
+    if(pts.length<2) return '';
+    return '<polyline points="'+pts.map(r=>X(r[0]).toFixed(1)+','+Y(r[1]).toFixed(1)).join(' ')+'" fill="none" stroke="'+color+'" stroke-width="1.8"'+(dash?' stroke-dasharray="5 4"':'')+' vector-effect="non-scaling-stroke" stroke-linejoin="round"/>';
+  };
+  s+=line(nat,'var(--nation)',true)+line(cen,'#0ca30c',false);
+  s+='</svg>';
+  // labels and the dot live in a third layer that keeps its aspect, so
+  // text and the dot stay round and readable
+  s+='<svg id="sparkTop" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">';
+  s+='<line id="sparkLine" x1="0" y1="0" x2="0" y2="'+h+'" stroke="var(--accent)" stroke-opacity="0.6" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+  s+='</svg>';
+  s+='<div id="sparkLab" style="position:absolute;left:4px;top:0;font-size:9.5px;color:var(--muted);line-height:1">'+lab(hi)+'</div>'
+    +'<div style="position:absolute;left:4px;bottom:0;font-size:9.5px;color:var(--muted);line-height:1">'+lab(lo)+'</div>'
+    +'<div id="sparkDot" style="position:absolute;width:9px;height:9px;border-radius:50%;background:#0ca30c;border:2px solid #121212;margin:-4.5px 0 0 -4.5px;display:none"></div>'
+    +'<div id="sparkDot2" style="position:absolute;width:9px;height:9px;border-radius:50%;background:var(--nation);border:2px solid #121212;margin:-4.5px 0 0 -4.5px;display:none"></div>';
+  box.innerHTML=s;
+})();
+function sparkDot(y){
+  const box=document.getElementById('spark'); if(!box||!sparkY) return;
+  const {cen,nat}=sparkSeries();
+  const fx=(y-1492)/SPAN*100;
+  const ln=document.getElementById('sparkLine');
+  if(ln){ ln.setAttribute('x1',fx*10); ln.setAttribute('x2',fx*10); }
+  const put=(id,pts)=>{
+    const d=document.getElementById(id); if(!d) return;
+    const v=(pts.length&&y>=pts[0][0]&&y<=pts[pts.length-1][0])?interp(pts,y):null;
+    if(!v){ d.style.display='none'; return; }
+    d.style.display='block'; d.style.left=fx+'%'; d.style.top=(sparkY(v)/62*100)+'%';
+    d.title=fmt(v);
+  };
+  put('sparkDot',cen); put('sparkDot2',nat);
 }
 
 // ---- cards ----
 function show(kind,name,body,src){
   document.getElementById('kindTxt').textContent=kind;
-  document.getElementById('nameTxt').textContent=name;
+  const nm=document.getElementById('nameTxt');
+  nm.textContent=name; nm.classList.remove('empty');
   document.getElementById('bodyTxt').textContent=body;
   document.getElementById('srcTxt').textContent=src||'';
 }
 function target(e){
-  const g=e.target.closest('[data-nat],[data-ev],[data-ct],[data-uni],[data-rd],[data-mig],[data-cty],[data-hp]');
+  const g=e.target.closest('[data-nat],[data-ev],[data-ct],[data-uni],[data-rd],[data-mig],[data-cty],[data-hp],[data-lim],[data-fnd]');
   if(!g) return null;
   if(g.dataset.nat!==undefined){ const n=HIST.nations[+g.dataset.nat];
-    return ['A nation of this land',n.n,
+    return [n.kind||'A nation of this land',n.n,
       n.note+(n.after?' '+n.after.t.charAt(0).toUpperCase()+n.after.t.slice(1)+'.':'')
-      +' The patch is an approximate homeland, drawn for orientation.',
+      +' The patch is an approximate homeland, drawn for orientation.'
+      +(focusNat===+g.dataset.nat?' Pinned: the other homelands are dimmed until the pin is lifted.':''),
       n.src||'']; }
   if(g.dataset.ev!==undefined){ const ev=HIST.events[+g.dataset.ev];
-    const k=ev.t==='rem'?'Removal and dispossession':ev.t==='cap'?'Capital \\u00b7 '+ev.y:'Settlement \\u00b7 '+ev.y;
+    const k=ev.t==='rem'?'Removal and dispossession':ev.t==='cap'?'Capital · '+ev.y:'Settlement · '+ev.y;
     let body=ev.note;
     if(ev.pp){ const p=interp(ev.pp,year);
       if(p) body+=' Population around '+year+': '+fmt(p)+' (census, interpolated).'; }
     return [k,ev.n,body,ev.src]; }
   if(g.dataset.mig!==undefined){ const m=HIST.mig[+g.dataset.mig];
-    return ['Migration \\u00b7 '+m.y0+' to '+m.y1, m.n,
+    return ['Migration · '+m.y0+' to '+m.y1, m.n,
       m.note+' Arrow width follows the size of the wave; the ends are '
       +'regions, not exact places.', m.src]; }
   if(g.dataset.rd!==undefined){ const r=ROADS[+g.dataset.rd];
-    return [RDN[r.lv]+(r.y?' \\u00b7 '+r.y:''), r.n,
+    return [RDN[r.lv]+(r.y?' · '+r.y:''), r.n,
       (r.y?'First carried this number in '+r.y+'. ':'No designation year is documented for this route. ')
       +'The line is the route as it runs today, not the alignment of that year.',
-      'Route history: the route\\u2019s Wikipedia article']; }
+      'Route history: the route’s Wikipedia article']; }
   if(g.dataset.uni!==undefined){ const u=HIST.unis[+g.dataset.uni];
-    return ['College \\u00b7 founded '+u.y, u.n,
+    return ['College · founded '+u.y, u.n,
       (u.pub?'Public':'Private')+' institution, on the map from its founding year.'
-      +(u.mine?' One of the author\\u2019s alma maters.':''),
+      +(u.mine?' One of the author’s alma maters.':''),
       'en.wikipedia.org/wiki/'+u.n.replace(/ /g,'_')]; }
   if(g.dataset.ct!==undefined){ const c=HIST.cities[+g.dataset.ct];
     const p=interp(c.pp,year);
-    return ['City \\u00b7 census', c.n,
+    return ['City · census', c.n,
       'Population around '+year+': '+fmt(p)+' (census, interpolated). '
       +'On the map from the first census over 10,000.',
-      'Census series via the city\\u2019s Wikipedia article']; }
+      'Census series via the city’s Wikipedia article']; }
   if(g.dataset.cty!==undefined){ const c=ST.counties[+g.dataset.cty];
-    return ['County \\u00b7 recent population',c.n,
+    return ['County · recent population',c.n,
       (c.y?'Established '+c.y+'. ':'')+'Population about '+fmt(c.p)+'.',
-      'Founding year via Wikipedia\\u2019s county list; census figures via the Balsama county dataset, 2025']; }
+      'Founding year via Wikipedia’s county list; census figures via the Balsama county dataset, 2025']; }
   if(g.dataset.hp!==undefined){ const hp=HIST.geo.hp;
-    return ['Highest point',hp.n,'Elevation '+hp.el+'.','']; }
+    return [hp.soft?'High ground':'Highest point',hp.n,'Elevation '+hp.el+'.','']; }
+  if(g.dataset.lim!==undefined){
+    return ['City limits',ST.limitsName||ST.name,'The incorporated city as it stands today, from the Census TIGER place file.','']; }
+  if(g.dataset.fnd!==undefined){
+    return ['The founding plat · '+ST.founded.y,ST.founded.n||ST.name,ST.founded.note||'The ground the town was first laid out on.',ST.founded.src||'']; }
   return null;
 }
 svg.addEventListener('pointerover',e=>{ if(pinned) return;
   const t=target(e); if(t) show(...t); });
 svg.addEventListener('click',e=>{
-  const g=e.target.closest('[data-nat],[data-ev],[data-ct],[data-uni],[data-rd],[data-mig],[data-cty],[data-hp]');
-  if(!g){ pinned=null; return; }
-  const id=g.dataset.nat!==undefined?'n'+g.dataset.nat:g.dataset.ev!==undefined?'e'+g.dataset.ev:g.dataset.ct!==undefined?'t'+g.dataset.ct:g.dataset.uni!==undefined?'u'+g.dataset.uni:g.dataset.rd!==undefined?'r'+g.dataset.rd:g.dataset.mig!==undefined?'m'+g.dataset.mig:g.dataset.cty!==undefined?'c'+g.dataset.cty:'hp';
+  const g=e.target.closest('[data-nat],[data-ev],[data-ct],[data-uni],[data-rd],[data-mig],[data-cty],[data-hp],[data-lim],[data-fnd]');
+  if(!g){ unpin(); return; }
+  const id=g.dataset.nat!==undefined?'n'+g.dataset.nat:g.dataset.ev!==undefined?'e'+g.dataset.ev:g.dataset.ct!==undefined?'t'+g.dataset.ct:g.dataset.uni!==undefined?'u'+g.dataset.uni:g.dataset.rd!==undefined?'r'+g.dataset.rd:g.dataset.mig!==undefined?'m'+g.dataset.mig:g.dataset.cty!==undefined?'c'+g.dataset.cty:g.dataset.hp!==undefined?'hp':g.dataset.lim!==undefined?'lim':'fnd';
   pinned = pinned===id?null:id;
+  // a pinned nation holds the stage: the others dim, and the slider then
+  // shows its own patch fading at the year of its removal
+  focusNat = (pinned&&g.dataset.nat!==undefined)?+g.dataset.nat:null;
+  render();
   const t=target(e); if(t) show(...t);
+});
+function unpin(){ if(pinned===null&&focusNat===null) return; pinned=null; focusNat=null; render(); }
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ unpin(); return; }
+  // arrow keys move the year only while the map itself has focus
+  if(document.activeElement!==svg) return;
+  const st=e.shiftKey?10:1;
+  if(e.key==='ArrowRight'||e.key==='ArrowUp'){ stop(); setYear(Math.min(2025,year+st)); e.preventDefault(); }
+  if(e.key==='ArrowLeft'||e.key==='ArrowDown'){ stop(); setYear(Math.max(1492,year-st)); e.preventDefault(); }
+  if(e.key===' '){ document.getElementById('bPlay').click(); e.preventDefault(); }
 });
 
 // ---- timeline ----
 document.getElementById('yr').addEventListener('input',e=>{ stop(); setYear(+e.target.value); });
-let timer=null;
+// Play runs on animation frames at a chosen number of years per second,
+// and sprints at ten times that through the centuries before the first
+// mark on the map, so the empty part of the rail passes in a few seconds
+let raf=null, speed=10, lastT=null, acc=0, countiesAuto=false;
+const FIRST=Math.min(...HIST.events.map(e=>e.y).concat(HIST.eras.filter(e=>e.y0>1492).map(e=>e.y0)).concat([2025]));
 function stop(){ playing=false; document.getElementById('bPlay').textContent='Play';
-  if(timer){ clearInterval(timer); timer=null; } }
-document.getElementById('bPlay').onclick=()=>{
-  if(playing){ stop(); return; }
+  if(raf){ cancelAnimationFrame(raf); raf=null; } lastT=null; }
+function frame(t){
+  if(!playing) return;
+  if(lastT==null) lastT=t;
+  const dt=Math.min(0.25,(t-lastT)/1000); lastT=t;
+  acc+=dt*speed*(year<FIRST?10:1);
+  const step=Math.floor(acc);
+  if(step>=1){
+    acc-=step;
+    const y=Math.min(2025, year<FIRST?Math.min(FIRST,year+step):year+step);
+    // the county grid filling in by founding year is the best time effect
+    // on the page, so the layer comes on by itself once the border exists
+    if(!countiesAuto&&y>=HIST.border&&!layers.cou){ countiesAuto=true; document.getElementById('cCou').click(); }
+    setYear(y);
+    if(y>=2025){ stop(); return; }
+  }
+  raf=requestAnimationFrame(frame);
+}
+function play(){
+  if(playing) return;
   playing=true; document.getElementById('bPlay').textContent='Pause';
-  if(year>=2025) setYear(1492);
-  timer=setInterval(()=>{ if(year>=2025){ stop(); return; } setYear(year+1); },130);
-};
+  if(year>=2025){ countiesAuto=false; setYear(1492); }
+  acc=0; lastT=null; raf=requestAnimationFrame(frame);
+}
+document.getElementById('bPlay').onclick=()=>{ if(playing) stop(); else play(); };
+// a jump to a marked year glides there
+let jumpRaf=null;
+function goTo(y){
+  stop(); if(jumpRaf){ cancelAnimationFrame(jumpRaf); jumpRaf=null; }
+  if(REDUCED||Math.abs(y-year)<3){ setYear(y); return; }
+  const y0=year, t0=performance.now(), dur=800;
+  const step=t=>{
+    const u=Math.min(1,(t-t0)/dur), e=u<0.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+    setYear(Math.round(y0+(y-y0)*e));
+    if(u<1) jumpRaf=requestAnimationFrame(step); else jumpRaf=null;
+  };
+  jumpRaf=requestAnimationFrame(step);
+}
 (function eband(){
   const eb=document.getElementById('eband'), span=2025-1492;
   const cols=['#3a3a3a','#7a6a2f','#2f5d7a','#7a2f2f','#2f7a4f','#50407a','#7a5a2f'];
@@ -1271,15 +1716,30 @@ document.getElementById('bPlay').onclick=()=>{
     const d=document.createElement('div');
     d.style.left=((e.y0-1492)/span*100)+'%';
     d.style.width=((Math.min(e.y1,2025)-e.y0)/span*100)+'%';
-    d.style.background=cols[i%cols.length]; d.title=e.y0+' \\u00b7 '+e.l;
+    d.style.background=cols[i%cols.length]; d.title=e.y0+' · '+e.l;
     eb.appendChild(d);
   });
   HIST.events.forEach(ev=>{
     const m=document.createElement('span');
     m.style.left=((ev.y-1492)/span*100)+'%';
     m.style.background=ev.t==='rem'?'var(--rem)':ev.t==='cap'?'var(--cap)':'var(--set)';
-    m.title=ev.y+' \\u00b7 '+ev.n;
+    m.title=ev.y+' · '+ev.n;
     eb.appendChild(m);
+  });
+  // the key to the band and the population lines, and the speed of Play
+  const key=document.getElementById('tlkey');
+  const {cen,nat}=sparkSeries();
+  key.innerHTML='<span><i style="background:var(--set)"></i>Settlement</span>'
+    +'<span><i style="background:var(--cap)"></i>Capital</span>'
+    +'<span><i style="background:var(--rem)"></i>Removal</span>'
+    +'<span><i style="background:#555"></i>One color per era</span>'
+    +(cen.length>1?'<span><i class="ln" style="background:#0ca30c"></i>Counted population, log scale</span>':'')
+    +(nat.length>1?'<span><i class="ln" style="background:var(--nation)"></i>Native estimate</span>':'')
+    +'<span class="spd"><span>Play</span>'
+    +[10,30,100].map(v=>'<button data-spd="'+v+'"'+(v===10?' class="on"':'')+'>'+v+' yr/s</button>').join('')+'</span>';
+  key.querySelectorAll('[data-spd]').forEach(b=>b.onclick=()=>{
+    speed=+b.dataset.spd;
+    key.querySelectorAll('[data-spd]').forEach(x=>x.classList.toggle('on',x===b));
   });
 })();
 // jump markers: each era boundary (statehood, transfers of power) is a
@@ -1293,26 +1753,47 @@ document.getElementById('bPlay').onclick=()=>{
     if(p.y<=1492) continue;
     if(by.has(p.y)){
       const had=by.get(p.y);
-      if(had.l.indexOf(p.l)<0) had.l+=' \u00b7 '+p.l;
+      if(had.l.indexOf(p.l)<0) had.l+=' · '+p.l;
     } else by.set(p.y,{y:p.y,l:p.l});
   }
   const pts=[...by.values()].sort((a,b)=>a.y-b.y);
-  let lastX={1:-99,2:-99};
-  pts.forEach(p=>{
-    const x=(p.y-1492)/span*100;
-    const row=(x-lastX[1]<5.5&&x-lastX[2]>=5.5)?2:1; lastX[row]=x;
+  const bs=pts.map(p=>{
     const b=document.createElement('button');
-    b.className='row'+row;
-    b.style.left=x+'%';
+    b.style.left=((p.y-1492)/span*100)+'%';
     b.textContent=p.y;
-    b.title=p.y+' \\u00b7 '+p.l;
-    b.onclick=()=>{ stop(); setYear(p.y); };
+    b.title=p.y+' · '+p.l;
+    b.onclick=()=>goTo(p.y);
     tk.appendChild(b);
+    return b;
   });
+  // rows are assigned in pixels: a year takes the lowest row with room
+  // for it, up to three rows, and a year that fits nowhere keeps only
+  // its arrow, so nothing is ever printed over anything else
+  const ROWS=3, RH=22, GAP=36;
+  function layout(){
+    const wpx=tk.clientWidth||1000;
+    const last=[-1e9,-1e9,-1e9];
+    let used=1;
+    bs.forEach((b,i)=>{
+      const x=(pts[i].y-1492)/span*wpx;
+      let row=-1;
+      for(let r=0;r<ROWS;r++) if(x-last[r]>=GAP){ row=r; break; }
+      b.classList.toggle('hid',row<0);
+      if(row<0) row=0; else { last[row]=x; used=Math.max(used,row+1); }
+      b.dataset.row=row;
+    });
+    bs.forEach(b=>{ b.style.top=((used-1-(+b.dataset.row))*RH)+'px'; });
+    tk.style.height=(used*RH+6)+'px';
+  }
+  layout();
+  let rt=null;
+  window.addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(layout,120); });
+  window.__tickLayout=layout;
 })();
 
 // ---- chips ----
 const CH={cTer:'ter',cWoo:'woo',cRiv:'riv',cLak:'lak',cCou:'cou',cNat:'nat',cTow:'tow',cUni:'uni',cHwy:'hwy',cMig:'mig'};
+if(document.getElementById('cLim')) CH.cLim='lim';
 for(const id in CH) document.getElementById(id).onclick=e=>{
   const k=CH[id]; layers[k]=!layers[k];
   e.target.classList.toggle('on',layers[k]);
@@ -1338,23 +1819,28 @@ function hyps(e){
   }
   return HYPS[HYPS.length-1].slice(1);
 }
-let terDone=false, wooDone=false;
+// done means painted: a fetch that fails leaves the flag down, so the
+// chip can ask again
+let terDone=false, wooDone=false, terBusy=false, wooBusy=false;
+let terPainted=false, wooPainted=false;
 const loadTxt=document.getElementById('loadTxt');
 async function terrain(){
-  if(terDone) return; terDone=true;
+  if(terDone||terBusy) return; terBusy=true;
   const cv=document.getElementById('terC'); const SC=2;
   cv.width=W*SC; cv.height=Math.round(H*SC);
   const ctx=cv.getContext('2d');
-  loadTxt.textContent='loading terrain\\u2026';
+  loadTxt.textContent='loading terrain…';
   try{
     const world=2*Math.PI*R;
+    // a phone gets fewer, coarser tiles: the frame is small there anyway
+    const cap=(window.innerWidth||1000)<700?36:80;
     let z=Math.round(Math.log2(world/(MX1-MX0)*(W*SC)/256)); z=Math.max(5,Math.min(11,z));
     let ts,tx0,tx1,ty0,ty1;
     for(;;){
       ts=world/(1<<z);
       tx0=Math.floor((MX0+world/2)/ts); tx1=Math.floor((MX1+world/2)/ts);
       ty0=Math.floor((world/2-MY1)/ts); ty1=Math.floor((world/2-MY0)/ts);
-      if((tx1-tx0+1)*(ty1-ty0+1)<=80||z<=5) break;
+      if((tx1-tx0+1)*(ty1-ty0+1)<=cap||z<=5) break;
       z--;
     }
     const px=Math.ceil((tx1-tx0+1)*256), py=Math.ceil((ty1-ty0+1)*256);
@@ -1403,15 +1889,17 @@ async function terrain(){
     ctx.drawImage(off, sx*256, sy*256, (MX1-MX0)/ts*256, (MY1-MY0)/ts*256,
       0, 0, W*SC, Math.round(H*SC));
     loadTxt.textContent='';
+    terDone=true; terPainted=true; render();
   }catch(e){ loadTxt.textContent='terrain unavailable'; }
+  terBusy=false;
 }
 // ---- woods: USGS NLCD 2021 forest classes via the MRLC WMS ----
 async function woods(){
-  if(wooDone) return; wooDone=true;
+  if(wooDone||wooBusy) return; wooBusy=true;
   const cv=document.getElementById('wooC'); const SC=2;
   cv.width=W*SC; cv.height=Math.round(H*SC);
   const ctx=cv.getContext('2d');
-  loadTxt.textContent='loading land cover\\u2026';
+  loadTxt.textContent='loading land cover…';
   try{
     const u='https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2021_Land_Cover_L48/wms'
       +'?service=WMS&version=1.1.1&request=GetMap&layers=NLCD_2021_Land_Cover_L48&styles='
@@ -1446,16 +1934,27 @@ async function woods(){
       wcv.style.display=layers.lak?'':'none';
     }
     loadTxt.textContent='';
+    wooDone=true; wooPainted=true; render();
   }catch(e){ loadTxt.textContent='land cover unavailable'; }
+  wooBusy=false;
 }
 
-setYear(1492);
+setYear(START);
 symbols();
 terrain(); woods();
-window.__state=()=>({year, layers:{...layers}, counties:ST.counties.length,
+// the page opens with the years already running, unless motion is turned
+// down, in which case the slider waits
+if(!REDUCED) play();
+window.__state=()=>({year, start:START, playing, speed, layers:{...layers}, counties:ST.counties.length,
   rivers:ST.rivers.length, lakes:ST.lakes.length, nations:HIST.nations.length,
   events:HIST.events.length, eras:HIST.eras.length,
-  visEvents:HIST.events.filter(e=>e.y<=year).length, pinned, terDone, wooDone});
+  visEvents:HIST.events.filter(e=>e.y<=year).length, pinned, focusNat, ghost:ghostSel, ghostOp,
+  terDone, wooDone, terPainted, wooPainted, first:FIRST, zoom:Z, vx:VX, vy:VY,
+  zCity:!document.getElementById('zCity').hidden,
+  spark:!!document.querySelector('#spark svg'),
+  tickRows:new Set([...document.querySelectorAll('#ticks button')].map(b=>b.dataset.row)).size,
+  tickHidden:document.querySelectorAll('#ticks button.hid').length});
+window.__goto=y=>{ stop(); setYear(y); };
 </script>
 </body>
 </html>
@@ -2010,6 +2509,7 @@ for st, fname in PAGES.items():
     data = json.loads((DATA / f"{st}.json").read_text())
     if st in HOME_COUNTY:
         data["home"] = HOME_COUNTY[st]
+    data["km2"] = AREA_KM2[st]
     hist = HIST[st]
     bulk = CITIES_ALL.get(st, {})
     ev_by_name = {norm(e["n"]): e for e in hist["events"]}
@@ -2037,9 +2537,14 @@ for st, fname in PAGES.items():
     roads.sort(key=lambda r: (r["y"], r["n"]))
     hist.pop("hwyAll", None)
     sibs = "".join(f' <a href="{f}">{n}</a>' for f, n in SIBLINGS if f != fname)
+    city_js = "null"
     if st in CITY_PAGE:
         cf, cn = CITY_PAGE[st]
         sibs += f' &middot; <a href="{cf}">{cn}</a>'
+        # the middle of the city page's own frame, where the zoom hands off
+        cm = json.loads((DATA.parent / "cities" / CITY_FILE[cf]).read_text())["m"]
+        city_js = json.dumps({"href": cf, "n": cn, "mx": round((cm[0] + cm[2]) / 2, 1),
+                              "my": round((cm[1] + cm[3]) / 2, 1)})
     html = (HTML.replace("__APACSS__", apa.CSS)
             .replace("__TITLE__", data["name"])
             .replace("__SIBS__", sibs)
@@ -2049,7 +2554,10 @@ for st, fname in PAGES.items():
             .replace("__ST__", json.dumps(data, separators=(",", ":")))
             .replace("__HIST__", json.dumps(hist, separators=(",", ":")))
             .replace("__ROADS__", json.dumps(roads, separators=(",", ":")))
-            .replace("__SYM__", json.dumps(SYMBOLS[st], separators=(",", ":"))))
+            .replace("__SYM__", json.dumps(SYMBOLS[st], separators=(",", ":")))
+            .replace("__GHOSTCHIPS__", ghost_chips(st))
+            .replace("__GHOST__", json.dumps(ghosts(st), separators=(",", ":")))
+            .replace("const CITY=null;", f"const CITY={city_js};"))
     (ROOT / fname).write_text(html, encoding="utf-8")
     print(f"wrote {ROOT / fname} ({len(html):,} B): "
           f"{len(hist['nations'])} nations, {len(hist['events'])} events, "

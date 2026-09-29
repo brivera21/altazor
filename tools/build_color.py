@@ -19,9 +19,15 @@ import json
 from pathlib import Path
 
 import apa
-from color_data import RECEPTORS, COUNTS, SRGB, POINTS, TERMS, STAGES, REFS
+from color_data import RECEPTORS, COUNTS, SRGB, GAMUTS, POINTS, TERMS, STAGES, REFS
 
 OUT = Path(__file__).parent.parent / "color.html"
+
+CAPTION = ("Light has a wavelength; color is what a brain makes of three "
+           "kinds of cone, tuned to short, middle and long waves. The eye "
+           "shows their curves over the spectrum, the gamut the map of every "
+           "color the eye can see with the triangle a screen can show, and "
+           "the names the order in which languages name colors.")
 
 NOTE1 = ("Color is not in the light. Light has a wavelength; color is "
          "what a brain makes of the answers of three kinds of cone, tuned "
@@ -52,7 +58,11 @@ METHOD = ("The receptor curves are drawn as bells at the peaks Bowmaker and "
           "is. The black-body curve is Planck's law run through the same "
           "observer. The naming sequence is Berlin and Kay's as revised by "
           "the World Color Survey; it is a strong tendency with exceptions, "
-          "not a law.")
+          "not a law. The three triangles are the published primaries of "
+          "sRGB, Display P3 and Rec. 2020, all with the D65 white; the share "
+          "of the map each covers is its area over the horseshoe's, in the "
+          "x, y plane, which is how the industry quotes it and not how much "
+          "of seeing it covers.")
 
 
 def _js(o):
@@ -62,6 +72,7 @@ def _js(o):
 receptors = [{"k": k, "n": n, "peak": p, "w": w, "c": c, "count": cnt, "b": b} for k, n, p, w, c, cnt, b in RECEPTORS]
 points = [{"k": k, "n": n, "x": x, "y": y, "b": b} for k, n, x, y, b in POINTS]
 terms = [{"stage": st, "n": n, "c": c, "b": b} for st, n, c, b in TERMS]
+gamuts = [{"k": k, "n": n, "r": r, "g": g, "b": b, "line": ln} for k, n, r, g, b, ln in GAMUTS]
 stages = {k: {"n": n, "what": w, "eg": eg} for k, (n, w, eg) in STAGES.items()}
 
 HTML = """<!DOCTYPE html>
@@ -115,7 +126,19 @@ h1 { margin:0 0 12px; font-size:26px; }
 .refs a { color:var(--accent); }
 __APACSS__
 h2.refh { font-size:15px; margin:26px 0 8px; }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+.controls button { background:var(--panel); color:var(--muted); border:1px solid var(--line);
+  border-radius:999px; padding:5px 13px; font-size:13px; cursor:pointer; font-family:inherit; }
+.controls button:hover { color:var(--text); border-color:#3d3d3d; }
+.controls button.on { background:var(--accent); color:#0b1a2b; border-color:var(--accent); font-weight:600; }
+.controls .seg { display:inline-flex; gap:6px; }
+#diagram:focus { outline:none; }
+#diagram:focus-visible { outline:1px dashed #3d3d3d; outline-offset:4px; }
+details.sources { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
+details.sources summary { cursor:pointer; }
+details.sources summary:hover { color:var(--text); }
+details.sources .note { border-top:none; padding-top:0; margin-top:10px; }
+@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%; order:-1;} #diagram{width:100%; flex-basis:auto;} }
+@media (max-width:600px){ #diagram{overflow-x:auto;} #diagram svg, #diagram canvas{min-width:600px;} }
 </style>
 </head>
 <body>
@@ -126,10 +149,11 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 </header>
 <h1>Color</h1>
 <div class="bar" id="views"><button data-v="eye" class="on">The eye</button><button data-v="gamut">The gamut</button><button data-v="names">The names</button></div>
-<div class="controls" id="eyeCtl"><label>the marker</label><output id="lamOut"></output></div>
-<div class="controls" id="gamutCtl" hidden><label>the marker</label><output id="xyOut"></output></div>
+<div class="controls" id="eyeCtl"><button id="sweepEye">Sweep the spectrum</button><label>the marker</label><output id="lamOut"></output></div>
+<div class="controls" id="gamutCtl" hidden><span class="seg" id="gamuts"></span><button id="sweepRim">Trace the rim</button><output id="xyOut"></output></div>
+<div class="controls" id="namesCtl" hidden><button id="playNames">Play the stages</button><output id="stOut"></output></div>
 <div class="stage">
-  <div id="diagram"></div>
+  <div id="diagram" tabindex="0"></div>
   <div class="side"><div class="card">
     <div id="kindTxt"></div>
     <div id="nameTxt"></div>
@@ -138,19 +162,27 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
     <div id="srcTxt"></div>
   </div></div>
 </div>
+<p class="note">__CAPTION__</p>
+<details class="sources"><summary>Sources</summary>
 <p class="note">__NOTE1__</p>
-<p class="note" style="border-top:none; padding-top:0;">__NOTE2__</p>
+<p class="note">__NOTE2__</p>
 <div class="method"><p>__METHOD__</p></div>
 <h2 class="refh">References</h2>
 <div class="refs">__REFS__</div>
+</details>
 </div>
 <script>
-const RECEPTORS=__RECEPTORS__, COUNTS=__COUNTS__, SRGB=__SRGB__, POINTS=__POINTS__, TERMS=__TERMS__, STAGES=__STAGES__;
+const RECEPTORS=__RECEPTORS__, COUNTS=__COUNTS__, SRGB=__SRGB__, GAMUTS=__GAMUTS__, POINTS=__POINTS__, TERMS=__TERMS__, STAGES=__STAGES__;
 const W=980;
 const el=document.getElementById('diagram');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const fmt=(n,d)=>n.toLocaleString('en-US',{maximumFractionDigits:d==null?0:d,minimumFractionDigits:d==null?0:d});
-let view='eye', hot=null, lam=550, mk={x:0.3127,y:0.3290};
+let view='eye', hot=null, lam=550, mk={x:0.3127,y:0.3290}, gm='srgb', tri={r:[...SRGB.r],g:[...SRGB.g],b:[...SRGB.b]}, rimNm=null, shown=7;
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ease=k=>k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+let animId=0;
+function tween(ms,step,done){ const id=++animId; if(RM){ step(1); if(done) done(); return; } const t0=performance.now();
+  const f=now=>{ if(id!==animId) return; const k=Math.min(1,(now-t0)/ms); step(ease(k)); if(k<1) requestAnimationFrame(f); else if(done) done(); }; requestAnimationFrame(f); }
 
 /* ---- the observer, as on the Light page ---- */
 const g=(l,mu,s1,s2)=>{ const s=l<mu?s1:s2; const t=(l-mu)/s; return Math.exp(-0.5*t*t); };
@@ -184,15 +216,20 @@ function showLam(nm){ const rs=RECEPTORS.map(r=>[r,receptor(r,nm)]); const [S,M,
   card('Light at', nm+' nm, '+colorName(nm), [['looks like',sw(waveColor(nm))+waveColor(nm)],['S cones answer',fmt(S*100,0)+'% of their most'],['M cones',fmt(M*100,0)+'%'],['L cones',fmt(L*100,0)+'%'],['rods',fmt(receptor(RECEPTORS[3],nm)*100,0)+'%'],['the ratio L to M',M>0.01?fmt(L/M,2):'no M signal']],
     L>M*1.5?'The L cones answer well ahead of the M: the brain reads that as red or orange.':L>M*1.05?'L a little ahead of M: yellow.':M>=L&&M>S*3?'M at or ahead of L, with little S: green.':S>M?'The S cones lead: blue or violet.':'M and S in balance with L behind: blue-green.', 'Bowmaker & Dartnall 1980; Wikipedia, Cone cell'); }
 function showReceptor(k){ const r=RECEPTORS.find(x=>x.k===k); card(k==='rod'?'The night receptor':'A cone', esc(r.n), [['peak',r.peak+' nm'],['how many',r.count]], r.b, 'Bowmaker & Dartnall 1980; Curcio et al. 1990'); }
-function showEye(){ card('The eye','Three cones and a rod',[['cones','about '+fmt(COUNTS.cones/1e6,1)+' million in a retina, '+fmt(COUNTS.fovea_per_mm2)+' a square millimeter at the center of gaze'],['rods','about '+fmt(COUNTS.rods/1e6,0)+' million'],['peaks','420, 534 and 564 nm for the cones, 498 for the rods']],'Every color is three numbers, the answers of the three cones; two lights that give the same three numbers look identical, however different their spectra. The curves answer under the pointer, and the marker reads any wavelength.','Bowmaker & Dartnall 1980; Curcio et al. 1990'); }
+function showEye(){ card('The eye','Three cones and a rod',[['dashed','the rods, for dim light; they see no color'],['cones','about '+fmt(COUNTS.cones/1e6,1)+' million in a retina, '+fmt(COUNTS.fovea_per_mm2)+' a square millimeter at the center of gaze'],['rods','about '+fmt(COUNTS.rods/1e6,0)+' million'],['peaks','420, 534 and 564 nm for the cones, 498 for the rods']],'Every color is three numbers, the answers of the three cones; two lights that give the same three numbers look identical, however different their spectra. The curves answer under the pointer, and the marker reads any wavelength.','Bowmaker & Dartnall 1980; Curcio et al. 1990'); }
 function dominant(x,y){ const w=SRGB.w; const dx=x-w[0], dy=y-w[1]; if(Math.hypot(dx,dy)<1e-4) return null; let best=null;
   const seg=(ax,ay,bx,by)=>{ const den=dx*(by-ay)-dy*(bx-ax); if(Math.abs(den)<1e-12) return null; const t=((ax-w[0])*(by-ay)-(ay-w[1])*(bx-ax))/den; const u=((ax-w[0])*dy-(ay-w[1])*dx)/den; if(t>0&&u>=0&&u<=1) return [t,u]; return null; };
   for(let i=0;i<locus.length-1;i++){ const h=seg(locus[i][0],locus[i][1],locus[i+1][0],locus[i+1][1]); if(h&&(!best||h[0]<best.t)) best={t:h[0],nm:locus[i][2]+h[1]*(locus[i+1][2]-locus[i][2]),purple:false}; }
   const h=seg(locus[locus.length-1][0],locus[locus.length-1][1],locus[0][0],locus[0][1]); if(h&&(!best||h[0]<best.t)){ best={t:h[0],purple:true}; const dx2=-dx, dy2=-dy; let comp=null; for(let i=0;i<locus.length-1;i++){ const ax=locus[i][0],ay=locus[i][1],bx=locus[i+1][0],by=locus[i+1][1]; const den=dx2*(by-ay)-dy2*(bx-ax); if(Math.abs(den)<1e-12) continue; const t=((ax-w[0])*(by-ay)-(ay-w[1])*(bx-ax))/den; const u=((ax-w[0])*dy2-(ay-w[1])*dx2)/den; if(t>0&&u>=0&&u<=1&&(comp==null||t<comp.t)) comp={t,nm:locus[i][2]+u*(locus[i+1][2]-locus[i][2])}; } best.comp=comp?comp.nm:null; }
   if(best) best.purity=Math.min(1,1/best.t); return best; }
 function showXY(x,y){ const d=dominant(x,y); const inside=inSRGB(x,y);
-  card('A color', 'x = '+x.toFixed(3)+', y = '+y.toFixed(3), [['nearest a screen can show',sw(xyColor(x,y))+xyColor(x,y)],['dominant wavelength',d?(d.purple?'none: a purple, the complement of '+fmt(d.comp,0)+' nm':fmt(d.nm,0)+' nm, '+colorName(d.nm)):'none, this is white'],['purity',d?fmt(d.purity*100,0)+'% of the way from white to the spectrum':'0%'],['on a screen',inside?'inside the sRGB triangle: a screen can show it':'outside the triangle: no screen shows it, and the swatch above is a paler stand-in']],
+  card('A color', 'x = '+x.toFixed(3)+', y = '+y.toFixed(3), [['nearest a screen can show',sw(xyColor(x,y))+xyColor(x,y)],['dominant wavelength',d?(d.purple?'none: a purple, the complement of '+fmt(d.comp,0)+' nm':fmt(d.nm,0)+' nm, '+colorName(d.nm)):'none, this is white'],['purity',d?fmt(d.purity*100,0)+'% of the way from white to the spectrum':'0%'],['on a screen',inside?'inside the sRGB triangle: a screen can show it':'outside the triangle: no sRGB screen shows it, and the swatch above is a paler stand-in'],['in '+G().n,gm==='srgb'?'':(inTri(x,y,G())?'inside: a screen built to it can show it':'outside it too')]],
     'The marker\\u2019s place on the horseshoe: its hue is the direction from the white point, and its purity how far along that line it lies toward the pure spectral color at the edge.', 'Wikipedia, CIE 1931 color space; Wyman, Sloan & Shirley 2013'); }
+const G=()=>GAMUTS.find(q=>q.k===gm);
+function inTri(x,y,t){ const sgn=(p,q,r2)=>(p[0]-r2[0])*(q[1]-r2[1])-(q[0]-r2[0])*(p[1]-r2[1]); const d1=sgn([x,y],t.r,t.g), d2=sgn([x,y],t.g,t.b), d3=sgn([x,y],t.b,t.r); const eps=1e-6; return !((d1<-eps||d2<-eps||d3<-eps)&&(d1>eps||d2>eps||d3>eps)); }
+const polyArea=pts=>{ let a=0; for(let i=0;i<pts.length;i++){ const [x1,y1]=pts[i], [x2,y2]=pts[(i+1)%pts.length]; a+=x1*y2-x2*y1; } return Math.abs(a)/2; };
+const share=t=>polyArea([t.r,t.g,t.b])/polyArea(locus);
+function showGamut(k){ const t=GAMUTS.find(q=>q.k===k); card('A screen standard', esc(t.n), [['red','x '+t.r[0].toFixed(3)+', y '+t.r[1].toFixed(3)],['green','x '+t.g[0].toFixed(3)+', y '+t.g[1].toFixed(3)],['blue','x '+t.b[0].toFixed(3)+', y '+t.b[1].toFixed(3)],['share of the map',fmt(share(t)*100,1)+'% of the horseshoe\u2019s area']], t.line, k==='srgb'?'Wikipedia, sRGB':k==='p3'?'Wikipedia, DCI-P3':'Wikipedia, Rec. 2020'); }
 function showPoint(k){ const p=POINTS.find(q=>q.k===k); card('A point on the map', esc(p.n), [['x, y',p.x.toFixed(4)+', '+p.y.toFixed(4)],['looks like',sw(xyColor(p.x,p.y))+xyColor(p.x,p.y)]], p.b, 'Wikipedia, Standard illuminant; Wikipedia, Planckian locus'); }
 function showTerm(i){ const t=TERMS[i]; const st=STAGES[t.stage]; card('Stage '+['I','II','III','IV','V','VI','VII'][t.stage-1]+', '+st.n, sw(t.c)+esc(t.n), [['appears','stage '+t.stage+' of 7, '+st.what],['languages at this stage',st.eg||'the survey found few languages exactly here; most pass through quickly']], t.b, 'Berlin & Kay 1969; Kay et al. 2009'); }
 function showNames(){ card('The names','Eleven words, in order',[['first','black and white, in every language'],['then','red'],['then','green and yellow, either first'],['then','blue, then brown'],['last','purple, pink, orange and gray']],'Berlin and Kay found in 1969 that languages with few color words have the same few, and that as words are added they come in nearly the same order everywhere, as if the spectrum were cut along the same lines by every people. Each swatch answers under the pointer.','Berlin & Kay 1969; Kay et al. 2009'); }
@@ -212,7 +249,7 @@ function eyeView(){ let s='';
   const mx=EX(lam);
   s+='<g id="marker" style="cursor:ew-resize"><line x1="'+mx.toFixed(1)+'" y1="'+E.y+'" x2="'+mx.toFixed(1)+'" y2="'+(E.y+E.h+26)+'" stroke="#ffffff" stroke-width="1.5"/>';
   for(const r of RECEPTORS) s+='<circle cx="'+mx.toFixed(1)+'" cy="'+(E.y+E.h-receptor(r,lam)*(E.h-30)).toFixed(1)+'" r="5" fill="'+r.c+'" stroke="#121212" stroke-width="1.5"/>';
-  s+='<text x="'+mx.toFixed(1)+'" y="'+(E.y-10)+'" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">'+lam+' nm</text></g>';
+  s+='<text x="'+(mx-6).toFixed(1)+'" y="'+(E.y-10)+'" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">'+lam+' nm</text><rect id="lamSw" x="'+(mx+20).toFixed(1)+'" y="'+(E.y-21)+'" width="18" height="13" rx="3" fill="'+waveColor(lam)+'" stroke="#3d3d3d"/></g>';
   return {svg:s, h:E.y+E.h+75}; }
 
 /* ---- the gamut ---- */
@@ -224,7 +261,7 @@ function inHorseshoe(x,y){ let inside=false; const n=locus.length; for(let i=0,j
 function makeFill(ctx){ const w=W, h=640; const img=ctx.createImageData(w,h); const d=img.data;
   for(let py=0;py<h;py++) for(let px=0;px<w;px++){ const x=IX(px+0.5), y=IY(py+0.5); const i=(py*w+px)*4; if(y>0&&inHorseshoe(x,y)){ const c=xyColor(x,y); d[i]=parseInt(c.slice(1,3),16); d[i+1]=parseInt(c.slice(3,5),16); d[i+2]=parseInt(c.slice(5,7),16); d[i+3]=255; } else { d[i]=18; d[i+1]=18; d[i+2]=18; d[i+3]=255; } }
   return img; }
-function gamutView(){ const cv=document.createElement('canvas'); cv.width=W; cv.height=640; cv.id='gcanvas'; const ctx=cv.getContext('2d');
+function gamutView(){ let cv=document.getElementById('gcanvas'); if(!cv){ cv=document.createElement('canvas'); cv.width=W; cv.height=640; cv.id='gcanvas'; } const ctx=cv.getContext('2d');
   const halo=(t,x,y)=>{ ctx.save(); ctx.lineJoin='round'; ctx.strokeStyle='#121212'; ctx.lineWidth=3.5; ctx.strokeText(t,x,y); ctx.restore(); ctx.fillText(t,x,y); };
   if(!fill) fill=makeFill(ctx); ctx.putImageData(fill,0,0);
   // the axes
@@ -240,48 +277,76 @@ function gamutView(){ const cv=document.createElement('canvas'); cv.width=W; cv.
   ctx.strokeStyle='#ffb02e'; ctx.lineWidth=1.5; ctx.beginPath(); let first=true; for(let T=1000;T<=20000;T*=1.04){ const [x,y]=planckXY(T); first?ctx.moveTo(PX(x),PY(y)):ctx.lineTo(PX(x),PY(y)); first=false; } ctx.stroke();
   ctx.fillStyle='#ffb02e'; for(const [T,dx,dy,al] of [[2000,6,-8,'left'],[3000,6,-8,'left'],[10000,-8,14,'right']]){ const [x,y]=planckXY(T); ctx.beginPath(); ctx.arc(PX(x),PY(y),2.5,0,7); ctx.fill(); ctx.textAlign=al; halo(fmt(T)+' K',PX(x)+dx,PY(y)+dy); }
   // the sRGB triangle
-  ctx.strokeStyle='#ffffff'; ctx.lineWidth=1.5; ctx.setLineDash([5,4]); ctx.beginPath(); ctx.moveTo(PX(SRGB.r[0]),PY(SRGB.r[1])); ctx.lineTo(PX(SRGB.g[0]),PY(SRGB.g[1])); ctx.lineTo(PX(SRGB.b[0]),PY(SRGB.b[1])); ctx.closePath(); ctx.stroke(); ctx.setLineDash([]);
-  ctx.fillStyle='#ffffff'; ctx.font='11px sans-serif'; ctx.textAlign='left'; halo('the sRGB triangle: what a screen can show',PX(SRGB.g[0])+14,PY(SRGB.g[1])-4);
+  if(gm!=='srgb'){ ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=1; ctx.setLineDash([2,4]); ctx.beginPath(); ctx.moveTo(PX(SRGB.r[0]),PY(SRGB.r[1])); ctx.lineTo(PX(SRGB.g[0]),PY(SRGB.g[1])); ctx.lineTo(PX(SRGB.b[0]),PY(SRGB.b[1])); ctx.closePath(); ctx.stroke(); }
+  ctx.strokeStyle='#ffffff'; ctx.lineWidth=1.5; ctx.setLineDash([5,4]); ctx.beginPath(); ctx.moveTo(PX(tri.r[0]),PY(tri.r[1])); ctx.lineTo(PX(tri.g[0]),PY(tri.g[1])); ctx.lineTo(PX(tri.b[0]),PY(tri.b[1])); ctx.closePath(); ctx.stroke(); ctx.setLineDash([]);
+
   // named points
-  for(const p of POINTS){ ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.arc(PX(p.x),PY(p.y),4,0,7); ctx.fill(); ctx.strokeStyle='#121212'; ctx.lineWidth=1; ctx.stroke(); ctx.fillStyle='#e6e6e6'; const [dx,dy,al]=p.k==='d65'?[-8,-6,'right']:p.k==='sun'?[8,16,'left']:[6,18,'left']; ctx.textAlign=al; halo(p.n,PX(p.x)+dx,PY(p.y)+dy); }
+  for(const p of POINTS){ ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.arc(PX(p.x),PY(p.y),4,0,7); ctx.fill(); ctx.strokeStyle='#121212'; ctx.lineWidth=1; ctx.stroke(); ctx.fillStyle='#e6e6e6'; const [dx,dy,al]=p.k==='d65'?[-8,-6,'right']:p.k==='sun'?[8,16,'left']:[-8,18,'right']; ctx.textAlign=al; halo(p.n,PX(p.x)+dx,PY(p.y)+dy); }
   // the marker
+  if(rimNm!=null){ ctx.fillStyle='#ffffff'; ctx.font='bold 11.5px sans-serif'; const dx=mk.x-SRGB.w[0], dy=mk.y-SRGB.w[1], L=Math.hypot(dx,dy)||1; ctx.textAlign=dx<0?'right':'left'; halo(rimNm+' nm',PX(mk.x)+dx/L*38,PY(mk.y)-dy/L*38+4); }
   ctx.strokeStyle='#ffffff'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(PX(mk.x),PY(mk.y),8,0,7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(PX(mk.x)-14,PY(mk.y)); ctx.lineTo(PX(mk.x)+14,PY(mk.y)); ctx.moveTo(PX(mk.x),PY(mk.y)-14); ctx.lineTo(PX(mk.x),PY(mk.y)+14); ctx.stroke();
   ctx.fillStyle='#9a9a9a'; ctx.font='11px sans-serif'; ctx.textAlign='left'; ctx.fillText('every color the eye can see, as the CIE 1931 diagram: the curved edge is the pure spectrum,',PX(0.22),PY(0.86));
   ctx.fillText('the straight bottom the purples that no wavelength makes; the orange curve is a glowing body, 1,000 to 20,000 K',PX(0.22),PY(0.83));
+  ctx.fillStyle='#ffffff'; ctx.fillText('dashed white: the '+G().n+' triangle, what a screen built to it can show'+(gm!=='srgb'?'; dotted: sRGB':''),PX(0.22),PY(0.80));
   return cv; }
 
 /* ---- the names ---- */
 function namesView(){ let s=''; const x0=90, cw=118, y0=70, sw2=78, sh=58, gap=30;
-  for(let st=1;st<=7;st++){ const x=x0+(st-1)*cw; const on=hot==='st'+st; s+='<g data-stage="'+st+'" style="cursor:pointer"><text x="'+(x+sw2/2)+'" y="'+(y0-30)+'" text-anchor="middle" font-size="12" font-weight="700" fill="'+(on?'#ffffff':'#e6e6e6')+'">'+['I','II','III','IV','V','VI','VII'][st-1]+'</text><text x="'+(x+sw2/2)+'" y="'+(y0-14)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">'+esc(STAGES[st].n)+'</text></g>';
+  for(let st=1;st<=7;st++){ const x=x0+(st-1)*cw; const on=hot==='st'+st; s+='<g data-stage="'+st+'" style="cursor:pointer" opacity="'+(st>shown?0.3:1)+'"><text x="'+(x+sw2/2)+'" y="'+(y0-30)+'" text-anchor="middle" font-size="12" font-weight="700" fill="'+(on?'#ffffff':'#e6e6e6')+'">'+['I','II','III','IV','V','VI','VII'][st-1]+'</text><text x="'+(x+sw2/2)+'" y="'+(y0-14)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">'+esc(STAGES[st].n)+'</text></g>';
     if(st<7) s+='<text x="'+(x+sw2+(cw-sw2)/2)+'" y="'+(y0+sh/2+5)+'" text-anchor="middle" font-size="16" fill="#3d444d">\\u2192</text>'; }
   const rows={}; TERMS.forEach((t,i)=>{ const st=t.stage===4?3:t.stage; const col=t.stage; rows[col]=(rows[col]||0); const x=x0+(col-1)*cw, y=y0+rows[col]*(sh+gap); rows[col]++; const on=hot==='t'+i;
-    s+='<g data-term="'+i+'" style="cursor:pointer"><rect x="'+x+'" y="'+y+'" width="'+sw2+'" height="'+sh+'" rx="8" fill="'+t.c+'" stroke="'+(on?'#ffffff':'#3d3d3d')+'" stroke-width="'+(on?2:1)+'"/><text x="'+(x+sw2/2)+'" y="'+(y+sh+16)+'" text-anchor="middle" font-size="11.5" fill="'+(on?'#ffffff':'#c8c8c8')+'">'+esc(t.n)+'</text></g>'; });
+    s+='<g data-term="'+i+'" style="cursor:pointer" opacity="'+(t.stage>shown?0.12:1)+'"><rect x="'+x+'" y="'+y+'" width="'+sw2+'" height="'+sh+'" rx="8" fill="'+t.c+'" stroke="'+(on?'#ffffff':'#3d3d3d')+'" stroke-width="'+(on?2:1)+'"/><text x="'+(x+sw2/2)+'" y="'+(y+sh+16)+'" text-anchor="middle" font-size="11.5" fill="'+(on?'#ffffff':'#c8c8c8')+'">'+esc(t.n)+'</text></g>'; });
   // the fourth stage: whichever of green and yellow came second
-  s+='<text x="'+(x0+3*cw+sw2/2)+'" y="'+(y0+sh/2-4)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">the other of</text><text x="'+(x0+3*cw+sw2/2)+'" y="'+(y0+sh/2+12)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">green and yellow</text>';
+  s+='<text x="'+(x0+3*cw+sw2/2)+'" y="'+(y0+sh/2-4)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a" opacity="'+(4>shown?0.3:1)+'">the other of</text><text x="'+(x0+3*cw+sw2/2)+'" y="'+(y0+sh/2+12)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a" opacity="'+(4>shown?0.3:1)+'">green and yellow</text>';
   const H=y0+4*(sh+gap)+40;
   s+='<text x="'+x0+'" y="'+(H-10)+'" font-size="11" fill="#9a9a9a">the eleven basic color terms of Berlin and Kay, in the order languages acquire them; a column is one stage, and within the last the order varies</text>';
   return {svg:s, h:H}; }
 
 /* ---- render and wiring ---- */
-function render(){ if(view==='gamut'){ el.innerHTML=''; el.appendChild(gamutView()); } else { const q=view==='eye'?eyeView():namesView(); el.innerHTML='<svg viewBox="0 0 '+W+' '+q.h+'" xmlns="http://www.w3.org/2000/svg" id="csvg"><rect width="'+W+'" height="'+q.h+'" fill="#121212"/>'+q.svg+'</svg>'; }
-  document.getElementById('eyeCtl').hidden=view!=='eye'; document.getElementById('gamutCtl').hidden=view!=='gamut'; document.getElementById('lamOut').textContent=lam+' nm, '+colorName(lam); document.getElementById('xyOut').textContent='x '+mk.x.toFixed(3)+', y '+mk.y.toFixed(3); }
+function render(){ if(view==='gamut'){ if(el.firstElementChild&&el.firstElementChild.id==='gcanvas') gamutView(); else { el.innerHTML=''; el.appendChild(gamutView()); } } else { const q=view==='eye'?eyeView():namesView(); el.innerHTML='<svg viewBox="0 0 '+W+' '+q.h+'" xmlns="http://www.w3.org/2000/svg" id="csvg"><rect width="'+W+'" height="'+q.h+'" fill="#121212"/>'+q.svg+'</svg>'; }
+  document.getElementById('eyeCtl').hidden=view!=='eye'; document.getElementById('gamutCtl').hidden=view!=='gamut'; document.getElementById('namesCtl').hidden=view!=='names'; document.getElementById('stOut').textContent=shown<7?'stage '+['I','II','III','IV','V','VI','VII'][shown-1]+' of VII: '+STAGES[shown].n:'all seven stages'; document.getElementById('lamOut').textContent=lam+' nm, '+colorName(lam); document.getElementById('xyOut').textContent='x '+mk.x.toFixed(3)+', y '+mk.y.toFixed(3); }
 function home(){ if(view==='eye') showEye(); else if(view==='gamut') showXY(mk.x,mk.y); else showNames(); }
-function setView(v){ view=v; hot=null; for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render(); home(); }
+function stopAll(){ animId++; for(const [b,t] of [['sweepEye','Sweep the spectrum'],['sweepRim','Trace the rim'],['playNames','Play the stages']]){ const e=document.getElementById(b); e.classList.remove('on'); e.textContent=t; } }
+const rimPt=nm=>{ const p=locus.reduce((a,q)=>Math.abs(q[2]-nm)<Math.abs(a[2]-nm)?q:a); const w=SRGB.w; return {x:p[0]+(w[0]-p[0])*0.004, y:p[1]+(w[1]-p[1])*0.004, nm:p[2]}; };
+function setView(v){ const was=view; stopAll(); view=v; hot=null; for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v);
+  if(was==='eye'&&v==='gamut'){ // the spectrum marker becomes its point on the rim
+    const to=rimPt(lam), from={x:SRGB.w[0],y:SRGB.w[1]}; rimNm=to.nm; mk={...from}; render();
+    tween(900,k=>{ mk={x:from.x+(to.x-from.x)*k, y:from.y+(to.y-from.y)*k}; render(); if(k===1){ showXY(mk.x,mk.y); document.getElementById('bodyTxt').textContent='The marker has carried '+to.nm+' nm from the spectrum to the curved edge of the map: the edge is the spectrum, one pure wavelength after another, and every color inside it is a mixture of them.'; } });
+    showXY(to.x,to.y); return; }
+  if(was==='gamut'&&v==='eye'){ const d=dominant(mk.x,mk.y); if(d&&!d.purple){ const a=lam, b=Math.round(Math.max(E.a,Math.min(E.b,d.nm))); render(); tween(900,k=>{ lam=Math.round(a+(b-a)*k); render(); if(k===1) showLam(lam); }); showLam(b); return; } }
+  rimNm=null; render(); home(); }
+function setGamut(k){ stopAll(); const t=GAMUTS.find(q=>q.k===k), f={r:[...tri.r],g:[...tri.g],b:[...tri.b]}; gm=k; paintGamuts();
+  tween(900,e=>{ for(const c of ['r','g','b']) tri[c]=[f[c][0]+(t[c][0]-f[c][0])*e, f[c][1]+(t[c][1]-f[c][1])*e]; render(); }); showGamut(k); }
+function paintGamuts(){ document.getElementById('gamuts').innerHTML=GAMUTS.map(q=>'<button data-g="'+q.k+'"'+(q.k===gm?' class="on"':'')+'>'+esc(q.n)+'</button>').join(''); }
+paintGamuts();
+document.getElementById('gamuts').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setGamut(b.dataset.g); });
+function runBtn(id,label,ms,from,to,step){ const b=document.getElementById(id); if(b.classList.contains('on')){ stopAll(); return; } stopAll(); b.classList.add('on'); b.textContent='Pause';
+  const aid=++animId; let t0=null; const f=now=>{ if(aid!==animId) return; if(t0==null) t0=now; const k=Math.min(1,(now-t0)/ms); step(from+(to-from)*k); if(k<1) requestAnimationFrame(f); else { b.classList.remove('on'); b.textContent=label; } };
+  if(RM){ step(to); b.classList.remove('on'); b.textContent=label; return; } requestAnimationFrame(f); }
+document.getElementById('sweepEye').addEventListener('click',()=>{ const a=lam>=E.b-5?E.a:lam; runBtn('sweepEye','Sweep the spectrum',(E.b-a)*20,a,E.b,v=>{ lam=Math.round(v); render(); showLam(lam); }); });
+document.getElementById('sweepRim').addEventListener('click',()=>{ const a=420; runBtn('sweepRim','Trace the rim',(640-a)*22,a,640,v=>{ const p=rimPt(Math.round(v)); mk={x:p.x,y:p.y}; rimNm=p.nm; render(); showXY(mk.x,mk.y); }); });
+function setShown(n){ shown=Math.max(1,Math.min(7,n)); render(); const st=STAGES[shown]; card('Stage '+['I','II','III','IV','V','VI','VII'][shown-1], esc(st.n), [['what is named',st.what],['languages',st.eg||'few sit exactly here']], shown<7?'The later words are grayed: a language at this stage has these '+TERMS.filter(t=>t.stage<=shown).length+' words for color, or fewer, and none of the rest.':'All eleven: a language with every basic term, as English has.', 'Berlin & Kay 1969; Kay et al. 2009'); }
+document.getElementById('playNames').addEventListener('click',()=>{ const a=shown>=7?1:shown; runBtn('playNames','Play the stages',(7-a+0.99)*1000,a,7.99,v=>{ const n=Math.floor(v); if(n!==shown) setShown(n); }); if(shown>=7&&!RM) setShown(1); });
+el.addEventListener('click',e=>{ const g=e.target.closest('[data-stage]'); if(!g) return; stopAll(); const st=+g.getAttribute('data-stage'); setShown(shown===st?7:st); });
+el.addEventListener('keydown',e=>{ const k=e.key; if(k==='Escape'){ stopAll(); return; } if(k!=='ArrowLeft'&&k!=='ArrowRight') return; const d=(k==='ArrowRight'?1:-1)*(e.shiftKey?10:1); e.preventDefault(); stopAll();
+  if(view==='eye'){ lam=Math.max(E.a,Math.min(E.b,lam+d)); render(); showLam(lam); }
+  else if(view==='gamut'){ const dm=dominant(mk.x,mk.y); const nm=Math.max(420,Math.min(640,(dm&&!dm.purple?Math.round(dm.nm):(d>0?419:641))+d*(e.shiftKey?1:5))); const p=rimPt(nm); mk={x:p.x,y:p.y}; rimNm=p.nm; render(); showXY(mk.x,mk.y); }
+  else setShown(shown+(d>0?1:-1)); });
 document.getElementById('views').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setView(b.dataset.v); });
 let dragging=false;
 const pt=e=>{ const c=el.firstElementChild, b=c.getBoundingClientRect(); const vh=c.tagName==='CANVAS'?c.height:c.viewBox.baseVal.height; return [(e.clientX-b.left)/b.width*W,(e.clientY-b.top)/b.height*vh]; };
-function setLam(x){ lam=Math.round(Math.max(E.a,Math.min(E.b,E.a+(x-E.x)/E.w*(E.b-E.a)))); render(); showLam(lam); }
-function setMk(px,py){ const x=IX(px), y=IY(py); if(y<=0.005||!inHorseshoe(x,y)) return; mk={x,y}; render(); showXY(x,y); }
+function setLam(x){ stopAll(); lam=Math.round(Math.max(E.a,Math.min(E.b,E.a+(x-E.x)/E.w*(E.b-E.a)))); render(); showLam(lam); }
+function setMk(px,py){ const x=IX(px), y=IY(py); if(y<=0.005||!inHorseshoe(x,y)) return; stopAll(); rimNm=null; mk={x,y}; render(); showXY(x,y); }
 el.addEventListener('pointerdown',e=>{ const [x,y]=pt(e); if(view==='eye'&&y>=E.y-20&&y<=E.y+E.h+30&&x>=E.x-6&&x<=E.x+E.w+6){ dragging=true; setLam(x); e.preventDefault(); } if(view==='gamut'){ dragging=true; setMk(x,y); e.preventDefault(); } });
 el.addEventListener('pointermove',e=>{ if(!dragging) return; const [x,y]=pt(e); if(view==='eye') setLam(x); else if(view==='gamut') setMk(x,y); });
 window.addEventListener('pointerup',()=>{ dragging=false; });
 el.addEventListener('pointerover',e=>{ if(dragging) return; const g=e.target.closest('[data-rec],[data-term],[data-stage]'); if(!g) return;
   const k=g.hasAttribute('data-rec')?g.getAttribute('data-rec'):g.hasAttribute('data-term')?'t'+g.getAttribute('data-term'):'st'+g.getAttribute('data-stage'); if(k===hot) return; hot=k; render();
   if(g.hasAttribute('data-rec')) showReceptor(k); else if(g.hasAttribute('data-term')) showTerm(+g.getAttribute('data-term')); else { const st=+g.getAttribute('data-stage'); card('Stage '+['I','II','III','IV','V','VI','VII'][st-1], esc(STAGES[st].n), [['what is named',STAGES[st].what],['languages',STAGES[st].eg||'few sit exactly here']], 'Each stage adds a term to those before it; a language at a later stage has every earlier word.', 'Berlin & Kay 1969; Kay et al. 2009'); } });
-el.addEventListener('pointerleave',()=>{ if(hot){ hot=null; render(); home(); } });
+el.addEventListener('pointerleave',()=>{ if(hot){ hot=null; render(); if(view==='names'&&shown<7) setShown(shown); else home(); } });
 
 render(); showEye();
-window.__color=(q)=>{ const o={view,hot,lam,mk,card:document.getElementById('numTxt').innerText,name:document.getElementById('nameTxt').innerText,body:document.getElementById('bodyTxt').innerText,
+window.__color=(q)=>{ const o={view,hot,lam,mk,gm,tri,rimNm,shown,share:GAMUTS.map(t=>share(t)),card:document.getElementById('numTxt').innerText,name:document.getElementById('nameTxt').innerText,body:document.getElementById('bodyTxt').innerText,
   curves:document.querySelectorAll('#csvg path[data-rec]').length, swatches:document.querySelectorAll('#csvg g[data-term]').length,
   marker:(()=>{ const c=document.querySelector('#marker line'); return c?+c.getAttribute('x1'):null; })()};
   if(q&&q.nm!=null){ o.resp=RECEPTORS.map(r=>receptor(r,q.nm)); o.ex=EX(q.nm); o.col=waveColor(q.nm); }
@@ -297,7 +362,7 @@ window.__color=(q)=>{ const o={view,hot,lam,mk,card:document.getElementById('num
 
 html = (HTML.replace("__APACSS__", apa.CSS)
         .replace("__RECEPTORS__", _js(receptors)).replace("__COUNTS__", _js(COUNTS)).replace("__SRGB__", _js(SRGB)).replace("__POINTS__", _js(points)).replace("__TERMS__", _js(terms)).replace("__STAGES__", _js(stages))
-        .replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2).replace("__METHOD__", METHOD)
+        .replace("__CAPTION__", CAPTION).replace("__GAMUTS__", _js(gamuts)).replace("__NOTE1__", NOTE1).replace("__NOTE2__", NOTE2).replace("__METHOD__", METHOD)
         .replace("__REFS__", apa.render(REFS)))
 OUT.write_text(html, encoding="utf-8")
 print(f"wrote {OUT} ({len(html):,} B): {len(RECEPTORS)} receptors, {len(POINTS)} points, {len(TERMS)} terms")
