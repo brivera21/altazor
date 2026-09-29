@@ -144,6 +144,88 @@ footer.site a:hover { color:var(--accent); }
 <script>
 const TERMS = [
   {
+    "name": "The knights alone",
+    "tagline": "Their starting squares, with nothing else on the board.",
+    "fen": "1n4n1/8/8/8/8/8/8/1N4N1",
+    "turn": "",
+    "marks": {
+      "a3": "zone",
+      "a6": "zone",
+      "c3": "plan",
+      "c6": "plan",
+      "d2": "zone",
+      "d7": "zone",
+      "e2": "zone",
+      "e7": "zone",
+      "f3": "plan",
+      "f6": "plan",
+      "h3": "zone",
+      "h6": "zone",
+      "b1": "subject",
+      "b8": "subject",
+      "g1": "subject",
+      "g8": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the knights, where they start"
+      ],
+      [
+        "zone",
+        "the squares they see"
+      ],
+      [
+        "plan",
+        "where each most often goes first"
+      ]
+    ],
+    "body": [
+      "The four knights alone. Each sees three squares. Blue is where each most often goes first: f3 and c3 for White, f6 and c6 for Black, nine times in ten or more when it moves in the first three moves."
+    ]
+  },
+  {
+    "name": "The knights in the full setup",
+    "tagline": "The same squares with every other piece in place.",
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",
+    "turn": "",
+    "marks": {
+      "a3": "zone",
+      "a6": "zone",
+      "c3": "plan",
+      "c6": "plan",
+      "d2": "zone",
+      "d7": "zone",
+      "e2": "zone",
+      "e7": "zone",
+      "f3": "plan",
+      "f6": "plan",
+      "h3": "zone",
+      "h6": "zone",
+      "b1": "subject",
+      "b8": "subject",
+      "g1": "subject",
+      "g8": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the knights, where they start"
+      ],
+      [
+        "zone",
+        "the squares they see"
+      ],
+      [
+        "plan",
+        "where each most often goes first"
+      ]
+    ],
+    "body": [
+      "The same knights in the full setup. Nothing blocks a knight, so each still sees its three squares; the one on the second rank holds its own pawn, which it defends. With the pawns, they are the only men that can move at once."
+    ]
+  },
+  {
     "name": "Knight mobility",
     "tagline": "How many squares a knight attacks from each square.",
     "fen": "8/8/8/8/8/8/8/8",

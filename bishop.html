@@ -144,6 +144,100 @@ footer.site a:hover { color:var(--accent); }
 <script>
 const TERMS = [
   {
+    "name": "The bishops alone",
+    "tagline": "Their starting squares, with nothing else on the board.",
+    "fen": "2b2b2/8/8/8/8/8/8/2B2B2",
+    "turn": "",
+    "marks": {
+      "a3": "zone",
+      "a6": "zone",
+      "b2": "zone",
+      "b4": "zone",
+      "b5": "plan",
+      "b7": "zone",
+      "c4": "zone",
+      "c5": "zone",
+      "d2": "zone",
+      "d3": "zone",
+      "d6": "zone",
+      "d7": "zone",
+      "e2": "zone",
+      "e3": "zone",
+      "e6": "zone",
+      "e7": "zone",
+      "f4": "plan",
+      "f5": "plan",
+      "g2": "zone",
+      "g4": "zone",
+      "g5": "plan",
+      "g7": "plan",
+      "h3": "zone",
+      "h6": "zone",
+      "c1": "subject",
+      "c8": "subject",
+      "f1": "subject",
+      "f8": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the bishops, where they start"
+      ],
+      [
+        "zone",
+        "the squares they see"
+      ],
+      [
+        "plan",
+        "where each most often goes first"
+      ]
+    ],
+    "body": [
+      "The four bishops alone. Each sees seven squares along its two diagonals. Blue is where each most often goes first: b5 for White's light bishop, f4 and g5 about equally for the dark one, g7 and f5 for Black. Bishops seldom move this early, so these rest on fewer games."
+    ]
+  },
+  {
+    "name": "The bishops in the full setup",
+    "tagline": "The same squares with every other piece in place.",
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",
+    "turn": "",
+    "marks": {
+      "b2": "zone",
+      "b7": "zone",
+      "d2": "zone",
+      "d7": "zone",
+      "e2": "zone",
+      "e7": "zone",
+      "g2": "zone",
+      "g7": "plan",
+      "b5": "plan",
+      "f4": "plan",
+      "g5": "plan",
+      "f5": "plan",
+      "c1": "subject",
+      "c8": "subject",
+      "f1": "subject",
+      "f8": "subject"
+    },
+    "legend": [
+      [
+        "subject",
+        "the bishops, where they start"
+      ],
+      [
+        "zone",
+        "the squares they see"
+      ],
+      [
+        "plan",
+        "where each most often goes first"
+      ]
+    ],
+    "body": [
+      "The same bishops in the full setup. Each sees only the two pawns in front of it, which it defends, and cannot move until one of them does."
+    ]
+  },
+  {
     "name": "Bishop mobility",
     "tagline": "How many squares a bishop attacks from each square.",
     "fen": "8/8/8/8/8/8/8/8",
