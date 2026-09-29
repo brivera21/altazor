@@ -8,6 +8,7 @@
 :root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
         --line:#2b2b2b; --accent:#58a6ff; --hl:#31d67a; }
 * { box-sizing:border-box; }
+[hidden] { display:none !important; }
 body { margin:0; background:var(--bg); color:var(--text);
   font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
 .wrap { max-width:1320px; margin:0 auto; padding:32px 20px 60px; }
@@ -18,8 +19,19 @@ header.site { border-top:4px solid var(--accent); padding-top:22px; margin-botto
 nav.site a { color:var(--muted); text-decoration:none; font-size:14px; margin-right:14px; }
 nav.site a:hover { color:var(--accent); }
 h1 { margin:0 0 6px; font-size:26px; }
+.bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:0 0 8px; min-height:32px; }
+.bar button { background:var(--panel); color:var(--muted); border:1px solid var(--line);
+  border-radius:999px; padding:6px 14px; font-size:13px; cursor:pointer; font-family:inherit; }
+.bar button:hover { color:var(--text); border-color:#3d3d3d; }
+.bar button.on { background:var(--accent); color:#0b1a2b; border-color:var(--accent); font-weight:600; }
+.bar button.on:hover { color:#0b1a2b; }
+.bar label { font-size:13px; color:var(--muted); display:flex; align-items:center; gap:8px; }
+.bar input[type=range] { width:200px; accent-color:var(--accent); direction:rtl; }
+.bar output { font-size:13px; color:var(--text); font-variant-numeric:tabular-nums; min-width:70px; }
+.bar .hint { font-size:12px; color:#7d7d7d; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
-#diagram { flex:1 1 640px; min-width:0; }
+#diagram { flex:1 1 640px; min-width:0; border-radius:8px; }
+#diagram:focus-visible { outline:1px solid var(--accent); outline-offset:4px; }
 #diagram svg { width:100%; height:auto; display:block; user-select:none; }
 .side { flex:0 0 300px; position:sticky; top:16px; }
 .card { background:var(--panel); border:1px solid var(--line); border-radius:12px;
@@ -33,6 +45,7 @@ h1 { margin:0 0 6px; font-size:26px; }
   border-top:1px solid var(--line); padding-top:8px; }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
+.method { color:var(--muted); font-size:12.5px; margin:0 0 12px; max-width:760px; }
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
 .refs p { margin:0 0 8px; overflow-wrap:anywhere; }
 .refs a { color:var(--accent); }
@@ -42,7 +55,8 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 details.sources { margin-top:22px; border-top:1px solid var(--line); padding-top:10px; max-width:760px; }
 details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; }
 details.sources > summary:hover { color:var(--accent); }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+@media (max-width:900px){ .stage{flex-direction:column;} #diagram{width:100%; flex-basis:auto;} .side{position:static; width:100%; flex-basis:auto; order:-1;} }
+@media (max-width:600px){ #diagram{overflow-x:auto; -webkit-overflow-scrolling:touch;} #diagram svg{min-width:680px;} }
 </style>
 </head>
 <body>
@@ -52,8 +66,16 @@ details.sources > summary:hover { color:var(--accent); }
   <nav class="site"><a href="library.html">&larr; Library &middot; Life</a> <a href="animals.html">Animals</a> <a href="primates.html">Primates</a></nav>
 </header>
 <h1>Mammals</h1>
+<div class="bar" id="ctl">
+  <button type="button" id="timeBtn" hidden>Make to time</button>
+  <label id="scrubLab" hidden>at <input type="range" id="scrub" min="0" max="190000" step="10" value="190000"><output id="scrubOut">any date</output></label>
+  <button type="button" id="scrubOff" hidden>any date</button>
+  <button type="button" id="sizeBtn" hidden>Size by species</button>
+  <button type="button" id="unfoldBtn" hidden>Unfold all</button>
+  <span class="hint">a branch point folds with a click; the arrow keys travel the tree</span>
+</div>
 <div class="stage">
-  <div id="diagram"></div>
+  <div id="diagram" tabindex="0" aria-label="Mammals, a tree; the arrow keys travel it"></div>
   <div class="side"><div class="card">
     <img id="cardImg" alt="">
     <div id="nameTxt">A group under the cursor lands here</div>
@@ -62,78 +84,170 @@ details.sources > summary:hover { color:var(--accent); }
     <div id="srcTxt"></div>
   </div></div>
 </div>
-<p class="note">From the deepest split at the left to orders at the right; branch lengths carry no time, and species counts are the Mammal Diversity Database's, rounded. The four placental superorders leave from one point, since the genomes still allow three ways to root them.</p>
+<p class="note">From the deepest split at the left to orders at the right. Branch lengths carry no time until To time moves each branching point to its median divergence age; species counts are the Mammal Diversity Database's, rounded. The four placental superorders leave from one point, since the genomes still allow three ways to root them.</p>
 <details class="sources"><summary>Sources</summary>
+<p class="method">In the time layout each branching point moves to the median age TimeTree gives for the split, read from a pair of living species whose last common ancestor it is, and every living group ends at the present: Mammalia, 181.2 Ma (platypus and human); Theria, 159.2 Ma (gray short-tailed opossum and human); Marsupialia, 73.8 Ma (gray short-tailed opossum and Tasmanian devil); Placentalia, 97 Ma (elephant, armadillo, cow and human); Euarchontoglires, 83.5 Ma (house mouse and human); Laurasiatheria, 82.1 Ma (European hedgehog and cow). A median across published studies, not a single study's estimate; the ranges behind them run several million years either way.</p>
 <div class="refs"><p>Burgin, C. J., Colella, J. P., Kahn, P. L., & Upham, N. S. (2018). How many species of mammals are there? <i>Journal of Mammalogy, 99</i>(1), 1-14. <a href="https://doi.org/10.1093/jmammal/gyx147">https://doi.org/10.1093/jmammal/gyx147</a></p>
 <p>Murphy, W. J., Eizirik, E., O'Brien, S. J., Madsen, O., Scally, M., Douady, C. J., Teeling, E., Ryder, O. A., Stanhope, M. J., de Jong, W. W., & Springer, M. S. (2001). Resolution of the early placental mammal radiation using Bayesian phylogenetics. <i>Science, 294</i>(5550), 2348-2351. <a href="https://doi.org/10.1126/science.1067179">https://doi.org/10.1126/science.1067179</a></p>
 <p>Upham, N. S., Esselstyn, J. A., & Jetz, W. (2019). Inferring the mammal tree: Species-level sets of phylogenies for questions in ecology, evolution, and conservation. <i>PLOS Biology, 17</i>(12), e3000494. <a href="https://doi.org/10.1371/journal.pbio.3000494">https://doi.org/10.1371/journal.pbio.3000494</a></p>
 <p>Mammal Diversity Database, American Society of Mammalogists. (2025). <a href="https://www.mammaldiversity.org/">https://www.mammaldiversity.org/</a></p>
+<p>Kumar, S., Suleski, M., Craig, J. M., Kasprowicz, A. E., Sanderford, M., Li, M., Stecher, G., & Hedges, S. B. (2022). TimeTree 5: An expanded resource for species divergence times. <i>Molecular Biology and Evolution, 39</i>(8), msac174. Divergence ages read from timetree.org, data version 20260820, on 29 September 2026. <a href="https://doi.org/10.1093/molbev/msac174">https://doi.org/10.1093/molbev/msac174</a></p>
 <p>Foley, N. M., et al. (2023). A genomic timescale for placental mammal evolution. <i>Science, 380</i>(6643), eabl8189. <a href="https://doi.org/10.1126/science.abl8189">https://doi.org/10.1126/science.abl8189</a></p>
 <p>Wikimedia Foundation. (n.d.). <i>Wikipedia, the free encyclopedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/">https://en.wikipedia.org/</a><span class="ann">Images: the linked group's Wikipedia article thumbnail, fetched at view time; each is credited on its article page.</span></p></div>
 </details>
 </div>
 <script>
-const ROOT={"n":"Mammalia","b":"Warm-blooded vertebrates with hair and milk: about 6,800 living species in 27 orders as counted by the Mammal Diversity Database.","s":"Mammal Diversity Database 2025","c":"~6,800 species","k":[{"n":"Monotremata","b":"The egg-laying mammals: the platypus and the echidnas, sole survivors of the deepest split.","s":"Burgin and others 2018","c":"5 species","w":["Monotreme","Platypus"]},{"n":"Theria","b":"The live-bearing mammals, split between marsupials and placentals.","s":"Upham and others 2019","k":[{"n":"Marsupialia","b":"Mammals whose young finish developing in a pouch. Seven orders, most of them Australasian.","s":"Burgin and others 2018","c":"~380 species","k":[{"n":"Didelphimorphia","b":"The opossums of the Americas.","s":"Burgin and others 2018","c":"~111 species","w":["Opossum"]},{"n":"Diprotodontia","b":"Kangaroos, wombats, possums and the koala: the big Australian radiation.","s":"Burgin and others 2018","c":"~155 species","w":["Diprotodontia","Kangaroo"]},{"n":"Dasyuromorphia and others","b":"The carnivorous marsupials, bandicoots, the marsupial mole and the monito del monte: five smaller orders.","s":"Burgin and others 2018","c":"~113 species","w":["Dasyuromorphia","Tasmanian devil"]}],"w":["Marsupial"]},{"n":"Placentalia","b":"Mammals carried to term inside the mother: four great superorders that split as the continents did.","s":"Murphy and others 2001","c":"~6,400 species","k":[{"n":"Afrotheria","b":"The African root stock: elephants, manatees, hyraxes, aardvark, sengis and tenrecs.","s":"Murphy and others 2001","w":["Afrotheria","African bush elephant"]},{"n":"Xenarthra","b":"The South American originals: armadillos, sloths and anteaters.","s":"Murphy and others 2001","w":["Xenarthra","Nine-banded armadillo"]},{"n":"Euarchontoglires","b":"The rodents, rabbits, treeshrews, colugos and primates, humankind included.","s":"Murphy and others 2001","hl":true,"k":[{"n":"Rodentia","b":"Two in every five mammal species are rodents.","s":"Mammal Diversity Database 2025","c":"~2,750 species","w":["Rodent"]},{"n":"Primates","b":"Lemurs to humans; the Primates diagram opens this branch.","s":"Mammal Diversity Database 2025","c":"~520 species","hl":true,"w":["Primate"]},{"n":"Lagomorpha and others","b":"Rabbits and hares, plus the treeshrews and colugos nearest the primates.","s":"Mammal Diversity Database 2025","w":["Lagomorpha","European rabbit"]}],"w":["Euarchontoglires"]},{"n":"Laurasiatheria","b":"The northern radiation: shrews, bats, carnivorans, pangolins, horses, and the even-toed ungulates including the whales.","s":"Murphy and others 2001","k":[{"n":"Chiroptera","b":"The bats, the only mammals with powered flight.","s":"Mammal Diversity Database 2025","c":"~1,490 species","w":["Bat"]},{"n":"Carnivora","b":"Cats, dogs, bears, seals and their kin.","s":"Mammal Diversity Database 2025","c":"~320 species","w":["Carnivora","Lion"]},{"n":"Artiodactyla","b":"The even-toed ungulates, with the whales and dolphins nested inside them.","s":"Mammal Diversity Database 2025","c":"~370 species","w":["Even-toed ungulate","Giraffe"]},{"n":"Eulipotyphla and others","b":"Shrews, moles and hedgehogs, plus pangolins and the horses, rhinos and tapirs.","s":"Mammal Diversity Database 2025","w":["Eulipotyphla","European hedgehog"]}],"w":["Laurasiatheria"]}],"w":["Placentalia"]}],"w":["Theria"]}],"w":["Mammal"]}, UP={"href": "animals.html", "label": "Animals"};
+const ROOT={"n":"Mammalia","b":"Warm-blooded vertebrates with hair and milk: about 6,800 living species in 27 orders as counted by the Mammal Diversity Database.","s":"Mammal Diversity Database 2025","c":"~6,800 species","k":[{"n":"Monotremata","b":"The egg-laying mammals: the platypus and the echidnas, sole survivors of the deepest split.","s":"Burgin and others 2018","c":"5 species","w":["Monotreme","Platypus"]},{"n":"Theria","b":"The live-bearing mammals, split between marsupials and placentals.","s":"Upham and others 2019","k":[{"n":"Marsupialia","b":"Mammals whose young finish developing in a pouch. Seven orders, most of them Australasian.","s":"Burgin and others 2018","c":"~380 species","k":[{"n":"Didelphimorphia","b":"The opossums of the Americas.","s":"Burgin and others 2018","c":"~111 species","w":["Opossum"]},{"n":"Diprotodontia","b":"Kangaroos, wombats, possums and the koala: the big Australian radiation.","s":"Burgin and others 2018","c":"~155 species","w":["Diprotodontia","Kangaroo"]},{"n":"Dasyuromorphia and others","b":"The carnivorous marsupials, bandicoots, the marsupial mole and the monito del monte: five smaller orders.","s":"Burgin and others 2018","c":"~113 species","w":["Dasyuromorphia","Tasmanian devil"]}],"w":["Marsupial"],"d":73.8,"dp":"gray short-tailed opossum and Tasmanian devil"},{"n":"Placentalia","b":"Mammals carried to term inside the mother: four great superorders that split as the continents did.","s":"Murphy and others 2001","c":"~6,400 species","k":[{"n":"Afrotheria","b":"The African root stock: elephants, manatees, hyraxes, aardvark, sengis and tenrecs.","s":"Murphy and others 2001","w":["Afrotheria","African bush elephant"],"p":"elephants, manatees, tenrecs"},{"n":"Xenarthra","b":"The South American originals: armadillos, sloths and anteaters.","s":"Murphy and others 2001","w":["Xenarthra","Nine-banded armadillo"],"p":"armadillos, sloths, anteaters"},{"n":"Euarchontoglires","b":"The rodents, rabbits, treeshrews, colugos and primates, humankind included.","s":"Murphy and others 2001","hl":true,"k":[{"n":"Rodentia","b":"Two in every five mammal species are rodents.","s":"Mammal Diversity Database 2025","c":"~2,750 species","w":["Rodent"]},{"n":"Primates","b":"Lemurs to humans; the Primates diagram opens this branch.","s":"Mammal Diversity Database 2025","c":"~520 species","hl":true,"w":["Primate"],"href":"primates.html"},{"n":"Lagomorpha and others","b":"Rabbits and hares, plus the treeshrews and colugos nearest the primates.","s":"Mammal Diversity Database 2025","w":["Lagomorpha","European rabbit"],"p":"rabbits, treeshrews, colugos"}],"w":["Euarchontoglires"],"d":83.5,"dp":"house mouse and human"},{"n":"Laurasiatheria","b":"The northern radiation: shrews, bats, carnivorans, pangolins, horses, and the even-toed ungulates including the whales.","s":"Murphy and others 2001","k":[{"n":"Chiroptera","b":"The bats, the only mammals with powered flight.","s":"Mammal Diversity Database 2025","c":"~1,490 species","w":["Bat"]},{"n":"Carnivora","b":"Cats, dogs, bears, seals and their kin.","s":"Mammal Diversity Database 2025","c":"~320 species","w":["Carnivora","Lion"]},{"n":"Artiodactyla","b":"The even-toed ungulates, with the whales and dolphins nested inside them.","s":"Mammal Diversity Database 2025","c":"~370 species","w":["Even-toed ungulate","Giraffe"]},{"n":"Eulipotyphla and others","b":"Shrews, moles and hedgehogs, plus pangolins and the horses, rhinos and tapirs.","s":"Mammal Diversity Database 2025","w":["Eulipotyphla","European hedgehog"],"p":"shrews, pangolins, horses"}],"w":["Laurasiatheria"],"d":82.1,"dp":"European hedgehog and cow"}],"w":["Placentalia"],"d":97.0,"dp":"elephant, armadillo, cow and human"}],"w":["Theria"],"d":159.2,"dp":"gray short-tailed opossum and human"}],"w":["Mammal"],"d":181.2,"dp":"platypus and human"}, UP={"href": "animals.html", "label": "Animals"}, TIME={"max": 190, "step": 20, "kind": "div"}, SIZED=false, START=null;
+// two kinds of time layout: fossil spans (each tip a bar from first to last
+// fossil) and divergence ages (each branching point at its split, living
+// tips at the present)
+const FOSSIL=!!TIME && TIME.kind==='fossil', DIV=!!TIME && TIME.kind==='div';
 const el=document.getElementById('diagram');
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ease=t=>t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const mix=(a,b,t)=>a+(b-a)*t;
+
+// every node gets an id and its parent; tips are counted once for the size scale
+let idc=0; const byId={}, allTips=[];
+(function walk(n,p){ n.id='n'+(idc++); byId[n.id]=n; n.parent=p;
+  if(n.k) n.k.forEach(c=>walk(c,n)); else allTips.push(n); })(ROOT,null);
+// the species count as a number, read off the count string ("~1.2 million
+// species", "~9,000 species"); a count with no figure gives null
+function countNum(s){ if(!s) return null; const m=s.match(/(\d[\d,]*(?:\.\d+)?)\s*(million)?/);
+  if(!m) return null; let v=parseFloat(m[1].replace(/,/g,'')); if(m[2]) v*=1e6; return v; }
+const CTOT=countNum(ROOT.c), CMAX=Math.max(...allTips.map(t=>countNum(t.c)||0));
+// the fossil span of a node: a tip's own, or the oldest to youngest of its
+// clade; with divergence ages, a branching point's age and a living tip's now
+function span(n){ if(n.t) return n.t;
+  if(DIV){ if(n.d!=null) return [n.d,n.d]; if(!n.k) return [0,0]; }
+  if(!n.k) return null; let a=-1, b=1e9;
+  for(const c of n.k){ const s=span(c); if(s){ a=Math.max(a,s[0]); b=Math.min(b,s[1]); } }
+  return a<0?null:[a,b]; }
+function alive(n,d){ if(n.k && !folded.has(n.id)) return n.k.some(c=>alive(c,d));
+  const s=span(n); return !!s && s[0]>=d && s[1]<=d; }
+const fmtMa=d=>d===0?'now':d>=1?(Math.round(d*100)/100)+' Ma':Math.round(d*1000)+' ka';
+
+// state
+const folded=new Set();
+let mTarget=0, mCur=0;      // 0 a cladogram, 1 the time layout
+let sized=false;            // tip dots scaled by species count
+let scrub=null;             // a date in Ma, time layout only
+let current='n0', pinned=null;
 
 // layout: tips evenly spaced down the right, parents at the mean of their
-// children, x by depth
+// children, x by depth; in the time layout x is the fossil date, each tip a
+// bar from its oldest to its youngest fossil and a clade at its oldest
+const RS=allTips.length>16?36:42, PADT=UP?62:28, PADB=TIME?34:16, PADL=16, PADR=300, TH=34;
+const W=1010; let H=0, hCur=0;
 const tips=[]; let maxd=0;
-(function walk(n,d){ n.depth=d; maxd=Math.max(maxd,d);
-  if(n.k) n.k.forEach(c=>walk(c,d+1)); else tips.push(n); })(ROOT,0);
-const RS=42, PADT=UP?62:28, PADB=16, PADL=16, PADR=300, TH=34;
-const W=1010, H=PADT+PADB+RS*tips.length;
-tips.forEach((t,i)=>{ t.y=PADT+RS*(i+0.5); });
-(function place(n){ if(n.k){ n.k.forEach(place);
-  n.y=n.k.reduce((a,c)=>a+c.y,0)/n.k.length; } })(ROOT);
-const X=d=>PADL+ (W-PADL-PADR) * d/maxd;
+const XT=ma=>PADL+(W-PADL-PADR)*(1-ma/TIME.max);
+function layout(){
+  tips.length=0; maxd=0;
+  (function walk(n,d){ n.depth=d; n.vis=true; maxd=Math.max(maxd,d);
+    if(n.k && !folded.has(n.id)) n.k.forEach(c=>walk(c,d+1));
+    else { tips.push(n); (function hide(m){ if(m.k) m.k.forEach(c=>{ c.vis=false; hide(c); }); })(n); } })(ROOT,0);
+  H=PADT+PADB+RS*tips.length;
+  tips.forEach((t,i)=>{ t.ty=PADT+RS*(i+0.5); });
+  (function place(n){ if(n.k && !folded.has(n.id)){ n.k.forEach(place);
+    n.ty=n.k.reduce((a,c)=>a+c.ty,0)/n.k.length; } })(ROOT);
+  const XC=d=>PADL+(W-PADL-PADR)*d/Math.max(1,maxd);
+  for(const id in byId){ const n=byId[id]; if(!n.vis) continue;
+    const xc=XC(n.depth); n.tx=[xc,xc,xc];
+    if(TIME){ const s=span(n), leaf=!n.k||folded.has(n.id);
+      const x0=s?XT(s[0]):xc, x1=s?XT(s[1]):xc;
+      n.tt=[x0,x0,leaf?(DIV?XT(0):x1):x0]; }
+    else n.tt=n.tx; }
+}
+const rad=n=>{ const leaf=!n.k||folded.has(n.id); if(!leaf) return 4;
+  if(!sized||!SIZED) return 4.5; const c=countNum(n.c); if(!c) return 2;
+  return Math.max(2, 2+12*(Math.log10(c)-1)/(Math.log10(CMAX)-1)); };
+const target=n=>({x:mix(n.tx[0],n.tt[0],mTarget), b:mix(n.tx[1],n.tt[1],mTarget),
+  e:mix(n.tx[2],n.tt[2],mTarget), y:n.ty, r:rad(n)});
+
+// every change of layout tweens from where things are to where they go
+let anim=null, t0=0; const DUR=700;
+function retarget(){
+  const wasVis={}; for(const id in byId) wasVis[id]=!!byId[id].vis;
+  for(const id in byId){ const n=byId[id]; n.sx=n.px; n.sy=n.py; n.sb=n.pb; n.se=n.pe; n.sr=n.pr; }
+  const hSnap=hCur, mSnap=mCur;
+  layout();
+  for(const id in byId){ const n=byId[id]; if(!n.vis||wasVis[id]) continue;
+    let a=n.parent; while(a && !wasVis[a.id]) a=a.parent;   // a node just unfolded grows out of its ancestor
+    if(a){ n.sx=a.sx; n.sy=a.sy; n.sb=a.sb; n.se=a.se; n.sr=a.sr; }
+    else { const g=target(n); n.sx=g.x; n.sy=g.y; n.sb=g.b; n.se=g.e; n.sr=g.r; } }
+  const step=k=>{ const e=ease(k);
+    for(const id in byId){ const n=byId[id]; if(!n.vis) continue; const g=target(n);
+      n.px=mix(n.sx,g.x,e); n.py=mix(n.sy,g.y,e); n.pb=mix(n.sb,g.b,e); n.pe=mix(n.se,g.e,e); n.pr=mix(n.sr,g.r,e); }
+    hCur=mix(hSnap,H,e); mCur=mix(mSnap,mTarget,e); render(); };
+  if(REDUCED){ anim=null; step(1); return; }
+  t0=performance.now();
+  const frame=now=>{ const k=Math.min(1,(now-t0)/DUR); step(k); if(k<1) anim=requestAnimationFrame(frame); else anim=null; };
+  if(anim) cancelAnimationFrame(anim); anim=requestAnimationFrame(frame);
+}
 
 const IMG={};      // node name -> thumbnail url, filled at view time
-let idc=0; const byId={};
 function draw(n){
-  if(!n.id){ n.id='n'+(idc++); byId[n.id]=n; }
-  const x=X(n.depth), col=n.hl?'var(--hl)':'#c9d1d9';
+  const leaf=!n.k||folded.has(n.id);
+  const x=n.px, y=n.py, col=n.hl?'var(--hl)':'#c9d1d9';
+  const dim=scrub!=null && mCur>0.5 && !alive(n,scrub);
   let s='';
-  if(n.k){
-    const x1=X(n.depth+1);
+  if(!leaf){
     for(const c of n.k)
-      s+=`<path d="M${x},${n.y} V${c.y} H${x1}" fill="none"
+      s+=`<path d="M${x.toFixed(1)},${y.toFixed(1)} V${c.py.toFixed(1)} H${c.pb.toFixed(1)}" fill="none"
         stroke="#3d444d" stroke-width="1.6"/>`;
     for(const c of n.k) s+=draw(c);
   }
+  const plain=n.p?` <tspan fill="#8b949e" font-size="11.5" font-weight="400">${esc(n.p)}</tspan>`:'';
   let lab;
-  if(n.k){
-    lab = n.depth===0
-      ? `<text x="${x+7}" y="${n.y-7}" font-size="12.5"
-          fill="${n.hl?'var(--hl)':'#9a9a9a'}">${esc(n.n)}</text>`
-      : `<text x="${x-8}" y="${n.y+4}" text-anchor="end" font-size="12.5"
+  if(!leaf){
+    const lw=Math.max(n.n.length*7, n.p?n.p.length*6.2:0);
+    // no room to the left: the label sits above the node, or below it when
+    // a branch leaves just above
+    const ly=n.k.some(c=>c.py<y-0.5 && y-c.py<16)?y+16:y-7;
+    lab = (n.depth===0 || x-9-lw<2)
+      ? `<text x="${x+7}" y="${ly}" font-size="12.5"
           fill="${n.hl?'var(--hl)':'#9a9a9a'}" stroke="#121212"
-          stroke-width="3" paint-order="stroke">${esc(n.n)}</text>`;
+          stroke-width="3" paint-order="stroke">${esc(n.n)}${plain}</text>`
+      : `<text x="${x-9}" y="${y+(n.p?-1:4)}" text-anchor="end" font-size="12.5"
+          fill="${n.hl?'var(--hl)':'#9a9a9a'}" stroke="#121212"
+          stroke-width="3" paint-order="stroke">${esc(n.n)}</text>`
+        +(n.p?`<text x="${x-9}" y="${y+12}" text-anchor="end" font-size="11" fill="#8b949e"
+          stroke="#121212" stroke-width="3" paint-order="stroke">${esc(n.p)}</text>`:'');
   } else {
-    const u=IMG[n.n], tx=u?x+16+TH:x+9;
-    lab=(u?`<image href="${u}" x="${x+10}" y="${n.y-TH/2}" width="${TH}"
+    const u=IMG[n.n], bar=n.pe-n.pb, x1=n.pe, tx=u?x1+16+TH:x1+9+(n.pr>4.5?n.pr-4.5:0);
+    const cnt=n.k?`${countTips(n)} tips folded`:n.c;
+    lab=(bar>1||(FOSSIL&&mCur>0.02)?`<rect x="${n.pb.toFixed(1)}" y="${(y-5).toFixed(1)}" width="${Math.max(4,bar).toFixed(1)}" height="10" rx="3"
+        fill="${n.hl?'var(--hl)':'#58a6ff'}" opacity="0.55"/>`:'')
+      +(u?`<image href="${u}" x="${x1+10}" y="${y-TH/2}" width="${TH}"
         height="${TH}" preserveAspectRatio="xMidYMin slice"/>
-      <rect x="${x+10}" y="${n.y-TH/2}" width="${TH}" height="${TH}"
+      <rect x="${x1+10}" y="${y-TH/2}" width="${TH}" height="${TH}"
         fill="none" stroke="#2b2b2b" stroke-width="1"/>`:'')
-      +`<text x="${tx}" y="${n.y+4.5}" font-size="13.5" font-weight="${n.hl?700:400}"
-      fill="${col}">${esc(n.n)}${n.c?` <tspan fill="#6b7280" font-size="11.5" font-weight="400">${esc(n.c)}</tspan>`:''}</text>`;
+      +`<text x="${tx.toFixed(1)}" y="${y+4.5}" font-size="13.5" font-weight="${n.hl?700:400}"
+      fill="${col}" stroke="#121212" stroke-width="3" paint-order="stroke">${esc(n.n)}${plain}${cnt?` <tspan fill="#8b949e" font-size="11.5" font-weight="400">${esc(cnt)}</tspan>`:''}${n.href?` <tspan fill="var(--accent)" font-weight="400">→</tspan>`:''}</text>`;
   }
-  s+=`<g data-id="${n.id}" style="cursor:pointer">
-    ${n.id===pinned?`<circle cx="${x}" cy="${n.y}" r="9.5" fill="none"
+  const hit=!leaf?Math.min(200,n.n.length*7+24):290;
+  s+=`<g data-id="${n.id}"${n.href?` data-href="${n.href}"`:''} style="cursor:pointer"${dim?' opacity="0.28"':''}>
+    ${n.id===pinned?`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(n.pr+5).toFixed(1)}" fill="none"
       stroke="${n.hl?'var(--hl)':'var(--accent)'}" stroke-width="1.6"
       opacity="0.9"/>`:''}
-    <circle cx="${x}" cy="${n.y}" r="${n.k?4:4.5}"
-      fill="${n.hl?'var(--hl)':(n.k?'#121212':'#58a6ff')}"
-      stroke="${n.hl?'var(--hl)':'#58a6ff'}" stroke-width="1.6"/>
-    <rect x="${x-10}" y="${n.y-Math.max(12,TH/2)}" width="${n.k?Math.min(200,n.n.length*7+24):290}" height="${n.k?24:TH}" fill="transparent"/>
-    ${lab}</g>`;
+    <rect x="${x-10}" y="${y-Math.max(12,TH/2)}" width="${hit}" height="${!leaf?24:TH}" fill="transparent"/>
+    ${lab}
+    ${n.k?`<g data-fold="${n.id}"><title>${folded.has(n.id)?'unfolds':'folds'} ${esc(n.n)}</title>
+      <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="10" fill="transparent"/>
+      <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5.5"
+        fill="${n.hl?'var(--hl)':'#121212'}" stroke="${n.hl?'var(--hl)':'#58a6ff'}" stroke-width="1.6"/>
+      <path d="M${(x-2.8).toFixed(1)},${y.toFixed(1)} h5.6${folded.has(n.id)?` M${x.toFixed(1)},${(y-2.8).toFixed(1)} v5.6`:''}"
+        stroke="${n.hl?'#0b1a2b':'#c9d1d9'}" stroke-width="1.4"/></g>`
+      :`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${n.pr.toFixed(1)}"
+      fill="${n.hl?'var(--hl)':'#58a6ff'}" stroke="${n.hl?'var(--hl)':'#58a6ff'}" stroke-width="1.6"/>`}</g>`;
   return s;
 }
+function countTips(n){ return n.k?n.k.reduce((a,c)=>a+countTips(c),0):1; }
 function upNode(){
   if(!UP) return '';
-  const x=X(0), y=20;
-  return `<path d="M${x},${ROOT.y} L${x},${y+8}" fill="none" stroke="#3d444d"
+  const x=ROOT.px, y=20;
+  return `<path d="M${x},${ROOT.py.toFixed(1)} L${x},${y+8}" fill="none" stroke="#3d444d"
       stroke-width="1.6" stroke-dasharray="4 4"/>
     <g data-href="${UP.href}" style="cursor:pointer">
       <rect x="${x-10}" y="${y-11}" width="${UP.label.length*8+40}" height="24"
@@ -142,28 +256,63 @@ function upNode(){
       <text x="${x+10}" y="${y+4.5}" font-size="13" fill="var(--accent)"
         >↑ ${UP.label}</text></g>`;
 }
-function render(){
-  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
-    id="treesvg">`+draw(ROOT)+upNode()+'</svg>';
+function axis(){
+  if(!TIME || mCur<0.02) return '';
+  const y=hCur-12; let s=`<g opacity="${mCur.toFixed(2)}">`;
+  for(let ma=0; ma<=TIME.max; ma+=TIME.step){ const x=XT(ma);
+    s+=`<line x1="${x.toFixed(1)}" y1="${PADT-4}" x2="${x.toFixed(1)}" y2="${(y-8).toFixed(1)}" stroke="#2b2b2b"/>
+      <text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="middle" font-size="11" fill="#9a9a9a">${ma?ma+' Ma':'now'}</text>`; }
+  s+=`<line x1="${XT(TIME.max)}" y1="${(y-8).toFixed(1)}" x2="${XT(0)}" y2="${(y-8).toFixed(1)}" stroke="#8a94a6"/>`;
+  if(scrub!=null){ const x=XT(scrub);
+    s+=`<g data-scrub="1" style="cursor:ew-resize"><line x1="${x.toFixed(1)}" y1="${PADT-8}" x2="${x.toFixed(1)}" y2="${(y-8).toFixed(1)}" stroke="#ffb02e" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <circle cx="${x.toFixed(1)}" cy="${(y-8).toFixed(1)}" r="6" fill="#ffb02e" stroke="#121212" stroke-width="1.5"/>
+      <rect x="${(x-14).toFixed(1)}" y="${PADT-8}" width="28" height="${(y-PADT+8).toFixed(1)}" fill="transparent"/>
+      <text x="${x.toFixed(1)}" y="${PADT-12}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffb02e">${fmtMa(scrub)}</text></g>`; }
+  return s+'</g>';
 }
-let current='n0', pinned=null;
+function render(){
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${hCur.toFixed(1)}" xmlns="http://www.w3.org/2000/svg"
+    id="treesvg">`+axis()+draw(ROOT)+upNode()+'</svg>';
+  document.getElementById('unfoldBtn').hidden=folded.size===0;
+}
 function show(id){
   const n=byId[id]; if(!n) return;
   current=id;
-  document.getElementById('nameTxt').textContent=n.n;
-  document.getElementById('cntTxt').textContent=n.c||'';
-  document.getElementById('bodyTxt').textContent=n.b;
-  document.getElementById('srcTxt').textContent=n.s;
+  document.getElementById('nameTxt').textContent=n.n+(n.p?', '+n.p:'');
+  let cnt=n.c||'';
+  if(SIZED && CTOT && !n.k && countNum(n.c)) cnt+=', '+share(countNum(n.c)/CTOT)+' of described animal species';
+  if(n.k && folded.has(n.id)) cnt=(cnt?cnt+'; ':'')+countTips(n)+' tips folded in';
+  if(n.d!=null) cnt=(cnt?cnt+'; ':'')+'its branches split ~'+n.d+' Ma';
+  document.getElementById('cntTxt').textContent=cnt;
+  document.getElementById('bodyTxt').textContent=n.b+(n.href?' A click opens it.':'');
+  document.getElementById('srcTxt').textContent=n.s+(n.d!=null?'; age: TimeTree median, '+n.dp:'');
   const img=document.getElementById('cardImg');
   if(IMG[n.n]){ img.src=IMG[n.n]; img.style.display='block'; }
   else img.style.display='none';
 }
+const share=f=>f>=0.1?Math.round(f*100)+'%':f>=0.01?(f*100).toFixed(1)+'%':f>=0.001?(f*100).toFixed(2)+'%':'under a tenth of a percent';
+function showScrub(){
+  const list=allTips.filter(t=>t.t && t.t[0]>=scrub && t.t[1]<=scrub).map(t=>t.n);
+  document.getElementById('nameTxt').textContent='At '+fmtMa(scrub);
+  document.getElementById('cntTxt').textContent=list.length+(list.length===1?' species':' species')+' known from then';
+  document.getElementById('bodyTxt').textContent=list.length?list.join('; ')+'.':'No named hominin fossil falls on this date.';
+  document.getElementById('srcTxt').textContent='The fossil ranges beside each species';
+  document.getElementById('cardImg').style.display='none';
+}
+function fold(id){ if(folded.has(id)) folded.delete(id); else folded.add(id);
+  if(pinned && !byId[pinned].vis) pinned=null; if(!byId[current].vis) current=id;
+  retarget(); show(current); }
+
 el.addEventListener('pointerover',e=>{
   if(pinned) return;
   const g=e.target.closest('[data-id]');
   if(g) show(g.getAttribute('data-id'));
 });
 el.addEventListener('click',e=>{
+  if(dragged){ dragged=false; return; }
+  const f=e.target.closest('[data-fold]');
+  if(f){ fold(f.getAttribute('data-fold')); return; }
+  if(e.target.closest('[data-scrub]')) return;
   const up=e.target.closest('[data-href]');
   if(up){ location.href=up.getAttribute('data-href'); return; }
   const g=e.target.closest('[data-id]');
@@ -173,6 +322,60 @@ el.addEventListener('click',e=>{
     show(id);
   } else pinned=null;
   render();
+});
+// a drag on the date marker, or along the axis, moves the date
+let dragging=false, dragged=false;
+const svgX=e=>{ const b=el.querySelector('svg').getBoundingClientRect(); return (e.clientX-b.left)/b.width*W; };
+const svgY=e=>{ const b=el.querySelector('svg').getBoundingClientRect(); return (e.clientY-b.top)/b.height*hCur; };
+function setScrub(d,fromInput){ scrub=d==null?null:Math.max(0,Math.min(TIME.max,d));
+  const inp=document.getElementById('scrub'), out=document.getElementById('scrubOut');
+  if(!fromInput) inp.value=scrub==null?TIME.max*1000:Math.round(scrub*1000);
+  out.textContent=scrub==null?'any date':fmtMa(scrub);
+  document.getElementById('scrubOff').hidden=scrub==null;
+  render(); if(!pinned){ if(scrub==null) show(current); else showScrub(); } }
+el.addEventListener('pointerdown',e=>{
+  if(!FOSSIL || mTarget!==1) return;
+  const onMarker=e.target.closest('[data-scrub]'), y=svgY(e);
+  if(!onMarker && y<hCur-30) return;
+  dragging=true; el.setPointerCapture(e.pointerId); e.preventDefault();
+  setScrub(TIME.max*(1-(svgX(e)-PADL)/(W-PADL-PADR)));
+});
+el.addEventListener('pointermove',e=>{ if(!dragging) return; dragged=true;
+  setScrub(TIME.max*(1-(svgX(e)-PADL)/(W-PADL-PADR))); });
+window.addEventListener('pointerup',()=>{ dragging=false; });
+
+// the controls
+const timeBtn=document.getElementById('timeBtn'), sizeBtn=document.getElementById('sizeBtn');
+if(TIME){ timeBtn.hidden=false;
+  timeBtn.addEventListener('click',()=>{ mTarget=mTarget?0:1;
+    timeBtn.classList.toggle('on',mTarget===1); timeBtn.textContent=mTarget?'To time \u2713':'Make to time';
+    document.getElementById('scrubLab').hidden=!(mTarget&&FOSSIL);
+    if(!mTarget) setScrub(null); retarget(); });
+  document.getElementById('scrub').addEventListener('input',e=>setScrub(+e.target.value/1000,true));
+  document.getElementById('scrubOff').addEventListener('click',()=>setScrub(null)); }
+if(SIZED){ sizeBtn.hidden=false;
+  sizeBtn.addEventListener('click',()=>{ sized=!sized; sizeBtn.classList.toggle('on',sized);
+    sizeBtn.textContent=sized?'By species \u2713':'Size by species'; retarget(); }); }
+document.getElementById('unfoldBtn').addEventListener('click',()=>{ folded.clear(); retarget(); show(current); });
+
+// the arrow keys travel the tree while the diagram has focus: up and down
+// along the rows, right into a branch, left out to its parent; Enter folds
+// a branch or opens a linked tip, space pins, Escape lets go
+el.addEventListener('keydown',e=>{
+  const tag=(document.activeElement||{}).tagName; if(tag==='INPUT'||tag==='TEXTAREA') return;
+  const n=byId[current]; if(!n) return;
+  const vis=Object.values(byId).filter(m=>m.vis).sort((a,b)=>a.ty-b.ty||a.depth-b.depth);
+  let next=null;
+  if(e.key==='ArrowDown'){ next=vis.filter(m=>m.ty>n.ty+0.5)[0]||null; }
+  else if(e.key==='ArrowUp'){ const above=vis.filter(m=>m.ty<n.ty-0.5); next=above[above.length-1]||null; }
+  else if(e.key==='ArrowRight'){ if(n.k){ if(folded.has(n.id)) fold(n.id); next=n.k[0]; } }
+  else if(e.key==='ArrowLeft'){ next=n.parent; }
+  else if(e.key==='Enter'){ if(n.href) location.href=n.href; else if(n.k) fold(n.id); }
+  else if(e.key===' '){ pinned=pinned===n.id?null:n.id; render(); }
+  else if(e.key==='Escape'){ pinned=null; render(); }
+  else return;
+  e.preventDefault();
+  if(next){ pinned=next.id; show(next.id); render(); }
 });
 
 // photos: each node's Wikipedia article summary thumbnail, first
@@ -198,15 +401,21 @@ async function loadImages(){
     if(u) IMG[n.n]=u;
   }));
   render();
-  show(current);
+  if(!(TIME && scrub!=null && !pinned)) show(current);
 }
 
+layout();
+for(const id in byId){ const n=byId[id]; if(!n.vis) continue; const g=target(n);
+  n.px=g.x; n.py=g.y; n.pb=g.b; n.pe=g.e; n.pr=g.r; }
+hCur=H;
 render();
-show('n0');
+{ const s=START?Object.values(byId).find(m=>m.n===START):null; show(s?s.id:'n0'); }
 loadImages();
 window.__tree=()=>({tips:tips.length, depth:maxd,
   nodes:Object.keys(byId).length, h:H, imgs:Object.keys(IMG).length,
-  tipImgs:tips.filter(t=>IMG[t.n]).length, pinned, current});
+  tipImgs:tips.filter(t=>IMG[t.n]).length, pinned, current, folded:[...folded],
+  mode:mTarget, sized, scrub, anim:!!anim,
+  pos:Object.fromEntries(Object.values(byId).filter(n=>n.vis).map(n=>[n.n,{x:n.px,y:n.py,b:n.pb,e:n.pe,r:n.pr}]))});
 </script>
 </body>
 </html>

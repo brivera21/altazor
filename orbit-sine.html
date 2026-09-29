@@ -37,15 +37,16 @@
   #readout .big { font-size: 20px; font-weight: 600; color: var(--accent); }
   #readout .lbl { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
   #controls {
-    position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%);
-    width: min(680px, calc(100% - 32px));
+    position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%);
+    width: min(1040px, calc(100% - 32px)); max-height: calc(100% - 150px); overflow-y: auto;
     background: var(--panel); border: 1px solid rgba(90,176,255,0.18);
     border-radius: 14px; padding: 14px 18px 12px;
     backdrop-filter: blur(8px); color: var(--text);
   }
-  .row { display: flex; align-items: center; gap: 14px; }
-  .row + .row { margin-top: 8px; }
-  label { font-size: 12.5px; color: var(--dim); white-space: nowrap; min-width: 150px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 26px; }
+  .row { display: flex; align-items: center; gap: 12px; }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  label { font-size: 12.5px; color: var(--dim); white-space: nowrap; min-width: 118px; }
   input[type="range"] {
     flex: 1; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px;
     background: #223046; outline: none;
@@ -66,12 +67,32 @@
     border-radius: 8px; padding: 6px 14px; font-size: 13px; cursor: pointer;
   }
   button:hover { background: #223354; }
+  button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
   #note {
-    margin-top: 9px; font-size: 11.5px; color: var(--dim); line-height: 1.4;
+    margin-top: 9px; font-size: 11.5px; color: var(--dim); line-height: 1.45;
+  }
+  details.sources { margin-top: 7px; font-size: 11.5px; color: var(--dim); line-height: 1.45; }
+  details.sources > summary { cursor: pointer; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+  details.sources > summary:hover { color: var(--accent); }
+  details.sources p { margin: 7px 0; }
+  details.sources a { color: var(--accent); }
+  .refs p { padding-left:2em; text-indent:-2em; }
+  .refs .ann { color:#7d7d7d; display:block; padding-left:0; text-indent:0; margin-top:2px; }
+  #readout .sub { font-size: 11.5px; color: var(--dim); margin-top: 2px; min-height: 1em; }
+  @media (max-width: 760px) {
+    .grid { grid-template-columns: 1fr; gap: 6px; }
   }
   @media (max-width: 640px) {
     #hud p { display: none; }
-    label { min-width: 110px; font-size: 11.5px; }
+    #note { display: none; }
+    .row { flex-wrap: wrap; gap: 4px 8px; }
+    label { min-width: 100%; font-size: 11.5px; }
+    .val { min-width: 60px; }
+    #controls { padding: 10px 14px 10px; bottom: 10px; }
+    #readout { padding: 7px 10px; }
+    #readout .big { font-size: 15px; }
+    #hud h1 { font-size: 15px; max-width: 150px; }
+    #sitenav a.xtra { display: none; }
   }
 </style>
 </head>
@@ -80,51 +101,73 @@
 
 <div id="hud">
   <div>
-    <div id="sitenav"><a class="brand" href="index.html">ALTAZOR</a><a href="library.html">&larr; Library &middot; Earth</a></div>
+    <div id="sitenav"><a class="brand" href="index.html">ALTAZOR</a><a href="library.html">&larr; Library &middot; Earth</a><a class="xtra" href="moon.html">The Month</a></div>
     <h1>The Year: Earth's Cycle</h1>
   </div>
   <div id="readout">
-    <div class="lbl">Elapsed</div>
-    <div class="big" id="yearsOut">0.0 yr</div>
-    <div class="lbl" style="margin-top:6px">Trace kept</div>
-    <div class="big" id="traceOut" style="font-size:15px">0.0 yr</div>
+    <div class="lbl">The date</div>
+    <div class="big" id="dateOut">March 20, 2027</div>
+    <div class="sub" id="eventOut"></div>
+    <div class="lbl" style="margin-top:6px">Since the start</div>
+    <div class="big" id="yearsOut" style="font-size:15px">1.0 yr</div>
   </div>
 </div>
 
 <div id="controls">
-  <div class="row">
-    <label for="past">Years of trace to keep</label>
-    <input type="range" id="past" min="0" max="30" step="0.05" value="30">
-    <div class="val" id="pastVal">30.0 years</div>
+  <div class="grid">
+    <div class="row">
+      <label for="tilt">View, pole to side</label>
+      <input type="range" id="tilt" min="0" max="90" step="0.5" value="35">
+      <div class="val" id="tiltVal">35°</div>
+    </div>
+    <div class="row">
+      <label for="speed">Orbit speed</label>
+      <input type="range" id="speed" min="0" max="3" step="0.05" value="0.6">
+      <div class="val" id="speedVal">0.6 yr/s</div>
+    </div>
+    <div class="row">
+      <label for="past">Years of trace</label>
+      <input type="range" id="past" min="0" max="30" step="0.05" value="5">
+      <div class="val" id="pastVal">5.0 years</div>
+    </div>
+    <div class="row">
+      <label for="depth">Year spacing</label>
+      <input type="range" id="depth" min="0" max="300" step="1" value="110">
+      <div class="val" id="depthVal">&times;1.0</div>
+    </div>
   </div>
-  <div class="row">
-    <label for="tilt">View: pole → side</label>
-    <input type="range" id="tilt" min="0" max="90" step="0.5" value="90">
-    <div class="val" id="tiltVal">90°</div>
+  <div class="btns">
     <button id="viewBtn">Pole view</button>
-  </div>
-  <div class="row">
-    <label for="depth">Time axis scale</label>
-    <input type="range" id="depth" min="0" max="300" step="1" value="110">
-    <div class="val" id="depthVal">110 px/yr</div>
     <button id="sideBtn">Side view</button>
-  </div>
-  <div class="row">
-    <label for="speed">Orbit speed</label>
-    <input type="range" id="speed" min="0" max="3" step="0.05" value="0.6">
-    <div class="val" id="speedVal">0.6 yr/s</div>
     <button id="playBtn">Pause</button>
     <button id="resetBtn">Restart</button>
+    <button id="scaleBtn" aria-pressed="false">To scale</button>
   </div>
   <div id="note">
-    Earth circles the Sun once a year, clockwise when seen from south of the ecliptic. With a time axis added, the circle
-    becomes a helix: from the side, Earth simply bobs up and down, and the trace it leaves stretches back through the years
-    as a sine wave. The view swings freely between the pole (circle) and the side (wave).
-    <br><br>
-    Note on accuracy: the clockwise direction of both Earth's orbit and its spin is correct for a south-of-the-ecliptic viewpoint,
-    and the side-on projection of uniform circular motion really is a sine wave. The horizontal axis is <i>time</i>, not distance;
-    Earth stays ≈1 au (149.6 million km) from the Sun on a nearly circular path. Sizes are not to scale.
+    Earth circles the Sun once a year, clockwise as seen from south of the ecliptic. With a time axis added, the circle
+    becomes a helix: seen from the side, Earth bobs up and down, and its trace runs back through the years as a sine wave.
+    The view turns with a drag, and a click on the trace takes the clock back to that moment.
   </div>
+  <details class="sources" id="sources"><summary>Sources</summary>
+    <p>The clockwise direction of both Earth's orbit and its spin is correct for a viewpoint south of the ecliptic,
+    and the side-on projection of uniform circular motion really is a sine wave. The horizontal axis is <i>time</i>, not distance;
+    Earth stays about 1 au (149.6 million km) from the Sun on a nearly circular path, drawn here as a circle run at an even pace.</p>
+    <p>The clock starts at the March equinox of 2026, 14:46 UT on March 20, and runs in tropical years of 365.2422 days.
+    The equinoxes and solstices are marked at the times they fall, 92.74, 186.39 and 276.25 days after the March equinox,
+    not at quarter turns: the orbit is slightly elliptical, Earth moves fastest in early January, and the northern spring and summer
+    together last about seven and a half days longer than autumn and winter. Because the drawing runs at an even pace, those marks sit
+    within two degrees of where the true ellipse would put them.</p>
+    <p>Sizes are drawn large so the Sun and Earth can be seen. To scale shrinks both to their true size against the orbit
+    (the Sun's radius is 695,700 km, 0.47% of the orbit's; the Earth's 6,371 km, 0.004%), where the Earth is far less than a pixel
+    and is kept as a point.</p>
+    <div class="refs">
+<p>Meeus, J. (1998). <i>Astronomical algorithms</i> (2nd ed.). Willmann-Bell.<span class="ann">The unequal lengths of the four seasons.</span></p>
+<p>U.S. Naval Observatory. (n.d.). <i>Earth's seasons and apsides</i>. Astronomical Applications Department. Retrieved September 4, 2026, from <a href="https://aa.usno.navy.mil/data/Earth_Seasons">https://aa.usno.navy.mil/data/Earth_Seasons</a><span class="ann">The times of the 2026 equinoxes and solstices the clock starts from and marks.</span></p>
+<p>International Astronomical Union. (2012). <i>Resolution B2 on the re-definition of the astronomical unit of length</i>. IAU XXVIII General Assembly. <a href="https://www.iau.org/static/resolutions/IAU2012_English.pdf">https://www.iau.org/static/resolutions/IAU2012_English.pdf</a><span class="ann">The astronomical unit, 149,597,870.7 km.</span></p>
+<p>International Astronomical Union. (2015). <i>Resolution B3 on recommended nominal conversion constants for selected solar and planetary properties</i>. IAU XXIX General Assembly. <a href="https://www.iau.org/static/resolutions/IAU2015_English.pdf">https://www.iau.org/static/resolutions/IAU2015_English.pdf</a><span class="ann">The Sun's radius, 695,700 km, for To scale.</span></p>
+<p>Earth radius. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Earth_radius">https://en.wikipedia.org/wiki/Earth_radius</a><span class="ann">The Earth's mean radius, 6,371 km.</span></p>
+    </div>
+  </details>
 </div>
 
 <script>
@@ -145,6 +188,28 @@
   const depthSlider = document.getElementById('depth');
   const depthVal = document.getElementById('depthVal');
   const sideBtn = document.getElementById('sideBtn');
+  const scaleBtn = document.getElementById('scaleBtn');
+  const dateOut = document.getElementById('dateOut');
+  const eventOut = document.getElementById('eventOut');
+  const RM = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ease = u => u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+
+  // The clock: year 0 is the March equinox of 2026, 14:46 UT on March 20, and a
+  // year is a tropical year. The other three events fall at the times they do,
+  // not at quarter turns, because the seasons are unequal (USNO; Meeus).
+  const TROPICAL = 365.2422;
+  const START = Date.UTC(2026, 2, 20, 14, 46);
+  const EVENTS = [
+    { f: 0,               name: 'March equinox',     c: '#9fe0a8' },
+    { f: 92.74 / 365.2422, name: 'June solstice',     c: '#ffd257' },
+    { f: 186.39 / 365.2422, name: 'September equinox', c: '#f2a36b' },
+    { f: 276.25 / 365.2422, name: 'December solstice', c: '#9fc8ff' },
+  ];
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  function dateAt(y) {
+    const d = new Date(START + y * TROPICAL * 86400000);
+    return MONTHS[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear();
+  }
 
   let W, H, cx, cy, Rorbit, dpr;
   let stars = [];
@@ -174,7 +239,7 @@
   // Angle in canvas coordinates (y down): an INCREASING angle appears CLOCKWISE
   // on screen, which is the correct sense for Earth's orbit seen from the south.
   const TWO_PI = Math.PI * 2;
-  let simYears = 0;          // elapsed simulated years ("now")
+  let simYears = 1;          // elapsed simulated years ("now"); it opens with one year traced
   let playing = true;
   let speed = parseFloat(speedSlider.value);   // years per real second
   let tracePast = parseFloat(pastSlider.value); // how many years of past to spiral through
@@ -196,9 +261,10 @@
   // ---- View rotation (3D) ----
   // The orbit lives in a flat plane (world x,y; z = 0, z pointing toward the viewer
   // on the south side). `tilt` rotates that plane about the screen's horizontal axis
-  // so you can look at it edge-on ("sideways"); `spin` turns it about the vertical
-  // screen axis. Drag on the canvas to rotate freely; the slider sets tilt directly.
-  let tilt = 90 * Math.PI / 180; // radians, 0 = looking straight at the south pole, 90 = side view
+  // so you can look at it edge-on ("sideways"); `spin` turns it about the horizontal
+  // screen axis. A horizontal drag on the canvas changes the tilt and a vertical one
+  // the spin; the slider sets the tilt directly.
+  let tilt = 35 * Math.PI / 180; // radians, 0 = looking straight at the south pole, 90 = side view
   let spin = 0;       // radians, rotation about the vertical screen axis
   const PERSP = 0; // orthographic: keeps the side view a true sine wave
   let timeDepth = 110;   // px per year: how far each year of history drops below the orbital plane
@@ -267,48 +333,92 @@
   pastSlider.addEventListener('input', () => {
     tracePast = parseFloat(pastSlider.value);
   });
+  // ---- tweens: the view buttons swing the view round, To scale shrinks the bodies ----
+  let viewTw = null, scaleK = 0, scaleTw = null, toScale = false;
+  function syncTilt() {
+    tiltSlider.value = (tilt * 180 / Math.PI).toFixed(1);
+    tiltVal.textContent = Math.round(tilt * 180 / Math.PI) + '°';
+  }
+  function tweenView(toTilt, toSpin) {
+    if (RM) { tilt = toTilt; spin = toSpin; viewTw = null; syncTilt(); return; }
+    viewTw = { a: [tilt, spin], b: [toTilt, toSpin], t0: performance.now(), dur: 1000 };
+  }
+  scaleBtn.addEventListener('click', () => {
+    toScale = !toScale;
+    scaleBtn.setAttribute('aria-pressed', toScale);
+    if (RM) { scaleK = toScale ? 1 : 0; scaleTw = null; return; }
+    scaleTw = { a: scaleK, b: toScale ? 1 : 0, t0: performance.now(), dur: 1100 };
+  });
+  function stepTweens(t) {
+    if (viewTw) {
+      const u = Math.min(1, (t - viewTw.t0) / viewTw.dur), e = ease(u);
+      tilt = viewTw.a[0] + (viewTw.b[0] - viewTw.a[0]) * e;
+      spin = viewTw.a[1] + (viewTw.b[1] - viewTw.a[1]) * e;
+      syncTilt();
+      if (u >= 1) viewTw = null;
+    }
+    if (scaleTw) {
+      const u = Math.min(1, (t - scaleTw.t0) / scaleTw.dur);
+      scaleK = scaleTw.a + (scaleTw.b - scaleTw.a) * ease(u);
+      if (u >= 1) scaleTw = null;
+    }
+  }
   speedSlider.addEventListener('input', () => {
     speed = parseFloat(speedSlider.value);
     speedVal.textContent = fmt(speed, 'yr/s');
   });
-  playBtn.addEventListener('click', () => {
-    playing = !playing;
-    playBtn.textContent = playing ? 'Pause' : 'Play';
-  });
+  function setPlaying(on) { playing = on; playBtn.textContent = playing ? 'Pause' : 'Play'; }
+  playBtn.addEventListener('click', () => setPlaying(!playing));
   resetBtn.addEventListener('click', () => { simYears = 0; });
   tiltSlider.addEventListener('input', () => {
+    viewTw = null;
     tilt = parseFloat(tiltSlider.value) * Math.PI / 180;
     tiltVal.textContent = tiltSlider.value + '°';
   });
-  viewBtn.addEventListener('click', () => {
-    tilt = 0; spin = 0;
-    tiltSlider.value = 0; tiltVal.textContent = '0°';
-  });
-  sideBtn.addEventListener('click', () => {
-    tilt = Math.PI / 2; spin = 0;
-    tiltSlider.value = (tilt * 180 / Math.PI).toFixed(1);
-    tiltVal.textContent = Math.round(tilt * 180 / Math.PI) + '°';
-  });
+  viewBtn.addEventListener('click', () => tweenView(0, 0));
+  sideBtn.addEventListener('click', () => tweenView(Math.PI / 2, 0));
   depthSlider.addEventListener('input', () => {
     timeDepth = parseFloat(depthSlider.value);
-    depthVal.textContent = depthSlider.value + ' px/yr';
+    depthVal.textContent = '\u00d7' + (timeDepth / 110).toFixed(1);
   });
-  // Drag on the canvas to rotate freely (vertical drag = tilt, horizontal = spin)
-  let dragging = false, lastX = 0, lastY = 0;
+  // The trace, sampled, so a click can find the moment nearest the pointer
+  function nearestAge(x, y) {
+    const shown = Math.min(simYears, tracePast);
+    if (shown <= 0.002) return null;
+    const n = Math.max(200, Math.round(shown * 360));
+    let best = null, bd = 12;
+    for (let i = 0; i <= n; i++) {
+      const a = (i / n) * shown, p = pos(a);
+      const d = Math.hypot(p.x - x, p.y - y);
+      if (d < bd) { bd = d; best = a; }
+    }
+    return best;
+  }
+  // A horizontal drag on the canvas changes the tilt, a vertical one the spin;
+  // a click without a drag on the trace takes the clock back to that moment
+  let dragging = false, lastX = 0, lastY = 0, downX = 0, downY = 0;
   canvas.addEventListener('pointerdown', e => {
-    dragging = true; lastX = e.clientX; lastY = e.clientY;
+    dragging = true; lastX = downX = e.clientX; lastY = downY = e.clientY; viewTw = null;
     canvas.setPointerCapture(e.pointerId);
   });
   canvas.addEventListener('pointermove', e => {
-    if (!dragging) return;
+    if (!dragging) {
+      canvas.style.cursor = nearestAge(e.clientX, e.clientY) != null ? 'pointer' : '';
+      return;
+    }
     const dx = e.clientX - lastX, dy = e.clientY - lastY;
     lastX = e.clientX; lastY = e.clientY;
     tilt = Math.max(0, Math.min(Math.PI / 2, tilt + dx * 0.008));
     spin = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, spin + dy * 0.008));
-    tiltSlider.value = (tilt * 180 / Math.PI).toFixed(1);
-    tiltVal.textContent = Math.round(tilt * 180 / Math.PI) + '°';
+    syncTilt();
   });
-  canvas.addEventListener('pointerup', () => { dragging = false; });
+  canvas.addEventListener('pointerup', e => {
+    if (dragging && Math.hypot(e.clientX - downX, e.clientY - downY) < 5) {
+      const a = nearestAge(e.clientX, e.clientY);
+      if (a != null && a > 0.001) { simYears -= a; setPlaying(false); }
+    }
+    dragging = false;
+  });
   canvas.addEventListener('pointercancel', () => { dragging = false; });
 
   // ---- Drawing ----
@@ -323,9 +433,12 @@
     ctx.globalAlpha = 1;
   }
 
+  const sunR = () => SUN_R + (Math.max(0.8, Rorbit * viewScale * 695700 / 149597870.7) - SUN_R) * scaleK;
+  const earthR = () => EARTH_R + (Math.max(0.6, Rorbit * viewScale * 6371 / 149597870.7) - EARTH_R) * scaleK;
   function drawSun() {
     const o = project(0, 0, 0);
     const cx = o.x, cy = o.y;
+    const SUN_R = sunR();
     // glow
     let g = ctx.createRadialGradient(cx, cy, 0, cx, cy, SUN_R * 5);
     g.addColorStop(0, 'rgba(255, 210, 100, 0.55)');
@@ -424,7 +537,9 @@
       ctx.beginPath(); ctx.arc(p.x, p.y, 2.8, 0, TWO_PI); ctx.fill();
       if (k % labelEvery === 0) {
         ctx.fillStyle = `rgba(180,200,235,${0.95 - 0.45 * frac})`;
-        ctx.fillText(k === 0 ? 'start' : 'yr ' + k, p.x + 8, p.y + 3.5);
+        ctx.textAlign = 'center';
+        ctx.fillText(k === 0 ? 'start' : 'yr ' + k, p.x, p.y - 9);
+        ctx.textAlign = 'left';
       }
     }
 
@@ -432,6 +547,7 @@
 
   function drawEarth() {
     const p = pos(0);
+    const EARTH_R = earthR();
     // atmosphere glow
     let g = ctx.createRadialGradient(p.x, p.y, 1, p.x, p.y, EARTH_R * 2.6);
     g.addColorStop(0, 'rgba(110,180,255,0.5)');
@@ -482,7 +598,60 @@
     ctx.fillStyle = 'rgba(200,225,255,0.95)';
     ctx.font = '11px system-ui, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Earth (now)', p.x, p.y - EARTH_R - 12);
+    ctx.fillText('Earth (now)', p.x, p.y - Math.max(EARTH_R, 6) - 12);
+    ctx.fillStyle = 'rgba(160,185,225,0.85)';
+    ctx.font = '10.5px system-ui, sans-serif';
+    ctx.fillText(dateAt(simYears), p.x, p.y + Math.max(EARTH_R, 6) + 18);
+  }
+
+  // The equinoxes and solstices: a dot on the trace each year, and the latest
+  // of each named, on the trace or, before the trace reaches it, on the orbit
+  function drawEvents() {
+    const shown = Math.min(simYears, tracePast);
+    ctx.font = '10.5px system-ui, sans-serif';
+    ctx.textAlign = 'right';
+    const marks = [];
+    for (const ev of EVENTS) {
+      const kMax = Math.floor(simYears - ev.f + 1e-9);
+      for (let k = kMax; k >= 0; k--) {
+        const age = simYears - (k + ev.f);
+        if (age > shown) break;
+        const p = pos(age);
+        ctx.fillStyle = ev.c;
+        ctx.globalAlpha = k === kMax ? 1 : 0.55;
+        ctx.beginPath(); ctx.arc(p.x, p.y, k === kMax ? 3.6 : 2.4, 0, TWO_PI); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      const age = simYears - (kMax + ev.f);
+      let p, faint = false;
+      if (kMax >= 0 && age <= shown) p = pos(age);
+      else {
+        const th = ev.f * TWO_PI - Math.PI / 2;
+        p = project(Rorbit * Math.cos(th), Rorbit * Math.sin(th), 0); faint = true;
+        ctx.strokeStyle = ev.c; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 3.6, 0, TWO_PI); ctx.stroke();
+      }
+      marks.push({ ev, p, faint });
+    }
+    // labels to the left of their marks, nudged apart where they would overlap
+    marks.sort((a, b) => a.p.y - b.p.y);
+    const e0 = pos(0);
+    for (const m of marks) {
+      // the Earth carries its own date, and the March equinox shares its point with the year's number
+      if (Math.hypot(m.p.x - e0.x, m.p.y - e0.y) < 26) continue;
+      let y = m.p.y + (m.ev.f === 0 ? 15 : 3.5);
+      const near = marks.find(o => o !== m && o.drawnY != null && Math.abs(o.p.x - m.p.x) < 120 && Math.abs(o.drawnY - y) < 13);
+      if (near) y = near.drawnY + 13;
+      m.drawnY = y;
+      ctx.fillStyle = m.ev.c;
+      ctx.globalAlpha = m.faint ? 0.55 : 0.95;
+      const w = ctx.measureText(m.ev.name).width;
+      if (m.p.x - 8 - w < 4) { ctx.textAlign = 'left'; ctx.fillText(m.ev.name, m.p.x + 8, y); ctx.textAlign = 'right'; }
+      else ctx.fillText(m.ev.name, m.p.x - 8, y);
+    }
+    ctx.globalAlpha = 1;
+    ctx.textAlign = 'left';
+    window.__orbitEvents = marks.map(m => ({ name: m.ev.name, x: m.p.x, y: m.p.y, faint: m.faint }));
   }
 
   function drawOrbitDirectionArrow() {
@@ -506,6 +675,7 @@
     const dt = Math.min((t - last) / 1000, 0.05);
     last = t;
     if (playing) simYears += dt * speed;
+    stepTweens(t);
 
     fitView();
     ctx.clearRect(0, 0, W, H);
@@ -513,13 +683,22 @@
     drawCurrentOrbit();
     drawTimeAxis();
     drawSpiral();
+    drawEvents();
     drawSun();
     drawOrbitDirectionArrow();
     drawEarth();
 
     pastVal.textContent = fmt(tracePast, 'years');
     yearsOut.textContent = fmt(simYears, 'yr');
-    traceOut.textContent = fmt(Math.min(simYears, tracePast), 'yr');
+    dateOut.textContent = dateAt(simYears);
+    const frac = simYears - Math.floor(simYears);
+    const ev = EVENTS.find(e => Math.abs(((frac - e.f + 0.5) % 1 + 1) % 1 - 0.5) * TROPICAL < 1.5);
+    eventOut.textContent = ev ? 'the ' + ev.name : '';
+    window.__orbit = { simYears, tilt: tilt * 180 / Math.PI, spin, playing, scaleK, sunR: sunR(), earthR: earthR(),
+      viewScale, date: dateAt(simYears), event: eventOut.textContent, tracePast, timeDepth,
+      earth: pos(0), events: window.__orbitEvents || [], ctrlTop: document.getElementById('controls').getBoundingClientRect().top };
+    window.__orbitPos = a => pos(a);
+    window.__orbitSet = o => { if (o.years != null) simYears = o.years; if (o.play != null) setPlaying(o.play); };
 
     requestAnimationFrame(frame);
   }

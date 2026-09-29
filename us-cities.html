@@ -21,29 +21,53 @@ nav.site a { color:var(--muted); text-decoration:none; font-size:14px; }
 nav.site a:hover { color:var(--accent); }
 h1 { margin:0 0 6px; font-size:26px; }
 h2 { font-size:16px; margin:34px 0 10px; letter-spacing:.02em; }
-.lede { color:var(--muted); font-size:14.5px; margin:0 0 6px; max-width:730px; }
-.stamp { color:var(--ink-3); font-size:12.5px; margin:0 0 22px; }
+.stamp { color:var(--ink-3); font-size:12.5px; margin:0 0 18px; }
 
-.tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; }
-.tile { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+.dash { display:grid; grid-template-columns:minmax(0,1fr) 400px; gap:14px; align-items:stretch; }
+@media (max-width:900px) { .dash { grid-template-columns:1fr; } }
+.mappanel { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:10px 12px 8px; }
+#cmap { display:block; width:100%; height:auto; outline:none; }
+#cmap:focus-visible { box-shadow:0 0 0 2px var(--accent); border-radius:6px; }
+#cmap path { fill:#262c33; stroke:#121212; stroke-width:0.7; }
+#cmap .dot { cursor:pointer; }
+#cmap .dot circle { transition:fill-opacity .12s; }
+#cmap .dot.hl circle, #cmap .dot.sel circle { fill-opacity:1; stroke:#fff; stroke-width:1.4; }
+#cmap text { font-size:8.5px; fill:#e6e6e6; stroke:#121212; stroke-width:2.2px; paint-order:stroke;
+  pointer-events:none; }
+.mapcap { color:var(--ink-2); font-size:12.5px; text-align:center; padding:4px 0 2px; min-height:24px; }
+.mapkey { display:flex; flex-wrap:wrap; justify-content:center; gap:4px 14px; font-size:11.5px; color:var(--ink-3); }
+.mapkey i { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; vertical-align:-1px; }
+.tiles { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; align-content:start; }
+.tile { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px; min-width:0; }
 .tile .lab { color:var(--muted); font-size:12.5px; }
-.tile .val { font-size:26px; font-weight:600; margin-top:2px; line-height:1.2; }
+.tile .val { font-size:24px; font-weight:600; margin-top:2px; line-height:1.2; overflow-wrap:anywhere; }
 .tile .sub { color:var(--ink-3); font-size:12px; margin-top:2px; }
 
-.legend { display:flex; gap:18px; font-size:12.5px; color:var(--ink-2); margin:26px 0 0; }
-.legend .sw { width:11px; height:11px; border-radius:3px; display:inline-block; margin-right:6px; }
+.ctl { display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; margin:4px 0 10px; }
+.ctl .grp { display:inline-flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.ctl .gl { color:var(--muted); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; margin-right:4px; }
+.ctl button { font:inherit; font-size:13px; padding:4px 12px; border-radius:999px;
+  border:1px solid var(--line); background:#1a1a1a; color:var(--muted); cursor:pointer; }
+.ctl button.on { color:var(--text); border-color:var(--accent); background:#1c2733; }
+.ctl button:hover { border-color:var(--accent); }
+.legend { display:inline-flex; gap:14px; font-size:12.5px; color:var(--ink-2); margin-left:auto; }
+.legend .sw { width:11px; height:11px; border-radius:3px; display:inline-block; margin-right:6px; vertical-align:-1px; }
 
 table { width:100%; border-collapse:collapse; margin-top:4px; }
 th { text-align:right; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
   color:var(--ink-3); font-weight:600; padding:0 10px 8px; border-bottom:1px solid var(--line); }
 th.l { text-align:left; }
+th .gh { color:#0ca30c; text-transform:none; letter-spacing:0; font-weight:500; }
 td { padding:8px 10px; border-bottom:1px solid var(--line); font-size:14px; }
 td.num { text-align:right; font-variant-numeric:tabular-nums; color:var(--ink-2); }
 td.rank { color:var(--ink-3); width:26px; font-variant-numeric:tabular-nums; }
 td.ct { white-space:nowrap; }
+td.ct a { color:var(--text); text-decoration:underline; text-decoration-color:var(--accent);
+  text-underline-offset:3px; }
+td.ct a:hover { color:var(--accent); }
 td.pop { white-space:nowrap; }
 .cw { display:flex; align-items:center; gap:10px; }
-.st { display:block; color:var(--ink-3); font-size:11.5px; line-height:1.1; }
+.st { display:block; color:#aaa89f; font-size:12px; line-height:1.15; }
 img.flag { width:30px; height:20px; object-fit:cover; border-radius:2px;
   box-shadow:0 0 0 1px rgba(255,255,255,.14); display:block; flex:none; }
 .gap { color:#0ca30c; font-size:12.5px; font-variant-numeric:tabular-nums; margin-left:7px; }
@@ -57,14 +81,29 @@ td.chg { width:250px; padding-top:6px; padding-bottom:6px; }
 svg.chg { display:block; width:100%; height:auto; }
 svg.chg rect { transition:opacity .12s; }
 svg.chg g:hover rect { opacity:.72; }
+tr.crow { cursor:pointer; outline:none; }
+tr.crow:hover td, tr.crow.hl td { background:#1e1e1e; }
+tr.crow.sel td { background:#20303f; }
 tr.total td { border-bottom:none; color:var(--muted); font-size:13px; padding-top:12px; }
+tr.total.sub td { border-bottom:1px solid var(--line); padding-bottom:12px; }
+.sorted tr.total.sub { display:none; }
+.tscroll { outline:none; }
+.tscroll:focus-visible { box-shadow:0 0 0 2px var(--accent); border-radius:6px; }
 
 .note { color:var(--muted); font-size:12.5px; max-width:760px; }
+details.sources { margin-top:30px; border-top:1px solid var(--line); padding-top:10px; max-width:760px; }
+details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; }
+details.sources > summary:hover { color:var(--accent); }
 .refs { font-size:13px; color:var(--ink-2); max-width:760px; }
 .refs p { padding-left:2.2em; text-indent:-2.2em; margin:0 0 .8em; }
 .refs a { color:var(--accent); }
 @media (max-width:820px) {
   td.share, td.chg { width:auto; } .track { width:56px; }
+  .tscroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+}
+@media (max-width:600px) {
+  .tile .val { font-size:20px; } .tiles { gap:10px; } .tile { padding:12px 13px; }
+  .ctl button { padding:4px 10px; font-size:12.5px; }
 }
 .refs p { padding-left:2em; text-indent:-2em; }
 .refs .ann { color:#7d7d7d; display:block; padding-left:0; text-indent:0; margin-top:2px; }
@@ -74,66 +113,65 @@ tr.total td { border-bottom:none; color:var(--muted); font-size:13px; padding-to
 <div class="wrap">
 <header class="site">
   <a class="brand" href="index.html">ALTAZOR</a>
-  <nav class="site"><a href="library.html">&larr; Library</a></nav>
+  <nav class="site"><a href="library.html">&larr; Library</a> &nbsp;·&nbsp;
+    <a href="us-states.html">States</a></nav>
 </header>
 
 <h1>Most Populous Cities in the United States</h1>
 <p class="stamp">Snapshot taken August 14, 2026, using Census Bureau estimates for
 July 1, 2025.</p>
 
-<div class="tiles">
-  <div class="tile"><div class="lab">U.S. population</div>
-    <div class="val">341.8 million</div>
-    <div class="sub">341,784,857 in 2025</div></div>
-  <div class="tile"><div class="lab">Largest city</div>
-    <div class="val">New York</div>
-    <div class="sub">8,584,629 people</div></div>
-  <div class="tile"><div class="lab">Fastest growth</div>
-    <div class="val">+11.9%</div>
-    <div class="sub">Fort Worth since 2020</div></div>
-  <div class="tile"><div class="lab">Steepest decline</div>
-    <div class="val">−6.0%</div>
-    <div class="sub">San Francisco since 2020</div></div>
+<div class="dash">
+<div class="mappanel">
+  <svg id="cmap" viewBox="78 15 386 218" role="img" tabindex="0"
+    aria-label="Map of the twenty largest cities, each dot sized by its population"><path d="M324.6,183.2L323.7,184.0L321.3,184.2L322.7,183.8L321.2,180.8L320.4,183.2L318.7,183.2L318.2,171.8L320.8,148.5L320.0,147.7L336.5,147.9L339.2,163.7L341.0,168.8L339.7,171.9L340.5,178.5L323.9,178.5L323.9,179.6L325.1,181.2L324.6,183.2ZM320.6,183.9L320.3,184.2L319.3,184.2L320.6,183.9Z"/><path d="M310.4,140.0L310.5,140.7L308.9,142.6L307.6,147.0L305.0,150.1L304.7,151.8L302.7,154.2L302.6,155.3L301.6,155.9L301.7,157.0L300.7,158.2L301.4,161.7L301.1,163.3L282.6,163.3L282.5,159.1L280.6,159.1L279.7,158.4L280.0,144.9L278.9,136.1L307.4,136.1L308.0,137.7L306.0,140.1L310.4,140.0Z"/><path d="M186.4,176.1L173.6,176.1L149.3,167.1L150.0,165.5L150.9,165.4L151.6,164.6L151.5,163.5L150.1,162.1L150.0,160.9L151.3,158.7L151.4,156.5L153.8,153.5L152.3,151.9L150.7,148.7L150.9,145.2L149.9,139.9L150.4,139.1L151.4,138.8L153.5,139.8L154.4,138.6L154.4,132.0L186.4,132.1L186.4,176.1Z"/><path d="M150.7,148.0L152.3,151.9L153.8,153.3L152.0,155.3L151.4,156.5L151.3,158.7L150.2,160.2L150.1,162.1L151.6,164.1L151.3,165.1L134.6,167.0L134.5,166.1L133.9,166.0L133.4,162.6L132.4,161.1L128.5,157.9L126.4,157.7L126.5,156.8L125.8,155.6L121.7,154.8L120.9,153.7L118.7,152.5L113.1,152.1L112.1,151.2L112.0,147.0L110.7,146.3L110.4,144.6L108.0,142.6L104.2,137.4L103.9,135.5L104.7,134.2L104.6,133.3L104.1,132.6L102.3,132.2L100.8,130.4L100.2,127.7L100.1,125.9L100.5,125.6L101.5,127.3L102.9,128.2L100.9,124.3L101.4,123.9L106.4,123.5L103.2,123.0L102.4,123.5L100.8,122.8L100.3,123.1L100.4,125.3L100.0,125.4L97.4,123.6L97.0,124.1L97.1,122.2L97.8,123.0L97.5,122.4L92.5,116.6L91.6,109.4L88.5,105.4L88.3,104.4L88.2,103.4L89.7,99.3L90.1,95.8L89.0,92.3L89.1,90.5L116.2,90.5L116.2,115.8L128.2,126.5L150.7,148.0ZM125.4,159.8L127.1,161.0L126.1,161.0L125.4,159.8ZM126.8,164.7L126.0,164.6L125.2,163.3L125.4,163.1L126.8,164.7ZM119.8,161.7L119.1,161.7L118.9,161.3L119.5,161.3L119.8,161.7ZM116.9,155.1L119.0,155.3L119.1,155.5L117.4,156.0L116.9,155.1ZM116.3,155.9L115.1,156.3L114.6,155.6L115.7,155.5L116.3,155.9ZM114.2,155.5L113.9,155.5L113.4,155.5L113.8,155.1L114.2,155.5Z"/><path d="M186.4,132.1L186.4,99.1L231.4,99.1L231.5,132.1L186.4,132.1Z"/><path d="M425.1,90.4L424.9,96.2L417.9,96.6L413.4,99.1L412.8,98.2L414.4,97.2L414.0,96.6L414.4,90.0L425.1,90.4Z"/><path d="M391.7,117.4L391.0,116.3L391.5,115.7L392.3,116.7L391.7,117.4Z"/><path d="M404.4,120.3L400.1,120.3L399.6,109.8L400.3,108.9L401.9,109.0L400.9,110.5L401.0,111.9L402.0,113.5L402.6,116.1L404.1,117.6L403.4,119.2L404.2,119.3L404.4,120.3Z"/><path d="M324.7,183.8L325.1,181.2L323.9,179.6L323.9,178.5L340.5,178.5L341.3,180.6L358.2,181.8L358.5,183.0L359.0,183.2L360.0,179.9L362.9,180.5L365.5,190.0L369.2,197.1L368.8,198.6L369.7,201.3L368.7,199.3L368.7,196.8L368.1,198.1L368.2,196.4L367.2,195.1L367.8,197.8L372.0,207.9L372.3,210.9L371.8,216.2L371.6,215.9L370.7,217.7L370.2,219.8L367.9,221.0L365.5,221.1L365.3,219.9L366.6,220.2L365.5,219.5L363.8,216.2L361.6,215.1L360.6,211.9L360.0,211.5L360.9,210.1L359.5,211.1L359.7,208.1L358.6,208.3L358.6,209.0L357.9,208.8L355.2,204.2L357.2,201.8L355.7,200.7L355.5,202.7L355.0,202.7L354.4,201.7L355.5,197.1L355.6,194.1L351.5,190.0L348.9,186.5L346.7,185.2L345.0,185.5L344.5,186.6L338.5,188.3L337.9,187.7L337.9,187.1L338.5,187.7L338.3,186.9L336.2,185.1L336.7,183.8L335.8,184.1L335.7,184.7L331.2,183.0L333.3,182.9L332.5,182.3L326.4,183.4L327.8,182.8L327.7,181.7L327.3,182.2L326.6,182.0L325.9,183.4L324.7,183.8ZM370.1,202.1L371.5,206.4L369.8,201.7L370.1,202.1ZM370.1,221.1L368.9,222.4L370.9,219.6L370.1,221.1ZM368.5,222.8L368.3,222.8L368.6,222.5L368.5,222.8ZM367.5,223.4L367.1,223.5L367.6,223.3L367.5,223.4ZM366.2,224.0L365.3,224.1L366.6,223.8L366.2,224.0ZM364.1,224.3L363.7,224.7L363.5,223.9L364.1,224.3ZM362.8,224.8L362.1,225.0L362.6,224.3L362.8,224.8ZM361.4,225.2L361.0,225.2L361.4,225.1L361.4,225.2ZM359.5,211.8L358.8,211.8L358.5,211.1L359.0,211.7L359.5,211.8ZM359.0,210.2L359.2,211.5L358.7,210.0L359.0,210.2ZM342.2,187.9L340.5,188.9L339.8,188.7L342.2,187.9Z"/><path d="M340.5,178.5L339.7,171.9L341.0,168.8L339.2,163.7L336.5,147.9L352.6,147.9L351.1,150.2L354.3,152.3L356.0,155.6L362.5,162.9L363.8,166.4L365.1,168.1L365.3,169.6L367.0,170.8L365.5,171.9L365.8,172.6L364.9,173.2L365.1,173.9L364.5,174.5L365.1,174.5L363.7,175.9L364.3,176.5L363.8,177.2L363.3,177.0L362.8,179.5L362.9,180.5L360.0,179.9L359.0,183.2L358.5,183.0L358.2,181.8L341.3,180.6L340.5,178.5ZM363.5,178.7L363.2,180.5L363.1,179.3L363.5,178.7Z"/><path d="M299.2,104.3L297.4,102.3L271.5,102.4L270.9,101.2L270.8,96.6L269.7,94.4L269.5,92.1L266.0,84.2L267.1,80.7L266.4,79.7L266.2,77.4L300.5,77.4L301.3,78.9L301.0,80.9L301.6,83.7L304.1,85.2L307.4,89.7L307.5,90.7L305.7,94.3L301.8,95.9L301.7,97.3L302.4,98.9L301.4,101.2L299.6,103.0L299.2,104.3Z"/><path d="M135.2,26.4L141.5,26.4L141.5,36.0L143.6,39.1L143.7,41.3L146.3,43.4L149.8,48.0L152.5,48.7L151.5,53.4L152.1,55.9L151.3,56.6L151.3,58.8L152.7,59.6L154.7,57.7L155.9,58.5L156.6,61.2L158.2,63.7L158.1,64.9L160.2,66.1L161.1,68.7L162.0,69.4L162.9,68.5L165.1,68.8L166.0,68.0L170.7,68.1L171.5,66.3L173.6,68.5L173.6,90.5L135.3,90.5L135.3,74.6L136.0,71.2L134.5,70.4L134.1,69.1L136.3,64.9L138.8,58.2L136.3,55.2L135.2,51.2L135.2,26.4Z"/><path d="M298.9,106.7L299.6,103.0L301.4,101.2L302.4,98.9L301.7,97.3L301.8,95.9L305.7,94.3L307.4,91.5L307.4,89.7L304.3,86.1L322.5,86.2L322.6,88.7L324.4,92.9L324.3,112.7L323.6,114.4L324.4,117.4L323.4,120.0L321.4,122.0L321.6,122.8L320.7,125.0L321.0,125.7L320.5,126.4L320.6,127.8L318.1,129.2L318.3,131.4L314.6,130.6L313.9,132.1L312.2,131.3L311.5,126.9L306.1,121.9L307.6,117.1L305.4,116.2L304.8,116.6L302.6,112.6L299.7,109.6L298.9,106.7Z"/><path d="M321.0,125.7L320.7,125.0L321.6,122.8L321.4,122.0L323.4,120.0L324.4,117.4L323.6,114.4L324.3,112.7L324.4,92.9L326.1,93.6L328.6,92.6L341.8,92.6L341.4,116.4L341.8,117.3L339.4,118.4L337.9,118.0L337.6,119.7L335.5,121.7L334.0,124.1L331.8,122.5L330.3,125.0L328.6,124.2L326.8,125.6L324.0,124.4L323.6,125.4L322.1,124.7L321.7,125.7L321.0,125.7Z"/><path d="M231.5,132.1L231.4,107.5L274.2,107.5L276.9,108.7L277.1,109.7L276.0,110.9L276.1,111.6L277.9,114.2L278.9,114.8L278.9,132.1L231.5,132.1Z"/><path d="M313.9,132.1L314.6,130.6L318.3,131.4L318.1,129.2L320.6,127.8L320.5,126.4L321.7,125.7L322.0,124.7L323.6,125.4L324.0,124.4L324.8,124.5L326.8,125.6L328.6,124.2L330.3,125.0L331.8,122.5L334.0,124.1L335.5,121.7L337.6,119.7L337.9,118.0L339.4,118.4L341.8,117.3L341.4,115.5L342.0,114.8L344.2,115.1L345.5,116.9L348.9,118.7L354.1,118.2L356.0,120.6L355.8,122.8L357.2,125.4L358.0,126.5L360.0,127.7L355.4,131.0L352.4,134.0L348.7,135.4L320.7,134.5L320.9,136.1L312.0,136.1L312.4,135.4L313.6,135.1L313.9,132.1ZM311.8,136.1L311.3,136.1L311.4,135.7L311.6,135.6L311.8,136.1Z"/><path d="M316.1,186.4L315.8,187.6L315.8,185.5L316.1,186.4ZM315.6,188.1L315.3,188.5L315.7,187.8L315.6,188.1ZM282.6,163.3L301.1,163.3L301.5,165.5L301.1,166.3L302.5,168.9L299.7,172.7L298.1,176.4L297.9,178.5L310.2,178.5L309.6,181.4L311.6,184.5L307.0,183.1L305.8,184.9L307.4,185.7L310.2,184.7L310.6,185.1L309.7,185.9L310.8,186.7L311.7,185.5L312.3,185.6L312.6,187.3L310.3,188.8L311.6,190.2L313.7,190.9L314.8,192.3L313.9,193.2L313.4,192.7L312.5,193.5L312.1,191.9L309.8,190.9L309.3,190.0L307.5,189.4L308.2,190.1L307.6,192.3L307.1,192.5L306.6,191.4L305.3,191.1L303.7,192.4L300.2,191.2L301.1,191.0L300.5,189.2L298.8,189.2L297.8,187.8L296.8,187.8L296.4,187.2L294.8,188.2L295.1,189.0L294.0,189.2L291.4,188.9L288.1,187.6L284.0,188.0L283.6,187.4L284.7,185.1L284.6,181.8L285.9,178.2L284.1,174.2L283.8,172.6L282.6,171.0L282.6,163.3ZM313.7,184.7L313.5,185.7L312.7,185.5L313.7,184.7ZM297.2,189.2L296.8,189.7L295.6,188.8L296.5,188.6L297.2,189.2Z"/><path d="M427.8,90.4L414.2,89.8L415.8,84.0L428.2,84.4L431.5,82.9L431.7,84.3L432.8,85.1L431.4,85.7L430.0,87.7L432.0,88.5L432.7,90.2L432.5,90.6L434.0,92.6L436.7,92.0L436.0,90.3L435.1,89.7L436.0,89.8L436.8,90.9L437.1,93.0L432.5,94.5L432.2,93.0L429.2,94.9L429.3,92.7L428.8,93.0L428.1,92.3L427.8,90.4ZM436.8,96.8L436.3,97.0L435.2,96.6L436.4,95.7L436.8,96.8ZM433.4,95.9L431.7,96.3L431.4,96.0L432.7,95.2L433.4,95.9Z"/><path d="M391.6,116.7L391.7,117.4L392.3,116.7L391.5,115.7L391.0,116.3L388.7,114.9L388.7,114.0L387.1,112.9L386.3,110.8L384.8,110.2L382.8,110.6L382.2,111.4L380.4,110.6L379.2,112.1L378.5,111.9L375.9,114.1L375.9,109.8L399.6,109.8L400.1,120.3L404.4,120.5L402.2,123.8L400.4,124.4L399.2,124.2L399.5,123.3L398.7,122.6L399.1,121.1L397.9,121.7L396.9,121.1L396.3,120.0L396.5,119.1L398.2,119.1L396.9,117.8L396.0,118.2L396.3,117.3L397.1,117.0L396.1,116.2L397.4,115.1L396.8,115.3L396.7,114.2L397.2,113.2L399.0,112.7L398.2,112.4L399.0,111.6L398.4,111.6L398.5,111.0L397.8,111.2L397.3,112.5L396.6,112.2L396.5,113.1L396.1,112.5L395.5,114.0L394.6,113.6L395.5,114.8L395.2,115.6L394.6,115.3L395.1,116.3L395.0,119.7L395.7,121.0L394.6,120.4L393.9,119.0L393.9,119.6L394.1,120.3L395.6,121.8L396.0,123.3L393.3,121.9L392.7,120.8L392.5,121.6L391.8,120.4L390.3,120.7L390.4,119.6L391.7,117.6L391.6,116.7ZM403.8,122.5L403.0,123.7L404.0,121.6L403.8,122.5Z"/><path d="M442.8,42.8L444.2,43.6L448.0,42.3L450.7,44.8L451.0,55.5L450.4,57.2L451.9,58.5L453.1,58.5L452.9,61.5L453.9,62.6L455.1,62.5L455.2,65.0L456.0,65.6L454.7,66.9L450.5,67.8L449.1,69.5L448.5,68.5L447.1,69.0L446.6,68.4L446.1,70.7L444.3,70.0L445.0,69.0L444.4,68.9L444.6,67.9L443.3,69.1L442.7,72.1L441.6,73.1L439.8,73.9L439.5,73.1L439.1,74.0L438.9,73.0L438.4,74.3L438.0,73.8L437.9,75.0L436.9,74.9L436.9,74.3L435.5,75.1L435.0,75.9L435.4,76.3L432.0,81.2L430.5,77.8L429.7,61.3L430.5,61.0L431.1,61.5L431.6,60.3L432.3,60.1L432.2,59.0L434.0,57.3L434.8,55.7L435.1,52.5L436.3,50.8L436.6,48.3L440.8,42.2L441.5,41.2L442.8,41.5L442.8,42.8ZM448.3,70.0L447.5,70.1L447.5,70.8L446.9,70.4L447.6,68.9L448.3,70.0ZM445.5,71.2L445.0,71.4L445.0,70.9L445.2,70.7L445.5,71.2Z"/><path d="M357.1,81.7L356.3,85.1L355.6,85.7L355.6,84.6L354.7,84.8L354.0,87.1L352.7,88.0L352.2,90.1L350.4,92.8L328.6,92.6L330.1,91.3L331.5,88.6L332.6,84.9L332.5,81.6L330.7,76.2L331.3,74.7L330.8,72.3L332.2,70.0L332.5,66.7L333.3,66.3L333.8,64.8L335.0,64.3L336.9,62.1L336.4,65.5L336.7,65.7L337.4,64.0L337.0,66.1L338.0,63.7L338.1,61.5L341.0,60.2L339.9,59.0L340.7,57.0L342.0,56.7L345.4,58.1L346.5,59.4L350.7,61.3L351.6,63.6L350.6,63.5L350.5,64.1L351.4,65.9L351.2,69.6L350.1,70.6L349.4,72.5L347.7,73.3L347.3,75.3L349.1,76.4L350.4,75.4L350.9,73.7L354.1,72.6L355.5,74.3L357.1,81.7ZM350.0,54.6L349.6,55.4L347.7,54.9L349.0,53.9L350.0,54.6ZM323.8,63.0L323.1,62.2L323.5,60.6L322.1,60.5L322.5,57.7L320.6,56.5L320.3,55.4L307.7,51.7L307.0,50.1L305.8,49.4L309.4,47.5L312.6,46.6L317.1,43.4L317.3,44.0L318.3,45.4L318.4,47.4L319.9,46.0L322.7,46.6L325.4,50.0L327.5,49.8L330.0,50.7L333.3,48.5L340.4,47.6L340.3,50.2L343.6,50.8L344.8,50.3L345.7,52.2L345.4,53.0L346.6,53.4L347.6,54.8L343.9,54.9L342.9,54.4L342.1,56.1L339.9,54.4L337.5,53.9L334.7,55.4L332.4,55.4L330.1,58.3L329.7,57.6L330.5,55.9L329.3,56.1L328.1,57.6L327.8,55.6L323.8,63.0ZM345.8,52.3L346.2,52.2L346.2,52.6L345.8,52.3ZM346.1,51.7L345.2,50.3L345.6,49.9L346.0,49.9L346.1,51.7ZM344.2,56.6L344.3,57.3L343.3,56.7L343.4,56.5L344.2,56.6ZM337.4,57.1L337.3,58.3L336.6,58.4L336.9,57.3L337.4,57.1ZM333.8,62.6L334.3,62.8L334.2,63.2L333.9,63.1L333.8,62.6ZM323.0,41.4L321.2,41.8L321.5,42.2L318.7,45.4L318.3,45.1L318.7,44.3L318.6,43.7L318.5,44.4L317.4,43.9L319.3,41.6L322.1,41.0L323.0,41.4ZM318.2,34.4L313.6,37.5L314.0,36.5L318.2,34.4Z"/><path d="M262.2,26.4L275.4,26.5L275.4,22.8L276.8,23.0L277.4,23.4L277.7,26.3L278.9,28.9L284.7,31.0L286.8,30.1L289.3,30.2L292.5,31.9L293.0,33.4L295.6,33.2L298.8,35.5L302.6,34.0L303.7,35.0L307.9,34.9L308.5,35.9L311.2,36.0L303.1,40.0L293.8,48.7L293.8,54.1L291.2,55.7L289.9,58.0L291.3,60.1L290.6,63.4L290.7,66.5L299.6,73.1L300.5,77.4L267.1,77.4L267.1,61.3L265.6,60.1L264.6,58.3L266.1,56.7L266.4,53.6L265.0,48.8L264.5,40.0L262.8,34.4L262.8,29.5L262.2,26.4Z"/><path d="M310.4,140.0L306.0,140.1L308.0,137.7L307.4,136.1L278.9,136.1L278.9,114.8L277.9,114.2L276.1,111.6L276.0,110.9L277.1,109.7L276.9,108.7L275.7,108.6L274.1,107.4L271.5,102.4L297.4,102.3L299.2,104.3L298.9,106.7L299.7,109.6L302.6,112.6L304.8,116.6L305.4,116.2L307.6,117.1L306.1,121.9L311.5,126.9L311.8,130.4L312.6,131.8L313.0,132.0L313.2,131.4L313.9,132.1L313.6,135.1L312.4,135.4L311.9,136.2L311.4,135.7L310.4,140.0Z"/><path d="M320.2,147.9L320.8,148.5L318.2,171.8L318.7,183.2L315.5,182.9L312.8,183.4L311.6,184.5L309.6,181.4L310.2,178.5L297.9,178.5L298.1,176.4L299.7,172.7L302.5,168.9L301.1,166.3L301.5,165.7L301.1,163.1L301.4,161.7L300.7,158.2L301.7,157.0L301.7,155.8L302.6,155.3L302.7,154.2L304.4,152.5L305.0,150.1L306.6,147.9L320.2,147.9ZM317.6,184.3L317.1,184.3L316.7,184.0L317.6,184.3Z"/><path d="M141.5,26.4L218.5,26.4L218.7,64.0L173.6,64.0L173.6,68.5L171.5,66.3L170.7,68.1L166.0,68.0L165.1,68.8L162.9,68.5L162.1,69.4L161.6,69.2L160.2,66.1L158.1,64.9L158.2,63.7L156.6,61.2L155.9,58.5L154.7,57.7L152.7,59.6L151.3,58.8L151.3,56.6L152.1,55.9L151.5,53.4L152.5,48.7L149.8,48.0L146.3,43.4L143.7,41.4L143.6,39.1L141.5,36.0L141.5,26.4Z"/><path d="M401.1,146.0L400.2,146.2L401.2,145.7L401.4,141.9L401.7,144.4L401.1,146.0ZM399.4,137.9L399.1,135.7L401.2,141.5L399.4,137.9ZM400.5,140.8L400.5,141.4L400.0,140.5L400.5,140.8ZM352.6,147.9L344.9,148.0L345.3,146.0L346.5,145.7L347.8,143.9L353.4,141.6L354.1,140.4L355.3,139.8L356.2,140.3L357.9,139.0L359.4,139.1L360.4,137.6L361.5,137.2L362.0,135.2L398.4,135.7L398.4,136.6L399.4,139.2L397.3,137.8L397.3,138.9L396.5,138.6L396.8,139.1L395.8,139.0L394.6,139.9L393.9,139.5L393.5,138.2L393.6,140.4L397.8,140.3L397.7,142.5L398.2,142.3L398.4,140.9L399.4,140.4L399.9,141.9L399.7,142.8L397.1,145.2L395.1,144.8L394.5,143.8L393.5,144.5L391.6,143.8L394.9,145.8L394.2,147.4L393.2,148.0L391.4,146.7L392.0,147.7L393.5,148.4L395.3,148.0L395.9,148.4L394.9,149.7L393.5,150.2L391.0,150.2L389.9,151.0L389.2,150.0L389.4,151.6L387.0,153.5L385.9,156.2L385.7,154.4L385.3,156.4L381.8,156.7L374.8,149.5L367.6,149.3L367.5,148.2L366.6,147.0L365.9,147.4L365.6,146.7L357.3,146.3L352.6,147.9ZM399.6,146.4L398.5,147.0L398.3,147.0L399.1,146.6L399.6,146.4ZM395.0,150.7L395.4,149.8L396.9,148.4L395.9,149.5L395.0,150.7ZM394.7,150.6L394.3,150.6L393.9,150.3L394.2,150.3L394.7,150.6Z"/><path d="M218.5,26.4L262.2,26.4L262.8,29.5L262.8,34.4L264.5,40.0L265.0,48.8L266.2,52.3L266.5,55.4L218.7,55.4L218.5,26.4Z"/><path d="M231.4,107.5L231.4,99.1L218.6,99.1L218.6,81.8L254.4,81.8L257.4,83.5L262.1,83.0L265.7,85.0L267.6,86.9L269.5,92.1L269.7,94.4L270.7,96.4L270.9,101.2L272.2,104.5L274.2,107.5L231.4,107.5Z"/><path d="M426.3,66.1L428.2,61.4L429.7,61.3L430.5,77.8L432.0,81.2L431.7,82.3L428.2,84.4L420.9,84.2L420.3,82.8L421.5,76.7L423.1,73.3L423.7,70.3L426.4,68.4L426.3,66.1Z"/><path d="M403.7,108.6L406.3,106.2L403.4,102.5L403.5,101.0L404.2,100.3L403.8,99.1L405.8,96.5L406.6,96.0L411.6,99.1L410.9,101.1L409.4,103.1L409.5,103.7L411.2,104.1L410.5,109.3L410.6,107.6L409.4,110.7L408.4,111.3L408.3,112.6L405.1,116.3L405.3,114.6L403.8,114.1L401.3,111.8L401.9,109.3L403.7,108.6ZM410.2,110.2L409.4,111.4L410.4,109.6L410.2,110.2Z"/><path d="M186.4,176.1L186.4,132.1L225.2,132.1L224.7,171.0L201.6,171.0L202.3,172.4L203.1,172.7L191.8,172.7L191.7,176.0L186.4,176.1Z"/><path d="M154.4,90.5L154.4,138.6L153.5,139.8L151.4,138.8L150.4,139.1L149.9,139.9L150.9,145.2L150.7,148.0L128.2,126.5L116.2,115.8L116.2,90.5L154.4,90.5Z"/><path d="M422.1,97.8L420.1,99.7L424.5,98.6L416.2,102.0L411.7,102.7L412.3,102.1L411.0,102.6L410.8,102.1L411.8,100.8L413.8,99.8L419.9,99.1L422.1,97.8ZM378.6,80.9L378.6,79.3L382.5,78.4L388.4,79.5L392.1,79.5L393.6,78.8L396.9,76.8L396.4,74.1L397.8,73.0L396.0,72.0L399.3,69.4L399.6,68.5L403.5,64.9L405.6,64.0L415.2,63.9L415.1,67.6L415.5,68.9L414.7,72.3L414.8,76.6L415.3,76.3L415.9,77.0L415.8,84.0L414.2,89.8L414.0,96.6L414.4,97.2L412.8,98.2L413.4,99.1L411.1,101.2L411.9,98.6L411.5,97.2L411.2,96.9L411.6,99.1L405.1,95.0L404.3,93.9L404.0,92.0L402.4,90.5L374.1,90.5L374.1,88.1L379.8,83.6L379.7,81.3L378.6,80.9ZM409.8,103.1L409.8,102.3L410.6,102.0L410.5,102.6L409.8,103.1ZM379.3,81.9L378.9,81.4L379.5,81.4L379.3,81.9Z"/><path d="M369.3,90.6L369.3,102.1L368.4,102.8L368.7,104.5L367.0,110.3L364.5,112.6L363.4,112.6L362.0,113.6L361.0,115.1L361.2,116.2L360.4,116.7L359.8,115.7L359.3,116.1L358.5,117.7L358.6,118.8L357.7,120.1L355.8,120.3L354.1,118.2L348.9,118.7L345.5,116.9L344.2,115.1L341.7,115.1L341.8,93.1L350.4,92.7L353.6,94.5L355.3,94.6L353.2,95.2L355.6,95.1L356.7,95.7L361.5,94.7L364.7,92.5L369.3,90.6Z"/><path d="M278.9,136.1L280.0,144.9L279.7,158.4L275.1,156.0L274.0,156.7L272.6,156.1L270.4,156.6L268.0,157.9L266.1,156.4L265.2,156.8L264.0,156.1L262.9,157.8L262.2,156.5L261.1,157.0L259.5,155.8L257.7,156.6L256.6,154.6L254.3,155.1L253.3,154.5L249.8,154.0L248.5,152.2L248.2,152.7L246.7,152.7L244.4,151.2L244.4,136.1L225.2,136.1L225.2,132.1L278.9,132.1L278.9,136.1Z"/><path d="M135.3,90.5L89.1,90.5L88.3,89.5L87.9,85.5L87.1,83.5L88.3,78.8L89.3,78.1L88.7,78.2L89.6,75.7L91.0,58.7L90.6,52.8L96.7,53.4L98.0,55.1L98.7,57.9L102.1,58.6L105.5,57.4L109.5,58.2L113.9,57.4L122.5,54.8L136.1,54.8L138.5,57.4L138.8,58.2L138.3,59.8L134.1,69.1L134.5,70.4L136.0,71.2L135.3,74.6L135.3,90.5Z"/><path d="M374.1,88.1L374.1,90.5L402.4,90.5L404.0,92.0L404.8,94.7L406.6,96.0L403.8,99.1L404.2,100.3L403.4,101.7L403.4,102.5L406.3,106.2L403.5,108.4L400.6,108.8L399.6,109.8L369.3,109.8L369.3,90.6L374.1,88.1Z"/><path d="M428.7,94.9L428.1,95.1L428.8,93.5L428.7,94.9ZM424.9,96.2L425.1,90.4L427.8,90.4L428.1,92.3L428.8,93.0L427.8,92.3L427.4,95.2L424.9,96.2ZM428.0,94.4L427.8,95.1L427.8,94.2L428.0,94.4Z"/><path d="M367.0,170.8L365.3,169.6L365.1,168.1L363.8,166.4L362.5,162.9L356.0,155.6L354.3,152.3L351.1,150.2L352.6,147.9L357.3,146.3L365.6,146.7L365.9,147.4L366.6,147.0L367.5,148.2L367.6,149.3L374.8,149.5L381.8,156.7L379.5,158.3L377.8,161.5L377.5,160.3L377.2,162.4L375.2,163.4L373.8,165.0L373.0,164.8L373.0,165.9L370.3,167.2L368.5,167.1L369.5,167.8L368.9,168.8L367.4,167.6L368.1,169.4L367.0,170.8Z"/><path d="M267.1,77.4L266.2,77.4L266.4,79.7L267.1,80.7L266.0,83.9L266.9,86.1L262.1,83.0L257.4,83.5L254.4,81.8L218.6,81.8L218.7,55.4L266.5,55.4L266.1,56.7L264.6,58.3L265.6,60.1L267.1,61.3L267.1,77.4Z"/><path d="M344.9,148.0L320.1,147.7L306.6,147.9L307.9,146.3L308.9,142.6L310.5,140.7L310.6,138.3L311.2,137.9L311.3,136.1L320.9,136.1L320.7,134.5L348.7,135.4L362.0,135.2L361.5,137.2L360.4,137.6L359.4,139.1L357.9,139.0L356.2,140.3L355.3,139.8L354.1,140.4L353.4,141.6L347.8,143.9L346.5,145.7L345.3,146.0L344.9,148.0Z"/><path d="M275.1,156.0L280.6,159.1L282.5,159.1L282.6,171.0L283.8,172.6L284.1,174.2L285.9,178.2L284.6,181.8L284.7,185.1L283.2,187.3L283.6,188.2L282.2,188.4L278.0,190.5L279.5,189.3L277.9,189.3L278.1,187.8L276.3,188.2L277.2,190.6L274.7,193.6L271.0,195.9L268.5,197.1L270.0,196.0L267.6,195.8L267.2,196.3L265.9,195.4L266.7,197.1L267.3,197.3L265.7,198.1L265.1,197.5L264.6,199.2L262.6,199.6L262.7,200.2L263.4,199.9L263.2,200.7L262.5,201.5L260.9,201.8L261.8,203.0L260.8,205.5L258.7,204.5L259.2,205.8L260.5,206.1L260.1,208.1L260.8,211.5L262.7,214.8L262.7,215.3L261.3,215.9L258.5,214.7L255.4,214.2L250.1,211.8L249.3,209.5L247.9,207.4L247.6,203.9L242.5,198.2L242.3,197.0L239.6,192.0L235.5,187.9L229.4,187.0L226.9,188.6L226.0,191.4L224.6,193.0L223.5,193.3L222.4,192.8L216.2,189.1L214.8,187.0L214.4,185.0L212.9,181.6L205.0,175.1L202.3,172.4L201.6,171.0L224.7,171.0L224.9,136.1L244.4,136.1L244.4,151.2L246.4,152.5L248.2,152.7L248.5,152.2L249.8,154.0L253.3,154.5L254.3,155.1L256.6,154.6L257.7,156.6L259.5,155.8L261.1,157.0L262.4,156.6L262.7,157.7L264.0,156.1L265.2,156.8L266.1,156.4L268.0,157.9L270.4,156.6L272.6,156.1L274.0,156.7L275.1,156.0ZM277.3,191.5L275.9,192.3L277.9,190.8L277.3,191.5ZM265.1,199.5L265.2,199.1L267.4,197.8L267.4,198.2L265.1,199.5ZM263.5,201.3L263.8,200.5L264.5,199.6L264.6,200.0L263.5,201.3ZM263.2,201.9L261.2,206.1L261.7,204.1L263.2,201.9ZM262.5,213.9L261.0,209.1L261.1,206.4L261.4,209.3L262.5,213.9Z"/><path d="M186.4,132.1L154.4,132.0L154.4,90.5L173.6,90.5L173.6,99.1L186.4,99.1L186.4,132.1Z"/><path d="M403.0,123.7L403.2,123.7L402.2,125.0L403.0,123.7ZM400.4,124.4L402.2,123.8L400.9,127.6L399.4,128.7L398.6,130.9L398.4,128.9L400.4,124.4ZM388.7,114.9L391.6,116.7L391.5,117.7L390.1,119.1L389.8,120.8L391.5,121.1L392.4,122.4L394.7,123.2L396.5,124.9L396.0,126.6L395.1,126.6L392.2,123.2L391.1,122.7L394.7,126.7L396.3,127.5L395.9,127.8L396.5,128.1L396.5,129.2L395.7,129.0L395.3,129.9L393.4,128.0L396.4,131.7L395.7,132.2L394.2,130.3L390.2,129.4L393.9,130.7L395.1,132.9L398.2,132.8L399.1,135.7L349.1,135.2L352.4,134.0L355.4,131.0L360.0,127.7L360.6,129.4L362.4,130.4L363.9,129.4L365.0,130.0L366.7,129.6L367.2,128.7L370.2,128.3L374.9,119.3L376.5,120.3L377.5,120.1L378.7,117.5L381.7,115.8L383.3,112.1L386.5,114.6L387.2,112.9L388.4,113.6L388.7,114.9Z"/><path d="M415.2,63.9L427.0,63.9L426.3,66.1L426.4,68.4L423.7,70.3L423.1,73.3L421.5,76.7L420.3,82.8L420.9,84.2L415.8,84.0L415.7,83.5L415.9,77.0L415.3,76.3L414.8,76.6L414.7,72.3L415.5,68.9L415.1,67.6L415.2,63.9Z"/><path d="M98.3,26.4L135.2,26.4L135.2,51.2L136.1,54.8L122.5,54.8L113.9,57.4L109.5,58.2L105.5,57.4L102.1,58.6L98.7,57.9L98.0,55.1L96.7,53.4L92.5,52.1L90.1,52.3L90.3,49.2L90.9,50.8L91.3,48.7L90.1,47.9L89.8,46.8L91.6,45.9L89.8,45.2L89.7,46.0L88.1,39.3L86.3,36.3L86.0,32.4L90.7,34.4L95.9,34.6L97.1,35.3L98.4,34.7L99.2,37.2L98.4,38.6L98.1,38.0L96.1,41.9L97.5,41.7L96.5,41.8L96.6,41.3L100.0,36.8L100.0,38.3L99.0,39.8L99.8,41.2L99.7,42.8L98.8,42.6L98.4,43.5L98.1,42.4L97.5,42.8L96.8,44.2L98.9,44.5L101.1,42.0L100.8,38.1L101.8,35.9L100.7,34.3L100.8,35.2L100.1,34.5L100.8,33.2L99.1,31.6L100.2,31.2L100.1,29.6L99.8,28.5L99.0,28.4L98.3,26.4ZM98.9,33.9L100.0,35.8L100.1,35.3L101.0,36.2L100.9,36.8L99.8,36.1L98.6,33.9L99.3,32.4L99.9,33.2L98.9,33.9ZM100.8,41.8L100.1,42.2L100.3,40.9L100.4,40.9L100.8,41.8ZM100.2,39.9L99.7,39.7L99.8,38.9L100.1,39.1L100.2,39.9ZM98.4,29.6L97.6,29.6L97.6,30.3L96.9,29.8L97.6,29.2L98.4,29.6ZM98.1,31.9L97.5,31.7L97.5,30.9L97.8,30.8L98.1,31.9ZM97.9,43.5L97.6,43.4L97.7,43.0L97.9,43.5ZM96.9,31.2L96.1,31.2L95.9,30.2L96.2,30.1L96.9,31.2ZM96.4,26.4L96.6,26.4L96.6,26.6L96.4,26.4Z"/><path d="M328.1,60.9L328.6,60.3L328.6,60.8L328.1,60.9ZM327.4,61.2L327.8,61.5L327.3,63.1L325.9,65.5L325.4,65.5L325.2,64.4L327.4,61.2ZM304.3,86.1L304.1,85.2L301.6,83.7L301.3,82.9L301.4,79.4L300.6,77.9L300.0,73.6L290.5,65.9L291.3,60.1L289.9,58.0L291.2,55.7L293.8,54.1L293.8,48.7L294.9,47.8L296.7,48.3L303.1,45.9L303.6,46.4L302.6,49.3L303.8,48.5L307.0,50.1L307.7,51.7L320.3,55.4L320.6,56.5L322.5,57.7L322.1,60.5L323.5,60.6L323.1,62.2L323.8,63.0L322.4,64.5L321.2,67.9L322.7,67.1L323.8,65.4L325.0,65.2L325.5,65.8L322.0,79.2L322.0,81.7L322.7,83.5L322.5,86.2L304.3,86.1ZM305.6,44.9L305.5,45.4L305.5,45.4L305.6,44.9ZM305.0,45.9L304.3,46.3L304.3,46.1L305.0,45.9ZM304.7,46.8L303.9,47.6L303.4,47.7L304.7,46.8Z"/><path d="M360.0,127.7L358.0,126.5L356.0,123.2L355.8,120.3L357.7,120.1L358.6,118.8L358.5,117.7L359.3,116.1L359.8,115.7L360.4,116.7L361.2,116.2L361.0,115.1L362.0,113.6L363.4,112.6L364.5,112.6L367.0,110.3L368.7,104.5L368.5,102.4L369.3,102.1L369.3,109.8L375.9,109.8L375.9,114.1L378.5,111.9L379.2,112.1L380.4,110.6L382.2,111.4L382.8,110.6L384.8,110.2L386.3,110.8L386.8,111.8L387.2,112.9L386.5,114.6L383.3,112.1L381.7,115.8L378.7,117.5L377.5,120.1L376.5,120.3L374.9,119.3L370.2,128.3L367.2,128.7L366.7,129.6L365.0,130.0L363.9,129.4L362.4,130.4L360.6,129.4L360.0,127.7Z"/><path d="M218.6,99.1L173.6,99.1L173.6,64.0L218.5,64.0L218.6,99.1Z"/><g id="dots"><g class="dot" data-i="0"><circle cx="410.8" cy="101.5" r="13.0" fill="#ff9440" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>New York</title></g><g class="dot" data-i="1"><circle cx="127.5" cy="155.2" r="8.7" fill="#ff9440" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>Los Angeles</title></g><g class="dot" data-i="2"><circle cx="323.6" cy="91.5" r="7.3" fill="#ff9440" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>Chicago</title></g><g class="dot" data-i="3"><circle cx="274.0" cy="187.6" r="6.9" fill="#ff9440" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>Houston</title></g><g class="dot" data-i="4"><circle cx="167.0" cy="159.9" r="5.7" fill="#ff9440" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>Phoenix</title></g><g class="dot" data-i="5"><circle cx="403.4" cy="107.8" r="5.6" fill="#ff9440" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>Philadelphia</title></g><g class="dot" data-i="6"><circle cx="254.0" cy="190.1" r="5.5" fill="#ff9440" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>San Antonio</title></g><g class="dot" data-i="7"><circle cx="134.5" cy="165.5" r="5.3" fill="#ff9440" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>San Diego</title></g><g class="dot" data-i="8"><circle cx="264.9" cy="165.0" r="5.1" fill="#ff9440" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>Dallas</title></g><g class="dot" data-i="9"><circle cx="261.5" cy="165.2" r="4.5" fill="#ff9440" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>Fort Worth</title></g><g class="dot" data-i="10"><circle cx="361.8" cy="183.4" r="4.5" fill="#ff9440" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>Jacksonville</title></g><g class="dot" data-i="11"><circle cx="258.8" cy="183.8" r="4.4" fill="#ff9440" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>Austin</title></g><g class="dot" data-i="12"><circle cx="104.2" cy="129.3" r="4.4" fill="#ffd24d" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>San Jose</title></g><g class="dot" data-i="13"><circle cx="367.0" cy="146.1" r="4.4" fill="#ffd24d" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>Charlotte</title></g><g class="dot" data-i="14"><circle cx="353.2" cy="107.8" r="4.3" fill="#ffd24d" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>Columbus</title></g><g class="dot" data-i="15"><circle cx="333.0" cy="109.4" r="4.2" fill="#ffd24d" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>Indianapolis</title></g><g class="dot" data-i="16"><circle cx="100.8" cy="125.8" r="4.0" fill="#ffd24d" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>San Francisco</title></g><g class="dot" data-i="17"><circle cx="101.4" cy="39.8" r="3.9" fill="#ffd24d" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>Seattle</title></g><g class="dot" data-i="18"><circle cx="212.4" cy="109.6" r="3.8" fill="#ffd24d" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>Denver</title></g><g class="dot" data-i="19"><circle cx="329.0" cy="138.7" r="3.8" fill="#ffd24d" fill-opacity="0.72" stroke="#121212" stroke-width="0.8"/><title>Nashville</title></g></g><g id="labs"></g></svg>
+  <div class="mapcap" id="mapcap">Each dot's area is its city's population</div>
+  <div class="mapkey"><span><i style="background:#ff9440"></i>a million or more</span><span><i style="background:#ffd24d"></i>100,000 to a million</span></div>
+</div>
+<div class="tiles"><div class="tile"><div class="lab" id="l1">U.S. population</div><div class="val" id="v1">341.8 million</div><div class="sub" id="s1">341,784,857 in 2025</div></div><div class="tile"><div class="lab" id="l2">Largest city</div><div class="val" id="v2">New York</div><div class="sub" id="s2">8,584,629 people</div></div><div class="tile"><div class="lab" id="l3">Fastest growth</div><div class="val" id="v3">+11.9%</div><div class="sub" id="s3">Fort Worth since 2020</div></div><div class="tile"><div class="lab" id="l4">Steepest decline</div><div class="val" id="v4">−6.0%</div><div class="sub" id="s4">San Francisco since 2020</div></div></div>
 </div>
 
-<div class="legend">
-  <span><span class="sw" style="background:var(--up)"></span>Grew since 2020</span>
-  <span><span class="sw" style="background:var(--down)"></span>Shrank since 2020</span>
+<h2>The twenty largest</h2>
+<div class="ctl">
+  <span class="grp" id="sorts"><span class="gl">Order</span>
+    <button data-sort="pop" class="on">Population</button>
+    <button data-sort="pct">Growth rate</button>
+    <button data-sort="chg">People gained</button></span>
+  <span class="legend"><span><span class="sw" style="background:var(--up)"></span>Grew since 2020</span>
+  <span><span class="sw" style="background:var(--down)"></span>Shrank since 2020</span></span>
 </div>
-
-<h2>The first ten</h2>
-<table>
+<div class="tscroll" id="tbl" tabindex="0" aria-label="The twenty cities; arrow keys walk the list when the table has focus"><table>
 <thead><tr>
   <th class="l" colspan="2">City</th>
-  <th>Population</th>
+  <th>Population <span class="gh">(lead over next)</span></th>
   <th class="l">Share of the U.S.</th>
   <th class="l">Change since 2020</th>
   <th>People</th>
 </tr></thead>
-<tbody>
-<tr>
+<tbody id="tb">
+<tr class="crow" data-i="0" data-pop="8584629" data-pct="-2.509" data-chg="-220965">
   <td class="rank">1</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-ny.png"
-      width="30" height="20" alt="Flag of New York"><span>New York<span
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEXl4+LT0MvnxoPIxr7Wuo3du2+9vLq0ubPUrnjGrHqxrqi9o4C/lmaora+lp6ShoZuemoqdk3x+prWFnJuJkY5bmbYyk8XDhWCXiXSGjIOEgHV1hoZzfHKtalmQZGp2bm/BSkS7PDqdTExdhI1efII0ha1hc3NQcn5TZWFDUXIsTHkmPG0SO3UHMXIALXEALHB6SNUmAAACB0lEQVR42s3WX7dlIBQA8MPxn1SOkMJBiCPz/b/dxJ15nLVy5+Xup83yW7WTtsfxH/H4eXhj6ivZ8+02VmmKFFwUjCJ1f9os8vMoz6No+07NCKYRghB9a8FUzmteU/W91f4lu07On1t4Xf5m+9wdN7Ggx0yvbBZins/16jpjjI4q/srGZT5HVmGsDPGONuxc2TSN+Bx5deJ1NsQOi5xzsruYcozr4whtp8ZmeIsLkk07j6lYlgU7vLZtOzTHUzFBp8JxqCN2ksQNMF6V0XuOx0JjHGdnkDBMSjdJgm03wrhjTIwhJBd+BUlJxwqb4oHUTRuSzPd9QEjcNgixfv0Y4WYopnLFGjsOyEj3Ke2E9bvZ3n63RZGs9MJ+RmaN3bE/zHEj9chp3bGMsNt4aNE41nyeCXkNpR0Md/DUxkIILsQi6FC6wfsepuJPnNgt34a4H4qiaClDlOmThFcXHm5hzCCklEKEBvcO7k+MGKWIckrxYAc3pn1hLDmKsJSSN/aNmt/9NGncyZprKyuNg8QQq/a9TFOLUSVlJ3m9Na7+qhqj7Zlbz8fj8WyqfMa8wqvuN56+YXkvI2zpZ70IAfU5j4CX510YjAZ4S1OYAuBZYFM69tTygL4GwKjmHO5HDrwnsDzraXka+69jA8y83WwghRYA6RNAH273exUDaQ79f7f2H/lPYhK/AYDFdvZokVpyAAAAAElFTkSuQmCC"
+      width="30" height="20" alt="Flag of New York"><span><a href="new-york.html">New York</a><span
       class="st">New York</span></span></span></td>
   <td class="num pop">8,584,629 <span class="gap">(+4,715,540)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:100.0%"></span></span><span class="pct">2.51%</span></td>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="New York: −2.5% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>220,965 people lost since 2020, −2.5%</title><rect x="99.6" y="4" width="18.4" height="11" rx="3" fill="#d55181"/><rect x="115.0" y="4" width="3" height="11" fill="#d55181"/></g><text x="93.6" y="13.5" text-anchor="end" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">−2.5%</text></svg></td>
   <td class="num">−220,965</td>
 </tr>
-<tr>
+<tr class="crow" data-i="1" data-pop="3869089" data-pct="-0.776" data-chg="-30253">
   <td class="rank">2</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-ca.png"
-      width="30" height="20" alt="Flag of California"><span>Los Angeles<span
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEX9/f339vXl5N/c0czNysHPvbe+t6y6sqaouqegtqC3rqGqoZHDiHC0hFmnk32dk4GUhnJtl3ZYh2F4gmexflmmelGddEyXck6UbkmPakWGeWOCdF2Ia0qGZUKBYT54ZEh2WzpObEVyWDdhVjgleUQcekIPez8LfT8cdD3JT2edO0FmTzFjTS9fTjBdSSu3FDU23esuAAABx0lEQVR42u2UXW+bMBSGDfhjsUvsUmwwno2BNE1lA///383RpCnaGo0STdpFnxtfPeccf70AfLGTIn9ApmS3it7XdS12T72uT7tbP1GEdsvZn7OQvdvIRNCtbowx0zT1/FM3wUN0qi6l1mpcFmed2Nr02ATfRqXKWpYJvyjZtBtt0TZR61hLrWybZJfkup23HUBoZBNi9LX2VpfKRqelit5scXG0vnQxhlo7JeW4hNbqENt5i/xdal+OMarSu7KUbWrchMXqLXPnIS6j97yvnU9b98sy6uC1CjPb0toEzwG01s0JQY+NHrWdre02X7SxIUA2K5Yhpa0gs5X9VhcrPaEsY+6YodabPIdiinCbC/t5Hl5e0tPs6TEM1fPhwMzM/2bD6nS5nIZpOP3icn5LXM5pOVf3zUN1+cnphte3W17vfZGiumEY0rTP/PDtN/J/EJ8U5iRLhTGBFPOiSIF4fRc5KQhEGBaQFRBA+HFOMopNjlORnAguqOlAYVK+oB6jTHScEkEZ4OJjmQI2XmUOCeOGjAaQPsUa6jDNOOMUe3KV7/xjwToo8msRwxkxAlCW2iCKaarJuyQbzIUB/wPvDwDWB/iSP8kPVcN6j4e9dScAAAAASUVORK5CYII="
+      width="30" height="20" alt="Flag of California"><span><a href="los-angeles.html">Los Angeles</a><span
       class="st">California</span></span></span></td>
   <td class="num pop">3,869,089 <span class="gap">(+1,137,504)</span></td>
   <td class="share"><span class="track"><span class="fill" style="width:45.1%"></span></span><span class="pct">1.13%</span></td>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Los Angeles: −0.8% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>30,253 people lost since 2020, −0.8%</title><rect x="112.3" y="4" width="5.7" height="11" rx="3" fill="#d55181"/><rect x="115.0" y="4" width="3" height="11" fill="#d55181"/></g><text x="106.3" y="13.5" text-anchor="end" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">−0.8%</text></svg></td>
   <td class="num">−30,253</td>
 </tr>
-<tr>
+<tr class="crow" data-i="2" data-pop="2731585" data-pct="-0.609" data-chg="-16748">
   <td class="rank">3</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-il.png"
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEX+/v79/v37/Pf4+PTy9fHr8+vs8Ozn8Ojo6ury8snf6N397FP/6S3/6Cjh39/X3uHJz9jU08zk1onNxL/SubbSs3+yurmrrKvPnpauoZGcn6ObloO5jnKUjH62emuJh3+IeGdXhFmEcl1ob0zCX2SCZ1J4ZlNzYE1wWkViVEW5QlWsJ0KlEC9fSzZQR0JMMkOjTkUVAAAB5ElEQVR42u3Vy5ajIBAGYKMYL7EVAgECRpEo0irx/d9u6MycWWPW/Xt09x2roMQo+s3/oHu3jh9aT7ftQ4zHbVs5Jp/htuNSkjhGKD/a77gsbW4nPdl5Npod6te3u40eG2etNvNsw8tH67a0nCdaGae1eljt7BSK23VB+BzHShurjDHq4ZxTgZh3jHRIYKy/nVHa2m/nDA7ENULoTnDt3O7Mw79WJge2aeUA4BrN2r/R3+7QHvsFI6Cefcm6N87ZKIqDcYKXbeN4nqTWxs1aR8WlKIpQXv9oaZSajbUAVBd/FaHzNXKydSc2K6mUY0X1VVVVEVY69/O1jrcCTM53zFDx9fXWQZjwZVtvL5VPfjR7ga/VW4dhhM7n/LnvU3u9sZxidDmCGTqjXOy70e2N0Ov1Lw6clGEYbiNHr/3VtXfmsa/7cg37rhs5DB3p+P21T0z0D9jUsGlgE4RzOAzEHwecTFKIvhfwHRBWdsaGbuRL17bCp5e0AWcIQyes7DXn4/R8SSGloHWaldkpeLyzlnRPv25Dk/kkh2wUp2XJvO0H5nGKkkPnJyjLLCtRlvqnz9GTO/uBaVp6DD45+eMEpOD00U8jyiNIkwjCuqHnw5h6DAGkTNDmMGaUCgioYH2fR7/5lz+uJjXPpHFjpQAAAABJRU5ErkJggg=="
       width="30" height="20" alt="Flag of Illinois"><span>Chicago<span
       class="st">Illinois</span></span></span></td>
   <td class="num pop">2,731,585 <span class="gap">(+334,270)</span></td>
@@ -141,9 +179,9 @@ July 1, 2025.</p>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Chicago: −0.6% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>16,748 people lost since 2020, −0.6%</title><rect x="113.5" y="4" width="4.5" height="11" rx="3" fill="#d55181"/><rect x="115.0" y="4" width="3" height="11" fill="#d55181"/></g><text x="107.5" y="13.5" text-anchor="end" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">−0.6%</text></svg></td>
   <td class="num">−16,748</td>
 </tr>
-<tr>
+<tr class="crow" data-i="3" data-pop="2397315" data-pct="4.247" data-chg="97666">
   <td class="rank">4</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-tx.png"
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEX////3+Pns7vLp6/Di5eve4unZ3eX12eHS1+HR1+HQ1uDL0d3Dyti/xtS1vs60vc2hrMF8jKp6i6l4iad3iKd1hqV0hqVidZpfcphecZdab5RXbJNNY4s+VoM3UH4wSXkpQ3UnQnMmQXMkP3EgO3AbN2waNmsZNWsXNGkNK2MDIlwBIFsAIFu+Dj8QHlgPHli3c8OQAAAAm0lEQVR42u3TSQ6CQBAFUD4qiAOKgCgqKKgMDtz/dja2mhg3dPXKpP6uFi81JGVcf3O3jY5hzPgfcHXRwH6ogS2HjvdARsYxEFJwshOZAyPPC9apIo5NfDLIVccuZ287PYuyUdx503vaRd0Wza1jXjiTjQ/yYIo4kHhJwkP0V5GFMQWfMBGXKlwcCbjy5VdsE8rY3y/JmDFjDfwAym0LMyy2VkYAAAAASUVORK5CYII="
       width="30" height="20" alt="Flag of Texas"><span>Houston<span
       class="st">Texas</span></span></span></td>
   <td class="num pop">2,397,315 <span class="gap">(+731,834)</span></td>
@@ -151,9 +189,9 @@ July 1, 2025.</p>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Houston: +4.2% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>97,666 people gained since 2020, +4.2%</title><rect x="118.0" y="4" width="31.1" height="11" rx="3" fill="#3987e5"/><rect x="118.0" y="4" width="3" height="11" fill="#3987e5"/></g><text x="155.1" y="13.5" text-anchor="start" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">+4.2%</text></svg></td>
   <td class="num">+97,666</td>
 </tr>
-<tr>
+<tr class="crow" data-i="4" data-pop="1665481" data-pct="3.552" data-chg="57132">
   <td class="rank">5</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-az.png"
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEX91AD90wD80wD90gD80AD7zgD6zAH5yQH3wAPztQTxsAXvpgbrnAjllwvpkgnmhwvkgAzgeQ3eaw/YXxLTWxPLWxfXUxLURBXQNhbOKxivTyGwOSJHOEsVLF7NJxkAJ2fKIRnJHBrIFBvHERzHDx3HDxzGDxzHDh3HDhzGDh3GDhzFDhzGDR3GDRzGDB3GDBxt0cylAAACKElEQVR42u3S23qiMBQF4AABIjCcMpDAp5RTdXAY+/5vN3uHk1Kstb3tupK4fxNXIP2QUBvitiqeDok7SISr4QnTOPqQsB4Q6Vc6VpjjTIA4wEWpcDzaeDIz7qMBmxni2oIhF7ELa0zZzFCUpv173HOqtFOj9mGMIWawFKGtmbKmWAQpl8/SVjpALHCPc9c1BqxkiANlbXk1T6i3PJY7pQVqLKfougxLRKta0HfLXtIhGHfmDf5DzSrHykTXCXhOwRZYgu4102TmkSluNq4dPXVfr21bUV3nXcc1za7hlnY3NvMpWWJ41VS6Md4XXHWorjmAjUN1deeJklXMYOQCajNk20rYqet8VRfWZ/Lh+8I3yPuYYTWXzmqszCkrR3Pg0HBLbCim3KQYK1LvXQbax8psKZnG1aGZqrkKKLkfO8LdSwcqhrfMShJKq1MKV4TLdWStxmuZBvb17jHUcgw0s2x9liSmf8qo7sGJivB6jAVpcyEXyFspYnc+EEvVm76rpZckrmx2NL65HMuN0xLZgFXOReqbw9cOvL9c818TyJ/IFn0ZjDVRLy3eZrJgzFGGLlM8/ZdSjpjD28zVgVnI5c30CqtU/BckkiJCHAn5G5/Hkz7CwJN1RL01t4kvf8XKNptj5GUzh/21zQ/bU3cw8PwR/QC/HCZ8136A54Pvv4Dz72Dl8Bfy5/F+aAp7238B59OlPY/zmezzZ/HhsP35k4V9Ij/4Bz/Mfx7k/MFEmIQKAAAAAElFTkSuQmCC"
       width="30" height="20" alt="Flag of Arizona"><span>Phoenix<span
       class="st">Arizona</span></span></span></td>
   <td class="num pop">1,665,481 <span class="gap">(+91,200)</span></td>
@@ -161,9 +199,9 @@ July 1, 2025.</p>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Phoenix: +3.6% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>57,132 people gained since 2020, +3.6%</title><rect x="118.0" y="4" width="26.0" height="11" rx="3" fill="#3987e5"/><rect x="118.0" y="4" width="3" height="11" fill="#3987e5"/></g><text x="150.0" y="13.5" text-anchor="start" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">+3.6%</text></svg></td>
   <td class="num">+57,132</td>
 </tr>
-<tr>
+<tr class="crow" data-i="5" data-pop="1574281" data-pct="-1.841" data-chg="-29519">
   <td class="rank">6</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-pa.png"
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEXKrCq1kBGKsKuQjT2kgBOddxOJdydrdWaCaCR9WxRpZEBmVCZTZFNTVkk9YjQ+VWBtRTFQRUBGS0dFPD43S1s4P0Q3OT45MzkoRVUhPVoaPGINPy0eNk0LNUAgMT4KMWEKMWCSExKMCg9MKSxpFiAzLS8oKzQvJisrHyAYLUcKL1wdJS8TJDQaHRwXFw8REQ2A/VdTAAACP0lEQVR42u2VW3ujIBCGQyIiQWU9YtAYTxQRkf//75a06U2bZHe7d7v9fDwM8M7IjM+4u/yFdt/wPwAvl5x+GbZbQ+36RXizm5PpvgQbh1rnYPlNmJ8oQu+GMutrbH2b2yNKn8AdKs08hu+mPhLSanOzUC5lUT2GeVjOs2Q3/yn0cABh8WY1jM0ySrvHkQshRIhyVyalfIAP+/0BgrdoTZKKOV2fwOhlHkeJWt1WCQT+3ungBxmTWoQjm02pniQMpakcf9jNVDk47G86wKiy1o7jzD5k7EOpOBJJZkxbHQFF7shpiBCA+YuchYgQf1rnU5ilzF7jwN0OXOWunrcZuzGRPYOFyEQWCbNyvkqMd6/C0IPHhnNjyixJIt3eh5UQkqXMbG7pqjMIvB3wfA8EaUg5V9aUSZSEIr8HKymVTDJrjXJL1yWIvYDEsU/AucqdO2NsGpVU0vwOXErVRRlTq9SG87omOCZxEAeYnOsmbY3RL1mWLEWKPsOU6q4RDHF+aqQp6lqRuo79OMaxrtPZrG4zudCXipb0c2SXyaLke34KvCQhZX0uCcYYYtzWdVAWx4hzlJvl0i33S5VTvi9copqsSGqntiBBO886cDcAfO7eTj2sc6BzH/djUUB8aty26/PZnTVPocO9vk+owQ9hV1MA+n5iPsaknwKYtYSwqYeEFGoaegAwfNZJmGOHYeh75Z4YIWU/OOo65AaHsfhFG2ou1yAuK800TOPUT+7TczBzE3/Stzs2jmz5/lf99/BPfBQQUef7nloAAAAASUVORK5CYII="
       width="30" height="20" alt="Flag of Pennsylvania"><span>Philadelphia<span
       class="st">Pennsylvania</span></span></span></td>
   <td class="num pop">1,574,281 <span class="gap">(+25,859)</span></td>
@@ -171,9 +209,9 @@ July 1, 2025.</p>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Philadelphia: −1.8% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>29,519 people lost since 2020, −1.8%</title><rect x="104.5" y="4" width="13.5" height="11" rx="3" fill="#d55181"/><rect x="115.0" y="4" width="3" height="11" fill="#d55181"/></g><text x="98.5" y="13.5" text-anchor="end" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">−1.8%</text></svg></td>
   <td class="num">−29,519</td>
 </tr>
-<tr>
+<tr class="crow" data-i="6" data-pop="1548422" data-pct="8.028" data-chg="115074">
   <td class="rank">7</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-tx.png"
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEX////3+Pns7vLp6/Di5eve4unZ3eX12eHS1+HR1+HQ1uDL0d3Dyti/xtS1vs60vc2hrMF8jKp6i6l4iad3iKd1hqV0hqVidZpfcphecZdab5RXbJNNY4s+VoM3UH4wSXkpQ3UnQnMmQXMkP3EgO3AbN2waNmsZNWsXNGkNK2MDIlwBIFsAIFu+Dj8QHlgPHli3c8OQAAAAm0lEQVR42u3TSQ6CQBAFUD4qiAOKgCgqKKgMDtz/dja2mhg3dPXKpP6uFi81JGVcf3O3jY5hzPgfcHXRwH6ogS2HjvdARsYxEFJwshOZAyPPC9apIo5NfDLIVccuZ287PYuyUdx503vaRd0Wza1jXjiTjQ/yYIo4kHhJwkP0V5GFMQWfMBGXKlwcCbjy5VdsE8rY3y/JmDFjDfwAym0LMyy2VkYAAAAASUVORK5CYII="
       width="30" height="20" alt="Flag of Texas"><span>San Antonio<span
       class="st">Texas</span></span></span></td>
   <td class="num pop">1,548,422 <span class="gap">(+142,316)</span></td>
@@ -181,9 +219,9 @@ July 1, 2025.</p>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="San Antonio: +8.0% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>115,074 people gained since 2020, +8.0%</title><rect x="118.0" y="4" width="58.9" height="11" rx="3" fill="#3987e5"/><rect x="118.0" y="4" width="3" height="11" fill="#3987e5"/></g><text x="182.9" y="13.5" text-anchor="start" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">+8.0%</text></svg></td>
   <td class="num">+115,074</td>
 </tr>
-<tr>
+<tr class="crow" data-i="7" data-pop="1406106" data-pct="1.562" data-chg="21625">
   <td class="rank">8</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-ca.png"
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEX9/f339vXl5N/c0czNysHPvbe+t6y6sqaouqegtqC3rqGqoZHDiHC0hFmnk32dk4GUhnJtl3ZYh2F4gmexflmmelGddEyXck6UbkmPakWGeWOCdF2Ia0qGZUKBYT54ZEh2WzpObEVyWDdhVjgleUQcekIPez8LfT8cdD3JT2edO0FmTzFjTS9fTjBdSSu3FDU23esuAAABx0lEQVR42u2UXW+bMBSGDfhjsUvsUmwwno2BNE1lA///383RpCnaGo0STdpFnxtfPeccf70AfLGTIn9ApmS3it7XdS12T72uT7tbP1GEdsvZn7OQvdvIRNCtbowx0zT1/FM3wUN0qi6l1mpcFmed2Nr02ATfRqXKWpYJvyjZtBtt0TZR61hLrWybZJfkup23HUBoZBNi9LX2VpfKRqelit5scXG0vnQxhlo7JeW4hNbqENt5i/xdal+OMarSu7KUbWrchMXqLXPnIS6j97yvnU9b98sy6uC1CjPb0toEzwG01s0JQY+NHrWdre02X7SxIUA2K5Yhpa0gs5X9VhcrPaEsY+6YodabPIdiinCbC/t5Hl5e0tPs6TEM1fPhwMzM/2bD6nS5nIZpOP3icn5LXM5pOVf3zUN1+cnphte3W17vfZGiumEY0rTP/PDtN/J/EJ8U5iRLhTGBFPOiSIF4fRc5KQhEGBaQFRBA+HFOMopNjlORnAguqOlAYVK+oB6jTHScEkEZ4OJjmQI2XmUOCeOGjAaQPsUa6jDNOOMUe3KV7/xjwToo8msRwxkxAlCW2iCKaarJuyQbzIUB/wPvDwDWB/iSP8kPVcN6j4e9dScAAAAASUVORK5CYII="
       width="30" height="20" alt="Flag of California"><span>San Diego<span
       class="st">California</span></span></span></td>
   <td class="num pop">1,406,106 <span class="gap">(+76,615)</span></td>
@@ -191,9 +229,9 @@ July 1, 2025.</p>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="San Diego: +1.6% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>21,625 people gained since 2020, +1.6%</title><rect x="118.0" y="4" width="11.5" height="11" rx="3" fill="#3987e5"/><rect x="118.0" y="4" width="3" height="11" fill="#3987e5"/></g><text x="135.5" y="13.5" text-anchor="start" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">+1.6%</text></svg></td>
   <td class="num">+21,625</td>
 </tr>
-<tr>
+<tr class="crow" data-i="8" data-pop="1329491" data-pct="1.928" data-chg="25150">
   <td class="rank">9</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-tx.png"
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEX////3+Pns7vLp6/Di5eve4unZ3eX12eHS1+HR1+HQ1uDL0d3Dyti/xtS1vs60vc2hrMF8jKp6i6l4iad3iKd1hqV0hqVidZpfcphecZdab5RXbJNNY4s+VoM3UH4wSXkpQ3UnQnMmQXMkP3EgO3AbN2waNmsZNWsXNGkNK2MDIlwBIFsAIFu+Dj8QHlgPHli3c8OQAAAAm0lEQVR42u3TSQ6CQBAFUD4qiAOKgCgqKKgMDtz/dja2mhg3dPXKpP6uFi81JGVcf3O3jY5hzPgfcHXRwH6ogS2HjvdARsYxEFJwshOZAyPPC9apIo5NfDLIVccuZ287PYuyUdx503vaRd0Wza1jXjiTjQ/yYIo4kHhJwkP0V5GFMQWfMBGXKlwcCbjy5VdsE8rY3y/JmDFjDfwAym0LMyy2VkYAAAAASUVORK5CYII="
       width="30" height="20" alt="Flag of Texas"><span>Dallas<span
       class="st">Texas</span></span></span></td>
   <td class="num pop">1,329,491 <span class="gap">(+301,374)</span></td>
@@ -201,9 +239,9 @@ July 1, 2025.</p>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Dallas: +1.9% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>25,150 people gained since 2020, +1.9%</title><rect x="118.0" y="4" width="14.1" height="11" rx="3" fill="#3987e5"/><rect x="118.0" y="4" width="3" height="11" fill="#3987e5"/></g><text x="138.1" y="13.5" text-anchor="start" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">+1.9%</text></svg></td>
   <td class="num">+25,150</td>
 </tr>
-<tr>
+<tr class="crow" data-i="9" data-pop="1028117" data-pct="11.887" data-chg="109225">
   <td class="rank">10</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-tx.png"
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEX////3+Pns7vLp6/Di5eve4unZ3eX12eHS1+HR1+HQ1uDL0d3Dyti/xtS1vs60vc2hrMF8jKp6i6l4iad3iKd1hqV0hqVidZpfcphecZdab5RXbJNNY4s+VoM3UH4wSXkpQ3UnQnMmQXMkP3EgO3AbN2waNmsZNWsXNGkNK2MDIlwBIFsAIFu+Dj8QHlgPHli3c8OQAAAAm0lEQVR42u3TSQ6CQBAFUD4qiAOKgCgqKKgMDtz/dja2mhg3dPXKpP6uFi81JGVcf3O3jY5hzPgfcHXRwH6ogS2HjvdARsYxEFJwshOZAyPPC9apIo5NfDLIVccuZ287PYuyUdx503vaRd0Wza1jXjiTjQ/yYIo4kHhJwkP0V5GFMQWfMBGXKlwcCbjy5VdsE8rY3y/JmDFjDfwAym0LMyy2VkYAAAAASUVORK5CYII="
       width="30" height="20" alt="Flag of Texas"><span>Fort Worth<span
       class="st">Texas</span></span></span></td>
   <td class="num pop">1,028,117 <span class="gap">(+10,428)</span></td>
@@ -211,23 +249,10 @@ July 1, 2025.</p>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Fort Worth: +11.9% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>109,225 people gained since 2020, +11.9%</title><rect x="118.0" y="4" width="87.2" height="11" rx="3" fill="#3987e5"/><rect x="118.0" y="4" width="3" height="11" fill="#3987e5"/></g><text x="211.2" y="13.5" text-anchor="start" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">+11.9%</text></svg></td>
   <td class="num">+109,225</td>
 </tr>
-<tr class="total"><td></td><td>These ten together</td><td class="num">26,134,516</td><td>7.6% of the country</td><td>+0.5% since 2020</td><td class="num">+128,387</td></tr>
-</tbody>
-</table>
-
-<h2>The next ten</h2>
-<table>
-<thead><tr>
-  <th class="l" colspan="2">City</th>
-  <th>Population</th>
-  <th class="l">Share of the U.S.</th>
-  <th class="l">Change since 2020</th>
-  <th>People</th>
-</tr></thead>
-<tbody>
-<tr>
+<tr class="total sub"><td></td><td>These ten together</td><td class="num">26,134,516</td><td>7.6% of the country</td><td>+0.5% since 2020</td><td class="num">+128,387</td></tr>
+<tr class="crow" data-i="10" data-pop="1017689" data-pct="7.169" data-chg="68082">
   <td class="rank">11</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-fl.png"
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEX+/f7+/f3++/z99/j77/D35tz12tbh2LfqyL/rwL3RxJi7wq7rs7/npLLqn0/2qAPGsYW9oXOhqY2en3/gilPmhg7rkgrbdl7ddhjedhO/kVqjj2yzeTxzkoB6eVZEgHPTalPUaSDYahfRW0/RTlPLO03FJELCFzrAEDW/DDG/DC9+YzYTY0u/CzG/CzC/CjDjxVydAAACaUlEQVR42o2V25aqMBBEWwERkAUBEy5GM50DCIOM//93J6KjBMGhHllsKqm+AF2va+WvV0vlnK93CrpfVbtlqFU8kRfcdYW5gPXrbhLuzn+ar5Ph+xrcdYnxkd1Vw5ev4NQaXVrzqFF0+jkBRo9qf/a2Z93GXIGSoz8tJotmlu8eNxjWxVU7z/ZzyM/CwF07zfw6zs0c3/b++AHDOtHNN6vNPqUZY2lqrZyZT8NTI3NMgyyTQSZTRP27zvNALxi0s9EgC7A9kXyPmOLPwHYQJwz1SkWxGB7FMXa9L2RBNZ2lBoP56D5kKYauOJ2Ea/NWSomTVYSR+pufJcOYu7EQwnYJb5Fm31P9M4ZhpWJHKW3v4EVxbttuaEdEsmpq6OBd20oGqedx7waGue1yThnWExM3AYOFtI3DnIe2a4fEzjknNJ0amCl4i6w9xiImnChrN89JnsnFsKTtMVJ1OnByyBVL9nKx80pSPKkikzyKiSuE65GMGsvgdUIZFwr2Yi8KxUUIj0tZLQrMKhvJKI+Phzg6CHG5XARXrbqkVKZfN80PC5B88ag9XXphwPreGe/2txo3N9WBmopDFB9751dzl+Y8bPjNQ1KNI4+8WKFtmjF8bp/dHOxXv2zzjZIxBXFEyigO5rwwpuBN2QxUfakx7jdJJv/Nbbj3E/dKVHR7zChNMd3Cpvq4hizNttyMchyv+0fs95byz0PWn+ic0eqt/F94dFsHJkdNX/pdYfXwrS0GtzVhWuO9X/trMBLNdgfzMsfmoIdswCetfZ2GTyG/y6lm4AQWyBz+lp5w6cAybcs3uDBgsbbVw/0/Qh6pGfyIKg4AAAAASUVORK5CYII="
       width="30" height="20" alt="Flag of Florida"><span>Jacksonville<span
       class="st">Florida</span></span></span></td>
   <td class="num pop">1,017,689 <span class="gap">(+15,057)</span></td>
@@ -235,9 +260,9 @@ July 1, 2025.</p>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Jacksonville: +7.2% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>68,082 people gained since 2020, +7.2%</title><rect x="118.0" y="4" width="52.6" height="11" rx="3" fill="#3987e5"/><rect x="118.0" y="4" width="3" height="11" fill="#3987e5"/></g><text x="176.6" y="13.5" text-anchor="start" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">+7.2%</text></svg></td>
   <td class="num">+68,082</td>
 </tr>
-<tr>
+<tr class="crow" data-i="11" data-pop="1002632" data-pct="4.642" data-chg="44481">
   <td class="rank">12</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-tx.png"
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEX////3+Pns7vLp6/Di5eve4unZ3eX12eHS1+HR1+HQ1uDL0d3Dyti/xtS1vs60vc2hrMF8jKp6i6l4iad3iKd1hqV0hqVidZpfcphecZdab5RXbJNNY4s+VoM3UH4wSXkpQ3UnQnMmQXMkP3EgO3AbN2waNmsZNWsXNGkNK2MDIlwBIFsAIFu+Dj8QHlgPHli3c8OQAAAAm0lEQVR42u3TSQ6CQBAFUD4qiAOKgCgqKKgMDtz/dja2mhg3dPXKpP6uFi81JGVcf3O3jY5hzPgfcHXRwH6ogS2HjvdARsYxEFJwshOZAyPPC9apIo5NfDLIVccuZ287PYuyUdx503vaRd0Wza1jXjiTjQ/yYIo4kHhJwkP0V5GFMQWfMBGXKlwcCbjy5VdsE8rY3y/JmDFjDfwAym0LMyy2VkYAAAAASUVORK5CYII="
       width="30" height="20" alt="Flag of Texas"><span>Austin<span
       class="st">Texas</span></span></span></td>
   <td class="num pop">1,002,632 <span class="gap">(+12,818)</span></td>
@@ -245,9 +270,9 @@ July 1, 2025.</p>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Austin: +4.6% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>44,481 people gained since 2020, +4.6%</title><rect x="118.0" y="4" width="34.0" height="11" rx="3" fill="#3987e5"/><rect x="118.0" y="4" width="3" height="11" fill="#3987e5"/></g><text x="158.0" y="13.5" text-anchor="start" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">+4.6%</text></svg></td>
   <td class="num">+44,481</td>
 </tr>
-<tr>
+<tr class="crow" data-i="12" data-pop="989814" data-pct="-2.320" data-chg="-23507">
   <td class="rank">13</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-ca.png"
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEX9/f339vXl5N/c0czNysHPvbe+t6y6sqaouqegtqC3rqGqoZHDiHC0hFmnk32dk4GUhnJtl3ZYh2F4gmexflmmelGddEyXck6UbkmPakWGeWOCdF2Ia0qGZUKBYT54ZEh2WzpObEVyWDdhVjgleUQcekIPez8LfT8cdD3JT2edO0FmTzFjTS9fTjBdSSu3FDU23esuAAABx0lEQVR42u2UXW+bMBSGDfhjsUvsUmwwno2BNE1lA///383RpCnaGo0STdpFnxtfPeccf70AfLGTIn9ApmS3it7XdS12T72uT7tbP1GEdsvZn7OQvdvIRNCtbowx0zT1/FM3wUN0qi6l1mpcFmed2Nr02ATfRqXKWpYJvyjZtBtt0TZR61hLrWybZJfkup23HUBoZBNi9LX2VpfKRqelit5scXG0vnQxhlo7JeW4hNbqENt5i/xdal+OMarSu7KUbWrchMXqLXPnIS6j97yvnU9b98sy6uC1CjPb0toEzwG01s0JQY+NHrWdre02X7SxIUA2K5Yhpa0gs5X9VhcrPaEsY+6YodabPIdiinCbC/t5Hl5e0tPs6TEM1fPhwMzM/2bD6nS5nIZpOP3icn5LXM5pOVf3zUN1+cnphte3W17vfZGiumEY0rTP/PDtN/J/EJ8U5iRLhTGBFPOiSIF4fRc5KQhEGBaQFRBA+HFOMopNjlORnAguqOlAYVK+oB6jTHScEkEZ4OJjmQI2XmUOCeOGjAaQPsUa6jDNOOMUe3KV7/xjwToo8msRwxkxAlCW2iCKaarJuyQbzIUB/wPvDwDWB/iSP8kPVcN6j4e9dScAAAAASUVORK5CYII="
       width="30" height="20" alt="Flag of California"><span>San Jose<span
       class="st">California</span></span></span></td>
   <td class="num pop">989,814 <span class="gap">(+25,030)</span></td>
@@ -255,9 +280,9 @@ July 1, 2025.</p>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="San Jose: −2.3% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>23,507 people lost since 2020, −2.3%</title><rect x="101.0" y="4" width="17.0" height="11" rx="3" fill="#d55181"/><rect x="115.0" y="4" width="3" height="11" fill="#d55181"/></g><text x="95.0" y="13.5" text-anchor="end" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">−2.3%</text></svg></td>
   <td class="num">−23,507</td>
 </tr>
-<tr>
+<tr class="crow" data-i="13" data-pop="964784" data-pct="10.298" data-chg="90076">
   <td class="rank">14</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-nc.png"
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEX+/f3k6O/ryDnuvwXouwjkuAnitwq9sGzZsg7XsA7bsw3cswvPqxLMqRPKqBTHphXBohe5nBqbl2SlkCKqkyGzmR2ulh+ZiSeRgyuLfy6DezGBejJ3hpNqdGl1cjdycDhma0pXYUxGVVM2S1YqQFUaOWATNF8NL2IFK2YCKWcCKWa+CjARJ2MQJ2MRJWIQJWE3SM0TAAABGElEQVR42u3T246DIBAG4BosUfEYpKCyskhBsXt4/7dbTPaY3ji927T/BXdfmGGGg7/O22VnDg98I17Oxt2EdcdyXOVZyhoNxHMVlyzFdGwLkeJmguB1rHVfs3ZLguv65AB4QEklls92DYqzxADKzlA9fT2bLUhmIT0L+3tOVpwf67kLz2Y7J+1AeBwMDexJhsPFqAHhPhHUSykjKRedO+bfIbhIqLcyiiLrVRWufz3sTcBjEcrecPhficr9CwTr5y5guYSm5xKNIHyVO8Dmj1zVDMEo5j8/WsXIADBFiPHvBW9SdAJgmx5L2o5qy1ALgTSkbEtE13cYU06OrOMM9tquJYRXWPE8JriDj2qelNLG2PVONuw/4g/LP/aHardf4QAAAABJRU5ErkJggg=="
       width="30" height="20" alt="Flag of North Carolina"><span>Charlotte<span
       class="st">North Carolina</span></span></span></td>
   <td class="num pop">964,784 <span class="gap">(+26,388)</span></td>
@@ -265,9 +290,9 @@ July 1, 2025.</p>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Charlotte: +10.3% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>90,076 people gained since 2020, +10.3%</title><rect x="118.0" y="4" width="75.5" height="11" rx="3" fill="#3987e5"/><rect x="118.0" y="4" width="3" height="11" fill="#3987e5"/></g><text x="199.5" y="13.5" text-anchor="start" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">+10.3%</text></svg></td>
   <td class="num">+90,076</td>
 </tr>
-<tr>
+<tr class="crow" data-i="14" data-pop="938396" data-pct="3.551" data-chg="32181">
   <td class="rank">15</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-oh.png"
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEVUZo/f0tvcmKlnFEXHLk7PVW+TlrFwFENeG0vZdot4hqeOGUTnusUDF1csHFSrtMhqE0WQEj2ec5E7UYC6wdFtBjWCFUErFlM5UH+GEj6KIVCuS2uPbIxpT3iVCTXIADfGVXHBjKIAAADAEDX8+/sDHlu+DTOuETiWEjwkOm8wR3ndh5oPKmTx5usHIl4ZM2qg0UbWAAAAMHRSTlP//vxk//78oPb//+T9HP//Mdz5//8cl1r/uTb/nP8dDgm9AP////788f////////8YaEfcAAACdElEQVR42pWWB9OjIBCGwUJsialfu/LdnSCCov//390i2BI1ZmecyTh59l2WLaKAc14Un2/ufv/vVUOMBVln/PTpuvuXYHYosrFBJPFut8WJhkGcZ48GpwnAye37CTyO/dHy1slMTgws0+Yu9tlIYnDy/r6/gxHWieN+GPpe9tQJL0471z1quBGMNdLEXlIwnDilv8FJViBGsCFZBU+c0N4UdlYD4S5iNRItKwiq4drO9M4gkHkfrj4zIAI1jKVEH14GCZ037GgvXq87SRi6wJPCj7OiK2ZOo9nunpFkEkWgrw/OakKfWHLsrqrWN43bl2ljnAlnlcVf3T0jUjPUv7apX8WdW18kSElgsZ9nXqkorliHk4WzO/tRhVUVptjLtfmUEnPpkQ4BOTP8eVqeIOznxkJKW2mh0tpU3Q8/LMf2c9wY8B9CsWVzj1JkEo5s0QXxtKwmXSWuklCng3NMESLCnhq3jg7xPAuwxILQpIcVvSA8hYNluK5ZRFU2hN2YsC827MM07Lf7YSCHhDkUt6KNioz6L50wp7fQnySMVU11fbgqhkC1Os81yd8xHOEPkFahl3swDFTTFYlcqnAyggXUQ1+e6sOiCK+U5+jMuhrQddIYa+hA25YEcRmlRDKxAdUt+WeABY7anm6nglxHFU5KGAa/bbbhYmCOVSmuQb6Klno4GU+hjH+15Ym6DowqHcMjNT9FuR6A5GqTpPN2UePwJlKzo1dAjoTlz0ao3DLyYf2MpqfeN9426vS2M+umhaOGHfgGKIYldXtYsWtLsmiX/XFpP8+jVunJl0Fw/0WwoDT3QcMHpU3MAMOMKUDKfYmy9h/TWCn6HbCPYwAAAABJRU5ErkJggg=="
       width="30" height="20" alt="Flag of Ohio"><span>Columbus<span
       class="st">Ohio</span></span></span></td>
   <td class="num pop">938,396 <span class="gap">(+37,280)</span></td>
@@ -275,9 +300,9 @@ July 1, 2025.</p>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Columbus: +3.6% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>32,181 people gained since 2020, +3.6%</title><rect x="118.0" y="4" width="26.0" height="11" rx="3" fill="#3987e5"/><rect x="118.0" y="4" width="3" height="11" fill="#3987e5"/></g><text x="150.0" y="13.5" text-anchor="start" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">+3.6%</text></svg></td>
   <td class="num">+32,181</td>
 </tr>
-<tr>
+<tr class="crow" data-i="15" data-pop="901116" data-pct="1.517" data-chg="13469">
   <td class="rank">16</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-in.png"
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEX0sQPzsQTsrAbnqAfipgrgpArcoQzQmQ/BjxW1hxmrgB2feSGadSSUciWFZyp4XjBzWzJpVDVfTThWSDxRRT5OQj9HPUJBOUQ9N0Y5NUc3M0g0MUkuLUsmKE4gJFAeI1EdIlEbIVEZH1IXHlQTG1URGVUPGVYMF1cJFVkHE1kGE1oFEloDEFsCEFwCEFsBD1txBOawAAABtklEQVR42sWW2XKCMBSG2WSHkLBLQFYFEfv+b1cwgtAZhdDpNBckZ8LHSf6zDEz3i8H8HZxl+2FfVf0dMGHustzMzG3wHcqAHBvXwwQkdN/u2RCJrwKGwVfv+GBSHBuH5WMuE4x6zfIQ71DbdrrIoxDseJuWiSYIcvnaKtZgXwGXycgFIZ6MM1LdFTgSrJcRADALknnAK3Bxa2aWg3B6Ho1T19AI1loSCJt96alBloXSztyWZJY1ebQVTpawxLIqn75/YQEjJZznsKLIoizPcz5U0FvYEfT553WtH/oY8+GhCvZbOLaGNMgNh6RVzDEMR059cY1q+LoVrwgWCdpYXAwzpozEx5vUbuoxrRDDjEs/vFFW1VHXo909LDocaOAf3VIUP24v4aN5JAXZLODrlRRlv/0BtkUS1hK47QN+ZHZrg/rZ2tAHOPWDZ4SNx6yqBOJIL8JuskGwzCN17zrkNk/PVGoXEBW7Q1Xy3IkOTm17upk1NfsMonyLZ0Wc3AE4ri6iUm2Bw1fZWVMrrT2P5s7tCBf0gmEzqDob9i71mBo+8X1VV9XQPTA1nAdPh4Gf/8MPzcr4BuseiJPwRogNAAAAAElFTkSuQmCC"
       width="30" height="20" alt="Flag of Indiana"><span>Indianapolis<span
       class="st">Indiana</span></span></span></td>
   <td class="num pop">901,116 <span class="gap">(+75,037)</span></td>
@@ -285,9 +310,9 @@ July 1, 2025.</p>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Indianapolis: +1.5% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>13,469 people gained since 2020, +1.5%</title><rect x="118.0" y="4" width="11.1" height="11" rx="3" fill="#3987e5"/><rect x="118.0" y="4" width="3" height="11" fill="#3987e5"/></g><text x="135.1" y="13.5" text-anchor="start" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">+1.5%</text></svg></td>
   <td class="num">+13,469</td>
 </tr>
-<tr>
+<tr class="crow" data-i="16" data-pop="826079" data-pct="-5.972" data-chg="-52471">
   <td class="rank">17</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-ca.png"
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEX9/f339vXl5N/c0czNysHPvbe+t6y6sqaouqegtqC3rqGqoZHDiHC0hFmnk32dk4GUhnJtl3ZYh2F4gmexflmmelGddEyXck6UbkmPakWGeWOCdF2Ia0qGZUKBYT54ZEh2WzpObEVyWDdhVjgleUQcekIPez8LfT8cdD3JT2edO0FmTzFjTS9fTjBdSSu3FDU23esuAAABx0lEQVR42u2UXW+bMBSGDfhjsUvsUmwwno2BNE1lA///383RpCnaGo0STdpFnxtfPeccf70AfLGTIn9ApmS3it7XdS12T72uT7tbP1GEdsvZn7OQvdvIRNCtbowx0zT1/FM3wUN0qi6l1mpcFmed2Nr02ATfRqXKWpYJvyjZtBtt0TZR61hLrWybZJfkup23HUBoZBNi9LX2VpfKRqelit5scXG0vnQxhlo7JeW4hNbqENt5i/xdal+OMarSu7KUbWrchMXqLXPnIS6j97yvnU9b98sy6uC1CjPb0toEzwG01s0JQY+NHrWdre02X7SxIUA2K5Yhpa0gs5X9VhcrPaEsY+6YodabPIdiinCbC/t5Hl5e0tPs6TEM1fPhwMzM/2bD6nS5nIZpOP3icn5LXM5pOVf3zUN1+cnphte3W17vfZGiumEY0rTP/PDtN/J/EJ8U5iRLhTGBFPOiSIF4fRc5KQhEGBaQFRBA+HFOMopNjlORnAguqOlAYVK+oB6jTHScEkEZ4OJjmQI2XmUOCeOGjAaQPsUa6jDNOOMUe3KV7/xjwToo8msRwxkxAlCW2iCKaarJuyQbzIUB/wPvDwDWB/iSP8kPVcN6j4e9dScAAAAASUVORK5CYII="
       width="30" height="20" alt="Flag of California"><span>San Francisco<span
       class="st">California</span></span></span></td>
   <td class="num pop">826,079 <span class="gap">(+41,302)</span></td>
@@ -295,9 +320,9 @@ July 1, 2025.</p>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="San Francisco: −6.0% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>52,471 people lost since 2020, −6.0%</title><rect x="74.2" y="4" width="43.8" height="11" rx="3" fill="#d55181"/><rect x="115.0" y="4" width="3" height="11" fill="#d55181"/></g><text x="68.2" y="13.5" text-anchor="end" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">−6.0%</text></svg></td>
   <td class="num">−52,471</td>
 </tr>
-<tr>
+<tr class="crow" data-i="17" data-pop="784777" data-pct="6.468" data-chg="47674">
   <td class="rank">18</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-wa.png"
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEXv7+/i5ufv1LznyLrrxR3sxRzdvm/kvhzivRuuwIxMvtA0vdg0vNUzu9bKsljRsBvZtRrUsRjOrBi/pCvAoRe4mRalnWGrkiOiiiaghhKHm3yHh1xEsbVTlIcAg1aRfR59dz9rbC5ZWzsPclIAflIoWS4CYj9OSywzRCcNSSkMPSEvMCQXJhgREg8GBgUDAwPxSm4xAAABv0lEQVR42u3VXXejIBAGYAlwojGJSJlaMC7VVfCDuP//33XodS+wuzd7Tuf+YQBfxuzXX1T2g/8ddsu6Lu47eFzWXuneb2EZj2LnGyaFBZErG9wxvPQKzkoqwAVU5d0R7KyqdV693O+i1lWtepeOXa+tvJtHiXV5FQrga/0VHuezbH7fEBJyKctHA1atqXhRjHXYlmRZRopr2b1VwrpEPEnWdrfycsLKCtQtSJjTsLMaOjytiZiQ1pRXq60ak/AioLl+YmqKghpTYmvgSxKezvUr2ocxZmgL05pb+QA4hyQ8M/aGuDMnQ2lcoYsXXvsjeDAU8bC1iK9KJ+KJ8ZfPzrSgxfbcNzyCkDINr4xVMVu0MLQNPmBaOgb1loY5z2MyL/REt2F43uJtK74m4SCsaGNrMjzDEPapLK3S2qV95ya37xEb4nHX+z49ZGX7tISNwdZx333AbA87FgasmlIfBuQ5jh9vSDZsEWtrmzH5Sea5mMNACf0TseZWLAeGAdPQeELMtu0bAEg/HhhDvawrLmyjtWQYkCNjCPVWc467tZBzJo8NwHjl/TmHCjiXfh0P/zHcOvvez+vqfn6x/z/+AAD9Cgi9USFsAAAAAElFTkSuQmCC"
       width="30" height="20" alt="Flag of Washington"><span>Seattle<span
       class="st">Washington</span></span></span></td>
   <td class="num pop">784,777 <span class="gap">(+44,164)</span></td>
@@ -305,9 +330,9 @@ July 1, 2025.</p>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Seattle: +6.5% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>47,674 people gained since 2020, +6.5%</title><rect x="118.0" y="4" width="47.4" height="11" rx="3" fill="#3987e5"/><rect x="118.0" y="4" width="3" height="11" fill="#3987e5"/></g><text x="171.4" y="13.5" text-anchor="start" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">+6.5%</text></svg></td>
   <td class="num">+47,674</td>
 </tr>
-<tr>
+<tr class="crow" data-i="18" data-pop="740613" data-pct="3.509" data-chg="25104">
   <td class="rank">19</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-co.png"
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEX+/v756+z019382kv+1xX+1w7+1Q7+1gf+1QDxxrH1xUj4yTXsqGDllm+9jpeZj6uWj6yui6Xhgk6+goHXa4HdcTqsWnnRUFjPS2bKOU0BKWjDITrCGDXAEjS+CzCyDDOfDziWEDuRET2AFEFzFkZjGEpYG05MHFEzIFkrIVshIl4YJGAPJWIMJWQFKGYAKGjTbekrAAABIklEQVR42u3U23KCMBCA4RSxRKAqjFZb6iKUo2D3/d+uHFKBiONGeul/l5l8Awkk7HNC7In/B5envHgM55EPVX6YnlVxFsAlP1HDMQw65nRcBiCXkHEI12VEHI9YOP7cwk7Xav3+N9+zLMt0D2IUrptWjhQbtBezbYPX6a4YL9n9tHbqweQi460ebjSCZUvxXH7J2Hk0ytimffC8w3zGqLVL3vYsn5PxR4PdPjamYF3xtXf8oTW3GwazPtaoeAHyjukeUD/VC8gfuvnF9prCoqs90xv6uhXjxY353amo6g6GbVqm/SVGgTMew0Hp2JGEAseTMEYjNkYixuurJEIyLmWdIB1X6+7fgVGBShjxFLeX/nd6RlTFtc/yEu/FcEJPrNgvxTn1dSkf91gAAAAASUVORK5CYII="
       width="30" height="20" alt="Flag of Colorado"><span>Denver<span
       class="st">Colorado</span></span></span></td>
   <td class="num pop">740,613 <span class="gap">(+19,539)</span></td>
@@ -315,9 +340,9 @@ July 1, 2025.</p>
   <td class="chg"><svg class="chg" viewBox="0 0 250 20" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Denver: +3.5% since 2020"><line x1="118" y1="1" x2="118" y2="19" stroke="#383835"/><g><title>25,104 people gained since 2020, +3.5%</title><rect x="118.0" y="4" width="25.7" height="11" rx="3" fill="#3987e5"/><rect x="118.0" y="4" width="3" height="11" fill="#3987e5"/></g><text x="149.7" y="13.5" text-anchor="start" font-size="10.5" fill="#c3c2b7" font-variant-numeric="tabular-nums">+3.5%</text></svg></td>
   <td class="num">+25,104</td>
 </tr>
-<tr>
+<tr class="crow" data-i="19" data-pop="721074" data-pct="4.587" data-chg="31625">
   <td class="rank">20</td>
-  <td class="ct"><span class="cw"><img class="flag" src="https://flagcdn.com/w80/us-tn.png"
+  <td class="ct"><span class="cw"><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAMAAACVZWnNAAAAkFBMVEX99PT19vn09fjw8fbq6O7h4enX3efW1+HN1eLR0NzPydS9w9S/vMy0vdC+tsW8r76msMezpLWbqMGVpL6vjZ+zg5OLkKxziKtieKCMbYetTl1UbJhIZJJDYI89WYozUoUqSoAhQ3sbPne3Mjs/PGsRNnINM3AKMG4HLmwGLWwGLWu7Iyq/GB7IBggFLGvMAABxTD7kAAABPElEQVR42u3Vy3aDIBAA0Kgx8W1ECdQERTw+WnX6/3/XIaZ7SJfNLDhuLgzDgIfvl+LwpePwxv8arzQ6hnnVv4A3mnI5qoaTYrXFfSIm2KNNejvcJwrI51N30WKD10zB7N2eGGRmgyk66QSM8F1zao63ZCKBgxEMcFcASmWbMa4ZDMxDOwIwnxN/5rUxrlqAGRf2sODCdd0LSGqMM0QKt5zeYOKIGcy5Mc51kQjmLGWA1sW6m+Ps94yaqRWlW8ZxV9itrLsjwOF20l+VMS7weEAwWWrXMj2DebVr3RvKdzyNhwGHdDFvEqKTLnWXpO0j/7NFe340KGI86AvTO4CQ2tyqYoQWFz7thbv6VldyLQdx7647bo6L5WMQY+Zj+rhSYW/7DC3ZhQkFg0iq7YUHsC4iP8xp//5jvPHf8A+GhZRp9EYu9gAAAABJRU5ErkJggg=="
       width="30" height="20" alt="Flag of Tennessee"><span>Nashville<span
       class="st">Tennessee</span></span></span></td>
   <td class="num pop">721,074 <span class="gap">(+1,225)</span></td>
@@ -327,31 +352,152 @@ July 1, 2025.</p>
 </tr>
 <tr class="total"><td></td><td>All twenty together</td><td class="num">35,021,490</td><td>10.2% of the country</td><td>+1.2% since 2020</td><td class="num">+405,101</td></tr>
 </tbody>
-</table>
+</table></div>
 
 <h2>How to read this</h2>
 <p class="note">The twenty largest cities by population, with each one's share of
-the country and how far it has moved since the 2020 census. Growth runs right on
-the change bars and decline runs left, on one scale for all twenty. 14
-of them have grown since 2020 and 6 have lost people.</p>
+the country and its change since the 2020 census. These are city limits, not metro
+areas, which is why Phoenix outranks Philadelphia. Growth runs right on the change
+bars, decline left, on one scale. 14 have grown since 2020 and
+6 have lost people.</p>
+
+<details class="sources"><summary>Sources</summary>
+<h2>Notes</h2>
 <p class="note">The green figure after a population is how many more people that
 city has than the one ranked below it. Nashville is last on the list, so its
 comparison is Oklahoma City at rank twenty-one.</p>
-
-<h2>Notes</h2>
 <p class="note">Populations are Census Bureau estimates for July 1, 2025, and the
 comparison year is the April 1, 2020 estimates base. These are city limits, not
 metropolitan areas, which is why Phoenix outranks Philadelphia here and why no
 figure for New York includes its suburbs. Indianapolis and Nashville are the
 consolidated city and county governments minus the towns that stayed separate,
-the balance figures the Census Bureau publishes for them. Flags are the state
-flags, served by <a href="https://flagcdn.com" style="color:var(--accent)">FlagCDN</a>.</p>
+the balance figures the Census Bureau publishes for them. The flags are the state
+flags, baked into the page from the us-state-flags package. On the map each dot
+sits on the city center and its area is proportional to the population; the
+colors are the population tiers of the state and city pages.</p>
 
 <h2>References</h2>
 <div class="refs">
 <p>U.S. Census Bureau. (2026). Annual estimates of the resident population for incorporated places: April 1, 2020 to July 1, 2025 (Vintage 2025 population estimates) [Data set]. Retrieved August 14, 2026, from. <a href="https://www.census.gov/programs-surveys/popest.html">https://www.census.gov/programs-surveys/popest.html</a></p>
 <p>U.S. Census Bureau. (2026). State population totals and components of change: 2020 to 2025 (Vintage 2025 population estimates) [Data set]. Retrieved August 14, 2026, from. <a href="https://www.census.gov/programs-surveys/popest.html">https://www.census.gov/programs-surveys/popest.html</a></p>
+<p>GitHub. (n.d.). <i>Us cities top 1k</i>. Retrieved September 4, 2026, from <a href="https://github.com/plotly/datasets/blob/master/us-cities-top-1k.csv">https://github.com/plotly/datasets/blob/master/us-cities-top-1k.csv</a><span class="ann">City coordinates: Plotly, us-cities-top-1k [Data set].</span></p>
+<p>Natural Earth. (n.d.). <i>Natural Earth vector, 1:10m cultural and physical layers</i> [Data set]. Public domain. <a href="https://www.naturalearthdata.com/">https://www.naturalearthdata.com/</a><span class="ann">Map outlines: Natural Earth, 50m states and provinces.</span></p>
+<p>npmjs.com. (n.d.). <i>Us state flags</i>. Retrieved September 4, 2026, from <a href="https://www.npmjs.com/package/us-state-flags">https://www.npmjs.com/package/us-state-flags</a><span class="ann">State flags: us-state-flags, version 1.0.7 (ISC license), rasterized at 60 by 40 pixels.</span></p>
 </div>
+</details>
 </div>
+<script>
+const C=[{"n":"New York","st":"New York","pop":8584629,"chg":-220965,"pct":-2.5,"share":2.51,"rank":1,"gap":4715540,"nxt":"Los Angeles","x":410.8,"y":101.5,"r":13.0,"lab":true,"href":"new-york.html","lp":"a"},{"n":"Los Angeles","st":"California","pop":3869089,"chg":-30253,"pct":-0.8,"share":1.13,"rank":2,"gap":1137504,"nxt":"Chicago","x":127.5,"y":155.2,"r":8.7,"lab":true,"href":"los-angeles.html","lp":"a"},{"n":"Chicago","st":"Illinois","pop":2731585,"chg":-16748,"pct":-0.6,"share":0.8,"rank":3,"gap":334270,"nxt":"Houston","x":323.6,"y":91.5,"r":7.3,"lab":true,"href":null,"lp":""},{"n":"Houston","st":"Texas","pop":2397315,"chg":97666,"pct":4.2,"share":0.7,"rank":4,"gap":731834,"nxt":"Phoenix","x":274.0,"y":187.6,"r":6.9,"lab":true,"href":null,"lp":""},{"n":"Phoenix","st":"Arizona","pop":1665481,"chg":57132,"pct":3.6,"share":0.49,"rank":5,"gap":91200,"nxt":"Philadelphia","x":167.0,"y":159.9,"r":5.7,"lab":true,"href":null,"lp":""},{"n":"Philadelphia","st":"Pennsylvania","pop":1574281,"chg":-29519,"pct":-1.8,"share":0.46,"rank":6,"gap":25859,"nxt":"San Antonio","x":403.4,"y":107.8,"r":5.6,"lab":true,"href":null,"lp":"b"},{"n":"San Antonio","st":"Texas","pop":1548422,"chg":115074,"pct":8.0,"share":0.45,"rank":7,"gap":142316,"nxt":"San Diego","x":254.0,"y":190.1,"r":5.5,"lab":false,"href":null,"lp":""},{"n":"San Diego","st":"California","pop":1406106,"chg":21625,"pct":1.6,"share":0.41,"rank":8,"gap":76615,"nxt":"Dallas","x":134.5,"y":165.5,"r":5.3,"lab":false,"href":null,"lp":""},{"n":"Dallas","st":"Texas","pop":1329491,"chg":25150,"pct":1.9,"share":0.39,"rank":9,"gap":301374,"nxt":"Fort Worth","x":264.9,"y":165.0,"r":5.1,"lab":false,"href":null,"lp":""},{"n":"Fort Worth","st":"Texas","pop":1028117,"chg":109225,"pct":11.9,"share":0.3,"rank":10,"gap":10428,"nxt":"Jacksonville","x":261.5,"y":165.2,"r":4.5,"lab":false,"href":null,"lp":""},{"n":"Jacksonville","st":"Florida","pop":1017689,"chg":68082,"pct":7.2,"share":0.3,"rank":11,"gap":15057,"nxt":"Austin","x":361.8,"y":183.4,"r":4.5,"lab":false,"href":null,"lp":""},{"n":"Austin","st":"Texas","pop":1002632,"chg":44481,"pct":4.6,"share":0.29,"rank":12,"gap":12818,"nxt":"San Jose","x":258.8,"y":183.8,"r":4.4,"lab":false,"href":null,"lp":""},{"n":"San Jose","st":"California","pop":989814,"chg":-23507,"pct":-2.3,"share":0.29,"rank":13,"gap":25030,"nxt":"Charlotte","x":104.2,"y":129.3,"r":4.4,"lab":false,"href":null,"lp":""},{"n":"Charlotte","st":"North Carolina","pop":964784,"chg":90076,"pct":10.3,"share":0.28,"rank":14,"gap":26388,"nxt":"Columbus","x":367.0,"y":146.1,"r":4.4,"lab":false,"href":null,"lp":""},{"n":"Columbus","st":"Ohio","pop":938396,"chg":32181,"pct":3.6,"share":0.27,"rank":15,"gap":37280,"nxt":"Indianapolis","x":353.2,"y":107.8,"r":4.3,"lab":false,"href":null,"lp":""},{"n":"Indianapolis","st":"Indiana","pop":901116,"chg":13469,"pct":1.5,"share":0.26,"rank":16,"gap":75037,"nxt":"San Francisco","x":333.0,"y":109.4,"r":4.2,"lab":false,"href":null,"lp":""},{"n":"San Francisco","st":"California","pop":826079,"chg":-52471,"pct":-6.0,"share":0.24,"rank":17,"gap":41302,"nxt":"Seattle","x":100.8,"y":125.8,"r":4.0,"lab":false,"href":null,"lp":""},{"n":"Seattle","st":"Washington","pop":784777,"chg":47674,"pct":6.5,"share":0.23,"rank":18,"gap":44164,"nxt":"Denver","x":101.4,"y":39.8,"r":3.9,"lab":false,"href":null,"lp":""},{"n":"Denver","st":"Colorado","pop":740613,"chg":25104,"pct":3.5,"share":0.22,"rank":19,"gap":19539,"nxt":"Nashville","x":212.4,"y":109.6,"r":3.8,"lab":false,"href":null,"lp":""},{"n":"Nashville","st":"Tennessee","pop":721074,"chg":31625,"pct":4.6,"share":0.21,"rank":20,"gap":1225,"nxt":"Oklahoma City","x":329.0,"y":138.7,"r":3.8,"lab":false,"href":null,"lp":""}];
+const DEF=[["U.S. population", "341.8 million", "341,784,857 in 2025"], ["Largest city", "New York", "8,584,629 people"], ["Fastest growth", "+11.9%", "Fort Worth since 2020"], ["Steepest decline", "−6.0%", "San Francisco since 2020"]];
+const CAP0="Each dot's area is its city's population";
+const REDUCED=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let sel=null, sortKey='pop';
+const map=document.getElementById('cmap'), labs=document.getElementById('labs');
+const cap=document.getElementById('mapcap');
+const tb=document.getElementById('tb'), tbl=document.getElementById('tbl');
+const fmtC=n=>n.toLocaleString('en-US');
+const big=n=>n>=1e6?(n/1e6).toFixed(2)+' million':fmtC(n);
+const sg=v=>(v>0?'+':'−');
+function setTiles(a){ a.forEach((t,i)=>{
+  document.getElementById('l'+(i+1)).textContent=t[0];
+  document.getElementById('v'+(i+1)).textContent=t[1];
+  document.getElementById('s'+(i+1)).textContent=t[2]; }); }
+function capFor(i){ const d=C[i];
+  return d.n+', '+d.st+' · '+fmtC(d.pop)+' · '+sg(d.chg)+Math.abs(d.pct).toFixed(1)+'% since 2020'; }
+// names on the map: the largest few always, and whichever city is lit
+function drawLabels(extra){
+  const on=new Set(C.map((d,i)=>d.lab?i:-1).filter(i=>i>=0));
+  if(sel!=null) on.add(sel); if(extra!=null) on.add(extra);
+  let s='';
+  on.forEach(i=>{ const d=C[i];
+    let x, y=d.y+3, an='start';
+    if(d.lp==='a'){ x=d.x; y=d.y-d.r-3; an='middle'; }
+    else if(d.lp==='b'){ x=d.x; y=d.y+d.r+9; an='middle'; }
+    else if(d.x>400){ x=d.x-d.r-2.5; an='end'; }
+    else x=d.x+d.r+2.5;
+    s+='<text x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" text-anchor="'+an+'">'+d.n+'</text>'; });
+  labs.innerHTML=s;
+}
+function apply(i){
+  sel=i;
+  document.querySelectorAll('#cmap .dot').forEach(g=>g.classList.toggle('sel',+g.dataset.i===i));
+  document.querySelectorAll('tr.crow').forEach(t=>t.classList.toggle('sel',+t.dataset.i===i));
+  drawLabels(null);
+  if(i==null){ setTiles(DEF); cap.textContent=CAP0; return; }
+  const g=map.querySelector('.dot[data-i="'+i+'"]'); if(g) g.parentNode.appendChild(g);
+  const d=C[i];
+  setTiles([
+    [d.n, big(d.pop), 'No. '+d.rank+' of 20 · '+d.st],
+    ['Share of the U.S.', d.share.toFixed(2)+'%', 'of 341,784,857 people'],
+    ['Change since 2020', sg(d.chg)+Math.abs(d.pct).toFixed(1)+'%', sg(d.chg)+fmtC(Math.abs(d.chg))+' people'],
+    ['Lead over next rank', '+'+fmtC(d.gap), 'over '+d.nxt]]);
+  cap.textContent=capFor(i);
+}
+function hl(i){
+  document.querySelectorAll('#cmap .dot.hl').forEach(g=>g.classList.remove('hl'));
+  document.querySelectorAll('tr.crow.hl').forEach(t=>t.classList.remove('hl'));
+  drawLabels(i);
+  if(i==null){ cap.textContent=sel!=null?capFor(sel):CAP0; return; }
+  const g=map.querySelector('.dot[data-i="'+i+'"]'); if(g) g.classList.add('hl');
+  const t=document.querySelector('tr.crow[data-i="'+i+'"]'); if(t) t.classList.add('hl');
+  cap.textContent=capFor(i);
+}
+document.querySelectorAll('tr.crow').forEach(t=>{
+  const i=+t.dataset.i;
+  t.addEventListener('click',e=>{ if(e.target.closest('a')) return; apply(sel===i?null:i); });
+  t.addEventListener('pointerenter',()=>hl(i));
+  t.addEventListener('pointerleave',()=>hl(null));
+});
+document.querySelectorAll('#cmap .dot').forEach(g=>{
+  const i=+g.dataset.i;
+  g.addEventListener('click',()=>apply(sel===i?null:i));
+  g.addEventListener('pointerenter',()=>hl(i));
+  g.addEventListener('pointerleave',()=>hl(null));
+});
+drawLabels(null);
+
+// ---- order: the rows slide to their new places ----
+function rowsNow(){ return [...tb.querySelectorAll('tr.crow')]; }
+function sortBy(key){
+  sortKey=key;
+  document.querySelectorAll('#sorts button').forEach(b=>b.classList.toggle('on',b.dataset.sort===key));
+  tbl.classList.toggle('sorted',key!=='pop');
+  const rs=rowsNow(), sub=tb.querySelector('tr.total.sub'), total=tb.querySelector('tr.total:not(.sub)');
+  const top0=new Map(rs.map(r=>[r,r.getBoundingClientRect().top]));
+  rs.sort((a,b)=>+b.dataset[key]-+a.dataset[key]);
+  rs.forEach(r=>tb.insertBefore(r,total));
+  if(key==='pop') tb.insertBefore(sub,rs[10]);
+  if(REDUCED) return;
+  rs.forEach(r=>{
+    const d=top0.get(r)-r.getBoundingClientRect().top;
+    if(!d) return;
+    r.style.transition='none'; r.style.transform='translateY('+d+'px)';
+  });
+  requestAnimationFrame(()=>requestAnimationFrame(()=>rs.forEach(r=>{
+    if(!r.style.transform) return;
+    r.style.transition='transform .8s cubic-bezier(.45,0,.55,1)'; r.style.transform='';
+  })));
+}
+document.querySelectorAll('#sorts button').forEach(b=>b.onclick=()=>sortBy(b.dataset.sort));
+
+// ---- arrow keys walk the rows, in the order shown, while the table or map has focus ----
+document.addEventListener('keydown',e=>{
+  const a=document.activeElement;
+  if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA')) return;
+  if(e.key==='Escape'){ apply(null); return; }
+  if(!(a===tbl||a===map||tbl.contains(a))) return;
+  const dn=e.key==='ArrowDown'||e.key==='ArrowRight', up=e.key==='ArrowUp'||e.key==='ArrowLeft';
+  if(!dn&&!up) return;
+  e.preventDefault();
+  const rs=rowsNow();
+  let k=rs.findIndex(r=>+r.dataset.i===sel);
+  k=k<0?(dn?0:rs.length-1):Math.max(0,Math.min(rs.length-1,k+(dn?1:-1)));
+  apply(+rs[k].dataset.i);
+  if(a!==map) rs[k].scrollIntoView({block:'nearest'});
+});
+window.__usc=()=>({sel, sortKey, tiles:[1,2,3,4].map(i=>document.getElementById('v'+i).textContent),
+  dots:document.querySelectorAll('#cmap .dot').length, labels:labs.querySelectorAll('text').length,
+  order:rowsNow().map(r=>C[+r.dataset.i].n)});
+</script>
 </body>
 </html>

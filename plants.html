@@ -49,7 +49,19 @@ h1 { margin:0 0 12px; font-size:26px; }
 .refs p { padding-left:2em; text-indent:-2em; }
 .refs .ann { color:#7d7d7d; display:block; padding-left:0; text-indent:0; margin-top:2px; }
 h2.refh { font-size:15px; margin:26px 0 8px; }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+.controls input[type=range] { width:180px; accent-color:var(--accent); }
+.presets { display:flex; gap:6px; flex-wrap:wrap; }
+.presets button { background:var(--panel); color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:5px 11px; font-size:12.5px; cursor:pointer; font-family:inherit; }
+.presets button:hover { color:var(--text); border-color:#3d3d3d; }
+.presets button.on { background:var(--accent); color:#0b1a2b; border-color:var(--accent); font-weight:600; }
+.controls .hint { font-size:12px; color:#7d7d7d; }
+#diagram { border-radius:8px; }
+details.sources { margin-top:22px; border-top:1px solid var(--line); padding-top:10px; max-width:760px; }
+details.sources > summary { cursor:pointer; color:var(--muted); font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; }
+details.sources > summary:hover { color:var(--accent); }
+details.sources .note { border-top:none; padding-top:0; margin-top:14px; }
+@media (max-width:900px){ .stage{flex-direction:column;} #diagram{width:100%; flex-basis:auto;} .side{position:static; width:100%; flex-basis:auto; order:-1;} }
+@media (max-width:600px){ #diagram{overflow-x:auto; -webkit-overflow-scrolling:touch;} #diagram svg{min-width:640px;} }
 </style>
 </head>
 <body>
@@ -60,7 +72,9 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 </header>
 <h1>Plants</h1>
 <div class="bar" id="views"><button data-v="parts" class="on">The parts</button><button data-v="light">The light</button><button data-v="kinds">The kinds</button></div>
-<div class="controls" id="lightCtl" hidden><label>the marker</label><output id="lamOut"></output></div>
+<div class="controls" id="partsCtl"><label for="sun">sunlight</label><input type="range" id="sun" min="0" max="100" step="1" value="100"><output id="sunOut">full sun</output><span class="hint">blue dots: water rising in the xylem; orange: sugar sinking in the phloem</span></div>
+<div class="controls" id="lightCtl" hidden><label>the marker</label><output id="lamOut"></output><span class="presets"><button type="button" id="leafBtn">Through a leaf</button></span><span class="hint">the marker drags along the spectrum</span></div>
+<div class="controls" id="kindsCtl" hidden><span class="presets"><button type="button" id="growBtn">Play the arrivals &#9654;</button></span><span class="hint">each kind rises as the line of time reaches it; the timeline in full is on <a href="earth-history.html" style="color:var(--accent)">Earth History</a></span></div>
 <div class="stage">
   <div id="diagram"></div>
   <div class="side"><div class="card">
@@ -71,10 +85,10 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
     <div id="srcTxt"></div>
   </div></div>
 </div>
-<p class="note">A plant is a machine for standing in the light. Roots hold it and draw water; the stem lifts the leaves and runs two pipelines, water up and sugar down; the leaves catch light and swap gases through pores; the flower is for sex and the fruit for travel. Every part is under the pointer, with what it does and one number that says how much.</p>
-<p class="note" style="border-top:none; padding-top:0;">The second view is the light itself. Chlorophyll takes the blue and the red and lets the green through, which is why leaves are the color they are, and what it takes goes into pulling carbon dioxide and water apart and rebuilding them as sugar, with oxygen left over: a hundred billion metric tons of carbon a year, half on land, half in the sea. The third view is who does it: four kinds of land plant, and when each arrived.</p>
-<div class="method"><p>The plant is a diagram, not a species. The absorption curves are drawn as sums of Gaussians at the measured peaks of chlorophyll a and b in ether, 430 and 662 nm and 453 and 642, with the relative heights of the published spectra; in a leaf the peaks shift a few nanometers and other pigments fill in some of the green. The spectrum's colors come from the CIE matching functions, as on the Light page. Production is Field and colleagues' 1998 estimate, still the standard one; species counts are Kew's, which change with every revision; the dates of first appearance are the fossil record's and are argued over by tens of millions of years.</p></div>
-<h2 class="refh">References</h2>
+<p class="note">A plant is a machine for standing in the light. Roots hold it and draw water; the stem lifts the leaves and runs two pipelines, water up and sugar down; leaves catch light and swap gases through pores; the flower is for sex and the fruit for travel. Every part answers under the pointer, with one number.</p>
+<details class="sources"><summary>Sources</summary>
+<p class="note">The second view is the light itself. Chlorophyll takes the blue and the red and lets the green through, which is why leaves are the color they are, and what it takes goes into pulling carbon dioxide and water apart and rebuilding them as sugar, with oxygen left over: a hundred billion metric tons of carbon a year, half on land, half in the sea. The third view is who does it: four kinds of land plant, and when each arrived.</p>
+<div class="method"><p>The plant is a diagram, not a species. The absorption curves are drawn as sums of Gaussians at the measured peaks of chlorophyll a and b in ether, 430 and 662 nm and 453 and 642, with the relative heights of the published spectra; in a leaf the peaks shift a few nanometers and other pigments fill in some of the green. The spectrum's colors come from the CIE matching functions, as on the Light page. Production is Field and colleagues' 1998 estimate, still the standard one; species counts are Kew's, which change with every revision; the dates of first appearance are the fossil record's and are argued over by tens of millions of years. The flows in the stem are drawn, not measured: the water slows with the light because most plants close their stomata in the dark, and the sugar keeps its pace on starch stored by day. The through-a-leaf strip dims the spectrum by the two drawn curves scaled to their joint peak, a sketch of one pass through chlorophyll rather than a measured leaf.</p></div>
 <div class="refs"><p>Field, C. B., Behrenfeld, M. J., Randerson, J. T., &amp; Falkowski, P. (1998). Primary production of the biosphere: Integrating terrestrial and oceanic components. <i>Science, 281</i>(5374), 237-240. <a href="https://doi.org/10.1126/science.281.5374.237">https://doi.org/10.1126/science.281.5374.237</a><span class="ann">The biosphere's production, 105 billion metric tons of carbon a year, split near evenly between land and sea.</span></p>
 <p>Dittmer, H. J. (1937). A quantitative study of the roots and root hairs of a winter rye plant (Secale cereale). <i>American Journal of Botany, 24</i>(7), 417-420. <a href="https://doi.org/10.1002/j.1537-2197.1937.tb09121.x">https://doi.org/10.1002/j.1537-2197.1937.tb09121.x</a><span class="ann">One rye plant's fourteen billion root hairs, 10,000 km of them.</span></p>
 <p>Ollerton, J., Winfree, R., &amp; Tarrant, S. (2011). How many flowering plants are pollinated by animals?. <i>Oikos, 120</i>(3), 321-326. <a href="https://doi.org/10.1111/j.1600-0706.2010.18644.x">https://doi.org/10.1111/j.1600-0706.2010.18644.x</a><span class="ann">About 87.5 percent of flowering plant species are pollinated by animals.</span></p>
@@ -95,6 +109,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <p>Fern. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Fern">https://en.wikipedia.org/wiki/Fern</a></p>
 <p>Gymnosperm. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Gymnosperm">https://en.wikipedia.org/wiki/Gymnosperm</a></p>
 <p>Flowering plant. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Flowering_plant">https://en.wikipedia.org/wiki/Flowering_plant</a></p></div>
+</details>
 </div>
 <script>
 const PARTS=[{"k":"root","n":"the roots","b":"Anchor the plant and draw up water and minerals through hairs a tenth of a millimeter across, of which a single rye plant was found to have fourteen billion. Nothing green happens here; roots are fed sugar from above.","num":"a rye plant's root hairs, laid end to end: 10,000 km","s":"Dittmer 1937; Wikipedia, Root"},{"k":"stem","n":"the stem","b":"Holds the leaves up to the light and carries traffic both ways: water and minerals up through the xylem, dead tubes pulled by evaporation at the leaves, and sugar down through the phloem, living tubes pushed by pressure.","num":"water rises in a tall tree at up to a meter a minute, and the pull at the top of the tallest reaches twenty or thirty atmospheres","s":"Wikipedia, Xylem; Wikipedia, Phloem"},{"k":"leaf","n":"the leaf","b":"A flat solar panel. Light is caught in chloroplasts in the cells beneath the surface; carbon dioxide enters through pores, the stomata, and water leaves through them, some 97 percent of all the water the roots take up.","num":"stomata: a hundred to a thousand on every square millimeter","s":"Wikipedia, Leaf; Wikipedia, Stoma"},{"k":"flower","n":"the flower","b":"The organ of sex, built to be visited. Petals advertise; stamens make pollen; the pistil at the center receives it and grows the seeds. Most flowering plants have both sexes in one flower.","num":"about nine tenths of flowering plants are pollinated by animals","s":"Ollerton et al. 2011; Wikipedia, Flower"},{"k":"fruit","n":"the fruit and seed","b":"A seed is an embryo packed with food and sealed against drought; the fruit around it is the ovary grown up, sweet to be eaten and carried away, or winged, hooked or buoyant to travel some other way.","num":"the smallest seeds, orchids', weigh a millionth of a gram; the largest, the coco de mer's, twenty kilograms","s":"Wikipedia, Seed"},{"k":"chloroplast","n":"the chloroplasts","b":"Green bodies a few microns across inside the leaf cells, descended from a bacterium swallowed a billion and a half years ago and never digested. Each holds stacks of membranes studded with chlorophyll.","num":"a leaf cell holds tens to a hundred of them","s":"Wikipedia, Chloroplast"}], CHL={"a":{"peaks":[[430,22,1.0],[662,14,0.8]],"color":"#9be564"},"b":{"peaks":[[453,20,0.85],[642,16,0.4]],"color":"#6ee7f2"}}, PHOTO={"equation":"6 CO₂ + 6 H₂O + light → C₆H₁₂O₆ + 6 O₂","energy_kj":2870,"npp_pg":104.9,"npp_land":56.4,"npp_ocean":48.5,"efficiency":"one to two percent of the sunlight that falls on a field ends up as plant, against a theoretical ceiling near five"}, KINDS=[{"k":"moss","n":"mosses and liverworts","sp":20000,"ma":470,"b":"The first plants on land, and still without roots or veins: they soak up water where they sit and cannot grow tall. A moss needs a film of water for its sperm to swim to the egg.","s":"Wikipedia, Bryophyte"},{"k":"fern","n":"ferns and horsetails","sp":12000,"ma":420,"b":"The first plants with veins, xylem and phloem, and so the first to stand up; the coal forests were made of their giant relatives. They still spread by spores and still need water to breed.","s":"Wikipedia, Fern"},{"k":"conifer","n":"conifers and their kin","sp":1100,"ma":385,"b":"The first seeds: an embryo sealed with food, so a plant could breed without standing water and colonize the dry interior. Pines, firs, cypresses, ginkgo and the cycads, few in species but vast in numbers and size.","s":"Wikipedia, Gymnosperm"},{"k":"flower","n":"flowering plants","sp":369000,"ma":135,"b":"The latest and the most: nine of every ten plant species. Flowers recruited insects to carry pollen and fruits recruited animals to carry seeds, and in a hundred million years they took over the land.","s":"Wikipedia, Flowering plant"}];
@@ -102,6 +117,11 @@ const W=980;
 const el=document.getElementById('diagram');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 let view='parts', hot=null, lam=550, t0=performance.now();
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let sun=1, xPh=0, pPh=0, lastT=performance.now();   // sunlight 0 to 1, and the two flows' phases
+let leaf=0, leafOn=false;                            // the through-a-leaf strip, 0 to 1
+let grow=null, growRAF=null;                         // the arrivals: a date in Ma sweeping from 500 to 0
+const mix=(a,b,t)=>a+(b-a)*t, ease=t=>t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
 
 /* ---- color, as on the Light page ---- */
 const g=(l,mu,s1,s2)=>{ const s=l<mu?s1:s2; const t=(l-mu)/s; return Math.exp(-0.5*t*t); };
@@ -135,49 +155,59 @@ function showKinds(){ const tot=KINDS.reduce((a,y)=>a+y.sp,0); card('The kinds',
 
 /* ---- the parts ---- */
 function partsView(now){
-  const cx=330, ground=420; let s='';
-  s+='<rect x="40" y="'+ground+'" width="600" height="180" fill="#3a2f22" opacity="0.5"/><line x1="40" y1="'+ground+'" x2="640" y2="'+ground+'" stroke="#6b5a45"/>';
+  const cx=430, ground=420, LB='font-size="12.5" fill="#b8bfcc"'; let s='';
+  s+='<rect x="0" y="'+ground+'" width="'+W+'" height="180" fill="#3a2f22" opacity="0.5"/><line x1="0" y1="'+ground+'" x2="'+W+'" y2="'+ground+'" stroke="#6b5a45"/>';
   const on=k=>hot===k;
   // roots
   s+='<g data-part="root" style="cursor:pointer">';
   for(const [dx,dy,c1x,c1y] of [[-140,120,-40,60],[-70,150,-20,80],[0,160,0,80],[70,150,20,80],[140,120,40,60],[-100,60,-30,30],[100,70,30,30]]) s+='<path d="M'+cx+','+ground+' Q'+(cx+c1x)+','+(ground+c1y)+' '+(cx+dx)+','+(ground+dy)+'" fill="none" stroke="'+(on('root')?'#e6e6e6':'#a08a6a')+'" stroke-width="'+(Math.abs(dx)<10?5:3)+'" stroke-linecap="round"/>';
   for(let i=0;i<40;i++){ const t=i/40; const dx=-140+280*t, dy=60+90*Math.sin(t*Math.PI)+((i*37)%23); s+='<line x1="'+(cx+dx)+'" y1="'+(ground+dy)+'" x2="'+(cx+dx+((i%2)?6:-6))+'" y2="'+(ground+dy+4)+'" stroke="'+(on('root')?'#e6e6e6':'#a08a6a')+'" stroke-width="1" opacity="0.7"/>'; }
-  s+='<text x="'+(cx+170)+'" y="'+(ground+120)+'" font-size="11" fill="#9a9a9a">roots: water and minerals in</text></g>';
+  s+='<text x="'+(cx+170)+'" y="'+(ground+120)+'" '+LB+'>roots: water and minerals in</text></g>';
   // stem
   s+='<g data-part="stem" style="cursor:pointer"><path d="M'+(cx-9)+','+ground+' L'+(cx-7)+','+(ground-330)+' L'+(cx+7)+','+(ground-330)+' L'+(cx+9)+','+ground+' Z" fill="'+(on('stem')?'#5c8a4a':'#4a7a3a')+'" stroke="'+(on('stem')?'#e6e6e6':'#2f5a26')+'"/>';
   // sap: blue dots up the xylem, orange down the phloem
-  const ph=((now-t0)/1200)%1;
-  for(let i=0;i<8;i++){ const f=(i/8+ph)%1; s+='<circle cx="'+(cx-3)+'" cy="'+(ground-f*330).toFixed(1)+'" r="2.2" fill="#58a6ff"/><circle cx="'+(cx+3)+'" cy="'+(ground-330+f*330).toFixed(1)+'" r="2.2" fill="#ffb02e"/>'; }
-  s+='<text x="'+(cx+20)+'" y="'+(ground-150)+'" font-size="11" fill="#9a9a9a">stem: water up, sugar down</text></g>';
+  for(let i=0;i<8;i++){ const fx=(i/8+xPh)%1, fp=(i/8+pPh)%1; s+='<circle cx="'+(cx-3)+'" cy="'+(ground-fx*330).toFixed(1)+'" r="2.2" fill="#58a6ff"/><circle cx="'+(cx+3)+'" cy="'+(ground-330+fp*330).toFixed(1)+'" r="2.2" fill="#ffb02e"/>'; }
+  s+='<text x="'+(cx+20)+'" y="'+(ground-150)+'" '+LB+'>stem: <tspan fill="#58a6ff">water up</tspan>, <tspan fill="#ffb02e">sugar down</tspan></text></g>';
   // leaves
   const leaf=(x,y,dir,k)=>'<path d="M'+x+','+y+' Q'+(x+dir*60)+','+(y-70)+' '+(x+dir*130)+','+(y-40)+' Q'+(x+dir*60)+','+(y-10)+' '+x+','+y+' Z" fill="'+(on(k)?'#8cc86a':'#5aa64a')+'" stroke="'+(on(k)?'#e6e6e6':'#2f5a26')+'"/><path d="M'+x+','+y+' Q'+(x+dir*60)+','+(y-38)+' '+(x+dir*125)+','+(y-40)+'" fill="none" stroke="#2f5a26" stroke-width="1.2"/>';
   s+='<g data-part="leaf" style="cursor:pointer">'+leaf(cx-6,ground-120,-1,'leaf')+leaf(cx+6,ground-200,1,'leaf')+leaf(cx-6,ground-260,-1,'leaf');
-  s+='<text x="'+(cx-250)+'" y="'+(ground-190)+'" font-size="11" fill="#9a9a9a">leaf: light in, CO\u2082 in, water out</text></g>';
+  s+='<text x="'+(cx-142)+'" y="'+(ground-150)+'" text-anchor="end" '+LB+'>leaf: light in, CO\u2082 in, water out</text></g>';
   // the chloroplast inset, a magnified cell of the leaf
   s+='<g data-part="chloroplast" style="cursor:pointer"><line x1="'+(cx-60)+'" y1="'+(ground-150)+'" x2="'+(cx-150)+'" y2="'+(ground-40)+'" stroke="#3d444d" stroke-dasharray="3 3"/><circle cx="'+(cx-60)+'" cy="'+(ground-150)+'" r="4" fill="none" stroke="#9a9a9a"/>';
   s+='<rect x="'+(cx-250)+'" y="'+(ground-90)+'" width="130" height="90" rx="10" fill="#1b2a1b" stroke="'+(on('chloroplast')?'#e6e6e6':'#3d5a3d')+'"/>';
   for(const [dx,dy] of [[20,20],[55,18],[95,22],[25,52],[62,58],[100,55],[40,75],[80,78]]) s+='<ellipse cx="'+(cx-250+dx)+'" cy="'+(ground-90+dy)+'" rx="11" ry="7" fill="#5aa64a" stroke="#8cc86a"/>';
-  s+='<text x="'+(cx-185)+'" y="'+(ground+14)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">one leaf cell, its chloroplasts</text></g>';
+  s+='<text x="'+(cx-185)+'" y="'+(ground+16)+'" text-anchor="middle" '+LB+'>one leaf cell, its chloroplasts</text></g>';
   // flower
   const fy=ground-340;
   s+='<g data-part="flower" style="cursor:pointer">';
   for(let i=0;i<6;i++){ const a=i*Math.PI/3; s+='<ellipse cx="'+(cx+Math.cos(a)*28).toFixed(1)+'" cy="'+(fy+Math.sin(a)*28).toFixed(1)+'" rx="22" ry="13" transform="rotate('+(i*60)+' '+(cx+Math.cos(a)*28).toFixed(1)+' '+(fy+Math.sin(a)*28).toFixed(1)+')" fill="'+(on('flower')?'#ffb8d0':'#f28cb0')+'" stroke="'+(on('flower')?'#e6e6e6':'#b0507a')+'"/>'; }
   for(let i=0;i<6;i++){ const a=i*Math.PI/3+0.5; s+='<line x1="'+cx+'" y1="'+fy+'" x2="'+(cx+Math.cos(a)*14).toFixed(1)+'" y2="'+(fy+Math.sin(a)*14).toFixed(1)+'" stroke="#e6d27a" stroke-width="1.5"/><circle cx="'+(cx+Math.cos(a)*15).toFixed(1)+'" cy="'+(fy+Math.sin(a)*15).toFixed(1)+'" r="2.5" fill="#ffb02e"/>'; }
   s+='<circle cx="'+cx+'" cy="'+fy+'" r="6" fill="#b8e070" stroke="#5aa64a"/>';
-  s+='<text x="'+(cx+70)+'" y="'+(fy-40)+'" font-size="11" fill="#9a9a9a">flower: petals, stamens, pistil</text></g>';
+  s+='<text x="'+(cx+70)+'" y="'+(fy-40)+'" '+LB+'>flower: petals, stamens, pistil</text></g>';
   // fruit and seed, on a side branch
   s+='<g data-part="fruit" style="cursor:pointer"><path d="M'+(cx+6)+','+(ground-290)+' Q'+(cx+60)+','+(ground-300)+' '+(cx+90)+','+(ground-270)+'" fill="none" stroke="#4a7a3a" stroke-width="3"/>';
   s+='<ellipse cx="'+(cx+96)+'" cy="'+(ground-250)+'" rx="18" ry="22" fill="'+(on('fruit')?'#ff8c6a':'#e05a3a')+'" stroke="'+(on('fruit')?'#e6e6e6':'#8a3a2a')+'"/><ellipse cx="'+(cx+96)+'" cy="'+(ground-246)+'" rx="4" ry="6" fill="#5a2a1a"/>';
-  s+='<text x="'+(cx+125)+'" y="'+(ground-250)+'" font-size="11" fill="#9a9a9a">fruit, with the seed inside</text></g>';
+  s+='<text x="'+(cx+125)+'" y="'+(ground-250)+'" '+LB+'>fruit, with the seed inside</text></g>';
   // sun and gas arrows
-  s+='<circle cx="120" cy="70" r="26" fill="#ffb02e" opacity="0.9"/>';
-  for(const [x2,y2] of [[cx-100,ground-280],[cx-90,ground-160]]) s+='<line x1="140" y1="86" x2="'+x2+'" y2="'+y2+'" stroke="#ffb02e" stroke-dasharray="4 4" opacity="0.7"/>';
-  s+='<text x="90" y="118" font-size="11" fill="#9a9a9a">light</text>';
-  s+='<text x="'+(cx+150)+'" y="'+(ground-110)+'" font-size="11" fill="#9a9a9a">CO\u2082 in \u2192</text><text x="'+(cx+150)+'" y="'+(ground-94)+'" font-size="11" fill="#9a9a9a">\u2190 O\u2082 and water vapor out</text>';
+  // the sun, dimmed by the slider, and its rays to the leaves
+  s+='<g id="sunDisk"><circle cx="120" cy="70" r="'+(14+12*sun).toFixed(1)+'" fill="#ffb02e" opacity="'+(0.25+0.7*sun).toFixed(2)+'"/>';
+  for(let i=0;i<8;i++){ const a=i*Math.PI/4; s+='<line x1="'+(120+Math.cos(a)*32).toFixed(1)+'" y1="'+(70+Math.sin(a)*32).toFixed(1)+'" x2="'+(120+Math.cos(a)*(32+10*sun)).toFixed(1)+'" y2="'+(70+Math.sin(a)*(32+10*sun)).toFixed(1)+'" stroke="#ffb02e" stroke-width="2" stroke-linecap="round" opacity="'+sun.toFixed(2)+'"/>'; }
+  s+='</g>';
+  for(const [x2,y2] of [[cx-100,ground-280],[cx-90,ground-160],[cx+70,ground-240]]){ const dx=x2-140, dy=y2-86, L=Math.hypot(dx,dy), ux=dx/L, uy=dy/L;
+    s+='<line x1="'+(140+ux*24).toFixed(1)+'" y1="'+(86+uy*24).toFixed(1)+'" x2="'+(x2-ux*8).toFixed(1)+'" y2="'+(y2-uy*8).toFixed(1)+'" stroke="#ffd36e" stroke-width="2.4" stroke-linecap="round" opacity="'+(0.7*sun).toFixed(2)+'"/>'+
+       '<path d="M'+(x2-ux*2).toFixed(1)+','+(y2-uy*2).toFixed(1)+' l'+(-ux*11-uy*5).toFixed(1)+','+(-uy*11+ux*5).toFixed(1)+' l'+(uy*10).toFixed(1)+','+(-ux*10).toFixed(1)+' Z" fill="#ffd36e" opacity="'+(0.7*sun).toFixed(2)+'"/>'; }
+  s+='<text x="94" y="124" '+LB+'>'+(sun>0.02?'light, '+Math.round(sun*100)+'% of full sun':'night')+'</text>';
+  const day=sun>0.05;
+  s+='<text x="'+(cx+150)+'" y="'+(ground-110)+'" '+LB+'>'+(day?'CO\u2082 in \u2192':'\u2190 CO\u2082 out, from respiration')+'</text><text x="'+(cx+150)+'" y="'+(ground-94)+'" '+LB+'>'+(day?'\u2190 O\u2082 and water vapor out':'stomata mostly shut, water rising slowly')+'</text>';
   return {svg:s, h:ground+190};
 }
 
 /* ---- the light ---- */
+// transmission through the drawn chlorophyll: one minus the summed absorption, scaled to its peak
+const AMAX=(()=>{ let m=0; for(let nm=380;nm<=750;nm++) m=Math.max(m,absorb('a',nm)+absorb('b',nm)); return m; })();
+const trans=nm=>Math.max(0,1-(absorb('a',nm)+absorb('b',nm))/AMAX);
+function waveRgb(nm){ const rgb=xyzToRgb(xbar(nm),ybar(nm),zbar(nm)); const br=Math.min(1,Math.max(xbar(nm),ybar(nm),zbar(nm))/0.6); return rgb.map(v=>v*br); }
+function passColor(){ let X=0,Y=0,Z=0; for(let nm=380;nm<=750;nm++){ const T=trans(nm); X+=xbar(nm)*T; Y+=ybar(nm)*T; Z+=zbar(nm)*T; } return hex(xyzToRgb(X,Y,Z)); }
 const L={x:80,y:60,w:820,h:300,a:380,b:750};
 const LX=nm=>L.x+(nm-L.a)/(L.b-L.a)*L.w;
 function lightView(){
@@ -193,8 +223,13 @@ function lightView(){
     const pk=CHL[k].peaks[0]; s+='<text x="'+(LX(pk[0])+(k==='a'?-8:8)).toFixed(1)+'" y="'+(L.y+L.h-pk[2]*(L.h-30)-8).toFixed(1)+'" text-anchor="'+(k==='a'?'end':'start')+'" font-size="11" fill="'+CHL[k].color+'">chlorophyll '+k+'</text>'; }
   const mx=LX(lam);
   s+='<g id="marker" style="cursor:ew-resize"><line x1="'+mx.toFixed(1)+'" y1="'+L.y+'" x2="'+mx.toFixed(1)+'" y2="'+(L.y+L.h+26)+'" stroke="#ffb02e" stroke-width="1.5"/><circle cx="'+mx.toFixed(1)+'" cy="'+(L.y+L.h-absorb('a',lam)*(L.h-30)).toFixed(1)+'" r="5" fill="#ffb02e" stroke="#121212" stroke-width="1.5"/><text x="'+mx.toFixed(1)+'" y="'+(L.y-8)+'" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffb02e">'+lam+' nm</text></g>';
+  // through a leaf: the same spectrum dimmed by the drawn absorption, and the color of what is left
+  if(leaf>0.01){ const sy=L.y+L.h+72, hh=24*leaf;
+    s+='<g opacity="'+leaf.toFixed(2)+'"><text x="'+L.x+'" y="'+(sy-6)+'" font-size="12.5" fill="#b8bfcc">after the chlorophyll, as the curves above have it</text>';
+    for(let nm=L.a; nm<L.b; nm+=2){ const T=trans(nm+1); s+='<rect x="'+LX(nm).toFixed(1)+'" y="'+sy+'" width="'+((L.w/((L.b-L.a)/2))+0.6).toFixed(2)+'" height="'+hh.toFixed(1)+'" fill="'+hex(waveRgb(nm+1).map(v=>v*T))+'"/>'; }
+    s+='</g>'; }
   // the equation
-  const ey=L.y+L.h+100;
+  const ey=L.y+L.h+100+50*leaf;
   s+='<g data-photo="1" style="cursor:pointer"><rect x="'+L.x+'" y="'+(ey-30)+'" width="'+L.w+'" height="60" rx="8" fill="#161616" stroke="#2b2b2b"/><text x="'+(L.x+L.w/2)+'" y="'+(ey+6)+'" text-anchor="middle" font-size="18" fill="#e6e6e6">'+esc(PHOTO.equation)+'</text>';
   s+='<text x="'+(L.x+L.w/2)+'" y="'+(ey+50)+'" text-anchor="middle" font-size="11" fill="#9a9a9a">'+PHOTO.energy_kj.toLocaleString('en-US')+' kJ a mole of sugar; '+PHOTO.npp_pg+' billion metric tons of carbon a year across the planet</text></g>';
   return {svg:s, h:ey+70};
@@ -207,21 +242,53 @@ function kindsView(){
   for(const ma of [500,400,300,200,100,0]){ const x=TX(ma); s+='<line x1="'+x.toFixed(1)+'" y1="'+(y0+300)+'" x2="'+x.toFixed(1)+'" y2="'+(y0+306)+'" stroke="#8a94a6"/><text x="'+x.toFixed(1)+'" y="'+(y0+322)+'" text-anchor="middle" font-size="10.5" fill="#9a9a9a">'+(ma?ma+' million years ago':'today')+'</text>'; }
   const maxSp=Math.max(...KINDS.map(k=>k.sp)); const BH=240;
   const lanes=[];
-  KINDS.forEach((k,i)=>{ const x=TX(k.ma), h=Math.max(3,Math.log10(k.sp)/Math.log10(maxSp)*BH), on=hot===k.k;
+  if(grow!=null){ const gx=TX(grow); s+='<line x1="'+gx.toFixed(1)+'" y1="'+(y0+10)+'" x2="'+gx.toFixed(1)+'" y2="'+(y0+300)+'" stroke="#ffb02e" stroke-width="1.5" stroke-dasharray="4 3"/><text x="'+gx.toFixed(1)+'" y="'+(y0+4)+'" text-anchor="middle" font-size="12" font-weight="700" fill="#ffb02e">'+(grow>0.5?Math.round(grow)+' million years ago':'today')+'</text>'; }
+  KINDS.forEach((k,i)=>{ const x=TX(k.ma), full=Math.max(3,Math.log10(k.sp)/Math.log10(maxSp)*BH), on=hot===k.k;
+    const age=grow==null?1:Math.max(0,Math.min(1,(k.ma-grow)/40)), h=Math.max(age>0?3:0,full*ease(age));
+    if(grow!=null && age<=0){ s+='<g data-kind="'+k.k+'"></g>'; return; }
     s+='<g data-kind="'+k.k+'" style="cursor:pointer"><rect x="'+(x-22).toFixed(1)+'" y="'+(y0+300-h).toFixed(1)+'" width="44" height="'+h.toFixed(1)+'" rx="4" fill="'+['#9be564','#6ee7f2','#58a6ff','#f28cb0'][i]+'" opacity="'+(on?1:0.8)+'"/>';
     const top=Math.min(...KINDS.filter(j=>Math.abs(TX(j.ma)-x)<150).map(j=>y0+300-Math.max(3,Math.log10(j.sp)/Math.log10(maxSp)*BH)));
+    s+='<g opacity="'+Math.min(1,age*1.5).toFixed(2)+'">';
     let ly=top-22; while(lanes.some(([lx,l])=>Math.abs(lx-x)<150&&Math.abs(l-ly)<30)) ly-=30; lanes.push([x,ly]);
     if(ly<y0+300-h-22) s+='<line x1="'+x.toFixed(1)+'" y1="'+(ly+10)+'" x2="'+x.toFixed(1)+'" y2="'+(y0+300-h-2).toFixed(1)+'" stroke="#3d444d"/>';
-    s+='<text x="'+x.toFixed(1)+'" y="'+ly.toFixed(1)+'" text-anchor="middle" font-size="11.5" fill="'+(on?'#e6e6e6':'#9a9a9a')+'">'+esc(k.n)+'</text><text x="'+x.toFixed(1)+'" y="'+(ly+14).toFixed(1)+'" text-anchor="middle" font-size="10.5" fill="#6b7280">'+k.sp.toLocaleString('en-US')+' species</text></g>'; });
-  s+='<text x="'+x0+'" y="'+(y0-10)+'" font-size="11" fill="#9a9a9a">each bar stands where its kind first appears in the rocks; its height is the number of species alive now, on a log scale</text>';
+    s+='<text x="'+x.toFixed(1)+'" y="'+ly.toFixed(1)+'" text-anchor="middle" font-size="11.5" fill="'+(on?'#e6e6e6':'#9a9a9a')+'">'+esc(k.n)+'</text><text x="'+x.toFixed(1)+'" y="'+(ly+14).toFixed(1)+'" text-anchor="middle" font-size="11" fill="#8b949e">'+k.sp.toLocaleString('en-US')+' species</text></g></g>'; });
+  s+='<text x="'+x0+'" y="'+(y0-30)+'" font-size="12.5" fill="#b8bfcc">each bar stands where its kind first appears in the rocks; its height is the number of species alive now, on a log scale</text>';
   return {svg:s, h:y0+340};
 }
 
 /* ---- render and wiring ---- */
-function render(now){ const q=view==='parts'?partsView(now||performance.now()):view==='light'?lightView():kindsView(); el.innerHTML='<svg viewBox="0 0 '+W+' '+q.h+'" xmlns="http://www.w3.org/2000/svg" id="psvg"><rect width="'+W+'" height="'+q.h+'" fill="#121212"/>'+q.svg+'</svg>'; document.getElementById('lightCtl').hidden=view!=='light'; document.getElementById('lamOut').textContent=lam+' nm, '+colorName(lam); }
-function setView(v){ view=v; hot=null; for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render(); if(v==='parts') showPlant(); else if(v==='light') showLam(lam); else showKinds(); }
+function render(now){ const q=view==='parts'?partsView(now||performance.now()):view==='light'?lightView():kindsView(); el.innerHTML='<svg viewBox="0 0 '+W+' '+q.h+'" xmlns="http://www.w3.org/2000/svg" id="psvg"><rect width="'+W+'" height="'+q.h+'" fill="#121212"/>'+q.svg+'</svg>'; for(const v of ['parts','light','kinds']) document.getElementById(v+'Ctl').hidden=view!==v; document.getElementById('lamOut').textContent=lam+' nm, '+colorName(lam); }
+function setView(v){ if(growRAF){ cancelAnimationFrame(growRAF); growRAF=null; } grow=null; setGrowBtn(); view=v; hot=null; for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render(); if(v==='parts') showPlant(); else if(v==='light') showLam(lam); else showKinds(); }
 document.getElementById('views').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setView(b.dataset.v); });
-(function tick(now){ if(view==='parts') render(now); requestAnimationFrame(tick); })(performance.now());
+// the flows: water rises at a pace set partly by the light (the stomata open by day and
+// transpiration pulls it up), sugar sinks at a steady pace (by night from starch stored by day);
+// the speeds are drawn, not measured
+(function tick(now){ const dt=Math.min(0.1,(now-lastT)/1000); lastT=now;
+  if(view==='parts' && !REDUCED){ xPh=(xPh+dt/1.2*(0.15+0.85*sun))%1; pPh=(pPh+dt/1.2*0.7)%1; render(now); }
+  requestAnimationFrame(tick); })(performance.now());
+const sunIn=document.getElementById('sun');
+function showSun(){ const pc=Math.round(sun*100); document.getElementById('sunOut').textContent=pc>=100?'full sun':pc<=2?'night':pc+'% of full sun';
+  card('Sunlight', pc<=2?'Night':pc+'% of full sun', [['sugar made in the leaves',pc<=2?'none; the leaf burns sugar instead':'in step with the light, up to what the leaf can use'],['stomata',pc<=5?'mostly shut':'open'],['water rising',pc<=5?'slowly':'pulled up by evaporation at the leaves'],['sugar sinking','on through the night, from starch stored by day']],
+    'Light drives the making of sugar and, by opening the pores, the pull of water from the roots. In the dark most plants close their stomata, the rise of water slows, and the phloem keeps carrying sugar made from the starch laid down by day. The dot speeds are drawn, not measured.', 'Wikipedia, Photosynthesis; Wikipedia, Stoma; Wikipedia, Phloem'); }
+sunIn.addEventListener('input',()=>{ sun=+sunIn.value/100; showSun(); if(REDUCED) render(); });
+// through a leaf
+const leafBtn=document.getElementById('leafBtn');
+leafBtn.addEventListener('click',()=>{ leafOn=!leafOn; leafBtn.classList.toggle('on',leafOn); const a=leaf, b=leafOn?1:0;
+  if(leafOn) card('Through a leaf','What the chlorophyll lets past',[['taken','the blue and the red'],['left','the green and yellow']],'The lower strip is the spectrum dimmed by the two absorption curves above: the blue and the red are taken, the green and yellow pass. A real leaf, many cells thick and with other pigments, takes more of everything.','Wikipedia, Chlorophyll'); else showLam(lam);
+  if(REDUCED){ leaf=b; render(); return; } const t0=performance.now();
+  const f=now=>{ const k=Math.min(1,(now-t0)/800); leaf=mix(a,b,ease(k)); render(); if(k<1) requestAnimationFrame(f); }; requestAnimationFrame(f); });
+// the arrivals: a line of time sweeps from 500 million years ago to today
+const growBtn=document.getElementById('growBtn'), GROW_MS=5000;
+function setGrowBtn(){ growBtn.innerHTML=growRAF?'Pause':grow!=null&&grow>0?'Go on &#9654;':'Play the arrivals &#9654;'; growBtn.classList.toggle('on',!!growRAF); }
+growBtn.addEventListener('click',()=>{
+  if(growRAF){ cancelAnimationFrame(growRAF); growRAF=null; setGrowBtn(); return; }
+  if(grow==null||grow<=0) grow=500;
+  if(REDUCED){ grow=null; render(); setGrowBtn(); return; }
+  let last=performance.now();
+  const f=now=>{ grow=Math.max(0,grow-(now-last)/GROW_MS*500); last=now; render();
+    const here=KINDS.filter(k=>k.ma>=grow); card('The arrivals', grow>0.5?Math.round(grow)+' million years ago':'Today', [['kinds on land',here.length?here.map(k=>k.n).join('; '):'none yet']], here.length?here[here.length-1].b:'Before the first land plants, the continents were bare rock and microbial crusts.', here.length?here[here.length-1].s:'Wikipedia, Plant');
+    if(grow>0) growRAF=requestAnimationFrame(f); else { growRAF=null; grow=null; render(); showKinds(); } setGrowBtn(); };
+  growRAF=requestAnimationFrame(f); setGrowBtn(); });
 let dragging=false;
 const svgPt=e=>{ const svg=document.getElementById('psvg'), b=svg.getBoundingClientRect(); return [(e.clientX-b.left)/b.width*W,(e.clientY-b.top)/b.height*svg.viewBox.baseVal.height]; };
 function setLam(nm){ lam=Math.round(Math.max(L.a,Math.min(L.b,nm))); render(); showLam(lam); }
@@ -234,9 +301,9 @@ el.addEventListener('pointerover',e=>{ if(dragging) return; const p=e.target.clo
 el.addEventListener('pointerleave',()=>{ if(view==='parts'&&hot){ hot=null; showPlant(); } if(view==='kinds'&&hot){ hot=null; render(); showKinds(); } });
 
 render(); showPlant();
-window.__plants=(q)=>{ const o={view,hot,lam,card:document.getElementById('numTxt').innerText,name:document.getElementById('nameTxt').innerText,parts:document.querySelectorAll('#psvg g[data-part]').length,kinds:document.querySelectorAll('#psvg g[data-kind]').length,
+window.__plants=(q)=>{ const o={view,hot,lam,sun,xPh,pPh,leaf,grow,growing:!!growRAF,card:document.getElementById('numTxt').innerText,name:document.getElementById('nameTxt').innerText,parts:document.querySelectorAll('#psvg g[data-part]').length,kinds:document.querySelectorAll('#psvg g[data-kind]').length,
   marker:(()=>{ const c=document.querySelector('#marker line'); return c?+c.getAttribute('x1'):null; })()};
-  if(q&&q.nm!=null){ o.abs=[absorb('a',q.nm),absorb('b',q.nm)]; o.col=waveColor(q.nm); } return o; };
+  if(q&&q.nm!=null){ o.abs=[absorb('a',q.nm),absorb('b',q.nm)]; o.col=waveColor(q.nm); o.trans=trans(q.nm); } if(q&&q.pass) o.pass=passColor(); return o; };
 </script>
 </body>
 </html>

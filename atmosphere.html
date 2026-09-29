@@ -34,6 +34,9 @@ h1 { margin:0 0 12px; font-size:26px; }
 .stage { display:flex; gap:22px; align-items:flex-start; }
 #diagram { flex:1 1 640px; min-width:0; }
 #diagram svg { width:100%; height:auto; display:block; user-select:none; }
+#scaleBtn, #balloonBtn { color:var(--text); border-color:#3d444d; }
+#scaleBtn.on { background:#1b2a3d; color:var(--accent); border-color:var(--accent); }
+#balloonBtn.run { background:#2a2214; color:#ffb02e; border-color:#ffb02e; }
 .side { flex:0 0 300px; min-width:0; position:sticky; top:16px; }
 .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; overflow-wrap:anywhere; }
 #kindTxt { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
@@ -49,10 +52,15 @@ h1 { margin:0 0 12px; font-size:26px; }
 .refs { color:var(--muted); font-size:12.5px; margin-top:14px; max-width:760px; }
 .refs p { margin:0 0 8px; overflow-wrap:anywhere; }
 .refs a { color:var(--accent); }
+details.sources { margin-top:14px; max-width:760px; color:var(--muted); font-size:12.5px; }
+details.sources > summary { cursor:pointer; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+details.sources > summary:hover { color:var(--accent); }
+details.sources .note { border-top:none; padding-top:0; margin-top:10px; }
 .refs p { padding-left:2em; text-indent:-2em; }
 .refs .ann { color:#7d7d7d; display:block; padding-left:0; text-indent:0; margin-top:2px; }
 h2.refh { font-size:15px; margin:26px 0 8px; }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;} }
+@media (max-width:900px){ .stage{flex-direction:column;} #diagram{flex:0 0 auto; width:100%;} .side{position:static; width:100%;} }
+@media (max-width:600px){ .stage{flex-direction:column-reverse;} #diagram{overflow-x:auto;} #diagram svg{min-width:700px;} .controls input[type=range]{width:150px;} }
 </style>
 </head>
 <body>
@@ -62,7 +70,7 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
   <nav class="site"><a href="library.html">&larr; Library &middot; Earth</a><a href="earth-interior.html">The Interior</a><a href="earth.html">Climate</a><a href="light.html">Light</a></nav>
 </header>
 <h1>The Atmosphere</h1>
-<div class="bar" id="views"><button data-v="up" class="on">Up</button><button data-v="made">Made of</button></div>
+<div class="bar" id="views"><button data-v="up" class="on">Up</button><button data-v="made">Made of</button><button type="button" id="scaleBtn" aria-pressed="false">True scale</button><button type="button" id="balloonBtn" aria-pressed="false">Launch a balloon</button></div>
 <div class="controls" id="upCtl">
   <label for="alt">height</label>
   <input type="range" id="alt" min="0" max="1000" step="1" value="0">
@@ -79,9 +87,10 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
     <div id="srcTxt"></div>
   </div></div>
 </div>
-<p class="note">The air is a thin skin: half of it lies below the height of a mountain, ninety-nine percent below 30 km, and the whole column weighs ten metric tons on every square meter. It comes in four layers by temperature, cooling with height where the ground warms it, warming where ozone catches the ultraviolet, cooling again, and then heating to a thousand kelvin in gas too thin to feel. The marker drags to any height and the card says what the air is like there.</p>
-<p class="note" style="border-top:none; padding-top:0;">The second view is what the air is made of. Two gases are nearly all of it, one noble gas is most of the rest, and the carbon dioxide that sets the planet's temperature is four hundredths of a percent, so the trace gases get their own line with a log scale. Water vapor is left out of dry air because it varies a hundredfold from place to place; on average it is a quarter of a percent.</p>
-<div class="method"><p>Temperature to 86 km is the US Standard Atmosphere of 1976: seven layers, each with a constant lapse rate, from 288.15 K at sea level. Pressure follows from hydrostatic balance, the exponential form where the lapse is zero and the power law elsewhere, with geopotential height converted to geometric; density is pressure over R T. Above 86 km the model's tables are interpolated in the log between nine anchors, and the real thermosphere swings by a factor of ten with the Sun's activity. The share of the air above a height is its pressure over the sea-level pressure. The speed of sound is the square root of gamma R T; the boiling point is the temperature at which the vapor pressure of water, from the Antoine equation, equals the air pressure. The column is drawn linear to 120 km and compressed fivefold above.</p></div>
+<p class="note">The air is a thin skin: half of it lies below the height of a mountain, ninety-nine percent below 30 km, and the whole column weighs ten metric tons on every square meter. Four layers by temperature: cooling with height, warming where ozone catches the ultraviolet, cooling again, then heating to a thousand kelvin in gas too thin to feel.</p>
+<details class="sources"><summary>Sources</summary>
+<p class="note">The second view is what the air is made of. Two gases are nearly all of it, one noble gas is most of the rest, and the carbon dioxide that sets the planet's temperature is four hundredths of a percent, so the trace gases get their own line with a log scale. Water vapor is left out of dry air because it varies a hundredfold from place to place; on average it is a quarter of a percent.</p>
+<div class="method"><p>Temperature to 86 km is the US Standard Atmosphere of 1976: seven layers, each with a constant lapse rate, from 288.15 K at sea level. Pressure follows from hydrostatic balance, the exponential form where the lapse is zero and the power law elsewhere, with geopotential height converted to geometric; density is pressure over R T. Above 86 km the model's tables are interpolated in the log between nine anchors, and the real thermosphere swings by a factor of ten with the Sun's activity. The share of the air above a height is its pressure over the sea-level pressure. The speed of sound is the square root of gamma R T; the boiling point is the temperature at which the vapor pressure of water, from the Antoine equation, equals the air pressure. The column is drawn linear to 120 km and compressed fivefold above; True scale removes the compression, one pixel to the kilometer. The balloon rises at 5 meters per second, the usual rate for a radiosonde, and swells as the product of the temperature and the inverse pressure, the ideal gas at the pressure outside, until it bursts at the 35 km of the mark on the column.</p></div>
 <h2 class="refh">References</h2>
 <div class="refs"><p>National Oceanic and Atmospheric Administration, National Aeronautics and Space Administration, &amp; United States Air Force. (1976). <i>U.S. Standard Atmosphere, 1976</i>. NOAA-S/T 76-1562, U.S. Government Printing Office. <a href="https://ntrs.nasa.gov/citations/19770009539">https://ntrs.nasa.gov/citations/19770009539</a><span class="ann">The temperature layers to 86 km and the tables above.</span></p>
 <p>Trenberth, K. E., &amp; Smith, L. (2005). The mass of the atmosphere: A constraint on global analyses. <i>Journal of Climate, 18</i>(6), 864-875. <a href="https://doi.org/10.1175/JCLI-3299.1">https://doi.org/10.1175/JCLI-3299.1</a><span class="ann">The mass of the air, 5.148 &times; 10<sup>18</sup> kg, and of the water in it.</span></p>
@@ -110,13 +119,18 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 <p>Lockheed U-2. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Lockheed_U-2">https://en.wikipedia.org/wiki/Lockheed_U-2</a></p>
 <p>Lockheed SR-71 Blackbird. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/Lockheed_SR-71_Blackbird">https://en.wikipedia.org/wiki/Lockheed_SR-71_Blackbird</a></p>
 <p>North American X-15. (n.d.). In <i>Wikipedia</i>. Retrieved September 4, 2026, from <a href="https://en.wikipedia.org/wiki/North_American_X-15">https://en.wikipedia.org/wiki/North_American_X-15</a></p></div>
+</details>
 </div>
 <script>
 const L76=[[0.0,288.15,-6.5],[11.0,216.65,0.0],[20.0,216.65,1.0],[32.0,228.65,2.8],[47.0,270.65,0.0],[51.0,270.65,-2.8],[71.0,214.65,-2.0],[84.852,186.946,0.0]], UPPER=[[86,186.9,0.373,6.96e-06,28.95],[100,195.1,0.032,5.6e-07,28.4],[120,360.0,0.00254,2.22e-08,26.2],[150,634.4,0.000454,2.08e-09,24.1],[200,854.6,8.47e-05,2.54e-10,21.3],[300,976.0,8.77e-06,1.92e-11,17.73],[400,995.8,1.45e-06,2.8e-12,15.98],[500,999.2,3.02e-07,5.22e-13,14.33],[600,999.9,8.21e-08,1.14e-13,11.51]], LAYERS=[{"k":"tropo","n":"the troposphere","a":0,"b":11,"c":"#58a6ff","t":"All the weather, three quarters of the air and nearly all the water vapor. Warmed from below, so it cools with height, six and a half degrees a kilometer, and convects. The top is higher at the equator, 17 km, and lower at the poles, 9."},{"k":"strato","n":"the stratosphere","a":11,"b":47,"c":"#9be564","t":"Warms with height because ozone here absorbs the Sun's ultraviolet, so it does not convect: the air is layered and still, which is why airliners cruise at its bottom edge. The ozone layer peaks around 25 km."},{"k":"meso","n":"the mesosphere","a":47,"b":86,"c":"#ffb02e","t":"Cools with height again to the coldest air on the planet, about minus 90 degrees at its top. Meteors burn up here, and the highest clouds, noctilucent, form at 80 km from ice on meteor dust."},{"k":"thermo","n":"the thermosphere","a":86,"b":600,"c":"#f28cb0","t":"The Sun's far ultraviolet and X-rays are absorbed here and the thin gas heats to a thousand kelvin, though it would not feel warm: there are too few molecules to carry heat. The aurora, the ionosphere and the space station are all in it."}], MARKS=[{"k":"burj","n":"the Burj Khalifa","z":0.83,"b":"The tallest building, 830 m. The air at the top is 8% thinner than at the door.","s":"Wikipedia, Burj Khalifa"},{"k":"lapaz","n":"La Paz","z":3.64,"b":"The highest seat of government, where the pressure is two thirds of sea level and visitors gasp on the stairs for a week.","s":"Wikipedia, La Paz"},{"k":"everest","n":"the summit of Everest","z":8.85,"b":"A third of the sea-level pressure; the highest a person can climb, and only just. Above 8,000 m the body dies faster than it acclimatises.","s":"Wikipedia, Mount Everest"},{"k":"airliner","n":"an airliner cruising","z":11,"b":"At the top of the troposphere, in still, cold air at minus 56 degrees, with a quarter of the pressure outside the window.","s":"Wikipedia, Cruise (aeronautics)"},{"k":"vulture","n":"the highest bird","z":11.3,"b":"A Rüppell's vulture struck an aircraft at 11,300 m in 1973, the highest any bird has been found.","s":"Wikipedia, Rüppell's vulture"},{"k":"armstrong","n":"the Armstrong limit","z":19,"b":"Where the pressure falls to 6.3 kPa and water boils at body temperature. Above this a person needs a pressure suit, not just oxygen.","s":"Wikipedia, Armstrong limit"},{"k":"ozone","n":"the ozone layer","z":25,"b":"Ozone is thickest here, a few parts per million, enough to stop the ultraviolet that would otherwise sterilize the surface.","s":"Wikipedia, Ozone layer"},{"k":"balloon","n":"a weather balloon bursting","z":35,"b":"Twice a day from hundreds of stations, a balloon rises until it swells to the size of a house and bursts, around 35 km.","s":"Wikipedia, Weather balloon"},{"k":"jump","n":"Baumgartner's jump","z":39,"b":"The highest parachute jump from a balloon, in 2012, from 39 km; he broke the sound barrier on the way down.","s":"Wikipedia, Red Bull Stratos"},{"k":"stratopause","n":"the stratopause","z":47,"b":"The warm top of the stratosphere, about minus 3 degrees, heated by ozone from below and the Sun above.","s":"US Standard Atmosphere 1976"},{"k":"noctilucent","n":"noctilucent clouds","z":83,"b":"The highest clouds, ice on meteor dust in the coldest air there is, seen glowing after sunset in summer at high latitudes.","s":"Wikipedia, Noctilucent cloud"},{"k":"meteor","n":"a meteor burning up","z":90,"b":"Shooting stars flare between 75 and 120 km, where the air first becomes thick enough to heat a grain of dust to incandescence.","s":"Wikipedia, Meteor"},{"k":"karman","n":"the Kármán line","z":100,"b":"The conventional edge of space: above this the air is too thin for wings to lift at any speed below orbital.","s":"Wikipedia, Kármán line"},{"k":"aurora","n":"the aurora","z":110,"b":"The green of the aurora is oxygen glowing at 100 to 150 km, hit by electrons coming down the magnetic field; the red is higher, at 200 to 300.","s":"Wikipedia, Aurora"},{"k":"iss","n":"the space station","z":420,"b":"Still inside the atmosphere: the thin air at 400 km drags the station down two kilometers a month, and it has to be boosted.","s":"Wikipedia, International Space Station"},{"k":"hubble","n":"the Hubble telescope","z":540,"b":"High enough to stay up for decades; low enough that the drag finally brings it down in the 2030s.","s":"Wikipedia, Hubble Space Telescope"}], OBJECTS=[{"k":"cumulus","n":"a fair-weather cumulus","z":1.2,"f":0.24,"kind":"cloud","b":"Its flat base is the height where rising warm air has cooled to its dew point and its water vapor condenses, usually a kilometer or two up.","s":"Wikipedia, Cumulus cloud"},{"k":"cumulonimbus","n":"a thunderstorm","z":11,"f":0.55,"kind":"storm","b":"A thunderstorm grows until it meets the tropopause, 11 km here and up to 17 at the equator. The stratosphere above is warmer, so the rising air stops there and spreads sideways into the anvil.","s":"Wikipedia, Cumulonimbus cloud"},{"k":"airliner","n":null,"z":11,"f":0.86,"kind":"airliner","b":null,"s":null},{"k":"concorde","n":"Concorde","z":18,"f":0.78,"kind":"concorde","b":"Cruised at up to 18 km, 60,000 feet, at twice the speed of sound, higher than any other airliner; it carried passengers from 1976 to 2003.","s":"Wikipedia, Concorde"},{"k":"u2","n":"the U-2","z":21.3,"f":0.3,"kind":"u2","b":"A spy plane first flown in 1955 and still flying, above 21 km. Its pilots wear full pressure suits, because they are past the Armstrong limit, where water boils at body temperature.","s":"Wikipedia, Lockheed U-2"},{"k":"sr71","n":"the SR-71","z":25.929,"f":0.62,"kind":"sr71","b":"Holds the record for sustained level flight by a jet: 25,929 m, on July 28, 1976, at more than three times the speed of sound.","s":"Wikipedia, Lockheed SR-71 Blackbird"},{"k":"balloon","n":null,"z":35,"f":0.22,"kind":"balloon","b":null,"s":null},{"k":"noctilucent","n":null,"z":83,"f":0.64,"kind":"wisp","b":null,"s":null},{"k":"meteor","n":null,"z":90,"f":0.8,"kind":"meteor","b":null,"s":null},{"k":"x15","n":"the X-15","z":107.96,"f":0.62,"kind":"x15","b":"A rocket plane dropped from under a B-52's wing. On August 22, 1963, Joe Walker flew it to 107.96 km, past the K&aacute;rm&aacute;n line: by that measure he reached space in an airplane.","s":"Wikipedia, North American X-15"},{"k":"aurora","n":null,"z":110,"f":0.3,"kind":"aurora","b":null,"s":null},{"k":"iss","n":null,"z":420,"f":0.55,"kind":"station","b":null,"s":null},{"k":"hubble","n":null,"z":540,"f":0.8,"kind":"telescope","b":null,"s":null}], GASES=[{"n":"nitrogen","f":"N₂","x":0.78084,"b":"Nearly inert, the bulk of the air, and the reason air is not explosive. Bacteria and lightning are what turn it into something a plant can use."},{"n":"oxygen","f":"O₂","x":0.20946,"b":"Put there by photosynthesis over two billion years. Every fire, engine and animal spends it; plants and plankton replace it."},{"n":"argon","f":"Ar","x":0.00934,"b":"Almost one percent, and nobody notices: a noble gas, born of potassium decaying in the rocks and leaking out over the ages."},{"n":"carbon dioxide","f":"CO₂","x":0.000425,"b":"Four hundred and twenty-five parts per million at Mauna Loa in 2024, up from 280 before coal, and the reason the planet is warming. Plants are built from it."},{"n":"neon","f":"Ne","x":1.818e-05,"b":"Eighteen parts per million; a glass tube of it glows red-orange."},{"n":"helium","f":"He","x":5.24e-06,"b":"Five parts per million, so light it escapes to space; the helium in balloons is mined from natural gas instead."},{"n":"methane","f":"CH₄","x":1.9e-06,"b":"Two parts per million, from wetlands, cattle, rice and leaks, and thirty times as warming as carbon dioxide, molecule for molecule."},{"n":"krypton","f":"Kr","x":1.14e-06,"b":"A part per million; the meter was once defined by its light."},{"n":"hydrogen","f":"H₂","x":5e-07,"b":"Half a part per million, escaping to space as fast as it is made."}], WATER={"n":"water vapor","f":"H₂O","x":0.0025,"b":"Not counted in dry air because it varies from almost none over a desert to four percent in the tropics; a quarter of a percent of the air by mass on average, and the source of every cloud, all the rain, and most of the greenhouse effect."}, COLUMN={"mass":5.148e+18,"water":1.27e+16,"note":"Five million billion metric tons, ten metric tons over every square meter; half of it below 5.5 km, ninety percent below 16, all but a millionth below 100."};
 const P0=101325.0, G0=9.80665, RA=287.05287, RE=6356.766, ZTOP=600, W=980;
 const el=document.getElementById('diagram');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const RM=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ease=t=>t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
 let view='up', z=0, hot=null;
+let sc=0, scaleOn=false, scAnim=0;            // 0: compressed above 120 km; 1: one pixel to the kilometer
+const B={t:0,running:false,burst:false,raf:0,last:0,rate:600,v:5,zb:35};   // the balloon: seconds aloft, 5 m/s, bursts at 35 km
 
 /* ---- the standard atmosphere ---- */
 const geopot=z=>RE*z/(RE+z);                       // geometric km to geopotential km
@@ -145,47 +159,100 @@ function card(kind,name,rows,body,src){
 }
 function showZ(zk){ const s=std(zk), L=layerOf(zk); const m=MARKS.find(x=>Math.abs(x.z-zk)<=Math.max(0.05,zk*0.01)); const tb=boil(s.p);
   card('At a height of', km(zk)+(m?', '+esc(m.n):''), [['layer',L.n],['temperature',Math.round(s.T-273.15)+' \u00b0C, '+Math.round(s.T)+' K'],['pressure',pres(s.p)],['air above',share(s.p)+' of it'],['air below',s.p/P0>0.9999?'':(100-s.p/P0*100).toFixed(s.p/P0>0.1?0:s.p/P0>0.01?1:s.p/P0>0.001?2:3)+'%'],
-    ['density',dens(s.rho)],['speed of sound',zk<=86?Math.round(sound(s.T))+' m/s':''],['water boils at',tb>-40&&zk<=86?Math.round(tb)+' \u00b0C':'']], m?m.b:L.t, m?m.s:'US Standard Atmosphere 1976'); }
+    ['density',dens(s.rho)],['speed of sound',zk<=86?Math.round(sound(s.T))+' m/s':''],['water boils at',tb>-40&&zk<=86?Math.round(tb)+' \u00b0C':''],balloonRow()||['','']], m?m.b:L.t, m?m.s:'US Standard Atmosphere 1976'); }
 function showLayer(k){ const L=LAYERS.find(x=>x.k===k); const a=std(L.a), b=std(Math.min(L.b,ZTOP)-0.001);
   card('A layer', L.n, [['from',km(L.a)+' to '+km(L.b)],['temperature',Math.round(a.T-273.15)+' to '+Math.round(b.T-273.15)+' \u00b0C'],['holds',((a.p-b.p)/P0*100).toFixed(a.p-b.p>P0*0.01?1:3)+'% of the air']], L.t, 'US Standard Atmosphere 1976'); }
 function showGas(g){ card('In dry air', esc(g.n)+', '+g.f, [['by volume', g.x>=0.001?(g.x*100).toFixed(g.x>0.1?1:2)+'%':(g.x*1e6).toLocaleString('en-US',{maximumFractionDigits:2})+' parts per million'],['in a breath of half a liter', g.x>=1e-3?(g.x*0.5*1000).toFixed(0)+' ml':(g.x*0.5*1e6).toFixed(g.x>1e-5?0:1)+' \u00b5l']], g.b, 'Picard et al. 2008; NOAA GML'); }
 
 /* ---- up ---- */
 const P={x:70,y:30,w:250,h:600}, ZB=120;                   // the column: linear to 120 km, then compressed
-const YZ=zk=>zk<=ZB?P.y+P.h-(zk/ZB)*P.h*0.78:P.y+P.h*0.22-((zk-ZB)/(ZTOP-ZB))*P.h*0.22;
-const ZY=y=>{ const f=(P.y+P.h-y)/P.h; return f<=0.78?f/0.78*ZB:ZB+(f-0.78)/0.22*(ZTOP-ZB); };
-const PR=[{k:'T',n:'temperature, K',x0:100,x1:1000,f:zk=>std(zk).T,c:'#ffb02e',log:false},{k:'p',n:'pressure, Pa',x0:1e-8,x1:2e5,f:zk=>std(zk).p,c:'#58a6ff',log:true},{k:'rho',n:'density, kg/m\u00b3',x0:1e-13,x1:2,f:zk=>std(zk).rho,c:'#9be564',log:true}];
-const PX0=520, PW=140, PG=12;
+const YZc=zk=>zk<=ZB?P.y+P.h-(zk/ZB)*P.h*0.78:P.y+P.h*0.22-((zk-ZB)/(ZTOP-ZB))*P.h*0.22;
+const YZt=zk=>P.y+P.h-zk/ZTOP*P.h;                          // true scale: one pixel to the kilometer
+const YZ=zk=>sc<=0?YZc(zk):sc>=1?YZt(zk):(1-sc)*YZc(zk)+sc*YZt(zk);
+const ZY=y=>{ let lo=0, hi=ZTOP; for(let i=0;i<40;i++){ const m=(lo+hi)/2; if(YZ(m)>y) lo=m; else hi=m; } return (lo+hi)/2; };
+const PR=[{k:'T',n:'temperature, K',x0:100,x1:1000,f:zk=>std(zk).T,c:'#ffb02e',log:false,fmt:v=>Math.round(v)+' K'},{k:'p',n:'pressure, Pa',x0:1e-8,x1:2e5,f:zk=>std(zk).p,c:'#58a6ff',log:true,fmt:v=>pres(v)},{k:'rho',n:'density, kg/m\u00b3',x0:1e-13,x1:2,f:zk=>std(zk).rho,c:'#9be564',log:true,fmt:v=>dens(v)}];
+const PX0=520, PW=130, PG=30;
 function up(){
   let s='';
   // the column with its layers
-  for(const L of LAYERS){ const y1=YZ(L.a), y0=YZ(Math.min(L.b,ZTOP)); s+='<g data-l="'+L.k+'" style="cursor:pointer"><rect x="'+P.x+'" y="'+y0.toFixed(1)+'" width="'+P.w+'" height="'+(y1-y0).toFixed(1)+'" fill="'+L.c+'" opacity="'+(hot===L.k?0.35:0.16)+'"/><text x="'+(P.x+8)+'" y="'+(y0+14).toFixed(1)+'" font-size="11" fill="'+L.c+'">'+L.n+'</text></g>'; }
+  for(const L of LAYERS){ const y1=YZ(L.a), y0=YZ(Math.min(L.b,ZTOP)); const ty=y1-y0>=17?y0+14:y1-3; s+='<g data-l="'+L.k+'" style="cursor:pointer"><rect x="'+P.x+'" y="'+y0.toFixed(1)+'" width="'+P.w+'" height="'+(y1-y0).toFixed(1)+'" fill="'+L.c+'" opacity="'+(hot===L.k?0.35:0.16)+'"/><text x="'+(P.x+8)+'" y="'+ty.toFixed(1)+'" font-size="11" fill="'+L.c+'">'+L.n+'</text></g>'; }
   s+='<rect x="'+P.x+'" y="'+P.y+'" width="'+P.w+'" height="'+P.h+'" fill="none" stroke="#2b2b2b"/>';
-  s+='<line x1="'+P.x+'" y1="'+YZ(ZB).toFixed(1)+'" x2="'+(P.x+P.w)+'" y2="'+YZ(ZB).toFixed(1)+'" stroke="#3d444d" stroke-dasharray="4 3"/><text x="'+(P.x+P.w-6)+'" y="'+(YZ(ZB)-4).toFixed(1)+'" text-anchor="end" font-size="9.5" fill="#6b7280">compressed above 120 km</text>';
-  for(const zk of [0,20,40,60,80,100,120,200,300,400,500,600]){ const y=YZ(zk); s+='<line x1="'+(P.x-5)+'" y1="'+y.toFixed(1)+'" x2="'+P.x+'" y2="'+y.toFixed(1)+'" stroke="#8a94a6"/><text x="'+(P.x-8)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="10.5" fill="#9a9a9a">'+zk+'</text>'; }
+  if(sc<1){ s+='<line x1="'+P.x+'" y1="'+YZ(ZB).toFixed(1)+'" x2="'+(P.x+P.w)+'" y2="'+YZ(ZB).toFixed(1)+'" stroke="#3d444d" stroke-dasharray="4 3" opacity="'+(1-sc).toFixed(2)+'"/><text x="'+(P.x+P.w-6)+'" y="'+(YZ(ZB)-4).toFixed(1)+'" text-anchor="end" font-size="9.5" fill="#6b7280" opacity="'+(1-sc).toFixed(2)+'">compressed above 120 km</text>'; }
+  else s+='<text x="'+(P.x+P.w-6)+'" y="'+(P.y+30)+'" text-anchor="end" font-size="9.5" fill="#6b7280">to scale: one pixel to the kilometer</text>';
+  const ticks=sc<0.5?[0,20,40,60,80,100,120,200,300,400,500,600]:[0,50,100,150,200,250,300,350,400,450,500,550,600];
+  for(const zk of ticks){ const y=YZ(zk); s+='<line x1="'+(P.x-5)+'" y1="'+y.toFixed(1)+'" x2="'+P.x+'" y2="'+y.toFixed(1)+'" stroke="#8a94a6"/><text x="'+(P.x-8)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="10.5" fill="#9a9a9a">'+zk+'</text>'; }
   s+='<text transform="translate(16,'+(P.y+P.h/2)+') rotate(-90)" text-anchor="middle" font-size="11.5" fill="#9a9a9a">height, km</text>';
   // the things in the air, each at its height
   s+=objectsSvg();
-  // the marks, packed
-  let lastY=1e9; const sorted=[...MARKS].sort((a,b)=>a.z-b.z);
-  for(const m of sorted){ const y0=YZ(m.z); let y=Math.min(y0,lastY-14); lastY=y; const on=hot===m.k;
+  // the marks, packed: pushed up off each other, then the pile pulled back down so it hangs around its points
+  const sorted=[...MARKS].sort((a,b)=>a.z-b.z), ys=[]; let lastY=1e9;
+  for(const m of sorted){ const y0=YZ(m.z); const y=Math.min(y0,lastY-14); ys.push(y); lastY=y; }
+  { let lo=P.y+P.h-4; for(let i=0;i<ys.length;i++){ if(ys[i]>lo) ys[i]=lo; lo=ys[i]-14; } }
+  sorted.forEach((m,i)=>{ const y0=YZ(m.z), y=ys[i], on=hot===m.k;
     s+='<g data-k="'+m.k+'" style="cursor:pointer"><line x1="'+(P.x+P.w)+'" y1="'+y0.toFixed(1)+'" x2="'+(P.x+P.w+16)+'" y2="'+y.toFixed(1)+'" stroke="'+(on?'#ffb02e':'#3d444d')+'"/><circle cx="'+(P.x+P.w)+'" cy="'+y0.toFixed(1)+'" r="2.5" fill="'+(on?'#ffb02e':'#9a9a9a')+'"/>';
-    s+='<text x="'+(P.x+P.w+20)+'" y="'+(y+3.5).toFixed(1)+'" font-size="10.5" fill="'+(on?'#ffb02e':'#9a9a9a')+'">'+esc(m.n)+'</text></g>'; }
+    s+='<text x="'+(P.x+P.w+20)+'" y="'+(y+3.5).toFixed(1)+'" font-size="10.5" fill="'+(on?'#ffb02e':'#9a9a9a')+'">'+esc(m.n)+'</text></g>'; });
+  s+=balloonSvg();
   // the profiles
   PR.forEach((p,i)=>{ const x0=PX0+i*(PW+PG); const X=v=>x0+(p.log?(Math.log10(v)-Math.log10(p.x0))/(Math.log10(p.x1)-Math.log10(p.x0)):(v-p.x0)/(p.x1-p.x0))*PW;
     s+='<rect x="'+x0+'" y="'+P.y+'" width="'+PW+'" height="'+P.h+'" fill="none" stroke="#2b2b2b"/><text x="'+x0+'" y="'+(P.y-10)+'" font-size="11" fill="#9a9a9a">'+p.n+'</text>';
     for(const L of LAYERS){ if(L.a===0) continue; const y=YZ(L.a); s+='<line x1="'+x0+'" y1="'+y.toFixed(1)+'" x2="'+(x0+PW)+'" y2="'+y.toFixed(1)+'" stroke="#2b2b2b" stroke-dasharray="3 4"/>'; }
-    const ticks=p.log?[p.x0,1e-4,1,1e4].filter(v=>v>=p.x0&&v<=p.x1):[200,400,600,800,1000];
-    for(const v of ticks){ const x=X(v); s+='<line x1="'+x.toFixed(1)+'" y1="'+(P.y+P.h)+'" x2="'+x.toFixed(1)+'" y2="'+(P.y+P.h+5)+'" stroke="#8a94a6"/><text x="'+x.toFixed(1)+'" y="'+(P.y+P.h+17)+'" text-anchor="middle" font-size="9.5" fill="#6b7280">'+(p.log?'10<tspan dy="-3" font-size="7">'+Math.round(Math.log10(v))+'</tspan>':v)+'</text>'; }
+    const ticks=p.log?[p.x0,1e-4,1,1e4].filter(v=>v>=p.x0&&v<=p.x1):[200,600,1000];
+    for(const v of ticks){ const x=X(v); s+='<line x1="'+x.toFixed(1)+'" y1="'+(P.y+P.h)+'" x2="'+x.toFixed(1)+'" y2="'+(P.y+P.h+5)+'" stroke="#8a94a6"/><text x="'+x.toFixed(1)+'" y="'+(P.y+P.h+17)+'" text-anchor="'+(x<x0+6?'start':x>x0+PW-6?'end':'middle')+'" font-size="9.5" fill="#6b7280">'+(p.log?'10<tspan dy="-3" font-size="7">'+Math.round(Math.log10(v))+'</tspan>':v)+'</text>'; }
     let d=''; for(let zk=0; zk<=ZTOP; zk+=zk<120?0.5:5){ d+=(d?'L':'M')+X(p.f(zk)).toFixed(1)+','+YZ(zk).toFixed(1); }
     s+='<path d="'+d+'" fill="none" stroke="'+p.c+'" stroke-width="2"/>';
-    s+='<circle cx="'+X(p.f(z)).toFixed(1)+'" cy="'+YZ(z).toFixed(1)+'" r="4.5" fill="#ffb02e" stroke="#121212" stroke-width="1.2"/>'; });
+    const vx=X(p.f(z)), vy=YZ(z), left=vx>x0+PW*0.55;
+    s+='<circle cx="'+vx.toFixed(1)+'" cy="'+vy.toFixed(1)+'" r="4.5" fill="#ffb02e" stroke="#121212" stroke-width="1.2"/>';
+    s+='<text class="val" x="'+(left?vx-8:vx+8).toFixed(1)+'" y="'+(vy<P.y+14?vy+14:vy-7).toFixed(1)+'" text-anchor="'+(left?'end':'start')+'" font-size="9.5" fill="'+p.c+'">'+p.fmt(p.f(z))+'</text>';
+    s+='<rect data-p="'+p.k+'" x="'+x0+'" y="'+P.y+'" width="'+PW+'" height="'+P.h+'" fill="transparent" style="cursor:crosshair"/>'; });
   // the marker
   const y=YZ(z);
   s+='<g id="marker" style="cursor:ns-resize"><line x1="'+P.x+'" y1="'+y.toFixed(1)+'" x2="'+(PX0+3*(PW+PG)-PG)+'" y2="'+y.toFixed(1)+'" stroke="#ffb02e" stroke-width="1" opacity="0.6"/><circle cx="'+(P.x+P.w/2)+'" cy="'+y.toFixed(1)+'" r="6" fill="#ffb02e" stroke="#121212" stroke-width="1.5"/>';
   s+='<text x="'+(P.x+P.w/2+12)+'" y="'+(y+4).toFixed(1)+'" font-size="11.5" font-weight="700" fill="#ffb02e">'+km(z)+'</text></g>';
   return {svg:s, h:P.y+P.h+30};
 }
+
+/* ---- the balloon: launched from the ground, up at 5 m/s, swelling with the fall in pressure ---- */
+function balloonSvg(){
+  if(!(B.t>0||B.running)) return '';
+  const zk=Math.min(B.zb,B.v*B.t/1000), x=P.x+0.42*P.w, y=YZ(zk), s0=std(0), s1=std(zk);
+  const grow=Math.cbrt((s1.T/s0.T)*(s0.p/s1.p)), r=3*grow;      // the ideal gas: volume goes as T over p
+  let s='<g id="balloon" pointer-events="none">';
+  if(B.burst){ for(let i=0;i<8;i++){ const a=i*Math.PI/4; s+='<line x1="'+(x+Math.cos(a)*r*0.5).toFixed(1)+'" y1="'+(y-r+Math.sin(a)*r*0.5).toFixed(1)+'" x2="'+(x+Math.cos(a)*r*1.3).toFixed(1)+'" y2="'+(y-r+Math.sin(a)*r*1.3).toFixed(1)+'" stroke="#f4efe2" stroke-width="1.2" opacity="0.8"/>'; }
+    s+='<text x="'+(x-r*1.5-4).toFixed(1)+'" y="'+(y-r+4).toFixed(1)+'" text-anchor="end" font-size="9.5" fill="#f4efe2">burst at '+km(zk)+'</text>'; }
+  else { s+='<circle cx="'+x+'" cy="'+(y-r).toFixed(1)+'" r="'+r.toFixed(1)+'" fill="#f4efe2" fill-opacity="0.85" stroke="#f4efe2" stroke-width="0.8"/><line x1="'+x+'" y1="'+y.toFixed(1)+'" x2="'+x+'" y2="'+(y+6).toFixed(1)+'" stroke="#d8dee8" stroke-width="0.8"/><rect x="'+(x-1.5)+'" y="'+(y+6).toFixed(1)+'" width="3" height="2.5" fill="#d8dee8"/>';
+    s+='<text x="'+(x-r-6).toFixed(1)+'" y="'+(y-r+4).toFixed(1)+'" text-anchor="end" font-size="9.5" fill="#f4efe2">'+grow.toFixed(1)+'× its launch width</text>'; }
+  return s+'</g>';
+}
+const bmin=t=>{ const m=Math.round(t/60); return m<60?m+' min':Math.floor(m/60)+' h '+String(m%60).padStart(2,'0')+' min'; };
+function balloonRow(){ if(!(B.t>0||B.running)) return null; const zk=Math.min(B.zb,B.v*B.t/1000), s0=std(0), s1=std(zk), grow=Math.cbrt((s1.T/s0.T)*(s0.p/s1.p));
+  return ['the balloon', B.burst?'burst at '+km(B.zb)+' after '+bmin(B.t)+', '+grow.toFixed(1)+' times its launch width':bmin(B.t)+' after launch, rising at 5 m/s, '+grow.toFixed(1)+' times its launch width']; }
+function balloonFrame(now){
+  if(!B.running) return;
+  const dt=(now-B.last)/1000; B.last=now; B.t=Math.min(B.zb*1000/B.v, B.t+dt*B.rate);
+  setZ(B.v*B.t/1000);
+  if(B.t>=B.zb*1000/B.v){ B.burst=true; balloonStop(true); return; }
+  B.raf=requestAnimationFrame(balloonFrame);
+}
+function balloonStop(done){ B.running=false; cancelAnimationFrame(B.raf); const b=document.getElementById('balloonBtn');
+  b.textContent=done?'Launch a balloon':'Resume the balloon'; b.classList.remove('run'); b.setAttribute('aria-pressed','false'); render(); showZ(z); }
+function balloonStart(){ const b=document.getElementById('balloonBtn');
+  if(view!=='up') setView('up');
+  if(B.burst){ B.t=0; B.burst=false; }
+  hot=null;
+  if(RM){ B.t=B.zb*1000/B.v; B.burst=true; setZ(B.zb); return; }
+  B.running=true; B.last=performance.now(); b.textContent='Pause'; b.classList.add('run'); b.setAttribute('aria-pressed','true'); B.raf=requestAnimationFrame(balloonFrame); }
+document.getElementById('balloonBtn').addEventListener('click',()=>{ if(B.running) balloonStop(false); else balloonStart(); });
+
+/* ---- true scale: the compression above 120 km tweens away ---- */
+function setScale(on){
+  scaleOn=on; const b=document.getElementById('scaleBtn'); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on?'true':'false');
+  cancelAnimationFrame(scAnim);
+  if(RM){ sc=on?1:0; render(); return; }
+  const from=sc, to=on?1:0, t0=performance.now(), dur=900;
+  const frame=now=>{ const u=Math.min(1,(now-t0)/dur); sc=from+(to-from)*ease(u); render(); if(u<1) scAnim=requestAnimationFrame(frame); };
+  scAnim=requestAnimationFrame(frame);
+}
+document.getElementById('scaleBtn').addEventListener('click',()=>setScale(!scaleOn));
 
 /* ---- things in the air ---- */
 const ICON={
@@ -202,6 +269,7 @@ const ICON={
 function objectsSvg(){
   let s='';
   for(const o of OBJECTS){
+    if(sc>0.5&&o.z<60) continue;                       // at true scale everything below 60 km is a smear; the marks still name them
     const m=o.n?null:MARKS.find(x=>x.k===o.k), key=o.k, on=hot===key;
     const x=P.x+o.f*P.w, y=YZ(o.z), col=on?'#ffb02e':'#d8dee8';
     const attr=(m?'data-k':'data-o')+'="'+key+'" style="cursor:pointer"';
@@ -215,9 +283,9 @@ function objectsSvg(){
       const y1=YZ(100), y2=YZ(150); let g='';
       for(let i=0;i<6;i++){ const xx=x-14+i*5.6; g+='<line x1="'+xx.toFixed(1)+'" y1="'+(y1-2*(i%2)).toFixed(1)+'" x2="'+xx.toFixed(1)+'" y2="'+(y2+3*(i%3)).toFixed(1)+'" stroke="'+(on?'#ffb02e':'#5ef08a')+'" stroke-width="2.2" opacity="'+(0.35+0.1*(i%3))+'"/>'; }
       s+='<g '+attr+'>'+g+'<rect x="'+(x-16)+'" y="'+y2.toFixed(1)+'" width="32" height="'+(y1-y2).toFixed(1)+'" fill="transparent"/></g>'; continue; }
-    const sc=o.kind==='cloud'?1.1:1;
-    s+='<g '+attr+' transform="translate('+x.toFixed(1)+','+y.toFixed(1)+') scale('+sc+')" fill="'+col+'" stroke="none">'+ICON[o.kind]+'<rect x="-12" y="-8" width="24" height="14" fill="transparent"/></g>';
-    if(o.n&&o.kind!=='cloud') s+='<text x="'+(x+14).toFixed(1)+'" y="'+(y+3.5).toFixed(1)+'" font-size="9.5" fill="'+(on?'#ffb02e':'#b8c0cc')+'" pointer-events="none">'+esc(o.n.replace(/^the /,''))+'</text>';
+    const isc=o.kind==='cloud'?1.1:1;
+    s+='<g '+attr+' transform="translate('+x.toFixed(1)+','+y.toFixed(1)+') scale('+isc+')" fill="'+col+'" stroke="none">'+ICON[o.kind]+'<rect x="-12" y="-8" width="24" height="14" fill="transparent"/></g>';
+    if(o.n&&o.kind!=='cloud'){ const left=o.f>0.6; s+='<text x="'+(left?x-14:x+14).toFixed(1)+'" y="'+(y+3.5).toFixed(1)+'" text-anchor="'+(left?'end':'start')+'" font-size="9.5" fill="'+(on?'#ffb02e':'#b8c0cc')+'" pointer-events="none">'+esc(o.n.replace(/^the /,''))+'</text>'; }
   }
   return s;
 }
@@ -261,23 +329,26 @@ const sliderToZ=v=>{ v=v/1000; return v<=0.78?v/0.78*ZB:ZB+(v-0.78)/0.22*(ZTOP-Z
 const zToSlider=zk=>Math.round(1000*(zk<=ZB?zk/ZB*0.78:0.78+(zk-ZB)/(ZTOP-ZB)*0.22));
 function setZ(zk){ z=Math.max(0,Math.min(ZTOP,zk)); document.getElementById('alt').value=zToSlider(z); render(); showZ(z); }
 function setView(v){ view=v; hot=null; for(const b of document.querySelectorAll('#views button')) b.classList.toggle('on',b.dataset.v===v); render(); if(v==='up') showZ(z); else card('Made of','Dry air',[['nitrogen and oxygen',((GASES[0].x+GASES[1].x)*100).toFixed(2)+'%'],['argon',(GASES[2].x*100).toFixed(2)+'%'],['everything else',((1-GASES[0].x-GASES[1].x-GASES[2].x)*100).toFixed(3)+'%']],'A gas under the pointer lands here.','Picard et al. 2008'); }
-document.getElementById('views').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setView(b.dataset.v); });
+document.getElementById('views').addEventListener('click',e=>{ const b=e.target.closest('button[data-v]'); if(b) setView(b.dataset.v); });
 document.getElementById('alt').addEventListener('input',e=>{ z=sliderToZ(+e.target.value); render(); showZ(z); });
 document.getElementById('marks').innerHTML=MARKS.filter(m=>['everest','airliner','armstrong','ozone','karman','iss'].includes(m.k)).map(m=>'<button type="button" data-k="'+m.k+'">'+esc(m.n)+'</button>').join('');
 document.getElementById('marks').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const m=MARKS.find(x=>x.k===b.dataset.k); hot=m.k; setZ(m.z); });
 let dragging=false;
 const svgPt=e=>{ const svg=document.getElementById('asvg'), b=svg.getBoundingClientRect(); return [(e.clientX-b.left)/b.width*W,(e.clientY-b.top)/b.height*svg.viewBox.baseVal.height]; };
 el.addEventListener('pointerdown',e=>{ if(view!=='up') return; const [x,y]=svgPt(e); if(y>=P.y-6&&y<=P.y+P.h+6&&x>=P.x-10&&!e.target.closest('[data-k]')&&!e.target.closest('[data-o]')){ dragging=true; hot=null; setZ(ZY(Math.max(P.y,Math.min(P.y+P.h,y)))); e.preventDefault(); } });
-el.addEventListener('pointermove',e=>{ if(!dragging) return; const [,y]=svgPt(e); setZ(ZY(Math.max(P.y,Math.min(P.y+P.h,y)))); });
+el.addEventListener('pointermove',e=>{ if(dragging){ const [,y]=svgPt(e); setZ(ZY(Math.max(P.y,Math.min(P.y+P.h,y)))); return; }
+  if(view!=='up'||B.running) return; const r=e.target.closest('[data-p]'); if(r){ const [,y]=svgPt(e); const zk=ZY(Math.max(P.y,Math.min(P.y+P.h,y))); if(Math.abs(zk-z)>0.05){ hot=null; setZ(zk); } } });
 window.addEventListener('pointerup',()=>{ dragging=false; });
-el.addEventListener('pointerover',e=>{ if(dragging) return; const k=e.target.closest('[data-k]'); if(k){ if(k.getAttribute('data-k')===hot) return; hot=k.getAttribute('data-k'); const m=MARKS.find(x=>x.k===hot); render(); card('A mark on the column', esc(m.n), [['height',km(m.z)],['pressure there',pres(std(m.z).p)],['temperature',Math.round(std(m.z).T-273.15)+' \u00b0C']], m.b, m.s); return; }
+el.addEventListener('pointerover',e=>{ if(dragging||B.running) return; const k=e.target.closest('[data-k]'); if(k){ if(k.getAttribute('data-k')===hot) return; hot=k.getAttribute('data-k'); const m=MARKS.find(x=>x.k===hot); render(); card('A mark on the column', esc(m.n), [['height',km(m.z)],['pressure there',pres(std(m.z).p)],['temperature',Math.round(std(m.z).T-273.15)+' \u00b0C']], m.b, m.s); return; }
   const ob=e.target.closest('[data-o]'); if(ob){ if(ob.getAttribute('data-o')===hot) return; hot=ob.getAttribute('data-o'); render(); showObj(OBJECTS.find(x=>x.k===hot)); return; }
   const l=e.target.closest('[data-l]'); if(l){ if(l.getAttribute('data-l')===hot) return; hot=l.getAttribute('data-l'); render(); showLayer(hot); return; }
   const g=e.target.closest('[data-g]'); if(g){ const id=g.getAttribute('data-g'); if('g'+id===hot) return; hot='g'+id; render(); showGas(id==='w'?WATER:GASES[+id]); } });
 
 render(); showZ(z);
-window.__atm=(q)=>{ const o={view,z,hot,card:document.getElementById('numTxt').innerText,name:document.getElementById('nameTxt').innerText,
-  marker:(()=>{ const c=document.querySelector('#marker circle'); return c?+c.getAttribute('cy'):null; })(), half:halfHeight(), h90:heightAt(0.1), h99:heightAt(0.01)};
+window.__atm=(q)=>{ const o={view,z,hot,sc,scaleOn,card:document.getElementById('numTxt').innerText,name:document.getElementById('nameTxt').innerText,
+  marker:(()=>{ const c=document.querySelector('#marker circle'); return c?+c.getAttribute('cy'):null; })(), half:halfHeight(), h90:heightAt(0.1), h99:heightAt(0.01),
+  balloon:{t:B.t,running:B.running,burst:B.burst,z:Math.min(B.zb,B.v*B.t/1000)}, vals:[...document.querySelectorAll('#asvg text.val')].map(t=>t.textContent),
+  icons:document.querySelectorAll('#asvg [data-o][transform], #asvg [data-k][transform]').length};
   if(q&&q.z!=null){ const s=std(q.z); o.at={T:s.T,p:s.p,rho:s.rho,c:sound(s.T),boil:boil(s.p)}; } if(q&&q.YZ!=null) o.yz=YZ(q.YZ); return o; };
 </script>
 </body>

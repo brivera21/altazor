@@ -24,14 +24,45 @@ h1 { margin:0 0 10px; font-size:26px; }
   border:1px solid var(--line); background:#1a1a1a; color:var(--muted); cursor:pointer; }
 .chips button.on { color:var(--text); border-color:var(--accent); background:#1c2733; }
 .chips button:hover { border-color:var(--accent); }
+/* the chips sit in three groups: the ground, the lines drawn on it, and
+   the layers that move with the year */
+.chips .grp { display:inline-flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.chips .gl { color:var(--muted); font-size:10.5px; letter-spacing:.09em;
+  text-transform:uppercase; margin-right:2px; }
+.chips .sep { width:1px; height:22px; background:var(--line); margin:0 4px; }
 .stage { display:flex; gap:20px; align-items:flex-start; }
-#mapwrap { flex:1 1 640px; min-width:0; position:relative; background:#151719;
+.mapcol { flex:1 1 640px; min-width:0; }
+#mapwrap { position:relative; background:#151719;
   border:1px solid var(--line); border-radius:12px; overflow:hidden; }
 #mapwrap canvas, #mapwrap svg { position:absolute; inset:0; width:100%; height:100%; display:block; }
-#mapwrap svg { position:relative; }
+#mapwrap svg { position:relative; outline:none; }
+#mapwrap svg:focus-visible { box-shadow:inset 0 0 0 2px var(--accent); }
+#loadTxt { position:absolute; right:10px; top:8px; z-index:2; pointer-events:none;
+  color:var(--muted); font-size:11.5px; padding:2px 9px; border-radius:999px;
+  background:rgba(18,18,18,.72); }
+#loadTxt:empty { display:none; }
+/* zoom: two buttons in the corner, the wheel, a drag to pan; lines keep
+   their width on screen and marks and names keep their size */
+#map path, #map line, #map circle, #map rect, #map polyline { vector-effect:non-scaling-stroke; }
+#map [data-mig] path { vector-effect:none; }
+#map.zoomed { cursor:grab; touch-action:none; }
+#map.zoomed.panning { cursor:grabbing; }
+#mapwrap canvas { transform-origin:0 0; }
+.zoomctl { position:absolute; left:10px; top:10px; z-index:2; display:flex; flex-direction:column; gap:4px; }
+.zoomctl button { width:28px; height:28px; border-radius:8px; border:1px solid var(--line);
+  background:rgba(18,18,18,.82); color:var(--text); font:inherit; font-size:16px; line-height:1;
+  cursor:pointer; padding:0; }
+.zoomctl button:hover { border-color:var(--accent); }
+.zoomctl button:disabled { opacity:.35; cursor:default; border-color:var(--line); }
+.zcity { position:absolute; right:10px; bottom:10px; z-index:2; font-size:12.5px; padding:4px 11px;
+  border-radius:999px; border:1px solid var(--accent); background:rgba(18,18,18,.86);
+  color:var(--text); text-decoration:none; }
+.zcity:hover { color:var(--accent); }
+.zcity[hidden] { display:none; }
 .side { flex:0 0 320px; position:sticky; top:16px; display:flex;
-  flex-direction:column; gap:14px; }
-.card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+  flex-direction:column; gap:14px; max-height:calc(100vh - 32px);
+  overflow-y:auto; scrollbar-width:thin; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px; flex:none; }
 .symh { color:var(--muted); font-size:11px; letter-spacing:.09em;
   text-transform:uppercase; margin-bottom:8px; }
 .sym { display:flex; gap:10px; align-items:flex-start; padding:7px 0;
@@ -39,8 +70,8 @@ h1 { margin:0 0 10px; font-size:26px; }
 .sym:first-child { border-top:none; padding-top:0; }
 .sym img { width:54px; height:54px; object-fit:cover; border-radius:7px;
   background:#0d0d0d; flex:0 0 54px; }
-.sym .noimg { width:54px; height:54px; border-radius:7px; background:#0d0d0d;
-  flex:0 0 54px; }
+.sym .noimg { width:54px; height:54px; border-radius:7px; background:#202020;
+  border:1px solid var(--line); flex:0 0 54px; }
 .sym .b { min-width:0; }
 .sym .k { color:var(--muted); font-size:10.5px; letter-spacing:.07em;
   text-transform:uppercase; }
@@ -60,9 +91,11 @@ h1 { margin:0 0 10px; font-size:26px; }
 #popTxt .totG { color:#0ca30c; }
 #kindTxt { color:var(--muted); font-size:11.5px; letter-spacing:.09em; text-transform:uppercase; }
 #nameTxt { font-weight:700; font-size:16px; margin:2px 0 6px; }
+#nameTxt.empty { font-weight:400; font-size:13px; color:var(--muted); }
 #bodyTxt { color:var(--muted); font-size:13px; line-height:1.5; }
 #srcTxt { color:var(--muted); font-size:11.5px; margin-top:8px; border-top:1px solid var(--line);
   padding-top:6px; overflow-wrap:anywhere; }
+#srcTxt:empty { display:none; }
 .tl { margin-top:14px; }
 .tlticks { position:relative; height:40px; margin:0 62px 2px 84px; }
 .tlticks button { position:absolute; transform:translateX(-50%); font:inherit; font-size:11px;
@@ -73,17 +106,34 @@ h1 { margin:0 0 10px; font-size:26px; }
   border-top:5px solid var(--muted); }
 .tlticks button:hover, .tlticks button.here { color:var(--accent); }
 .tlticks button:hover::after, .tlticks button.here::after { border-top-color:var(--accent); }
-.tlticks button.row2 { top:0; } .tlticks button.row1 { top:21px; }
+/* a year that cannot find room on any row keeps its arrow and its title */
+.tlticks button.hid { color:transparent; }
+.tlticks button.hid:hover { color:var(--accent); background:var(--bg); z-index:2; }
 .tlrow { display:flex; gap:10px; align-items:center; }
 .tlrow button { font:inherit; font-size:13.5px; padding:6px 14px; border-radius:999px;
   border:1px solid var(--line); background:#1a1a1a; color:var(--text); cursor:pointer; }
 .tlrow button:hover { border-color:var(--accent); }
 .tlrow input[type=range] { flex:1; accent-color:var(--accent); }
+#bPlay { width:74px; }
 #yearTxt { font-family:ui-monospace,Menlo,monospace; font-size:15px; width:52px; text-align:right; }
 .eraband { position:relative; height:14px; margin:6px 62px 0 84px; border-radius:4px;
   overflow:hidden; border:1px solid var(--line); }
 .eraband div { position:absolute; top:0; bottom:0; }
 .eraband span { position:absolute; top:-2px; width:2px; bottom:-2px; }
+/* the population under the slider: the counted line and the Native
+   estimate on one log scale, with a dot riding the year */
+.spark { position:relative; height:62px; margin:6px 62px 0 84px; }
+.spark svg { position:absolute; inset:0; width:100%; height:100%; display:block; overflow:visible; }
+.spark text { font-size:9.5px; fill:var(--muted); }
+.tlkey { display:flex; gap:6px 16px; flex-wrap:wrap; align-items:center;
+  font-size:11.5px; color:var(--muted); margin:8px 0 0 84px; }
+.tlkey i { display:inline-block; width:9px; height:9px; border-radius:2px;
+  margin-right:5px; vertical-align:-1px; }
+.tlkey i.ln { height:2px; width:14px; border-radius:1px; vertical-align:2px; }
+.tlkey .spd { margin-left:auto; display:inline-flex; gap:6px; align-items:center; }
+.tlkey .spd button { font:inherit; font-size:11px; padding:2px 9px; border-radius:999px;
+  border:1px solid var(--line); background:#1a1a1a; color:var(--muted); cursor:pointer; }
+.tlkey .spd button.on { color:var(--text); border-color:var(--accent); }
 .note { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:760px;
   border-top:1px solid var(--line); padding-top:12px; }
 .method { color:var(--muted); font-size:12.5px; margin-top:14px;
@@ -99,8 +149,21 @@ details.sources > summary:hover { color:var(--accent); }
 .refs p { padding-left:2em; text-indent:-2em; }
 .refs .ann { color:#7d7d7d; display:block; padding-left:0; text-indent:0; margin-top:2px; }
 h2.refh { font-size:15px; margin:26px 0 8px; }
-@media (max-width:900px){ .stage{flex-direction:column;} .side{position:static; width:100%;
+@media (max-width:900px){ .stage{flex-direction:column;} .mapcol{flex-basis:auto; width:100%;} #mapwrap{width:100%;}
+  .side{position:static; width:100%; max-height:none; overflow:visible;
   flex-direction:row; flex-wrap:wrap;} .side .card{flex:1 1 260px;} }
+/* a phone: the map scrolls sideways at a readable size, the chips lose
+   their dividers, and the card that answers a tap sits above the map */
+@media (max-width:600px){ .tlticks, .eraband, .spark{ margin-left:0; margin-right:0; }
+  .tlkey{ margin-left:0; } .tlrow{ flex-wrap:wrap; } .tlrow input[type=range]{ flex:1 1 100%; order:3; }
+  .tlkey .spd{ margin-left:0; }
+  .chips{ gap:6px; } .chips .sep{ display:none; } .chips .grp{ gap:6px; }
+  .chips button{ padding:4px 10px; font-size:12.5px; }
+  .mapscroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:12px; }
+  #mapwrap{ min-width:640px; }
+  .side{ display:contents; } .stage{ gap:14px; align-items:stretch; }
+  .side .card{ flex:none; }
+  .side .card.hover{ order:-1; } .side .card.hover:has(#nameTxt.empty){ display:none; } }
 </style>
 </head>
 <body>
@@ -111,24 +174,44 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 </header>
 <h1>New York City</h1>
 <div class="chips">
+  <span class="grp"><span class="gl">Ground</span>
   <button id="cTer" class="on">Terrain</button>
   <button id="cWoo" class="on">Woods</button>
   <button id="cRiv" class="on">Rivers</button>
   <button id="cLak" class="on">Lakes</button>
+  </span><span class="sep"></span><span class="grp"><span class="gl">Lines</span>
   <button id="cCou">Counties</button>
+  <button id="cLim" class="on">Limits</button>
+  <button id="cHwy">Highways</button>
+  </span><span class="sep"></span><span class="grp"><span class="gl">By the year</span>
   <button id="cNat" class="on">Nations</button>
   <button id="cTow" class="on">Towns</button>
   <button id="cUni">Colleges</button>
-  <button id="cHwy">Highways</button>
   <button id="cMig" class="on">Migrations</button>
-  <span id="loadTxt" style="color:var(--muted);font-size:12px"></span>
+  </span>
 </div>
 <div class="stage">
-  <div id="mapwrap">
+  <div class="mapcol">
+  <div class="mapscroll"><div id="mapwrap">
     <canvas id="terC"></canvas>
     <canvas id="wooC"></canvas>
     <canvas id="watC"></canvas>
-    <svg id="map"></svg>
+    <svg id="map" tabindex="0" aria-label="The map; arrow keys move the year when it has focus"></svg>
+    <span id="loadTxt"></span>
+    <div class="zoomctl"><button id="zIn" aria-label="Closer">+</button><button id="zOut" aria-label="Farther" disabled>&minus;</button></div>
+    <a id="zCity" class="zcity" hidden></a>
+  </div></div>
+  <div class="tl">
+    <div class="tlticks" id="ticks"></div>
+    <div class="tlrow">
+      <button id="bPlay">Play</button>
+      <input type="range" id="yr" min="1492" max="2025" value="1492" step="1" aria-label="Year">
+      <div id="yearTxt"></div>
+    </div>
+    <div class="eraband" id="eband"></div>
+    <div class="spark" id="spark"></div>
+    <div class="tlkey" id="tlkey"></div>
+  </div>
   </div>
   <div class="side">
     <div class="card">
@@ -140,22 +223,13 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
       <div id="yearBig"></div>
       <div id="popTxt"></div>
     </div>
-    <div class="card">
+    <div class="card hover">
       <div id="kindTxt"></div>
-      <div id="nameTxt">A mark under the cursor lands here</div>
+      <div id="nameTxt" class="empty">A mark under the cursor lands here</div>
       <div id="bodyTxt"></div>
       <div id="srcTxt"></div>
     </div>
   </div>
-</div>
-<div class="tl">
-  <div class="tlticks" id="ticks"></div>
-  <div class="tlrow">
-    <button id="bPlay">Play</button>
-    <input type="range" id="yr" min="1492" max="2025" value="1492" step="1">
-    <div id="yearTxt"></div>
-  </div>
-  <div class="eraband" id="eband"></div>
 </div>
 <p class="note">The real city and its ground: terrain, woods, water, counties and the city limits in green dashes, each a layer to switch. The slider runs from 1492: the nations' homelands first, then the founding, the turns, the losses and the migrations that filled it. These nations still exist; Native Land Digital maps their territories with their input.</p>
 <details class="sources"><summary>Sources</summary>
@@ -177,21 +251,27 @@ h2.refh { font-size:15px; margin:26px 0 8px; }
 </details>
 </div>
 <script>
-const ST={"name":"New York City","fips":"nyc","W":1000,"H":950.8,"m":[-8254896.839775202,4959121.827113814,-8212595.433273758,4999340.875497432],"ll":[-74.155,40.6382,-73.775,40.9118],"home":"36061","outline":[[[1000.0,67.4],[963.7,185.6],[983.7,253.8],[965.2,242.8],[954.6,194.8],[935.4,222.0],[900.5,226.5],[893.2,266.8],[983.2,406.7],[1000.0,402.9],[1000.0,950.8],[309.0,950.8],[359.8,878.6],[342.6,781.5],[363.7,730.2],[343.3,703.6],[306.5,699.1],[190.0,827.6],[177.9,897.4],[160.3,910.9],[0.0,933.1],[0.0,0.0],[1000.0,0.0],[1000.0,67.4]],[[1000.0,103.7],[999.5,96.1],[1000.0,96.0],[1000.0,103.7]],[[307.9,739.9],[283.4,769.5],[304.2,734.8],[307.9,739.9]],[[5.3,948.4],[180.3,914.7],[208.2,916.5],[225.4,950.8],[5.3,948.4]]],"counties":[{"n":"Bergen","fips":"34003","p":978641,"y":1683,"r":[[[617.3,0.0],[583.1,103.5],[442.5,394.8],[362.6,307.1],[289.5,362.2],[19.7,436.0],[43.5,393.5],[39.9,378.1],[48.7,325.7],[65.7,319.6],[29.9,0.0],[617.3,0.0]]]},{"n":"Essex","fips":"34013","p":881527,"y":1683,"r":[[[100.0,607.5],[99.9,700.3],[111.1,725.6],[48.2,825.1],[0.0,813.2],[0.0,610.8],[100.0,607.5]],[[65.7,319.6],[48.7,325.7],[39.9,378.1],[43.5,393.5],[19.7,436.0],[17.7,458.9],[0.0,487.1],[0.0,274.3],[65.7,319.6]]]},{"n":"Hudson","fips":"34017","p":736185,"y":1840,"r":[[[442.5,394.8],[371.6,539.8],[343.3,703.6],[306.5,699.1],[273.2,750.9],[190.0,827.6],[171.1,875.5],[177.9,897.4],[160.3,910.9],[30.6,938.0],[0.0,933.1],[0.0,901.6],[111.1,725.6],[99.9,700.3],[100.0,607.5],[0.0,610.8],[0.0,487.1],[17.7,458.9],[19.7,436.0],[289.5,362.2],[362.6,307.1],[442.5,394.8]]]},{"n":"Passaic","fips":"34031","p":526597,"y":1837,"r":[[[65.7,319.6],[0.0,274.3],[0.0,0.0],[29.9,0.0],[65.7,319.6]]]},{"n":"Union","fips":"34039","p":594160,"y":1857,"r":[[[48.2,825.1],[5.2,893.2],[0.0,901.6],[0.0,813.2],[48.2,825.1]]]},{"n":"Bronx","fips":"36005","p":24111,"y":1914,"r":[[[951.6,389.4],[905.3,371.3],[853.8,378.0],[769.2,398.5],[747.4,434.3],[697.6,432.8],[695.8,423.3],[638.1,402.3],[652.4,123.7],[641.0,113.2],[631.1,126.1],[583.1,103.5],[617.3,0.0],[675.4,0.0],[870.9,76.4],[977.5,107.1],[963.7,185.6],[965.6,200.7],[981.1,224.3],[983.7,253.8],[976.7,261.0],[965.2,242.8],[954.6,194.8],[935.4,222.0],[916.0,216.8],[900.5,226.5],[893.2,266.8],[902.9,300.8],[922.3,324.5],[941.2,334.8],[971.1,386.0],[951.6,389.4]]]},{"n":"Kings","fips":"36047","p":27013,"y":1683,"r":[[[760.5,799.1],[787.7,862.0],[775.0,893.7],[782.0,950.8],[309.0,950.8],[323.5,922.1],[359.8,878.6],[354.0,810.1],[347.6,801.4],[357.0,807.4],[397.5,774.4],[422.0,722.0],[487.3,705.0],[509.1,653.5],[505.8,605.6],[527.0,599.9],[547.2,606.1],[572.8,632.5],[594.1,639.7],[608.2,666.7],[614.5,705.1],[659.4,751.4],[680.3,797.3],[752.8,753.2],[760.5,799.1]]]},{"n":"New York","fips":"36061","p":49175,"y":1683,"r":[[[509.1,653.5],[487.3,705.0],[422.0,722.0],[397.5,774.4],[357.0,807.4],[344.8,797.6],[342.6,781.5],[359.2,752.1],[363.7,730.2],[356.5,712.1],[343.3,703.6],[371.6,539.8],[583.1,103.5],[631.1,126.1],[641.0,113.2],[652.4,123.7],[652.6,133.5],[638.1,402.3],[643.3,420.3],[597.4,469.8],[578.7,461.2],[570.0,477.3],[578.4,487.2],[574.9,493.8],[555.4,512.6],[509.1,586.8],[509.1,653.5]],[[302.6,734.0],[307.9,739.9],[290.9,776.5],[285.9,774.0],[302.6,734.0]]]},{"n":"Queens","fips":"36081","p":12995,"y":1683,"r":[[[739.4,756.5],[698.5,791.3],[680.3,797.3],[659.4,751.4],[614.5,705.1],[608.2,666.7],[594.1,639.7],[572.8,632.5],[547.2,606.1],[527.0,599.9],[505.8,605.6],[509.1,586.8],[526.5,557.5],[578.4,487.2],[570.0,477.3],[578.7,461.2],[597.4,469.8],[643.3,420.3],[638.1,402.3],[710.9,435.5],[747.4,434.3],[769.2,398.5],[905.3,371.3],[951.6,389.4],[971.1,386.0],[983.2,406.7],[1000.0,402.9],[1000.0,950.8],[782.0,950.8],[775.0,893.7],[787.7,862.0],[760.5,799.1],[752.8,753.2],[739.4,756.5]]]},{"n":"Richmond","fips":"36085","p":4860,"y":1683,"r":[[[0.0,950.8],[180.3,914.7],[208.2,916.5],[225.4,950.8],[0.0,950.8]]]},{"n":"Westchester","fips":"36119","p":2012,"y":1683,"r":[[[1000.0,67.4],[977.5,107.1],[870.9,76.4],[675.4,0.0],[1000.0,0.0],[1000.0,67.4]],[[1000.0,103.7],[999.5,96.1],[1000.0,96.0],[1000.0,103.7]]]}],"rivers":[{"n":"Passaic","s":[[[112.0,674.3],[78.0,601.0],[21.3,603.9],[0.0,591.2]],[[0.0,508.2],[111.0,160.4],[60.9,69.3],[56.6,0.0]]]}],"lakes":[],"limits":[[[0.0,932.4],[30.9,937.1],[55.5,931.8],[77.5,930.6],[118.5,916.8],[161.2,916.0],[179.5,904.3],[261.2,903.8],[295.4,830.1],[315.6,792.1],[338.7,736.7],[352.3,641.2],[371.6,539.8],[414.8,457.5],[504.8,295.5],[529.0,222.1],[543.7,185.6],[592.6,80.5],[616.7,0.0],[677.8,0.4],[778.1,39.4],[778.9,35.9],[777.4,33.5],[780.8,33.9],[783.7,31.1],[783.4,23.6],[786.5,23.1],[786.0,19.6],[792.6,16.1],[789.8,12.5],[791.2,9.8],[794.9,6.6],[796.9,8.0],[799.7,6.2],[793.3,15.1],[799.9,18.6],[802.0,15.4],[814.9,21.7],[816.6,26.5],[825.3,26.6],[826.9,35.2],[831.1,43.3],[829.7,49.8],[833.1,61.8],[871.0,76.8],[873.0,71.7],[1000.0,114.7],[1000.0,281.7],[986.3,297.2],[989.6,348.3],[1000.0,364.4],[1000.0,950.8],[0.0,950.8],[0.0,932.4]],[[300.9,735.6],[305.4,737.6],[306.9,741.0],[302.8,741.3],[300.9,735.6]],[[285.6,772.9],[283.8,767.2],[286.7,767.0],[290.7,769.1],[293.0,771.3],[293.2,774.6],[289.3,775.5],[285.6,772.9]]],"limitsName":"New York City limits","homeFill":0.07,"natFill":0.17,"migGap":24}, HIST={"eras":[{"y0":1492,"y1":1624,"l":"Lenapehoking","f":null},{"y0":1624,"y1":1664,"l":"New Netherland","f":{"a":"Flag of the Netherlands"}},{"y0":1664,"y1":1707,"l":"England: New York","f":{"a":"Flag of England"}},{"y0":1707,"y1":1783,"l":"Great Britain","f":{"a":"Flag of Great Britain"}},{"y0":1783,"y1":1898,"l":"United States; capital 1785 to 1790","f":{"a":"Flag of the United States"}},{"y0":1898,"y1":1965,"l":"The consolidated city","f":{"a":"Flag of the United States"}},{"y0":1965,"y1":2026,"l":"The city after the 1965 immigration act","f":{"a":"Flag of the United States"}}],"marks":[{"y":1626,"l":"The purchase of Manhattan"},{"y":1664,"l":"The English take it"},{"y":1827,"l":"Slavery ends in New York"},{"y":1898,"l":"The five boroughs join"},{"y":1904,"l":"Harlem changes hands"},{"y":1935,"l":"The Harlem riot"}],"border":1898,"nb":[{"n":"Hudson River","lat":40.85,"lon":-74.02,"sea":true},{"n":"Long Island Sound","lat":40.9,"lon":-73.72,"sea":true},{"n":"Atlantic Ocean","lat":40.45,"lon":-73.85,"sea":true},{"n":"New Jersey","lat":40.75,"lon":-74.3},{"n":"Harlem","lat":40.818,"lon":-73.95},{"n":"East Harlem","lat":40.792,"lon":-73.934},{"n":"Brooklyn","lat":40.678,"lon":-73.95},{"n":"Queens","lat":40.74,"lon":-73.82},{"n":"The Bronx","lat":40.855,"lon":-73.87}],"pre":"Lenapehoking: Munsee-speaking Lenape villages, planting grounds and oyster beds across the islands and the mainland.","nations":[{"n":"Lenape","src":"en.wikipedia.org/wiki/Lenape","poly":[[-74.2,40.55],[-74.08,40.55],[-73.96,40.55],[-73.84,40.55],[-73.72,40.55],[-73.7275,40.65],[-73.735,40.75],[-73.7425,40.85],[-73.75,40.95],[-73.8675,40.945],[-73.985,40.94],[-74.1025,40.935],[-74.22,40.93],[-74.215,40.835],[-74.21,40.74],[-74.205,40.645]],"lat":40.78,"lon":-73.95,"note":"Manhattan, the Bronx and the western Island; the name Manhattan is theirs.","after":{"y":1750,"t":"pushed west and north out of the region"}},{"n":"Canarsee","src":"en.wikipedia.org/wiki/Canarsee","poly":[[-74.05,40.55],[-73.975,40.5525],[-73.9,40.555],[-73.825,40.5575],[-73.75,40.56],[-73.7575,40.6],[-73.765,40.64],[-73.7725,40.68],[-73.78,40.72],[-73.85,40.7175],[-73.92,40.715],[-73.99,40.7125],[-74.06,40.71],[-74.0575,40.67],[-74.055,40.63],[-74.0525,40.59]],"lat":40.63,"lon":-73.92,"note":"The Lenape band of western Long Island, whose name survives in Canarsie."},{"n":"Matinecock","src":"en.wikipedia.org/wiki/Matinecock","poly":[[-73.85,40.7],[-73.775,40.705],[-73.7,40.71],[-73.625,40.715],[-73.55,40.72],[-73.5575,40.765],[-73.565,40.81],[-73.5725,40.855],[-73.58,40.9],[-73.6525,40.895],[-73.725,40.89],[-73.7975,40.885],[-73.87,40.88],[-73.865,40.835],[-73.86,40.79],[-73.855,40.745]],"lat":40.8,"lon":-73.7,"note":"Northern Queens and the Sound shore."}],"events":[{"y":1609,"t":"set","n":"Hudson in the harbor","lat":40.7,"lon":-74.02,"note":"The Halve Maen enters the river; the Dutch claim follows.","src":"en.wikipedia.org/wiki/Henry_Hudson"},{"y":1624,"t":"set","n":"New Amsterdam","lat":40.704,"lon":-74.013,"note":"A company post at the tip of Manhattan; by 1643 eighteen languages are spoken in it.","src":"en.wikipedia.org/wiki/New_Amsterdam","pp":[[1698,4937],[1712,5840],[1723,7248],[1737,10664],[1746,11717],[1756,13046],[1771,21863],[1790,33131],[1800,60515],[1810,96373],[1820,123706],[1830,202589],[1840,312710],[1850,515547],[1860,813669],[1870,942292],[1880,1206299],[1890,1515301],[1900,3437202],[1910,4766883],[1920,5620048],[1930,6930446],[1940,7454995],[1950,7891957],[1960,7781984],[1970,7894862],[1980,7071639],[1990,7322564],[2000,8008288],[2010,8175133],[2020,8804190]]},{"y":1643,"t":"rem","n":"Kieft's War","lat":40.73,"lon":-74.03,"note":"Director Kieft's raids kill hundreds of Lenape, including the massacre at Pavonia.","src":"en.wikipedia.org/wiki/Kieft%27s_War"},{"y":1664,"t":"cap","n":"New York","lat":40.704,"lon":-74.011,"note":"An English fleet takes the town without a shot; Stuyvesant surrenders it in August.","src":"en.wikipedia.org/wiki/History_of_New_York_City"},{"y":1712,"t":"rem","n":"The slave revolt of 1712","lat":40.712,"lon":-74.006,"note":"One in five people in the city is enslaved; the rising and its punishments harden the slave codes.","src":"en.wikipedia.org/wiki/New_York_Slave_Revolt_of_1712"},{"y":1754,"t":"set","n":"King's College","lat":40.807,"lon":-73.962,"note":"Chartered by George II; renamed Columbia after the Revolution.","src":"en.wikipedia.org/wiki/Columbia_University"},{"y":1785,"t":"cap","n":"Capital of the United States","lat":40.707,"lon":-74.01,"note":"Congress meets at Federal Hall; Washington is inaugurated there in 1789.","src":"en.wikipedia.org/wiki/Federal_Hall"},{"y":1811,"t":"set","n":"The Commissioners' Plan","lat":40.75,"lon":-73.98,"note":"The grid is laid over Manhattan above Houston Street, before the city reaches it.","src":"en.wikipedia.org/wiki/Commissioners%27_Plan_of_1811"},{"y":1827,"t":"set","n":"Emancipation in New York","lat":40.712,"lon":-74.006,"note":"State law frees the last enslaved New Yorkers on July 4.","src":"en.wikipedia.org/wiki/Slavery_in_New_York"},{"y":1863,"t":"rem","n":"The draft riots","lat":40.735,"lon":-73.99,"note":"Four days of violence aimed at Black New Yorkers; the Colored Orphan Asylum is burned.","src":"en.wikipedia.org/wiki/New_York_City_draft_riots"},{"y":1892,"t":"set","n":"Ellis Island opens","lat":40.699,"lon":-74.039,"note":"Twelve million people pass through before it closes in 1954.","src":"en.wikipedia.org/wiki/Ellis_Island"},{"y":1898,"t":"cap","n":"The five boroughs","lat":40.712,"lon":-74.006,"note":"Manhattan, Brooklyn, Queens, the Bronx and Staten Island consolidate on January 1.","src":"en.wikipedia.org/wiki/City_of_Greater_New_York"},{"y":1904,"t":"set","n":"The subway","lat":40.751,"lon":-73.977,"note":"The IRT opens and the city's growth follows the lines out into the boroughs.","src":"en.wikipedia.org/wiki/New_York_City_Subway"},{"y":1658,"t":"set","n":"Nieuw Haarlem","lat":40.806,"lon":-73.938,"note":"Dutch settlers lay out a village on the flats by the Harlem River and name it for Haarlem; Stuyvesant's council incorporates it in 1660. It stays farmland for two centuries.","src":"en.wikipedia.org/wiki/Harlem"},{"y":1904,"t":"set","n":"Payton's Harlem","lat":40.813,"lon":-73.944,"note":"Philip A. Payton Jr. founds the Afro-American Realty Company on 15 June and places Black tenants in the flats of a Harlem built ahead of its demand. By the 1915 state census his own block, white in 1900, is almost wholly Black.","src":"en.wikipedia.org/wiki/Philip_A._Payton_Jr."},{"y":1925,"t":"set","n":"The Harlem Renaissance","lat":40.8155,"lon":-73.9405,"note":"Central and West Harlem carry the writing, music and painting of the twenties and thirties, and the idea that a neighborhood could speak for a people.","src":"en.wikipedia.org/wiki/Harlem_Renaissance"},{"y":1935,"t":"rem","n":"The Harlem riot of 1935","lat":40.8085,"lon":-73.9475,"note":"On 19 March a rumor that a boy caught shoplifting had been beaten to death empties the avenues: three dead, a hundred injured, two million dollars of damage. Historians count it the first modern riot, aimed at shops and police rather than at neighbors.","src":"en.wikipedia.org/wiki/Harlem_riot_of_1935"},{"y":1950,"t":"set","n":"El Barrio","lat":40.795,"lon":-73.936,"note":"Puerto Rican families settle East Harlem after the war, and Italian Harlem becomes Spanish Harlem.","src":"en.wikipedia.org/wiki/Harlem"},{"y":1964,"t":"rem","n":"The Harlem riot of 1964","lat":40.8045,"lon":-73.9425,"note":"A police lieutenant shoots James Powell, fifteen, on 16 July. Six nights follow in Harlem and Bedford-Stuyvesant: one dead, 118 injured, 465 arrested, and the grand jury clears the officer.","src":"en.wikipedia.org/wiki/Harlem_riot_of_1964"},{"y":1969,"t":"set","n":"Stonewall","lat":40.734,"lon":-74.002,"note":"Six nights of resistance to a police raid on Christopher Street.","src":"en.wikipedia.org/wiki/Stonewall_riots"},{"y":2001,"t":"rem","n":"September 11","lat":40.711,"lon":-74.013,"note":"2,753 people are killed at the World Trade Center.","src":"en.wikipedia.org/wiki/September_11_attacks"}],"census":[[1698,4937],[1712,5840],[1723,7248],[1737,10664],[1746,11717],[1756,13046],[1771,21863],[1790,33131],[1800,60515],[1810,96373],[1820,123706],[1830,202589],[1840,312710],[1850,515547],[1860,813669],[1870,942292],[1880,1206299],[1890,1515301],[1900,3437202],[1910,4766883],[1920,5620048],[1930,6930446],[1940,7454995],[1950,7891957],[1960,7781984],[1970,7894862],[1980,7071639],[1990,7322564],[2000,8008288],[2010,8175133],[2020,8804190]],"native":[],"geo":{"hp":{"n":"Todt Hill","el":"125 m","lat":40.598,"lon":-74.099}},"mig":[{"y0":1845,"y1":1860,"n":"The Irish famine","p":900000,"f":[41.8,-74.6],"t":[40.71,-74.0],"b":0.15,"note":"By 1855 the Irish-born are more than a quarter of the city.","src":"en.wikipedia.org/wiki/Irish_Americans_in_New_York_City"},{"y0":1880,"y1":1924,"n":"Ellis Island","p":4000000,"f":[41.3,-73.3],"t":[40.699,-74.039],"b":-0.13,"note":"Italians, Eastern European Jews, Poles, Greeks and Hungarians land at Castle Garden and then Ellis Island, until the 1924 quotas close the door.","src":"en.wikipedia.org/wiki/Ellis_Island"},{"y0":1916,"y1":1970,"n":"The Great Migration","p":800000,"f":[33.5,-80.0],"t":[40.81,-73.94],"b":0.17,"note":"Black southerners come north to Harlem and Bedford-Stuyvesant.","src":"en.wikipedia.org/wiki/Great_Migration_(African_American)"},{"y0":1945,"y1":1970,"n":"The Puerto Rican migration","p":700000,"f":[39.6,-73.4],"t":[40.8,-73.93],"b":-0.18,"note":"Air travel and citizenship bring some 700,000 people to East Harlem and the South Bronx.","src":"en.wikipedia.org/wiki/Puerto_Ricans_in_New_York_City"},{"y0":1965,"y1":2020,"n":"After the 1965 act","p":3000000,"f":[40.2,-73.1],"t":[40.73,-73.87],"b":0.12,"note":"Dominican, Chinese, Jamaican, Guyanese, Mexican, Bangladeshi and West African communities remake Queens and the Bronx; over a third of the city is foreign-born.","src":"en.wikipedia.org/wiki/Immigration_Nationality_Act_of_1965"}],"refs":[["Lenapehoking and the Lenape of the harbor.","https://en.wikipedia.org/wiki/Lenape"],["The consolidation of Greater New York, 1898.","https://en.wikipedia.org/wiki/City_of_Greater_New_York"],["Ellis Island and the years of the great arrival.","https://en.wikipedia.org/wiki/Ellis_Island"],["Nieuw Haarlem, and the Harlem that followed it.","https://en.wikipedia.org/wiki/Harlem"],["Philip A. Payton Jr. and the Afro-American Realty Company, 1904.","https://en.wikipedia.org/wiki/Philip_A._Payton_Jr."],["The Harlem riot of 1935, and why it is counted the first modern one.","https://en.wikipedia.org/wiki/Harlem_riot_of_1935"],["The Harlem riot of 1964, after the shooting of James Powell.","https://en.wikipedia.org/wiki/Harlem_riot_of_1964"]],"unis":[{"n":"Columbia University","y":1754,"pub":0,"lat":40.807,"lon":-73.962},{"n":"General Theological Seminary","y":1817,"pub":0,"lat":40.746,"lon":-74.004},{"n":"New York University","y":1831,"pub":0,"lat":40.73,"lon":-73.995},{"n":"Union Theological Seminary","y":1836,"pub":0,"lat":40.811,"lon":-73.964},{"n":"Fordham University","y":1841,"pub":0,"lat":40.862,"lon":-73.886},{"n":"City College of New York","y":1847,"pub":1,"lat":40.819,"lon":-73.95},{"n":"Manhattan University","y":1853,"pub":0,"lat":40.889,"lon":-73.902},{"n":"Cooper Union","y":1859,"pub":0,"lat":40.729,"lon":-73.991},{"n":"St. Francis College","y":1859,"pub":0,"lat":40.693,"lon":-73.992},{"n":"SUNY Downstate Health Sciences University","y":1860,"pub":1,"lat":40.655,"lon":-73.946},{"n":"Hunter College","y":1870,"pub":1,"lat":40.769,"lon":-73.965},{"n":"St. John's University (New York City)","y":1870,"pub":0,"lat":40.722,"lon":-73.796},{"n":"State University of New York Maritime College","y":1874,"pub":1,"lat":40.805,"lon":-73.793},{"n":"Jewish Theological Seminary of America","y":1886,"pub":0,"lat":40.812,"lon":-73.96},{"n":"Yeshiva University","y":1886,"pub":0,"lat":40.851,"lon":-73.93},{"n":"Pratt Institute","y":1887,"pub":0,"lat":40.691,"lon":-73.964},{"n":"Teachers College, Columbia University","y":1887,"pub":0,"lat":40.81,"lon":-73.961},{"n":"Barnard College","y":1889,"pub":0,"lat":40.81,"lon":-73.963},{"n":"New York Law School","y":1891,"pub":0,"lat":40.718,"lon":-74.006},{"n":"Weill Cornell Medicine","y":1898,"pub":0,"lat":40.765,"lon":-73.954},{"n":"Brooklyn Law School","y":1901,"pub":0,"lat":40.692,"lon":-73.99},{"n":"Rockefeller University","y":1901,"pub":0,"lat":40.763,"lon":-73.956},{"n":"Juilliard School","y":1905,"pub":0,"lat":40.774,"lon":-73.983},{"n":"Bank Street College of Education","y":1916,"pub":0,"lat":40.806,"lon":-73.966},{"n":"Manhattan School of Music","y":1917,"pub":0,"lat":40.812,"lon":-73.961},{"n":"Baruch College","y":1919,"pub":1,"lat":40.74,"lon":-73.983},{"n":"The New School","y":1919,"pub":0,"lat":40.736,"lon":-73.997},{"n":"Lehman College","y":1931,"pub":1,"lat":40.873,"lon":-73.894},{"n":"Vaughn College of Aeronautics and Technology","y":1932,"pub":0,"lat":40.768,"lon":-73.882},{"n":"Queens College, City University of New York","y":1937,"pub":1,"lat":40.737,"lon":-73.817},{"n":"Fashion Institute of Technology","y":1944,"pub":1,"lat":40.747,"lon":-73.994},{"n":"School of Visual Arts","y":1947,"pub":0,"lat":40.746,"lon":-74.0},{"n":"New York Institute of Technology","y":1955,"pub":0,"lat":40.77,"lon":-73.982},{"n":"John Jay College of Criminal Justice","y":1964,"pub":1,"lat":40.77,"lon":-73.988},{"n":"Metropolitan College of New York","y":1964,"pub":0,"lat":40.723,"lon":-74.007},{"n":"York College, City University of New York","y":1966,"pub":1,"lat":40.702,"lon":-73.795},{"n":"Medgar Evers College","y":1970,"pub":1,"lat":40.666,"lon":-73.957}],"cities":[]}, ROADS=[{"n":"SR 17","lv":"sr","y":1924,"s":[[[244.2,124.9],[216.6,52.0],[217.8,0.0]]]},{"n":"US 1","lv":"us","y":1926,"s":[[[303.2,473.2],[385.8,322.5],[393.7,239.3]],[[236.3,597.9],[303.2,473.2]],[[393.7,239.3],[421.2,244.5],[472.4,187.3]],[[0.0,676.3],[82.9,613.5],[141.9,613.5],[236.3,597.9]],[[665.1,234.1],[692.7,171.7],[751.7,192.5],[798.9,130.1],[960.2,31.2],[997.1,0.0]]]},{"n":"SR 27","lv":"sr","y":1927,"s":[[[472.4,914.4],[511.7,904.1],[614.0,893.7]],[[614.0,893.7],[688.7,883.3],[751.7,847.0],[822.5,847.0]],[[472.4,914.4],[421.2,852.2]]]},{"n":"SR 3","lv":"sr","y":1927,"s":[[[0.0,261.4],[149.7,353.7],[216.6,369.3],[279.6,436.9],[299.3,483.6]]]},{"n":"Southern State Parkway","lv":"sr","y":1927,"s":[[[1000.0,854.2],[879.2,847.3],[792.4,851.1],[725.9,881.4],[667.0,928.7],[657.1,950.8]]]},{"n":"US 9W","lv":"us","y":1927,"s":[[[499.9,176.9],[531.4,135.3],[582.3,0.0]]]},{"n":"US 46","lv":"us","y":1936,"s":[[[0.0,115.4],[59.3,93.7],[59.3,62.4],[126.1,62.4],[224.5,130.1],[248.1,166.5],[295.3,197.7]],[[366.1,228.9],[393.7,239.3]]]},{"n":"I-78","lv":"i","y":1956,"s":[[[385.6,660.4],[312.5,636.3],[184.5,630.3],[0.0,692.2]],[[0.0,708.7],[157.6,784.8],[263.8,696.5],[275.6,629.1],[354.3,639.4]]]},{"n":"I-80","lv":"i","y":1957,"s":[[[0.0,39.2],[105.9,49.2]]]},{"n":"I-95","lv":"i","y":1957,"s":[[[146.2,0.0],[84.0,62.7],[0.0,115.3]],[[937.0,0.0],[902.0,32.4],[870.0,38.5],[833.5,105.0],[685.1,259.8]],[[105.9,49.2],[184.5,56.6],[358.2,171.5],[586.7,171.5],[687.2,268.1]],[[90.7,571.9],[118.3,551.2],[185.2,535.6],[244.2,494.0],[318.9,374.5],[354.3,265.3]],[[558.9,218.5],[598.3,234.1],[688.7,239.3],[720.2,260.1],[814.6,291.3],[865.8,270.5],[865.8,202.9],[846.1,140.5],[857.9,104.1],[928.7,83.3],[973.2,0.0]]]},{"n":"I-495","lv":"i","y":1958,"s":[[[486.1,582.0],[458.7,569.9],[385.6,660.4]],[[1000.0,571.5],[911.2,594.1],[833.5,588.0],[760.3,624.2],[664.4,624.2],[481.6,582.0]]]},{"n":"I-278","lv":"i","y":1961,"s":[[[355.6,950.8],[353.6,937.6],[408.5,877.4],[463.3,756.9],[413.0,678.5],[385.6,660.4]],[[682.3,264.4],[833.5,286.2],[947.7,382.9],[1000.0,480.5]],[[354.3,935.2],[417.3,852.2],[397.6,805.5],[417.3,738.1],[499.9,748.5],[527.4,691.4],[621.9,613.5],[684.8,577.1],[661.2,499.2],[641.5,499.2]]]},{"n":"I-678","lv":"i","y":1965,"s":[[[877.6,421.3],[838.3,338.1]],[[960.2,930.0],[916.9,898.9],[932.7,831.5],[865.8,665.4],[838.3,618.7],[842.2,566.7],[830.4,514.8],[877.6,421.3]]]}], SYM=[];
+const ST={"name":"New York City","fips":"nyc","W":1000,"H":950.8,"m":[-8254896.839775202,4959121.827113814,-8212595.433273758,4999340.875497432],"ll":[-74.155,40.6382,-73.775,40.9118],"home":"36061","outline":[[[1000.0,67.4],[963.7,185.6],[983.7,253.8],[965.2,242.8],[954.6,194.8],[935.4,222.0],[900.5,226.5],[893.2,266.8],[983.2,406.7],[1000.0,402.9],[1000.0,950.8],[309.0,950.8],[359.8,878.6],[342.6,781.5],[363.7,730.2],[343.3,703.6],[306.5,699.1],[190.0,827.6],[177.9,897.4],[160.3,910.9],[0.0,933.1],[0.0,0.0],[1000.0,0.0],[1000.0,67.4]],[[1000.0,103.7],[999.5,96.1],[1000.0,96.0],[1000.0,103.7]],[[307.9,739.9],[283.4,769.5],[304.2,734.8],[307.9,739.9]],[[5.3,948.4],[180.3,914.7],[208.2,916.5],[225.4,950.8],[5.3,948.4]]],"counties":[{"n":"Bergen","fips":"34003","p":978641,"y":1683,"r":[[[617.3,0.0],[583.1,103.5],[442.5,394.8],[362.6,307.1],[289.5,362.2],[19.7,436.0],[43.5,393.5],[39.9,378.1],[48.7,325.7],[65.7,319.6],[29.9,0.0],[617.3,0.0]]]},{"n":"Essex","fips":"34013","p":881527,"y":1683,"r":[[[100.0,607.5],[99.9,700.3],[111.1,725.6],[48.2,825.1],[0.0,813.2],[0.0,610.8],[100.0,607.5]],[[65.7,319.6],[48.7,325.7],[39.9,378.1],[43.5,393.5],[19.7,436.0],[17.7,458.9],[0.0,487.1],[0.0,274.3],[65.7,319.6]]]},{"n":"Hudson","fips":"34017","p":736185,"y":1840,"r":[[[442.5,394.8],[371.6,539.8],[343.3,703.6],[306.5,699.1],[273.2,750.9],[190.0,827.6],[171.1,875.5],[177.9,897.4],[160.3,910.9],[30.6,938.0],[0.0,933.1],[0.0,901.6],[111.1,725.6],[99.9,700.3],[100.0,607.5],[0.0,610.8],[0.0,487.1],[17.7,458.9],[19.7,436.0],[289.5,362.2],[362.6,307.1],[442.5,394.8]]]},{"n":"Passaic","fips":"34031","p":526597,"y":1837,"r":[[[65.7,319.6],[0.0,274.3],[0.0,0.0],[29.9,0.0],[65.7,319.6]]]},{"n":"Union","fips":"34039","p":594160,"y":1857,"r":[[[48.2,825.1],[5.2,893.2],[0.0,901.6],[0.0,813.2],[48.2,825.1]]]},{"n":"Bronx","fips":"36005","p":24111,"y":1914,"r":[[[951.6,389.4],[905.3,371.3],[853.8,378.0],[769.2,398.5],[747.4,434.3],[697.6,432.8],[695.8,423.3],[638.1,402.3],[652.4,123.7],[641.0,113.2],[631.1,126.1],[583.1,103.5],[617.3,0.0],[675.4,0.0],[870.9,76.4],[977.5,107.1],[963.7,185.6],[965.6,200.7],[981.1,224.3],[983.7,253.8],[976.7,261.0],[965.2,242.8],[954.6,194.8],[935.4,222.0],[916.0,216.8],[900.5,226.5],[893.2,266.8],[902.9,300.8],[922.3,324.5],[941.2,334.8],[971.1,386.0],[951.6,389.4]]]},{"n":"Kings","fips":"36047","p":27013,"y":1683,"r":[[[760.5,799.1],[787.7,862.0],[775.0,893.7],[782.0,950.8],[309.0,950.8],[323.5,922.1],[359.8,878.6],[354.0,810.1],[347.6,801.4],[357.0,807.4],[397.5,774.4],[422.0,722.0],[487.3,705.0],[509.1,653.5],[505.8,605.6],[527.0,599.9],[547.2,606.1],[572.8,632.5],[594.1,639.7],[608.2,666.7],[614.5,705.1],[659.4,751.4],[680.3,797.3],[752.8,753.2],[760.5,799.1]]]},{"n":"New York","fips":"36061","p":49175,"y":1683,"r":[[[509.1,653.5],[487.3,705.0],[422.0,722.0],[397.5,774.4],[357.0,807.4],[344.8,797.6],[342.6,781.5],[359.2,752.1],[363.7,730.2],[356.5,712.1],[343.3,703.6],[371.6,539.8],[583.1,103.5],[631.1,126.1],[641.0,113.2],[652.4,123.7],[652.6,133.5],[638.1,402.3],[643.3,420.3],[597.4,469.8],[578.7,461.2],[570.0,477.3],[578.4,487.2],[574.9,493.8],[555.4,512.6],[509.1,586.8],[509.1,653.5]],[[302.6,734.0],[307.9,739.9],[290.9,776.5],[285.9,774.0],[302.6,734.0]]]},{"n":"Queens","fips":"36081","p":12995,"y":1683,"r":[[[739.4,756.5],[698.5,791.3],[680.3,797.3],[659.4,751.4],[614.5,705.1],[608.2,666.7],[594.1,639.7],[572.8,632.5],[547.2,606.1],[527.0,599.9],[505.8,605.6],[509.1,586.8],[526.5,557.5],[578.4,487.2],[570.0,477.3],[578.7,461.2],[597.4,469.8],[643.3,420.3],[638.1,402.3],[710.9,435.5],[747.4,434.3],[769.2,398.5],[905.3,371.3],[951.6,389.4],[971.1,386.0],[983.2,406.7],[1000.0,402.9],[1000.0,950.8],[782.0,950.8],[775.0,893.7],[787.7,862.0],[760.5,799.1],[752.8,753.2],[739.4,756.5]]]},{"n":"Richmond","fips":"36085","p":4860,"y":1683,"r":[[[0.0,950.8],[180.3,914.7],[208.2,916.5],[225.4,950.8],[0.0,950.8]]]},{"n":"Westchester","fips":"36119","p":2012,"y":1683,"r":[[[1000.0,67.4],[977.5,107.1],[870.9,76.4],[675.4,0.0],[1000.0,0.0],[1000.0,67.4]],[[1000.0,103.7],[999.5,96.1],[1000.0,96.0],[1000.0,103.7]]]}],"rivers":[{"n":"Passaic","s":[[[112.0,674.3],[78.0,601.0],[21.3,603.9],[0.0,591.2]],[[0.0,508.2],[111.0,160.4],[60.9,69.3],[56.6,0.0]]]}],"lakes":[],"limits":[[[0.0,932.4],[30.9,937.1],[55.5,931.8],[77.5,930.6],[118.5,916.8],[161.2,916.0],[179.5,904.3],[261.2,903.8],[295.4,830.1],[315.6,792.1],[338.7,736.7],[352.3,641.2],[371.6,539.8],[414.8,457.5],[504.8,295.5],[529.0,222.1],[543.7,185.6],[592.6,80.5],[616.7,0.0],[677.8,0.4],[778.1,39.4],[778.9,35.9],[777.4,33.5],[780.8,33.9],[783.7,31.1],[783.4,23.6],[786.5,23.1],[786.0,19.6],[792.6,16.1],[789.8,12.5],[791.2,9.8],[794.9,6.6],[796.9,8.0],[799.7,6.2],[793.3,15.1],[799.9,18.6],[802.0,15.4],[814.9,21.7],[816.6,26.5],[825.3,26.6],[826.9,35.2],[831.1,43.3],[829.7,49.8],[833.1,61.8],[871.0,76.8],[873.0,71.7],[1000.0,114.7],[1000.0,281.7],[986.3,297.2],[989.6,348.3],[1000.0,364.4],[1000.0,950.8],[0.0,950.8],[0.0,932.4]],[[300.9,735.6],[305.4,737.6],[306.9,741.0],[302.8,741.3],[300.9,735.6]],[[285.6,772.9],[283.8,767.2],[286.7,767.0],[290.7,769.1],[293.0,771.3],[293.2,774.6],[289.3,775.5],[285.6,772.9]]],"limitsName":"New York City limits","homeFill":0.07,"natFill":0.1,"migGap":24}, HIST={"eras":[{"y0":1492,"y1":1624,"l":"Lenapehoking","f":null},{"y0":1624,"y1":1664,"l":"New Netherland","f":{"a":"Flag of the Netherlands"}},{"y0":1664,"y1":1707,"l":"England: New York","f":{"a":"Flag of England"}},{"y0":1707,"y1":1783,"l":"Great Britain","f":{"a":"Flag of Great Britain"}},{"y0":1783,"y1":1898,"l":"United States; capital 1785 to 1790","f":{"a":"Flag of the United States"}},{"y0":1898,"y1":1965,"l":"The consolidated city","f":{"a":"Flag of the United States"}},{"y0":1965,"y1":2026,"l":"The city after the 1965 immigration act","f":{"a":"Flag of the United States"}}],"marks":[{"y":1626,"l":"The purchase of Manhattan"},{"y":1664,"l":"The English take it"},{"y":1827,"l":"Slavery ends in New York"},{"y":1898,"l":"The five boroughs join"},{"y":1904,"l":"Harlem changes hands"},{"y":1935,"l":"The Harlem riot"}],"border":1898,"nb":[{"n":"Hudson River","lat":40.85,"lon":-74.02,"sea":true},{"n":"Long Island Sound","lat":40.9,"lon":-73.72,"sea":true},{"n":"Atlantic Ocean","lat":40.45,"lon":-73.85,"sea":true},{"n":"New Jersey","lat":40.75,"lon":-74.3},{"n":"Harlem","lat":40.818,"lon":-73.95},{"n":"East Harlem","lat":40.792,"lon":-73.934},{"n":"Brooklyn","lat":40.678,"lon":-73.95},{"n":"Queens","lat":40.74,"lon":-73.82},{"n":"The Bronx","lat":40.855,"lon":-73.87}],"pre":"Lenapehoking: Munsee-speaking Lenape villages, planting grounds and oyster beds across the islands and the mainland.","nations":[{"n":"Lenape","src":"en.wikipedia.org/wiki/Lenape","poly":[[-74.2,40.55],[-74.08,40.55],[-73.96,40.55],[-73.84,40.55],[-73.72,40.55],[-73.7275,40.65],[-73.735,40.75],[-73.7425,40.85],[-73.75,40.95],[-73.8675,40.945],[-73.985,40.94],[-74.1025,40.935],[-74.22,40.93],[-74.215,40.835],[-74.21,40.74],[-74.205,40.645]],"lat":40.78,"lon":-73.95,"note":"Manhattan, the Bronx and the western Island; the name Manhattan is theirs.","after":{"y":1750,"t":"pushed west and north out of the region"}},{"n":"Canarsee","src":"en.wikipedia.org/wiki/Canarsee","poly":[[-74.05,40.55],[-73.975,40.5525],[-73.9,40.555],[-73.825,40.5575],[-73.75,40.56],[-73.7575,40.6],[-73.765,40.64],[-73.7725,40.68],[-73.78,40.72],[-73.85,40.7175],[-73.92,40.715],[-73.99,40.7125],[-74.06,40.71],[-74.0575,40.67],[-74.055,40.63],[-74.0525,40.59]],"lat":40.63,"lon":-73.92,"note":"The Lenape band of western Long Island, whose name survives in Canarsie."},{"n":"Matinecock","src":"en.wikipedia.org/wiki/Matinecock","poly":[[-73.85,40.7],[-73.775,40.705],[-73.7,40.71],[-73.625,40.715],[-73.55,40.72],[-73.5575,40.765],[-73.565,40.81],[-73.5725,40.855],[-73.58,40.9],[-73.6525,40.895],[-73.725,40.89],[-73.7975,40.885],[-73.87,40.88],[-73.865,40.835],[-73.86,40.79],[-73.855,40.745]],"lat":40.8,"lon":-73.7,"note":"Northern Queens and the Sound shore."}],"events":[{"y":1609,"t":"set","n":"Hudson in the harbor","lat":40.7,"lon":-74.02,"note":"The Halve Maen enters the river; the Dutch claim follows.","src":"en.wikipedia.org/wiki/Henry_Hudson"},{"y":1624,"t":"set","n":"New Amsterdam","lat":40.704,"lon":-74.013,"note":"A company post at the tip of Manhattan; by 1643 eighteen languages are spoken in it.","src":"en.wikipedia.org/wiki/New_Amsterdam","pp":[[1698,4937],[1712,5840],[1723,7248],[1737,10664],[1746,11717],[1756,13046],[1771,21863],[1790,33131],[1800,60515],[1810,96373],[1820,123706],[1830,202589],[1840,312710],[1850,515547],[1860,813669],[1870,942292],[1880,1206299],[1890,1515301],[1900,3437202],[1910,4766883],[1920,5620048],[1930,6930446],[1940,7454995],[1950,7891957],[1960,7781984],[1970,7894862],[1980,7071639],[1990,7322564],[2000,8008288],[2010,8175133],[2020,8804190]]},{"y":1643,"t":"rem","n":"Kieft's War","lat":40.73,"lon":-74.03,"note":"Director Kieft's raids kill hundreds of Lenape, including the massacre at Pavonia.","src":"en.wikipedia.org/wiki/Kieft%27s_War"},{"y":1664,"t":"cap","n":"New York","lat":40.704,"lon":-74.011,"note":"An English fleet takes the town without a shot; Stuyvesant surrenders it in August.","src":"en.wikipedia.org/wiki/History_of_New_York_City"},{"y":1712,"t":"rem","n":"The slave revolt of 1712","lat":40.712,"lon":-74.006,"note":"One in five people in the city is enslaved; the rising and its punishments harden the slave codes.","src":"en.wikipedia.org/wiki/New_York_Slave_Revolt_of_1712"},{"y":1754,"t":"set","n":"King's College","lat":40.807,"lon":-73.962,"note":"Chartered by George II; renamed Columbia after the Revolution.","src":"en.wikipedia.org/wiki/Columbia_University"},{"y":1785,"t":"cap","n":"Capital of the United States","lat":40.707,"lon":-74.01,"note":"Congress meets at Federal Hall; Washington is inaugurated there in 1789.","src":"en.wikipedia.org/wiki/Federal_Hall"},{"y":1811,"t":"set","n":"The Commissioners' Plan","lat":40.75,"lon":-73.98,"note":"The grid is laid over Manhattan above Houston Street, before the city reaches it.","src":"en.wikipedia.org/wiki/Commissioners%27_Plan_of_1811"},{"y":1827,"t":"set","n":"Emancipation in New York","lat":40.712,"lon":-74.006,"note":"State law frees the last enslaved New Yorkers on July 4.","src":"en.wikipedia.org/wiki/Slavery_in_New_York"},{"y":1863,"t":"rem","n":"The draft riots","lat":40.735,"lon":-73.99,"note":"Four days of violence aimed at Black New Yorkers; the Colored Orphan Asylum is burned.","src":"en.wikipedia.org/wiki/New_York_City_draft_riots"},{"y":1892,"t":"set","n":"Ellis Island opens","lat":40.699,"lon":-74.039,"note":"Twelve million people pass through before it closes in 1954.","src":"en.wikipedia.org/wiki/Ellis_Island"},{"y":1898,"t":"cap","n":"The five boroughs","lat":40.712,"lon":-74.006,"note":"Manhattan, Brooklyn, Queens, the Bronx and Staten Island consolidate on January 1.","src":"en.wikipedia.org/wiki/City_of_Greater_New_York"},{"y":1904,"t":"set","n":"The subway","lat":40.751,"lon":-73.977,"note":"The IRT opens and the city's growth follows the lines out into the boroughs.","src":"en.wikipedia.org/wiki/New_York_City_Subway"},{"y":1658,"t":"set","n":"Nieuw Haarlem","lat":40.806,"lon":-73.938,"note":"Dutch settlers lay out a village on the flats by the Harlem River and name it for Haarlem; Stuyvesant's council incorporates it in 1660. It stays farmland for two centuries.","src":"en.wikipedia.org/wiki/Harlem"},{"y":1904,"t":"set","n":"Payton's Harlem","lat":40.813,"lon":-73.944,"note":"Philip A. Payton Jr. founds the Afro-American Realty Company on 15 June and places Black tenants in the flats of a Harlem built ahead of its demand. By the 1915 state census his own block, white in 1900, is almost wholly Black.","src":"en.wikipedia.org/wiki/Philip_A._Payton_Jr."},{"y":1925,"t":"set","n":"The Harlem Renaissance","lat":40.8155,"lon":-73.9405,"note":"Central and West Harlem carry the writing, music and painting of the twenties and thirties, and the idea that a neighborhood could speak for a people.","src":"en.wikipedia.org/wiki/Harlem_Renaissance"},{"y":1935,"t":"rem","n":"The Harlem riot of 1935","lat":40.8085,"lon":-73.9475,"note":"On 19 March a rumor that a boy caught shoplifting had been beaten to death empties the avenues: three dead, a hundred injured, two million dollars of damage. Historians count it the first modern riot, aimed at shops and police rather than at neighbors.","src":"en.wikipedia.org/wiki/Harlem_riot_of_1935"},{"y":1950,"t":"set","n":"El Barrio","lat":40.795,"lon":-73.936,"note":"Puerto Rican families settle East Harlem after the war, and Italian Harlem becomes Spanish Harlem.","src":"en.wikipedia.org/wiki/Harlem"},{"y":1964,"t":"rem","n":"The Harlem riot of 1964","lat":40.8045,"lon":-73.9425,"note":"A police lieutenant shoots James Powell, fifteen, on 16 July. Six nights follow in Harlem and Bedford-Stuyvesant: one dead, 118 injured, 465 arrested, and the grand jury clears the officer.","src":"en.wikipedia.org/wiki/Harlem_riot_of_1964"},{"y":1969,"t":"set","n":"Stonewall","lat":40.734,"lon":-74.002,"note":"Six nights of resistance to a police raid on Christopher Street.","src":"en.wikipedia.org/wiki/Stonewall_riots"},{"y":2001,"t":"rem","n":"September 11","lat":40.711,"lon":-74.013,"note":"2,753 people are killed at the World Trade Center.","src":"en.wikipedia.org/wiki/September_11_attacks"}],"census":[[1698,4937],[1712,5840],[1723,7248],[1737,10664],[1746,11717],[1756,13046],[1771,21863],[1790,33131],[1800,60515],[1810,96373],[1820,123706],[1830,202589],[1840,312710],[1850,515547],[1860,813669],[1870,942292],[1880,1206299],[1890,1515301],[1900,3437202],[1910,4766883],[1920,5620048],[1930,6930446],[1940,7454995],[1950,7891957],[1960,7781984],[1970,7894862],[1980,7071639],[1990,7322564],[2000,8008288],[2010,8175133],[2020,8804190]],"native":[],"geo":{"hp":{"n":"Todt Hill","el":"125 m","lat":40.598,"lon":-74.099}},"mig":[{"y0":1845,"y1":1860,"n":"The Irish famine","p":900000,"f":[41.8,-74.6],"t":[40.71,-74.0],"b":0.15,"note":"By 1855 the Irish-born are more than a quarter of the city.","src":"en.wikipedia.org/wiki/Irish_Americans_in_New_York_City"},{"y0":1880,"y1":1924,"n":"Ellis Island","p":4000000,"f":[41.3,-73.3],"t":[40.699,-74.039],"b":-0.13,"note":"Italians, Eastern European Jews, Poles, Greeks and Hungarians land at Castle Garden and then Ellis Island, until the 1924 quotas close the door.","src":"en.wikipedia.org/wiki/Ellis_Island"},{"y0":1916,"y1":1970,"n":"The Great Migration","p":800000,"f":[33.5,-80.0],"t":[40.81,-73.94],"b":0.17,"note":"Black southerners come north to Harlem and Bedford-Stuyvesant.","src":"en.wikipedia.org/wiki/Great_Migration_(African_American)"},{"y0":1945,"y1":1970,"n":"The Puerto Rican migration","p":700000,"f":[39.6,-73.4],"t":[40.8,-73.93],"b":-0.18,"note":"Air travel and citizenship bring some 700,000 people to East Harlem and the South Bronx.","src":"en.wikipedia.org/wiki/Puerto_Ricans_in_New_York_City"},{"y0":1965,"y1":2020,"n":"After the 1965 act","p":3000000,"f":[40.2,-73.1],"t":[40.73,-73.87],"b":0.12,"note":"Dominican, Chinese, Jamaican, Guyanese, Mexican, Bangladeshi and West African communities remake Queens and the Bronx; over a third of the city is foreign-born.","src":"en.wikipedia.org/wiki/Immigration_Nationality_Act_of_1965"}],"refs":[["Lenapehoking and the Lenape of the harbor.","https://en.wikipedia.org/wiki/Lenape"],["The consolidation of Greater New York, 1898.","https://en.wikipedia.org/wiki/City_of_Greater_New_York"],["Ellis Island and the years of the great arrival.","https://en.wikipedia.org/wiki/Ellis_Island"],["Nieuw Haarlem, and the Harlem that followed it.","https://en.wikipedia.org/wiki/Harlem"],["Philip A. Payton Jr. and the Afro-American Realty Company, 1904.","https://en.wikipedia.org/wiki/Philip_A._Payton_Jr."],["The Harlem riot of 1935, and why it is counted the first modern one.","https://en.wikipedia.org/wiki/Harlem_riot_of_1935"],["The Harlem riot of 1964, after the shooting of James Powell.","https://en.wikipedia.org/wiki/Harlem_riot_of_1964"]],"unis":[{"n":"Columbia University","y":1754,"pub":0,"lat":40.807,"lon":-73.962},{"n":"General Theological Seminary","y":1817,"pub":0,"lat":40.746,"lon":-74.004},{"n":"New York University","y":1831,"pub":0,"lat":40.73,"lon":-73.995},{"n":"Union Theological Seminary","y":1836,"pub":0,"lat":40.811,"lon":-73.964},{"n":"Fordham University","y":1841,"pub":0,"lat":40.862,"lon":-73.886},{"n":"City College of New York","y":1847,"pub":1,"lat":40.819,"lon":-73.95},{"n":"Manhattan University","y":1853,"pub":0,"lat":40.889,"lon":-73.902},{"n":"Cooper Union","y":1859,"pub":0,"lat":40.729,"lon":-73.991},{"n":"St. Francis College","y":1859,"pub":0,"lat":40.693,"lon":-73.992},{"n":"SUNY Downstate Health Sciences University","y":1860,"pub":1,"lat":40.655,"lon":-73.946},{"n":"Hunter College","y":1870,"pub":1,"lat":40.769,"lon":-73.965},{"n":"St. John's University (New York City)","y":1870,"pub":0,"lat":40.722,"lon":-73.796},{"n":"State University of New York Maritime College","y":1874,"pub":1,"lat":40.805,"lon":-73.793},{"n":"Jewish Theological Seminary of America","y":1886,"pub":0,"lat":40.812,"lon":-73.96},{"n":"Yeshiva University","y":1886,"pub":0,"lat":40.851,"lon":-73.93},{"n":"Pratt Institute","y":1887,"pub":0,"lat":40.691,"lon":-73.964},{"n":"Teachers College, Columbia University","y":1887,"pub":0,"lat":40.81,"lon":-73.961},{"n":"Barnard College","y":1889,"pub":0,"lat":40.81,"lon":-73.963},{"n":"New York Law School","y":1891,"pub":0,"lat":40.718,"lon":-74.006},{"n":"Weill Cornell Medicine","y":1898,"pub":0,"lat":40.765,"lon":-73.954},{"n":"Brooklyn Law School","y":1901,"pub":0,"lat":40.692,"lon":-73.99},{"n":"Rockefeller University","y":1901,"pub":0,"lat":40.763,"lon":-73.956},{"n":"Juilliard School","y":1905,"pub":0,"lat":40.774,"lon":-73.983},{"n":"Bank Street College of Education","y":1916,"pub":0,"lat":40.806,"lon":-73.966},{"n":"Manhattan School of Music","y":1917,"pub":0,"lat":40.812,"lon":-73.961},{"n":"Baruch College","y":1919,"pub":1,"lat":40.74,"lon":-73.983},{"n":"The New School","y":1919,"pub":0,"lat":40.736,"lon":-73.997},{"n":"Lehman College","y":1931,"pub":1,"lat":40.873,"lon":-73.894},{"n":"Vaughn College of Aeronautics and Technology","y":1932,"pub":0,"lat":40.768,"lon":-73.882},{"n":"Queens College, City University of New York","y":1937,"pub":1,"lat":40.737,"lon":-73.817},{"n":"Fashion Institute of Technology","y":1944,"pub":1,"lat":40.747,"lon":-73.994},{"n":"School of Visual Arts","y":1947,"pub":0,"lat":40.746,"lon":-74.0},{"n":"New York Institute of Technology","y":1955,"pub":0,"lat":40.77,"lon":-73.982},{"n":"John Jay College of Criminal Justice","y":1964,"pub":1,"lat":40.77,"lon":-73.988},{"n":"Metropolitan College of New York","y":1964,"pub":0,"lat":40.723,"lon":-74.007},{"n":"York College, City University of New York","y":1966,"pub":1,"lat":40.702,"lon":-73.795},{"n":"Medgar Evers College","y":1970,"pub":1,"lat":40.666,"lon":-73.957}],"cities":[]}, ROADS=[{"n":"SR 17","lv":"sr","y":1924,"s":[[[244.2,124.9],[216.6,52.0],[217.8,0.0]]]},{"n":"US 1","lv":"us","y":1926,"s":[[[303.2,473.2],[385.8,322.5],[393.7,239.3]],[[236.3,597.9],[303.2,473.2]],[[393.7,239.3],[421.2,244.5],[472.4,187.3]],[[0.0,676.3],[82.9,613.5],[141.9,613.5],[236.3,597.9]],[[665.1,234.1],[692.7,171.7],[751.7,192.5],[798.9,130.1],[960.2,31.2],[997.1,0.0]]]},{"n":"SR 27","lv":"sr","y":1927,"s":[[[472.4,914.4],[511.7,904.1],[614.0,893.7]],[[614.0,893.7],[688.7,883.3],[751.7,847.0],[822.5,847.0]],[[472.4,914.4],[421.2,852.2]]]},{"n":"SR 3","lv":"sr","y":1927,"s":[[[0.0,261.4],[149.7,353.7],[216.6,369.3],[279.6,436.9],[299.3,483.6]]]},{"n":"Southern State Parkway","lv":"sr","y":1927,"s":[[[1000.0,854.2],[879.2,847.3],[792.4,851.1],[725.9,881.4],[667.0,928.7],[657.1,950.8]]]},{"n":"US 9W","lv":"us","y":1927,"s":[[[499.9,176.9],[531.4,135.3],[582.3,0.0]]]},{"n":"US 46","lv":"us","y":1936,"s":[[[0.0,115.4],[59.3,93.7],[59.3,62.4],[126.1,62.4],[224.5,130.1],[248.1,166.5],[295.3,197.7]],[[366.1,228.9],[393.7,239.3]]]},{"n":"I-78","lv":"i","y":1956,"s":[[[385.6,660.4],[312.5,636.3],[184.5,630.3],[0.0,692.2]],[[0.0,708.7],[157.6,784.8],[263.8,696.5],[275.6,629.1],[354.3,639.4]]]},{"n":"I-80","lv":"i","y":1957,"s":[[[0.0,39.2],[105.9,49.2]]]},{"n":"I-95","lv":"i","y":1957,"s":[[[146.2,0.0],[84.0,62.7],[0.0,115.3]],[[937.0,0.0],[902.0,32.4],[870.0,38.5],[833.5,105.0],[685.1,259.8]],[[105.9,49.2],[184.5,56.6],[358.2,171.5],[586.7,171.5],[687.2,268.1]],[[90.7,571.9],[118.3,551.2],[185.2,535.6],[244.2,494.0],[318.9,374.5],[354.3,265.3]],[[558.9,218.5],[598.3,234.1],[688.7,239.3],[720.2,260.1],[814.6,291.3],[865.8,270.5],[865.8,202.9],[846.1,140.5],[857.9,104.1],[928.7,83.3],[973.2,0.0]]]},{"n":"I-495","lv":"i","y":1958,"s":[[[486.1,582.0],[458.7,569.9],[385.6,660.4]],[[1000.0,571.5],[911.2,594.1],[833.5,588.0],[760.3,624.2],[664.4,624.2],[481.6,582.0]]]},{"n":"I-278","lv":"i","y":1961,"s":[[[355.6,950.8],[353.6,937.6],[408.5,877.4],[463.3,756.9],[413.0,678.5],[385.6,660.4]],[[682.3,264.4],[833.5,286.2],[947.7,382.9],[1000.0,480.5]],[[354.3,935.2],[417.3,852.2],[397.6,805.5],[417.3,738.1],[499.9,748.5],[527.4,691.4],[621.9,613.5],[684.8,577.1],[661.2,499.2],[641.5,499.2]]]},{"n":"I-678","lv":"i","y":1965,"s":[[[877.6,421.3],[838.3,338.1]],[[960.2,930.0],[916.9,898.9],[932.7,831.5],[865.8,665.4],[838.3,618.7],[842.2,566.7],[830.4,514.8],[877.6,421.3]]]}], SYM=[], GHOST={};
+// the city page inside this map, if there is one; the zoom hands off to it
+const CITY=null;
 const W=ST.W, H=ST.H;
 const [MX0,MY0,MX1,MY1]=ST.m;
 const R=6378137, RAD=Math.PI/180;
+function MXY(mx,my){ return [ (mx-MX0)/(MX1-MX0)*W, (MY1-my)/(MY1-MY0)*H ]; }
 function XY(lat,lon){
   const mx=R*lon*RAD, my=R*Math.log(Math.tan(Math.PI/4+lat*RAD/2));
-  return [ (mx-MX0)/(MX1-MX0)*W, (MY1-my)/(MY1-MY0)*H ];
+  return MXY(mx,my);
 }
+const REDUCED=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wrap=document.getElementById('mapwrap');
 wrap.style.aspectRatio=W+' / '+H;
 const svg=document.getElementById('map');
 svg.setAttribute('viewBox','0 0 '+W+' '+H);
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
-const layers={ter:true,woo:true,riv:true,lak:true,cou:false,nat:true,tow:true,uni:false,hwy:false,mig:true};
-let year=1492, playing=false, pinned=null;
+const layers={ter:true,woo:true,riv:true,lak:true,cou:false,nat:true,tow:true,uni:false,hwy:false,mig:true,lim:true};
+let year=1492, playing=false, pinned=null, focusNat=null, ghostSel=null, ghostOp=0;
+// the year everything opens on; the rail then runs on its own
+const START=1492;
 
 function ringsPath(rr){ return rr.map(r=>'M'+r.map(p=>p[0]+','+p[1]).join('L')+'Z').join(''); }
 const outlineD=ringsPath(ST.outline);
@@ -211,24 +291,77 @@ const RDN={i:'Interstate', us:'US route', sr:'State route'};
 // labels crowd at city scale, so each one is nudged clear of those
 // already placed
 let LBL=[];
-function lblY(x,y,n){
-  const w=n*5.6; let ty=y;
-  for(let k=0;k<26;k++){
-    let hit=false;
-    for(const b of LBL){
-      if(Math.abs(b[0]-x)<(b[2]+w)/2 && Math.abs(b[1]-ty)<11){ hit=true; break; } }
-    if(!hit) break;
-    ty-=12;
+function lblY(x,y,n,pw,lh){
+  // lh, when given, is the line height of a larger label: it is then tried
+  // above and below its anchor in turn and kept inside the frame
+  const w=n*(pw||5.6), L=lh||13;
+  const free=ty=>!LBL.some(b=>Math.abs(b[0]-x)<(b[2]+w)/2+4 && Math.abs(b[1]-ty)<Math.max(b[3]||13,L));
+  let ty=y;
+  if(lh){
+    for(let k=0;k<40;k++){
+      const c=y+(k%2?1:-1)*Math.ceil(k/2)*L;
+      if(c<L||c>H-6) continue;
+      if(free(c)){ ty=c; break; }
+    }
+  } else {
+    for(let k=0;k<26;k++){ if(free(ty)) break; ty-=13; }
   }
-  LBL.push([x,ty,w]);
+  LBL.push([x,ty,w,L]);
   return ty;
+}
+// a polygon cut to the frame (Sutherland-Hodgman), for the part of a
+// homeland that is actually in view
+function clipToFrame(P){
+  const edges=[[0,0,1],[W,0,-1],[0,1,1],[H,1,-1]];
+  let out=P.slice();
+  for(const [v,ax,sg] of edges){
+    const inp=out; out=[];
+    if(!inp.length) break;
+    const inside=p=>sg>0?p[ax]>=v:p[ax]<=v;
+    for(let i=0;i<inp.length;i++){
+      const a=inp[i], b=inp[(i+1)%inp.length], ia=inside(a), ib=inside(b);
+      if(ia) out.push(a);
+      if(ia!==ib){
+        const t=(v-a[ax])/(b[ax]-a[ax]);
+        out.push([a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t]);
+      }
+    }
+  }
+  return out;
+}
+function centroid(P){
+  let A=0,cx=0,cy=0;
+  for(let i=0;i<P.length;i++){
+    const a=P[i], b=P[(i+1)%P.length], f=a[0]*b[1]-b[0]*a[1];
+    A+=f; cx+=(a[0]+b[0])*f; cy+=(a[1]+b[1])*f;
+  }
+  if(Math.abs(A)<1e-6) return null;
+  return [cx/(3*A), cy/(3*A), Math.abs(A)/2];
+}
+// where a nation's name goes: its own anchor when that is in the frame,
+// otherwise the middle of the part of the patch that is in view; then
+// held clear of the edges and of the names already placed
+function natLabel(n){
+  let [x,y]=XY(n.lat,n.lon);
+  const w=n.n.length*7.2;
+  if(!(x>=0&&x<=W&&y>=0&&y<=H)){
+    if(!n.poly) return null;
+    const c=centroid(clipToFrame(n.poly.map(([lon,lat])=>XY(lat,lon))));
+    if(!c||c[2]<400) return null;
+    x=c[0]; y=c[1];
+  }
+  x=Math.max(w/2+6, Math.min(W-w/2-6, x));
+  y=Math.max(16, Math.min(H-8, y));
+  return [x, lblY(x,y,n.n.length,7.2,17)];
 }
 function render(){
   let s=''; LBL=[];
   s+='<defs><clipPath id="stclip"><path d="'+outlineD+'"/></clipPath>'
     +'<marker id="migArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="3.6" markerHeight="3.6" orient="auto-start-reverse">'
     +'<path d="M0,1 L9,5 L0,9 z" fill="#ffc247"/></marker></defs>';
-  s+='<path d="'+outlineD+'" fill="'+(layers.ter||layers.woo?'none':'#1d2126')+'" stroke="none"/>';
+  // the ground is painted by the terrain canvas; until it has painted,
+  // or if it never does, the state carries a flat fill of its own
+  s+='<path d="'+outlineD+'" fill="'+((layers.ter&&terPainted)||(layers.woo&&wooPainted)?'none':'#1d2126')+'" stroke="none"/>';
   if(layers.cou){
     // each county joins the map in its founding year; the one the author
     // lived in is drawn in gold
@@ -239,7 +372,7 @@ function render(){
     });
   }
   // the city limits, where the map is a city rather than a state
-  if(layers.cou&&ST.limits&&ST.limits.length){
+  if(layers.lim&&ST.limits&&ST.limits.length){
     const d=ringsPath(ST.limits);
     s+='<g data-lim="1" style="cursor:pointer">'
       +'<path d="'+d+'" fill="none" stroke="#121212" stroke-width="3.6" stroke-opacity="0.6"/>'
@@ -280,33 +413,53 @@ function render(){
   if(year>=HIST.border)
     s+='<path d="'+outlineD+'" fill="none" stroke="#121212" stroke-width="3.4" stroke-opacity="0.75"/>'
       +'<path d="'+outlineD+'" fill="none" stroke="#e6e6e6" stroke-width="1.7"/>';
+  // another state's outline, at true ground scale, centered on this one
+  if(ghostSel&&GHOST[ghostSel]&&ghostOp>0){
+    s+='<path d="'+ghostPath(ghostSel)+'" fill="#e6e6e6" fill-opacity="'+(0.10*ghostOp).toFixed(3)+'" stroke="#ffffff" stroke-opacity="'+(0.9*ghostOp).toFixed(3)+'" stroke-width="1.6" stroke-dasharray="7 5" pointer-events="none"/>';
+  }
   for(const nb of (HIST.nb||[])){
     if(!nb.sea&&year<HIST.border) continue;
-    const [x,y]=XY(nb.lat,nb.lon);
+    // a neighbor's name is held inside the frame, whichever way it runs
+    let [x,y]=XY(nb.lat,nb.lon);
+    const nw=nb.n.length*(nb.sea?7:9.5)/2+6;
+    if(nb.v){ x=Math.max(12,Math.min(W-6,x)); y=Math.max(nw,Math.min(H-nw,y)); }
+    else { x=Math.max(nw,Math.min(W-nw,x)); y=Math.max(16,Math.min(H-8,y)); }
     const rot=nb.v?' transform="rotate(-90 '+x.toFixed(1)+' '+y.toFixed(1)+')"':'';
+    if(nb.sea) LBL.push([x,y,nb.n.length*7]);
     s+= nb.sea
       ?'<text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="12.5" font-style="italic" fill="var(--water)" fill-opacity="0.9" stroke="#121212" stroke-width="2.6" paint-order="stroke">'+esc(nb.n)+'</text>'
       :'<text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="11.5" letter-spacing="2"'+rot+' fill="#9aa4ad" stroke="#121212" stroke-width="2.6" paint-order="stroke">'+esc(nb.n.toUpperCase())+'</text>';
   }
-  if(layers.ter&&HIST.geo&&HIST.geo.hp){
-    const hp=HIST.geo.hp, [x,y]=XY(hp.lat,hp.lon);
-    s+='<g data-hp="1"><path d="M'+x+','+(y-7)+' L'+(x-6)+','+(y+4)+' L'+(x+6)+','+(y+4)+' Z" fill="#e6e6e6" stroke="#121212" stroke-width="1"/>'
-      +'<text x="'+(x+9)+'" y="'+lblY(x+9,y+4,(hp.n+hp.el).length)+'" font-size="11" fill="#c9d1d9" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+esc(hp.n)+' '+esc(hp.el)+'</text></g>';
-  }
   if(layers.nat) HIST.nations.forEach((n,i)=>{
     const gone=n.after&&year>=n.after.y;
-    const hue=(i*137.508+40)%360;
-    const [x,y]=XY(n.lat,n.lon);
-    s+='<g data-nat="'+i+'" style="cursor:pointer">';
+    // one hue for every homeland: the outline says where each one is,
+    // and the ground shows through
+    const dim=focusNat!=null&&focusNat!==i;
+    const lab=natLabel(n);
+    s+='<g data-nat="'+i+'" style="cursor:pointer"'+(dim?' opacity="0.22"':'')+'>';
     if(n.poly)
       s+='<path d="'+blob(n.poly)+'"'
-        +' fill="hsl('+hue+',62%,55%)" fill-opacity="'+(gone?0.10:(ST.natFill||0.30))+'"'
-        +' stroke="hsl('+hue+',62%,62%)" stroke-opacity="'+(gone?0.3:0.8)+'" stroke-width="1.3"/>';
-    s+='<g opacity="'+(gone?0.5:1)+'">'
-      +'<text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="13" font-style="italic" fill="var(--nation)" stroke="#121212" stroke-width="3" paint-order="stroke">'+esc(n.n)+'</text>'
-      +(gone?'<text x="'+x+'" y="'+(y+13)+'" text-anchor="middle" font-size="9.5" fill="var(--rem)" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+n.after.y+'</text>':'')
-      +'</g></g>';
+        +' fill="var(--nation)" fill-opacity="'+(gone?0.04:(ST.natFill||0.16))+'"'
+        +' stroke="var(--nation)" stroke-opacity="'+(gone?0.3:(focusNat===i?1:0.75))+'" stroke-width="'+(focusNat===i?2:1.3)+'"/>';
+    if(lab){
+      const [x,y]=lab;
+      s+='<g opacity="'+(gone?0.5:1)+'">'
+        +'<text x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" text-anchor="middle" font-size="13" font-style="italic" fill="var(--nation)" stroke="#121212" stroke-width="3" paint-order="stroke">'+esc(n.n)+'</text>'
+        +(gone?'<text x="'+x.toFixed(1)+'" y="'+(y+13).toFixed(1)+'" text-anchor="middle" font-size="9.5" fill="var(--rem)" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+n.after.y+'</text>':'')
+        +'</g>';
+    }
+    s+='</g>';
   });
+  if(layers.ter&&HIST.geo&&HIST.geo.hp){
+    // the highest point, drawn over the homelands so it is never lost
+    // in one; on a city map it is a note on the high ground, not a peak
+    const hp=HIST.geo.hp, [x,y]=XY(hp.lat,hp.lon);
+    const soft=!!hp.soft;
+    s+='<g data-hp="1">'
+      +(soft?'<circle cx="'+x+'" cy="'+y+'" r="2.6" fill="#c9d1d9" stroke="#121212" stroke-width="1"/>'
+            :'<path d="M'+x+','+(y-7)+' L'+(x-6)+','+(y+4)+' L'+(x+6)+','+(y+4)+' Z" fill="#e6e6e6" stroke="#121212" stroke-width="1"/>')
+      +'<text x="'+(x+(soft?6:9))+'" y="'+lblY(x+9,y+4,(hp.n+hp.el).length)+'" font-size="'+(soft?10:11)+'" fill="'+(soft?'#9aa4ad':'#c9d1d9')+'"'+(soft?' font-style="italic"':'')+' stroke="#121212" stroke-width="2.4" paint-order="stroke">'+esc(hp.n)+' '+esc(hp.el)+'</text></g>';
+  }
   if(layers.mig) (HIST.mig||[]).forEach((m,i)=>{
     // a wave rises over its span, then stays as a faded record
     if(m.y0>year) return;
@@ -338,10 +491,12 @@ function render(){
       +'<text x="'+x1.toFixed(1)+'" y="'+lblY(x1,y1-7,m.n.length)+'" text-anchor="middle" font-size="9.5" fill="#ffc247" fill-opacity="'+(live?1:0.55)+'" stroke="#121212" stroke-width="2.6" paint-order="stroke">'+esc(m.n)+'</text>'
       +'</g>';
   });
+  let anyCity=false;
   if(layers.tow) (HIST.cities||[]).forEach((c,i)=>{
     // bulk cities surface once the census finds 10,000 people
     const p=interp(c.pp,year); const R=cityR(p);
     if(!R) return;
+    anyCity=true;
     const [x,y]=XY(c.lat,c.lon); const C=cityC(p);
     s+='<g data-ct="'+i+'" style="cursor:pointer">'
       +'<circle cx="'+x+'" cy="'+y+'" r="'+R.toFixed(1)+'" fill="'+C+'" fill-opacity="0.62" stroke="'+C+'" stroke-opacity="0.95" stroke-width="1"/>'
@@ -358,6 +513,7 @@ function render(){
       const cap=e.t==='cap';
       const p=e.pp?interp(e.pp,year):null;
       const R=cityR(p), C=cityC(p);
+      if(R) anyCity=true;
       s+='<g data-ev="'+i+'" style="cursor:pointer">'
         +(R?'<circle cx="'+x+'" cy="'+y+'" r="'+R.toFixed(1)+'" fill="'+C+'" fill-opacity="0.62" stroke="'+C+'" stroke-opacity="0.95" stroke-width="1.2"/>':'')
         +(cap?'<path d="'+star(x,y,6)+'" fill="var(--cap)" stroke="#121212" stroke-width="1"/>'
@@ -376,10 +532,11 @@ function render(){
       +(u.mine?'<text x="'+x+'" y="'+lblY(x,y-9,u.mine.length)+'" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ffd24d" stroke="#121212" stroke-width="2.4" paint-order="stroke">'+esc(u.mine)+'</text>':'')
       +'</g>';
   });
-  if(layers.tow){
+  // the key to the circles, once there is a circle to read
+  if(layers.tow&&anyCity){
     const tiers=[[1e4,'10,000'],[1e5,'100,000'],[1e6,'1,000,000'],[1e7,'10,000,000']];
     const Rmax=cityR(1e7), cx=16+Rmax, by=H-14;
-    s+='<g pointer-events="none">';
+    s+='<g pointer-events="none" data-fixed="1">';
     s+='<text x="16" y="'+(by-2*Rmax-10)+'" font-size="10" fill="#8b949e" stroke="#121212" stroke-width="2.4" paint-order="stroke">City population</text>';
     // filled disks, largest painted first so each tier stays visible
     for(const [p] of [...tiers].reverse()){
@@ -403,6 +560,7 @@ function render(){
     s+='</g>';
   }
   svg.innerHTML=s;
+  fixZoom();
 }
 // a smooth closed blob through lon/lat vertices (Catmull-Rom to bezier)
 function segLen(seg){
@@ -430,6 +588,135 @@ function star(x,y,r){
   }
   return d+'Z';
 }
+
+// ---- zoom: the wheel, the two buttons or the + and - keys close in on a
+// point; a drag pans. The ground canvases scale with the view, while the
+// names and the marks keep their size on screen. ----
+let Z=1, VX=0, VY=0, zoomRaf=null, drag=null, dragged=false;
+function fixZoom(){
+  svg.classList.toggle('zoomed',Z>1);
+  if(Z===1) return;
+  const k=1/Z;
+  // a point mark and its name shrink back together about the mark
+  svg.querySelectorAll('[data-ev],[data-uni],[data-ct],[data-hp]').forEach(g=>{
+    const m=g.firstElementChild; if(!m) return;
+    const b=m.getBBox(), cx=b.x+b.width/2, cy=b.y+b.height/2;
+    g.setAttribute('transform','matrix('+k+' 0 0 '+k+' '+(cx*(1-k)).toFixed(2)+' '+(cy*(1-k)).toFixed(2)+')');
+  });
+  // every other name keeps its type size
+  svg.querySelectorAll('text').forEach(t=>{
+    if(t.closest('[data-ev],[data-uni],[data-ct],[data-hp],[data-fixed]')) return;
+    for(const a of ['font-size','stroke-width','letter-spacing']){
+      const v=parseFloat(t.getAttribute(a)); if(v) t.setAttribute(a,(v*k).toFixed(2));
+    }
+  });
+  // the keys stay where they are on the screen
+  svg.querySelectorAll('[data-fixed]').forEach(g=>
+    g.setAttribute('transform','translate('+VX.toFixed(1)+' '+VY.toFixed(1)+') scale('+k+')'));
+}
+function applyView(){
+  const vw=W/Z, vh=H/Z;
+  VX=Math.max(0,Math.min(W-vw,VX)); VY=Math.max(0,Math.min(H-vh,VY));
+  svg.setAttribute('viewBox',VX+' '+VY+' '+vw+' '+vh);
+  const tf=Z===1?'':'scale('+Z+') translate('+(-VX/W*100)+'%,'+(-VY/H*100)+'%)';
+  for(const id of ['terC','wooC','watC']){ const c=document.getElementById(id); if(c) c.style.transform=tf; }
+  render();
+  document.getElementById('zOut').disabled=Z<=1.0001;
+  document.getElementById('zIn').disabled=Z>=5.999;
+  const a=document.getElementById('zCity');
+  let near=false;
+  if(CITY&&Z>=2.5){ const [x,y]=MXY(CITY.mx,CITY.my); near=x>=VX&&x<=VX+vw&&y>=VY&&y<=VY+vh; }
+  if(CITY){ a.href=CITY.href; a.textContent=CITY.n+', up close →'; }
+  a.hidden=!near;
+}
+// fx, fy: where in the view (0 to 1) the zoom is centered
+function zoomTo(nz,fx,fy,glide){
+  nz=Math.max(1,Math.min(6,nz));
+  if(zoomRaf){ cancelAnimationFrame(zoomRaf); zoomRaf=null; }
+  const px=VX+fx*W/Z, py=VY+fy*H/Z, z0=Z;
+  const set=z=>{ Z=z; VX=px-fx*W/Z; VY=py-fy*H/Z; applyView(); };
+  if(!glide||REDUCED){ set(nz); return; }
+  const t0=performance.now(), dur=650;
+  const step=t=>{ const u=Math.min(1,(t-t0)/dur), e=u<0.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+    set(z0*Math.pow(nz/z0,e)); zoomRaf=u<1?requestAnimationFrame(step):null; };
+  zoomRaf=requestAnimationFrame(step);
+}
+document.getElementById('zIn').onclick=()=>zoomTo(Z*2,0.5,0.5,true);
+document.getElementById('zOut').onclick=()=>zoomTo(Z/2,0.5,0.5,true);
+svg.addEventListener('wheel',e=>{
+  // at the widest view, a scroll down belongs to the page
+  if(Z<=1&&e.deltaY>0) return;
+  e.preventDefault();
+  const r=svg.getBoundingClientRect();
+  zoomTo(Z*Math.exp(-e.deltaY*0.0015),(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height,false);
+},{passive:false});
+svg.addEventListener('pointerdown',e=>{
+  if(Z<=1||e.button!==0) return;
+  drag={x:e.clientX,y:e.clientY,vx:VX,vy:VY}; dragged=false;
+});
+window.addEventListener('pointermove',e=>{
+  if(!drag) return;
+  const dx=e.clientX-drag.x, dy=e.clientY-drag.y;
+  if(!dragged&&Math.hypot(dx,dy)<4) return;
+  dragged=true; svg.classList.add('panning');
+  const r=svg.getBoundingClientRect();
+  VX=drag.vx-dx/r.width*W/Z; VY=drag.vy-dy/r.height*H/Z; applyView();
+});
+window.addEventListener('pointerup',()=>{ drag=null; svg.classList.remove('panning'); });
+// a drag is not a click on whatever it ended over
+svg.addEventListener('click',e=>{ if(dragged){ e.stopPropagation(); dragged=false; } },true);
+document.addEventListener('keydown',e=>{
+  if(document.activeElement!==svg) return;
+  if(e.key==='+'||e.key==='='){ zoomTo(Z*2,0.5,0.5,true); e.preventDefault(); }
+  if(e.key==='-'||e.key==='_'){ zoomTo(Z/2,0.5,0.5,true); e.preventDefault(); }
+  if(e.key==='0'){ zoomTo(1,0.5,0.5,true); e.preventDefault(); }
+});
+
+// ---- the ghost of another state ----
+// Its outline comes in that page's own frame. It goes back to Mercator
+// meters, is scaled by the ratio of the cosines of the two latitudes so
+// that a kilometer there is a kilometer here, and is centered on this
+// state. Latitude is taken at the middle of each state's frame.
+const ghostCache={};
+function ghostPath(code){
+  if(ghostCache[code]) return ghostCache[code];
+  const g=GHOST[code], [bx0,by0,bx1,by1]=g.m;
+  const toM=([x,y])=>[bx0+x/g.W*(bx1-bx0), by1-y/g.H*(by1-by0)];
+  const latOf=my=>(2*Math.atan(Math.exp(my/R))-Math.PI/2)/RAD;
+  const k=Math.cos(latOf((by0+by1)/2)*RAD)/Math.cos(latOf((MY0+MY1)/2)*RAD);
+  const bcx=(bx0+bx1)/2, bcy=(by0+by1)/2, acx=(MX0+MX1)/2, acy=(MY0+MY1)/2;
+  const d=g.o.map(r=>'M'+r.map(p=>{ const [mx,my]=toM(p);
+    const [x,y]=MXY(acx+(mx-bcx)*k, acy+(my-bcy)*k);
+    return x.toFixed(1)+','+y.toFixed(1); }).join('L')+'Z').join('');
+  ghostCache[code]=d; return d;
+}
+let ghostAnim=null;
+function setGhost(code){
+  const same=ghostSel===code;
+  const from=ghostOp, to=same?0:1, next=same?null:code;
+  if(!same) ghostSel=code;
+  document.querySelectorAll('[data-ghost]').forEach(b=>b.classList.toggle('on',b.dataset.ghost===next));
+  if(next){
+    const g=GHOST[next];
+    show('Another state, at the same ground scale', g.n+' over '+ST.name,
+      g.n+' covers '+fmt(g.km2)+' km² against '+fmt(ST.km2||0)+' km² for '+ST.name
+      +(ST.km2?', '+(g.km2/ST.km2*100).toFixed(g.km2/ST.km2<0.1?1:0)+'% of it.':'.')
+      +' The outline is drawn to the same kilometer scale and centered here.',
+      'Areas: US Census Bureau, 2020 gazetteer files (land and water)');
+  }
+  if(ghostAnim) cancelAnimationFrame(ghostAnim);
+  if(REDUCED){ ghostOp=to; if(!next) ghostSel=null; render(); return; }
+  const t0=performance.now(), dur=700;
+  const step=t=>{
+    const u=Math.min(1,(t-t0)/dur), e=u<0.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+    ghostOp=from+(to-from)*e;
+    render();
+    if(u<1) ghostAnim=requestAnimationFrame(step);
+    else { ghostAnim=null; if(!next) ghostSel=null; }
+  };
+  ghostAnim=requestAnimationFrame(step);
+}
+document.querySelectorAll('[data-ghost]').forEach(b=>b.onclick=()=>setGhost(b.dataset.ghost));
 
 // ---- population and era readouts ----
 const CEN=(HIST.early||[]).map(r=>[r[0],r[1],r[2]])
@@ -489,19 +776,15 @@ async function symbols(){
   }
 }
 
-async function setYear(y){
+// the map and the readouts first; the flag arrives when the network does
+let curEra=null;
+function setYear(y){
   year=y;
   document.getElementById('yr').value=y;
   document.getElementById('yearTxt').textContent=y;
   document.getElementById('yearBig').textContent=y;
   const era=HIST.eras.find(e=>y>=e.y0&&y<e.y1)||HIST.eras[HIST.eras.length-1];
   document.getElementById('eraTxt').textContent=era.l;
-  const img=document.getElementById('flagImg'), none=document.getElementById('flagNone');
-  const u=await flagUrl(era.f);
-  if(y!==year) return;
-  if(u){ img.src=u; img.style.display='block'; none.hidden=true; }
-  else{ img.style.display='none'; none.hidden=false;
-    none.textContent=era.f?'flag unavailable':'No flag: the nations\u2019 own land'; }
   const cen=interp(CEN,y);
   const natLast=HIST.native.length?HIST.native[HIST.native.length-1][0]:0;
   const nat=y<=natLast?interp(HIST.native,y):null;
@@ -511,79 +794,204 @@ async function setYear(y){
   else t.push(esc('Before the counts: '+HIST.pre));
   if(nat!=null) t.push(esc('Native population (estimate): '+fmt(nat)));
   document.getElementById('popTxt').innerHTML=t.join('<br>');
+  document.querySelectorAll('#ticks button').forEach(b=>b.classList.toggle('here',+b.textContent===y));
   render();
+  sparkDot(y);
+  if(era!==curEra){ curEra=era; flag(era); }
+}
+async function flag(era){
+  const img=document.getElementById('flagImg'), none=document.getElementById('flagNone');
+  const u=await flagUrl(era.f);
+  if(era!==curEra) return;
+  if(u){ img.src=u; img.style.display='block'; none.hidden=true; }
+  else{ img.style.display='none'; none.hidden=false;
+    none.textContent=era.f?'flag unavailable':'No flag: the nations’ own land'; }
+}
+
+// ---- the population under the slider ----
+const SPAN=2025-1492;
+function sparkSeries(){
+  const cen=CEN.map(r=>[r[0],r[1]]).filter(r=>r[1]>0);
+  const nat=(HIST.native||[]).map(r=>[r[0],r[1]]).filter(r=>r[1]>0);
+  return {cen,nat};
+}
+let sparkY=null;
+(function spark(){
+  const box=document.getElementById('spark'); if(!box) return;
+  const {cen,nat}=sparkSeries();
+  const all=cen.concat(nat);
+  if(all.length<2){ box.style.display='none'; return; }
+  const vals=all.map(r=>Math.log10(r[1]));
+  let lo=Math.floor(Math.min(...vals)), hi=Math.ceil(Math.max(...vals));
+  if(hi-lo<1) hi=lo+1;
+  const w=1000, h=62, pad=6;
+  const X=y=>(y-1492)/SPAN*w, Y=v=>pad+(h-2*pad)*(1-(Math.log10(v)-lo)/(hi-lo));
+  sparkY=Y;
+  let s='<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">';
+  const lab=p=>p>=6?(p===6?'1M':Math.pow(10,p-6)+'M'):p>=3?Math.pow(10,p-3)+'k':String(Math.pow(10,p));
+  for(let p=lo;p<=hi;p++){
+    const y=Y(Math.pow(10,p));
+    s+='<line x1="0" y1="'+y.toFixed(1)+'" x2="'+w+'" y2="'+y.toFixed(1)+'" stroke="#2b2b2b" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+  }
+  s+='</svg><svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">';
+  const line=(pts,color,dash)=>{
+    if(pts.length<2) return '';
+    return '<polyline points="'+pts.map(r=>X(r[0]).toFixed(1)+','+Y(r[1]).toFixed(1)).join(' ')+'" fill="none" stroke="'+color+'" stroke-width="1.8"'+(dash?' stroke-dasharray="5 4"':'')+' vector-effect="non-scaling-stroke" stroke-linejoin="round"/>';
+  };
+  s+=line(nat,'var(--nation)',true)+line(cen,'#0ca30c',false);
+  s+='</svg>';
+  // labels and the dot live in a third layer that keeps its aspect, so
+  // text and the dot stay round and readable
+  s+='<svg id="sparkTop" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">';
+  s+='<line id="sparkLine" x1="0" y1="0" x2="0" y2="'+h+'" stroke="var(--accent)" stroke-opacity="0.6" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+  s+='</svg>';
+  s+='<div id="sparkLab" style="position:absolute;left:4px;top:0;font-size:9.5px;color:var(--muted);line-height:1">'+lab(hi)+'</div>'
+    +'<div style="position:absolute;left:4px;bottom:0;font-size:9.5px;color:var(--muted);line-height:1">'+lab(lo)+'</div>'
+    +'<div id="sparkDot" style="position:absolute;width:9px;height:9px;border-radius:50%;background:#0ca30c;border:2px solid #121212;margin:-4.5px 0 0 -4.5px;display:none"></div>'
+    +'<div id="sparkDot2" style="position:absolute;width:9px;height:9px;border-radius:50%;background:var(--nation);border:2px solid #121212;margin:-4.5px 0 0 -4.5px;display:none"></div>';
+  box.innerHTML=s;
+})();
+function sparkDot(y){
+  const box=document.getElementById('spark'); if(!box||!sparkY) return;
+  const {cen,nat}=sparkSeries();
+  const fx=(y-1492)/SPAN*100;
+  const ln=document.getElementById('sparkLine');
+  if(ln){ ln.setAttribute('x1',fx*10); ln.setAttribute('x2',fx*10); }
+  const put=(id,pts)=>{
+    const d=document.getElementById(id); if(!d) return;
+    const v=(pts.length&&y>=pts[0][0]&&y<=pts[pts.length-1][0])?interp(pts,y):null;
+    if(!v){ d.style.display='none'; return; }
+    d.style.display='block'; d.style.left=fx+'%'; d.style.top=(sparkY(v)/62*100)+'%';
+    d.title=fmt(v);
+  };
+  put('sparkDot',cen); put('sparkDot2',nat);
 }
 
 // ---- cards ----
 function show(kind,name,body,src){
   document.getElementById('kindTxt').textContent=kind;
-  document.getElementById('nameTxt').textContent=name;
+  const nm=document.getElementById('nameTxt');
+  nm.textContent=name; nm.classList.remove('empty');
   document.getElementById('bodyTxt').textContent=body;
   document.getElementById('srcTxt').textContent=src||'';
 }
 function target(e){
-  const g=e.target.closest('[data-nat],[data-ev],[data-ct],[data-uni],[data-rd],[data-mig],[data-cty],[data-hp]');
+  const g=e.target.closest('[data-nat],[data-ev],[data-ct],[data-uni],[data-rd],[data-mig],[data-cty],[data-hp],[data-lim],[data-fnd]');
   if(!g) return null;
   if(g.dataset.nat!==undefined){ const n=HIST.nations[+g.dataset.nat];
-    return ['A nation of this land',n.n,
+    return [n.kind||'A nation of this land',n.n,
       n.note+(n.after?' '+n.after.t.charAt(0).toUpperCase()+n.after.t.slice(1)+'.':'')
-      +' The patch is an approximate homeland, drawn for orientation.',
+      +' The patch is an approximate homeland, drawn for orientation.'
+      +(focusNat===+g.dataset.nat?' Pinned: the other homelands are dimmed until the pin is lifted.':''),
       n.src||'']; }
   if(g.dataset.ev!==undefined){ const ev=HIST.events[+g.dataset.ev];
-    const k=ev.t==='rem'?'Removal and dispossession':ev.t==='cap'?'Capital \u00b7 '+ev.y:'Settlement \u00b7 '+ev.y;
+    const k=ev.t==='rem'?'Removal and dispossession':ev.t==='cap'?'Capital · '+ev.y:'Settlement · '+ev.y;
     let body=ev.note;
     if(ev.pp){ const p=interp(ev.pp,year);
       if(p) body+=' Population around '+year+': '+fmt(p)+' (census, interpolated).'; }
     return [k,ev.n,body,ev.src]; }
   if(g.dataset.mig!==undefined){ const m=HIST.mig[+g.dataset.mig];
-    return ['Migration \u00b7 '+m.y0+' to '+m.y1, m.n,
+    return ['Migration · '+m.y0+' to '+m.y1, m.n,
       m.note+' Arrow width follows the size of the wave; the ends are '
       +'regions, not exact places.', m.src]; }
   if(g.dataset.rd!==undefined){ const r=ROADS[+g.dataset.rd];
-    return [RDN[r.lv]+(r.y?' \u00b7 '+r.y:''), r.n,
+    return [RDN[r.lv]+(r.y?' · '+r.y:''), r.n,
       (r.y?'First carried this number in '+r.y+'. ':'No designation year is documented for this route. ')
       +'The line is the route as it runs today, not the alignment of that year.',
-      'Route history: the route\u2019s Wikipedia article']; }
+      'Route history: the route’s Wikipedia article']; }
   if(g.dataset.uni!==undefined){ const u=HIST.unis[+g.dataset.uni];
-    return ['College \u00b7 founded '+u.y, u.n,
+    return ['College · founded '+u.y, u.n,
       (u.pub?'Public':'Private')+' institution, on the map from its founding year.'
-      +(u.mine?' One of the author\u2019s alma maters.':''),
+      +(u.mine?' One of the author’s alma maters.':''),
       'en.wikipedia.org/wiki/'+u.n.replace(/ /g,'_')]; }
   if(g.dataset.ct!==undefined){ const c=HIST.cities[+g.dataset.ct];
     const p=interp(c.pp,year);
-    return ['City \u00b7 census', c.n,
+    return ['City · census', c.n,
       'Population around '+year+': '+fmt(p)+' (census, interpolated). '
       +'On the map from the first census over 10,000.',
-      'Census series via the city\u2019s Wikipedia article']; }
+      'Census series via the city’s Wikipedia article']; }
   if(g.dataset.cty!==undefined){ const c=ST.counties[+g.dataset.cty];
-    return ['County \u00b7 recent population',c.n,
+    return ['County · recent population',c.n,
       (c.y?'Established '+c.y+'. ':'')+'Population about '+fmt(c.p)+'.',
-      'Founding year via Wikipedia\u2019s county list; census figures via the Balsama county dataset, 2025']; }
+      'Founding year via Wikipedia’s county list; census figures via the Balsama county dataset, 2025']; }
   if(g.dataset.hp!==undefined){ const hp=HIST.geo.hp;
-    return ['Highest point',hp.n,'Elevation '+hp.el+'.','']; }
+    return [hp.soft?'High ground':'Highest point',hp.n,'Elevation '+hp.el+'.','']; }
+  if(g.dataset.lim!==undefined){
+    return ['City limits',ST.limitsName||ST.name,'The incorporated city as it stands today, from the Census TIGER place file.','']; }
+  if(g.dataset.fnd!==undefined){
+    return ['The founding plat · '+ST.founded.y,ST.founded.n||ST.name,ST.founded.note||'The ground the town was first laid out on.',ST.founded.src||'']; }
   return null;
 }
 svg.addEventListener('pointerover',e=>{ if(pinned) return;
   const t=target(e); if(t) show(...t); });
 svg.addEventListener('click',e=>{
-  const g=e.target.closest('[data-nat],[data-ev],[data-ct],[data-uni],[data-rd],[data-mig],[data-cty],[data-hp]');
-  if(!g){ pinned=null; return; }
-  const id=g.dataset.nat!==undefined?'n'+g.dataset.nat:g.dataset.ev!==undefined?'e'+g.dataset.ev:g.dataset.ct!==undefined?'t'+g.dataset.ct:g.dataset.uni!==undefined?'u'+g.dataset.uni:g.dataset.rd!==undefined?'r'+g.dataset.rd:g.dataset.mig!==undefined?'m'+g.dataset.mig:g.dataset.cty!==undefined?'c'+g.dataset.cty:'hp';
+  const g=e.target.closest('[data-nat],[data-ev],[data-ct],[data-uni],[data-rd],[data-mig],[data-cty],[data-hp],[data-lim],[data-fnd]');
+  if(!g){ unpin(); return; }
+  const id=g.dataset.nat!==undefined?'n'+g.dataset.nat:g.dataset.ev!==undefined?'e'+g.dataset.ev:g.dataset.ct!==undefined?'t'+g.dataset.ct:g.dataset.uni!==undefined?'u'+g.dataset.uni:g.dataset.rd!==undefined?'r'+g.dataset.rd:g.dataset.mig!==undefined?'m'+g.dataset.mig:g.dataset.cty!==undefined?'c'+g.dataset.cty:g.dataset.hp!==undefined?'hp':g.dataset.lim!==undefined?'lim':'fnd';
   pinned = pinned===id?null:id;
+  // a pinned nation holds the stage: the others dim, and the slider then
+  // shows its own patch fading at the year of its removal
+  focusNat = (pinned&&g.dataset.nat!==undefined)?+g.dataset.nat:null;
+  render();
   const t=target(e); if(t) show(...t);
+});
+function unpin(){ if(pinned===null&&focusNat===null) return; pinned=null; focusNat=null; render(); }
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ unpin(); return; }
+  // arrow keys move the year only while the map itself has focus
+  if(document.activeElement!==svg) return;
+  const st=e.shiftKey?10:1;
+  if(e.key==='ArrowRight'||e.key==='ArrowUp'){ stop(); setYear(Math.min(2025,year+st)); e.preventDefault(); }
+  if(e.key==='ArrowLeft'||e.key==='ArrowDown'){ stop(); setYear(Math.max(1492,year-st)); e.preventDefault(); }
+  if(e.key===' '){ document.getElementById('bPlay').click(); e.preventDefault(); }
 });
 
 // ---- timeline ----
 document.getElementById('yr').addEventListener('input',e=>{ stop(); setYear(+e.target.value); });
-let timer=null;
+// Play runs on animation frames at a chosen number of years per second,
+// and sprints at ten times that through the centuries before the first
+// mark on the map, so the empty part of the rail passes in a few seconds
+let raf=null, speed=10, lastT=null, acc=0, countiesAuto=false;
+const FIRST=Math.min(...HIST.events.map(e=>e.y).concat(HIST.eras.filter(e=>e.y0>1492).map(e=>e.y0)).concat([2025]));
 function stop(){ playing=false; document.getElementById('bPlay').textContent='Play';
-  if(timer){ clearInterval(timer); timer=null; } }
-document.getElementById('bPlay').onclick=()=>{
-  if(playing){ stop(); return; }
+  if(raf){ cancelAnimationFrame(raf); raf=null; } lastT=null; }
+function frame(t){
+  if(!playing) return;
+  if(lastT==null) lastT=t;
+  const dt=Math.min(0.25,(t-lastT)/1000); lastT=t;
+  acc+=dt*speed*(year<FIRST?10:1);
+  const step=Math.floor(acc);
+  if(step>=1){
+    acc-=step;
+    const y=Math.min(2025, year<FIRST?Math.min(FIRST,year+step):year+step);
+    // the county grid filling in by founding year is the best time effect
+    // on the page, so the layer comes on by itself once the border exists
+    if(!countiesAuto&&y>=HIST.border&&!layers.cou){ countiesAuto=true; document.getElementById('cCou').click(); }
+    setYear(y);
+    if(y>=2025){ stop(); return; }
+  }
+  raf=requestAnimationFrame(frame);
+}
+function play(){
+  if(playing) return;
   playing=true; document.getElementById('bPlay').textContent='Pause';
-  if(year>=2025) setYear(1492);
-  timer=setInterval(()=>{ if(year>=2025){ stop(); return; } setYear(year+1); },130);
-};
+  if(year>=2025){ countiesAuto=false; setYear(1492); }
+  acc=0; lastT=null; raf=requestAnimationFrame(frame);
+}
+document.getElementById('bPlay').onclick=()=>{ if(playing) stop(); else play(); };
+// a jump to a marked year glides there
+let jumpRaf=null;
+function goTo(y){
+  stop(); if(jumpRaf){ cancelAnimationFrame(jumpRaf); jumpRaf=null; }
+  if(REDUCED||Math.abs(y-year)<3){ setYear(y); return; }
+  const y0=year, t0=performance.now(), dur=800;
+  const step=t=>{
+    const u=Math.min(1,(t-t0)/dur), e=u<0.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+    setYear(Math.round(y0+(y-y0)*e));
+    if(u<1) jumpRaf=requestAnimationFrame(step); else jumpRaf=null;
+  };
+  jumpRaf=requestAnimationFrame(step);
+}
 (function eband(){
   const eb=document.getElementById('eband'), span=2025-1492;
   const cols=['#3a3a3a','#7a6a2f','#2f5d7a','#7a2f2f','#2f7a4f','#50407a','#7a5a2f'];
@@ -591,15 +999,30 @@ document.getElementById('bPlay').onclick=()=>{
     const d=document.createElement('div');
     d.style.left=((e.y0-1492)/span*100)+'%';
     d.style.width=((Math.min(e.y1,2025)-e.y0)/span*100)+'%';
-    d.style.background=cols[i%cols.length]; d.title=e.y0+' \u00b7 '+e.l;
+    d.style.background=cols[i%cols.length]; d.title=e.y0+' · '+e.l;
     eb.appendChild(d);
   });
   HIST.events.forEach(ev=>{
     const m=document.createElement('span');
     m.style.left=((ev.y-1492)/span*100)+'%';
     m.style.background=ev.t==='rem'?'var(--rem)':ev.t==='cap'?'var(--cap)':'var(--set)';
-    m.title=ev.y+' \u00b7 '+ev.n;
+    m.title=ev.y+' · '+ev.n;
     eb.appendChild(m);
+  });
+  // the key to the band and the population lines, and the speed of Play
+  const key=document.getElementById('tlkey');
+  const {cen,nat}=sparkSeries();
+  key.innerHTML='<span><i style="background:var(--set)"></i>Settlement</span>'
+    +'<span><i style="background:var(--cap)"></i>Capital</span>'
+    +'<span><i style="background:var(--rem)"></i>Removal</span>'
+    +'<span><i style="background:#555"></i>One color per era</span>'
+    +(cen.length>1?'<span><i class="ln" style="background:#0ca30c"></i>Counted population, log scale</span>':'')
+    +(nat.length>1?'<span><i class="ln" style="background:var(--nation)"></i>Native estimate</span>':'')
+    +'<span class="spd"><span>Play</span>'
+    +[10,30,100].map(v=>'<button data-spd="'+v+'"'+(v===10?' class="on"':'')+'>'+v+' yr/s</button>').join('')+'</span>';
+  key.querySelectorAll('[data-spd]').forEach(b=>b.onclick=()=>{
+    speed=+b.dataset.spd;
+    key.querySelectorAll('[data-spd]').forEach(x=>x.classList.toggle('on',x===b));
   });
 })();
 // jump markers: each era boundary (statehood, transfers of power) is a
@@ -617,22 +1040,43 @@ document.getElementById('bPlay').onclick=()=>{
     } else by.set(p.y,{y:p.y,l:p.l});
   }
   const pts=[...by.values()].sort((a,b)=>a.y-b.y);
-  let lastX={1:-99,2:-99};
-  pts.forEach(p=>{
-    const x=(p.y-1492)/span*100;
-    const row=(x-lastX[1]<5.5&&x-lastX[2]>=5.5)?2:1; lastX[row]=x;
+  const bs=pts.map(p=>{
     const b=document.createElement('button');
-    b.className='row'+row;
-    b.style.left=x+'%';
+    b.style.left=((p.y-1492)/span*100)+'%';
     b.textContent=p.y;
-    b.title=p.y+' \u00b7 '+p.l;
-    b.onclick=()=>{ stop(); setYear(p.y); };
+    b.title=p.y+' · '+p.l;
+    b.onclick=()=>goTo(p.y);
     tk.appendChild(b);
+    return b;
   });
+  // rows are assigned in pixels: a year takes the lowest row with room
+  // for it, up to three rows, and a year that fits nowhere keeps only
+  // its arrow, so nothing is ever printed over anything else
+  const ROWS=3, RH=22, GAP=36;
+  function layout(){
+    const wpx=tk.clientWidth||1000;
+    const last=[-1e9,-1e9,-1e9];
+    let used=1;
+    bs.forEach((b,i)=>{
+      const x=(pts[i].y-1492)/span*wpx;
+      let row=-1;
+      for(let r=0;r<ROWS;r++) if(x-last[r]>=GAP){ row=r; break; }
+      b.classList.toggle('hid',row<0);
+      if(row<0) row=0; else { last[row]=x; used=Math.max(used,row+1); }
+      b.dataset.row=row;
+    });
+    bs.forEach(b=>{ b.style.top=((used-1-(+b.dataset.row))*RH)+'px'; });
+    tk.style.height=(used*RH+6)+'px';
+  }
+  layout();
+  let rt=null;
+  window.addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(layout,120); });
+  window.__tickLayout=layout;
 })();
 
 // ---- chips ----
 const CH={cTer:'ter',cWoo:'woo',cRiv:'riv',cLak:'lak',cCou:'cou',cNat:'nat',cTow:'tow',cUni:'uni',cHwy:'hwy',cMig:'mig'};
+if(document.getElementById('cLim')) CH.cLim='lim';
 for(const id in CH) document.getElementById(id).onclick=e=>{
   const k=CH[id]; layers[k]=!layers[k];
   e.target.classList.toggle('on',layers[k]);
@@ -658,23 +1102,28 @@ function hyps(e){
   }
   return HYPS[HYPS.length-1].slice(1);
 }
-let terDone=false, wooDone=false;
+// done means painted: a fetch that fails leaves the flag down, so the
+// chip can ask again
+let terDone=false, wooDone=false, terBusy=false, wooBusy=false;
+let terPainted=false, wooPainted=false;
 const loadTxt=document.getElementById('loadTxt');
 async function terrain(){
-  if(terDone) return; terDone=true;
+  if(terDone||terBusy) return; terBusy=true;
   const cv=document.getElementById('terC'); const SC=2;
   cv.width=W*SC; cv.height=Math.round(H*SC);
   const ctx=cv.getContext('2d');
-  loadTxt.textContent='loading terrain\u2026';
+  loadTxt.textContent='loading terrain…';
   try{
     const world=2*Math.PI*R;
+    // a phone gets fewer, coarser tiles: the frame is small there anyway
+    const cap=(window.innerWidth||1000)<700?36:80;
     let z=Math.round(Math.log2(world/(MX1-MX0)*(W*SC)/256)); z=Math.max(5,Math.min(11,z));
     let ts,tx0,tx1,ty0,ty1;
     for(;;){
       ts=world/(1<<z);
       tx0=Math.floor((MX0+world/2)/ts); tx1=Math.floor((MX1+world/2)/ts);
       ty0=Math.floor((world/2-MY1)/ts); ty1=Math.floor((world/2-MY0)/ts);
-      if((tx1-tx0+1)*(ty1-ty0+1)<=80||z<=5) break;
+      if((tx1-tx0+1)*(ty1-ty0+1)<=cap||z<=5) break;
       z--;
     }
     const px=Math.ceil((tx1-tx0+1)*256), py=Math.ceil((ty1-ty0+1)*256);
@@ -723,15 +1172,17 @@ async function terrain(){
     ctx.drawImage(off, sx*256, sy*256, (MX1-MX0)/ts*256, (MY1-MY0)/ts*256,
       0, 0, W*SC, Math.round(H*SC));
     loadTxt.textContent='';
+    terDone=true; terPainted=true; render();
   }catch(e){ loadTxt.textContent='terrain unavailable'; }
+  terBusy=false;
 }
 // ---- woods: USGS NLCD 2021 forest classes via the MRLC WMS ----
 async function woods(){
-  if(wooDone) return; wooDone=true;
+  if(wooDone||wooBusy) return; wooBusy=true;
   const cv=document.getElementById('wooC'); const SC=2;
   cv.width=W*SC; cv.height=Math.round(H*SC);
   const ctx=cv.getContext('2d');
-  loadTxt.textContent='loading land cover\u2026';
+  loadTxt.textContent='loading land cover…';
   try{
     const u='https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2021_Land_Cover_L48/wms'
       +'?service=WMS&version=1.1.1&request=GetMap&layers=NLCD_2021_Land_Cover_L48&styles='
@@ -766,16 +1217,27 @@ async function woods(){
       wcv.style.display=layers.lak?'':'none';
     }
     loadTxt.textContent='';
+    wooDone=true; wooPainted=true; render();
   }catch(e){ loadTxt.textContent='land cover unavailable'; }
+  wooBusy=false;
 }
 
-setYear(1492);
+setYear(START);
 symbols();
 terrain(); woods();
-window.__state=()=>({year, layers:{...layers}, counties:ST.counties.length,
+// the page opens with the years already running, unless motion is turned
+// down, in which case the slider waits
+if(!REDUCED) play();
+window.__state=()=>({year, start:START, playing, speed, layers:{...layers}, counties:ST.counties.length,
   rivers:ST.rivers.length, lakes:ST.lakes.length, nations:HIST.nations.length,
   events:HIST.events.length, eras:HIST.eras.length,
-  visEvents:HIST.events.filter(e=>e.y<=year).length, pinned, terDone, wooDone});
+  visEvents:HIST.events.filter(e=>e.y<=year).length, pinned, focusNat, ghost:ghostSel, ghostOp,
+  terDone, wooDone, terPainted, wooPainted, first:FIRST, zoom:Z, vx:VX, vy:VY,
+  zCity:!document.getElementById('zCity').hidden,
+  spark:!!document.querySelector('#spark svg'),
+  tickRows:new Set([...document.querySelectorAll('#ticks button')].map(b=>b.dataset.row)).size,
+  tickHidden:document.querySelectorAll('#ticks button.hid').length});
+window.__goto=y=>{ stop(); setYear(y); };
 </script>
 </body>
 </html>

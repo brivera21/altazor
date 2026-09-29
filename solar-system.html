@@ -46,8 +46,12 @@
     background: #1a2740; color: var(--text); border: 1px solid rgba(88,166,255,0.35);
     border-radius: 8px; padding: 6px 16px; font-size: 13px; cursor: pointer;
   }
+  #orbBtn, #speedBtn, #lineBtn, #ghostBtn {
+    background: #1a2740; color: var(--text); border: 1px solid rgba(88,166,255,0.35);
+    border-radius: 8px; padding: 6px 16px; font-size: 13px; cursor: pointer;
+  }
   #scaleBtn:hover { background: #223354; }
-  #scaleBtn.on { background: var(--accent); color: #0b1120; font-weight: 600; }
+  #scaleBtn.on, #orbBtn.on, #speedBtn.on { background: var(--accent); color: #0b1120; font-weight: 600; }
   #modeNote { font-size: 11.5px; color: var(--dim); }
   details.sources { font-size: 11.5px; color: var(--dim); }
   details.sources summary { cursor: pointer; }
@@ -114,7 +118,11 @@
   <div id="chips"></div>
   <div id="row2">
     <button id="scaleBtn">Make to scale</button>
-    <span id="modeNote">Lenient scale: sizes and spacing are exaggerated so every planet is visible.</span>
+    <button id="orbBtn">Run the orbits</button>
+    <button id="speedBtn" hidden>A year a second</button>
+    <button id="lineBtn" hidden>Line them up</button>
+    <button id="ghostBtn" title="the body drawn beside another for size">Ghost: Earth</button>
+    <span id="modeNote">Lenient scale: sizes and spacing are exaggerated so every planet is visible; Make to scale shows the true distances.</span>
     <details class="sources"><summary>Sources</summary>
       Planets, the Sun and Pluto: NASA's <a href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/">planetary
       fact sheets</a>. Ceres, Vesta and the belts: the
@@ -641,6 +649,7 @@
     info.scrollTop = 0;
   }
   function select(o) {
+    if (o && orbDays > 0) lineUp();
     selected = o;
     document.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.name === (o && o.name)));
     if (o) { showInfo(o); focusOn(o); }
@@ -807,6 +816,84 @@
   }
 
 
+  // ---------- The orbits ----------
+  // Sidereal periods in days, from NASA's planetary fact sheets. The orbits are
+  // drawn as circles seen from a little above the plane, and all eight start
+  // in a line, which never happens; each then goes round at its own period.
+  const PERIOD = { Mercury: 87.969, Venus: 224.701, Earth: 365.256, Mars: 686.980,
+    Jupiter: 4332.589, Saturn: 10759.22, Uranus: 30685.4, Neptune: 60189 };
+  const FLAT = 0.3;
+  let orbDays = 0, orbRun = false, orbSpeed = 40, orbFade = 1, fading = false, baseNote = "";
+  const wrapA = a => { a = a % (2 * Math.PI); if (a > Math.PI) a -= 2 * Math.PI; if (a < -Math.PI) a += 2 * Math.PI; return a; };
+  function theta(p) { if (!orbDays || !PERIOD[p.name]) return 0; return wrapA(2 * Math.PI * orbDays / PERIOD[p.name]) * orbFade; }
+  function ppos(p) { const d = px(p), th = theta(p); return [sx(d * Math.cos(th)), y0 + d * Math.sin(th) * cam.z * FLAT]; }
+  function orbNote() {
+    if (!orbDays) { modeNote.textContent = baseNote; return; }
+    const yrs = orbDays / 365.256;
+    modeNote.textContent = "Day " + Math.floor(orbDays).toLocaleString("en-US") + ", " + (yrs < 10 ? yrs.toFixed(2) : yrs.toFixed(1))
+      + " Earth years. Circles at the true periods; all eight started in a line, which never happens.";
+  }
+  function setOrbBtns() {
+    const ob = el("orbBtn");
+    ob.classList.toggle("on", orbRun); ob.textContent = orbRun ? "Pause" : (orbDays > 0 ? "Run on" : "Run the orbits");
+    el("speedBtn").hidden = !(orbRun || orbDays > 0);
+    el("lineBtn").hidden = !(orbDays > 0) || fading;
+  }
+  function lineUp() {
+    orbRun = false; fading = true; setOrbBtns();
+    if (!selected) fitAll();
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { orbFade = 0; }
+  }
+  el("orbBtn").addEventListener("click", () => {
+    if (orbRun) { orbRun = false; setOrbBtns(); return; }
+    if (selected) select(null);
+    fading = false; orbFade = 1; orbRun = true; setOrbBtns();
+    // the Sun to the middle, and room for Neptune's whole circle
+    const nep = PLANETS.find(q => q.name === "Neptune");
+    camT.c = 0; camT.z = Math.min((W / 2 - 40) / px(nep), (H / 2 - 150) / (px(nep) * FLAT)); tracking = false;
+  });
+  el("speedBtn").addEventListener("click", () => {
+    orbSpeed = orbSpeed === 40 ? 365.256 : 40;
+    el("speedBtn").classList.toggle("on", orbSpeed > 40);
+  });
+  el("lineBtn").addEventListener("click", lineUp);
+  function drawOrbits() {
+    if (!orbDays) return;
+    ctx.save();
+    ctx.globalAlpha = orbFade;
+    ctx.strokeStyle = "rgba(120,160,220,0.22)"; ctx.lineWidth = 1;
+    for (const p of PLANETS) {
+      const d = px(p) * cam.z;
+      ctx.beginPath(); ctx.ellipse(sx(0), y0, d, d * FLAT, 0, 0, 2 * Math.PI); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // ---------- The ghost ----------
+  // the body drawn for size beside whatever is zoomed in: Earth, or Jupiter
+  const GHOSTS = [
+    { name: "Earth", km: 6371, fill: "90,157,224", line: "150,195,240", text: "200,225,255" },
+    { name: "Jupiter", km: 69911, fill: "216,189,151", line: "232,214,186", text: "240,226,204" }];
+  let ghost = GHOSTS[0];
+  el("ghostBtn").addEventListener("click", () => {
+    ghost = ghost === GHOSTS[0] ? GHOSTS[1] : GHOSTS[0];
+    el("ghostBtn").textContent = "Ghost: " + ghost.name;
+  });
+
+  // ---------- Keys ----------
+  // left and right walk the chips, Escape goes back to the overview
+  document.addEventListener("keydown", e => {
+    if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+    const cs = [...document.querySelectorAll(".chip")];
+    if (e.key === "Escape") { select(null); return; }
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    e.preventDefault();
+    let i = cs.findIndex(c => c.classList.contains("on"));
+    if (i < 0) i = 0;
+    i = (i + (e.key === "ArrowRight" ? 1 : -1) + cs.length) % cs.length;
+    cs[i].click();
+  });
+
   // ---------- Chips & scale button ----------
   const chips = document.getElementById("chips");
   function addChip(label, obj) {
@@ -832,7 +919,8 @@
     scaleBtn.textContent = mTarget === 1 ? "To scale ✓" : "Make to scale";
     modeNote.textContent = mTarget === 1
       ? "True scale: spacing is exact. Dots are drawn at the smallest visible size, larger than true; zoom in and each planet appears at its real size."
-      : "Lenient scale: sizes and spacing are exaggerated so every planet is visible.";
+      : "Lenient scale: sizes and spacing are exaggerated so every planet is visible; Make to scale shows the true distances.";
+    baseNote = modeNote.textContent;
     scalebar.style.display = mTarget === 1 ? "block" : "none";
     fitPanel();
     if (selected) focusOn(selected); else fitAll();
@@ -861,9 +949,10 @@
         const r = Math.max(pr(b) * cam.z, 9);
         if (Math.abs(sx(px(b)) - mx) < r && Math.abs(e.clientY - y0) < r + 8) hit = b;
       }
+      if (orbDays > 0) hit = null;   // mid-orbit only the planets answer, where they are
       for (const p of PLANETS) {
-        const r = Math.max(pr(p) * cam.z, 12);
-        if (Math.abs(sx(px(p)) - mx) < r && Math.abs(e.clientY - y0) < r + 8) hit = p;
+        const r = Math.max(pr(p) * cam.z, 12), [qx, qy] = ppos(p);
+        if (Math.abs(qx - mx) < r && Math.abs(e.clientY - qy) < r + 8) hit = p;
       }
       if (hit) select(hit);
     }
@@ -1166,38 +1255,38 @@
 
   function drawPlanet(p) {
     const wr = pr(p) * cam.z;
-    const x = sx(px(p));
+    const [x, yy] = ppos(p);
     const r = Math.max(wr, 0.9);
     if (x + r < -60 || x - r > W + 60) { return; }
     const detailed = r > 3.5;
 
     // Saturn's rings: back half behind the disc (i≈27° tilt stylized)
     if (p.name === "Saturn" && detailed) {
-      ringArc(x, y0, r*2.0, r*0.62, -0.20, Math.PI, 2*Math.PI, r*0.34, "rgba(214,190,140,0.85)");
-      ringArc(x, y0, r*1.55, r*0.48, -0.20, Math.PI, 2*Math.PI, r*0.10, "rgba(120,100,70,0.9)");
+      ringArc(x, yy, r*2.0, r*0.62, -0.20, Math.PI, 2*Math.PI, r*0.34, "rgba(214,190,140,0.85)");
+      ringArc(x, yy, r*1.55, r*0.48, -0.20, Math.PI, 2*Math.PI, r*0.10, "rgba(120,100,70,0.9)");
     }
     // Uranus' rings are near-vertical (98° axial tilt): back half
     if (p.name === "Uranus" && detailed) {
-      ringArc(x, y0, r*0.5, r*1.7, -0.12, Math.PI/2, 3*Math.PI/2, r*0.07, "rgba(190,225,228,0.5)");
+      ringArc(x, yy, r*0.5, r*1.7, -0.12, Math.PI/2, 3*Math.PI/2, r*0.07, "rgba(190,225,228,0.5)");
     }
 
     if (!detailed) {
       // dot mode (true scale zoomed out)
       ctx.fillStyle = p.dotColor;
-      circle(x, y0, r); ctx.fill();
+      circle(x, yy, r); ctx.fill();
     } else {
-      FEATURES[p.name](x, y0, r);
+      FEATURES[p.name](x, yy, r);
     }
 
     if (p.name === "Saturn" && detailed) {
-      ringArc(x, y0, r*2.0, r*0.62, -0.20, 0, Math.PI, r*0.34, "rgba(226,203,152,0.95)");
-      ringArc(x, y0, r*1.55, r*0.48, -0.20, 0, Math.PI, r*0.10, "rgba(120,100,70,0.95)");
+      ringArc(x, yy, r*2.0, r*0.62, -0.20, 0, Math.PI, r*0.34, "rgba(226,203,152,0.95)");
+      ringArc(x, yy, r*1.55, r*0.48, -0.20, 0, Math.PI, r*0.10, "rgba(120,100,70,0.95)");
     }
     if (p.name === "Uranus" && detailed) {
-      ringArc(x, y0, r*0.5, r*1.7, -0.12, -Math.PI/2, Math.PI/2, r*0.07, "rgba(210,240,242,0.7)");
+      ringArc(x, yy, r*0.5, r*1.7, -0.12, -Math.PI/2, Math.PI/2, r*0.07, "rgba(210,240,242,0.7)");
     }
 
-    const ly = y0 - Math.max(r, p.name === "Uranus" ? r*1.75 : r) - (p.name === "Saturn" ? r*0.7 : 0) - 10;
+    const ly = yy - Math.max(r, p.name === "Uranus" ? r*1.75 : r) - (p.name === "Saturn" ? r*0.7 : 0) - 10;
     label(p.name, x, ly, p === selected);
   }
 
@@ -1272,7 +1361,7 @@
     // Not on Earth itself, which IS Earth, and not on a region, which has no
     // size of its own. Jupiter gets its own treatment, below.
     if (!selected || selected.isBelt) return;
-    if (selected.name === "Earth") return;
+    if (selected.name === ghost.name) return;
     if (selected.small) {
       // Earth would be a ring five to twenty-four times wider than these,
       // off every screen, so the yardstick here is the Moon, drawn around it
@@ -1296,10 +1385,10 @@
     const x = isSun ? sx(0) : sx(px(selected));
     const Rd = (isSun ? sunR() : pr(selected)) * cam.z;   // drawn radius of the selected body
     if (Rd < 40) return;                                   // only when actually zoomed in
-    const gr = Math.max(Rd * 6371 / selected.rKm, 1.2);    // Earth radius at the same drawn scale
+    const gr = Math.max(Rd * ghost.km / selected.rKm, 1.2);  // the ghost's radius at the same drawn scale
     ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
-    if (selected.name === "Jupiter") {
+    if (selected.name === "Jupiter" && ghost.name === "Earth") {
       // Earth laid on the Great Red Spot, which is the comparison everyone
       // knows. Both are drawn from their real sizes, so the storm reads as
       // what it is: a little wider than the planet Earth.
@@ -1329,7 +1418,7 @@
     if (isSun) {
       // a speck on the Sun's disc (left side, clear of the info panel)
       const gx = x - Rd * 0.72, gy = y0;
-      ctx.fillStyle = "rgba(74,122,200,0.95)";
+      ctx.fillStyle = "rgba(" + ghost.fill + ",0.95)";
       circle(gx, gy, gr); ctx.fill();
       ctx.strokeStyle = "rgba(20,40,80,0.9)"; ctx.lineWidth = 1;
       circle(gx, gy, gr + 0.8); ctx.stroke();
@@ -1337,14 +1426,28 @@
       ctx.strokeStyle = "rgba(190,215,245,0.55)";
       ctx.beginPath(); ctx.moveTo(lx + 4, ly + 4); ctx.lineTo(gx - gr - 2, gy - 2); ctx.stroke();
       ctx.textAlign = "right";
-      ctx.fillStyle = "rgba(200,225,255,0.9)";
-      ctx.fillText("Earth, to scale", lx, ly);
+      ctx.fillStyle = "rgba(" + ghost.text + ",0.9)";
+      ctx.fillText(ghost.name + ", to scale", lx, ly);
       ghostState = { kind: "speck", r: gr, x: gx, y: gy };
+    } else if (gr >= Rd && gr > Math.hypot(W, H) / 2) {
+      // too big to show whole: the body sits just inside the ghost's edge,
+      // and the edge curves past it across the screen
+      const gx = x - gr + Rd * 2.9;            // the edge on the open right side, clear of the panel
+      ctx.fillStyle = "rgba(" + ghost.fill + ",0.08)";
+      circle(gx, y0, gr); ctx.fill();
+      ctx.strokeStyle = "rgba(" + ghost.line + ",0.75)";
+      ctx.setLineDash([5, 4]); ctx.lineWidth = 1.3;
+      circle(gx, y0, gr); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.textAlign = "right";
+      ctx.fillStyle = "rgba(" + ghost.text + ",0.9)";
+      ctx.fillText("the edge of " + ghost.name + ", to scale", x + Rd * 2.9 - 12, y0 - Rd * 1.15);
+      ghostState = { kind: "edge", r: gr, x: gx, y: y0 };
     } else if (gr >= Rd) {
       // Earth is the bigger one: draw its outline around the planet, concentric
-      ctx.fillStyle = "rgba(90,157,224,0.10)";
+      ctx.fillStyle = "rgba(" + ghost.fill + ",0.10)";
       circle(x, y0, gr); ctx.fill();
-      ctx.strokeStyle = "rgba(150,195,240,0.75)";
+      ctx.strokeStyle = "rgba(" + ghost.line + ",0.75)";
       ctx.setLineDash([4, 4]); ctx.lineWidth = 1.2;
       circle(x, y0, gr); ctx.stroke();
       ctx.setLineDash([]);
@@ -1352,17 +1455,17 @@
       ctx.strokeStyle = "rgba(190,215,245,0.45)";
       ctx.beginPath(); ctx.moveTo(x, ly + 4); ctx.lineTo(x, y0 - gr - 2); ctx.stroke();
       ctx.textAlign = "center";
-      ctx.fillStyle = "rgba(200,225,255,0.9)";
-      ctx.fillText("Earth, to scale", x, ly);
+      ctx.fillStyle = "rgba(" + ghost.text + ",0.9)";
+      ctx.fillText(ghost.name + ", to scale", x, ly);
       ghostState = { kind: "around", r: gr, x: x, y: y0 };
     } else {
       // Earth is the smaller one: set it beside the planet, on the open left side
       const side = selected.name === "Saturn" ? Rd * 2.15 : selected.name === "Uranus" ? Rd * 1.3 : Rd;
       const gx = x - side - gr - 34, gy = y0;
       if (gx + gr < -40) return;
-      ctx.fillStyle = "rgba(90,157,224,0.5)";
+      ctx.fillStyle = "rgba(" + ghost.fill + ",0.5)";
       circle(gx, gy, gr); ctx.fill();
-      ctx.strokeStyle = "rgba(190,215,245,0.8)";
+      ctx.strokeStyle = "rgba(" + ghost.line + ",0.8)";
       ctx.setLineDash([3, 3]); ctx.lineWidth = 1;
       circle(gx, gy, gr + 1.5); ctx.stroke();
       ctx.setLineDash([]);
@@ -1370,8 +1473,8 @@
       ctx.strokeStyle = "rgba(190,215,245,0.45)";
       ctx.beginPath(); ctx.moveTo(gx, ly + 4); ctx.lineTo(gx, gy - gr - 3); ctx.stroke();
       ctx.textAlign = "center";
-      ctx.fillStyle = "rgba(200,225,255,0.9)";
-      ctx.fillText("Earth, to scale", gx, ly);
+      ctx.fillStyle = "rgba(" + ghost.text + ",0.9)";
+      ctx.fillText(ghost.name + ", to scale", gx, ly);
       ghostState = { kind: "beside", r: gr, x: gx, y: gy };
     }
   }
@@ -1396,6 +1499,9 @@
   function frame(t) {
     const dt = Math.min((t - last) / 1000, 0.05); last = t;
     lightClock += dt;
+    if (orbRun) orbDays += dt * orbSpeed;
+    if (fading) { orbFade = Math.max(0, orbFade - dt / 1.0); if (orbFade === 0) { fading = false; orbDays = 0; orbFade = 1; setOrbBtns(); orbNote(); } }
+    if (orbRun || fading || orbDays) orbNote();
     // animate mode & camera
     m += (mTarget - m) * Math.min(1, dt * 3.5);
     if (Math.abs(mTarget - m) < 0.0005) m = mTarget;
@@ -1429,15 +1535,16 @@
     roomU += (roomT - roomU) * Math.min(1, dt * 6);
     if (Math.abs(roomT - roomU) * cam.z < 0.5) roomU = roomT;
     if (roomU === 0 && !showing) roomFrom = Infinity;
+    const orbiting = orbDays > 0;
+    drawOrbits();
     drawSun();
-    for (const g of REGIONS) drawBelt(g);
-    for (const b of SMALL) drawSmall(b);
+    if (!orbiting) { for (const g of REGIONS) drawBelt(g); for (const b of SMALL) drawSmall(b); }
     for (const p of PLANETS) drawPlanet(p);
     drawMoons();
     flushLabels();
     drawGhostEarth();
     drawCharon();
-    drawLightTimes();
+    if (!orbiting) drawLightTimes(); else lightClock = 0;
     drawScalebar();
     window.__dbg = { m, mTarget, camc: cam.c, camz: cam.z, tracking,
       sel: selected && selected.name,
@@ -1460,12 +1567,15 @@
       small: SMALL.map(b => ({ name: b.name, au: b.au, fr: b.fr,
         x: px(b), sx: sx(px(b)), r: pr(b) * cam.z, trueX: b.xTrue, rTrue: b.rTrue,
         region: b.region.name, beltIn: b.region.edgeIn(), beltOut: b.region.edgeOut() })),
-      ghost: ghostState, charon: charonState,
+      ghost: ghostState, charon: charonState, ghostBody: ghost.name,
+      orbit: { days: orbDays, run: orbRun, fade: orbFade, speed: orbSpeed,
+               at: PLANETS.map(p => ({ name: p.name, th: theta(p), pos: ppos(p) })) },
       moons: moonState,
       light: lightState, speedup: LIGHT_SPEEDUP,
       lightEnd: KUIPER.auOut * AU / C_KM_S };
     requestAnimationFrame(frame);
   }
+  baseNote = modeNote.textContent;
   resize();
   fitAll();
   cam.c = camT.c; cam.z = camT.z;

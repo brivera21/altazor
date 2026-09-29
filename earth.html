@@ -23,7 +23,7 @@ h1{font-size:1.7rem;font-weight:600;margin:0 0 .2rem}
 .stamp{color:var(--ink3);font-size:.82rem;margin:0 0 1.4rem}
 
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));
-gap:10px;margin:0 0 14px}
+gap:10px;margin:22px 0 0}
 .tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 14px}
 .tile .k{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em}
 .tile .v{font-size:1.32rem;font-weight:650;margin-top:3px;font-variant-numeric:tabular-nums}
@@ -55,7 +55,14 @@ button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
 
 .legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));
 gap:9px 16px;margin:16px 0 0}
-.lg{display:flex;gap:9px;align-items:flex-start;font-size:.83rem}
+.lg{display:flex;gap:9px;align-items:flex-start;font-size:.83rem;cursor:pointer;border-radius:8px;padding:3px 6px;margin:-3px -6px;border:1px solid transparent}
+.lg:hover{background:#1a1e23}
+.lg.on{border-color:var(--accent);background:#141c26}
+.bar .track{position:relative}
+.bar .tick{position:absolute;top:-2px;width:2px;height:13px;background:#ffffff;border-radius:1px}
+.cmp{font-size:.78rem;color:var(--ink3);margin-top:6px}
+button.on{background:var(--accent);color:#0b1a2b;border-color:var(--accent);font-weight:600}
+@media(max-width:600px){.tile .v small{display:block}}
 .sw{flex:0 0 13px;height:13px;border-radius:3px;margin-top:3px;
 border:1px solid rgba(255,255,255,.18)}
 .ld{color:var(--ink3);font-size:.78rem}
@@ -88,6 +95,34 @@ table.mix td{font-variant-numeric:tabular-nums}
 <h1>Earth's Climate</h1>
 <p class="stamp">Coastlines from GSHHG; climates from Beck and others, 2018.</p>
 
+
+<div class="stage">
+  <div class="mapwrap"><canvas id="map"></canvas></div>
+  <div class="side"><div class="card">
+    <h2 id="selName">All land</h2>
+    <div class="sub" id="selSub">every continent together</div>
+    <div class="row"><span>Area</span><span id="selArea"></span></div>
+    <div class="row"><span>Share of land</span><span id="selShare"></span></div>
+    <div class="row"><span>Share of the surface</span><span id="selSurf"></span></div>
+    <div class="bars" id="bars"></div>
+    <div class="cmp" id="cmp"></div>
+  </div></div>
+</div>
+
+<div class="controls">
+  <button id="bClim" aria-pressed="true">Climate colors</button>
+  <button id="bGrat" aria-pressed="false">Tropics and circles</button>
+  <button id="bArea" aria-pressed="false">True area</button>
+  <button id="bSun">The Sun overhead &#9654;</button>
+  <span id="hint" style="color:var(--ink3)">A continent under the cursor fills the panel and a click holds it for comparison; a climate in the legend lights alone</span>
+</div>
+
+<div class="legend"><div class="lg" data-g="1"><span class="sw" style="background:#47a566"></span><span><b>A Tropical</b><br><span class="ld">Hot all year, and wet enough that something grows through it</span></span></div>
+<div class="lg" data-g="2"><span class="sw" style="background:#b17600"></span><span><b>B Arid</b><br><span class="ld">More water leaves than arrives: deserts and the steppe around them</span></span></div>
+<div class="lg" data-g="3"><span class="sw" style="background:#a84e7c"></span><span><b>C Temperate</b><br><span class="ld">Mild winters, no month averaging below minus three</span></span></div>
+<div class="lg" data-g="4"><span class="sw" style="background:#386bb6"></span><span><b>D Continental</b><br><span class="ld">Warm summers and hard winters, which needs a landmass to sit in</span></span></div>
+<div class="lg" data-g="5"><span class="sw" style="background:#e3ecf5"></span><span><b>E Polar</b><br><span class="ld">No month averaging above ten: tundra and permanent ice</span></span></div></div>
+
 <div class="tiles">
   <div class="tile"><div class="k">Surface area</div>
     <div class="v">510,072,000 <small>km²</small></div></div>
@@ -101,36 +136,12 @@ table.mix td{font-variant-numeric:tabular-nums}
     <div class="v">2.5% <small>and 69% of that is ice</small></div></div>
 </div>
 
-<div class="stage">
-  <div class="mapwrap"><canvas id="map"></canvas></div>
-  <div class="side"><div class="card">
-    <h2 id="selName">All land</h2>
-    <div class="sub" id="selSub">every continent together</div>
-    <div class="row"><span>Area</span><span id="selArea"></span></div>
-    <div class="row"><span>Share of land</span><span id="selShare"></span></div>
-    <div class="row"><span>Share of the surface</span><span id="selSurf"></span></div>
-    <div class="bars" id="bars"></div>
-  </div></div>
-</div>
-
-<div class="controls">
-  <button id="bClim" aria-pressed="true">Climate</button>
-  <button id="bGrat" aria-pressed="false">Tropics and circles</button>
-  <span id="hint" style="color:var(--ink3)">A continent under the cursor fills the panel</span>
-</div>
-
-<div class="legend"><div class="lg"><span class="sw" style="background:#47a566"></span><span><b>A Tropical</b><br><span class="ld">Hot all year, and wet enough that something grows through it</span></span></div>
-<div class="lg"><span class="sw" style="background:#b17600"></span><span><b>B Arid</b><br><span class="ld">More water leaves than arrives: deserts and the steppe around them</span></span></div>
-<div class="lg"><span class="sw" style="background:#a84e7c"></span><span><b>C Temperate</b><br><span class="ld">Mild winters, no month averaging below minus three</span></span></div>
-<div class="lg"><span class="sw" style="background:#386bb6"></span><span><b>D Continental</b><br><span class="ld">Warm summers and hard winters, which needs a landmass to sit in</span></span></div>
-<div class="lg"><span class="sw" style="background:#e3ecf5"></span><span><b>E Polar</b><br><span class="ld">No month averaging above ten: tundra and permanent ice</span></span></div></div>
-
 <div class="notes">
 <p>The colors are the five main K&ouml;ppen groups, which sort land by what its
 temperature and rainfall do through the year rather than by where it sits. The
 equirectangular projection keeps latitude and longitude square and stretches
 everything toward the poles, so Greenland and Antarctica look far larger than
-they are; the areas are given as numbers.</p>
+they are; True area squeezes it onto an equal-area map.</p>
 </div>
 
 <details class="sources"><summary>Sources</summary>
@@ -182,6 +193,12 @@ const D = {"png": "iVBORw0KGgoAAAANSUhEUgAACHAAAAQ4CAAAAABODObAAAEAAElEQVR42uy9W
 const cv = document.getElementById('map'), ctx = cv.getContext('2d');
 let W = D.w, H = D.h;
 let showClim = true, showGrat = false, hover = 0, sel = 0;
+let iso = 0, isoPin = 0;        // a climate group lit alone, 1 to 5
+let ea = 0;                     // 0 the equirectangular map, 1 Lambert's equal-area cylinder
+let sunDay = null;              // the day of the year whose noon Sun is drawn
+let frame = null, warped = null, warpKey = '';
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ease = k => k < .5 ? 2*k*k : 1 - Math.pow(-2*k + 2, 2)/2;
 let ids = null, base = null;
 
 const img = new Image();
@@ -222,6 +239,7 @@ function paint() {
     // the focused continent keeps its exact palette color, so it still
     // matches the legend; everything else is dimmed instead of it being lit
     let f = (hover && ids[p] !== 0 && ids[p] !== hover) ? 0.48 : 1;
+    if (iso && ids[p] !== 0 && g[p] !== iso) f *= 0.25;
     o[i] = Math.min(255, c[0] * f);
     o[i+1] = Math.min(255, c[1] * f);
     o[i+2] = Math.min(255, c[2] * f);
@@ -237,8 +255,64 @@ function paint() {
       o[i] = COAST[0]; o[i+1] = COAST[1]; o[i+2] = COAST[2];
     }
   }
-  ctx.putImageData(out, 0, 0);
+  frame = out; warpKey = '';
+  draw();
+}
+
+// where a latitude lands on the canvas, part way between the two maps
+const yEq = lat => (90 - lat) * H / 180;
+const yEa = lat => H / 2 - Math.sin(lat * Math.PI / 180) * W / (2 * Math.PI);
+const yOf = lat => (1 - ea) * yEq(lat) + ea * yEa(lat);
+let rowSrc = null;
+function rows() {
+  rowSrc = new Int32Array(H);
+  const top = yOf(90), bot = yOf(-90);
+  for (let y = 0; y < H; y++) {
+    const t = y + 0.5;
+    if (t < top || t > bot) { rowSrc[y] = -1; continue; }
+    let lo = -90, hi = 90;
+    for (let k = 0; k < 40; k++) { const m = (lo + hi) / 2; if (yOf(m) > t) lo = m; else hi = m; }
+    rowSrc[y] = Math.min(H - 1, Math.max(0, Math.floor(yEq((lo + hi) / 2))));
+  }
+}
+function draw() {
+  if (!frame) return;
+  if (ea === 0) { rowSrc = null; ctx.putImageData(frame, 0, 0); }
+  else {
+    const key = ea.toFixed(4);
+    if (warpKey !== key) {
+      rows();
+      if (!warped) warped = ctx.createImageData(W, H);
+      const src = new Uint32Array(frame.data.buffer), dst = new Uint32Array(warped.data.buffer);
+      const bg = new Uint32Array(new Uint8ClampedArray([18, 18, 18, 255]).buffer)[0];
+      for (let y = 0; y < H; y++) {
+        const s = rowSrc[y];
+        if (s < 0) dst.fill(bg, y * W, (y + 1) * W);
+        else dst.set(src.subarray(s * W, (s + 1) * W), y * W);
+      }
+      warpKey = key;
+    }
+    ctx.putImageData(warped, 0, 0);
+  }
   if (showGrat) graticule();
+  if (sunDay != null) sunLine();
+}
+// the latitude of the noon Sun overhead, from the usual sine approximation
+// (within about a degree of the almanac)
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MDAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
+const decl = d => 23.44 * Math.sin(2 * Math.PI * (d - 81) / 365);
+function dateOf(d) { let m = 0, n = Math.floor(d); while (m < 11 && n >= MDAYS[m]) { n -= MDAYS[m]; m++; } return MONTHS[m] + ' ' + (n + 1); }
+function sunLine() {
+  const u = W / 1000, lat = decl(sunDay), y = yOf(lat);
+  ctx.save();
+  ctx.fillStyle = 'rgba(255,200,80,0.16)'; ctx.fillRect(0, y - 9 * u, W, 18 * u);
+  ctx.strokeStyle = '#ffc850'; ctx.lineWidth = 2.2 * u; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  ctx.font = `600 ${Math.round(12 * u)}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+  const t = 'the noon Sun overhead, ' + dateOf(sunDay) + ': ' + Math.abs(lat).toFixed(1) + '\u00b0 ' + (lat >= 0 ? 'N' : 'S');
+  ctx.lineWidth = 4 * u; ctx.strokeStyle = '#121212'; ctx.strokeText(t, W - 10 * u - ctx.measureText(t).width, y - 12 * u);
+  ctx.fillStyle = '#ffd67a'; ctx.fillText(t, W - 10 * u - ctx.measureText(t).width, y - 12 * u);
+  ctx.restore();
 }
 
 function graticule() {
@@ -253,7 +327,7 @@ function graticule() {
   for (const [lat, name] of [[66.5634,'Arctic Circle'], [23.4366,'Tropic of Cancer'],
                              [0,'Equator'], [-23.4366,'Tropic of Capricorn'],
                              [-66.5634,'Antarctic Circle']]) {
-    const y = (90 - lat) * H / 180;
+    const y = yOf(lat);
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
     ctx.fillText(name, 10 * u, y - 6 * u);
   }
@@ -263,8 +337,21 @@ function graticule() {
 const el = id => document.getElementById(id);
 const fmt = n => n.toLocaleString('en-US');
 
-function show(i) {
+function showClimate(g) {
+  const k = g - 1, tot = D.world[k] / 100 * 148940000;
+  el('selName').textContent = D.keys[k][0] + ' ' + D.keys[k].slice(2);
+  el('selSub').textContent = 'one climate, lit alone on the map';
+  el('selArea').textContent = 'about ' + fmt(Math.round(tot / 1e5) * 1e5) + ' km²';
+  el('selShare').textContent = D.world[k].toFixed(1) + '%';
+  el('selSurf').textContent = (tot / 510072000 * 100).toFixed(1) + '%';
+  const by = D.conts.map(c => [c.n, c.km2 * c.mix[k] / 100]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]);
+  const sum = by.reduce((a, x) => a + x[1], 0);
+  el('bars').innerHTML = by.map(([n, v]) => `<div class="bar"><span class="t">${n}</span><span class="track"><span class="fill" style="width:${v / sum * 100}%;background:${D.colors[k]}"></span></span><span class="p">${(v / sum * 100).toFixed(1)}%</span></div>`).join('');
+  el('cmp').textContent = 'the bars: where this climate lies, by continent';
+}
+function show(i, cmp) {
   const c = i ? D.conts.find(c => c.i === i) : null;
+  const o = cmp ? D.conts.find(c => c.i === cmp) : null;
   const mix = c ? c.mix : D.world;
   el('selName').textContent = c ? c.n : 'All land';
   el('selSub').textContent = c ? 'continent' : 'every continent together';
@@ -275,23 +362,58 @@ function show(i) {
   el('bars').innerHTML = mix.map((v, k) =>
     `<div class="bar"><span class="t">${D.keys[k]}</span>` +
     `<span class="track"><span class="fill" style="width:${v}%;` +
-    `background:${D.colors[k]}"></span></span>` +
+    `background:${D.colors[k]}"></span>` + (o ? `<span class="tick" style="left:calc(${o.mix[k]}% - 1px)"></span>` : '') + `</span>` +
     `<span class="p">${v.toFixed(1)}%</span></div>`).join('');
+  el('cmp').textContent = o ? 'the white ticks: ' + o.n + ', held' : (sel && i === sel ? 'held; another continent under the cursor compares with it' : '');
 }
 
 function at(ev) {
   const r = cv.getBoundingClientRect();
   const x = Math.floor((ev.clientX - r.left) / r.width * W);
-  const y = Math.floor((ev.clientY - r.top) / r.height * H);
+  let y = Math.floor((ev.clientY - r.top) / r.height * H);
   if (x < 0 || y < 0 || x >= W || y >= H || !ids) return 0;
+  if (rowSrc) { y = rowSrc[y]; if (y < 0) return 0; }
   return ids[y * W + x];
 }
 cv.addEventListener('mousemove', e => {
   const i = at(e);
-  if (i !== hover) { hover = i; paint(); show(i || sel); }
+  if (i !== hover) { hover = i; paint(); if (!i && iso) showClimate(iso); else show(i || sel, i && sel && i !== sel ? sel : 0); }
 });
-cv.addEventListener('mouseleave', () => { hover = 0; paint(); show(sel); });
-cv.addEventListener('click', e => { sel = at(e); show(sel || hover); });
+cv.addEventListener('mouseleave', () => { hover = 0; paint(); if (iso) showClimate(iso); else show(sel); });
+cv.addEventListener('click', e => { const i = at(e); sel = i && i !== sel ? i : 0; show(sel || i); });
+// the legend lights one climate alone; a click holds it
+for (const lg of document.querySelectorAll('.lg')) {
+  const g = +lg.dataset.g;
+  lg.addEventListener('mouseenter', () => { if (iso !== g) { iso = g; paint(); } showClimate(g); });
+  lg.addEventListener('mouseleave', () => { iso = isoPin; paint(); if (iso) showClimate(iso); else show(sel); });
+  lg.addEventListener('click', () => { isoPin = isoPin === g ? 0 : g; iso = isoPin || g;
+    for (const x of document.querySelectorAll('.lg')) x.classList.toggle('on', +x.dataset.g === isoPin);
+    if (!showClim && isoPin) { showClim = true; el('bClim').setAttribute('aria-pressed', true); }
+    paint(); if (isoPin) showClimate(isoPin); else show(sel); });
+}
+let areaId = 0;
+el('bArea').addEventListener('click', () => {
+  const to = ea > 0.5 ? 0 : 1, from = ea, id = ++areaId;
+  el('bArea').setAttribute('aria-pressed', to === 1);
+  if (RM) { ea = to; warpKey = ''; draw(); return; }
+  const t0 = performance.now();
+  const f = now => { if (id !== areaId) return; const k = Math.min(1, (now - t0) / 1100); ea = from + (to - from) * ease(k); draw(); if (k < 1) requestAnimationFrame(f); };
+  requestAnimationFrame(f);
+});
+let sunId = 0;
+function stopSun() { sunId++; el('bSun').classList.remove('on'); el('bSun').innerHTML = 'The Sun overhead &#9654;'; }
+el('bSun').addEventListener('click', () => {
+  if (el('bSun').classList.contains('on')) { stopSun(); return; }
+  if (sunDay == null || sunDay >= 364) sunDay = 0;
+  el('bSun').classList.add('on'); el('bSun').textContent = 'Pause';
+  if (RM) { sunDay = 171; draw(); stopSun(); return; }
+  const id = ++sunId, d0 = sunDay, t0 = performance.now();
+  const f = now => { if (id !== sunId) return; sunDay = Math.min(364, d0 + (now - t0) / 1000 * 45); draw();
+    if (sunDay < 364) requestAnimationFrame(f); else { stopSun(); sunDay = null; draw(); } };
+  requestAnimationFrame(f);
+});
+document.addEventListener('keydown', ev => { if (ev.key !== 'Escape' || /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  stopSun(); sunDay = null; sel = 0; isoPin = 0; iso = 0; for (const x of document.querySelectorAll('.lg')) x.classList.remove('on'); paint(); show(0); });
 el('bClim').addEventListener('click', () => {
   showClim = !showClim;
   el('bClim').setAttribute('aria-pressed', showClim);
@@ -300,10 +422,13 @@ el('bClim').addEventListener('click', () => {
 el('bGrat').addEventListener('click', () => {
   showGrat = !showGrat;
   el('bGrat').setAttribute('aria-pressed', showGrat);
-  paint();
+  draw();
 });
 show(0);
-window.__earth = () => ({ ids: !!ids, W, H, showClim, showGrat, hover, sel,
+window.__earth = (q) => ({ ids: !!ids, W, H, showClim, showGrat, hover, sel, iso, isoPin, ea, sunDay,
+  sunLat: sunDay == null ? null : decl(sunDay), y: q && q.lat != null ? yOf(q.lat) : null,
+  src: q && q.row != null && rowSrc ? rowSrc[q.row] : null,
+  px: q && q.px ? Array.from(ctx.getImageData(q.px[0], q.px[1], 1, 1).data.slice(0, 3)) : null,
   conts: D.conts, world: D.world });
 </script>
 </body>

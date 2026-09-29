@@ -117,6 +117,21 @@
   details.sources > summary { cursor: pointer; color: var(--muted); font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; }
   details.sources > summary:hover { color: var(--accent); }
   details.sources #footnote { margin-top: 8px; }
+
+  .card svg { outline: none; }
+  .card svg:focus-visible { outline: 1px solid var(--accent); outline-offset: -1px; border-radius: 12px; }
+  #tip.pinned { pointer-events: auto; border-color: var(--accent); }
+  #tip .t-path { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--grid); color: var(--text-secondary); }
+  #tip .t-path b { color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; }
+  #tip .t-hint { margin-top: 6px; color: var(--muted); font-size: 11.5px; }
+  .compass.sub { font-size: 9.5px; font-weight: 400; letter-spacing: .04em; }
+  p.caption { color: var(--text-secondary); font-size: .95rem; line-height: 1.65; max-width: 74ch; margin: 18px 0 0; }
+  .tiles { margin: 18px 0 0; }
+  @media (max-width: 600px) {
+    .controls { gap: 6px; }
+    button.ctl { padding: 5px 9px; font-size: 12.5px; }
+    #tip { max-width: calc(100vw - 24px); }
+  }
 </style>
 </head>
 <body>
@@ -129,9 +144,10 @@
     <h1>El Terrero, Namiquipa: red carretera regional</h1>
   </header>
 
-  <div class="tiles" id="tiles"></div>
-
   <div class="controls">
+    <button class="ctl" id="btn-zoom" aria-pressed="false">Acercar al valle</button>
+    <button class="ctl" id="btn-arc" aria-pressed="false">Rectas contra carretera</button>
+    <span class="spacer"></span>
     <button class="ctl" id="btn-km" aria-pressed="true">Km por carretera</button>
     <button class="ctl" id="btn-labels" aria-pressed="true">Nombres de pueblos</button>
     <button class="ctl" id="btn-rings" aria-pressed="true">Anillos de distancia</button>
@@ -139,18 +155,27 @@
   </div>
 
   <div class="card">
-    <svg id="map" viewBox="0 0 1240 1010" role="img" aria-labelledby="maptitle mapdesc">
+    <svg id="map" viewBox="0 0 1240 1010" role="img" tabindex="0" aria-labelledby="maptitle mapdesc">
       <title id="maptitle">Red carretera con centro en El Terrero, Namiquipa, Chihuahua</title>
       <desc id="mapdesc">Pueblos del valle de Namiquipa y las cabeceras municipales vecinas, puestos en sus coordenadas reales y unidos solo donde existe carretera entre ellos. Cada enlace lleva su distancia en kilómetros. La ruta baja al sur hacia Ciudad Cuauhtémoc y de ahí a la ciudad de Chihuahua.</desc>
       <g id="g-rings"></g>
       <g id="g-compass"></g>
       <g id="g-links"></g>
       <g id="g-kms"></g>
+      <g id="g-halo"></g>
       <g id="g-nodes"></g>
     </svg>
   </div>
 
   <div class="legend" id="legend"></div>
+
+  <p class="caption">Cada pueblo está en su latitud y longitud reales y cada
+  línea es una carretera que existe, con sus km de manejo; el área del círculo va
+  con la población de 2020. Un clic vuelve a un pueblo el centro de los anillos y
+  suma su camino a El Terrero. Rectas contra carretera curva cada enlace al largo
+  manejado.</p>
+
+  <div class="tiles" id="tiles"></div>
 
   <div id="tablewrap">
     <h3 class="tbl">Pueblos</h3>
@@ -171,7 +196,6 @@
     </table>
   </div>
 
-  <footer class="note"><p>Cada pueblo está en su latitud y longitud reales respecto a El Terrero. Las líneas son carreteras que existen, y el número sobre cada línea es la distancia de manejo entre esos dos pueblos, no la línea recta. El área del círculo va con la población del censo 2020.</p></footer>
   <footer class="note"><details class="sources"><summary>Fuentes</summary><div id="footnote"></div></details></footer>
 </div>
 
@@ -301,18 +325,24 @@
   function fmt(n) { return n.toLocaleString('es-MX'); }
 
   // ---- distance rings -----------------------------------------------------
+  // the rings follow whichever town is the center, El Terrero to begin with
   var gRings = document.getElementById('g-rings');
-  var cx = px(CENTER), cy = py(CENTER);
-  [25, 50, 100, 150].forEach(function (km) {
-    gRings.appendChild(el('circle', {cx: cx, cy: cy, r: km * scale, fill: 'none',
-      stroke: 'var(--grid)', 'stroke-width': 1, 'stroke-dasharray': '3 5'}));
-    var rr = km * scale, k = Math.SQRT1_2;
-    var lx = cx + rr * k, ly = cy - rr * k;
-    gRings.appendChild(el('rect', {x: lx - 22, y: ly - 10, width: 44, height: 14, rx: 4, fill: 'var(--surface-1)', opacity: 0.92}));
-    var t = el('text', {x: lx, y: ly, class: 'ringlbl', 'text-anchor': 'middle'});
-    t.textContent = km + ' km';
-    gRings.appendChild(t);
-  });
+  var center = CENTER;
+  function drawRings() {
+    while (gRings.firstChild) gRings.removeChild(gRings.firstChild);
+    var cx = px(center), cy = py(center);
+    [25, 50, 100, 150].forEach(function (km) {
+      gRings.appendChild(el('circle', {cx: cx, cy: cy, r: km * scale, fill: 'none',
+        stroke: 'var(--grid)', 'stroke-width': 1, 'stroke-dasharray': '3 5'}));
+      var rr = km * scale, k = Math.SQRT1_2;
+      var lx = cx + rr * k, ly = cy - rr * k;
+      gRings.appendChild(el('rect', {x: lx - 22, y: ly - 10, width: 44, height: 14, rx: 4, fill: 'var(--surface-1)', opacity: 0.92}));
+      var t = el('text', {x: lx, y: ly, class: 'ringlbl', 'text-anchor': 'middle'});
+      t.textContent = km + ' km';
+      gRings.appendChild(t);
+    });
+  }
+  drawRings();
 
   // ---- compass ------------------------------------------------------------
   var gC = document.getElementById('g-compass');
@@ -325,6 +355,9 @@
     t.textContent = d[0];
     gC.appendChild(t);
   });
+  var tn0 = el('text', {x: cxa, y: cya + arm + 32, class: 'compass sub', 'text-anchor': 'middle'});
+  tn0.textContent = 'norte verdadero';
+  gC.appendChild(tn0);
 
   // ---- links + km labels --------------------------------------------------
   var gL = document.getElementById('g-links');
@@ -335,8 +368,8 @@
     var a = byId[L[0]], b = byId[L[1]], km = L[2], corridor = L[3], tweak = L[4] || {};
     var x1 = px(a), y1 = py(a), x2 = px(b), y2 = py(b);
 
-    var line = el('line', {
-      x1: x1, y1: y1, x2: x2, y2: y2,
+    var line = el('path', {
+      d: 'M' + x1 + ',' + y1 + 'L' + x2 + ',' + y2, fill: 'none',
       stroke: corridor ? 'var(--corridor)' : 'var(--link)',
       'stroke-width': corridor ? 2.6 : 2,
       'stroke-linecap': 'round',
@@ -347,10 +380,22 @@
     gL.appendChild(line);
     linkEls.push(line);
 
+    // the arc this link bends into when its length is drawn as the road
+    // km: a circular arc on the same chord, as long as the drive
+    var dx = x2 - x1, dy = y2 - y1, len = Math.sqrt(dx*dx + dy*dy) || 1;
+    var straight = haversine(a, b), k = km / straight;
+    var u = arcHalfAngle(k);
+    // it bows away from El Terrero, so the arcs spread out from the valley
+    var nx = -dy / len, ny = dx / len;
+    var ccx = px(CENTER), ccy = py(CENTER);
+    var side = ((x1 + x2) / 2 + nx - ccx) * nx + ((y1 + y2) / 2 + ny - ccy) * ny >= 0 ? 1 : -1;
+    var geo = {x1: x1, y1: y1, x2: x2, y2: y2, len: len, nx: nx * side, ny: ny * side,
+               u: u, side: side, straight: straight, km: km, lbl: null};
+    line._geo = geo;
+
     if (tweak.skip) return;
     var t = tweak.t === undefined ? 0.5 : tweak.t;
     var mx = x1 + (x2 - x1) * t, my = y1 + (y2 - y1) * t;
-    var dx = x2 - x1, dy = y2 - y1, len = Math.sqrt(dx*dx + dy*dy) || 1;
     var offv = tweak.off === undefined ? 0 : tweak.off;
     var lx = mx + (-dy / len) * offv, ly = my + (dx / len) * offv;
 
@@ -358,12 +403,15 @@
     var w = txt.length * 5.7 + 8;
     var g = el('g');
     g.dataset.a = L[0]; g.dataset.b = L[1];
-    g.appendChild(el('rect', {x: lx - w/2, y: ly - 8, width: w, height: 14, rx: 4, fill: 'var(--surface-1)', opacity: 0.94}));
+    var rct = el('rect', {x: lx - w/2, y: ly - 8, width: w, height: 14, rx: 4, fill: 'var(--surface-1)', opacity: 0.94});
+    g.appendChild(rct);
     var tn = el('text', {x: lx, y: ly + 3, class: 'kmlbl', 'text-anchor': 'middle'});
     tn.textContent = txt;
     if (corridor) { tn.setAttribute('font-weight', '650'); tn.setAttribute('fill', 'var(--text-primary)'); }
     g.appendChild(tn);
     gK.appendChild(g);
+    geo.lbl = {g: g, rect: rct, text: tn, x: lx, y: ly, road: txt,
+               both: straight.toFixed(0) + ' → ' + km.toFixed(0) + ' km'};
   });
 
   // ---- nodes --------------------------------------------------------------
@@ -386,10 +434,6 @@
     var x = px(n), y = py(n), r = radius(n.pop);
     var color = 'var(' + CATS[n.cat].v + ')';
 
-    if (n.center) {
-      g.appendChild(el('circle', {cx: x, cy: y, r: r + 9, fill: 'none', stroke: color, 'stroke-width': 1.5, opacity: 0.55}));
-      g.appendChild(el('circle', {cx: x, cy: y, r: r + 15, fill: 'none', stroke: color, 'stroke-width': 1, opacity: 0.28}));
-    }
     g.appendChild(el('circle', {cx: x, cy: y, r: r, fill: color, class: 'dot'}));
 
     var o = OFFSETS[n.lp] || OFFSETS.s;
@@ -413,10 +457,22 @@
     gN.appendChild(g);
     nodeEls[n.id] = g;
 
-    hit.addEventListener('mouseenter', function () { showTip(n); highlight(n.id); });
-    hit.addEventListener('mousemove', moveTip);
-    hit.addEventListener('mouseleave', function () { hideTip(); highlight(null); });
+    hit.addEventListener('mouseenter', function () { if (pinned) return; showTip(n); highlight(n.id); });
+    hit.addEventListener('mousemove', function (ev) { if (!pinned) moveTip(ev); });
+    hit.addEventListener('mouseleave', function () { if (pinned) return; hideTip(); highlight(null); });
+    hit.addEventListener('click', function (ev) { ev.stopPropagation(); pin(pinned === n.id ? null : n.id); });
   });
+
+  // the center's halo, which moves with it
+  var gHalo = document.getElementById('g-halo');
+  function drawHalo() {
+    while (gHalo.firstChild) gHalo.removeChild(gHalo.firstChild);
+    var x = px(center), y = py(center), r = radius(center.pop);
+    var color = 'var(' + CATS[center.cat].v + ')';
+    gHalo.appendChild(el('circle', {cx: x, cy: y, r: r + 9, fill: 'none', stroke: color, 'stroke-width': 1.5, opacity: 0.55}));
+    gHalo.appendChild(el('circle', {cx: x, cy: y, r: r + 15, fill: 'none', stroke: color, 'stroke-width': 1, opacity: 0.28}));
+  }
+  drawHalo();
 
   // ---- adjacency ----------------------------------------------------------
   var adj = {};
@@ -432,25 +488,80 @@
     var rows = '<dt>Población 2020</dt><dd>' + fmt(n.pop) + '</dd>';
     if (n.munPop) rows += '<dt>Total del municipio</dt><dd>' + fmt(n.munPop) + '</dd>';
     rows += '<dt>Altitud</dt><dd>' + fmt(n.elev) + ' m</dd>';
-    if (!n.center) rows += '<dt>Línea recta</dt><dd>' + n.dist.toFixed(0) + ' km ' + compass(n.brg) + '</dd>';
+    if (n !== center) rows += '<dt>Línea recta' + (center === CENTER ? '' : ' desde ' + center.short) +
+      '</dt><dd>' + haversine(center, n).toFixed(0) + ' km ' + compass(bearing(center, n)) + '</dd>';
 
     var roads = (adj[n.id] || []).slice().sort(function (a, b) { return a.km - b.km; })
       .map(function (e) { return byId[e.to].short + ' <b>' + e.km.toFixed(0) + '</b>'; })
       .join(' · ');
+
+    // the road path to El Terrero, summed link by link along the shortest chain
+    var path = '';
+    if (n !== CENTER) {
+      var sp = shortest(n.id, CENTER.id);
+      if (sp) {
+        var via = sp.nodes.slice(1, -1).map(function (id) { return byId[id].short; });
+        path = '<div class="t-path">A El Terrero por carretera: <b>' + sp.km.toFixed(0) + ' km</b>' +
+          (via.length ? ', por ' + via.join(', ') : '') +
+          ' (' + (sp.km / haversine(n, CENTER)).toFixed(1) + ' veces la recta)</div>';
+      }
+    }
 
     tip.innerHTML =
       '<div class="t-name">' + n.name + '</div>' +
       '<div class="t-mun">Mpio. ' + n.mun.replace(' (cabecera)', '') +
       (n.mun.indexOf('cabecera') > -1 ? ' · cabecera municipal' : '') + '</div>' +
       '<dl>' + rows + '</dl>' +
-      '<div class="t-roads">Carreteras (km): ' + roads + '</div>';
+      '<div class="t-roads">Carreteras (km): ' + roads + '</div>' + path +
+      (pinned === n.id ? '<div class="t-hint">Centro de los anillos; otro clic o Escape vuelve a El Terrero.</div>' : '');
     tip.style.opacity = 1;
+  }
+
+  // Dijkstra over the road links
+  function shortest(from, to) {
+    var dist = {}, prev = {}, done = {};
+    NODES.forEach(function (n) { dist[n.id] = Infinity; });
+    dist[from] = 0;
+    for (;;) {
+      var u = null;
+      NODES.forEach(function (n) { if (!done[n.id] && (u === null || dist[n.id] < dist[u])) u = n.id; });
+      if (u === null || dist[u] === Infinity) break;
+      if (u === to) break;
+      done[u] = true;
+      (adj[u] || []).forEach(function (e) {
+        if (dist[u] + e.km < dist[e.to]) { dist[e.to] = dist[u] + e.km; prev[e.to] = u; }
+      });
+    }
+    if (dist[to] === Infinity) return null;
+    var nodes = [to];
+    while (nodes[0] !== from) nodes.unshift(prev[nodes[0]]);
+    return {km: dist[to], nodes: nodes};
+  }
+
+  // a click makes a town the center: the rings move there, the card stays
+  // open beside it and reads the distances from it
+  var pinned = null;
+  function tipAt(n) {
+    var r = svg.getBoundingClientRect(), vb = svg.viewBox.baseVal;
+    var x = r.left + (px(n) - vb.x) / vb.width * r.width;
+    var y = r.top + (py(n) - vb.y) / vb.height * r.height;
+    moveTip({clientX: x, clientY: y});
+  }
+  function pin(id) {
+    pinned = id;
+    center = id ? byId[id] : CENTER;
+    drawRings(); drawHalo();
+    tip.classList.toggle('pinned', !!id);
+    if (id) { showTip(byId[id]); highlight(id); tipAt(byId[id]); }
+    else { hideTip(); highlight(null); }
   }
   function moveTip(ev) {
     var x = ev.clientX + 16, y = ev.clientY + 16;
     var w = tip.offsetWidth, h = tip.offsetHeight;
     if (x + w > window.innerWidth - 8) x = ev.clientX - w - 16;
     if (y + h > window.innerHeight - 8) y = ev.clientY - h - 16;
+    x = Math.max(8, Math.min(window.innerWidth - w - 8, x));
+    y = Math.max(8, y);
     tip.style.left = x + 'px'; tip.style.top = y + 'px';
   }
   function hideTip() { tip.style.opacity = 0; }
@@ -476,7 +587,7 @@
   document.getElementById('map').appendChild(gI);
   (function () {
     var X = 902, Y = 232, W = 300, ROW = 46;
-    var H = 46 + (CHAIN.length - 1) * ROW + 22;
+    var H = 66 + (CHAIN.length - 1) * ROW + 30;
     gI.appendChild(el('rect', {x: X, y: Y, width: W, height: H, rx: 12,
       fill: 'var(--surface-1)', stroke: 'var(--border)', 'stroke-width': 1}));
     var ttl = el('text', {x: X + 18, y: Y + 26, class: 'lbl'});
@@ -588,6 +699,124 @@
   toggle('btn-labels', 'Nombres de pueblos', 'Nombres ocultos', function (on) { svg.classList.toggle('hide-labels', !on); });
   toggle('btn-rings', 'Anillos de distancia', 'Anillos ocultos', function (on) { gRings.style.display = on ? '' : 'none'; });
   toggle('btn-table', 'Ocultar tablas', 'Ver tablas', function (on) { document.getElementById('tablewrap').classList.toggle('on', on); });
+
+  var REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function ease(f) { return f < .5 ? 2 * f * f : 1 - Math.pow(-2 * f + 2, 2) / 2; }
+  function tween(dur, fn, done) {
+    if (REDUCED) { fn(1); if (done) done(); return; }
+    var t0 = performance.now();
+    requestAnimationFrame(function step(t) {
+      var f = Math.min(1, (t - t0) / dur);
+      fn(ease(f));
+      if (f < 1) requestAnimationFrame(step); else if (done) done();
+    });
+  }
+
+  // ---- rectas contra carretera ---------------------------------------------
+  // For a chord c and an arc of half angle u on it, arc / chord = u / sin u;
+  // the half angle that makes the arc as long as the road is found by halving.
+  function arcHalfAngle(k) {
+    if (!(k > 1.0005)) return 0;
+    var lo = 1e-6, hi = Math.PI - 1e-6;
+    for (var i = 0; i < 60; i++) {
+      var mid = (lo + hi) / 2;
+      if (mid / Math.sin(mid) < k) lo = mid; else hi = mid;
+    }
+    return (lo + hi) / 2;
+  }
+  function arcD(g, f) {
+    var u = g.u * f;
+    if (u < 1e-3) return 'M' + g.x1 + ',' + g.y1 + 'L' + g.x2 + ',' + g.y2;
+    var R = g.len / (2 * Math.sin(u));
+    // sweep chosen so the arc bows toward (nx, ny)
+    var cross = (g.x2 - g.x1) * g.ny - (g.y2 - g.y1) * g.nx;
+    var sweep = cross > 0 ? 0 : 1;
+    return 'M' + g.x1 + ',' + g.y1 + 'A' + R.toFixed(2) + ',' + R.toFixed(2) + ' 0 ' +
+      (u > Math.PI / 2 ? 1 : 0) + ' ' + sweep + ' ' + g.x2 + ',' + g.y2;
+  }
+  var arcOn = false, arcF = 0;
+  function paintArcs(f) {
+    arcF = f;
+    linkEls.forEach(function (line) {
+      var g = line._geo;
+      line.setAttribute('d', arcD(g, f));
+      if (!g.lbl) return;
+      // the label rides the arc's apex
+      var u = g.u * f, sag = u < 1e-3 ? 0 : g.len / (2 * Math.sin(u)) * (1 - Math.cos(u));
+      var mx = (g.x1 + g.x2) / 2 + g.nx * sag, my = (g.y1 + g.y2) / 2 + g.ny * sag;
+      var tx = (mx - g.lbl.x) * f, ty = (my - g.lbl.y) * f;
+      g.lbl.g.setAttribute('transform', 'translate(' + tx.toFixed(1) + ',' + ty.toFixed(1) + ')');
+    });
+  }
+  function labelText(both) {
+    linkEls.forEach(function (line) {
+      var L = line._geo.lbl; if (!L) return;
+      var txt = both ? L.both : L.road, w = txt.length * 5.7 + 8;
+      L.text.textContent = txt;
+      L.rect.setAttribute('x', L.x - w / 2); L.rect.setAttribute('width', w);
+    });
+  }
+  document.getElementById('btn-arc').addEventListener('click', function () {
+    arcOn = !arcOn;
+    this.setAttribute('aria-pressed', String(arcOn));
+    labelText(arcOn);
+    var from = arcF, to = arcOn ? 1 : 0;
+    tween(1000, function (e) { paintArcs(from + (to - from) * e); });
+  });
+
+  // ---- acercar al valle ----------------------------------------------------
+  var FULL = [0, 0, VW, VH];
+  var VALLEY = (function () {
+    var ids = CHAIN.concat(['lapinta']);
+    var X = ids.map(function (id) { return px(byId[id]); }), Y = ids.map(function (id) { return py(byId[id]); });
+    var x0 = Math.min.apply(null, X) - 80, x1 = Math.max.apply(null, X) + 80;
+    var y0 = Math.min.apply(null, Y) - 60, y1 = Math.max.apply(null, Y) + 60;
+    var w = Math.max(x1 - x0, (y1 - y0) * VW / VH), h = w * VH / VW;
+    var cx0 = (x0 + x1) / 2, cy0 = (y0 + y1) / 2;
+    return [cx0 - w / 2, cy0 - h / 2, w, h];
+  })();
+  var vb = FULL.slice(), zoomed = false;
+  function setVB(b) { vb = b; svg.setAttribute('viewBox', b.map(function (v) { return v.toFixed(1); }).join(' ')); }
+  function zoomTo(on, instant) {
+    zoomed = on;
+    var btn = document.getElementById('btn-zoom');
+    btn.setAttribute('aria-pressed', String(on));
+    btn.textContent = on ? 'Ver toda la región' : 'Acercar al valle';
+    gI.style.display = on ? 'none' : '';
+    var from = vb.slice(), to = on ? VALLEY : FULL;
+    if (instant) { setVB(to); return; }
+    tween(900, function (e) {
+      setVB(from.map(function (v, i) { return v + (to[i] - v) * e; }));
+    }, function () { if (pinned) tipAt(byId[pinned]); });
+  }
+  document.getElementById('btn-zoom').addEventListener('click', function () { zoomTo(!zoomed); });
+
+  // ---- teclado y clics fuera -----------------------------------------------
+  // up and down walk the valley chain from Cruces to Independencia while the
+  // map has focus
+  svg.addEventListener('keydown', function (ev) {
+    if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp' || ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') {
+      ev.preventDefault();
+      var i = CHAIN.indexOf(pinned || 'terrero');
+      if (i < 0) i = CHAIN.indexOf('terrero');
+      var d = (ev.key === 'ArrowDown' || ev.key === 'ArrowRight') ? 1 : -1;
+      pin(CHAIN[Math.max(0, Math.min(CHAIN.length - 1, i + d))]);
+    }
+  });
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && pinned) pin(null); });
+  svg.addEventListener('click', function () { if (pinned) pin(null); });
+  window.addEventListener('scroll', function () { if (pinned) tipAt(byId[pinned]); }, {passive: true});
+  window.addEventListener('resize', function () { if (pinned) tipAt(byId[pinned]); });
+
+  // on a phone the whole region is too small to read, so the map opens on the valley
+  if (window.matchMedia && matchMedia('(max-width: 600px)').matches) zoomTo(true, true);
+
+  window.__et = function () {
+    return {center: center.id, pinned: pinned, zoomed: zoomed, arc: arcF, vb: vb.slice(),
+            tip: tip.style.opacity === '1' ? tip.textContent : '',
+            rings: gRings.querySelectorAll('circle').length,
+            ringCx: +gRings.querySelector('circle').getAttribute('cx')};
+  };
 
   // ---- footnote -----------------------------------------------------------
   document.getElementById('footnote').innerHTML =

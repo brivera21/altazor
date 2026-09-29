@@ -8,7 +8,7 @@
 :root{color-scheme:dark;
 --ink:#e6e6e6; --ink2:#9a9a9a; --ink3:#7d7d7d;
 --bg:#121212; --panel:#1a1a1a; --line:#2b2b2b; --accent:#58a6ff;
---land:#1b1f24; --mx:#333b44; --us:#2a3138; --edge:#8d98a4; --border:#c3ccd6;
+--land:#1b1f24; --mx:#333b44; --us:#2a3138; --edge:#5f6973; --border:#9aa4ae;
 --riv:#6fb6f5; --sra:#414139; --alt:#5c5749; --ruta:#f5a623; --hito:#e2725b;}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);
@@ -41,6 +41,23 @@ border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
 button.ctl:hover{color:var(--ink);border-color:var(--edge)}
 button.ctl[aria-pressed="true"]{color:#12161a;background:var(--ink2);border-color:var(--ink2)}
 input[type=range]{flex:1;min-width:220px;accent-color:var(--ruta);height:22px}
+.stage{display:flex;gap:18px;align-items:flex-start}
+.stage figure{flex:0 1 660px;min-width:0}
+.side{flex:1 1 300px;min-width:0;position:sticky;top:12px}
+.side .controls{margin-top:0}
+.side input[type=range]{flex:1 1 100%;min-width:0;order:9}
+.side .readout{flex-direction:column}
+.side .box{min-width:0}
+.side .hint{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;font-size:12.5px;color:var(--ink3);margin:.8rem 0 0;line-height:1.5}
+svg#perfil{cursor:ew-resize;touch-action:none}
+#frontera{stroke-dasharray:7 4}
+details.sources{margin-top:2rem;border-top:1px solid var(--line);padding-top:.8rem}
+details.sources>summary{cursor:pointer;color:var(--ink3);font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+details.sources>summary:hover{color:var(--accent)}
+details.sources .notes{margin-top:1rem;border-top:none;padding-top:0}
+.notes.cap{margin-top:1.6rem}
+.tiles{margin-top:1.2rem}
+@media(max-width:860px){.stage{flex-direction:column}.side{position:static;width:100%;flex-basis:auto}.stage figure{width:100%;flex-basis:auto}}
 .readout{display:flex;gap:.75rem;margin-top:.85rem;flex-wrap:wrap;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
 .box{background:var(--panel);border-radius:8px;padding:.7rem .95rem;min-width:150px}
@@ -80,17 +97,7 @@ circle.stop.on{fill:var(--ruta)}
 
 <h1>Cabalgata Binacional Villista</h1>
 
-<div class="tiles">
-  <div class="tile"><div class="k">salida</div><div class="v">Bachíniva</div>
-    <div class="g">de la hacienda de San Gerónimo salió la columna en 1916</div></div>
-  <div class="tile"><div class="k">llegada</div><div class="v">Columbus</div>
-    <div class="g">Nuevo México, cruzando la línea en Puerto Palomas</div></div>
-  <div class="tile"><div class="k">corredor</div><div class="v">653 km</div>
-    <div class="g">medidos sobre la traza de caminos entre cabeceras</div></div>
-  <div class="tile"><div class="k">primera edición</div><div class="v">1999</div>
-    <div class="g">aquella vez se juntaron más de 125 jinetes</div></div>
-</div>
-
+<div class="stage">
 <figure>
 <svg id="map" viewBox="0 0 980 961" role="img"
   aria-label="Mapa del noroeste de Chihuahua y el sur de Nuevo México con el corredor de la cabalgata.">
@@ -142,25 +149,16 @@ circle.stop.on{fill:var(--ruta)}
 </g>
 </svg>
 
-<svg id="perfil" viewBox="0 0 980 168" role="img"
-  aria-label="Altitud del corredor, de la sierra al desierto.">
-<title>Altitud del corredor</title>
-<path id="perfilArea" d="" fill="#2a2a22"/>
-<path id="perfilLinea" d="" fill="none" stroke="var(--ruta)" stroke-width="1.6"/>
-<g id="perfilEjes"></g>
-<line id="perfilMarca" x1="0" y1="14" x2="0" y2="142" stroke="#fff3d6" stroke-width="1.4"/>
-</svg>
 </figure>
-
+<div class="side">
 <div class="controls">
   <button class="ctl" id="bPlay" aria-pressed="false">Recorrer</button>
   <input type="range" id="km" min="0" max="653.1" step="0.5" value="0"
     aria-label="Kilómetro del corredor">
   <button class="ctl" id="bRel" aria-pressed="true">Relieve</button>
   <button class="ctl" id="bRio" aria-pressed="true">Ríos</button>
-  <button class="ctl" id="b1916" aria-pressed="false">1916</button>
+  <button class="ctl" id="b1916" aria-pressed="false" title="los pueblos de donde salieron los hombres en 1916, y las dos fechas">Los de 1916</button>
 </div>
-
 <div class="readout">
   <div class="box"><div class="lab">kilómetro</div>
     <div class="val" id="rKm">0</div><div class="sub2" id="rFalta"></div></div>
@@ -171,17 +169,44 @@ circle.stop.on{fill:var(--ruta)}
     <div class="sub2" id="rSub"></div></div>
 </div>
 
-<div class="notes">
+<p class="hint">El jinete recorre el corredor; la barra, el perfil y cada parada lo llevan a cualquier kilómetro, y una parada bajo el puntero dice cuánto sube y baja desde la anterior.</p>
+</div>
+</div>
+<svg id="perfil" viewBox="0 0 980 168" role="img"
+  aria-label="Altitud del corredor, de la sierra al desierto.">
+<title>Altitud del corredor</title>
+<path id="perfilArea" d="" fill="#2a2a22"/>
+<path id="perfilLinea" d="" fill="none" stroke="var(--ruta)" stroke-width="1.6"/>
+<text class="ax" x="46" y="12">altitud a lo largo del corredor; abajo, el kilómetro de las paradas</text>
+<g id="perfilEjes"></g>
+<line id="perfilMarca" x1="0" y1="14" x2="0" y2="142" stroke="#fff3d6" stroke-width="1.4"/>
+</svg>
+
+
+<div class="notes cap">
 <p>La cabalgata sale de Bachíniva a finales de febrero y llega a Columbus el
 sábado más cercano al 9 de marzo, el día del ataque de 1916. La edición de 2026
 se hizo en dieciocho días con más de doscientos jinetes, por los municipios que
 van marcados aquí.</p>
+</div>
+<div class="tiles">
+  <div class="tile"><div class="k">salida</div><div class="v">Bachíniva</div>
+    <div class="g">de la hacienda de San Gerónimo salió la columna en 1916</div></div>
+  <div class="tile"><div class="k">llegada</div><div class="v">Columbus</div>
+    <div class="g">Nuevo México, cruzando la línea en Puerto Palomas</div></div>
+  <div class="tile"><div class="k">corredor</div><div class="v">653 km</div>
+    <div class="g">medidos sobre la traza de caminos entre cabeceras</div></div>
+  <div class="tile"><div class="k">primera edición</div><div class="v">1999</div>
+    <div class="g">aquella vez se juntaron más de 125 jinetes</div></div>
+</div>
+
+<details class="sources"><summary>Fuentes</summary>
+<div class="notes">
 <p>Nadie publica los campamentos de cada noche, solo los municipios, así que la
 línea une las cabeceras por caminos que existen. El perfil lleva la misma
 cuenta: se sale de la sierra alta y se llega al desierto ochocientos metros
 más abajo, y la parte más pesada queda entre Madera y Ignacio Zaragoza.</p>
 </div>
-
 <div class="method">
 <p>La traza se armó tramo por tramo sobre la red de caminos de OpenStreetMap
 con BRouter, con el perfil de caminos vecinales, salvo tres tramos donde ese
@@ -194,7 +219,6 @@ solamente los dos extremos y los pueblos de donde salieron los hombres, porque
 el camino que siguió la columna entre una fecha y otra no aparece en las
 fuentes consultadas.</p>
 </div>
-
 <h2>Referencias</h2>
 <div class="refs">
 <p>Gobierno del Estado de Chihuahua. (2026, 27 de febrero). <em>Arranca en
@@ -217,6 +241,7 @@ Research: Solid Earth, 101</em>(B4), 8741-8743.
 Information Society.
 <a href="https://www.naturalearthdata.com/downloads/10m-raster-data/10m-natural-earth-2/">https://www.naturalearthdata.com/downloads/10m-raster-data/10m-natural-earth-2/</a></p>
 </div>
+</details>
 </main>
 <script>
 const TRACK=[[627.6, 834.4, 0.0], [627.3, 835.1, 0.33], [628.3, 837.3, 1.44], [628.6, 844.6, 4.81], [630.8, 845.8, 5.99], [630.2, 847.6, 6.83], [631.0, 850.6, 8.27], [630.4, 851.2, 8.67], [630.8, 853.2, 9.6], [630.4, 854.9, 10.42], [629.2, 856.9, 11.52], [628.1, 857.7, 12.16], [627.6, 859.3, 12.91], [629.3, 861.1, 14.06], [630.3, 861.6, 14.59], [632.0, 866.3, 16.93], [631.8, 867.5, 17.47], [629.0, 868.3, 18.82], [627.7, 869.1, 19.55], [629.5, 874.4, 22.11], [632.8, 880.6, 25.39], [634.5, 882.8, 26.67], [635.3, 889.4, 29.74], [633.4, 888.0, 30.85], [633.2, 888.6, 31.12], [632.4, 888.5, 31.48], [627.7, 893.3, 34.61], [618.5, 899.9, 39.89], [615.3, 903.7, 42.24], [613.0, 904.4, 43.38], [612.7, 905.1, 43.73], [608.7, 906.4, 45.71], [607.8, 907.2, 46.28], [599.1, 907.3, 50.36], [592.8, 909.6, 53.56], [591.5, 910.7, 54.35], [590.4, 910.4, 54.91], [588.5, 905.2, 57.48], [588.6, 898.7, 60.48], [587.1, 898.5, 61.22], [583.7, 891.8, 64.7], [581.8, 890.9, 65.7], [581.3, 889.6, 66.3], [578.6, 888.7, 67.69], [578.6, 887.6, 68.2], [578.8, 885.0, 69.38], [576.4, 881.4, 71.41], [575.7, 881.3, 71.77], [575.8, 880.3, 72.21], [574.8, 878.4, 73.24], [574.9, 877.7, 73.59], [574.0, 877.0, 74.13], [570.9, 870.0, 77.71], [570.5, 866.9, 79.15], [569.5, 864.4, 80.39], [564.8, 861.6, 82.97], [564.1, 860.7, 83.51], [561.2, 859.9, 84.93], [560.7, 858.6, 85.57], [561.1, 855.8, 86.9], [555.4, 852.8, 89.94], [554.8, 850.3, 91.14], [554.2, 849.8, 91.51], [554.4, 848.6, 92.1], [539.7, 841.1, 99.89], [535.2, 837.9, 102.49], [534.4, 836.0, 103.4], [531.1, 832.2, 105.77], [525.0, 823.1, 110.92], [522.5, 816.6, 114.17], [521.8, 816.7, 114.51], [521.2, 815.0, 115.34], [520.9, 815.1, 115.5], [520.9, 815.1, 115.51], [520.8, 813.0, 116.48], [517.7, 808.5, 118.99], [514.4, 799.6, 123.33], [512.4, 796.8, 124.93], [510.8, 793.2, 126.75], [508.9, 790.9, 128.08], [508.1, 791.0, 128.47], [507.7, 789.5, 129.2], [504.7, 788.3, 130.7], [504.9, 787.9, 130.9], [504.1, 784.4, 132.51], [504.6, 782.5, 133.38], [504.7, 778.9, 135.04], [503.0, 766.7, 140.65], [503.5, 765.6, 141.2], [502.7, 764.4, 141.85], [502.6, 762.9, 142.52], [500.8, 763.2, 143.36], [498.2, 762.9, 144.6], [498.2, 759.9, 145.96], [496.0, 758.8, 147.09], [490.7, 748.9, 152.16], [489.1, 746.9, 153.34], [485.8, 746.7, 154.89], [484.5, 745.9, 155.57], [483.8, 744.0, 156.5], [483.7, 742.2, 157.29], [482.9, 742.9, 157.75], [481.4, 742.4, 158.52], [478.9, 740.0, 160.12], [465.0, 732.3, 167.41], [461.7, 733.4, 169.03], [447.0, 731.7, 175.85], [439.1, 730.8, 179.52], [438.5, 728.9, 180.42], [438.2, 729.0, 180.6], [438.5, 728.9, 180.78], [439.1, 730.8, 181.68], [447.0, 731.7, 185.37], [461.7, 733.4, 192.21], [464.9, 732.2, 193.81], [478.9, 740.0, 201.17], [481.4, 742.4, 202.77], [482.9, 742.9, 203.54], [483.7, 742.2, 204.01], [483.8, 744.0, 204.81], [484.5, 745.9, 205.74], [485.8, 746.7, 206.42], [488.5, 746.9, 207.71], [489.4, 745.4, 208.49], [489.9, 741.0, 210.51], [488.1, 735.8, 212.99], [486.8, 734.1, 214.0], [487.5, 733.0, 214.61], [488.8, 733.3, 215.21], [489.3, 733.0, 215.48], [489.6, 732.6, 215.75], [489.3, 731.9, 216.09], [495.0, 725.8, 219.9], [495.4, 723.5, 221.0], [497.0, 721.3, 222.21], [498.6, 720.5, 223.04], [498.8, 717.4, 224.45], [499.7, 717.0, 224.89], [501.9, 717.5, 225.93], [503.4, 720.0, 227.27], [504.3, 720.6, 227.77], [505.6, 719.7, 228.5], [506.8, 720.4, 229.16], [510.6, 719.1, 231.02], [512.4, 719.7, 231.93], [516.8, 718.5, 234.02], [517.7, 717.4, 234.67], [524.5, 713.5, 238.29], [531.1, 711.5, 241.47], [529.9, 708.1, 243.09], [530.1, 702.8, 245.51], [529.8, 700.6, 246.54], [525.6, 692.1, 250.86], [526.1, 691.9, 251.1], [524.8, 688.2, 252.85], [524.3, 688.3, 253.1], [526.1, 688.2, 253.94], [525.9, 684.6, 255.59], [532.5, 677.3, 260.09], [533.6, 663.9, 266.27], [529.1, 649.8, 273.04], [529.1, 645.1, 275.21], [527.0, 639.2, 278.05], [527.4, 635.6, 279.7], [526.8, 633.3, 280.82], [527.8, 632.6, 281.35], [527.9, 631.8, 281.69], [526.7, 627.0, 283.99], [525.7, 624.6, 285.18], [520.9, 620.3, 288.14], [519.7, 617.9, 289.37], [519.0, 618.0, 289.7], [518.9, 617.1, 290.16], [521.0, 615.8, 291.3], [521.5, 613.4, 292.46], [523.9, 612.1, 293.73], [527.7, 603.8, 298.03], [538.4, 591.6, 305.61], [539.4, 589.7, 306.6], [541.4, 588.7, 307.65], [543.4, 589.0, 308.63], [545.7, 588.1, 309.76], [546.3, 586.9, 310.4], [547.9, 587.5, 311.22], [548.5, 586.1, 311.94], [549.0, 585.9, 312.19], [548.9, 585.4, 312.43], [550.2, 585.9, 313.1], [550.4, 585.4, 313.37], [551.3, 585.2, 313.8], [553.0, 586.2, 314.74], [554.4, 588.6, 316.04], [554.6, 587.9, 316.39], [556.2, 588.8, 317.26], [557.3, 588.2, 317.82], [559.5, 589.9, 319.12], [563.1, 591.0, 320.91], [565.5, 590.7, 322.05], [565.9, 590.0, 322.45], [567.4, 589.8, 323.15], [567.6, 589.1, 323.48], [568.5, 589.0, 323.89], [570.4, 589.9, 324.89], [570.5, 589.2, 325.24], [571.3, 589.5, 325.64], [571.0, 588.6, 326.11], [571.8, 588.3, 326.52], [577.2, 570.1, 335.37], [582.8, 568.1, 338.14], [583.1, 568.7, 338.47], [583.6, 568.6, 338.7], [583.1, 568.7, 338.93], [582.6, 567.8, 339.4], [580.9, 568.5, 340.27], [579.4, 564.4, 342.25], [576.0, 559.9, 344.85], [573.2, 555.0, 347.43], [566.7, 539.7, 355.06], [565.3, 537.7, 356.2], [562.0, 528.1, 360.85], [561.7, 528.1, 361.02], [559.3, 524.5, 363.01], [557.0, 525.8, 364.22], [555.2, 522.8, 365.83], [555.8, 522.1, 366.26], [554.8, 521.3, 366.84], [552.8, 513.0, 370.75], [550.7, 511.1, 372.06], [549.5, 508.7, 373.3], [549.7, 505.4, 374.82], [550.6, 502.0, 376.4], [550.4, 502.0, 376.5], [550.6, 499.9, 377.45], [548.3, 485.4, 384.06], [544.1, 484.3, 386.01], [522.5, 470.6, 397.59], [518.5, 466.9, 400.04], [515.0, 460.9, 403.17], [510.2, 458.9, 405.5], [507.3, 455.7, 407.44], [490.2, 431.3, 420.88], [490.0, 427.7, 422.51], [487.5, 427.7, 423.63], [487.5, 427.6, 423.7], [487.5, 427.1, 423.9], [484.8, 427.2, 425.15], [484.6, 428.5, 425.76], [481.9, 428.4, 427.04], [481.6, 431.3, 428.42], [482.1, 433.0, 429.24], [481.6, 433.9, 429.68], [480.5, 433.9, 430.23], [480.4, 435.5, 430.97], [479.6, 436.1, 431.45], [479.6, 436.7, 431.75], [478.9, 436.9, 432.09], [478.9, 436.9, 432.1], [480.4, 435.5, 433.02], [480.5, 433.9, 433.74], [481.6, 433.9, 434.27], [482.1, 433.0, 434.69], [481.6, 431.3, 435.48], [481.8, 428.4, 436.81], [484.6, 428.5, 438.04], [484.8, 427.2, 438.62], [486.3, 427.2, 439.31], [486.3, 424.1, 440.69], [487.3, 424.1, 441.15], [487.4, 415.8, 444.92], [492.0, 381.5, 460.63], [492.4, 374.2, 463.97], [493.7, 362.5, 469.3], [489.6, 362.6, 471.15], [489.7, 361.0, 471.85], [482.5, 361.2, 475.14], [483.0, 350.2, 480.13], [477.4, 350.6, 482.65], [475.2, 350.3, 483.66], [475.3, 344.6, 486.24], [470.9, 345.7, 488.31], [469.8, 347.2, 489.15], [467.0, 348.6, 490.58], [462.8, 347.8, 492.53], [460.7, 348.5, 493.55], [456.9, 348.5, 495.26], [428.7, 311.0, 516.57], [428.2, 311.4, 516.84], [427.5, 310.9, 517.2], [429.4, 309.6, 518.27], [434.3, 302.0, 522.38], [433.4, 301.6, 522.85], [436.2, 293.7, 526.68], [440.4, 286.6, 530.44], [441.2, 285.9, 530.93], [439.0, 283.6, 532.41], [440.3, 281.8, 533.45], [440.6, 280.5, 534.04], [439.8, 280.1, 534.41], [441.2, 275.6, 536.57], [441.0, 274.8, 536.94], [444.6, 271.9, 539.05], [448.2, 271.9, 540.68], [465.0, 263.2, 549.34], [466.8, 263.3, 550.15], [468.1, 262.6, 550.82], [468.6, 260.6, 551.78], [469.5, 260.8, 552.19], [469.5, 260.8, 552.2], [470.0, 259.1, 553.0], [496.7, 231.8, 570.18], [502.1, 221.8, 575.31], [517.5, 205.4, 585.43], [519.4, 189.6, 592.6], [522.9, 184.3, 595.47], [551.4, 167.6, 610.31], [550.8, 166.3, 610.98], [551.3, 148.9, 618.8], [551.9, 147.1, 619.68], [551.3, 145.6, 620.39], [552.3, 108.5, 637.1], [548.6, 92.7, 644.43], [546.7, 93.0, 645.28], [546.7, 91.9, 645.8], [546.5, 90.8, 646.3], [548.3, 90.6, 647.12], [548.0, 89.5, 647.65], [548.3, 89.8, 647.87], [548.3, 87.5, 648.93], [547.1, 86.9, 649.55], [545.3, 79.5, 653.1]];
@@ -238,7 +263,8 @@ const gp=el('paradas'), gl=el('etiquetas');
 STOPS.forEach((s,i)=>{
   const c=make('circle',{class:'stop',cx:s.x,cy:s.y,r:i===0||i===STOPS.length-1?5.5:4,
     'data-i':i},gp);
-  c.addEventListener('mouseenter',()=>marcar(i));
+  c.addEventListener('mouseenter',()=>{marcar(i);parada(i);});
+  c.addEventListener('mouseleave',()=>ver(+el('km').value));
   c.addEventListener('click',()=>{el('km').value=s.km;ver(s.km);});
   const der=s.x<VWmid();
   const L=s.lab||[der?9:-9,4,der?'start':'end'];
@@ -297,6 +323,22 @@ function alturaEn(km){
   const j=Math.min(PROF.length-1,i+1), f=t-i;
   return PROF[i]+(PROF[j]-PROF[i])*f;
 }
+// lo que sube y baja el camino entre dos kilómetros, del perfil
+function subeBaja(k0,k1){
+  let s=0,b=0,prev=alturaEn(k0);
+  for(let k=k0+STEP;k<=k1+1e-9;k+=STEP){const h=alturaEn(Math.min(k,k1));
+    if(h>prev) s+=h-prev; else b+=prev-h; prev=h;}
+  return [Math.round(s),Math.round(b)];
+}
+function parada(i){
+  const s=STOPS[i];
+  el('rLab').textContent='parada';
+  el('rTramo').textContent=s.n+', km '+s.km.toFixed(0);
+  if(i===0){el('rSub').textContent='la salida, a '+Math.round(alturaEn(0))+' m';return;}
+  const p=STOPS[i-1], [su,ba]=subeBaja(p.km,s.km);
+  el('rSub').textContent='desde '+p.n+': '+(s.km-p.km).toFixed(0)+' km, sube '
+    +su.toLocaleString('es-MX')+' m y baja '+ba.toLocaleString('es-MX')+' m';
+}
 function marcar(i){
   [...gp.children].forEach((c,k)=>c.classList.toggle('on',k===i));
 }
@@ -327,9 +369,20 @@ el('km').addEventListener('input',e=>{parar();ver(+e.target.value);});
 let anim=null;
 function parar(){if(anim){cancelAnimationFrame(anim);anim=null;
   el('bPlay').setAttribute('aria-pressed','false');el('bPlay').textContent='Recorrer';}}
+// el perfil también se recorre con el puntero
+{
+  const pf=el('perfil');
+  const kmDe=ev=>{const r=pf.getBoundingClientRect();const x=(ev.clientX-r.left)/r.width*PW;
+    return Math.max(0,Math.min(TOTAL,(x-46)/(PW-70)*TOTAL));};
+  let arr=false;
+  pf.addEventListener('pointerdown',ev=>{parar();arr=true;try{pf.setPointerCapture(ev.pointerId);}catch(e){}
+    const k=kmDe(ev);el('km').value=k;ver(k);ev.preventDefault();});
+  pf.addEventListener('pointermove',ev=>{if(!arr)return;const k=kmDe(ev);el('km').value=k;ver(k);});
+  for(const t of ['pointerup','pointercancel']) pf.addEventListener(t,()=>{arr=false;});
+}
 el('bPlay').addEventListener('click',()=>{
   if(anim){parar();return;}
-  el('bPlay').setAttribute('aria-pressed','true'); el('bPlay').textContent='Alto';
+  el('bPlay').setAttribute('aria-pressed','true'); el('bPlay').textContent='Pausa';
   let last=null;
   if(+el('km').value>=TOTAL) el('km').value=0;
   const paso=t=>{
