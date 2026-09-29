@@ -21,7 +21,8 @@ MARS_AU, JUPITER_AU = 1.524, 5.204
 
 WANT_CHIPS = ["Overview", "I. SUN", "II. MERCURY", "III. VENUS", "IV. EARTH",
               "V. MARS", "VI. ASTEROID BELT", "VII. JUPITER", "VIII. SATURN",
-              "IX. URANUS", "X. NEPTUNE", "XI. KUIPER BELT"]
+              "IX. URANUS", "X. NEPTUNE", "XI. KUIPER BELT", "XII. HELIOPAUSE",
+              "XIII. OORT CLOUD"]
 
 NEPTUNE_AU = 30.07
 KUIPER_IN, KUIPER_OUT = 30, 50
@@ -204,7 +205,8 @@ with sync_playwright() as pw:
               "Kuiper belt XI")
 
     WANT = {"Asteroid Belt": (BELT_IN, BELT_OUT),
-            "Kuiper Belt": (KUIPER_IN, KUIPER_OUT)}
+            "Kuiper Belt": (KUIPER_IN, KUIPER_OUT),
+            "Oort Cloud": (2000, 100000)}
     regions = {r["name"]: r for r in pg.evaluate("()=>__dbg.regions")}
     if set(regions) != set(WANT):
         fails.append(f"the page draws regions {sorted(regions)}")
@@ -354,10 +356,13 @@ with sync_playwright() as pw:
                                  " year: rowYear.style.display !== 'none' && iYear.textContent.trim(),"
                                  " blank: [...document.querySelectorAll('#info dd')].filter(d=>"
                                  "!d.textContent.trim() && d.getClientRects().length).length})")
-                belt = "BELT" in chip
-                if not dy["year"]:
+                belt = "BELT" in chip or "OORT" in chip
+                edge = "HELIOPAUSE" in chip       # a boundary: no day and no year
+                if not dy["year"] and not edge:
                     fails.append(f"{chip}: no length of a year")
-                if bool(dy["day"]) == belt:
+                if edge and (dy["day"] or dy["year"]):
+                    fails.append(f"{chip}: a boundary with a day or a year")
+                if not edge and bool(dy["day"]) == belt:
                     fails.append(f"{chip}: the day row is {'shown' if belt else 'missing'}")
                 if dy["blank"]:
                     fails.append(f"{chip}: {dy['blank']} blank rows")
@@ -481,20 +486,28 @@ with sync_playwright() as pw:
     # Ceres, Vesta and Pluto sit on the line inside their belts, each at its
     # real fraction of the way across in both layouts, and each opens its panel.
     SMALL = {"Vesta": (2.362, 262.7, "525"), "Ceres": (2.766, 469.7, "939"),
-             "Pluto": (39.48, 1188.3, "2,377")}
+             "Pallas": (2.772, 256, "512"), "Pluto": (39.48, 1188.3, "2,377"),
+             "Haumea": (43.12, 1061, "2,120"), "Makemake": (45.50, 715, "1,430"),
+             "Eris": (67.69, 1163, "2,326"), "Sedna": (506, 500, "1,000")}
     REGION = {"Vesta": (BELT_IN, BELT_OUT), "Ceres": (BELT_IN, BELT_OUT),
-              "Pluto": (KUIPER_IN, KUIPER_OUT)}
+              "Pallas": (BELT_IN, BELT_OUT), "Pluto": (KUIPER_IN, KUIPER_OUT),
+              "Haumea": (KUIPER_IN, KUIPER_OUT), "Makemake": (KUIPER_IN, KUIPER_OUT)}
     for scale in ("lenient", "true"):
         pg.click('.chip:text-is("Overview")')
         if scale == "true":
             pg.click("#scaleBtn")
         pg.wait_for_timeout(2200)
         sm = {b["name"]: b for b in pg.evaluate("()=>__dbg.small")}
-        if list(sm) != ["Vesta", "Ceres", "Pluto"]:
-            fails.append(f"the belts hold {list(sm)}, expected Vesta, Ceres, Pluto")
+        if list(sm) != list(SMALL):
+            fails.append(f"the small bodies are {list(sm)}, expected {list(SMALL)}")
             continue
         for name, (au, rkm, _) in SMALL.items():
             b = sm[name]
+            if name not in REGION:
+                # on its own past the Kuiper belt: at its average distance at true scale
+                if scale == "true" and abs(b["trueX"] / sm["Pluto"]["trueX"] - au / 39.48) > 1e-6:
+                    fails.append(f"true scale: {name} is not at its distance")
+                continue
             lo, hi = REGION[name]
             want = b["beltIn"] + (au - lo) / (hi - lo) * (b["beltOut"] - b["beltIn"])
             if abs(b["x"] - want) > 1e-6:
@@ -516,11 +529,15 @@ with sync_playwright() as pw:
               f"{sm['Vesta']['fr']:.3f} and {sm['Ceres']['fr']:.3f} of its width, "
               f"Pluto inside the Kuiper belt at {sm['Pluto']['fr']:.3f}")
 
+    # the clicks run on the lenient line, where everything out to Sedna is on screen
+    if pg.evaluate("()=>__dbg.mTarget") == 1:
+        pg.click("#scaleBtn")
+        pg.wait_for_timeout(2200)
     for name, (au, rkm, diam) in SMALL.items():
         pg.click('.chip:text-is("Overview")')
-        pg.wait_for_timeout(1800)
+        pg.wait_for_timeout(3200)            # the zoom out from a close-up is a long one
         b = next(x for x in pg.evaluate("()=>__dbg.small") if x["name"] == name)
-        pg.mouse.click(b["sx"], pg.evaluate("()=>innerHeight*0.46"))
+        pg.mouse.click(b["sx"], b["y"])
         pg.wait_for_timeout(2000)
         got = pg.evaluate("()=>({n:document.querySelector('#iName').textContent,"
                           "d:document.querySelector('#iDiam').textContent,"
@@ -528,14 +545,14 @@ with sync_playwright() as pw:
                           "rows:[...document.querySelectorAll('#info dd')].filter(d=>d.offsetParent)"
                           ".map(d=>d.textContent.trim()), sel:__dbg.sel})")
         if got["n"] != name or got["sel"] != name:
-            fails.append(f"a click on {name} opened {got['n']!r}")
+            fails.append(f"a click on {name} opened {got['n']!r} (clicked {b['sx']:.1f},{b['y']:.1f}; now {pg.evaluate('()=>__dbg.small.map(q=>[q.name, Math.round(q.sx)])')}, z {pg.evaluate('()=>__dbg.camz')})")
             continue
         if diam not in got["d"]:
             fails.append(f"{name}: the panel's diameter reads {got['d']!r}")
         if not all(got["rows"]):
             fails.append(f"{name}: a blank row in the panel")
-        if "dwarf planet" not in got["x"] and not (name == "Pluto" and "not a planet" in got["x"]):
-            fails.append(f"{name}: the extra row is labeled {got['x']!r}")
+        if not got["x"].strip():
+            fails.append(f"{name}: the extra row has no label")
         g = pg.evaluate("()=>__dbg.ghost")
         if not g or g["kind"] != "moon" or abs(g["r"] / g["Rd"] - 1737.4 / rkm) > 1e-6:
             fails.append(f"{name}: the Moon is not drawn around it to scale ({g})")
@@ -615,17 +632,65 @@ with sync_playwright() as pw:
         fails.append(f"two right arrows from the overview land on {on!r}")
     else:
         print("  ok   the arrow keys walk the chips, Escape comes back")
-    # the ghost can be Jupiter
+    # the ghost can be Jupiter: a tenth of the Sun's width, set on its disc
     pg.click("#ghostBtn")
-    pg.evaluate("()=>document.querySelector('.chip[data-name=\"Saturn\"]').click()")
+    pg.evaluate("()=>document.querySelector('.chip[data-name=\"Sun\"]').click()")
     pg.wait_for_timeout(2500)
     gs = pg.evaluate("()=>window.__dbg")
     g = gs["ghost"]
-    if gs["ghostBody"] != "Jupiter" or not g or abs(g["r"] / gs["er"] - 69911 / 58232) > 0.01:
-        fails.append(f"the Jupiter ghost beside Saturn: {g}, {gs['er']}")
+    ok = gs["ghostBody"] == "Jupiter" and g and g["kind"] == "speck"
+    if ok:
+        sun_px = pg.evaluate("()=>{const e=__dbg; return e.sunPx}")
+        ok = sun_px is not None and abs(g["r"] / sun_px - 69911 / 695700) < 0.002
+    if not ok:
+        fails.append(f"the Jupiter ghost on the Sun: {g}")
     else:
-        print(f"  ok   the ghost turns to Jupiter, {69911 / 58232:.2f} times Saturn's width beside it")
+        print(f"  ok   the ghost turns to Jupiter, a tenth of the Sun's width on its disc")
     pg.click("#ghostBtn")
+
+    # the new neighbors: the Trojans at Jupiter, the heliopause at 120 au,
+    # Halley on its orbit today, and the Oort cloud past everything
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(1800)
+    ex = pg.evaluate("()=>__dbg.extra")
+    jx = pg.evaluate("()=>{const p=__dbg; return null}")
+    t = ex["trojans"]
+    if not (len(t) == 2 and abs(t[0]["x"] - t[1]["x"]) < 1e-6 and t[0]["y"] < pg.evaluate("()=>innerHeight*0.46") < t[1]["y"]):
+        fails.append(f"the Trojans are not above and below Jupiter: {t}")
+    h = ex["halley"]
+    if not (0.586 <= h["r"] <= 35.1 and h["a"] <= h["x"] <= h["b"]):
+        fails.append(f"Halley today at {h['r']:.2f} au, drawn outside its orbit")
+    pg.click("#orbBtn")
+    pg.wait_for_timeout(1500)
+    o = pg.evaluate("()=>{const d=__dbg; const j=d.orbit.at.find(a=>a.name==='Jupiter'); return {j, t: d.extra.trojans}}")
+    pg.click("#orbBtn")
+    import math as _m
+    jx0 = pg.evaluate("()=>innerWidth/2")
+    cx = o["j"]["pos"][0]
+    ang = lambda q: _m.atan2(q[1] - pg.evaluate("()=>innerHeight*0.46"), q[0] - jx0)
+    pg.click("#lineBtn")
+    pg.wait_for_timeout(1300)
+    if len(o["t"]) != 2 or o["t"][0]["x"] == o["t"][1]["x"]:
+        fails.append("with the orbits running the Trojans do not leave the line")
+    pg.click("#scaleBtn")
+    pg.wait_for_timeout(2500)
+    pg.evaluate("()=>document.querySelector('.chip[data-name=\"Heliopause\"]').click()")
+    pg.wait_for_timeout(2500)
+    hx = pg.evaluate("()=>__dbg.extra.helioX")
+    sb = pg.evaluate("()=>({w: innerWidth})")
+    nm = pg.evaluate("()=>document.querySelector('#iName').textContent")
+    if nm != "Heliopause" or abs(hx - sb["w"] / 2) > 2:
+        fails.append(f"the heliopause chip opens {nm!r}, line at {hx}")
+    pg.evaluate("()=>document.querySelector('.chip[data-name=\"Oort Cloud\"]').click()")
+    pg.wait_for_timeout(3000)
+    oo = pg.evaluate("()=>__dbg.extra.oort")
+    rr = pg.evaluate("()=>__dbg.regions.find(r=>r.name==='Oort Cloud')")
+    if abs(rr["trueOut"] / rr["trueIn"] - 50) > 1e-6 or abs(rr["trueIn"] / pg.evaluate("()=>__dbg.small.find(b=>b.name==='Pluto').trueX") - 2000 / 39.48) > 1e-6:
+        fails.append(f"true scale: the Oort cloud's edges are not 2,000 and 100,000 au apart in proportion")
+    pg.click("#scaleBtn")
+    pg.wait_for_timeout(1500)
+    print("  ok   the Trojans sit with Jupiter and leave the line with the orbits running; Halley rides its orbit; "
+          "the heliopause and the Oort cloud open from their chips")
 
     if errs:
         fails.append(f"javascript errors: {errs}")
