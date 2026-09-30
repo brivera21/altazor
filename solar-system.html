@@ -130,7 +130,10 @@
       and New Horizons results. Pallas: VLT/SPHERE (Marsset and others, 2020). Haumea, Makemake, Eris and
       Sedna: the stellar occultations and moon orbits summarized on Wikipedia (Ortiz and others, 2012 and 2017).
       Jupiter's Trojans: the Minor Planet Center's count and NASA's Lucy pages. The heliopause: NASA's Voyager
-      pages. Halley's Comet: JPL's orbital elements, its position today worked out from them. The Oort cloud's
+      pages. The frost line: <a href="https://doi.org/10.1143/PTPS.70.35">Hayashi (1981)</a>; how it moved,
+      <a href="https://arxiv.org/abs/astro-ph/0602217">Lecar and others (2006)</a> and
+      <a href="https://doi.org/10.1111/j.1745-3933.2012.01290.x">Martin and Livio (2012)</a>; the divide in the
+      meteorites, <a href="https://doi.org/10.1073/pnas.1704461114">Kruijer and others (2017)</a>. Halley's Comet: JPL's orbital elements, its position today worked out from them. The Oort cloud's
       edges are estimates, from NASA. A day is sunrise to sunrise; a year is one orbit of the Sun, in Earth time.
     </details>
   </div>
@@ -435,6 +438,24 @@
     disc: "Predicted in the 1950s and 60s once the solar wind was understood; found where it is by Voyager 1 in 2012",
     probe: "Voyager 1 and Voyager 2, launched in 1977"
   };
+  // The frost line: where the disk the planets grew from was cold enough for
+  // water to freeze. Not a body and not there now; a boundary in the young
+  // solar system, drawn where Hayashi (1981) put it. Where it really sat, and
+  // how it moved, are from disk models and from meteorites.
+  const FROST = {
+    name: "Frost Line", type: "Where water froze as the planets formed, not a body", au: 2.7, noGhost: true, special: true,
+    labels: { diam: "What it divides", area: "Why it matters", mass: "Temperature",
+              moons: "Near it", made: "What freezes there", extra: "It moved" },
+    dist: "About 2.7 au (400 million km) while the planets were forming, in the middle of what is now the asteroid belt. Ceres, at 2.77 au, sits just outside it",
+    diam: "Inside it the planets and asteroids are rock and metal: Mercury, Venus, Earth, Mars and the inner belt. Outside it they carry ice: the outer belt, the cores of the giant planets, their icy moons, and the comets",
+    area: "Beyond it water was solid, and ice added several times more material to build with than rock and metal alone. That is thought to be why the giant planets grew outside it and only small rocky ones inside",
+    mass: "About 150 to 170 K (minus 120 to minus 100 °C), where water vapor in the thin gas of the disk froze straight to ice",
+    moons: "Ceres, with water ice and salts under its crust. Across the belt, dry stony asteroids fill the inner part and dark, water-bearing ones the outer part",
+    made: "Water. Carbon monoxide, nitrogen and the other ices that freeze at lower temperatures each have a line of their own, farther out",
+    extra: "The line was not fixed. As the disk cooled and thinned it drifted inward: to 1.6 to 1.8 au in one model, inside Earth's orbit in others, which is hard to square with how little water Earth has",
+    disc: "Chushiro Hayashi put it at 2.7 au in 1981, where the young disk would have cooled to 170 K. Meteorites back a divide: the carbon-rich, water-bearing kinds formed farther out and were kept apart from the dry ones from about a million years on, most likely by the young Jupiter",
+    probe: "Pioneer 10 crossed its place in 1972, on the way through the belt. Dawn, orbiting Ceres from 2015, found the ice and the salts just beyond it"
+  };
   // The Oort cloud: a shell of comets, never seen, inferred from the orbits
   // of long-period comets. Its edges are estimates and vary by a factor of a
   // few between models; these are NASA's round figures.
@@ -619,6 +640,8 @@
       if (au <= pts[i][0]) { const [a0, x0] = pts[i - 1], [a1, x1] = pts[i]; return x0 + (au - a0) / (a1 - a0) * (x1 - x0); }
     return pts[pts.length - 1][1];
   }
+  FROST.xLen = auToLen(FROST.au); FROST.xTrue = FROST.au * AU * KM2U;
+  FROST.lenR = 1; FROST.rTrue = 1e-9;
   HALLEY.xLenIn = auToLen(HALLEY.auIn); HALLEY.xLenOut = auToLen(HALLEY.auOut);
   HALLEY.xTrueIn = HALLEY.auIn * AU * KM2U; HALLEY.xTrueOut = HALLEY.auOut * AU * KM2U;
   HALLEY.edgeIn = () => mix(HALLEY.xLenIn + shifted(HALLEY.xLenIn), HALLEY.xTrueIn, ease(m));
@@ -692,6 +715,10 @@
     else if (obj === TROJANS) {
       // Jupiter in the middle, both swarms in view
       camT.c = px(JUPITER); camT.z = Math.min(H, W) * 0.09 / pr(JUPITER);
+    }
+    else if (obj === FROST) {
+      // the whole belt around it, and Mars and Jupiter on either side
+      camT.c = px(FROST); camT.z = W / mix(LEN_GAP * 2.6, 5.2 * AU * KM2U, mTarget);
     }
     else if (obj === HELIO) {
       camT.c = px(HELIO); camT.z = W / mix(LEN_GAP * 2.2, 90 * AU * KM2U, mTarget);
@@ -1125,9 +1152,9 @@
   }
   addChip("Overview", null);
   addChip("I. SUN", SUN);
-  const ORDER = [...PLANETS.slice(0, BELT_SLOT), BELT,
+  const ORDER = [...PLANETS.slice(0, BELT_SLOT), BELT, FROST,
                  ...PLANETS.slice(BELT_SLOT), KUIPER, HELIO, OORT];
-  const NUMERALS = ["II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII"];
+  const NUMERALS = ["II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV"];
   ORDER.forEach((o, i) => addChip(NUMERALS[i] + ". " + o.name.toUpperCase(), o));
 
   const scaleBtn = document.getElementById("scaleBtn");
@@ -1167,6 +1194,7 @@
             Math.abs(e.clientY - y0) < beltHalfHeight()) hit = g;
       }
       if (Math.abs(sx(px(HELIO)) - mx) < 10 && Math.abs(e.clientY - y0) < beltHalfHeight()) hit = HELIO;
+      if (Math.abs(sx(px(FROST)) - mx) < 6 && Math.abs(e.clientY - y0) < beltHalfHeight() + 22) hit = FROST;
       { const hy = y0 + halleyY();
         if (mx > sx(HALLEY.edgeIn()) - 4 && mx < sx(HALLEY.edgeOut()) + 4 && Math.abs(e.clientY - hy) < 6) hit = HALLEY;
         if (Math.hypot(sx(px(HALLEY)) - mx, e.clientY - hy) < 12) hit = HALLEY; }
@@ -1668,6 +1696,27 @@
       ctx.fillText(n, vx + 6, vy + 3);
     }
   }
+  // The frost line, straight across the belt, labeled just inside the top of
+  // the curtain so it stays clear of the belt's own name above it
+  function drawFrost() {
+    const x = sx(px(FROST)), hh = beltHalfHeight();
+    if (x < -80 || x > W + 80) return;
+    if (crowded() && selected !== FROST) return;
+    const hot = selected === FROST;
+    ctx.strokeStyle = hot ? "rgba(88,166,255,0.9)" : "rgba(200,225,255,0.45)";
+    ctx.lineWidth = 1.2; ctx.setLineDash([3, 4]);
+    ctx.beginPath(); ctx.moveTo(x, y0 - hh + 38); ctx.lineTo(x, y0 + hh); ctx.stroke();
+    ctx.setLineDash([]);
+    const ty = y0 - hh + 14;
+    ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillStyle = hot ? "#58a6ff" : "rgba(210,225,250,0.95)";
+    ctx.fillText("frost line", x, ty);
+    ctx.font = "10px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.fillStyle = hot ? "rgba(150,195,245,0.95)" : "rgba(180,195,220,0.85)";
+    ctx.textAlign = "right"; ctx.fillText("rock ←", x - 4, ty + 15);
+    ctx.textAlign = "left"; ctx.fillText("→ ice", x + 4, ty + 15);
+  }
   // Halley: its orbit as a faint bar well under the line, the nucleus where it
   // is today, and a short tail pointing away from the Sun
   function halleyY() { return beltHalfHeight() * 0.62; }
@@ -1927,7 +1976,7 @@
     const orbiting = orbDays > 0;
     drawOrbits();
     drawSun();
-    if (!orbiting) { for (const g of REGIONS) drawBelt(g); drawHelio();
+    if (!orbiting) { for (const g of REGIONS) drawBelt(g); drawFrost(); drawHelio();
       if (!crowded() || selected === HALLEY) drawHalley();
       for (const b of SMALL) if (!crowded() || b === selected) drawSmall(b); }
     drawTrojans();
@@ -1962,7 +2011,7 @@
         region: b.region ? b.region.name : null, beltIn: b.region ? b.region.edgeIn() : null, beltOut: b.region ? b.region.edgeOut() : null, y: y0 + smallDy(b) })),
       ghost: ghostState, charon: charonState, ghostBody: ghost.name,
       sunPx: sunR() * cam.z,
-      extra: { trojans: trojanSpots(), helioX: sx(px(HELIO)), halley: { r: HALLEY.now.r, x: sx(px(HALLEY)), y: y0 + halleyY(), a: sx(HALLEY.edgeIn()), b: sx(HALLEY.edgeOut()) },
+      extra: { trojans: trojanSpots(), helioX: sx(px(HELIO)), frostX: sx(px(FROST)), ceresX: sx(px(CERES)), sunX: sx(0), halley: { r: HALLEY.now.r, x: sx(px(HALLEY)), y: y0 + halleyY(), a: sx(HALLEY.edgeIn()), b: sx(HALLEY.edgeOut()) },
                pallasY: y0 + smallDy(PALLAS), oort: { xIn: OORT.edgeIn(), xOut: OORT.edgeOut() } },
       orbit: { days: orbDays, run: orbRun, fade: orbFade, speed: orbSpeed,
                at: PLANETS.map(p => ({ name: p.name, th: theta(p), pos: ppos(p) })) },
