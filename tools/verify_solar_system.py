@@ -20,9 +20,11 @@ BELT_IN, BELT_OUT = 2.1, 3.3
 MARS_AU, JUPITER_AU = 1.524, 5.204
 
 WANT_CHIPS = ["Overview", "I. SUN", "II. MERCURY", "III. VENUS", "IV. EARTH",
-              "V. MARS", "VI. ASTEROID BELT", "VII. JUPITER", "VIII. SATURN",
-              "IX. URANUS", "X. NEPTUNE", "XI. KUIPER BELT", "XII. HELIOPAUSE",
-              "XIII. OORT CLOUD"]
+              "V. MARS", "VI. ASTEROID BELT", "VII. FROST LINE", "VIII. JUPITER",
+              "IX. SATURN", "X. URANUS", "XI. NEPTUNE", "XII. KUIPER BELT",
+              "XIII. HELIOPAUSE", "XIV. OORT CLOUD"]
+# the frost line in the young solar system (Hayashi, 1981), and Ceres beside it
+FROST_AU, CERES_AU = 2.7, 2.77
 
 NEPTUNE_AU = 30.07
 KUIPER_IN, KUIPER_OUT = 30, 50
@@ -201,8 +203,8 @@ with sync_playwright() as pw:
     if chips != WANT_CHIPS:
         fails.append(f"the chips read {chips}")
     else:
-        print(f"  ok   {len(chips)} chips, asteroid belt VI, Neptune X, "
-              "Kuiper belt XI")
+        print(f"  ok   {len(chips)} chips, asteroid belt VI, the frost line VII, "
+              "Neptune XI, Kuiper belt XII")
 
     WANT = {"Asteroid Belt": (BELT_IN, BELT_OUT),
             "Kuiper Belt": (KUIPER_IN, KUIPER_OUT),
@@ -357,7 +359,7 @@ with sync_playwright() as pw:
                                  " blank: [...document.querySelectorAll('#info dd')].filter(d=>"
                                  "!d.textContent.trim() && d.getClientRects().length).length})")
                 belt = "BELT" in chip or "OORT" in chip
-                edge = "HELIOPAUSE" in chip       # a boundary: no day and no year
+                edge = "HELIOPAUSE" in chip or "FROST" in chip   # a boundary: no day and no year
                 if not dy["year"] and not edge:
                     fails.append(f"{chip}: no length of a year")
                 if edge and (dy["day"] or dy["year"]):
@@ -691,6 +693,36 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(1500)
     print("  ok   the Trojans sit with Jupiter and leave the line with the orbits running; Halley rides its orbit; "
           "the heliopause and the Oort cloud open from their chips")
+
+    # the frost line: across the belt at 2.7 au, just inside Ceres, on
+    # either layout, and a click on the line opens it
+    for mode in ("lenient", "true"):
+        if mode == "true":
+            pg.click("#scaleBtn"); pg.wait_for_timeout(2500)
+        pg.evaluate("()=>document.querySelector('.chip[data-name=\"Frost Line\"]').click()")
+        pg.wait_for_timeout(2500)
+        ex = pg.evaluate("()=>__dbg.extra")
+        belt = pg.evaluate("()=>__dbg.regions.find(r=>r.name==='Asteroid Belt')")
+        nm = pg.evaluate("()=>document.querySelector('#iName').textContent")
+        w = pg.evaluate("()=>innerWidth")
+        if nm != "Frost Line" or abs(ex["frostX"] - w / 2) > 2 or not ex["frostX"] < ex["ceresX"]:
+            fails.append(f"{mode}: the frost line chip opens {nm!r}, line at {ex['frostX']}, Ceres at {ex['ceresX']}")
+        if mode == "true":
+            sun = ex["sunX"]
+            ratio = (ex["frostX"] - sun) / (ex["ceresX"] - sun) if sun is not None else None
+            if ratio is not None and abs(ratio - FROST_AU / CERES_AU) > 0.002:
+                fails.append(f"true scale: the frost line sits at {ratio:.4f} of Ceres's distance")
+            pg.click("#scaleBtn"); pg.wait_for_timeout(1500)
+    pg.keyboard.press("Escape"); pg.wait_for_timeout(1800)
+    fx = pg.evaluate("()=>__dbg.extra.frostX")
+    pg.mouse.click(fx, pg.evaluate("()=>innerHeight*0.46") - 30)
+    pg.wait_for_timeout(600)
+    nm = pg.evaluate("()=>document.querySelector('#iName').textContent")
+    if nm != "Frost Line":
+        fails.append(f"a click on the frost line opens {nm!r}")
+    else:
+        print("  ok   the frost line crosses the belt just inside Ceres on either layout, and opens from its chip and from a click")
+    pg.keyboard.press("Escape"); pg.wait_for_timeout(600)
 
     if errs:
         fails.append(f"javascript errors: {errs}")
