@@ -990,10 +990,49 @@ QUEEN[:0] = _start_entries("queen")
 KING_P[:0] = _start_entries("king")
 
 
+# ---------------------------------------------------------------- LESSONS
+# Lessons from games, in the player's own words, each on the position it
+# turns on. The text is supplied and kept as written: it runs past the
+# 60-word caption and speaks in the imperative, which the term pages do not.
+# A body line starting "- " is a list item; one starting "|" is a move line,
+# here the game from the first move.
+LESSONS = [
+    {"name": "Losing lost material on one's own terms",
+     "tagline": "What to do with a pawn or piece that can't be saved.",
+     "moves": "e4 e5 Nf3 Nc6 Bc4 Nf6 d3 Bb4+ c3 Ba5 O-O O-O Be3 d5 exd5 Nxd5 Bxd5 Qxd5 "
+              "b4 Bb6 c4 Qe6 c5 Nxb4 cxb6 axb6 Nc3 c5 Nb5 Qe7 a3 Nd5 Bd2 Bd7 Nc3 Nf6 Re1",
+     "turn": "magodehoz against Altazor21, Chess.com, October 2026, after 19.Re1, Black to move",
+     "marks": marks(plan=["d5"], zone=["e2", "e3", "e4", "e6"], subject=["e1", "e7"], target=["e5"]),
+     "legend": [["target", "the pawn on e5, already lost"],
+                ["subject", "White's rook and Black's queen, on the same file"],
+                ["zone", "the e-file the pawn keeps closed"],
+                ["plan", "where the knight stood before 18...Nf6"]],
+     "body": [
+         "Once a pawn or piece can't be saved, stop looking for defenses and choose the way of "
+         "losing it that costs the least. A rescue attempt that fails can lose the same material "
+         "plus a tempo, an open line, or a weaker position.",
+         "Questions to ask when something is lost:",
+         "- What will the capturing piece attack afterward?",
+         "- Which lines open when it's gone?",
+         "- Can I get something back for it (activity, a tempo, a better pawn structure)?",
+         "Example: magodehoz vs Altazor21, Chess.com, Oct 2026 (I was Black).",
+         "|1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. d3 Bb4+ 5. c3 Ba5 6. O-O O-O 7. Be3 d5 8. exd5 Nxd5 "
+         "9. Bxd5 Qxd5 10. b4 Bb6 11. c4 Qe6 12. c5 Nxb4 13. cxb6 axb6 14. Nc3 c5 15. Nb5 Qe7 "
+         "16. a3 Nd5 17. Bd2 Bd7 18. Nc3 Nf6 19. Re1 e4 20. Nxe4 Nxe4 21. Rxe4",
+         "After 19.Re1, my e5 pawn was already lost. Stockfish's top six replies for Black all drop "
+         "it, to Nxe5 or Bf4xe5, at about +3.6 to +3.9 for White. I played 19...e4, which lost the "
+         "same pawn on worse terms (about +4.1): after 20.Nxe4 Nxe4 21.Rxe4, the rook took on e4 and "
+         "hit my queen on e7 along the now-open e-file, so White gained a tempo. Letting White take "
+         "on e5 would have kept the file closed in front of my queen.",
+         "The real error was 18...Nf6. On d5 the knight covered f4 and kept White's bishop out, and "
+         "18...Nxc3 19.Bxc3 f6 would have supported e5 with a pawn.",
+     ]},
+]
+
 PAGES = {
     "pawn": PAWN, "knight": KNIGHT_P, "bishop": BISHOP, "rook": ROOK,
     "queen": QUEEN, "king": KING_P, "tactics": TACTICS, "checkmates": CHECKMATES,
-    "fundamental": FUNDAMENTAL,
+    "fundamental": FUNDAMENTAL, "lessons": LESSONS,
     "opening-terms.html": OPENING_ADD, "middlegame-terms.html": MIDDLEGAME_ADD,
     "endgame-terms.html": ENDGAME_ADD,
 }

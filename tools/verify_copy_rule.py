@@ -51,8 +51,9 @@ ROOT = Path(__file__).resolve().parent.parent
 INDEXES = {"index.html", "library.html", "chess.html", "film.html",
            "science-fiction.html", "elsewhere.html", "notes.html"}
 
-# Pages that are writing rather than a diagram with a caption.
-PROSE = {"hello.html", "good-of-the-internet.html"}
+# Pages that are writing rather than a diagram with a caption. Chess Lessons
+# is the player's own write-up of each game, kept as written beside its board.
+PROSE = {"hello.html", "good-of-the-internet.html", "lessons.html"}
 
 # Reference material: cited below the description, outside its word budget.
 # It may not appear above the diagram.

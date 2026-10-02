@@ -119,7 +119,11 @@ for key, terms in DATA.items():
         check({k for k, _ in t["legend"]} == used or ("numbers" in t and {k for k, _ in t["legend"]} <= KINDS),
               f"{fname} / {d['name']}: the legend names exactly the kinds used")
         words = len(" ".join([t["tagline"]] + [p for p in t["body"] if not p.startswith("|")]).split())
-        check(words <= 60, f"{fname} / {d['name']}: {words} words, a caption")
+        if key == "lessons":
+            # a lesson is the player's own text, kept as written
+            print(f"  --   {fname} / {d['name']}: {words} words, supplied text, no caption limit")
+        else:
+            check(words <= 60, f"{fname} / {d['name']}: {words} words, a caption")
         check("—" not in json.dumps(t, ensure_ascii=False), f"{fname} / {d['name']}: no em dashes")
         b = position(t, d)
         if b is not None:
@@ -128,7 +132,21 @@ for key, terms in DATA.items():
             check(ok, f"{fname} / {d['name']}: a legal position ({b.status()!r})" if not ok else
                   f"{fname} / {d['name']}: a legal position")
             for p in t["body"]:
-                if p.startswith("|"):
+                if p.startswith("|") and key == "lessons":
+                    # the whole game from move one, through the position shown
+                    try:
+                        g = chess.Board()
+                        seen = False
+                        for tok in p[1:].split():
+                            if re.fullmatch(r"\d+\.", tok):
+                                continue
+                            g.push_san(tok)
+                            seen = seen or g.board_fen() == t["fen"]
+                        ok = seen
+                    except ValueError:
+                        ok = False
+                    check(ok, f"{fname} / {d['name']}: the game replays from move one, through the board shown")
+                elif p.startswith("|"):
                     try:
                         replay(b, p[1:])
                         ok = True
@@ -483,6 +501,8 @@ fund = re.search(r"<h2>Fundamentals</h2>(.*?)<h2>Openings</h2>", idx, re.S).grou
 for f, t, col, *_ in NEW:
     if col == "Fundamentals":
         check(f'href="{f}">{t}<' in fund, f"{t} is listed under Fundamentals")
+misc = re.search(r"<h2>Miscellaneous</h2>(.*?)</div>", idx, re.S).group(1)
+check('href="lessons.html">Lessons<' in misc, "Lessons is listed under Miscellaneous")
 end = re.search(r"<h2>Endgames</h2>(.*?)</div>", idx, re.S).group(1)
 check('href="checkmates.html">Checkmates<' in end, "Checkmates is listed under Endgames")
 intu = (ROOT / "intuition.html").read_text(encoding="utf-8")

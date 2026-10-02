@@ -68,6 +68,7 @@ NEW = [
     ("king.html", "King", "Fundamentals", "The king in attack, defense and the ending.", "king"),
     ("tactics.html", "Tactics", "Fundamentals", "Double attacks, pins and the rest, each on a position.", "tactics"),
     ("checkmates.html", "Checkmates", "Endgames", "Named mating patterns, each on a position.", "checkmates"),
+    ("lessons.html", "Lessons", "Miscellaneous", "Lessons from games, each on the position it turns on.", "lessons"),
 ]
 
 # which pages share a navigation row
@@ -75,6 +76,7 @@ NAV_GROUPS = [
     ["intuition.html", "fundamental-terms.html", "pawn.html", "knight.html", "bishop.html",
      "rook.html", "queen.html", "king.html", "tactics.html"],
     ["opening-terms.html", "middlegame-terms.html", "endgame-terms.html", "checkmates.html"],
+    ["lessons.html"],
 ]
 TITLES = {f: t for f, t, *_ in PAGES}
 TITLES.update({f: t for f, t, *_ in NEW})
@@ -165,6 +167,8 @@ h1 { margin:0 0 14px; font-size:26px; }
 .tagline { color:var(--muted); margin:0 0 16px; }
 .text p { margin:0 0 14px; color:#d4d4d4; }
 .moves { font-variant-numeric:tabular-nums; }
+.text ul { margin:-6px 0 14px; padding-left:22px; color:#d4d4d4; }
+.text li { margin:0 0 4px; }
 
 footer.site { margin-top:60px; padding-top:18px; border-top:1px solid var(--line);
   font-size:13px; color:var(--muted); }
@@ -203,14 +207,14 @@ __NAV__</nav>
 <div class="layout">
 <div class="termcol">
   <div class="chips" id="chips" role="tablist" aria-orientation="vertical"></div>
-  <span class="keys">Arrow keys step through the terms.</span>
+  <span class="keys">Arrow keys step through __NOUN__.</span>
 </div>
 
 <div class="main">
 <div class="boardcol">
   <div class="board-grid">
     <div class="ranks" id="ranks"></div>
-    <div class="board" id="board" role="img" aria-label="The position for the selected term"></div>
+    <div class="board" id="board" role="img" aria-label="The position for the selected __ONE__"></div>
     <div class="files" id="files"></div>
   </div>
   <p class="turn" id="turn"></p>
@@ -308,7 +312,17 @@ function render(index) {
 
   const body = document.getElementById("body");
   body.textContent = "";
+  let list = null;
   term.body.forEach(par => {
+    // lines starting "- " gather into one list
+    if (par.startsWith("- ")) {
+      if (!list) { list = document.createElement("ul"); body.appendChild(list); }
+      const li = document.createElement("li");
+      li.textContent = par.slice(2);
+      list.appendChild(li);
+      return;
+    }
+    list = null;
     const p = document.createElement("p");
     if (par.startsWith("|")) { p.className = "moves"; p.textContent = par.slice(1); }
     else p.textContent = par;
@@ -414,6 +428,8 @@ def write(fname, title, section, desc, block):
                 .replace("__DESC__", desc)
                 .replace("__SECTION__", section)
                 .replace("__NAV__", nav_for(fname))
+                .replace("__NOUN__", "the lessons" if fname == "lessons.html" else "the terms")
+                .replace("__ONE__", "lesson" if fname == "lessons.html" else "term")
                 .replace("__TERMS__", block))
     (ROOT / fname).write_text(html, encoding="utf-8")
     return html
