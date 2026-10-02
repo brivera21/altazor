@@ -1062,6 +1062,30 @@ LESSONS = [
          "a-file. The ...d5 break is still available later once the pieces are set up.",
          "John Nunn's shorthand for the underlying idea: \"loose pieces drop off.\"",
      ]},
+    {"name": "A threat can be answered with a counter-threat",
+     "tagline": "What to look for before retreating an attacked piece.",
+     "moves": "e4 e5 Nf3 Nc6 Bc4 Nf6 d3 Bb4+ c3 Ba5 O-O O-O Be3 d5 exd5 Nxd5 Bxd5 Qxd5 b4",
+     "turn": "magodehoz against Altazor21, Chess.com, October 2026, after 10.b4, Black to move",
+     "marks": marks(subject=["b4"], zone=["f3"], plan=["e4"], target=["a5"]),
+     "legend": [["target", "the bishop on a5, attacked"],
+                ["subject", "the pawn on b4 that attacks it"],
+                ["plan", "10...e4, the counter-threat"],
+                ["zone", "the knight on f3 it attacks"]],
+     "body": [
+         "When a piece is attacked, the obvious move is to retreat it. Before doing that, look for a "
+         "move that creates a threat of your own. If your threat is equal or bigger, your opponent "
+         "has to answer it first, and the original threat often loses its force.",
+         "Example: magodehoz vs Altazor21, move 10.",
+         "After 10.b4, White attacked my bishop on a5. I retreated with 10...Bb6, and White followed "
+         "with c4 and c5 to hit my queen and then trap the bishop (Stockfish: +2.00 for White).",
+         "The better move was 10...e4, attacking the knight on f3:",
+         "- If 11.dxe4, the d-file opens and Black trades queens with 11...Qxd1 12.Rxd1, then saves "
+         "the bishop with 12...Bb6. With the queens off, White's c4 no longer comes with tempo, so "
+         "the trap doesn't work. Black gives up a pawn but keeps the bishop (Stockfish: about +0.8).",
+         "- If 11.bxa5, Black takes the knight with 11...exf3, so the bishop is not lost for nothing.",
+         "When the counter-threat is played in place of the expected reply, it's also called a "
+         "zwischenzug (in-between move).",
+     ]},
 ]
 
 PAGES = {
