@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Knight &middot; Altazor</title>
-<meta name="description" content="Where a knight sees most, and where it belongs.">
+<title>Lessons &middot; Altazor</title>
+<meta name="description" content="Lessons from games, each on the position it turns on.">
 <style>
 :root { --bg:#121212; --panel:#1a1a1a; --text:#e6e6e6; --muted:#9a9a9a;
         --line:#2b2b2b; --accent:#58a6ff;
@@ -105,27 +105,20 @@ footer.site a:hover { color:var(--accent); }
 <header class="site">
   <a class="brand" href="index.html">ALTAZOR</a>
   <nav class="site"><a href="chess.html">&larr; Chess</a>
-  <a href="intuition.html">Board Intuition</a>
-  <a href="fundamental-terms.html">Fundamental Terms</a>
-  <a href="pawn.html">Pawn</a>
-  <a href="bishop.html">Bishop</a>
-  <a href="rook.html">Rook</a>
-  <a href="queen.html">Queen</a>
-  <a href="king.html">King</a>
-  <a href="tactics.html">Tactics</a></nav>
+</nav>
 </header>
-<h1>Knight</h1>
+<h1>Lessons</h1>
 <div class="layout">
 <div class="termcol">
   <div class="chips" id="chips" role="tablist" aria-orientation="vertical"></div>
-  <span class="keys">Arrow keys step through the terms.</span>
+  <span class="keys">Arrow keys step through the lessons.</span>
 </div>
 
 <div class="main">
 <div class="boardcol">
   <div class="board-grid">
     <div class="ranks" id="ranks"></div>
-    <div class="board" id="board" role="img" aria-label="The position for the selected term"></div>
+    <div class="board" id="board" role="img" aria-label="The position for the selected lesson"></div>
     <div class="files" id="files"></div>
   </div>
   <p class="turn" id="turn"></p>
@@ -140,214 +133,54 @@ footer.site a:hover { color:var(--accent); }
 </div>
 </div>
 
-<footer class="site"><a href="index.html">Altazor</a> &middot; <a href="chess.html">Chess</a> &middot; Fundamentals</footer>
+<footer class="site"><a href="index.html">Altazor</a> &middot; <a href="chess.html">Chess</a> &middot; Miscellaneous</footer>
 </div>
 
 <script>
 const TERMS = [
   {
-    "name": "The knights alone",
-    "tagline": "Their starting squares, with nothing else on the board.",
-    "fen": "1n4n1/8/8/8/8/8/8/1N4N1",
-    "turn": "",
+    "name": "Losing lost material on one's own terms",
+    "tagline": "What to do with a pawn or piece that can't be saved.",
+    "fen": "r4rk1/1p1bqppp/1p3n2/2p1p3/8/P1NP1N2/3B1PPP/R2QR1K1",
+    "turn": "magodehoz against Altazor21, Chess.com, October 2026, after 19.Re1, Black to move",
     "marks": {
-      "a3": "zone",
-      "a6": "zone",
-      "c3": "plan",
-      "c6": "plan",
-      "d2": "zone",
-      "d7": "zone",
       "e2": "zone",
-      "e7": "zone",
-      "f3": "plan",
-      "f6": "plan",
-      "h3": "zone",
-      "h6": "zone",
-      "b1": "subject",
-      "b8": "subject",
-      "g1": "subject",
-      "g8": "subject"
+      "e3": "zone",
+      "e4": "zone",
+      "e6": "zone",
+      "d5": "plan",
+      "e5": "target",
+      "e1": "subject",
+      "e7": "subject"
     },
     "legend": [
       [
+        "target",
+        "the pawn on e5, already lost"
+      ],
+      [
         "subject",
-        "the knights, where they start"
+        "White's rook and Black's queen, on the same file"
       ],
       [
         "zone",
-        "the squares they see"
+        "the e-file the pawn keeps closed"
       ],
       [
         "plan",
-        "where each most often goes first"
+        "where the knight stood before 18...Nf6"
       ]
     ],
     "body": [
-      "The four knights alone. Each sees three squares. Blue is where each most often goes first: f3 and c3 for White, f6 and c6 for Black, nine times in ten or more when it moves in the first three moves."
-    ]
-  },
-  {
-    "name": "The knights in the full setup",
-    "tagline": "The same squares with every other piece in place.",
-    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",
-    "turn": "",
-    "marks": {
-      "a3": "zone",
-      "a6": "zone",
-      "c3": "plan",
-      "c6": "plan",
-      "d2": "zone",
-      "d7": "zone",
-      "e2": "zone",
-      "e7": "zone",
-      "f3": "plan",
-      "f6": "plan",
-      "h3": "zone",
-      "h6": "zone",
-      "b1": "subject",
-      "b8": "subject",
-      "g1": "subject",
-      "g8": "subject"
-    },
-    "legend": [
-      [
-        "subject",
-        "the knights, where they start"
-      ],
-      [
-        "zone",
-        "the squares they see"
-      ],
-      [
-        "plan",
-        "where each most often goes first"
-      ]
-    ],
-    "body": [
-      "The same knights in the full setup. Nothing blocks a knight, so each still sees its three squares; the one on the second rank holds its own pawn, which it defends. With the pawns, they are the only men that can move at once."
-    ]
-  },
-  {
-    "name": "Knight mobility",
-    "tagline": "How many squares a knight attacks from each square.",
-    "fen": "8/8/8/8/8/8/8/8",
-    "turn": "",
-    "marks": {},
-    "legend": [
-      [
-        "subject",
-        "more squares"
-      ],
-      [
-        "zone",
-        "fewer"
-      ]
-    ],
-    "body": [
-      "Two in the corner, eight in the center. This is why the rim is dim."
-    ],
-    "numbers": {
-      "a1": 2,
-      "a2": 3,
-      "a3": 4,
-      "a4": 4,
-      "a5": 4,
-      "a6": 4,
-      "a7": 3,
-      "a8": 2,
-      "b1": 3,
-      "b2": 4,
-      "b3": 6,
-      "b4": 6,
-      "b5": 6,
-      "b6": 6,
-      "b7": 4,
-      "b8": 3,
-      "c1": 4,
-      "c2": 6,
-      "c3": 8,
-      "c4": 8,
-      "c5": 8,
-      "c6": 8,
-      "c7": 6,
-      "c8": 4,
-      "d1": 4,
-      "d2": 6,
-      "d3": 8,
-      "d4": 8,
-      "d5": 8,
-      "d6": 8,
-      "d7": 6,
-      "d8": 4,
-      "e1": 4,
-      "e2": 6,
-      "e3": 8,
-      "e4": 8,
-      "e5": 8,
-      "e6": 8,
-      "e7": 6,
-      "e8": 4,
-      "f1": 4,
-      "f2": 6,
-      "f3": 8,
-      "f4": 8,
-      "f5": 8,
-      "f6": 8,
-      "f7": 6,
-      "f8": 4,
-      "g1": 3,
-      "g2": 4,
-      "g3": 6,
-      "g4": 6,
-      "g5": 6,
-      "g6": 6,
-      "g7": 4,
-      "g8": 3,
-      "h1": 2,
-      "h2": 3,
-      "h3": 4,
-      "h4": 4,
-      "h5": 4,
-      "h6": 4,
-      "h7": 3,
-      "h8": 2
-    }
-  },
-  {
-    "name": "Outpost territory",
-    "tagline": "Where a knight is strongest.",
-    "fen": "8/8/8/8/8/8/8/8",
-    "turn": "",
-    "marks": {
-      "a5": "zone",
-      "a6": "zone",
-      "b5": "zone",
-      "b6": "zone",
-      "g5": "zone",
-      "g6": "zone",
-      "h5": "zone",
-      "h6": "zone",
-      "c5": "subject",
-      "c6": "subject",
-      "d5": "subject",
-      "d6": "subject",
-      "e5": "subject",
-      "e6": "subject",
-      "f5": "subject",
-      "f6": "subject"
-    },
-    "legend": [
-      [
-        "subject",
-        "prime outpost squares: c5 to f6"
-      ],
-      [
-        "zone",
-        "the rest of the 5th and 6th ranks"
-      ]
-    ],
-    "body": [
-      "A knight is strongest on the 5th or 6th rank where no enemy pawn can chase it away. The c, d, e and f files matter most."
+      "Once a pawn or piece can't be saved, stop looking for defenses and choose the way of losing it that costs the least. A rescue attempt that fails can lose the same material plus a tempo, an open line, or a weaker position.",
+      "Questions to ask when something is lost:",
+      "- What will the capturing piece attack afterward?",
+      "- Which lines open when it's gone?",
+      "- Can I get something back for it (activity, a tempo, a better pawn structure)?",
+      "Example: magodehoz vs Altazor21, Chess.com, Oct 2026 (I was Black).",
+      "|1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. d3 Bb4+ 5. c3 Ba5 6. O-O O-O 7. Be3 d5 8. exd5 Nxd5 9. Bxd5 Qxd5 10. b4 Bb6 11. c4 Qe6 12. c5 Nxb4 13. cxb6 axb6 14. Nc3 c5 15. Nb5 Qe7 16. a3 Nd5 17. Bd2 Bd7 18. Nc3 Nf6 19. Re1 e4 20. Nxe4 Nxe4 21. Rxe4",
+      "After 19.Re1, my e5 pawn was already lost. Stockfish's top six replies for Black all drop it, to Nxe5 or Bf4xe5, at about +3.6 to +3.9 for White. I played 19...e4, which lost the same pawn on worse terms (about +4.1): after 20.Nxe4 Nxe4 21.Rxe4, the rook took on e4 and hit my queen on e7 along the now-open e-file, so White gained a tempo. Letting White take on e5 would have kept the file closed in front of my queen.",
+      "The real error was 18...Nf6. On d5 the knight covered f4 and kept White's bishop out, and 18...Nxc3 19.Bxc3 f6 would have supported e5 with a pawn."
     ]
   }
 ];

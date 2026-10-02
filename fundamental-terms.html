@@ -80,6 +80,8 @@ h1 { margin:0 0 14px; font-size:26px; }
 .tagline { color:var(--muted); margin:0 0 16px; }
 .text p { margin:0 0 14px; color:#d4d4d4; }
 .moves { font-variant-numeric:tabular-nums; }
+.text ul { margin:-6px 0 14px; padding-left:22px; color:#d4d4d4; }
+.text li { margin:0 0 4px; }
 
 footer.site { margin-top:60px; padding-top:18px; border-top:1px solid var(--line);
   font-size:13px; color:var(--muted); }
@@ -486,7 +488,17 @@ function render(index) {
 
   const body = document.getElementById("body");
   body.textContent = "";
+  let list = null;
   term.body.forEach(par => {
+    // lines starting "- " gather into one list
+    if (par.startsWith("- ")) {
+      if (!list) { list = document.createElement("ul"); body.appendChild(list); }
+      const li = document.createElement("li");
+      li.textContent = par.slice(2);
+      list.appendChild(li);
+      return;
+    }
+    list = null;
     const p = document.createElement("p");
     if (par.startsWith("|")) { p.className = "moves"; p.textContent = par.slice(1); }
     else p.textContent = par;
