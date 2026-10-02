@@ -1027,6 +1027,41 @@ LESSONS = [
          "The real error was 18...Nf6. On d5 the knight covered f4 and kept White's bishop out, and "
          "18...Nxc3 19.Bxc3 f6 would have supported e5 with a pawn.",
      ]},
+    {"name": "Opening the position is bad for loose pieces",
+     "tagline": "What a central pawn break does to loose pieces.",
+     "moves": "e4 e5 Nf3 Nc6 Bc4 Nf6 d3 Bb4+ c3 Ba5 O-O O-O Be3",
+     "turn": "magodehoz against Altazor21, Chess.com, October 2026, after 7.Be3, Black to move",
+     "marks": marks(subject=["b2", "c3"], zone=["d7"], plan=["b6"], target=["a5"]),
+     "legend": [["target", "the bishop on a5, loose"],
+                ["subject", "the queenside pawns that later hit it with tempo"],
+                ["zone", "the d-pawn, about to break with 7...d5"],
+                ["plan", "7...Bb6, Stockfish's choice"]],
+     "body": [
+         "Before a central pawn break, check whether any of your pieces are loose or about to be "
+         "hit with tempo, and secure them first.",
+         "What opening the position means:",
+         "The position opens when pawns come off the board, especially center pawns, because pawns "
+         "are what block lines.",
+         "- Open file: a file with no pawns on it, so rooks and queens can travel its whole length. "
+         "A half-open file has only the opponent's pawn on it.",
+         "- Open diagonal: a diagonal no longer blocked by pawns, which frees bishops and the queen.",
+         "- Pawn break: a pawn move that offers a pawn exchange, like ...d5 against e4. The break is "
+         "the act of opening.",
+         "A closed position is the opposite: pawn chains locked against each other (for example White "
+         "pawns on d4 and e5 against Black pawns on d5 and e6), so pieces have to maneuver behind "
+         "them. Trading pieces does not open a position by itself. Pawn exchanges do.",
+         "Example: magodehoz vs Altazor21, Chess.com, Oct 2026 (I was Black).",
+         "|1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. d3 Bb4+ 5. c3 Ba5 6. O-O O-O 7. Be3 d5 8. exd5 Nxd5 "
+         "9. Bxd5 Qxd5 10. b4 Bb6 11. c4 Qe6 12. c5",
+         "7...d5 was a normal central break, but my bishop on a5 was loose. The exchanges removed "
+         "White's e-pawn and my d-pawn, opened the d-file and the long diagonals, and brought my queen "
+         "to d5. White's queenside pawns then hit both with tempo: b4 against the bishop, c4 against "
+         "the queen, and c5 trapped the bishop on b6. Stockfish: +1.13 for White after 7...d5.",
+         "Better was 7...Bb6 (Stockfish about +0.13). The bishop leaves a5 before b4 comes with tempo, "
+         "and if 8.Bxb6 axb6, the a-pawn recaptures toward the center and the rook gets the half-open "
+         "a-file. The ...d5 break is still available later once the pieces are set up.",
+         "John Nunn's shorthand for the underlying idea: \"loose pieces drop off.\"",
+     ]},
 ]
 
 PAGES = {
