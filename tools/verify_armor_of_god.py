@@ -41,6 +41,22 @@ check(PAGE.read_bytes() == before, "the page is what the builder makes")
 print("--- the base ---")
 base = (ROOT / "tools" / "verify_solar_system.py").read_text(encoding="utf-8")
 base = base.replace('/ "solar-system.html"', '/ "armor-of-god.html"')
+# this page draws no size ghost on the Sun or the planets, so the checks of
+# that ghost become one check that it is absent
+i = base.index("    WANT_GHOST = {")
+j = base.index("    labels = pg.evaluate(", i)
+base = base[:i] + """    for name in ("Sun", "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"):
+        pg.click(f'.chip[data-name="{name}"]')
+        pg.wait_for_timeout(1500)
+        if pg.evaluate("()=>__dbg.ghost"):
+            fails.append(f"{name}: a size ghost is drawn")
+    print("  ok   no body is drawn to scale against the Sun or the planets")
+    pg.click('.chip[data-name="Jupiter"]')
+    pg.wait_for_timeout(1500)
+""" + base[j:]
+i = base.index("    # the ghost can be Jupiter")
+j = base.index("    # the new neighbors", i)
+base = base[:i] + base[j:]
 # this page adds Psyche and Hygiea to the belt
 for x, y in (('"Pallas": (2.772, 256, "512"), "Pluto"',
               '"Pallas": (2.772, 256, "512"), "Psyche": (2.924, 111, "222"), "Hygiea": (3.142, 216.5, "433"), "Pluto"'),

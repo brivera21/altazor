@@ -7,6 +7,8 @@ is rebuilt from solar-system.html every time and picks up whatever that page
 gains. On top of it go:
 
   * a title, a back link to Science Fiction, and a heading of its own;
+  * no Earth (or Jupiter) drawn to scale against the Sun and the planets;
+    the small bodies keep the Moon drawn around them;
   * Psyche and Hygiea, drawn in the belt like Ceres and Vesta;
   * the 2500 layer from tools/armor_of_god_2500.js: who holds each body (a
     colored ring, and a legend of five kinds of holder), the places and
@@ -80,6 +82,11 @@ PATCHES = [
     ("    drawTrojans();\n    for (const p of PLANETS) drawPlanet(p);\n    drawCrowdLabel();\n    drawMoons();\n",
      "    aogDraw();\n    drawTrojans();\n    for (const p of PLANETS) drawPlanet(p);\n    drawCrowdLabel();\n    drawMoons();\n    aogDrawTop();\n"),
     ("      moons: moonState,", "      moons: moonState, aog: aogDbg(),"),
+    # no size ghost on the Sun or the planets here; small bodies keep the Moon
+    ('<button id="ghostBtn" title', '<button id="ghostBtn" hidden title'),
+    ("    const isSun = selected === SUN;\n    const x = isSun ? sx(0) : sx(px(selected));",
+     "    return;   // this page draws no size ghost on the Sun or the planets\n"
+     "    const isSun = selected === SUN;\n    const x = isSun ? sx(0) : sx(px(selected));"),
     ("  baseNote = modeNote.textContent;\n  resize();", "__LAYER__\n  baseNote = modeNote.textContent;\n  resize();"),
     ("Halley's Comet: JPL's orbital elements,",
      "Psyche and Hygiea: the published measurements as Wikipedia summarizes them, and NASA's schedule for the Psyche "
