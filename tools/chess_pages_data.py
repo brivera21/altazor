@@ -1086,6 +1086,19 @@ LESSONS = [
          "When the counter-threat is played in place of the expected reply, it's also called a "
          "zwischenzug (in-between move).",
      ]},
+    {"name": "The center sets where the game is fought",
+     "tagline": "A locked center sends the fight to the wings; an open one keeps it in the middle.",
+     "moves": "d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 f3 O-O Be3 e5 d5 Nh5 Qd2 f5 O-O-O",
+     "turn": "King's Indian, Sämisch, after 9.O-O-O: castled on opposite sides, Black to move",
+     "marks": marks(zone=["d5", "e4", "d6", "e5"], subject=["c1", "g8"], plan=["g4", "h4", "b5"]),
+     "legend": [["zone", "the locked center"],
+                ["subject", "the kings, castled on opposite sides"],
+                ["plan", "where the wing pawns go: g4 and h4 for White, b5 for Black"]],
+     "body": [
+         "The more locked the center, the more viable opposite-side castling and wing attacks "
+         "become, and the more open the center, the more the game is fought over central files "
+         "and quick development.",
+     ]},
 ]
 
 PAGES = {
