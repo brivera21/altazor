@@ -144,7 +144,7 @@
     <button id="orbBtn">Run the orbits</button>
     <button id="speedBtn" hidden>A year a second</button>
     <button id="lineBtn" hidden>Line them up</button>
-    <button id="ghostBtn" title="the body drawn beside another for size">Ghost: Earth</button>
+    <button id="ghostBtn" hidden title="the body drawn beside another for size">Ghost: Earth</button>
     <span id="modeNote">Lenient scale: sizes and spacing are exaggerated so every planet is visible; Make to scale shows the true distances.</span>
     <details class="sources"><summary>Sources</summary>
       Planets, the Sun and Pluto: NASA's <a href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/">planetary
@@ -1880,6 +1880,7 @@
       ghostState = { kind: "moon", r: gr, x, y: y0, of: selected.name, Rd };
       return;
     }
+    return;   // this page draws no size ghost on the Sun or the planets
     const isSun = selected === SUN;
     const x = isSun ? sx(0) : sx(px(selected));
     const Rd = (isSun ? sunR() : pr(selected)) * cam.z;   // drawn radius of the selected body
