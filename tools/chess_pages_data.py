@@ -353,6 +353,31 @@ BISHOP = [
      "body": ["It goes b5, a4, b3 and often later c2. It looks idle, but from b3 it "
               "presses along a2-g8 at f7 and the castled king for the whole game, and "
               "Black's plans have to allow for it."]},
+    {"name": "Trapped on the edge",
+     "tagline": "A bishop that takes the h- or a-pawn can be walled in by one pawn move.",
+     "fen": "6k1/pp3ppp/8/8/8/2N3P1/PP3P1b/5K2", "turn": "Black to move",
+     "marks": marks(subject=["g3"], zone=["g1"], target=["h2"]),
+     "legend": [["target", "the bishop that took on h2"], ["subject", "g3, the pawn that shut it in"],
+                ["zone", "g1, its only other square, covered by the king"]],
+     "body": ["After g3 the bishop has no way back, and Kg2 wins it. Fischer lost the "
+              "first game of his 1972 match with Spassky this way, after 29...Bxh2 30.g3."]},
+    {"name": "The a7 pawn grab",
+     "tagline": "The same trap on the other wing.",
+     "fen": "8/B1k1bppp/1p3n2/8/8/5N2/5PPP/6K1", "turn": "White to move",
+     "marks": marks(subject=["b6"], zone=["b8"], target=["a7"]),
+     "legend": [["target", "the bishop that took on a7"], ["subject", "b6, the pawn that shut it in"],
+                ["zone", "b8, its only other square, covered by the king"]],
+     "body": ["The king on c7 guards b8 and comes to b7 to take the bishop. Bxb6+ "
+              "gives it back for a single pawn."]},
+    {"name": "Noah's Ark trap",
+     "tagline": "Pawns chase the Spanish bishop into a box.",
+     "moves": "e4 e5 Nf3 Nc6 Bb5 a6 Ba4 d6 d4 b5 Bb3 Nxd4 Nxd4 exd4 Qxd4 c5 Qd5 Be6 Qc6+ Bd7 Qd5 c4",
+     "turn": "Ruy Lopez, after 8.Qxd4?? c5 9.Qd5 Be6 10.Qc6+ Bd7 11.Qd5 c4",
+     "marks": marks(subject=["b5", "c4"], zone=["a2", "c2", "a4"], target=["b3"]),
+     "legend": [["target", "the bishop on b3"], ["subject", "b5 and c4, the pawns that box it in"],
+                ["zone", "its other squares: two blocked by its own pawns, a4 covered by b5"]],
+     "body": ["Taking on d4 with the queen lets Black gain time on her with ...c5, ...Be6 "
+              "and ...c4. The bishop can only take on c4, a piece for a pawn."]},
 ]
 
 
