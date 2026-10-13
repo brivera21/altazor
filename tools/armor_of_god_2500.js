@@ -33,6 +33,12 @@
     probe: "None. No spacecraft has visited it"
   };
 //@@ LAYER
+  // This page ends at the Kuiper belt. The far bodies keep their places in the
+  // layout, which the Library diagram's code uses, but leave the lists that
+  // are drawn, clicked and named.
+  for (const b of [ERIS, SEDNA]) SMALL.splice(SMALL.indexOf(b), 1);
+  REGIONS.splice(REGIONS.indexOf(OORT), 1);
+
   // ---------- Armor of God, 2500 ----------
   // How things stand in the novel's solar system in the year 2500: who holds
   // each place, who lives there, and who controls what it yields. Everything

@@ -57,6 +57,15 @@ base = base[:i] + """    for name in ("Sun", "Mercury", "Venus", "Earth", "Mars"
 i = base.index("    # the ghost can be Jupiter")
 j = base.index("    # the new neighbors", i)
 base = base[:i] + base[j:]
+# this page ends at the Kuiper belt: no Eris, Sedna, heliopause or Oort cloud
+for x, y in ((',\n              "XIII. HELIOPAUSE", "XIV. OORT CLOUD"]', ']'),
+             (',\n            "Oort Cloud": (2000, 100000)}', '}'),
+             (',\n             "Eris": (67.69, 1163, "2,326"), "Sedna": (506, 500, "1,000")}', '}')):
+    assert base.count(x) == 1, x
+    base = base.replace(x, y)
+i = base.index("    pg.evaluate(\"()=>document.querySelector('.chip[data-name=\\\"Heliopause\\\"]').click()\")")
+j = base.index("    pg.click(\"#scaleBtn\")\n    pg.wait_for_timeout(1500)\n    print(\"  ok   the Trojans", i)
+base = base[:i] + base[j:]
 # this page adds Psyche and Hygiea to the belt
 for x, y in (('"Pallas": (2.772, 256, "512"), "Pluto"',
               '"Pallas": (2.772, 256, "512"), "Psyche": (2.924, 111, "222"), "Hygiea": (3.142, 216.5, "433"), "Pluto"'),

@@ -7,6 +7,8 @@ is rebuilt from solar-system.html every time and picks up whatever that page
 gains. On top of it go:
 
   * a title, a back link to Science Fiction, and a heading of its own;
+  * nothing past the Kuiper belt: Eris, Sedna, the heliopause and the Oort
+    cloud stay on the Library diagram only;
   * no Earth (or Jupiter) drawn to scale against the Sun and the planets;
     the small bodies keep the Moon drawn around them;
   * Psyche and Hygiea, drawn in the belt like Ceres and Vesta;
@@ -82,6 +84,15 @@ PATCHES = [
     ("    drawTrojans();\n    for (const p of PLANETS) drawPlanet(p);\n    drawCrowdLabel();\n    drawMoons();\n",
      "    aogDraw();\n    drawTrojans();\n    for (const p of PLANETS) drawPlanet(p);\n    drawCrowdLabel();\n    drawMoons();\n    aogDrawTop();\n"),
     ("      moons: moonState,", "      moons: moonState, aog: aogDbg(),"),
+    # this page ends at the Kuiper belt: no Eris, Sedna, heliopause or Oort cloud
+    ("KUIPER, HELIO, OORT];", "KUIPER];"),
+    ("return mix(OORT.xLenOut, KUIPER.xTrueOut, mTarget);", "return mix(KUIPER.xLenOut, KUIPER.xTrueOut, mTarget);"),
+    ("for (const g of REGIONS) drawBelt(g); drawFrost(); drawHelio();", "for (const g of REGIONS) drawBelt(g); drawFrost();"),
+    ("      if (Math.abs(sx(px(HELIO)) - mx) < 10 && Math.abs(e.clientY - y0) < beltHalfHeight()) hit = HELIO;\n", ""),
+    ("the Sun, the planets, both belts and the heliopause, all in here", "the Sun, the planets and both belts, all in here"),
+    ("Haumea, Makemake, Eris and\n      Sedna:", "Haumea and Makemake:"),
+    (" The heliopause: NASA's Voyager\n      pages.", ""),
+    (" The Oort cloud's\n      edges are estimates, from NASA.", ""),
     # no size ghost on the Sun or the planets here; small bodies keep the Moon
     ('<button id="ghostBtn" title', '<button id="ghostBtn" hidden title'),
     ("    const isSun = selected === SUN;\n    const x = isSun ? sx(0) : sx(px(selected));",
