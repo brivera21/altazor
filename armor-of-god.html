@@ -150,14 +150,11 @@
       Planets, the Sun and Pluto: NASA's <a href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/">planetary
       fact sheets</a>. Ceres, Vesta and the belts: the
       <a href="https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html">JPL Small-Body Database</a> and the Dawn
-      and New Horizons results. Pallas: VLT/SPHERE (Marsset and others, 2020). Haumea, Makemake, Eris and
-      Sedna: the stellar occultations and moon orbits summarized on Wikipedia (Ortiz and others, 2012 and 2017).
-      Jupiter's Trojans: the Minor Planet Center's count and NASA's Lucy pages. The heliopause: NASA's Voyager
-      pages. The frost line: <a href="https://doi.org/10.1143/PTPS.70.35">Hayashi (1981)</a>; how it moved,
+      and New Horizons results. Pallas: VLT/SPHERE (Marsset and others, 2020). Haumea and Makemake: the stellar occultations and moon orbits summarized on Wikipedia (Ortiz and others, 2012 and 2017).
+      Jupiter's Trojans: the Minor Planet Center's count and NASA's Lucy pages. The frost line: <a href="https://doi.org/10.1143/PTPS.70.35">Hayashi (1981)</a>; how it moved,
       <a href="https://arxiv.org/abs/astro-ph/0602217">Lecar and others (2006)</a> and
       <a href="https://doi.org/10.1111/j.1745-3933.2012.01290.x">Martin and Livio (2012)</a>; the divide in the
-      meteorites, <a href="https://doi.org/10.1073/pnas.1704461114">Kruijer and others (2017)</a>. Psyche and Hygiea: the published measurements as Wikipedia summarizes them, and NASA's schedule for the Psyche mission. Halley's Comet: JPL's orbital elements, its position today worked out from them. The Oort cloud's
-      edges are estimates, from NASA. A day is sunrise to sunrise; a year is one orbit of the Sun, in Earth time.
+      meteorites, <a href="https://doi.org/10.1073/pnas.1704461114">Kruijer and others (2017)</a>. Psyche and Hygiea: the published measurements as Wikipedia summarizes them, and NASA's schedule for the Psyche mission. Halley's Comet: JPL's orbital elements, its position today worked out from them. A day is sunrise to sunrise; a year is one orbit of the Sun, in Earth time.
     </details>
   </div>
 </div>
@@ -757,7 +754,7 @@
   function outerEdge() {
     // the lenient line runs out to the Oort cloud; at true scale the overview
     // stops at the Kuiper belt, and the far things are a chip or a zoom away
-    return mix(OORT.xLenOut, KUIPER.xTrueOut, mTarget);
+    return mix(KUIPER.xLenOut, KUIPER.xTrueOut, mTarget);
   }
   function fitAll() {
     const outer = outerEdge();
@@ -1212,7 +1209,7 @@
   addChip("Overview", null);
   addChip("I. SUN", SUN);
   const ORDER = [...PLANETS.slice(0, BELT_SLOT), BELT, FROST,
-                 ...PLANETS.slice(BELT_SLOT), KUIPER, HELIO, OORT];
+                 ...PLANETS.slice(BELT_SLOT), KUIPER];
   const NUMERALS = ["II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV"];
   ORDER.forEach((o, i) => addChip(NUMERALS[i] + ". " + o.name.toUpperCase(), o));
 
@@ -1252,7 +1249,6 @@
         if (mx > sx(g.edgeIn()) - 6 && mx < sx(g.edgeOut()) + 6 &&
             Math.abs(e.clientY - y0) < beltHalfHeight()) hit = g;
       }
-      if (Math.abs(sx(px(HELIO)) - mx) < 10 && Math.abs(e.clientY - y0) < beltHalfHeight()) hit = HELIO;
       if (Math.abs(sx(px(FROST)) - mx) < 6 && Math.abs(e.clientY - y0) < beltHalfHeight() + 22) hit = FROST;
       { const hy = y0 + halleyY();
         if (mx > sx(HALLEY.edgeIn()) - 4 && mx < sx(HALLEY.edgeOut()) + 4 && Math.abs(e.clientY - hy) < 6) hit = HALLEY;
@@ -1685,7 +1681,7 @@
     if (x < -40 || x > W + 40) return;
     ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
     ctx.textAlign = "left"; ctx.fillStyle = "rgba(190,205,235,0.85)";
-    ctx.fillText("the Sun, the planets, both belts and the heliopause, all in here", x + 10, y0 - 26);
+    ctx.fillText("the Sun, the planets and both belts, all in here", x + 10, y0 - 26);
     ctx.strokeStyle = "rgba(190,205,235,0.35)"; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(x + 8, y0 - 30); ctx.lineTo(x, y0 - 6); ctx.stroke();
   }
@@ -2038,7 +2034,7 @@
     const orbiting = orbDays > 0;
     drawOrbits();
     drawSun();
-    if (!orbiting) { for (const g of REGIONS) drawBelt(g); drawFrost(); drawHelio();
+    if (!orbiting) { for (const g of REGIONS) drawBelt(g); drawFrost();
       if (!crowded() || selected === HALLEY) drawHalley();
       for (const b of SMALL) if (!crowded() || b === selected) drawSmall(b); }
     aogDraw();
@@ -2084,6 +2080,12 @@
       lightEnd: KUIPER.auOut * AU / C_KM_S };
     requestAnimationFrame(frame);
   }
+  // This page ends at the Kuiper belt. The far bodies keep their places in the
+  // layout, which the Library diagram's code uses, but leave the lists that
+  // are drawn, clicked and named.
+  for (const b of [ERIS, SEDNA]) SMALL.splice(SMALL.indexOf(b), 1);
+  REGIONS.splice(REGIONS.indexOf(OORT), 1);
+
   // ---------- Armor of God, 2500 ----------
   // How things stand in the novel's solar system in the year 2500: who holds
   // each place, who lives there, and who controls what it yields. Everything
