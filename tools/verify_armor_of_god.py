@@ -4,14 +4,24 @@
   the build    rebuilding from solar-system.html and the layer gives the page
                as it stands, byte for byte
   the base     every check the Library diagram passes, run on this page
-  the layer    no script errors; the legend's five holders; a 2500 block in
-               the panel of every body that has one; Psyche and Hygiea in the
-               belt at their distances; the Sails between the Sun and Mercury
-               on the lenient line and at 0.1 au at true scale; the Sun zone,
-               the Gate, the Lines and each holder open their own panels
-  the text     what the 2500 blocks say carries no years and no em dashes,
-               and none of the terms kept off the site. That list is not kept
-               here: pass its path in AOG_HIDDEN to run that part.
+  the layer    no script errors; the legend's five holders and the second
+               legend's five icons; a 2500 block in the panel of every body
+               that has one; Psyche and Hygiea in the belt at their distances;
+               the Sails between the Sun and Mercury on the lenient line and at
+               0.1 au at true scale, with 40 Lighthouses; the Hollows, 100 of
+               them inside the belt; the Cyclers' loop from inside Earth's
+               orbit to past Mars, with its three Cyclers; the Sun zone, the
+               Gate, the Lines, the Hollows, the Cyclers and each holder open
+               their own panels
+  the panel    the Earth-Moon panel opens with Earth, and from the tag under
+               Earth; it shows the three cored worlds, all three Prairie pairs,
+               the Roads, Cumbre, the Counterweight, the Moon, Lagrange and
+               Yongle; its distances are to scale and L4 and L5 sit 60 degrees
+               either side of the Moon
+  the text     what the 2500 blocks and the panel say carries no years, no em
+               dashes and nothing dropped from the canon, and none of the terms
+               kept off the site. That list is not kept here: pass its path in
+               AOG_HIDDEN to run that part.
 
 Usage: AOG_HIDDEN=/path/to/list python3 tools/verify_armor_of_god.py
 """
@@ -98,6 +108,14 @@ with sync_playwright() as p:
     pg.wait_for_timeout(1200)
     a = pg.evaluate("()=>__dbg.aog")
     check(a["legend"] == 6, "the legend: a heading and five holders")
+    check(a["icons"] == 6, "the second legend: a heading and five icons")
+    check(a["lights"] == 40, "40 Lighthouses among the Sails")
+    bx0, bx1 = a["belt"]
+    check(len(a["hollows"]) == 100 and all(bx0 <= x <= bx1 for x, y in a["hollows"]), "the Hollows: 100, all inside the belt")
+    cy = a["cyclers"]
+    check(cy["a"] < cy["earth"] and cy["mars"] < cy["b"] < bx0 + (bx1 - bx0) * 0.2,
+          "the Cyclers' loop runs from just inside Earth's orbit to past Mars's")
+    check([c[0] for c in cy["at"]] == ["Ellis", "Galveston", "Angel"], "the three Cyclers on the loop")
     check(a["sunEdge"] < a["sails"] < a["zone"][0] < a["zone"][1] < a["mercury"],
           "lenient: the Sails, then the stations, between the Sun's edge and Mercury")
     small = {b["name"]: b for b in pg.evaluate("()=>__dbg.small")}
@@ -145,7 +163,47 @@ with sync_playwright() as p:
         texts.append(pg.evaluate("()=>document.getElementById('aog').innerText"))
         pg.keyboard.press("Escape")
         pg.wait_for_timeout(1300)
-    for k, nm in (("l5", "The L5 nation"), ("ind", "Independent"), ("tied", "Tied to the US-led bloc"),
+    a = pg.evaluate("()=>__dbg.aog")
+    hx, hy = a["hollowsLabel"]
+    click_open(hx + 20, hy - 3, "The Hollows", "a click on the Hollows' label")
+    a = pg.evaluate("()=>__dbg.aog")
+    n, x, y = a["cyclers"]["at"][1]
+    click_open(x, y, "The Cyclers", f"a click on {n}")
+    # the Earth tag opens Earth and its panel
+    a = pg.evaluate("()=>__dbg.aog")
+    check(len(a["earthTag"]) == 1, "the tag under Earth is drawn")
+    pg.mouse.click(*a["earthTag"][0])
+    pg.wait_for_timeout(1500)
+    nm = pg.evaluate("()=>document.querySelector('#iName').textContent")
+    a = pg.evaluate("()=>__dbg.aog")
+    check(nm == "Earth" and a["em"], "the tag under Earth opens Earth, with the Earth-Moon panel")
+    if a["em"]:
+        want = {"Armstrong", "Penglai", "The Pearl", "A Prairie pair in Armstrong's orbit", "Two Prairie pairs near the Pearl",
+                "The Roads", "Cumbre", "The Counterweight", "The Moon", "The Quarry", "Lagrange", "Yongle", "The elevator"}
+        check(want <= set(a["em"]), f"the panel shows {sorted(want - set(a['em'])) or 'everything'}")
+        g = a["emGeo"]
+        import math
+        d = lambda p: math.hypot(p[0] - g["earth"][0], p[1] - g["earth"][1])
+        ang = lambda p: math.degrees(math.atan2(-(p[1] - g["earth"][1]), p[0] - g["earth"][0])) % 360
+        check(abs(d(g["moon"]) / d(g["arm"]) - 384400 / 116000) < 0.01, "the panel: the Moon and Armstrong at their true distances")
+        check(abs(d(g["l4"]) - d(g["moon"])) < 0.5 and abs(d(g["l5"]) - d(g["moon"])) < 0.5
+              and abs((ang(g["l4"]) - ang(g["moon"])) % 360 - 60) < 0.5 and abs((ang(g["moon"]) - ang(g["l5"])) % 360 - 60) < 0.5,
+              "the panel: L4 60 degrees ahead of the Moon, L5 60 degrees behind, on its orbit")
+        st = g["strip"]
+        r = lambda x: (x - st["earth"]) / st["re"] * 6371
+        check(abs(r(st["cumbre"]) - 42164) < 60 and abs(r(st["cw"]) - 106371) < 60 and abs(st["arm"] / st["re"] * 6371 - 116000) < 60,
+              "the panel, enlarged: Cumbre at 35,786 km up, the Counterweight at 100,000, Armstrong 116,000 km out")
+        texts.extend(a["emTips"])
+    pg.click("#emClose")
+    pg.wait_for_timeout(300)
+    check(pg.evaluate("()=>document.getElementById('em').hidden"), "the panel closes")
+    pg.click("#aog .aog-em")
+    pg.wait_for_timeout(300)
+    check(not pg.evaluate("()=>document.getElementById('em').hidden"), "the button in Earth's block opens it again")
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(1300)
+    check(pg.evaluate("()=>document.getElementById('em').hidden"), "it closes when Earth is let go")
+    for k, nm in (("l5", "The United Reaches"), ("ind", "Independent"), ("tied", "Tied to the US-led bloc"),
                   ("earth", "Held from Earth"), ("none", "No one, or a treaty")):
         pg.click(f'#aogLegend button[data-k="{k}"]')
         pg.wait_for_timeout(500)
@@ -168,6 +226,10 @@ print("--- the text ---")
 blob = "\n".join(texts)
 years = sorted(set(re.findall(r"\b(1[4-9]\d\d|2[0-6]\d\d)\b", blob)) - {"2500"})
 check(not years, f"the 2500 blocks carry no years {years}")
+gone = [t for t in ("Presidio", "Terraria", "Arcadia", "Kranz Station", "Lancaster Station", "cored station", "Amun",
+                    "University-class", "Campus-class", "Sprawl-class", "biomass", "L5 nation", "Machine-core")
+        if t.lower() in (blob + (ROOT / "tools" / "armor_of_god_2500.js").read_text(encoding="utf-8")).lower()]
+check(not gone, f"nothing dropped from the canon is left {gone}")
 check("—" not in blob, "no em dashes in the 2500 blocks")
 layer = (ROOT / "tools" / "armor_of_god_2500.js").read_text(encoding="utf-8")
 check("—" not in layer, "no em dashes in the layer")

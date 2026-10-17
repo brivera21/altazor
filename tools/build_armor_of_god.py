@@ -14,8 +14,13 @@ gains. On top of it go:
   * Psyche and Hygiea, drawn in the belt like Ceres and Vesta;
   * the 2500 layer from tools/armor_of_god_2500.js: who holds each body (a
     colored ring, and a legend of five kinds of holder), the places and
-    who controls what in each panel, the Sun zone with its Sails, the Gate,
-    and the Lines.
+    who controls what in each panel, the Sun zone with its Sails and
+    Lighthouses, the Gate, the Lines, the Hollows, the Cyclers' loop, tags
+    under the planets, and a second legend of the made objects' icons;
+  * the Earth-Moon panel beside Earth: the three cored worlds, the Prairie
+    pairs, the Roads, the elevator, Cumbre and the Counterweight, at their
+    true distances;
+  * one caption, at the head of the controls.
 
 Every insertion is made at an anchor that must occur exactly once in
 solar-system.html, so a change there that moves an anchor stops the build
@@ -51,6 +56,28 @@ CSS = """
   #aog .aog-pn { display: flex; justify-content: space-between; gap: 10px; }
   #aog .aog-pop { color: #e9b949; text-align: right; max-width: 58%; }
   #aog .aog-where, #aog .aog-short { color: var(--dim); font-size: 12px; }
+  #aog .aog-em { margin-top: 8px; background: #1a2740; color: var(--text); border: 1px solid rgba(88,166,255,0.35);
+    border-radius: 8px; padding: 4px 10px; font: inherit; font-size: 12px; cursor: pointer; }
+  #aog .aog-em:hover { background: #223354; }
+  .aog-icons { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; margin-bottom: 8px;
+    font-size: 12px; color: var(--dim); }
+  .aog-icons span { display: inline-flex; align-items: center; gap: 5px; }
+  .aog-icons canvas { flex: none; }
+  #em { position: absolute; top: 60px; right: 16px; width: min(420px, calc(100% - 32px)); z-index: 4;
+    max-height: calc(100vh - 150px); overflow-y: auto; overscroll-behavior: contain;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px 12px;
+    color: var(--text); backdrop-filter: blur(8px); }
+  #em[hidden] { display: none; }
+  #em .close { position: absolute; top: 6px; right: 10px; background: none; border: none; color: var(--dim);
+    font-size: 18px; cursor: pointer; }
+  #em .close:hover { color: var(--text); }
+  #em .em-h { font-size: 15px; font-weight: 600; }
+  #em .em-sub { font-size: 11px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin: 2px 0 8px; }
+  #aogCap { font-size: 12px; color: var(--dim); text-align: center; margin-bottom: 7px; line-height: 1.4; }
+  #emCv { display: block; width: 100%; touch-action: manipulation; }
+  #em .em-note { font-size: 12px; line-height: 1.45; color: var(--dim); margin-top: 8px; }
+  #emTip { position: absolute; z-index: 5; max-width: 250px; padding: 7px 9px; border-radius: 8px; pointer-events: none;
+    background: rgba(11,17,32,0.96); border: 1px solid var(--line); font-size: 12px; line-height: 1.4; }
 """
 
 # (anchor, replacement); each anchor must appear exactly once
@@ -61,7 +88,14 @@ PATCHES = [
     ("<h1>The Solar System</h1>",
      "<h1>The Solar System of Armor of God</h1>"),
     ('<div id="controls">\n  <div id="chips"></div>',
-     '<div id="controls">\n  <div class="aog-legend legend" id="aogLegend"><span class="aog-yr">In 2500:</span></div>\n  <div id="chips"></div>'),
+     '<div id="em" hidden>\n  <button class="close" id="emClose" aria-label="Close">×</button>\n'
+     '  <div class="em-h">Earth and the Moon</div>\n  <div class="em-sub">In 2500, in the novel</div>\n'
+     '  <canvas id="emCv"></canvas>\n  <div id="emTip" hidden></div>\n'
+     '  <div class="em-note">The Moon, L4 and L5 go round Earth together once a month. Distances to scale; '
+     'objects drawn larger.</div>\n</div>\n\n'
+     '<div id="controls">\n  <p id="aogCap">Only three made objects in the whole system make ground at one gravity '
+     'without spinning, and all three are within a day of Earth.</p>\n  <div class="aog-legend legend" id="aogLegend"><span class="aog-yr">In 2500:</span></div>\n'
+     '  <div class="aog-icons legend" id="aogIcons"><span class="aog-yr">Made:</span></div>\n  <div id="chips"></div>'),
     ('  <div class="type" id="iType"></div>\n  <dl>', '  <div class="type" id="iType"></div>\n  <div id="aog" hidden></div>\n  <dl>'),
     ("</style>", CSS + "</style>"),
     # Psyche and Hygiea, in the belt
@@ -98,6 +132,8 @@ PATCHES = [
     ("    const isSun = selected === SUN;\n    const x = isSun ? sx(0) : sx(px(selected));",
      "    return;   // this page draws no size ghost on the Sun or the planets\n"
      "    const isSun = selected === SUN;\n    const x = isSun ? sx(0) : sx(px(selected));"),
+    ("        const left = panel + 24, right = W - 16;",
+     "        const left = panel + 24, right = W - 16 - aogPadRight(obj);"),
     ("  baseNote = modeNote.textContent;\n  resize();", "__LAYER__\n  baseNote = modeNote.textContent;\n  resize();"),
     ("Halley's Comet: JPL's orbital elements,",
      "Psyche and Hygiea: the published measurements as Wikipedia summarizes them, and NASA's schedule for the Psyche "
