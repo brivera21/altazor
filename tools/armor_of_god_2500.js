@@ -633,9 +633,11 @@
     c.beginPath(); c.rect(0.5, stripTop + 0.5, cw - 1, stripH - 1); c.fill(); c.stroke();
     c.save(); c.beginPath(); c.rect(1, stripTop + 1, cw - 2, stripH - 2); c.clip();
     const s2 = (cw - 22) / (122000 + EM_KM.re), ex = 10 + EM_KM.re * s2, ey = stripTop + stripH / 2 + 6;
-    const eg = c.createRadialGradient(ex - 6, ey - 6, 2, ex, ey, EM_KM.re * s2);
-    eg.addColorStop(0, "#6fb0ff"); eg.addColorStop(1, "#1d4f9a");
-    c.fillStyle = eg; c.beginPath(); c.arc(ex, ey, EM_KM.re * s2, 0, 2 * Math.PI); c.fill();
+    if (!drawEarthAt(c, ex, ey, EM_KM.re * s2, dpr)) {
+      const eg = c.createRadialGradient(ex - 6, ey - 6, 2, ex, ey, EM_KM.re * s2);
+      eg.addColorStop(0, "#6fb0ff"); eg.addColorStop(1, "#1d4f9a");
+      c.fillStyle = eg; c.beginPath(); c.arc(ex, ey, EM_KM.re * s2, 0, 2 * Math.PI); c.fill();
+    }
     // the Roads: a band 400 to 600 km up, thicker here than to scale
     c.strokeStyle = "rgba(200,210,225,0.85)"; c.lineWidth = Math.max(1.5, (EM_KM.roadsOut - EM_KM.roadsIn) * s2);
     c.beginPath(); c.arc(ex, ey, (EM_KM.roadsIn + EM_KM.roadsOut) / 2 * s2 + 0.6, 0, 2 * Math.PI); c.stroke();
